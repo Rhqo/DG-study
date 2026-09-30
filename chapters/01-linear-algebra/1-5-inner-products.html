@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1.5 내적과 그람 행렬 — 미분기하 스터디</title>
+  <meta name="dg-id" content="1.5">
+  <meta name="dg-status" content="draft">
+  <meta name="dg-prereq" content="1.1, 1.2, 1.3, 1.4">
+  <meta name="dg-refs" content="Ax Ch. 6; Lee-IRM Ch. 2 pp. 9–11">
+  <meta name="dg-updated" content="2026-09-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">1. 선형대수 복습</a> ›
+    <span>1.5 내적과 그람 행렬</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>1.5 내적과 그람 행렬</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#Ax">[Ax 6장]</a>,
+        <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM 2장, pp. 9–11]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>내적의 세 조건을 확인하고, 각 조건이 빠지면 무엇이 깨지는지 예로 설명할 수 있다.</li>
+        <li>코시-슈바르츠 부등식과 삼각부등식을 증명하고, 노름·거리·각을 정의할 수 있다.</li>
+        <li>그람-슈미트 과정으로 정규직교기저를 만들 수 있다.</li>
+        <li>그람 행렬 \((g_{ij})\)로 내적을 계산하고, 기저를 바꿀 때 \(\tilde G = B^{\mathsf{T}}GB\)로 변함을 안다.</li>
+        <li>내적이 벡터와 여벡터 사이의 자연스러운 동형 \(V \to V^*\)를 준다는 것과 그 성분 공식(첨자 내리기)을 안다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="1-1-vector-spaces-bases.html#i-1-1-13">정리 1.1.13</a>, <a href="1-1-vector-spaces-bases.html#i-1-1-15">예 1.1.15 (기준 기저)</a></li>
+        <li><a href="1-2-linear-maps.html#i-1-2-10">따름정리 1.2.10</a>, <a href="1-2-linear-maps.html#i-1-2-14">명제 1.2.14</a></li>
+        <li><a href="1-3-dual-spaces.html#i-1-3-5">정리 1.3.5 (쌍대기저)</a>, <a href="1-3-dual-spaces.html#i-1-3-9">예 1.3.9 (극좌표 기저)</a>, <a href="1-3-dual-spaces.html#i-1-3-16">비고 1.3.16</a></li>
+        <li><a href="1-4-change-of-basis.html#i-1-4-1">정의 1.4.1 (기저변환 행렬)</a>, <a href="1-4-change-of-basis.html#i-1-4-9">비고 1.4.9 (인덱스 위치 규약)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="1-4-change-of-basis.html">1.4절</a>에서 두 벡터의 성분을 곱해 더한 \(\sum_i v^i w^i\)가 기저에 따라 값이 달라진다는 것을 보았다
+      (<a href="1-4-change-of-basis.html#ex-1-4-3">연습 1.4.3</a>(b)). 그런데 \(\R^2\)에서 우리는 이 식으로 길이와 각을 계산해 왔다. 이것은 표준기저라는 특별한 기저를 쓰고 있었기 때문이다.
+      기저를 바꾸면 이 식은 더 이상 길이를 주지 않는다. 벡터공간의 공리(덧셈과 스칼라곱)만으로는 “길이”가 정해지지 않는다는 뜻이다.</p>
+      <p>그래서 길이와 각을 재려면 벡터공간에 구조를 하나 더 얹어야 한다. 그것이 <em>내적</em>이다.
+      <a href="1-3-dual-spaces.html#i-1-3-16">비고 1.3.16</a>에서 남긴 문제, 즉 “기저 없이 벡터를 여벡터로 바꾸려면 무엇이 필요한가”에 대한 답도 내적이다.
+      미분기하에서 이 구조는 곡면의 제1기본형식(<a href="../07-first-fundamental-form/index.html">7장</a>)과 리만 계량(<a href="../21-riemannian-metrics/index.html">21장</a>)으로 다시 나온다.
+      “접공간마다 내적을 하나씩 준 것”이 리만 기하의 출발점이다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 내적을 고르는 것은 단위원을 고르는 것이다</p>
+        <p>내적이 있으면 길이 \(1\)인 벡터들의 집합, 즉 단위원이 정해지고, 거꾸로 단위원(노름)에서 내적을 되살릴 수 있다(<a href="#ex-1-5-5">연습 1.5.5</a>).
+        유클리드 내적의 단위원은 보통의 원이지만, 다른 내적의 단위원은 타원일 수 있다(<a href="#fig-1-5-1">그림 1.5.1</a>(b)). 그 내적에서는 타원 위의 벡터가 모두 길이 \(1\)이고,
+        눈으로 보기에 수직이 아닌 두 벡터가 “수직”일 수 있다. 어느 경우에나 그람-슈미트 과정으로 서로 수직인 단위벡터들의 기저를 만들 수 있다(<a href="#fig-1-5-1">그림 1.5.1</a>(a)).</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-1-5-1">
+        <img src="figures/fig-1-5-1-inner-products.svg" alt="두 평면 그림. (a) 기준 기저 b1=(2,1), b2=(-1,1)과 단위원(점선). b1을 정규화한 u1, b2에서 u1 방향 성분을 뺀 벡터(-3/5, 6/5), 그리고 그것을 정규화한 u2가 주황으로 그려져 있고 직각 표시가 있다. (b) 내적 g의 단위원인 기울어진 타원(하늘색으로 채움)과 유클리드 단위원(점선), 그리고 타원 위에 끝이 놓인 g-정규직교기저 u1, u2. 두 벡터는 눈으로는 직교하지 않는다.">
+        <figcaption><span class="fig-head">그림 1.5.1.</span>
+        (a) 유클리드 내적으로 기준 기저 \(b_1 = (2,1)\), \(b_2 = (-1,1)\)에 그람-슈미트 과정을 적용한다. \(u_1 = b_1/\abs{b_1}\), \(b_2 - \inner{b_2}{u_1}u_1 = (-\tfrac35, \tfrac65)\),
+        \(u_2 = (-1, 2)/\sqrt5\)(<a href="#i-1-5-11">예 1.5.11</a>). 점선은 단위원이다.
+        (b) 내적 \(g(x, y) = x^{\mathsf{T}}Gy\), \(G = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}\)(<a href="#i-1-5-2">예 1.5.2</a>(b))의 단위원 \(\{g(x,x) = 1\}\)(실선 타원)과 유클리드 단위원(점선).
+        주황 벡터는 \((e_1, e_2)\)에 \(g\)로 그람-슈미트를 적용해 얻은 \(g\)-정규직교기저 \(u_1 = e_1/\sqrt2\), \(u_2 = (-\tfrac12, 1)/\sqrt{3/2}\)이다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-inner-products">
+      <h2>내적</h2>
+
+      <div class="thm definition" id="i-1-5-1">
+        <p><span class="thm-head">정의 1.5.1</span> <span class="thm-name">(내적, inner product)</span>.
+        벡터공간 \(V\) 위의 <dfn>내적</dfn>(inner product)은 함수 \(g\colon V \times V \to \R\)로서, 모든 \(u, v, w \in V\)와 \(a, b \in \R\)에 대하여 다음을 만족하는 것이다.</p>
+        <ol>
+          <li>(쌍선형) \(g(au + bv, w) = a\,g(u, w) + b\,g(v, w)\)이고 \(g(w, au + bv) = a\,g(w, u) + b\,g(w, v)\).</li>
+          <li>(대칭) \(g(v, w) = g(w, v)\).</li>
+          <li>(양의 정부호) \(v \neq 0\)이면 \(g(v, v) \gt 0\).</li>
+        </ol>
+        <p>\(g(v, w)\)를 \(\inner{v}{w}_g\)로도 쓰고, 내적이 주어진 벡터공간 \((V, g)\)를 <dfn>내적공간</dfn>(inner product space)이라 한다.</p>
+      </div>
+
+      <p>대칭이므로 쌍선형 조건은 첫째 자리의 선형성만 확인하면 된다. 또 선형성에서 \(g(0, w) = g(0 \cdot 0, w) = 0\)이므로 \(g(0, 0) = 0\)이다.
+      따라서 양의 정부호 조건은 “\(g(v, v) \ge 0\)이고, 등호는 \(v = 0\)일 때만”과 같다. 이 study set에서 \(\R^n\)의 표준 내적은 첨자 없이 \(\inner{v}{w}\)로 쓴다.</p>
+
+      <div class="thm example" id="i-1-5-2">
+        <p><span class="thm-head">예 1.5.2</span>.
+        (a) (유클리드 내적) \(\R^n\)에서 \(\inner{v}{w} = \sum_i v^i w^i\)(표준기저에 대한 성분)은 내적이다. 쌍선형과 대칭은 식에서 바로 보이고,
+        \(\inner{v}{v} = \sum_i (v^i)^2\)은 \(v \neq 0\)이면 양수다.</p>
+        <p>(b) \(G = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}\)에 대하여 \(\R^2\)에서 \(g(x, y) = x^{\mathsf{T}}Gy = 2x^1y^1 + x^1y^2 + x^2y^1 + 2x^2y^2\)는 내적이다.
+        쌍선형은 행렬곱의 분배법칙에서, 대칭은 \(G^{\mathsf{T}} = G\)에서 나온다. 양의 정부호는 제곱을 완성해서 확인한다:
+        \(g(x, x) = 2(x^1)^2 + 2x^1x^2 + 2(x^2)^2 = (x^1 + x^2)^2 + (x^1)^2 + (x^2)^2\)은 \(x \neq 0\)이면 양수다. 이 내적의 단위원이 <a href="#fig-1-5-1">그림 1.5.1</a>(b)의 타원이다.</p>
+        <p>(c) \(P_d\)에서 \(g(p, q) = \int_0^1 p(t)q(t)\,dt\)는 내적이다. 적분의 선형성에서 쌍선형이고, 분명히 대칭이다. \(p \neq 0\)이면 \(p^2\)은 \([0, 1]\)에서 \(0\) 이상인 연속함수이고
+        근이 유한개뿐이므로 어떤 점 근처에서 양수다. 따라서 \(\int_0^1 p^2 \gt 0\)이다.</p>
+      </div>
+
+      <div class="thm nonexample" id="i-1-5-3">
+        <p><span class="thm-head">비예 1.5.3</span> <span class="thm-name">(조건 하나씩 빼기)</span>.
+        \(\R^2\) 위의 다음 함수는 내적이 아니다.</p>
+        <ul>
+          <li>(a) \(\eta(v, w) = v^1w^1 - v^2w^2\): 쌍선형이고 대칭이지만 \(\eta(e_2, e_2) = -1 \lt 0\)이다. 이런 “부호가 섞인” 형식은 상대성이론에서 쓰이며, 양의 정부호를 빼고 비퇴화만 요구하는 일반화(준리만 계량, pseudo-Riemannian metric)의 모형이다.</li>
+          <li>(b) \(h(v, w) = v^1w^1\): 쌍선형이고 대칭이며 \(h(v, v) \ge 0\)이지만 \(h(e_2, e_2) = 0\)이다. \(e_2\)의 “길이”가 \(0\)이 되어 버린다.</li>
+          <li>(c) \(k(v, w) = v^1w^1 + 2v^1w^2 + 2v^2w^1 + v^2w^2\): 대칭이고 \(k(e_1, e_1) = k(e_2, e_2) = 1 \gt 0\)이지만 \(k((1,-1), (1,-1)) = 1 - 2 - 2 + 1 = -2\)이다. 기저벡터에서 양수라고 양의 정부호인 것은 아니다.</li>
+          <li>(d) \(s(v, w) = v^1w^2\): 쌍선형이지만 \(s(e_1, e_2) = 1 \neq 0 = s(e_2, e_1)\)이므로 대칭이 아니다. 또 \(s(e_1, e_1) = 0\)이다.</li>
+        </ul>
+      </div>
+
+      <div class="thm definition" id="i-1-5-4">
+        <p><span class="thm-head">정의 1.5.4</span> <span class="thm-name">(노름과 직교, norm and orthogonality)</span>.
+        내적공간 \((V, g)\)에서 \(\abs{v}_g = \sqrt{g(v, v)}\)를 \(v\)의 <dfn>노름</dfn>(norm) 또는 길이라 한다. \(\abs{v}_g = 1\)이면 <em>단위벡터</em>라 하고,
+        \(g(v, w) = 0\)이면 \(v\)와 \(w\)가 <dfn>직교</dfn>(orthogonal)한다고 한다. 유클리드 내적의 노름은 첨자 없이 \(\abs{v}\)로 쓴다.</p>
+      </div>
+
+      <p>노름은 양의 정부호 덕분에 \(v \neq 0\)이면 양수이고, \(\abs{av}_g = \sqrt{a^2 g(v,v)} = \abs{a}\,\abs{v}_g\)이다. 노름은 선형이 아니다(<a href="1-2-linear-maps.html#i-1-2-3">비예 1.2.3</a>(c)).
+      직교는 내적에 따라 달라진다. <a href="#fig-1-5-1">그림 1.5.1</a>(b)의 \(u_1, u_2\)는 \(g\)에 대해서는 직교하지만 유클리드 내적에 대해서는 직교하지 않는다(\(\inner{u_1}{u_2} = -\tfrac{1}{2\sqrt3} \neq 0\)).</p>
+
+      <div class="thm theorem" id="i-1-5-5">
+        <p><span class="thm-head">정리 1.5.5</span> <span class="thm-name">(코시-슈바르츠 부등식, Cauchy–Schwarz inequality)</span>.
+        내적공간 \((V, g)\)의 모든 \(v, w\)에 대하여</p>
+        <div class="equation" id="eq-1-5-1">
+        \[ \abs{g(v, w)} \le \abs{v}_g\,\abs{w}_g \tag{1.5.1} \]
+        </div>
+        <p>이고, 등호는 \((v, w)\)가 일차종속일 때, 그리고 그때만 성립한다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: \(v\)에서 \(w\) 방향 성분을 뺀 \(v - tw\)의 길이의 제곱은 \(0\) 이상이다. \(t\)를 가장 좋게 고르면 부등식이 된다.</p>
+        <p><span class="proof-head">증명.</span>
+        \(w = 0\)이면 양변이 \(0\)이고 \((v, 0)\)은 일차종속이므로 성립한다. \(w \neq 0\)이라 하자. 모든 실수 \(t\)에 대하여 쌍선형성과 대칭성에서
+        \[ 0 \le g(v - tw,\ v - tw) = g(v, v) - 2t\,g(v, w) + t^2 g(w, w) \]
+        이다. \(t = g(v, w)/g(w, w)\)로 두면
+        \[ 0 \le g(v, v) - 2\frac{g(v, w)^2}{g(w, w)} + \frac{g(v, w)^2}{g(w, w)} = \abs{v}_g^2 - \frac{g(v, w)^2}{\abs{w}_g^2} \]
+        이므로 \(g(v, w)^2 \le \abs{v}_g^2\abs{w}_g^2\)이고, 양변의 제곱근을 취하면 <a href="#eq-1-5-1">(1.5.1)</a>이다.
+        등호가 성립하면 위의 \(t\)에서 \(g(v - tw, v - tw) = 0\)이므로 양의 정부호에 의해 \(v = tw\), 즉 일차종속이다.
+        거꾸로 \(w \neq 0\)이고 일차종속이면 \(v = cw\)이고 \(\abs{g(cw, w)} = \abs{c}\,\abs{w}_g^2 = \abs{v}_g\abs{w}_g\)이다.</p>
+      </div>
+
+      <div class="thm corollary" id="i-1-5-6">
+        <p><span class="thm-head">따름정리 1.5.6</span> <span class="thm-name">(삼각부등식, 거리, 각)</span>.</p>
+        <ul>
+          <li>(a) \(\abs{v + w}_g \le \abs{v}_g + \abs{w}_g\)이다.</li>
+          <li>(b) \(\R^n\)의 두 점 사이의 <dfn>유클리드 거리</dfn>(Euclidean distance) \(d(p, q) = \abs{q - p}\)는 \(d(p, q) \ge 0\)(등호는 \(p = q\)일 때만), \(d(p, q) = d(q, p)\),
+          \(d(p, r) \le d(p, q) + d(q, r)\)을 만족한다.</li>
+          <li>(c) \(v, w \neq 0\)이면 \(-1 \le \dfrac{g(v, w)}{\abs{v}_g\abs{w}_g} \le 1\)이므로 \(\cos\vartheta = \dfrac{g(v, w)}{\abs{v}_g\abs{w}_g}\)인 \(\vartheta \in [0, \pi]\)가 꼭 하나 있다.
+          이 \(\vartheta\)를 \(v\)와 \(w\) 사이의 <em>각</em>이라 한다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) \(\abs{v + w}_g^2 = \abs{v}_g^2 + 2g(v, w) + \abs{w}_g^2 \le \abs{v}_g^2 + 2\abs{v}_g\abs{w}_g + \abs{w}_g^2 = (\abs{v}_g + \abs{w}_g)^2\)이다. 부등호는 코시-슈바르츠다.
+        (b) 첫째는 양의 정부호, 둘째는 \(\abs{-u} = \abs{u}\)이다. 셋째는 (a)를 \(r - p = (q - p) + (r - q)\)에 쓴 것이다.
+        (c) 코시-슈바르츠에서 가운데 식의 절댓값이 \(1\) 이하이고, \(\cos\)는 \([0, \pi]\)에서 \([-1, 1]\)로 가는 전단사다.</p>
+      </div>
+
+      <p>유클리드 거리는 <a href="../03-topology-basics/index.html">3장</a>에서 거리공간의 가장 기본적인 예가 되고, 열린집합과 연속의 정의에 쓰인다.
+      다음 명제는 <a href="../02-calculus-rn/index.html">2장</a>에서 미분의 “크기”를 잴 때 쓴다.</p>
+
+      <div class="thm proposition" id="i-1-5-7">
+        <p><span class="thm-head">명제 1.5.7</span> <span class="thm-name">(선형사상은 유계이다)</span>.
+        \(T\colon \R^n \to \R^m\)이 선형사상이고 표준기저에 대한 행렬이 \(A = (A^i_j)\)이면, \(C = \big(\sum_{i,j} (A^i_j)^2\big)^{1/2}\)에 대하여 모든 \(x \in \R^n\)에서 \(\abs{Tx} \le C\abs{x}\)이다.
+        특히 \(\abs{Tx - Ty} \le C\abs{x - y}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        \(A\)의 \(i\)번째 행을 벡터로 본 것을 \(a_{(i)} = (A^i_1, \dots, A^i_n)\)이라 하면 <a href="1-2-linear-maps.html#eq-1-2-2">(1.2.2)</a>에서 \((Tx)^i = \sum_j A^i_j x^j = \inner{a_{(i)}}{x}\)이다.
+        코시-슈바르츠에서 \(\abs{(Tx)^i} \le \abs{a_{(i)}}\,\abs{x}\)이므로
+        \(\abs{Tx}^2 = \sum_i \big((Tx)^i\big)^2 \le \sum_i \abs{a_{(i)}}^2 \abs{x}^2 = C^2\abs{x}^2\)이다. 둘째 부등식은 \(T\)의 선형성에서 \(Tx - Ty = T(x - y)\)이기 때문이다.</p>
+      </div>
+    </section>
+
+    <section id="sec-orthonormal">
+      <h2>정규직교기저와 그람-슈미트 과정</h2>
+
+      <div class="thm definition" id="i-1-5-8">
+        <p><span class="thm-head">정의 1.5.8</span> <span class="thm-name">(정규직교, orthonormal)</span>.
+        내적공간 \((V, g)\)의 목록 \((u_1, \dots, u_k)\)가 \(g(u_i, u_j) = \delta_{ij}\)(\(i = j\)이면 \(1\), 아니면 \(0\))를 만족하면 <dfn>정규직교</dfn>(orthonormal)라 한다.
+        기저이면서 정규직교인 목록을 <em>정규직교기저</em>라 한다.</p>
+      </div>
+
+      <p>여기서 \(\delta_{ij}\)는 크로네커 델타를 아래첨자 둘로 쓴 것이다. 첨자가 모두 아래에 있는 이유는 \(g(u_i, u_j)\)가 벡터 두 개를 받는 양이기 때문이다(뒤의 그람 행렬 참고).
+      표준기저는 유클리드 내적에 대한 정규직교기저다. <a href="1-3-dual-spaces.html#i-1-3-9">예 1.3.9</a>의 극좌표 기저 \((b_1, b_2)\)는 서로 직교하지만 \(\abs{b_2} = r\)이므로 \(r \neq 1\)이면 정규직교가 아니다. 이것이 정규직교의 비예다.</p>
+
+      <div class="thm proposition" id="i-1-5-9">
+        <p><span class="thm-head">명제 1.5.9</span> <span class="thm-name">(정규직교기저에서의 계산)</span>.
+        (a) 정규직교인 목록은 일차독립이다. (b) \((u_1, \dots, u_n)\)이 정규직교기저이면 모든 \(v, w \in V\)에 대하여
+        \[ v = \sum_{i=1}^{n} g(v, u_i)\, u_i, \qquad g(v, w) = \sum_{i=1}^{n} v^i w^i, \qquad \abs{v}_g^2 = \sum_{i=1}^{n} (v^i)^2 \]
+        이다. 여기서 \(v^i, w^i\)는 이 기저에 대한 성분이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) \(\sum_i a^i u_i = 0\)과 \(u_j\)의 내적을 취하면 \(0 = \sum_i a^i g(u_i, u_j) = \sum_i a^i \delta_{ij} = a^j\)이다.
+        (b) \(v = \sum_i v^i u_i\)와 \(u_j\)의 내적은 같은 계산으로 \(g(v, u_j) = v^j\)이다. 또 \(g(v, w) = \sum_{i,j} v^i w^j g(u_i, u_j) = \sum_i v^i w^i\)이고, \(w = v\)로 두면 셋째 식이다.</p>
+      </div>
+
+      <p>즉 정규직교기저를 쓰면 어떤 내적이든 성분으로는 유클리드 내적처럼 보인다. <a href="1-4-change-of-basis.html">1.4절</a>의 \(\sum_i v^i w^i\)가 표준기저에서 길이를 준 것은 표준기저가 정규직교이기 때문이었다.
+      다음 정리는 정규직교기저가 언제나 있음을 보장하고, 그것을 만드는 방법까지 준다.</p>
+
+      <div class="thm theorem" id="i-1-5-10">
+        <p><span class="thm-head">정리 1.5.10</span> <span class="thm-name">(그람-슈미트 과정, Gram–Schmidt process)</span>.
+        \((V, g)\)가 \(n\)차원 내적공간이고 \((b_1, \dots, b_n)\)이 기저이면, 각 \(k = 1, \dots, n\)에 대하여</p>
+        <div class="equation" id="eq-1-5-2">
+        \[ \operatorname{span}(u_1, \dots, u_k) = \operatorname{span}(b_1, \dots, b_k) \tag{1.5.2} \]
+        </div>
+        <p>를 만족하는 정규직교기저 \((u_1, \dots, u_n)\)이 있다. 그것은 다음 식으로 차례로 얻는다.</p>
+        <div class="equation" id="eq-1-5-3">
+        \[ u_1 = \frac{b_1}{\abs{b_1}_g}, \qquad w_j = b_j - \sum_{i=1}^{j-1} g(b_j, u_i)\, u_i, \quad u_j = \frac{w_j}{\abs{w_j}_g} \quad (j = 2, \dots, n) \tag{1.5.3} \]
+        </div>
+        <p>특히 모든 유한차원 내적공간에는 정규직교기저가 있다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 기저벡터를 차례로 보면서, 앞에서 만든 방향의 성분을 빼고 길이를 \(1\)로 맞추면 정규직교기저가 된다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: \(k\)에 대한 귀납법. \(w_j\)는 앞의 \(u_i\)들과 직교하도록 만든 것이고, \(b_j\)가 앞의 것들의 일차결합이 아니므로 \(0\)이 아니다.</p>
+        <p><span class="proof-head">증명.</span>
+        \(b_1 \neq 0\)(기저는 \(0\)을 포함하지 않는다. <a href="1-1-vector-spaces-bases.html#i-1-1-10">예 1.1.10</a>(d))이므로 \(u_1\)이 정의되고, \(\abs{u_1}_g = 1\), \(\operatorname{span}(u_1) = \operatorname{span}(b_1)\)이다.
+        \(j \ge 2\)이고 \((u_1, \dots, u_{j-1})\)이 정규직교이며 <a href="#eq-1-5-2">(1.5.2)</a>가 \(k = j - 1\)까지 성립한다고 하자.</p>
+        <ul>
+          <li><em>\(w_j \neq 0\)이다.</em> \(w_j = 0\)이면 \(b_j = \sum_{i \lt j} g(b_j, u_i)u_i \in \operatorname{span}(u_1, \dots, u_{j-1}) = \operatorname{span}(b_1, \dots, b_{j-1})\)이 되어 기저의 일차독립에 어긋난다. 따라서 \(u_j\)가 정의되고 \(\abs{u_j}_g = 1\)이다.</li>
+          <li><em>직교한다.</em> \(k \lt j\)이면 \(g(w_j, u_k) = g(b_j, u_k) - \sum_{i \lt j} g(b_j, u_i)\,\delta_{ik} = g(b_j, u_k) - g(b_j, u_k) = 0\)이므로 \(g(u_j, u_k) = 0\)이다.</li>
+          <li><em><a href="#eq-1-5-2">(1.5.2)</a>가 \(k = j\)에서 성립한다.</em> \(u_j\)는 \(b_j\)와 \(u_1, \dots, u_{j-1}\)의 일차결합이므로 \(\operatorname{span}(b_1, \dots, b_j)\)에 있고, 거꾸로 \(b_j = \abs{w_j}_g u_j + \sum_{i \lt j} g(b_j, u_i)u_i\)이다. 두 부분공간은 서로를 포함한다.</li>
+        </ul>
+        <p>귀납법으로 \((u_1, \dots, u_n)\)은 정규직교이고, <a href="#i-1-5-9">명제 1.5.9</a>(a)에 의해 일차독립이며, 길이가 \(n\)이므로 기저다(<a href="1-1-vector-spaces-bases.html#i-1-1-21">따름정리 1.1.21</a>(a)).
+        기저는 언제나 있으므로(<a href="1-1-vector-spaces-bases.html#i-1-1-18">정리 1.1.18</a>) 정규직교기저도 언제나 있다.</p>
+      </div>
+
+      <div class="thm example" id="i-1-5-11">
+        <p><span class="thm-head">예 1.5.11</span> <span class="thm-name">(기준 기저의 그람-슈미트)</span>.
+        유클리드 내적으로 \(b_1 = (2,1)\), \(b_2 = (-1,1)\)에 <a href="#eq-1-5-3">(1.5.3)</a>을 적용하자(<a href="#fig-1-5-1">그림 1.5.1</a>(a)). 처음 나오는 계산이므로 모든 단계를 쓴다.
+        \(\abs{b_1} = \sqrt{4 + 1} = \sqrt5\)이므로 \(u_1 = (2, 1)/\sqrt5\)이다. 다음으로 \(\inner{b_2}{u_1} = (-2 + 1)/\sqrt5 = -1/\sqrt5\)이므로</p>
+        <div class="equation" id="eq-1-5-4">
+        \[ \begin{aligned} w_2 = b_2 - \inner{b_2}{u_1}u_1 &= (-1, 1) + \frac{1}{\sqrt5}\cdot\frac{(2, 1)}{\sqrt5} \\ &= (-1, 1) + \big(\tfrac25, \tfrac15\big) = \big(-\tfrac35, \tfrac65\big) \end{aligned} \tag{1.5.4} \]
+        </div>
+        <p>이다. \(\abs{w_2} = \tfrac35\sqrt{1 + 4} = \tfrac{3}{\sqrt5}\)이므로 \(u_2 = w_2/\abs{w_2} = (-1, 2)/\sqrt5\)이다.
+        확인: \(\inner{u_1}{u_2} = (-2 + 2)/5 = 0\), \(\abs{u_2}^2 = (1 + 4)/5 = 1\).</p>
+        <p class="verified">검증: <code>verify/v-1-5-inner-products.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-gram">
+      <h2>그람 행렬</h2>
+      <p>정규직교가 아닌 기저에서는 내적을 어떻게 계산하는가? 기저벡터끼리의 내적 \(n^2\)개만 알면 된다.</p>
+
+      <div class="thm definition" id="i-1-5-12">
+        <p><span class="thm-head">정의 1.5.12</span> <span class="thm-name">(그람 행렬, Gram matrix)</span>.
+        \((V, g)\)가 내적공간이고 \(\mathcal{B} = (b_1, \dots, b_n)\)이 기저일 때 \(g_{ij} = g(b_i, b_j)\)로 두자. \(i\)행 \(j\)열 성분이 \(g_{ij}\)인 \(n \times n\) 행렬 \(G = (g_{ij})\)를
+        \(\mathcal{B}\)에 대한 \(g\)의 <dfn>그람 행렬</dfn>(Gram matrix)이라 한다.</p>
+      </div>
+
+      <p>쌍선형성에서 \(v = \sum_i v^i b_i\), \(w = \sum_j w^j b_j\)이면</p>
+      <div class="equation" id="eq-1-5-5">
+      \[ g(v, w) = \sum_{i,j} v^i w^j\, g(b_i, b_j) = \sum_{i=1}^{n}\sum_{j=1}^{n} g_{ij}\, v^i w^j = [v]_{\mathcal{B}}^{\mathsf{T}}\, G\, [w]_{\mathcal{B}} \tag{1.5.5} \]
+      </div>
+      <p>이다. 첨자를 보자. 벡터를 두 개 받는 \(g\)의 성분 \(g_{ij}\)는 첨자 둘이 모두 <em>아래</em>에 있고, 각각이 벡터 성분의 위첨자와 짝을 이룬다(비고 <a href="1-4-change-of-basis.html#i-1-4-9">1.4.9</a>의 균형 규칙).
+      <a href="1-4-change-of-basis.html">1.4절</a>의 \(\sum_i v^i w^i\)는 균형 규칙을 어긴 식이었고, 그 자리에 들어가야 할 것이 \(g_{ij}\)였다. 정규직교기저에서만 \(g_{ij} = \delta_{ij}\)가 되어 두 식이 같아진다.</p>
+
+      <div class="thm proposition" id="i-1-5-13">
+        <p><span class="thm-head">명제 1.5.13</span> <span class="thm-name">(그람 행렬의 성질)</span>.
+        \(G\)가 기저 \(\mathcal{B}\)에 대한 그람 행렬이라 하자.</p>
+        <ul>
+          <li>(a) \(G\)는 대칭행렬이고, \(0\)이 아닌 모든 \(a \in \R^n\)에 대해 \(a^{\mathsf{T}}Ga \gt 0\)이다(양의 정부호 행렬).</li>
+          <li>(b) \(G\)는 가역이다.</li>
+          <li>(c) \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 기저변환 행렬이 \(B\)이면 새 그람 행렬은 \(\tilde G = B^{\mathsf{T}}GB\)이다. 성분으로는
+          \(\tilde g_{kl} = \sum_{i,j} B^i_k B^j_l\, g_{ij}\)이다.</li>
+          <li>(d) \(\mathcal{B}\)가 정규직교기저일 필요충분조건은 \(G = I\)이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) \(g_{ij} = g(b_i, b_j) = g(b_j, b_i) = g_{ji}\)이다. \(a \neq 0\)이면 \(v = \sum_i a^i b_i \neq 0\)이고 <a href="#eq-1-5-5">(1.5.5)</a>에서 \(a^{\mathsf{T}}Ga = g(v, v) \gt 0\)이다.
+        (b) \(Ga = 0\)이면 \(a^{\mathsf{T}}Ga = 0\)이므로 (a)에 의해 \(a = 0\)이다. 따라서 \(x \mapsto Gx\)는 단사이고, <a href="1-2-linear-maps.html#i-1-2-10">따름정리 1.2.10</a>(a)에 의해 전단사, 즉 \(G\)는 가역이다.
+        (c) <a href="1-4-change-of-basis.html#eq-1-4-1">(1.4.1)</a>과 쌍선형성에서 \(\tilde g_{kl} = g(\tilde b_k, \tilde b_l) = g\big(\sum_i B^i_k b_i,\ \sum_j B^j_l b_j\big) = \sum_{i,j} B^i_k B^j_l\, g_{ij}\)이고, 이것은 \((B^{\mathsf{T}}GB)_{kl}\)이다.
+        (d)는 <a href="#i-1-5-8">정의 1.5.8</a>을 다시 쓴 것이다.</p>
+      </div>
+
+      <p>(c)에서 아래첨자 하나마다 \(B\)가 하나씩 붙는다. 여벡터의 성분 \(\omega_i\)(공변, 정리 <a href="1-4-change-of-basis.html#i-1-4-6">1.4.6</a>)와 같은 규칙이다.
+      그래서 그람 행렬은 “공변 첨자가 둘인 양”이다. 이것이 <a href="#eq-1-5-5">(1.5.5)</a>의 \(\sum g_{ij}v^iw^j\)가 기저에 무관한 이유다. 위첨자마다 \(B^{-1}\), 아래첨자마다 \(B\)가 붙어 모두 상쇄된다.</p>
+
+      <div class="thm example" id="i-1-5-14">
+        <p><span class="thm-head">예 1.5.14</span> <span class="thm-name">(기준 기저와 극좌표 기저의 그람 행렬)</span>.
+        (a) 유클리드 내적의 기준 기저 \(\mathcal{B}\)에 대한 그람 행렬은
+        \[ \begin{aligned} g_{11} &= \inner{b_1}{b_1} = 4 + 1 = 5, \qquad g_{22} = \inner{b_2}{b_2} = 1 + 1 = 2, \\ g_{12} &= g_{21} = \inner{b_1}{b_2} = -2 + 1 = -1 \end{aligned} \]
+        에서 \(G = \begin{pmatrix} 5 & -1 \\ -1 & 2 \end{pmatrix}\)이다. 표준기저의 그람 행렬이 \(I\)이므로 <a href="#i-1-5-13">명제 1.5.13</a>(c)에서도 \(G = B^{\mathsf{T}}IB = B^{\mathsf{T}}B\)이다(곱해서 확인해 보자).
+        \(v = (1, 2) = b_1 + b_2\)이면 <a href="#eq-1-5-5">(1.5.5)</a>에서 \(\abs{v}^2 = 5 \cdot 1 \cdot 1 + (-1) \cdot 1 \cdot 1 + (-1) \cdot 1 \cdot 1 + 2 \cdot 1 \cdot 1 = 5\)이고, 실제로 \(1^2 + 2^2 = 5\)이다.
+        \(\mathcal{B}\)-성분의 제곱합 \(1^2 + 1^2 = 2\)는 길이의 제곱이 아니다.</p>
+        <p>(b) <a href="1-3-dual-spaces.html#i-1-3-9">예 1.3.9</a>의 극좌표 기저 \(b_1 = (\cos\theta, \sin\theta)\), \(b_2 = (-r\sin\theta, r\cos\theta)\)에서는
+        \(g_{11} = \cos^2\theta + \sin^2\theta = 1\), \(g_{12} = -r\sin\theta\cos\theta + r\sin\theta\cos\theta = 0\), \(g_{22} = r^2\sin^2\theta + r^2\cos^2\theta = r^2\)이므로</p>
+        <div class="equation" id="eq-1-5-6">
+        \[ G = \begin{pmatrix} 1 & 0 \\ 0 & r^2 \end{pmatrix}, \qquad \abs{v}^2 = (v^1)^2 + r^2 (v^2)^2 \tag{1.5.6} \]
+        </div>
+        <p>이다(\(v^1, v^2\)는 극좌표 기저에 대한 성분). 각이 \(\theta\)에서 \(\theta + \Delta\theta\)로 변할 때 반지름 \(r\)인 원 위에서 움직인 거리가 대략 \(r\Delta\theta\)라는 사실이 \(g_{22} = r^2\)에 담겨 있다.</p>
+        <p class="verified">검증: <code>verify/v-1-5-inner-products.py</code></p>
+      </div>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 제1기본형식과 리만 계량</p>
+        <p><a href="../07-first-fundamental-form/index.html">7장</a>에서 곡면의 매개화 \(\mathbf{x}\)의 편미분 \(\mathbf{x}_u, \mathbf{x}_v\)는 접평면 \(T_pS\)의 기저가 되고,
+        \(\R^3\)의 내적을 \(T_pS\)로 제한한 내적의 그람 행렬이 제1기본형식의 계수 \(\begin{pmatrix} E & F \\ F & G \end{pmatrix}\)이다(<a href="#ex-1-5-2">연습 1.5.2</a>에서 구면의 경우를 미리 계산한다).
+        <a href="../21-riemannian-metrics/index.html">21장</a>의 리만 계량은 접공간마다 내적을 준 것이고, 좌표기저에 대한 그 그람 행렬이 \(g_{ij}\)이다.
+        <a href="#eq-1-5-6">(1.5.6)</a>은 평면의 유클리드 계량을 극좌표로 쓴 \(dr^2 + r^2\,d\theta^2\)가 된다. <a href="#i-1-5-13">명제 1.5.13</a>(c)는 좌표를 바꿀 때 \(g_{ij}\)가 야코비 행렬 두 개로 변한다는 규칙이 된다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-musical">
+      <h2>내적이 주는 동형 \(V \cong V^*\)</h2>
+      <p>내적이 있으면 벡터 \(v\)에서 여벡터 “\(v\)와 내적하기” \(w \mapsto g(v, w)\)를 만들 수 있다. 기저는 쓰지 않는다.</p>
+
+      <div class="thm proposition" id="i-1-5-15">
+        <p><span class="thm-head">명제 1.5.15</span> <span class="thm-name">(내적이 주는 동형)</span>.
+        \((V, g)\)가 유한차원 내적공간일 때 \(\hat g\colon V \to V^*\)를 \(\hat g(v)(w) = g(v, w)\)로 정의하면 \(\hat g\)는 동형사상이다.
+        특히 모든 \(\omega \in V^*\)에 대해 \(\omega = g(v_\omega, \cdot\,)\)인 \(v_\omega \in V\)가 꼭 하나 있다. 기저 \(\mathcal{B}\)의 그람 행렬을 \(G = (g_{ij})\), 그 역행렬을 \(G^{-1} = (g^{ij})\)로 쓰면</p>
+        <div class="equation" id="eq-1-5-7">
+        \[ \hat g(v) = \sum_{i} \Big(\sum_{j} g_{ij}\, v^j\Big)\beta^i, \qquad v_\omega = \sum_{i} \Big(\sum_{j} g^{ij}\, \omega_j\Big) b_i \tag{1.5.7} \]
+        </div>
+        <p>이다. 여기서 \((\beta^i)\)는 \(\mathcal{B}\)의 쌍대기저다.</p>
+      </div>
+      <p><strong>이 명제가 말하는 것.</strong> 내적이 있으면 벡터와 여벡터를 서로 바꿀 수 있다. 성분으로는 벡터의 위첨자를 \(g_{ij}\)로 “내리고”, 여벡터의 아래첨자를 \(g^{ij}\)로 “올린다”.</p>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        \(\hat g(v)\)는 \(w\)에 대해 선형이므로 \(V^*\)의 원소이고, \(\hat g\)는 \(v\)에 대해 선형이다(쌍선형성). \(\hat g(v) = 0\)이면 특히 \(0 = \hat g(v)(v) = \abs{v}_g^2\)이므로 \(v = 0\)이다.
+        \(\dim V^* = \dim V\)(정리 <a href="1-3-dual-spaces.html#i-1-3-5">1.3.5</a>)이므로 <a href="1-2-linear-maps.html#i-1-2-10">따름정리 1.2.10</a>(a)에 의해 \(\hat g\)는 동형사상이고, \(v_\omega = \hat g^{-1}(\omega)\)이다.
+        성분을 구하자. <a href="1-3-dual-spaces.html#i-1-3-5">정리 1.3.5</a>에 의해 \(\hat g(v)\)의 \(i\)번째 성분은 \(\hat g(v)(b_i) = g(v, b_i) = \sum_j v^j g(b_j, b_i) = \sum_j g_{ij} v^j\)이다(대칭성).
+        \(v_\omega\)는 \(\omega_i = \sum_j g_{ij} (v_\omega)^j\), 즉 \([\omega]^{\mathsf{T}} = G[v_\omega]\)를 풀어 얻으므로 \([v_\omega] = G^{-1}[\omega]^{\mathsf{T}}\)이고, 이것이 둘째 식이다.</p>
+      </div>
+
+      <p>\(G^{-1}\)의 성분을 위첨자 둘로 \(g^{ij}\)라 쓰는 것은 균형 규칙과 맞는다: \(\sum_j g^{ij} g_{jk} = \delta^i_k\)이다. <a href="1-3-dual-spaces.html#i-1-3-16">비고 1.3.16</a>에서 \(V \to V^*\)에는 자연스러운 동형이 없다고 했다.
+      <a href="#i-1-5-15">명제 1.5.15</a>는 <em>내적을 하나 고르면</em> 그런 동형이 생긴다는 것이다. 내적을 바꾸면 동형도 바뀐다.</p>
+
+      <div class="thm example" id="i-1-5-16">
+        <p><span class="thm-head">예 1.5.16</span> <span class="thm-name">(첨자 내리기와 올리기)</span>.
+        (a) 유클리드 내적과 표준기저에서는 \(g_{ij} = \delta_{ij}\)이므로 벡터 \((a^1, \dots, a^n)\)에 대응하는 여벡터의 성분이 \((a_1, \dots, a_n) = (a^1, \dots, a^n)\)으로 숫자가 같다.
+        즉 \(\hat g(v)\)는 \(v\)를 행벡터로 눕힌 것이다. 기준 기저 \(\mathcal{B}\)에서 확인하면, <a href="#i-1-5-14">예 1.5.14</a>(a)의 \(G\)로 \(\hat g(b_1) = \sum_i g_{i1}\beta^i = 5\beta^1 - \beta^2\)이고,
+        <a href="1-3-dual-spaces.html#i-1-3-6">예 1.3.6</a>의 \(\beta^i\)를 넣으면 \(5 \cdot \tfrac13(1,1) - \tfrac13(-1, 2) = (2, 1)\), 즉 \(b_1\)을 눕힌 행벡터다.</p>
+        <p>(b) 극좌표 기저에서는 <a href="#eq-1-5-6">(1.5.6)</a>에서 \(G = \operatorname{diag}(1, r^2)\), \(G^{-1} = \operatorname{diag}(1, 1/r^2)\)이다. 따라서 \(\hat g(b_1) = \beta^1\), \(\hat g(b_2) = r^2\beta^2\)이고,
+        거꾸로 여벡터 \(\beta^2\)에 대응하는 벡터는 \(b_2/r^2\)이다. 성분의 숫자가 같지 않다. 여벡터 \(\omega = \omega_1\beta^1 + \omega_2\beta^2\)에 대응하는 벡터는
+        \(\omega_1 b_1 + \tfrac{1}{r^2}\omega_2 b_2\)이다.</p>
+        <p class="verified">검증: <code>verify/v-1-5-inner-products.py</code></p>
+      </div>
+
+      <aside class="box warning">
+        <p class="box-title">주의: 벡터와 여벡터가 같아 보이는 것은 정규직교기저 덕분이다</p>
+        <p>미적분학에서는 함수의 기울기 벡터 \(\nabla f\)와 미분(여벡터) \(v \mapsto \sum_i \partial_i f\, v^i\)를 흔히 같은 것처럼 다룬다. 그렇게 해도 되는 것은
+        표준기저가 유클리드 내적에 대해 정규직교여서 \(g_{ij} = \delta_{ij}\)이기 때문이다(<a href="#i-1-5-16">예 1.5.16</a>(a)). 극좌표 기저처럼 정규직교가 아닌 기저에서는 두 대상의 성분이 달라진다(<a href="#i-1-5-16">예 1.5.16</a>(b)).
+        같은 이유로 <a href="1-3-dual-spaces.html#i-1-3-7">비예 1.3.7</a>에서 기저벡터를 눕혀도 쌍대기저가 되지 않았다. 정규직교기저에서만 \(\hat g(u_i) = \beta^i\)이다(<a href="#ex-1-5-6">연습 1.5.6</a>).</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교: 내적의 표기</p>
+        <p>이 study set은 \(\R^n\)의 표준 내적을 \(\inner{v}{w}\)로, 일반 내적을 \(g(v, w) = \inner{v}{w}_g\)로 쓰고, 점곱 \(v \cdot w\)는 쓰지 않는다.
+        do Carmo는 \(\R^3\)의 내적을 \(u \cdot v\)로 쓰고 <a class="cite" href="../../references.html#dC">[dC §1-4]</a>, Lee는 \(\R^n\)의 표준 내적을 \(v \cdot w\)로, 일반 내적을 \(\langle v, w \rangle\)으로 쓴다
+        <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM 2장, p. 9]</a>. 대응 \(\hat g\)의 기호는 이 절에서만 쓰는 임시 기호다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 일반화: 음악적 동형과 기울기</p>
+        <p><a href="../21-riemannian-metrics/index.html">21장</a>에서 리만 계량 \(g\)가 주는 \(\hat g\)와 그 역을 모든 점에서 모은 것을 음악적 동형 \(\flat\), \(\sharp\)라 부른다.
+        첨자를 내리는 것이 \(\flat\)(내림표), 올리는 것이 \(\sharp\)(올림표)다. 함수의 기울기는 \(\grad f = (df)^\sharp\)로 정의되고, <a href="#i-1-5-16">예 1.5.16</a>(b)가 극좌표에서
+        \(\grad f = \pd{f}{r}\,\partial_r + \frac{1}{r^2}\pd{f}{\theta}\,\partial_\theta\)라는 공식을 미리 보여 준다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>내적은 쌍선형, 대칭, 양의 정부호인 함수 \(g\)이고, 세 조건은 각각 필요하다(<a href="#i-1-5-3">비예 1.5.3</a>). 벡터공간의 공리만으로는 길이가 정해지지 않는다.</li>
+        <li>코시-슈바르츠 부등식에서 삼각부등식, 유클리드 거리, 각이 나온다(<a href="#i-1-5-5">정리 1.5.5</a>, <a href="#i-1-5-6">따름정리 1.5.6</a>). 선형사상 \(\R^n \to \R^m\)은 유계이다.</li>
+        <li>그람-슈미트 과정으로 정규직교기저를 만들 수 있고, 정규직교기저에서는 어떤 내적도 성분으로는 \(\sum_i v^iw^i\)이다.</li>
+        <li>일반 기저에서는 그람 행렬로 \(g(v, w) = \sum_{i,j} g_{ij}v^iw^j\)이고, 그람 행렬은 \(\tilde G = B^{\mathsf{T}}GB\)로 변한다(공변 첨자 둘).</li>
+        <li>내적은 자연스러운 동형 \(\hat g\colon V \to V^*\)를 준다. 성분으로는 첨자를 \(g_{ij}\)로 내리고 \(g^{ij}\)로 올린다(<a href="#i-1-5-15">명제 1.5.15</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 길이와 각 다음으로 넓이와 부피를 다룬다. 부호 있는 부피를 주는 행렬식, 기저의 “손잡이”를 가르는 방향, 그리고 \(\R^3\)에서 평면에 수직인 벡터를 주는 외적을 정의한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-1-5-1" data-level="1">
+        <p><span class="thm-head">연습 1.5.1</span> <span class="level">★</span>
+        다음 함수가 \(\R^2\) 위의 내적인지 판별하여라.
+        (a) \(3v^1w^1 + v^2w^2\) (b) \(v^1w^2 + v^2w^1\) (c) \(v^1w^1 + 2v^1w^2 + 2v^2w^1 + 5v^2w^2\) (d) \((v^1w^1)^2\)</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 내적이다. 쌍선형·대칭이고 \(3(v^1)^2 + (v^2)^2 \gt 0\)(\(v \neq 0\)).</p>
+          <p>(b) 아니다. 쌍선형·대칭이지만 \(v = (1, -1)\)에서 값이 \(-2\)이다.</p>
+          <p>(c) 내적이다. 쌍선형·대칭이고, 제곱을 완성하면 \((v^1)^2 + 4v^1v^2 + 5(v^2)^2 = (v^1 + 2v^2)^2 + (v^2)^2\)이다. 이것이 \(0\)이면 \(v^2 = 0\)이고 \(v^1 = -2v^2 = 0\)이다.</p>
+          <p>(d) 아니다. 쌍선형이 아니다. \(v = w = e_1\)에서 \(v\)를 \(2\)배 하면 값이 \(4\)배가 된다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-5-2" data-level="1">
+        <p><span class="thm-head">연습 1.5.2</span> <span class="level">★</span>
+        <a href="1-1-vector-spaces-bases.html#ex-1-1-5">연습 1.1.5</a>의 두 벡터 \(u = (r\cos\theta\cos\varphi, r\cos\theta\sin\varphi, -r\sin\theta)\), \(w = (-r\sin\theta\sin\varphi, r\sin\theta\cos\varphi, 0)\)
+        (\(r \gt 0\), \(0 \lt \theta \lt \pi\))의 유클리드 내적에 대한 그람 행렬을 구하여라. (<a href="../07-first-fundamental-form/index.html">7장</a>에서 사용)</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\inner{u}{u} = r^2\cos^2\theta(\cos^2\varphi + \sin^2\varphi) + r^2\sin^2\theta = r^2\),
+          \(\inner{u}{w} = -r^2\sin\theta\cos\theta\sin\varphi\cos\varphi + r^2\sin\theta\cos\theta\sin\varphi\cos\varphi + 0 = 0\),
+          \(\inner{w}{w} = r^2\sin^2\theta(\sin^2\varphi + \cos^2\varphi) = r^2\sin^2\theta\)이다. 따라서 그람 행렬은 \(\begin{pmatrix} r^2 & 0 \\ 0 & r^2\sin^2\theta \end{pmatrix}\)이다.
+          (<a href="../07-first-fundamental-form/index.html">7장</a>에서 이것이 반지름 \(r\)인 구면의 제1기본형식 계수 \(E = r^2\), \(F = 0\), \(G = r^2\sin^2\theta\)가 된다.)</p>
+          <p class="verified">검증: <code>verify/v-1-5-inner-products.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-5-3" data-level="1">
+        <p><span class="thm-head">연습 1.5.3</span> <span class="level">★</span>
+        유클리드 내적으로 \(\R^3\)의 기저 \(b_1 = (1,1,0)\), \(b_2 = (0,1,1)\), \(b_3 = (1,0,1)\)에 그람-슈미트 과정을 적용하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(u_1 = (1,1,0)/\sqrt2\). \(\inner{b_2}{u_1} = 1/\sqrt2\)이므로 \(w_2 = (0,1,1) - \tfrac12(1,1,0) = (-\tfrac12, \tfrac12, 1)\), \(\abs{w_2} = \sqrt{3/2}\),
+          \(u_2 = (-1, 1, 2)/\sqrt6\). \(\inner{b_3}{u_1} = 1/\sqrt2\), \(\inner{b_3}{u_2} = (-1 + 0 + 2)/\sqrt6 = 1/\sqrt6\)이므로
+          \(w_3 = (1,0,1) - \tfrac12(1,1,0) - \tfrac16(-1,1,2) = (\tfrac23, -\tfrac23, \tfrac23)\), \(u_3 = (1, -1, 1)/\sqrt3\).
+          확인: \(\inner{u_1}{u_2} = (-1 + 1)/\sqrt{12} = 0\), \(\inner{u_1}{u_3} = (1 - 1)/\sqrt6 = 0\), \(\inner{u_2}{u_3} = (-1 - 1 + 2)/\sqrt{18} = 0\).</p>
+          <p class="verified">검증: <code>verify/v-1-5-inner-products.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-5-4" data-level="1">
+        <p><span class="thm-head">연습 1.5.4</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 대어라.
+        (a) 정규직교인 목록은 일차독립이다.
+        (b) 모든 \(w\)에 대해 \(g(v, w) = 0\)이면 \(v = 0\)이다.
+        (c) 모든 기저의 그람 행렬은 대각행렬이다.
+        (d) \(\abs{v + w}_g^2 = \abs{v}_g^2 + \abs{w}_g^2\)이면 \(v\)와 \(w\)는 직교한다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 참. <a href="#i-1-5-9">명제 1.5.9</a>(a). (b) 참. \(w = v\)로 두면 \(\abs{v}_g^2 = 0\)이다. (c) 거짓. <a href="#i-1-5-14">예 1.5.14</a>(a)의 \(G\)는 \(g_{12} = -1\)이다.
+          (d) 참. \(\abs{v + w}_g^2 = \abs{v}_g^2 + 2g(v, w) + \abs{w}_g^2\)이므로 \(g(v, w) = 0\)이다(피타고라스 정리의 역).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-5-5" data-level="2">
+        <p><span class="thm-head">연습 1.5.5</span> <span class="level">★★</span>
+        (a) (편극 항등식) \(g(v, w) = \tfrac14\big(\abs{v + w}_g^2 - \abs{v - w}_g^2\big)\)임을 보여라. 따라서 노름을 알면 내적을 안다.
+        (b) (평행사변형 법칙) \(\abs{v + w}_g^2 + \abs{v - w}_g^2 = 2\abs{v}_g^2 + 2\abs{w}_g^2\)임을 보여라.
+        <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM 보조정리 2.1 참고]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p>쌍선형성과 대칭성에서 \(\abs{v \pm w}_g^2 = \abs{v}_g^2 \pm 2g(v, w) + \abs{w}_g^2\)이다. 두 식을 빼면 \(4g(v, w)\)이므로 (a)이고, 더하면 (b)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-5-6" data-level="2">
+        <p><span class="thm-head">연습 1.5.6</span> <span class="level">★★</span>
+        \((u_1, \dots, u_n)\)이 \((V, g)\)의 정규직교기저이고 \((\beta^i)\)가 그 쌍대기저라 하자. (a) \(\hat g(u_i) = \beta^i\)임을 보여라.
+        (b) \(T \in \End(V)\)의 이 기저에 대한 행렬의 성분이 \(A^i_j = g(u_i, Tu_j)\)임을 보여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) \(\hat g(u_i)(u_j) = g(u_i, u_j) = \delta_{ij} = \beta^i(u_j)\)이므로 두 여벡터는 기저에서 값이 같고, <a href="1-2-linear-maps.html#i-1-2-4">명제 1.2.4</a>에 의해 같다. (또는 <a href="#eq-1-5-7">(1.5.7)</a>에서 \(g_{ij} = \delta_{ij}\).)</p>
+          <p>(b) <a href="1-2-linear-maps.html#i-1-2-13">정의 1.2.13</a>에서 \(Tu_j = \sum_k A^k_j u_k\)이다. <a href="#i-1-5-9">명제 1.5.9</a>(b)에 의해 이 성분은 \(A^i_j = g(Tu_j, u_i) = g(u_i, Tu_j)\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-5-7" data-level="2">
+        <p><span class="thm-head">연습 1.5.7</span> <span class="level">★★</span>
+        코시-슈바르츠 부등식을 써서 다음을 보여라.
+        (a) 실수 \(a_1, \dots, a_n, c_1, \dots, c_n\)에 대해 \(\big(\sum_i a_i c_i\big)^2 \le \big(\sum_i a_i^2\big)\big(\sum_i c_i^2\big)\).
+        (b) \(p, q \in P_d\)에 대해 \(\big(\int_0^1 pq\big)^2 \le \int_0^1 p^2 \int_0^1 q^2\).
+        (c) \(\R^3\)에서 \(\abs{u + v + w} \le \abs{u} + \abs{v} + \abs{w}\).</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) \(\R^n\)의 유클리드 내적에 코시-슈바르츠를 쓰고 제곱한다. (b) <a href="#i-1-5-2">예 1.5.2</a>(c)의 내적에 코시-슈바르츠를 쓰고 제곱한다.
+          (c) 삼각부등식을 두 번 쓴다: \(\abs{u + v + w} \le \abs{u + v} + \abs{w} \le \abs{u} + \abs{v} + \abs{w}\).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-5-8" data-level="3">
+        <p><span class="thm-head">연습 1.5.8</span> <span class="level">★★★</span>
+        (a) \(\R^n\) 위의 모든 내적은 대칭이고 양의 정부호인 행렬 \(G\)로 \(g(x, y) = x^{\mathsf{T}}Gy\)라 쓸 수 있고, 거꾸로 그런 \(G\)는 모두 내적을 줌을 보여라.
+        (b) \((V, g)\)가 \(n\)차원 내적공간이면 \(g(v, w) = \inner{\Phi(v)}{\Phi(w)}\)를 만족하는 동형사상 \(\Phi\colon V \to \R^n\)이 있음을 보여라. 즉 같은 차원의 내적공간은 내적까지 포함해 모두 “같은 모양”이다.</p>
+        <details class="hint"><summary>힌트</summary><p>(a) 표준기저의 그람 행렬을 쓴다. (b) 정규직교기저의 좌표사상을 쓴다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) \(g\)가 내적이면 \(G\)를 표준기저에 대한 그람 행렬로 두면 <a href="#eq-1-5-5">(1.5.5)</a>에서 \(g(x, y) = x^{\mathsf{T}}Gy\)이고, <a href="#i-1-5-13">명제 1.5.13</a>(a)에서 \(G\)는 대칭이고 양의 정부호다.
+          거꾸로 \(G\)가 그렇다면 \(x^{\mathsf{T}}Gy\)는 행렬곱의 분배법칙에서 쌍선형이고, \(y^{\mathsf{T}}Gx = (y^{\mathsf{T}}Gx)^{\mathsf{T}} = x^{\mathsf{T}}G^{\mathsf{T}}y = x^{\mathsf{T}}Gy\)에서 대칭이며(\(1 \times 1\) 행렬은 전치해도 같다), 양의 정부호는 가정 그대로다.</p>
+          <p>(b) 그람-슈미트로 정규직교기저 \(\mathcal{U} = (u_1, \dots, u_n)\)을 잡고 \(\Phi(v) = [v]_{\mathcal{U}}\)로 두자. \(\Phi\)는 동형사상이고(명제 <a href="1-2-linear-maps.html#i-1-2-12">1.2.12</a>(b)),
+          <a href="#i-1-5-9">명제 1.5.9</a>(b)에서 \(g(v, w) = \sum_i v^i w^i = \inner{\Phi(v)}{\Phi(w)}\)이다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="1-4-change-of-basis.html">← 1.4 기저변환과 성분변환</a>
+    <a rel="next" href="1-6-determinant-orientation.html">1.6 행렬식, 방향, 외적 →</a>
+  </nav>
+</body>
+</html>

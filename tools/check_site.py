@@ -326,7 +326,7 @@ def find_math_spans(text):
         nested = None
         while True:
             c = text.find(close_tok, j)
-            o = text.find(open_tok, j)
+            o = text.find(open_tok, p + 2)
             if c == -1:
                 break
             if not _unescaped(text, c):

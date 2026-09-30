@@ -37,7 +37,7 @@ f_Xth = sp.lambdify((th, ph), list(X.diff(th)), "numpy")
 f_Xph = sp.lambdify((th, ph), list(X.diff(ph)), "numpy")
 f_N = sp.lambdify((th, ph), list(Nsym), "numpy")
 
-th0, ph0 = np.deg2rad(52), np.deg2rad(30)
+th0, ph0 = np.deg2rad(42), np.deg2rad(22)
 p = np.array(f_X(th0, ph0), float)
 Xth = np.array(f_Xth(th0, ph0), float)
 Xph = np.array(f_Xph(th0, ph0), float)
@@ -52,11 +52,11 @@ close("그림 1: 바깥쪽 법벡터 N(p) = p", Np, p, tol=1e-12)
 SCALE = 0.6  # 벡터 배율 (캡션에 명시할 값)
 
 fig = plt.figure(figsize=(6, 4.5))
-ax = dgfig.axes3d(fig, elev=18, azim=-18)
+ax = dgfig.axes3d(fig, elev=20, azim=-20)
 vv = dgfig.view_vector(ax)
 
 # 곡면 (면만; 격자는 숨은선 처리한 위도·경도선으로 따로)
-T, P = np.meshgrid(np.linspace(0, np.pi, 60), np.linspace(0, 2 * np.pi, 90), indexing="ij")
+T, P = np.meshgrid(np.linspace(0, np.pi, 40), np.linspace(0, 2 * np.pi, 60), indexing="ij")
 Xs, Ys, Zs = np.sin(T) * np.cos(P), np.sin(T) * np.sin(P), np.cos(T)
 dgfig.surface(ax, Xs, Ys, Zs, grid=False, alpha=0.30, shade=False)
 
@@ -85,7 +85,7 @@ dgfig.point3d(ax, p, r"$p$", label_offset=(-0.02, -0.12, -0.12))
 corner = p - 0.62 * Xth / np.linalg.norm(Xth) + 0.62 * Xph / np.linalg.norm(Xph)
 ax.text(*(corner + np.array([0.0, 0.02, 0.06])), r"$T_pS^2$", color=C["tangent"], fontsize=12, zorder=20)
 
-dgfig.equal_aspect(ax, np.array([[-1, -1, -1], [1, 1, 1]]), p + SCALE * Np * 1.25)
+dgfig.equal_aspect(ax, np.array([[-1, -1, -1], [1, 1, 1]]), p + SCALE * Np * 1.25, zoom=1.35)
 fig.subplots_adjust(0, 0, 1, 1)
 paths1 = dgfig.save(fig, __file__, png=True, outdir=OUT, stem="sample-sphere-tangent-plane")
 
@@ -101,7 +101,7 @@ U = dgfig.blob(axM, center=(0.28, 0.12), radius=0.45, seed=11, amp=0.18, fill="r
 pM = np.array([0.30, 0.10])
 axM.plot(*pM, "o", color=C["main"], ms=4, zorder=5)
 axM.text(pM[0] + 0.06, pM[1] - 0.14, r"$p$", fontsize=12)
-axM.text(0.52, 0.50, r"$U$", fontsize=12, color=C["tangent"])
+axM.text(-0.08, 0.62, r"$U$", fontsize=12, color=C["tangent"])
 axM.text(-0.95, 0.80, r"$M$", fontsize=14)
 
 # ℝ²: 좌표축, 차트의 치역 Û = φ(U) (좌표격자를 영역으로 잘라 그림)
@@ -111,7 +111,7 @@ axR.annotate("", xy=(-0.95, 1.25), xytext=(-0.95, -1.0),
              arrowprops=dict(arrowstyle="-|>", color=C["aux"], lw=dgfig.LW["aux"]))
 axR.text(1.3, -1.08, r"$x^1$", fontsize=11, color=C["aux"], ha="right")
 axR.text(-1.13, 1.18, r"$x^2$", fontsize=11, color=C["aux"])
-axR.text(0.95, 1.05, r"$\mathbb{R}^2$", fontsize=13)
+axR.text(1.05, -0.72, r"$\mathbb{R}^2$", fontsize=13)
 
 Uhat = dgfig.blob(axR, center=(0.15, 0.1), radius=0.72, seed=5, amp=0.10, fill="region", edge="tangent", lw=1.0)
 clip = Polygon(Uhat, closed=True, facecolor="none", edgecolor="none")
@@ -123,9 +123,9 @@ for c in np.linspace(-1.0, 1.2, 12):
 pR = np.array([0.18, 0.02])
 axR.plot(*pR, "o", color=C["main"], ms=4, zorder=5)
 axR.text(pR[0] + 0.07, pR[1] - 0.2, r"$\varphi(p)$", fontsize=12)
-axR.text(0.25, 0.93, r"$\hat U = \varphi(U)$", fontsize=12, color=C["tangent"])
+axR.text(0.62, 0.95, r"$\hat U = \varphi(U)$", fontsize=12, color=C["tangent"], ha="center")
 
-dgfig.map_arrow(fig, axM, axR, r"$\varphi$", xy_from=(0.62, 0.35), xy_to=(-0.35, 0.35), coords="data", rad=-0.35)
+dgfig.map_arrow(fig, axM, axR, r"$\varphi$", xy_from=(0.70, 0.22), xy_to=(-0.40, 0.30), coords="data", rad=-0.35)
 
 check("그림 2: 점 p가 U 안에 있음",
       bool(Polygon(U, closed=True).get_path().contains_point(pM)))

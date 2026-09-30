@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1.6 행렬식, 방향, 외적 — 미분기하 스터디</title>
+  <meta name="dg-id" content="1.6">
+  <meta name="dg-status" content="draft">
+  <meta name="dg-prereq" content="1.1, 1.2, 1.4, 1.5">
+  <meta name="dg-refs" content="Ax Ch. 9; dC §1-4; Lee-IRM App. B pp. 400–403">
+  <meta name="dg-updated" content="2026-09-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">1. 선형대수 복습</a> ›
+    <span>1.6 행렬식, 방향, 외적</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>1.6 행렬식, 방향, 외적</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#Ax">[Ax 9장]</a>,
+        <a class="cite" href="../../references.html#dC">[dC §1-4]</a>,
+        <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM 부록 B, pp. 400–403]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>다중선형과 교대의 뜻을 알고, 행렬식을 “정규화된 교대 다중선형 함수”로 특징짓는 정리를 증명의 흐름과 함께 이해한다.</li>
+        <li>\(\det(AB) = \det A\det B\), \(\det A \neq 0 \iff A\) 가역, \(\det A^{\mathsf{T}} = \det A\)를 증명할 수 있다.</li>
+        <li>벡터공간의 방향을 기저변환 행렬의 행렬식 부호로 정의하고, 방향이 정확히 두 개임을 보일 수 있다.</li>
+        <li>\(\R^3\)의 외적을 행렬식과 내적으로 정의하고, 수직성·넓이·오른손 방향을 증명하며, 쐐기곱과 구별할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="1-1-vector-spaces-bases.html#i-1-1-18">정리 1.1.18</a>, <a href="1-1-vector-spaces-bases.html#i-1-1-21">따름정리 1.1.21</a></li>
+        <li><a href="1-2-linear-maps.html#i-1-2-16">정리 1.2.16 (합성과 행렬곱)</a>, <a href="1-2-linear-maps.html#i-1-2-17">따름정리 1.2.17</a></li>
+        <li><a href="1-4-change-of-basis.html#i-1-4-1">정의 1.4.1 (기저변환 행렬)</a>, <a href="1-4-change-of-basis.html#i-1-4-4">명제 1.4.4</a>, <a href="1-4-change-of-basis.html#i-1-4-12">정리 1.4.12</a></li>
+        <li><a href="1-5-inner-products.html#i-1-5-5">정리 1.5.5 (코시-슈바르츠)</a>, <a href="1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>, <a href="1-5-inner-products.html#i-1-5-15">명제 1.5.15 (내적이 주는 동형)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="1-5-inner-products.html">1.5절</a>에서 내적으로 길이와 각을 쟀다. 이번에는 넓이와 부피다. \(\R^2\)의 두 벡터 \(v, w\)가 만드는 평행사변형의 넓이는
+      \(\abs{v^1w^2 - v^2w^1}\)이다. 그런데 절댓값을 떼어 낸 \(D(v, w) = v^1w^2 - v^2w^1\)이 계산하기에 훨씬 좋다. 이 값은</p>
+      <ul>
+        <li>각 자리에 대해 선형이고(한 변을 두 배로 늘이면 넓이가 두 배, 두 벡터를 더하면 넓이가 더해진다),</li>
+        <li>두 벡터를 바꾸면 부호가 바뀌며(\(D(w, v) = -D(v, w)\)),</li>
+        <li>표준기저에서 \(D(e_1, e_2) = 1\)이다.</li>
+      </ul>
+      <p>부호에는 정보가 있다. \(v\)에서 \(w\)로 반시계 방향으로 돌면 양수, 시계 방향이면 음수다(<a href="#fig-1-6-1">그림 1.6.1</a>). 이 세 성질을 \(n\)차원으로 옮긴 것이 행렬식이고,
+      부호가 담은 “도는 방향”을 일반화한 것이 벡터공간의 <em>방향</em>이다. 끝으로 \(\R^3\)에서는 두 벡터가 만드는 평행사변형에 수직이고 길이가 그 넓이인 벡터, 즉 외적을 얻는다.
+      곡선의 종법선벡터(<a href="../05-space-curves/index.html">5장</a>)와 곡면의 단위법벡터(<a href="../07-first-fundamental-form/index.html">7장</a>)가 모두 외적으로 만들어진다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 부호 있는 넓이</p>
+        <p><a href="#fig-1-6-1">그림 1.6.1</a>(a)와 (b)는 같은 평행사변형이지만 두 변을 적는 순서가 다르다. 순서를 바꾸면 도는 방향이 반대가 되고 부호 있는 넓이의 부호가 바뀐다.
+        (c)는 한 변에 다른 변의 배수를 더해도(밀기) 밑변과 높이가 그대로라 넓이가 변하지 않음을 보여 준다. 선형성과 교대성에서 이 사실이 저절로 나온다(<a href="#ex-1-6-5">연습 1.6.5</a>).</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-1-6-1">
+        <img src="figures/fig-1-6-1-signed-area.svg" alt="세 평면 그림. (a) b1=(2,1)과 b2=(-1,1)이 만드는 하늘색 평행사변형과 b1에서 b2로 반시계 방향으로 도는 화살표, det(b1,b2)=3. (b) 같은 평행사변형을 주홍색으로 칠하고 b2에서 b1로 시계 방향으로 도는 화살표, det(b2,b1)=-3. (c) b1+b2와 b2가 만드는 평행사변형(하늘색)과 원래 평행사변형(점선). 밑변 b2와 높이가 같다.">
+        <figcaption><span class="fig-head">그림 1.6.1.</span>
+        기준 기저 \(b_1 = (2,1)\), \(b_2 = (-1,1)\)의 부호 있는 넓이.
+        (a) \(\det(b_1, b_2) = 3 \gt 0\): \(b_1\)에서 \(b_2\)로 반시계 방향. (b) \(\det(b_2, b_1) = -3 \lt 0\): 시계 방향.
+        (c) \(\det(b_1 + b_2, b_2) = \det(b_1, b_2) = 3\): 밀어도 넓이는 그대로다(점선이 원래 평행사변형).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-alternating">
+      <h2>다중선형 교대 함수</h2>
+
+      <div class="thm definition" id="i-1-6-1">
+        <p><span class="thm-head">정의 1.6.1</span> <span class="thm-name">(다중선형과 교대, multilinear and alternating)</span>.
+        \(V\)가 벡터공간이고 \(k \ge 1\)이라 하자. 함수 \(D\colon V \times \dots \times V \to \R\)(\(V\)가 \(k\)개)가 각 자리에 대해, 나머지 자리를 고정할 때마다 선형이면
+        \(k\)-<dfn>다중선형</dfn>(multilinear)이라 한다. 다중선형인 \(D\)가 어느 두 자리를 맞바꾸어도 부호만 바뀌면, 즉
+        \[ D(v_1, \dots, v_i, \dots, v_j, \dots, v_k) = -D(v_1, \dots, v_j, \dots, v_i, \dots, v_k) \qquad (i \lt j) \]
+        이면 <dfn>교대</dfn>(alternating)라 한다.</p>
+      </div>
+
+      <p>\(k = 2\)인 다중선형 함수를 쌍선형이라 부른다. <a href="1-5-inner-products.html">1.5절</a>의 내적은 쌍선형이었다. 교대성은 다음처럼 바꿔 말할 수 있고, 증명에서는 오히려 이쪽이 쓰기 편하다.</p>
+
+      <div class="thm lemma" id="i-1-6-2">
+        <p><span class="thm-head">보조정리 1.6.2</span>.
+        \(k\)-다중선형 함수 \(D\)에 대하여 다음 세 조건은 동치다.</p>
+        <ul>
+          <li>(a) \(D\)는 교대이다.</li>
+          <li>(b) 두 자리에 같은 벡터가 들어가면 \(D\)의 값이 \(0\)이다.</li>
+          <li>(c) \((v_1, \dots, v_k)\)가 일차종속이면 \(D(v_1, \dots, v_k) = 0\)이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a)\(\Rightarrow\)(b): \(i\)번째와 \(j\)번째에 같은 \(v\)가 들어 있으면, 두 자리를 맞바꿔도 인자는 그대로이므로 \(D(\dots) = -D(\dots)\), 즉 \(2D(\dots) = 0\)이다.</p>
+        <p>(b)\(\Rightarrow\)(a): \(i\)번째와 \(j\)번째 자리만 적고 나머지는 고정해 \(D(x, y)\)로 줄여 쓰자. (b)와 다중선형성에서
+        \[ 0 = D(v + w,\ v + w) = D(v, v) + D(v, w) + D(w, v) + D(w, w) = D(v, w) + D(w, v) \]
+        이므로 \(D(w, v) = -D(v, w)\)이다.</p>
+        <p>(b)\(\Rightarrow\)(c): 일차종속이면 보조정리 <a href="1-1-vector-spaces-bases.html#i-1-1-11">1.1.11</a>에 의해 어떤 \(v_j\)가 나머지의 일차결합 \(v_j = \sum_{i \neq j} a^i v_i\)이다.
+        \(j\)번째 자리에 넣고 선형성으로 풀면 \(D(v_1, \dots, v_k) = \sum_{i \neq j} a^i D(v_1, \dots, v_i, \dots, v_k)\)인데, 여기서 \(v_i\)가 \(i\)번째와 \(j\)번째에 두 번 나오므로 (b)에 의해 각 항이 \(0\)이다.</p>
+        <p>(c)\(\Rightarrow\)(b): 같은 벡터가 두 번 나오는 목록은 일차종속이다.</p>
+      </div>
+
+      <div class="thm example" id="i-1-6-3">
+        <p><span class="thm-head">예 1.6.3</span>.
+        (a) \(\R^2\)에서 \(D(v, w) = v^1w^2 - v^2w^1\)은 쌍선형이고 교대이다. \(v\)에 대해 선형인 것은 \(w\)를 고정하면 \(v^1, v^2\)의 일차식이기 때문이고, \(D(w, v) = w^1v^2 - w^2v^1 = -D(v, w)\)이다.</p>
+        <p>(b) 더 일반적으로 2차원 벡터공간 \(V\)의 기저의 쌍대기저 \((\beta^1, \beta^2)\)에 대하여 \(D(v, w) = \beta^1(v)\beta^2(w) - \beta^2(v)\beta^1(w)\)는 쌍선형 교대 함수다.
+        표준기저를 쓰면 (a)가 된다.</p>
+        <p>(c) \(k = 1\)이면 교대 조건은 비어 있으므로, 모든 여벡터가 1-다중선형 교대 함수다.</p>
+      </div>
+
+      <div class="thm nonexample" id="i-1-6-4">
+        <p><span class="thm-head">비예 1.6.4</span>.
+        (a) 내적 \(\inner{v}{w}\)는 쌍선형이지만 교대가 아니다. 대칭이고, \(\inner{v}{v} \gt 0\)이므로 <a href="#i-1-6-2">보조정리 1.6.2</a>(b)를 어긴다.
+        (b) 부호 없는 넓이 \(\abs{v^1w^2 - v^2w^1}\)은 교대가 아닐 뿐 아니라 다중선형도 아니다. \(v\)를 \(-v\)로 바꿔도 값이 그대로이기 때문이다.
+        넓이에 부호를 붙여야 선형이 된다.</p>
+      </div>
+    </section>
+
+    <section id="sec-determinant">
+      <h2>행렬식</h2>
+      <p>동기에서 본 세 성질을 \(\R^n\)에서 요구하면 함수가 하나로 정해진다. 이것이 이 절의 핵심 정리다.
+      이하 \(n \times n\) 행렬 \(A\)를 열벡터 \(a_1, \dots, a_n\)의 목록으로 보고, \(n \ge 2\)일 때 \(A\)에서 첫째 행과 \(j\)번째 열을 지운 \((n-1) \times (n-1)\) 행렬을 \(A_{(1j)}\)로 쓴다.</p>
+
+      <div class="thm theorem" id="i-1-6-5">
+        <p><span class="thm-head">정리 1.6.5</span> <span class="thm-name">(행렬식의 존재와 유일성)</span>.
+        각 \(n \ge 1\)에 대하여, \(\R^n\) 위의 \(n\)-다중선형 교대 함수 \(\Delta\) 가운데 \(\Delta(e_1, \dots, e_n) = 1\)인 것이 꼭 하나 있다.
+        더 나아가 \(\R^n\) 위의 모든 \(n\)-다중선형 교대 함수 \(D\)는</p>
+        <div class="equation" id="eq-1-6-1">
+        \[ D(v_1, \dots, v_n) = D(e_1, \dots, e_n)\,\Delta(v_1, \dots, v_n) \tag{1.6.1} \]
+        </div>
+        <p>를 만족한다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> “부호 있는 부피”의 성질을 가진 함수는 본질적으로 하나뿐이고, 다른 것은 모두 그 상수배다. 상수는 표준기저에서의 값이다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: 존재는 첫째 행을 따라 전개하는 식으로 귀납적으로 만든다. 유일성은 다중선형성으로 모든 것을 \(D(e_{i_1}, \dots, e_{i_n})\)으로 풀고, 교대성으로 그것을 \(\pm D(e_1, \dots, e_n)\)으로 되돌린다.</p>
+        <p><span class="proof-head">증명.</span>
+        <em>존재.</em> \(n\)에 대한 귀납법으로 함수 \(\Delta_n\)을 만든다. \(n = 1\)이면 \(\Delta_1(a) = a\)로 둔다. \(n \ge 2\)이고 \(\Delta_{n-1}\)이 \((n-1)\)-다중선형, 교대이며 \(\Delta_{n-1}(e_1, \dots, e_{n-1}) = 1\)이라 하자.
+        \(n \times n\) 행렬 \(A = (A^i_j)\)(열이 \(a_1, \dots, a_n\))에 대하여</p>
+        <div class="equation" id="eq-1-6-2">
+        \[ \Delta_n(a_1, \dots, a_n) = \sum_{j=1}^{n} (-1)^{1+j} A^1_j\, \Delta_{n-1}\big(A_{(1j)}\big) \tag{1.6.2} \]
+        </div>
+        <p>로 정의한다(첫째 행을 따라 전개한 식). 네 단계로 확인한다.</p>
+        <ol>
+          <li><em>다중선형.</em> \(k\)번째 열 \(a_k\)만 움직이고 나머지는 고정하자. \(j = k\)인 항에서는 \(A^1_k\)가 \(a_k\)의 첫 성분이므로 \(a_k\)에 대해 선형이고, \(A_{(1k)}\)에는 \(a_k\)가 들어 있지 않다.
+          \(j \neq k\)인 항에서는 \(A^1_j\)가 상수이고, \(A_{(1j)}\)의 한 열이 \(a_k\)에서 첫 성분을 뺀 것이므로 귀납 가정에 의해 \(\Delta_{n-1}(A_{(1j)})\)가 \(a_k\)에 대해 선형이다. 선형인 함수의 합은 선형이다.</li>
+          <li><em>이웃한 두 열이 같으면 \(0\)이다.</em> \(a_k = a_{k+1}\)이라 하자. \(j \notin \{k, k+1\}\)이면 \(A_{(1j)}\)에도 이웃한 두 열이 같으므로, 귀납 가정과 <a href="#i-1-6-2">보조정리 1.6.2</a>(b)에 의해 \(\Delta_{n-1}(A_{(1j)}) = 0\)이다.
+          남은 두 항에서는 \(A_{(1k)} = A_{(1,k+1)}\)(같은 두 열 가운데 어느 것을 지워도 같은 행렬이 남는다)이고 \(A^1_k = A^1_{k+1}\)이므로
+          \((-1)^{1+k}A^1_k\,\Delta_{n-1}(A_{(1k)}) + (-1)^{2+k}A^1_{k+1}\,\Delta_{n-1}(A_{(1,k+1)}) = 0\)이다. 부호가 반대이기 때문이다.</li>
+          <li><em>교대.</em> 2번과 1번에서, <a href="#i-1-6-2">보조정리 1.6.2</a>의 (b)\(\Rightarrow\)(a) 계산을 이웃한 두 자리에 쓰면 이웃한 두 열을 맞바꿀 때 부호만 바뀐다.
+          이제 \(k \lt l\)이고 \(a_k = a_l\)이라 하자. \(l\)번째 열을 왼쪽으로 한 칸씩 옮겨 \(k\)번째 열 바로 옆으로 가져오면 매번 부호만 바뀌고, 옮긴 뒤에는 2번에 의해 값이 \(0\)이다.
+          따라서 어느 두 열이 같아도 \(\Delta_n = 0\)이고, <a href="#i-1-6-2">보조정리 1.6.2</a>에 의해 \(\Delta_n\)은 교대이다.</li>
+          <li><em>정규화.</em> 단위행렬의 첫째 행은 \((1, 0, \dots, 0)\)이므로 <a href="#eq-1-6-2">(1.6.2)</a>에서 \(j = 1\)인 항만 남고, \(\Delta_n(e_1, \dots, e_n) = \Delta_{n-1}(e_1, \dots, e_{n-1}) = 1\)이다.</li>
+        </ol>
+        <p><em>유일성과 <a href="#eq-1-6-1">(1.6.1)</a>.</em> \(D\)가 \(n\)-다중선형 교대 함수이고 \(v_j = \sum_i A^i_j e_i\)라 하자. 각 자리의 선형성을 차례로 쓰면</p>
+        <div class="equation" id="eq-1-6-3">
+        \[ D(v_1, \dots, v_n) = \sum_{i_1=1}^{n} \cdots \sum_{i_n=1}^{n} A^{i_1}_1 \cdots A^{i_n}_n\, D(e_{i_1}, \dots, e_{i_n}) \tag{1.6.3} \]
+        </div>
+        <p>이다. \(i_1, \dots, i_n\) 가운데 같은 것이 있으면 <a href="#i-1-6-2">보조정리 1.6.2</a>(b)에 의해 그 항은 \(0\)이다. 모두 다르면 \((i_1, \dots, i_n)\)은 \((1, \dots, n)\)을 재배열한 것이다.
+        이런 목록은 “\(e_1\)이 첫째 자리에 없으면 첫째 자리와 \(e_1\)이 있는 자리를 맞바꾸고, 다음에 \(e_2\)를 둘째 자리로 맞바꾸고, …”라는 정해진 절차로 많아야 \(n - 1\)번 맞바꾸어
+        \((e_1, \dots, e_n)\)으로 되돌릴 수 있다. 이 절차가 쓰는 맞바꾸기 횟수를 \(N\)이라 하자. \(N\)은 목록 \((i_1, \dots, i_n)\)만으로 정해지고 \(D\)와는 무관하다.
+        한 번 맞바꿀 때마다 \(D\)의 값의 부호가 바뀌므로 \(D(e_{i_1}, \dots, e_{i_n}) = (-1)^N D(e_1, \dots, e_n)\)이다. 같은 절차를 \(\Delta = \Delta_n\)에 쓰면 \(\Delta(e_{i_1}, \dots, e_{i_n}) = (-1)^N\)이다. 따라서
+        같은 것이 있는 경우까지 포함해 모든 \((i_1, \dots, i_n)\)에 대해 \(D(e_{i_1}, \dots, e_{i_n}) = D(e_1, \dots, e_n)\,\Delta(e_{i_1}, \dots, e_{i_n})\)이다. 이것을 <a href="#eq-1-6-3">(1.6.3)</a>에 넣고,
+        <a href="#eq-1-6-3">(1.6.3)</a>을 \(\Delta\)에 쓴 식과 비교하면 <a href="#eq-1-6-1">(1.6.1)</a>을 얻는다. \(D(e_1, \dots, e_n) = 1\)이면 \(D = \Delta\)이므로 유일성도 따른다.</p>
+      </div>
+
+      <div class="thm definition" id="i-1-6-6">
+        <p><span class="thm-head">정의 1.6.6</span> <span class="thm-name">(행렬식, determinant)</span>.
+        <a href="#i-1-6-5">정리 1.6.5</a>의 함수 \(\Delta\)를 \(\det\)으로 쓰고 <dfn>행렬식</dfn>(determinant)이라 한다. \(n \times n\) 행렬 \(A\)의 행렬식은 그 열들에서의 값 \(\det A = \det(a_1, \dots, a_n)\)이다.</p>
+      </div>
+
+      <div class="thm example" id="i-1-6-7">
+        <p><span class="thm-head">예 1.6.7</span>.
+        (a) \(n = 2\)이면 <a href="#eq-1-6-2">(1.6.2)</a>에서 \(\det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = a\,d - b\,c\)이다. 동기의 \(D(v, w) = v^1w^2 - v^2w^1\)이 바로 이것이다.</p>
+        <p>(b) \(n = 3\)이면 <a href="#eq-1-6-2">(1.6.2)</a>와 (a)에서</p>
+        <div class="equation" id="eq-1-6-4">
+        \[ \det A = A^1_1(A^2_2A^3_3 - A^2_3A^3_2) - A^1_2(A^2_1A^3_3 - A^2_3A^3_1) + A^1_3(A^2_1A^3_2 - A^2_2A^3_1) \tag{1.6.4} \]
+        </div>
+        <p>이다.</p>
+        <p>(c) 기준 기저 \(\mathcal{B}\)의 행렬 \(B = \begin{pmatrix} 2 & -1 \\ 1 & 1 \end{pmatrix}\)은 \(\det B = 2 \cdot 1 - (-1) \cdot 1 = 3\)이다(<a href="#fig-1-6-1">그림 1.6.1</a>(a)).
+        극좌표 기저의 행렬 <a href="1-3-dual-spaces.html#eq-1-3-8">(1.3.8)</a>은 \(\det B = \cos\theta \cdot r\cos\theta - (-r\sin\theta)\sin\theta = r\)이다.</p>
+        <p class="verified">검증: <code>verify/v-1-6-determinant-orientation.py</code></p>
+      </div>
+
+      <div class="thm theorem" id="i-1-6-8">
+        <p><span class="thm-head">정리 1.6.8</span> <span class="thm-name">(행렬식의 성질)</span>.
+        \(A, B\)가 \(n \times n\) 행렬이면 다음이 성립한다.</p>
+        <ul>
+          <li>(a) \(\det(AB) = \det A\,\det B\).</li>
+          <li>(b) \(A\)가 가역일 필요충분조건은 \(\det A \neq 0\)이다. 이때 \(\det(A^{-1}) = 1/\det A\)이다.</li>
+          <li>(c) \(\det A^{\mathsf{T}} = \det A\). 따라서 \(\det\)은 행에 대해서도 다중선형이고 교대이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: (a)는 \(v \mapsto \det(Av_1, \dots, Av_n)\)도 다중선형 교대 함수라는 것에 <a href="#i-1-6-5">정리 1.6.5</a>의 <a href="#eq-1-6-1">(1.6.1)</a>을 쓴다. (b)는 (a)와 <a href="#i-1-6-2">보조정리 1.6.2</a>(c). (c)는 <a href="#eq-1-6-3">(1.6.3)</a>을 전치에 맞춰 다시 센다.</p>
+        <p><span class="proof-head">증명.</span>
+        (a) \(A\)를 고정하고 \(D(v_1, \dots, v_n) = \det(Av_1, \dots, Av_n)\)으로 두자. \(x \mapsto Ax\)가 선형이고 \(\det\)이 다중선형이므로 \(D\)는 다중선형이다.
+        두 자리를 맞바꾸면 \(\det\)의 두 자리가 맞바뀌므로 \(D\)는 교대이다. <a href="#eq-1-6-1">(1.6.1)</a>에서 \(D = D(e_1, \dots, e_n)\det = \det(Ae_1, \dots, Ae_n)\det = (\det A)\det\)이다.
+        \(AB\)의 \(j\)번째 열은 \(A\)에 \(B\)의 \(j\)번째 열 \(b_j\)를 곱한 것이므로 \(\det(AB) = D(b_1, \dots, b_n) = \det A\,\det B\)이다.</p>
+        <p>(b) \(A\)가 가역이면 (a)에서 \(\det A\,\det(A^{-1}) = \det I = 1\)이므로 \(\det A \neq 0\)이고 둘째 식이 성립한다.
+        \(A\)가 가역이 아니면 선형사상 \(x \mapsto Ax\)는 동형사상이 아니고(<a href="1-2-linear-maps.html#i-1-2-17">따름정리 1.2.17</a>), <a href="1-2-linear-maps.html#i-1-2-10">따름정리 1.2.10</a>(a)에 의해 단사가 아니므로 \(Ax = 0\)인 \(x \neq 0\)이 있다.
+        \(Ax = \sum_j x^j a_j = 0\)은 열들이 일차종속이라는 뜻이므로 <a href="#i-1-6-2">보조정리 1.6.2</a>(c)에 의해 \(\det A = 0\)이다.</p>
+        <p>(c) 이 증명에서만 전치를 편하게 쓰려고 행렬 성분을 \(a_{ij}\)(\(i\)행 \(j\)열)로 쓴다. 그러면 \(A^{\mathsf{T}}\)의 \(i\)행 \(j\)열 성분은 \(a_{ji}\)이다.
+        \(\{1, \dots, n\}\)에서 자기 자신으로 가는 전단사를 <em>치환</em>(permutation)이라 하고, 치환 \(\sigma\)에 대해 \(j\)번째 열이 \(e_{\sigma(j)}\)인 행렬을 \(P_\sigma\), \(s(\sigma) = \det P_\sigma\)라 하자.
+        유일성 증명에서 보았듯 \(s(\sigma) = \pm 1\)이고, <a href="#eq-1-6-3">(1.6.3)</a>을 \(\det\)에 쓰면(같은 첨자가 있는 항은 \(0\))</p>
+        <div class="equation" id="eq-1-6-5">
+        \[ \det A = \sum_{\sigma} s(\sigma)\, a_{\sigma(1)1}\, a_{\sigma(2)2} \cdots a_{\sigma(n)n} \tag{1.6.5} \]
+        </div>
+        <p>이다(합은 모든 치환에 대해). \(P_\sigma P_\tau\)의 \(j\)번째 열은 \(P_\sigma e_{\tau(j)} = e_{\sigma(\tau(j))}\)이므로 \(P_\sigma P_\tau = P_{\sigma \circ \tau}\)이다. 특히 \(P_{\sigma^{-1}}P_\sigma = I\)이고, (a)에서
+        \(s(\sigma^{-1})s(\sigma) = 1\), 즉 \(s(\sigma^{-1}) = s(\sigma)\)이다(\(\pm 1\)의 역수는 자기 자신). 이제 <a href="#eq-1-6-5">(1.6.5)</a>를 \(A^{\mathsf{T}}\)에 쓰면
+        \(\det A^{\mathsf{T}} = \sum_\sigma s(\sigma)\, a_{1\sigma(1)} \cdots a_{n\sigma(n)}\)이다. 곱의 인수 \(a_{j\sigma(j)}\)를 \(i = \sigma(j)\)로 다시 번호를 매기면 \(a_{\sigma^{-1}(i)\,i}\)이므로
+        \[ \det A^{\mathsf{T}} = \sum_\sigma s(\sigma^{-1})\, a_{\sigma^{-1}(1)1} \cdots a_{\sigma^{-1}(n)n} = \sum_\tau s(\tau)\, a_{\tau(1)1} \cdots a_{\tau(n)n} = \det A \]
+        이다. 둘째 등호는 \(\sigma\)가 모든 치환을 한 번씩 지날 때 \(\tau = \sigma^{-1}\)도 그렇다는 것이다. 행에 대한 성질은 \(A^{\mathsf{T}}\)의 열에 대한 성질이다.</p>
+      </div>
+
+      <div class="thm corollary" id="i-1-6-9">
+        <p><span class="thm-head">따름정리 1.6.9</span> <span class="thm-name">(그람 행렬식과 부피)</span>.
+        \(v_1, \dots, v_n \in \R^n\)을 열로 하는 행렬을 \(M\), 유클리드 내적에 대한 이 목록의 그람 행렬을 \(G = (\inner{v_i}{v_j})\)라 하면 \(G = M^{\mathsf{T}}M\)이고</p>
+        <div class="equation" id="eq-1-6-6">
+        \[ \det G = (\det M)^2, \qquad \abs{\det(v_1, \dots, v_n)} = \sqrt{\det G} \tag{1.6.6} \]
+        </div>
+        <p>이다. 특히 \((v_1, \dots, v_n)\)이 기저이면 \(\det G \gt 0\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        \(M^{\mathsf{T}}M\)의 \(i\)행 \(j\)열 성분은 \(M^{\mathsf{T}}\)의 \(i\)번째 행(\(= v_i\))과 \(M\)의 \(j\)번째 열(\(= v_j\))의 곱, 즉 \(\inner{v_i}{v_j}\)이다.
+        <a href="#i-1-6-8">정리 1.6.8</a>(a), (c)에서 \(\det G = \det M^{\mathsf{T}}\det M = (\det M)^2\)이다. 기저이면 \(M\)이 가역이므로 (b)에서 \(\det M \neq 0\)이다.</p>
+      </div>
+
+      <p>\(n = 2\)이면 \(\det G = \abs{v}^2\abs{w}^2 - \inner{v}{w}^2\)이고, 이것이 평행사변형 넓이의 제곱이다. 즉 절댓값 \(\abs{\det}\)은 평행사변형(평행육면체)의 넓이(부피)이고,
+      <em>내적만으로</em> \(\sqrt{\det G}\)로 계산할 수 있다. 이 사실이 곡면의 넓이요소와 리만 체적형식의 출발점이다.</p>
+
+      <div class="thm proposition" id="i-1-6-10">
+        <p><span class="thm-head">명제 1.6.10</span> <span class="thm-name">(선형사상의 행렬식)</span>.
+        \(T \in \End(V)\)이면 \(\det[T]_{\mathcal{B}}\)는 기저 \(\mathcal{B}\)를 어떻게 골라도 같다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        <a href="1-4-change-of-basis.html#i-1-4-12">정리 1.4.12</a>에서 \([T]_{\tilde{\mathcal{B}}} = B^{-1}[T]_{\mathcal{B}}B\)이고, <a href="#i-1-6-8">정리 1.6.8</a>(a), (b)에서 \(\det(B^{-1}AB) = \det B^{-1}\det A\det B = \det A\)이다.</p>
+      </div>
+
+      <p>그래서 \(T\)의 행렬식을 \(\det T = \det[T]_{\mathcal{B}}\)로 정의할 수 있다(대각합과 같은 방식, 따름정리 <a href="1-4-change-of-basis.html#i-1-4-13">1.4.13</a>).
+      예를 들어 \(\det\id_V = 1\), 회전 \(R_\alpha\)는 \(\det R_\alpha = \cos^2\alpha + \sin^2\alpha = 1\), <a href="1-2-linear-maps.html#i-1-2-7">예 1.2.7</a>의 \(P\)는 가역이 아니므로 \(\det P = 0\)이다.</p>
+    </section>
+
+    <section id="sec-orientation">
+      <h2>방향</h2>
+      <p><a href="#fig-1-6-1">그림 1.6.1</a>(a)와 (b)의 차이, 즉 “두 기저벡터가 도는 방향”을 일반적인 벡터공간에서 정의하자. 한 기저만 보아서는 방향을 말할 수 없다.
+      두 기저를 <em>비교</em>하는 것만 가능하고, 그 비교가 기저변환 행렬의 행렬식의 부호다.</p>
+
+      <div class="thm definition" id="i-1-6-11">
+        <p><span class="thm-head">정의 1.6.11</span> <span class="thm-name">(방향, orientation)</span>.
+        \(V\)가 \(n\)차원 벡터공간(\(n \ge 1\))이라 하자. 두 기저 \(\mathcal{B}, \tilde{\mathcal{B}}\)에 대하여 \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 기저변환 행렬의 행렬식이 양수이면
+        두 기저가 <em>같은 방향</em>이라 하고 \(\mathcal{B} \sim \tilde{\mathcal{B}}\)로 쓴다. 이 관계의 동치류(<a href="#i-1-6-12">명제 1.6.12</a>) 하나를 \(V\)의 <dfn>방향</dfn>(orientation)이라 한다.
+        방향을 하나 정한 벡터공간을 <em>방향이 주어진</em> 벡터공간이라 하고, 정한 방향에 속한 기저를 <em>양의 방향</em>(positively oriented), 나머지 기저를 <em>음의 방향</em>이라 한다.
+        \(\R^n\)의 <em>표준 방향</em>은 표준기저 \((e_1, \dots, e_n)\)이 속한 방향이다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-1-6-12">
+        <p><span class="thm-head">명제 1.6.12</span> <span class="thm-name">(방향은 정확히 두 개다)</span>.
+        \(\sim\)은 \(V\)의 기저들 위의 동치관계이고, 동치류는 정확히 두 개다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        기저변환 행렬에 대한 명제 <a href="1-4-change-of-basis.html#i-1-4-4">1.4.4</a>와 <a href="#i-1-6-8">정리 1.6.8</a>을 쓴다.
+        (반사) \(\mathcal{B}\)에서 \(\mathcal{B}\)로의 행렬은 \(I\)이고 \(\det I = 1 \gt 0\).
+        (대칭) \(\mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬이 \(B\)이면 \(\tilde{\mathcal{B}} \to \mathcal{B}\)의 행렬은 \(B^{-1}\)이고 \(\det B^{-1} = 1/\det B\)는 \(\det B\)와 부호가 같다.
+        (추이) \(\mathcal{B} \to \tilde{\mathcal{B}}\)가 \(B\), \(\tilde{\mathcal{B}} \to \hat{\mathcal{B}}\)가 \(C\)이면 \(\mathcal{B} \to \hat{\mathcal{B}}\)는 \(BC\)이고 \(\det(BC) = \det B\det C \gt 0\).</p>
+        <p>이제 기저 \(\mathcal{B} = (b_1, \dots, b_n)\)을 하나 고정하고 \(\mathcal{B}' = (-b_1, b_2, \dots, b_n)\)이라 하자. \(\mathcal{B} \to \mathcal{B}'\)의 행렬은 \(\operatorname{diag}(-1, 1, \dots, 1)\)이고 행렬식이 \(-1\)이므로
+        \(\mathcal{B} \not\sim \mathcal{B}'\)이다. 따라서 동치류는 적어도 두 개다. 임의의 기저 \(\tilde{\mathcal{B}}\)에 대해 \(\mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬 \(B\)는 가역이므로 \(\det B \neq 0\)이다.
+        \(\det B \gt 0\)이면 \(\tilde{\mathcal{B}} \sim \mathcal{B}\)이다. \(\det B \lt 0\)이면 \(\mathcal{B}' \to \mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬 \(\operatorname{diag}(-1, 1, \dots, 1)B\)의 행렬식이 \(-\det B \gt 0\)이므로
+        \(\tilde{\mathcal{B}} \sim \mathcal{B}'\)이다. 따라서 동치류는 정확히 두 개다.</p>
+      </div>
+
+      <div class="thm example" id="i-1-6-13">
+        <p><span class="thm-head">예 1.6.13</span>.
+        (a) \(\R^2\)의 기준 기저 \(\mathcal{B} = (b_1, b_2)\)는 \(\mathcal{E}\)에서의 행렬 \(B\)의 행렬식이 \(3 \gt 0\)이므로 양의 방향이다. \((b_2, b_1)\)은 행렬 \(\begin{pmatrix} -1 & 2 \\ 1 & 1 \end{pmatrix}\)의 행렬식이 \(-3\)이므로 음의 방향이다
+        (<a href="#fig-1-6-1">그림 1.6.1</a>(a), (b)).</p>
+        <p>(b) \(\R^3\)에서 \((e_1, e_3, e_2)\)는 두 열을 맞바꾼 단위행렬이 행렬이므로 행렬식이 \(-1\), 즉 음의 방향이다. \((e_2, e_3, e_1)\)은 두 번 맞바꾸어 얻으므로 행렬식이 \(+1\), 양의 방향이다.</p>
+        <p>(c) 극좌표 기저는 <a href="#i-1-6-7">예 1.6.7</a>(c)에서 \(\det B = r \gt 0\)이므로 모든 점에서 양의 방향이다.</p>
+      </div>
+
+      <div class="thm nonexample" id="i-1-6-14">
+        <p><span class="thm-head">비예 1.6.14</span> <span class="thm-name">(모양이 같아도 방향은 다를 수 있다)</span>.
+        \((e_1, e_2)\)와 \((e_1, -e_2)\)는 둘 다 정규직교기저이고 길이와 각이 모두 같지만 방향이 반대다(행렬 \(\operatorname{diag}(1, -1)\)의 행렬식이 \(-1\)). 방향은 길이와 각으로 정해지지 않는다.
+        또 추상적인 벡터공간에는 “표준” 방향이 없다. 예를 들어 <a href="1-1-vector-spaces-bases.html#i-1-1-22">예 1.1.22</a>의 평면 \(W \subseteq \R^3\)에서 \((c_1, c_2)\)와 \((c_2, c_1)\)은 서로 다른 방향이고, \(W\) 자체에는 어느 쪽을 택할 이유가 없다.
+        (\(\R^3\) 안에서 \(W\)에 수직인 벡터를 하나 고르면 한쪽이 정해진다. <a href="#ex-1-6-7">연습 1.6.7</a> 참고.)</p>
+      </div>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 반시계 방향과 오른손</p>
+        <p>\(\R^2\)에서 \((v, w)\)가 양의 방향일 필요충분조건은 \(v\)를 \(\pi\)보다 작은 각만큼 반시계 방향으로 돌려 \(w\) 쪽으로 가져갈 수 있다는 것이다(<a href="#fig-1-6-1">그림 1.6.1</a>).
+        \(\R^3\)에서는 좌표축을 \((e_1, e_2, e_3)\)이 오른손 엄지·검지·중지처럼 놓이게 그리는 관례를 따르므로, 양의 방향인 기저는 “오른손 기저”다(<a href="#fig-1-6-2">그림 1.6.2</a>).
+        이것은 그림을 그리는 관례에 대한 말이지 수학적 정의는 아니다. 정의는 <a href="#i-1-6-11">정의 1.6.11</a>이다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 일반화: 곡면과 다양체의 방향</p>
+        <p><a href="../07-first-fundamental-form/index.html">7장</a>에서 곡면의 방향은 단위법벡터장 \(\mathbf{N}\)을 연속적으로 고르는 것으로 정의하고, 뫼비우스 띠처럼 그럴 수 없는 곡면이 있음을 본다.
+        <a href="../18-integration-stokes/index.html">18장</a>에서 다양체의 방향은 모든 접공간에 <a href="#i-1-6-11">정의 1.6.11</a>의 방향을 “연속적으로” 주는 것이고, 좌표변환의 야코비 행렬식의 부호로 판정한다.
+        그곳에서 \(0\)차원 벡터공간의 방향은 부호 \(\pm 1\)의 선택으로 따로 정한다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-cross-product">
+      <h2>\(\R^3\)의 외적</h2>
+      <p>\(u, v \in \R^3\)을 고정하면 \(w \mapsto \det(u, v, w)\)는 \(w\)에 대해 선형, 즉 \(\R^3\) 위의 여벡터다. 명제 <a href="1-5-inner-products.html#i-1-5-15">1.5.15</a>(유클리드 내적)에 의해
+      이 여벡터는 어떤 벡터와의 내적으로 꼭 한 가지 방식으로 쓸 수 있다. 그 벡터가 외적이다.</p>
+
+      <div class="thm definition" id="i-1-6-15">
+        <p><span class="thm-head">정의 1.6.15</span> <span class="thm-name">(외적, cross product)</span>.
+        \(u, v \in \R^3\)의 <dfn>외적</dfn>(cross product) \(u \times v\)는 모든 \(w \in \R^3\)에 대하여</p>
+        <div class="equation" id="eq-1-6-7">
+        \[ \inner{u \times v}{w} = \det(u, v, w) \tag{1.6.7} \]
+        </div>
+        <p>를 만족하는 유일한 벡터 \(u \times v \in \R^3\)이다.</p>
+      </div>
+
+      <p>성분을 구하자. 명제 <a href="1-5-inner-products.html#i-1-5-9">1.5.9</a>(b)에서 \((u \times v)^i = \inner{u \times v}{e_i} = \det(u, v, e_i)\)이다. 처음이므로 <a href="#eq-1-6-4">(1.6.4)</a>로 모두 전개한다.
+      \(\det(u, v, e_1)\)은 셋째 열이 \(e_1\)인 행렬의 행렬식이고, 첫째 행 \((u^1, v^1, 1)\)을 따라 전개하면</p>
+      <div class="equation" id="eq-1-6-8">
+      \[ \begin{aligned} \det\begin{pmatrix} u^1 & v^1 & 1 \\ u^2 & v^2 & 0 \\ u^3 & v^3 & 0 \end{pmatrix} &= u^1(v^2 \cdot 0 - 0 \cdot v^3) - v^1(u^2 \cdot 0 - 0 \cdot u^3) \\ &\quad + 1 \cdot (u^2v^3 - v^2u^3) = u^2v^3 - u^3v^2 \end{aligned} \tag{1.6.8} \]
+      </div>
+      <p>이다. 같은 방법으로 \(\det(u, v, e_2) = u^1(v^2 \cdot 0 - 1 \cdot v^3) - v^1(u^2 \cdot 0 - 1 \cdot u^3) = u^3v^1 - u^1v^3\),
+      \(\det(u, v, e_3) = u^1(v^2 \cdot 1 - 0) - v^1(u^2 \cdot 1 - 0) = u^1v^2 - u^2v^1\)이다. 따라서</p>
+      <div class="equation" id="eq-1-6-9">
+      \[ u \times v = \big(u^2v^3 - u^3v^2,\ \ u^3v^1 - u^1v^3,\ \ u^1v^2 - u^2v^1\big) \tag{1.6.9} \]
+      </div>
+      <p>이다. 이 정의는 \(\R^3\) 전용이다. \(\R^4\)에서 \(w \mapsto \det(u, v, w)\)는 인자가 모자라 정의되지 않으므로, 두 벡터의 외적을 같은 방식으로 만들 수 없다(비예).</p>
+
+      <div class="thm theorem" id="i-1-6-16">
+        <p><span class="thm-head">정리 1.6.16</span> <span class="thm-name">(외적의 성질)</span>.
+        \(u, v, w \in \R^3\)이라 하자.</p>
+        <ul>
+          <li>(a) \(u \times v\)는 \(u\)와 \(v\)에 대해 쌍선형이고, \(v \times u = -u \times v\)이다. 특히 \(u \times u = 0\).</li>
+          <li>(b) \(\inner{u \times v}{u} = \inner{u \times v}{v} = 0\). 즉 \(u \times v\)는 \(u\)와 \(v\)에 모두 수직이다.</li>
+          <li>(c) \(u \times v = 0\)일 필요충분조건은 \((u, v)\)가 일차종속인 것이다.</li>
+          <li>(d) \(\abs{u \times v}^2 = \abs{u}^2\abs{v}^2 - \inner{u}{v}^2\)이다. 따라서 \(u, v \neq 0\)이고 두 벡터 사이의 각이 \(\vartheta\)이면 \(\abs{u \times v} = \abs{u}\abs{v}\sin\vartheta\), 즉 \(u, v\)가 만드는 평행사변형의 넓이다.</li>
+          <li>(e) \((u, v)\)가 일차독립이면 \((u, v, u \times v)\)는 \(\R^3\)의 양의 방향 기저다.</li>
+        </ul>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> \(u \times v\)는 평행사변형에 수직이고, 길이는 그 넓이이며, \((u, v, u \times v)\)가 오른손 기저가 되는 쪽을 향한다(<a href="#fig-1-6-2">그림 1.6.2</a>). 이 세 조건이 외적을 결정한다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: (a)–(c), (e)는 정의 <a href="#eq-1-6-7">(1.6.7)</a>과 행렬식의 성질에서 바로 나온다. (d)는 \(M = (u, v, u \times v)\)의 행렬식을 두 가지로 계산한다: 정의로 한 번, 그람 행렬식(<a href="#i-1-6-9">따름정리 1.6.9</a>)으로 한 번.</p>
+        <p><span class="proof-head">증명.</span>
+        (a) \(\det\)이 첫째 자리에 대해 선형이므로 모든 \(w\)에 대해 \(\inner{(au + u') \times v}{w} = a\det(u, v, w) + \det(u', v, w) = \inner{a\,u \times v + u' \times v}{w}\)이다.
+        모든 \(w\)와의 내적이 같은 두 벡터는 같으므로(차를 \(w\)에 넣으면 길이의 제곱이 \(0\)) 첫째 자리에 대해 선형이다. 둘째 자리도 같다.
+        \(\det(v, u, w) = -\det(u, v, w)\)에서 같은 논법으로 \(v \times u = -u \times v\)이고, \(u = v\)로 두면 \(u \times u = -u \times u\), 즉 \(u \times u = 0\)이다.</p>
+        <p>(b) \(\inner{u \times v}{u} = \det(u, v, u) = 0\)이다(두 열이 같다. <a href="#i-1-6-2">보조정리 1.6.2</a>). \(v\)도 같다.</p>
+        <p>(c) \((u, v)\)가 일차종속이면 모든 \(w\)에 대해 \((u, v, w)\)도 일차종속이므로 \(\det(u, v, w) = 0\)이고, 따라서 \(u \times v\)는 모든 \(w\)와 수직이어서 \(0\)이다.
+        \((u, v)\)가 일차독립이면 <a href="1-1-vector-spaces-bases.html#i-1-1-18">정리 1.1.18</a>(b)로 기저 \((u, v, w)\)로 확장할 수 있고, <a href="#i-1-6-8">정리 1.6.8</a>(b)에서 \(\inner{u \times v}{w} = \det(u, v, w) \neq 0\)이므로 \(u \times v \neq 0\)이다.</p>
+        <p>(e) <a href="#eq-1-6-7">(1.6.7)</a>에 \(w = u \times v\)를 넣으면 \(\det(u, v, u \times v) = \abs{u \times v}^2\)이고, (c)에 의해 이것은 양수다. 행렬식이 \(0\)이 아니므로 \((u, v, u \times v)\)는 기저이고(<a href="#i-1-6-8">정리 1.6.8</a>(b)),
+        \(\mathcal{E}\)에서 이 기저로의 기저변환 행렬이 바로 열이 \(u, v, u \times v\)인 행렬이므로 양의 방향이다.</p>
+        <p>(d) \(n = u \times v\), \(M = (u, v, n)\)이라 하자. (e)의 계산에서 \(\det M = \abs{n}^2\)이다. 한편 <a href="#i-1-6-9">따름정리 1.6.9</a>와 (b)에서
+        \[ (\det M)^2 = \det\begin{pmatrix} \abs{u}^2 & \inner{u}{v} & 0 \\ \inner{u}{v} & \abs{v}^2 & 0 \\ 0 & 0 & \abs{n}^2 \end{pmatrix} = \big(\abs{u}^2\abs{v}^2 - \inner{u}{v}^2\big)\abs{n}^2 \]
+        이다(첫째 행을 따라 전개: \(\abs{u}^2 \cdot \abs{v}^2\abs{n}^2 - \inner{u}{v} \cdot \inner{u}{v}\abs{n}^2 + 0\)). 따라서 \(\abs{n}^4 = (\abs{u}^2\abs{v}^2 - \inner{u}{v}^2)\abs{n}^2\)이다.
+        \(n \neq 0\)이면 \(\abs{n}^2\)으로 나누어 원하는 식을 얻는다. \(n = 0\)이면 (c)에 의해 \((u, v)\)가 일차종속이고, 코시-슈바르츠의 등호 조건(정리 <a href="1-5-inner-products.html#i-1-5-5">1.5.5</a>)에 의해 우변도 \(0\)이다.
+        \(\inner{u}{v} = \abs{u}\abs{v}\cos\vartheta\)를 넣으면 \(\abs{n}^2 = \abs{u}^2\abs{v}^2(1 - \cos^2\vartheta) = \abs{u}^2\abs{v}^2\sin^2\vartheta\)이고, \(\vartheta \in [0, \pi]\)에서 \(\sin\vartheta \ge 0\)이다.
+        \(\abs{v}\sin\vartheta\)는 \(u\)를 밑변으로 할 때 평행사변형의 높이다(<a href="#fig-1-6-2">그림 1.6.2</a>의 회색 점선).</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-1-6-2">
+        <img src="figures/fig-1-6-2-cross-product.svg" alt="3차원 그림. 원점에서 나온 두 파랑 벡터 u, v가 하늘색 평행사변형을 만들고, u에서 v로 도는 작은 원호 화살표가 있다. 원점에서 위쪽으로 평행사변형에 수직인 주홍 벡터 u×v가 있고, 아래쪽으로 점선 주홍 벡터 v×u가 있다. v의 끝에서 u로 내린 회색 점선이 높이를 나타낸다.">
+        <figcaption><span class="fig-head">그림 1.6.2.</span>
+        \(u = (1.1, 0, 0.15)\), \(v = (0.25, 0.9, 0.1)\)이 만드는 평행사변형과 \(u \times v = (-0.135, -0.0725, 0.99)\)(실제 길이).
+        \(\abs{u \times v}\)는 평행사변형의 넓이(밑변 \(\abs{u}\) × 높이, 회색 점선)와 같고, \(u\)에서 \(v\)로 도는 방향으로 오른손 네 손가락을 감으면 엄지가 \(u \times v\)를 가리킨다.
+        아래쪽 점선은 \(v \times u = -(u \times v)\)이다(<a href="#i-1-6-16">정리 1.6.16</a>).</figcaption>
+      </figure>
+
+      <div class="thm proposition" id="i-1-6-17">
+        <p><span class="thm-head">명제 1.6.17</span> <span class="thm-name">(양의 정규직교기저의 외적)</span>.
+        \((u_1, u_2, u_3)\)이 \(\R^3\)의 양의 방향 정규직교기저이면
+        \[ u_1 \times u_2 = u_3, \qquad u_2 \times u_3 = u_1, \qquad u_3 \times u_1 = u_2 \]
+        이다. 특히 \(e_1 \times e_2 = e_3\), \(e_2 \times e_3 = e_1\), \(e_3 \times e_1 = e_2\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        열이 \(u_1, u_2, u_3\)인 행렬을 \(U\)라 하면, 정규직교이므로 그람 행렬이 \(I\)이고 <a href="#i-1-6-9">따름정리 1.6.9</a>에서 \((\det U)^2 = 1\)이다. 양의 방향이므로 \(\det U = 1\)이다.
+        <a href="1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>(b)에서 \(u_1 \times u_2\)의 이 기저에 대한 성분은 \(\inner{u_1 \times u_2}{u_k} = \det(u_1, u_2, u_k)\)이다. \(k = 1, 2\)이면 같은 열이 있어 \(0\)이고, \(k = 3\)이면 \(\det U = 1\)이다.
+        따라서 \(u_1 \times u_2 = u_3\)이다. 같은 방법으로 \(\inner{u_2 \times u_3}{u_k} = \det(u_2, u_3, u_k)\)는 \(k = 1\)일 때만 \(0\)이 아니고, 그 값은 \((u_2, u_3, u_1)\)을 두 번 맞바꾸어 \((u_1, u_2, u_3)\)으로 만들 수 있으므로 \(\det U = 1\)이다.
+        \(u_3 \times u_1 = u_2\)도 마찬가지다.</p>
+      </div>
+
+      <div class="thm example" id="i-1-6-18">
+        <p><span class="thm-head">예 1.6.18</span>.
+        (a) \(u = (1, 2, 3)\), \(v = (-1, 0, 2)\)이면 <a href="#eq-1-6-9">(1.6.9)</a>에서
+        \[ u \times v = \big(2 \cdot 2 - 3 \cdot 0,\ \ 3 \cdot (-1) - 1 \cdot 2,\ \ 1 \cdot 0 - 2 \cdot (-1)\big) = (4, -5, 2) \]
+        이다. 확인: \(\inner{u \times v}{u} = 4 - 10 + 6 = 0\), \(\inner{u \times v}{v} = -4 + 0 + 4 = 0\)(<a href="#i-1-6-16">정리 1.6.16</a>(b)).
+        \(\abs{u \times v}^2 = 16 + 25 + 4 = 45\)이고 \(\abs{u}^2\abs{v}^2 - \inner{u}{v}^2 = 14 \cdot 5 - 5^2 = 45\)(<a href="#i-1-6-16">정리 1.6.16</a>(d)).</p>
+        <p>(b) 기준 기저를 \(xy\)평면에 놓은 \(b_1 = (2, 1, 0)\), \(b_2 = (-1, 1, 0)\)에서는 \(b_1 \times b_2 = (1 \cdot 0 - 0 \cdot 1,\ 0 \cdot (-1) - 2 \cdot 0,\ 2 \cdot 1 - 1 \cdot (-1)) = (0, 0, 3)\)이다.
+        길이 \(3\)은 <a href="#fig-1-6-1">그림 1.6.1</a>(a)의 넓이이고, \(\mathcal{B}\)가 \(\R^2\)에서 양의 방향이므로 \(e_3\) 쪽을 향한다.</p>
+        <p class="verified">검증: <code>verify/v-1-6-determinant-orientation.py</code></p>
+      </div>
+
+      <p>끝으로 곡선에 쓸 성질 하나. \(u(t), v(t)\)가 미분가능한 \(\R^3\) 값 함수이면 <a href="#eq-1-6-9">(1.6.9)</a>의 각 성분에 곱의 미분법을 쓰면
+      \((u \times v)' = u' \times v + u \times v'\)이다. 외적은 결합법칙을 만족하지 않는다: \((e_1 \times e_1) \times e_2 = 0\)이지만 \(e_1 \times (e_1 \times e_2) = e_1 \times e_3 = -e_2\)이다(<a href="#i-1-6-17">명제 1.6.17</a>).</p>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교: 외적과 쐐기곱</p>
+        <p>do Carmo는 외적을 \(u \wedge v\)로 쓰고, \(u \times v\)라는 표기도 흔하다고 덧붙인다 <a class="cite" href="../../references.html#dC">[dC §1-4]</a>. 정의 자체는 <a href="#eq-1-6-7">(1.6.7)</a>과 같다.
+        이 study set은 외적을 \(u \times v\)로만 쓰고 \(\wedge\)는 <a href="../17-differential-forms/index.html">17장</a>의 쐐기곱 전용으로 남겨 둔다. 둘은 다른 대상이다.
+        외적 \(u \times v\)는 \(\R^3\)의 <em>벡터</em>이고, 만드는 데 내적(<a href="1-5-inner-products.html#i-1-5-15">명제 1.5.15</a>)과 방향(행렬식)이 쓰였으며, 3차원에서만 정의된다.
+        쐐기곱 \(\beta^1 \wedge \beta^2\)는 벡터 두 개를 받아 수를 내는 교대 쌍선형 <em>함수</em>(<a href="#i-1-6-3">예 1.6.3</a>(b)와 같은 꼴)이고, 어떤 차원에서도 내적 없이 정의된다.
+        용어도 구별한다. 쐐기곱을 “외적”이라 부르지 않는다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 이 절의 결과가 쓰이는 곳</p>
+        <ul>
+          <li><a href="../05-space-curves/index.html">5장</a>: 종법선벡터 \(\mathbf{b} = \mathbf{t} \times \mathbf{n}\)과 비틀림률 공식. \((\mathbf{t}, \mathbf{n}, \mathbf{b})\)는 양의 정규직교기저이므로 <a href="#i-1-6-17">명제 1.6.17</a>이 그대로 쓰인다.</li>
+          <li><a href="../07-first-fundamental-form/index.html">7장</a>: 단위법벡터 \(\mathbf{N} = \mathbf{x}_u \times \mathbf{x}_v / \abs{\mathbf{x}_u \times \mathbf{x}_v}\)와 \(\abs{\mathbf{x}_u \times \mathbf{x}_v}^2 = EG - F^2\)(<a href="#i-1-6-16">정리 1.6.16</a>(d)와 그람 행렬).</li>
+          <li><a href="../08-gauss-map/index.html">8장</a>: 가우스 곡률 \(K = \det W_p\)(<a href="#i-1-6-10">명제 1.6.10</a>).</li>
+          <li><a href="../02-calculus-rn/index.html">2장</a>: 변수변환 공식의 \(\abs{\det DF}\). 부피가 \(\abs{\det}\)배로 변한다는 <a href="#i-1-6-9">따름정리 1.6.9</a>의 해석.</li>
+          <li><a href="../17-differential-forms/index.html">17장</a>: 쐐기곱의 결정식 규약 \(dx^{1} \wedge \cdots \wedge dx^{k}(v_1, \dots, v_k) = \det\big(dx^{i}(v_j)\big)\). <a href="#i-1-6-5">정리 1.6.5</a>의 유일성이 핵심 도구다.</li>
+          <li><a href="../21-riemannian-metrics/index.html">21장</a>: 리만 체적형식 \(dV_g = \sqrt{\det(g_{ij})}\,dx^1 \wedge \cdots \wedge dx^n\). <a href="#i-1-6-9">따름정리 1.6.9</a>의 \(\sqrt{\det G}\)가 그 계수다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>교대 다중선형 함수는 두 자리가 같으면 \(0\)이고, 일차종속인 인자에서 \(0\)이다(<a href="#i-1-6-2">보조정리 1.6.2</a>).</li>
+        <li>\(\R^n\) 위의 정규화된 교대 \(n\)-다중선형 함수는 행렬식 하나뿐이고, 다른 것은 모두 그 상수배다(<a href="#i-1-6-5">정리 1.6.5</a>). 첫째 행 전개 <a href="#eq-1-6-2">(1.6.2)</a>가 존재를 준다.</li>
+        <li>\(\det(AB) = \det A\det B\), \(\det A \neq 0 \iff A\) 가역, \(\det A^{\mathsf{T}} = \det A\)(<a href="#i-1-6-8">정리 1.6.8</a>). \(\abs{\det}\)은 부피이고 \(\sqrt{\det G}\)로 계산된다.</li>
+        <li>두 기저는 기저변환 행렬의 행렬식이 양수일 때 같은 방향이고, 방향은 정확히 두 개다(<a href="#i-1-6-12">명제 1.6.12</a>). 방향은 길이와 각으로 정해지지 않는다.</li>
+        <li>\(\R^3\)의 외적은 \(\inner{u \times v}{w} = \det(u, v, w)\)로 정의되고, \(u, v\)에 수직이며, 길이가 넓이이고, \((u, v, u \times v)\)가 양의 방향이다(<a href="#i-1-6-16">정리 1.6.16</a>). 외적과 쐐기곱은 다르다.</li>
+      </ul>
+      <p class="next">다음 장에서는 이 장의 선형대수를 미적분에 쓴다. 휘어진 사상을 한 점 근처에서 선형사상으로 근사하는 것, 즉 전미분 \(DF(p)\)가 <a href="../02-calculus-rn/index.html">2장</a>의 첫 주제다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-1-6-1" data-level="1">
+        <p><span class="thm-head">연습 1.6.1</span> <span class="level">★</span>
+        다음 기저가 표준 방향에 대해 양의 방향인지 판별하여라. (a) \(\R^2\)의 \(((1,2), (3,1))\) (b) \(\R^3\)의 \(((1,1,0), (0,1,1), (1,0,1))\)
+        <a class="cite" href="../../references.html#dC">[dC §1-4 연습문제 1 변형]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 기저변환 행렬은 열이 \((1,2), (3,1)\)인 행렬이고 행렬식은 \(1 \cdot 1 - 3 \cdot 2 = -5 \lt 0\)이므로 음의 방향이다.
+          (b) <a href="#eq-1-6-4">(1.6.4)</a>에서 \(\det\begin{pmatrix} 1 & 0 & 1 \\ 1 & 1 & 0 \\ 0 & 1 & 1 \end{pmatrix} = 1(1 \cdot 1 - 0 \cdot 1) - 0 + 1(1 \cdot 1 - 1 \cdot 0) = 2 \gt 0\)이므로 양의 방향이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-6-2" data-level="1">
+        <p><span class="thm-head">연습 1.6.2</span> <span class="level">★</span>
+        \(a \gt 0\), \(b \neq 0\)일 때 \(\gamma'(t) = (-a\sin t,\ a\cos t,\ b)\)와 \(\gamma''(t) = (-a\cos t,\ -a\sin t,\ 0)\)의 외적과 그 길이를 구하고, 두 벡터에 수직임을 확인하여라. (<a href="../05-space-curves/index.html">5장</a>에서 사용)</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="#eq-1-6-9">(1.6.9)</a>에서
+          \[ \begin{aligned} (\gamma' \times \gamma'')^1 &= a\cos t \cdot 0 - b\,(-a\sin t) = ab\sin t, \\ (\gamma' \times \gamma'')^2 &= b\,(-a\cos t) - (-a\sin t) \cdot 0 = -ab\cos t, \\ (\gamma' \times \gamma'')^3 &= (-a\sin t)(-a\sin t) - a\cos t\,(-a\cos t) = a^2 \end{aligned} \]
+          이다. \(\abs{\gamma' \times \gamma''}^2 = a^2b^2(\sin^2 t + \cos^2 t) + a^4 = a^2(a^2 + b^2)\)이므로 \(\abs{\gamma' \times \gamma''} = a\sqrt{a^2 + b^2}\)이다.
+          \(\inner{\gamma' \times \gamma''}{\gamma'} = -a^2b\sin^2 t - a^2b\cos^2 t + a^2b = 0\), \(\inner{\gamma' \times \gamma''}{\gamma''} = -a^2b\sin t\cos t + a^2b\sin t\cos t + 0 = 0\).
+          (이 두 벡터는 나선 \(\gamma(t) = (a\cos t, a\sin t, bt)\)의 속도와 가속도다. <a href="../05-space-curves/index.html">5장</a>에서 곡률 \(\kappa = \abs{\gamma' \times \gamma''}/\abs{\gamma'}^3 = a/(a^2 + b^2)\)을 계산할 때 이 값을 쓴다.)</p>
+          <p class="verified">검증: <code>verify/v-1-6-determinant-orientation.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-6-3" data-level="1">
+        <p><span class="thm-head">연습 1.6.3</span> <span class="level">★</span>
+        <a href="1-5-inner-products.html#ex-1-5-2">연습 1.5.2</a>의 두 벡터 \(u, w\)(\(r \gt 0\), \(0 \lt \theta \lt \pi\))에 대해 \(u \times w\)와 \(\abs{u \times w}\)를 구하고,
+        \(\abs{u \times w}^2\)이 <a href="1-5-inner-products.html#ex-1-5-2">연습 1.5.2</a>의 그람 행렬의 행렬식과 같음을 확인하여라. \((u \times w)/\abs{u \times w}\)는 무엇인가? (<a href="../07-first-fundamental-form/index.html">7장</a>, <a href="../08-gauss-map/index.html">8장</a>에서 사용)</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="#eq-1-6-9">(1.6.9)</a>에서
+          \(x\)성분 \(= r\cos\theta\sin\varphi \cdot 0 - (-r\sin\theta)(r\sin\theta\cos\varphi) = r^2\sin^2\theta\cos\varphi\),
+          \(y\)성분 \(= (-r\sin\theta)(-r\sin\theta\sin\varphi) - r\cos\theta\cos\varphi \cdot 0 = r^2\sin^2\theta\sin\varphi\),
+          \(z\)성분 \(= r\cos\theta\cos\varphi \cdot r\sin\theta\cos\varphi - r\cos\theta\sin\varphi(-r\sin\theta\sin\varphi) = r^2\sin\theta\cos\theta\)이므로
+          \(u \times w = r^2\sin\theta\,(\sin\theta\cos\varphi,\ \sin\theta\sin\varphi,\ \cos\theta)\)이다. 괄호 안의 벡터는 길이가 \(1\)이고 \(\sin\theta \gt 0\)이므로 \(\abs{u \times w} = r^2\sin\theta\)이다.
+          그람 행렬식은 \(r^2 \cdot r^2\sin^2\theta - 0^2 = r^4\sin^2\theta = \abs{u \times w}^2\)이다(<a href="#i-1-6-16">정리 1.6.16</a>(d)).
+          \((u \times w)/\abs{u \times w} = (\sin\theta\cos\varphi, \sin\theta\sin\varphi, \cos\theta)\)는 점 \((r\sin\theta\cos\varphi, r\sin\theta\sin\varphi, r\cos\theta)\)를 \(r\)로 나눈 것, 즉 반지름 \(r\)인 구면 위 그 점에서 바깥쪽을 향하는 단위벡터다
+          (<a href="../07-first-fundamental-form/index.html">7장</a>과 <a href="../08-gauss-map/index.html">8장</a>의 단위법벡터 \(\mathbf{N} = \mathbf{x}/r\)).</p>
+          <p class="verified">검증: <code>verify/v-1-6-determinant-orientation.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-6-4" data-level="1">
+        <p><span class="thm-head">연습 1.6.4</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 대어라.
+        (a) \(\det(A + B) = \det A + \det B\).
+        (b) \(n \times n\) 행렬에 대해 \(\det(cA) = c\det A\).
+        (c) \(u \times (v \times w) = (u \times v) \times w\).
+        (d) 기저의 두 벡터를 맞바꾸면 방향이 바뀐다.
+        (e) \(\R^3\)에서 \((b_2, b_3, b_1)\)은 \((b_1, b_2, b_3)\)과 같은 방향이다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 거짓. \(A = B = I_2\)이면 좌변은 \(\det(2I) = 4\), 우변은 \(2\)이다.
+          (b) 거짓. 각 열이 \(c\)배이므로 다중선형성에서 \(\det(cA) = c^n\det A\)이다.
+          (c) 거짓. 본문 끝의 예: \((e_1 \times e_1) \times e_2 = 0\), \(e_1 \times (e_1 \times e_2) = -e_2\).
+          (d) 참. 기저변환 행렬은 두 열을 맞바꾼 단위행렬이고 행렬식이 \(-1\)이다.
+          (e) 참. 두 번 맞바꾸어 얻으므로 기저변환 행렬의 행렬식이 \((-1)^2 = 1\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-6-5" data-level="1">
+        <p><span class="thm-head">연습 1.6.5</span> <span class="level">★</span>
+        \(\det(v + tw, w) = \det(v, w)\)(\(t \in \R\))를 다중선형성과 교대성으로 보이고, <a href="#fig-1-6-1">그림 1.6.1</a>(c)로 그 뜻을 설명하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>첫째 자리의 선형성에서 \(\det(v + tw, w) = \det(v, w) + t\det(w, w)\)이고, <a href="#i-1-6-2">보조정리 1.6.2</a>(b)에서 \(\det(w, w) = 0\)이다.
+          <a href="#fig-1-6-1">그림 1.6.1</a>(c)에서 \(v = b_1\), \(w = b_2\), \(t = 1\)이다. 평행사변형을 \(b_2\) 방향으로 밀어도 밑변 \(b_2\)와 그에 대한 높이가 그대로이므로 넓이가 같다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-6-6" data-level="2">
+        <p><span class="thm-head">연습 1.6.6</span> <span class="level">★★</span>
+        \((u \times v) \times w = \inner{u}{w}\,v - \inner{v}{w}\,u\)임을 보여라.</p>
+        <details class="hint"><summary>힌트</summary><p>양변이 \(u, v, w\)에 대해 각각 선형이므로 \(u, v, w\)가 표준기저벡터일 때만 확인하면 된다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>양변은 <a href="#i-1-6-16">정리 1.6.16</a>(a)와 내적의 쌍선형성에 의해 \(u, v, w\) 각각에 대해 선형이다. 따라서 \(u = e_i\), \(v = e_j\), \(w = e_k\)일 때 성립하면 일반적으로 성립한다(각 벡터를 표준기저로 전개해 선형성으로 푼다).
+          \(i = j\)이면 좌변은 \(0\)이고 우변은 \(\delta_{ik}e_i - \delta_{ik}e_i = 0\)이다. \(i \neq j\)이면 <a href="#i-1-6-17">명제 1.6.17</a>에서 \(e_i \times e_j = \pm e_l\)(\(l\)은 \(i, j\)와 다른 첨자)이다.
+          \(k = l\)이면 \(e_l \times e_l = 0\)이고 우변도 \(\delta_{il}e_j - \delta_{jl}e_i = 0\)이다. \(k = i\)이면 우변은 \(e_j\)이다. 좌변은, 예컨대 \((i, j, l)\)이 \((1, 2, 3)\)의 순환 순서이면
+          \(e_i \times e_j = e_l\)이고 \(e_l \times e_i = e_j\)(<a href="#i-1-6-17">명제 1.6.17</a>)이므로 \(e_j\)다. 순환 순서가 아니면 \(e_i \times e_j = -e_l\)이고 \(e_l \times e_i = -e_j\)이므로 다시 \(e_j\)다.
+          \(k = j\)인 경우도 같은 방법으로 양변이 \(-e_i\)이다. 따라서 모든 경우에 성립한다.</p>
+          <p class="verified">검증: <code>verify/v-1-6-determinant-orientation.py</code> (기호 계산)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-6-7" data-level="2">
+        <p><span class="thm-head">연습 1.6.7</span> <span class="level">★★</span>
+        (a) \(T \in \End(\R^n)\)이 양의 방향 기저를 모두 양의 방향 기저로 보낼 필요충분조건은 \(\det T \gt 0\)임을 보여라. 반사 \((x^1, x^2) \mapsto (x^1, -x^2)\)는 어떤가?
+        (b) 2차원 부분공간 \(W \subseteq \R^3\)과 \(W\)에 수직인 \(0\)이 아닌 벡터 \(n\)이 주어졌을 때, \(W\)의 기저 \((c_1, c_2)\)가 “\((c_1, c_2, n)\)이 \(\R^3\)에서 양의 방향”을 만족하는가로 \(W\)의 방향이 하나 정해짐을 보여라. ((b)는 <a href="../07-first-fundamental-form/index.html">7장</a>에서 사용)</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 기저 \(\mathcal{B}\)의 행렬을 \(B\)(열이 \(b_j\))라 하면 \(T\mathcal{B} = (Tb_1, \dots, Tb_n)\)의 행렬은 \(AB\)(\(A\)는 \(T\)의 표준행렬)이다. \(\det(AB) = \det A\det B\)이므로
+          \(\det B \gt 0\)인 모든 \(B\)에 대해 \(\det(AB) \gt 0\)일 필요충분조건은 \(\det A \gt 0\)이다. 반사는 \(\det = -1\)이므로 방향을 뒤집는다.</p>
+          <p>(b) \((c_1, c_2)\)와 \((c'_1, c'_2)\)가 \(W\)의 기저이고 그 사이의 기저변환 행렬이 \(C\)(\(2 \times 2\))이면, \((c_1, c_2, n)\)에서 \((c'_1, c'_2, n)\)으로의 기저변환 행렬은
+          \(\begin{pmatrix} C & 0 \\ 0 & 1 \end{pmatrix}\)(왼쪽 위 \(2 \times 2\) 블록이 \(C\))이다. 이 행렬의 행렬식이 \(\det C\)임을 보이자.
+          \(x, y \in \R^2\)에 대해 \(D(x, y) = \det\big((x, 0), (y, 0), e_3\big)\)로 두면 \(D\)는 \(\R^2\) 위의 쌍선형 교대 함수이고 \(D(e_1, e_2) = \det I_3 = 1\)이므로,
+          <a href="#i-1-6-5">정리 1.6.5</a>의 유일성에 의해 \(D = \det\)(\(2 \times 2\))이다. \(C\)의 두 열을 \(x, y\)에 넣으면 원하는 식이다.
+          따라서 \((c_1, c_2) \sim (c'_1, c'_2)\)일 필요충분조건은 \((c_1, c_2, n)\)과 \((c'_1, c'_2, n)\)이 \(\R^3\)에서 같은 방향인 것이다. 또 \((c_1, c_2, n)\)은 언제나 \(\R^3\)의 기저이고
+          (\(n \notin W\)), \((c_2, c_1, n)\)과는 방향이 반대이므로 조건을 만족하는 기저가 있다. 그 기저들이 \(W\)의 한 방향을 이룬다. (<a href="../07-first-fundamental-form/index.html">7장</a>에서 곡면의 접평면에 이 방법으로 방향을 준다.)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-1-6-8" data-level="3">
+        <p><span class="thm-head">연습 1.6.8</span> <span class="level">★★★</span>
+        \(v_1, \dots, v_k \in \R^n\)(\(k \le n\))의 그람 행렬 \(G = (\inner{v_i}{v_j})\)에 대하여 \(\det G \ge 0\)이고, 등호는 \((v_1, \dots, v_k)\)가 일차종속일 때 그리고 그때만 성립함을 보여라.
+        (\(\sqrt{\det G}\)를 \(v_1, \dots, v_k\)가 만드는 \(k\)차원 평행체의 부피로 정의한다. \(k = 2\), \(n = 3\)이면 \(\abs{v_1 \times v_2}\)이다.)</p>
+        <details class="hint"><summary>힌트</summary><p>일차독립이면 \(W = \operatorname{span}(v_1, \dots, v_k)\)의 정규직교기저를 잡고, \(G\)를 \(k \times k\) 행렬 \(C\)로 \(C^{\mathsf{T}}C\)라 쓴다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>열이 \(v_j\)인 \(n \times k\) 행렬을 \(M\)이라 하면 <a href="#i-1-6-9">따름정리 1.6.9</a>의 증명처럼 \(G = M^{\mathsf{T}}M\)이다.</p>
+          <p><em>일차종속이면.</em> 모두 \(0\)은 아닌 \(a\)로 \(Ma = \sum_j a^j v_j = 0\)이면 \(Ga = M^{\mathsf{T}}Ma = 0\)이므로 \(G\)는 가역이 아니고 \(\det G = 0\)이다(<a href="#i-1-6-8">정리 1.6.8</a>(b)).</p>
+          <p><em>일차독립이면.</em> \(W = \operatorname{span}(v_1, \dots, v_k)\)는 \(k\)차원이다. \(W\)에 유클리드 내적을 제한한 내적공간에서 그람-슈미트(정리 <a href="1-5-inner-products.html#i-1-5-10">1.5.10</a>)로 정규직교기저 \((w_1, \dots, w_k)\)를 잡고
+          \(v_j = \sum_i C^i_j w_i\)라 하자. \(C\)는 \((w_i)\)에서 \((v_j)\)로의 기저변환 행렬이므로 가역이다. <a href="1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>(b)에서 \(\inner{v_i}{v_j} = \sum_l C^l_i C^l_j\)이므로 \(G = C^{\mathsf{T}}C\)이고,
+          \(\det G = (\det C)^2 \gt 0\)이다.</p>
+          <p class="verified">검증: <code>verify/v-1-6-determinant-orientation.py</code> (무작위 수치 확인)</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="1-5-inner-products.html">← 1.5 내적과 그람 행렬</a>
+    <a rel="next" href="../02-calculus-rn/index.html">2. ℝⁿ의 미적분 →</a>
+  </nav>
+</body>
+</html>

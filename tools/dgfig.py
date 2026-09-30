@@ -107,6 +107,8 @@ def save(fig, script_file, fmt="svg", png=False, outdir=None, stem=None):
         p = out / f"{stem}.png"
         fig.savefig(p, format="png", dpi=200)
         paths.append(p)
+    if fmt == "svg":
+        _make_svg_ids_deterministic(main)
     for p in paths:
         size = p.stat().st_size
         print(f"saved {p} ({size / 1024:.0f} KB)")
@@ -114,6 +116,26 @@ def save(fig, script_file, fmt="svg", png=False, outdir=None, stem=None):
             print(f"WARNING: {p.name}가 1.5MB를 넘는다. 격자 해상도를 낮추거나 PNG로 저장할 것 (§12.3).")
     plt.close(fig)
     return paths
+
+
+def _make_svg_ids_deterministic(path):
+    """matplotlib는 경로 clip의 id를 파이썬 객체 id로 만들어 실행마다 달라진다.
+
+    ``p0123456789`` 꼴(문자 1개 + 16진수 10자리)의 id를 처음 나타난 순서대로 다시 붙여
+    같은 스크립트가 항상 같은 SVG를 내게 한다 (§12.1 재생성).
+    """
+    import re
+
+    text = Path(path).read_text(encoding="utf-8")
+    pat = re.compile(r'(?<=["#])([a-z])([0-9a-f]{10})(?=["\)])')
+    mapping = {}
+    for m in pat.finditer(text):
+        tok = m.group(0)
+        if tok not in mapping:
+            mapping[tok] = f"{m.group(1)}{len(mapping):010d}"
+    if mapping:
+        text = pat.sub(lambda m: mapping[m.group(0)], text)
+        Path(path).write_text(text, encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -129,8 +151,11 @@ def axes3d(fig, pos=111, elev=20, azim=35, axis_off=True):
     return ax
 
 
-def equal_aspect(ax, *arrays, pad=0.02):
-    """주어진 좌표 배열들(모양 (..., 3) 또는 X, Y, Z 따로)이 모두 들어가도록 x:y:z 실제 비율을 맞춘다."""
+def equal_aspect(ax, *arrays, pad=0.02, zoom=1.0):
+    """주어진 좌표 배열들(모양 (..., 3) 또는 X, Y, Z 따로)이 모두 들어가도록 x:y:z 실제 비율을 맞춘다.
+
+    ``zoom`` > 1이면 3D 상자를 확대해 그림 둘레의 빈 공간을 줄인다.
+    """
     if len(arrays) == 3 and all(np.ndim(a) >= 1 for a in arrays) and np.shape(arrays[0]) == np.shape(arrays[1]):
         pts = np.stack([np.ravel(a) for a in arrays], axis=1)
     else:
@@ -141,7 +166,7 @@ def equal_aspect(ax, *arrays, pad=0.02):
     ax.set_xlim(lo[0], hi[0])
     ax.set_ylim(lo[1], hi[1])
     ax.set_zlim(lo[2], hi[2])
-    ax.set_box_aspect(hi - lo)
+    ax.set_box_aspect(hi - lo, zoom=zoom)
 
 
 def view_vector(ax):
@@ -199,26 +224,36 @@ def _dilate(mask):
     return d
 
 
-def curve3d(ax, pts, role="main", lw=None, ls="-", visible=None, zorder=5, **kw):
-    """3D 곡선. ``visible``(불리언 배열)을 주면 보이는 부분은 실선, 가려진 부분은 회색 점선(숨은선)."""
+def curve3d(ax, pts, role="main", lw=None, ls="-", visible=None, hidden="dashed", zorder=5, **kw):
+    """3D 곡선. ``visible``(불리언 배열)을 주면 보이는 부분은 실선으로 그린다.
+
+    가려진 부분은 ``hidden="dashed"``이면 옅은 회색 점선(숨은선), ``hidden=None``이면 그리지 않는다.
+    """
     pts = np.asarray(pts, float)
     if visible is None:
         return ax.plot(*pts.T, color=_color(role), lw=lw or LW["main"], ls=ls, zorder=zorder, **kw)
     visible = np.asarray(visible, bool)
     front = np.where(_dilate(visible)[:, None], pts, np.nan)
     back = np.where(_dilate(~visible)[:, None], pts, np.nan)
-    lines = ax.plot(*back.T, color=COLORS["aux"], lw=LW["aux"], ls=(0, (3, 2)), zorder=zorder - 1, **kw)
+    lines = []
+    if hidden == "dashed":
+        lines += ax.plot(*back.T, color=COLORS["aux"], lw=0.6, ls=(0, (3, 2.5)), alpha=0.55,
+                         zorder=zorder - 1, **kw)
     lines += ax.plot(*front.T, color=_color(role), lw=lw or LW["main"], ls=ls, zorder=zorder, **kw)
     return lines
 
 
 def surface(ax, X, Y, Z, color=None, alpha=None, grid=True, grid_color="#8C8C8C",
-            rstride=1, cstride=1, grid_every=4, zorder=1, shade=True, **kw):
-    """반투명 곡면 + 얇은 좌표격자 (교과서 선화 느낌)."""
+            rstride=1, cstride=1, grid_every=4, zorder=1, shade=True, rasterized=True, **kw):
+    """반투명 곡면 + 얇은 좌표격자 (교과서 선화 느낌).
+
+    면은 기본적으로 래스터화한다(``rasterized=True``): SVG가 작아지고, 반투명 다각형 사이의
+    이음새 선이 생기지 않는다. 선(격자, 곡선, 벡터)은 벡터로 남는다.
+    """
     ax.plot_surface(X, Y, Z, color=color or COLORS["surface"],
                     alpha=ALPHA["surface"] if alpha is None else alpha,
                     rstride=rstride, cstride=cstride, linewidth=0, antialiased=True,
-                    shade=shade, zorder=zorder, **kw)
+                    shade=shade, zorder=zorder, rasterized=rasterized, **kw)
     if grid:
         ax.plot_wireframe(X, Y, Z, rstride=grid_every, cstride=grid_every,
                           color=grid_color, linewidth=LW["grid"], zorder=zorder + 0.5)
@@ -268,7 +303,10 @@ def blob(ax, center=(0.0, 0.0), radius=1.0, seed=0, n_modes=4, amp=0.13, n=400,
         ax.fill(*pts.T, color=_color(fill),
                 alpha=ALPHA["region"] if fill_alpha is None else fill_alpha, lw=0, zorder=zorder - 1)
     if edge:
-        ax.plot(*pts.T, color=_color(edge), lw=lw or LW["main"], zorder=zorder)
+        # 닫힌 다각형으로 그려야 시작점과 끝점의 이음새에 홈이 생기지 않는다.
+        from matplotlib.patches import Polygon
+        ax.add_patch(Polygon(pts[:-1], closed=True, fill=False, edgecolor=_color(edge),
+                             lw=lw or LW["main"], joinstyle="round", zorder=zorder))
     return pts
 
 

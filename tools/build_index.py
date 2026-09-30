@@ -194,7 +194,13 @@ class Index:
         dg = page.meta.get("dg-id", rel) if page else rel
         if it:
             return it["head"]
-        return f"{dg}절" if page is not None and page.kind == "section" else dg
+        base = f"{dg}절" if page is not None and page.kind == "section" else dg
+        node = page.ids.get(loc) if (page is not None and loc) else None
+        if node is not None:
+            heading = node if node.tag in ("h1", "h2", "h3", "h4") else (node.find("h2") or node.find("h3"))
+            if heading is not None and heading.text():
+                return f"{base} · {heading.text()}"
+        return base
 
     def href(self, rel, frag=None):
         return rel + (f"#{frag}" if frag else "")
