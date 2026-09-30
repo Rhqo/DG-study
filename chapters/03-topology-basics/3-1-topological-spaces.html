@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>3.1 열린집합과 위상공간 — 미분기하 스터디</title>
   <meta name="dg-id" content="3.1">
-  <meta name="dg-status" content="draft">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="1.1, 1.5">
   <meta name="dg-refs" content="Lee-ITM Ch. 2; Lee-ISM App. A; dC Ch. 2 Appendix A">
-  <meta name="dg-updated" content="2026-09-30">
+  <meta name="dg-updated" content="2026-10-01">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
@@ -44,7 +44,7 @@
       <ul>
         <li><a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-2">예 1.1.2 (\(\R^n\))</a>: \(\R^n\)의 점을 \(x = (x^1, \dots, x^n)\)으로 쓴다. 위첨자는 거듭제곱이 아니라 성분 번호다.</li>
         <li><a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-4">정의 1.5.4 (노름)</a>: 유클리드 노름 \(\abs{x} = \sqrt{(x^1)^2 + \dots + (x^n)^2}\).
-          <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6 (삼각부등식, 유클리드 거리)</a>: \(\abs{x + y} \le \abs{x} + \abs{y}\)이고, 유클리드 거리 \(d(p, q) = \abs{q - p}\)는 세 성질(양수성, 대칭성, 삼각부등식)을 만족한다.</li>
+          <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6 (삼각부등식, 유클리드 거리)</a>: \(\abs{x + y} \le \abs{x} + \abs{y}\)이고, 유클리드 거리 \(d(p, q) = \abs{q - p}\)는 세 성질(<a href="#i-3-1-1">정의 3.1.1</a>의 이름으로 양의 정부호성, 대칭성, 삼각부등식)을 만족한다.</li>
         <li>집합의 기본 연산: 합집합 \(\bigcup\), 교집합 \(\bigcap\), 여집합 \(X \setminus A\), 드모르간 법칙
           \(X \setminus \bigcup_\alpha A_\alpha = \bigcap_\alpha (X \setminus A_\alpha)\), \(X \setminus \bigcap_\alpha A_\alpha = \bigcup_\alpha (X \setminus A_\alpha)\).
           여기서 \(\alpha\)는 임의의(무한할 수도 있는) 첨자 집합을 움직인다.</li>
@@ -55,10 +55,10 @@
       <h2>동기</h2>
       <p><a href="../01-linear-algebra/index.html">1장</a>과 <a href="../02-calculus-rn/index.html">2장</a>에서는 \(\R^n\) 안에서 모든 것을 거리로 쟀다.
       두 점 사이의 거리 \(\abs{x - y}\)로 수열의 극한을 정하고, “\(x\)가 \(p\)에 가까우면 \(F(x)\)가 \(F(p)\)에 가깝다”로 연속을 정하고,
-      그 위에서 미분을 정의했다. 그런데 이 study set이 다룰 대상에는 거리가 처음부터 붙어 있지 않거나, 붙어 있더라도 자연스럽지 않은 것이 많다.</p>
+      그 위에서 미분을 정의했다(<a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절</a>에서는 열린집합과 극한을 미적분학의 약속으로 상기만 했다). 그런데 이 study set이 다룰 대상에는 거리가 처음부터 붙어 있지 않거나, 붙어 있더라도 자연스럽지 않은 것이 많다.</p>
       <ul>
         <li>구면 \(S^2\)은 \(\R^3\) 안에 놓여 있으므로 \(\R^3\)의 거리를 빌려 쓸 수 있다. 그러나 구면 위에 사는 존재에게는 대원을 따라 잰 거리가 더 자연스럽다. 두 거리는 값이 다르다.</li>
-        <li>실사영공간 \(\RP^2\)의 “점”은 \(\R^3\)에서 원점을 지나는 직선이다(<a href="index.html">3장</a>의 몫공간 절). 두 직선 사이의 거리를 무엇으로 정해야 하는가?</li>
+        <li>실사영공간 \(\RP^2\)의 “점”은 \(\R^3\)에서 원점을 지나는 직선이다(<a href="3-4-quotient-spaces.html">3.4절</a>). 두 직선 사이의 거리를 무엇으로 정해야 하는가?</li>
         <li><a href="../11-smooth-manifolds/index.html">11장</a>의 추상 다양체는 둘러싼 공간이 아예 없다.</li>
       </ul>
       <p>다행히 연속과 극한에 실제로 필요한 것은 거리의 <em>값</em>이 아니다. 필요한 것은 “\(p\) 근처”라는 개념, 즉 어떤 집합이
@@ -104,9 +104,9 @@
         <p><span class="thm-head">예 3.1.2</span> <span class="thm-name">(\(\R^n\) 위의 세 거리)</span>.
         \(x, y \in \R^n\)에 대하여 다음 셋은 모두 \(\R^n\) 위의 거리다.</p>
         <div class="equation" id="eq-3-1-1">
-        \[ d(x, y) = \abs{x - y} = \Big(\sum_{i=1}^{n} (x^i - y^i)^2\Big)^{1/2}, \qquad
-           d_\infty(x, y) = \max_{1 \le i \le n} \abs{x^i - y^i}, \qquad
-           d_1(x, y) = \sum_{i=1}^{n} \abs{x^i - y^i}. \tag{3.1.1} \]
+        \[ \begin{aligned} d(x, y) &= \abs{x - y} = \Big(\sum_{i=1}^{n} (x^i - y^i)^2\Big)^{1/2}, \\
+           d_\infty(x, y) &= \max_{1 \le i \le n} \abs{x^i - y^i}, \\
+           d_1(x, y) &= \sum_{i=1}^{n} \abs{x^i - y^i}. \end{aligned} \tag{3.1.1} \]
         </div>
         <p>첫째가 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6</a>(b)의 유클리드 거리이고, \(\R^n\)에 거리를 따로 말하지 않으면 늘 이것을 쓴다. 조건 1과 2는 세 거리 모두 식에서 바로 보인다
         (예를 들어 \(d_\infty(x, y) = 0\)이면 모든 \(i\)에서 \(\abs{x^i - y^i} = 0\)이다). 조건 3을 확인하자.</p>
@@ -159,7 +159,7 @@
       </div>
 
       <p>한정사의 순서에 주의하자. 반지름 \(r\)은 점 \(p\)마다 따로 골라도 된다. <a href="#fig-3-1-1">그림 3.1.1</a>(a)에서 경계에 가까운 \(p'\)은 작은 공을 쓴다.
-      \(\R\)에서 열린공은 열린구간 \((p - r,\ p + r)\)이고, \(\R^2\)에서는 경계를 뺀 원판이다. 그런데 이름이 “열린공”이라고 해서 정의 3.1.5의 뜻으로 열려 있다는 것이
+      \(\R\)에서 열린공은 열린구간 \((p - r,\ p + r)\)이고, \(\R^2\)에서는 경계를 뺀 원판이다. 그런데 이름이 “열린공”이라고 해서 <a href="#i-3-1-5">정의 3.1.5</a>의 뜻으로 열려 있다는 것이
       저절로 보장되지는 않는다. 확인해 두자.</p>
 
       <div class="thm lemma" id="i-3-1-6">
@@ -169,7 +169,7 @@
       <div class="proof">
         <p class="proof-idea">증명 아이디어: \(q\)에서 공의 가장자리까지 남은 거리 \(s\)만큼은 여유가 있다. 삼각부등식이 이것을 보장한다.</p>
         <p><span class="proof-head">증명.</span>
-        \(q \in B_r(p)\)이므로 \(d(p, q) \lt r\)이고, 따라서 \(s = r - d(p, q) \gt 0\)이다. \(x \in B_s(q)\)라 하자. 삼각부등식(정의 3.1.1의 조건 3)과 대칭성에 의해
+        \(q \in B_r(p)\)이므로 \(d(p, q) \lt r\)이고, 따라서 \(s = r - d(p, q) \gt 0\)이다. \(x \in B_s(q)\)라 하자. 삼각부등식(<a href="#i-3-1-1">정의 3.1.1</a>의 조건 3)과 대칭성에 의해
         \[ d(p, x) \le d(p, q) + d(q, x) \lt d(p, q) + s = r \]
         이다. 따라서 \(x \in B_r(p)\)이다. \(x\)는 \(B_s(q)\)의 임의의 점이므로 \(B_s(q) \subseteq B_r(p)\)이다.</p>
       </div>
@@ -202,6 +202,7 @@
           <li>(c) <em>유한개의</em> 열린집합의 교집합 \(U_1 \cap \dots \cap U_k\)는 열린집합이다.</li>
         </ul>
       </div>
+      <p><strong>이 정리가 말하는 것.</strong> 열린집합은 아무리 많이 합쳐도 열린집합이지만, 교집합은 유한개까지만 안전하다. 이 비대칭이 위상의 공리에 그대로 들어간다(<a href="#i-3-1-10">비예 3.1.10</a>).</p>
       <div class="proof">
         <p class="proof-idea">증명 아이디어: (b)는 한 집합 안에 들어간 공이 합집합 안에도 들어간다는 것이다. (c)는 반지름 \(k\)개 가운데 가장 작은 것을 고른다. 개수가 유한해야 가장 작은 반지름이 양수다.</p>
         <p><span class="proof-head">증명.</span>
@@ -239,11 +240,11 @@
       </div>
 
       <p>조건 3은 “두 열린집합의 교집합은 열려 있다”만 확인하면 된다. \(U_1 \cap \dots \cap U_k = (U_1 \cap \dots \cap U_{k-1}) \cap U_k\)로 묶어 \(k\)에 대한 귀납법을 쓰면 되기 때문이다.
-      <a href="#i-3-1-5">정의 3.1.5</a>의 “열린집합”과 정의 3.1.11의 “열린집합”은 같은 낱말이다. 정의 3.1.11이 정의 3.1.5를 일반화한 것이고, 거리공간에서는 다음 예 (a)에 의해 두 뜻이 일치하므로 혼란이 없다.</p>
+      <a href="#i-3-1-5">정의 3.1.5</a>의 “열린집합”과 <a href="#i-3-1-11">정의 3.1.11</a>의 “열린집합”은 같은 낱말이다. <a href="#i-3-1-11">정의 3.1.11</a>이 <a href="#i-3-1-5">정의 3.1.5</a>를 일반화한 것이고, 거리공간에서는 다음 예 (a)에 의해 두 뜻이 일치하므로 혼란이 없다.</p>
 
       <div class="thm example" id="i-3-1-12">
         <p><span class="thm-head">예 3.1.12</span> <span class="thm-name">(위상의 예)</span>.
-        (a) 거리공간 \((X, d)\)에서 정의 3.1.5의 뜻으로 열린 집합 전체 \(\mathcal{T}_d\)는 <a href="#i-3-1-9">정리 3.1.9</a>에 의해 위상이다.
+        (a) 거리공간 \((X, d)\)에서 <a href="#i-3-1-5">정의 3.1.5</a>의 뜻으로 열린 집합 전체 \(\mathcal{T}_d\)는 <a href="#i-3-1-9">정리 3.1.9</a>에 의해 위상이다.
         이것을 \(d\)가 주는 <dfn>거리 위상</dfn>(metric topology)이라 한다. \(\R^n\)에는 따로 말하지 않는 한 늘 유클리드 거리의 거리 위상을 주고, 이것을 \(\R^n\)의
         <dfn>표준 위상</dfn>(standard topology)이라 한다.</p>
         <p>(b) 임의의 집합 \(X\)에서 모든 부분집합의 모임은 위상이다. 이것을 <dfn>이산위상</dfn>(discrete topology)이라 한다. 이산거리의 거리 위상이 바로 이것이다(<a href="#i-3-1-7">예 3.1.7</a>(c)).</p>
@@ -268,7 +269,7 @@
       </div>
       <div class="proof">
         <p><span class="proof-head">증명.</span>
-        \(d\)가 \(X\) 위의 거리라 하고 \(x \ne y\)라 하자. \(r = d(x, y)\)로 두면 정의 3.1.1의 조건 1에서 \(r \gt 0\)이다. <a href="#i-3-1-6">보조정리 3.1.6</a>에 의해
+        \(d\)가 \(X\) 위의 거리라 하고 \(x \ne y\)라 하자. \(r = d(x, y)\)로 두면 <a href="#i-3-1-1">정의 3.1.1</a>의 조건 1에서 \(r \gt 0\)이다. <a href="#i-3-1-6">보조정리 3.1.6</a>에 의해
         \(B_r(x)\)는 \(d\)에 대한 열린집합이다. 그런데 \(x \in B_r(x)\)이므로 \(B_r(x) \ne \varnothing\)이고, \(d(y, x) = r\)은 \(r\)보다 작지 않으므로 \(y \notin B_r(x)\), 즉 \(B_r(x) \ne X\)이다.
         따라서 \(\mathcal{T}_d\)에는 \(\varnothing\)도 \(X\)도 아닌 원소가 있어 밀착위상과 다르다.</p>
       </div>
@@ -305,7 +306,7 @@
       </div>
       <div class="proof">
         <p><span class="proof-head">증명.</span>
-        (a) \(X \setminus \varnothing = X\)와 \(X \setminus X = \varnothing\)은 열린집합이다(정의 3.1.11의 조건 1).
+        (a) \(X \setminus \varnothing = X\)와 \(X \setminus X = \varnothing\)은 열린집합이다(<a href="#i-3-1-11">정의 3.1.11</a>의 조건 1).
         (b) 닫힌집합 \(A_\alpha\)들에 대해 드모르간 법칙으로 \(X \setminus \bigcap_\alpha A_\alpha = \bigcup_\alpha (X \setminus A_\alpha)\)이고, 이것은 열린집합들의 합집합이므로 열린집합이다(조건 2).
         (c) 같은 방식으로 \(X \setminus (A_1 \cup \dots \cup A_k) = (X \setminus A_1) \cap \dots \cap (X \setminus A_k)\)는 열린집합 유한개의 교집합이다(조건 3).</p>
         <p>(d) (b)에 의해 \(\overline{A}\)는 닫힌집합이고, 교집합에 참여한 모든 집합이 \(A\)를 포함하므로 \(A \subseteq \overline{A}\)이다. \(C\)가 \(A\)를 포함하는 닫힌집합이면
@@ -326,7 +327,7 @@
         두 조건의 부정이 동치임을 보인다. \(p\)의 근방 \(U\)가 \(U \cap A = \varnothing\)을 만족한다고 하자. 그러면 \(X \setminus U\)는 닫힌집합이고 \(A \subseteq X \setminus U\)이므로
         <a href="#i-3-1-16">명제 3.1.16</a>(d)에 의해 \(\overline{A} \subseteq X \setminus U\)이다. \(p \in U\)이므로 \(p \notin \overline{A}\)이다.
         거꾸로 \(p \notin \overline{A}\)라 하자. 그러면 \(U = X \setminus \overline{A}\)는 열린집합이고 \(p\)를 포함하므로 \(p\)의 근방이다. 또 \(A \subseteq \overline{A}\)이므로 \(U \cap A = \varnothing\)이다.</p>
-        <p>거리공간의 경우: 열린공 \(B_\varepsilon(p)\)는 \(p\)의 근방이다(<a href="#i-3-1-6">보조정리 3.1.6</a>). 거꾸로 \(p\)의 근방 \(U\)는 어떤 \(B_\varepsilon(p)\)를 포함한다(정의 3.1.5).
+        <p>거리공간의 경우: 열린공 \(B_\varepsilon(p)\)는 \(p\)의 근방이다(<a href="#i-3-1-6">보조정리 3.1.6</a>). 거꾸로 \(p\)의 근방 \(U\)는 어떤 \(B_\varepsilon(p)\)를 포함한다(<a href="#i-3-1-5">정의 3.1.5</a>).
         따라서 “모든 근방이 \(A\)와 만난다”와 “모든 \(B_\varepsilon(p)\)가 \(A\)와 만난다”는 같은 조건이다.</p>
       </div>
 
@@ -342,7 +343,7 @@
         거꾸로 \(\abs{x} = 1\)이고 \(0 \lt \varepsilon \lt 1\)이면 점 \(y = (1 - \varepsilon/2)x\)는 \(\abs{y} = 1 - \varepsilon/2 \lt 1\)이고 \(\abs{x - y} = \varepsilon/2 \lt \varepsilon\)이므로
         \(B_\varepsilon(x) \cap B_1(0) \ne \varnothing\)이다. \(\varepsilon \ge 1\)이면 더 큰 공이므로 역시 만난다. 따라서 \(x \in \overline{B_1(0)}\)이다.
         같은 논증으로 \(\R^n\)에서 \(\overline{B_r(p)} = \{x : \abs{x - p} \le r\}\)이다. 그래서 \(\R^n\)에서는 닫힌공을 \(\overline{B}_r(p)\)로 쓴다.</p>
-        <p>(e) \(\R\)에서 유리수 전체 \(\mathbb{Q}\)의 폐포는 \(\R\)이다. 모든 열린구간에 유리수가 있기 때문이다(실수의 기본 성질).</p>
+        <p>(e) \(\R\)에서 유리수 전체 \(\Q\)의 폐포는 \(\R\)이다. 모든 열린구간에 유리수가 있기 때문이다(실수의 기본 성질).</p>
       </div>
 
       <div class="thm nonexample" id="i-3-1-19">
@@ -358,7 +359,7 @@
         <p class="box-title">주의: 열림과 닫힘은 반대말이 아니다</p>
         <p>“닫힌집합”은 “열린집합이 아닌 집합”이 아니다. \([0, 1)\)은 열려 있지도 닫혀 있지도 않고, \(\varnothing\)과 \(X\)는 열려 있으면서 닫혀 있다.
         이산위상에서는 모든 부분집합이 열려 있으면서 닫혀 있다. 반면 \(\R\)에서 열려 있으면서 닫힌 부분집합은 \(\varnothing\)과 \(\R\)뿐이다.
-        이 사실이 <a href="index.html">3장</a>의 연결성 절의 출발점이다.</p>
+        이 사실이 <a href="3-7-connectedness.html">3.7절</a>의 연결성의 출발점이다(<a href="3-7-connectedness.html#i-3-7-4">정리 3.7.4</a>).</p>
       </aside>
     </section>
 
@@ -394,7 +395,7 @@
 
       <div class="thm example" id="i-3-1-22">
         <p><span class="thm-head">예 3.1.22</span>.
-        (a) 거리공간에서 모든 열린공의 모임은 거리 위상의 기저다. 열린공은 열린집합이고(<a href="#i-3-1-6">보조정리 3.1.6</a>), 정의 3.1.5가 바로 <a href="#i-3-1-21">명제 3.1.21</a>의 조건이다.
+        (a) 거리공간에서 모든 열린공의 모임은 거리 위상의 기저다. 열린공은 열린집합이고(<a href="#i-3-1-6">보조정리 3.1.6</a>), <a href="#i-3-1-5">정의 3.1.5</a>가 바로 <a href="#i-3-1-21">명제 3.1.21</a>의 조건이다.
         반지름이 \(1/k\) (\(k = 1, 2, \dots\)) 꼴인 열린공만 모아도 기저다. \(B_r(p) \subseteq U\)이면 \(1/k \lt r\)인 \(k\)를 골라 \(B_{1/k}(p) \subseteq B_r(p) \subseteq U\)로 쓰면 된다.</p>
         <p>(b) 이산위상에서 한 점 집합 \(\{p\}\)들의 모임은 기저다. \(p \in U\)이면 \(p \in \{p\} \subseteq U\)이다.</p>
       </div>
@@ -406,7 +407,7 @@
       </div>
 
       <p>지금까지는 위상이 먼저 있고 기저를 찾았다. 거꾸로, 벽돌들의 모임에서 출발해 위상을 <em>만들</em> 수도 있다.
-      <a href="index.html">3장</a>의 곱공간 절에서 이 방법으로 곱위상을 정의한다.</p>
+      <a href="3-3-subspaces-products.html">3.3절</a>에서 이 방법으로 곱위상을 정의한다.</p>
 
       <div class="thm proposition" id="i-3-1-24">
         <p><span class="thm-head">명제 3.1.24</span> <span class="thm-name">(기저로부터 만든 위상)</span>.
@@ -421,7 +422,7 @@
       <div class="proof">
         <p class="proof-idea">증명 아이디어: 합집합의 합집합은 합집합이므로 조건 2는 저절로 성립한다. 교집합에 대한 조건 3을 위해 (ii)가 필요하다.</p>
         <p><span class="proof-head">증명.</span>
-        정의 3.1.11의 세 조건을 확인한다. <em>조건 1.</em> 원소를 하나도 고르지 않은 합집합이 \(\varnothing\)이다. (i)에 의해 \(\mathcal{B}\)의 모든 원소의 합집합이 \(X\)이다.
+        <a href="#i-3-1-11">정의 3.1.11</a>의 세 조건을 확인한다. <em>조건 1.</em> 원소를 하나도 고르지 않은 합집합이 \(\varnothing\)이다. (i)에 의해 \(\mathcal{B}\)의 모든 원소의 합집합이 \(X\)이다.
         <em>조건 2.</em> \(\mathcal{T}_{\mathcal{B}}\)의 원소들은 각각 \(\mathcal{B}\)의 원소들의 합집합이므로, 그것들의 합집합도 \(\mathcal{B}\)의 원소들의 합집합이다.
         <em>조건 3.</em> 두 원소의 경우만 보이면 된다. \(U = \bigcup_\alpha B_\alpha\), \(V = \bigcup_\beta B'_\beta\)이고 \(p \in U \cap V\)라 하자. 어떤 \(\alpha, \beta\)에서 \(p \in B_\alpha \cap B'_\beta\)이고,
         (ii)에 의해 \(p \in B_p \subseteq B_\alpha \cap B'_\beta \subseteq U \cap V\)인 \(B_p \in \mathcal{B}\)가 있다. 따라서 \(U \cap V = \bigcup_{p \in U \cap V} B_p\)는 \(\mathcal{T}_{\mathcal{B}}\)에 속한다.
@@ -487,12 +488,48 @@
       </aside>
     </section>
 
+    <section id="sec-boundary-points">
+      <h2>경계점으로 본 폐포</h2>
+      <p>미적분학에서는 폐포를 “집합에 경계점을 더한 것”으로 배운다. <a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절 준비</a>도 \(\R^n\)에서 이것을 약속으로 삼았다.
+      <a href="#i-3-1-15">정의 3.1.15</a>의 폐포(닫힌집합들의 교집합)가 그 약속과 같은 집합임을 확인해 두자.</p>
+
+      <div class="thm proposition" id="i-3-1-27">
+        <p><span class="thm-head">명제 3.1.27</span> <span class="thm-name">(폐포는 집합에 경계점을 더한 것이다)</span>.
+        \(X\)가 위상공간이고 \(A \subseteq X\)라 하자. \(p\)의 모든 근방이 \(A\)와 \(X \setminus A\)를 함께 만나는 점 \(p \in X\) 전체를 \(\partial A\)로 쓰면</p>
+        <div class="equation" id="eq-3-1-4">
+        \[ \overline{A} = A \cup \partial A \tag{3.1.4} \]
+        </div>
+        <p>이다. \(X\)가 거리공간이면 \(\partial A\)의 조건에서 “모든 근방” 대신 “모든 열린공 \(B_\varepsilon(p)\)”라 해도 같은 집합이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: <a href="#i-3-1-17">명제 3.1.17</a>의 판정법 “모든 근방이 \(A\)와 만난다”를 쓴다. \(A\) 밖의 점에서는 “모든 근방이 \(X \setminus A\)와 만난다”는 조건이 저절로 성립한다. 그 점 자신이 \(X \setminus A\)에 있기 때문이다.</p>
+        <p><span class="proof-head">증명.</span>
+        (\(\supseteq\)) <a href="#i-3-1-16">명제 3.1.16</a>(d)에 의해 \(A \subseteq \overline{A}\)이다. \(p \in \partial A\)이면 \(p\)의 모든 근방이 \(A\)와 만나므로 <a href="#i-3-1-17">명제 3.1.17</a>에 의해 \(p \in \overline{A}\)이다.</p>
+        <p>(\(\subseteq\)) \(p \in \overline{A}\)라 하자. \(p \in A\)이면 \(p \in A \cup \partial A\)이다. \(p \notin A\)이면, \(p\)의 근방 \(U\)는 <a href="#i-3-1-17">명제 3.1.17</a>에 의해 \(A\)와 만나고,
+        \(p \in U \cap (X \setminus A)\)이므로 \(X \setminus A\)와도 만난다. \(U\)는 \(p\)의 임의의 근방이므로 \(p \in \partial A\)이다.</p>
+        <p>거리공간의 경우: 열린공 \(B_\varepsilon(p)\)는 \(p\)의 근방이고(<a href="#i-3-1-6">보조정리 3.1.6</a>), \(p\)의 모든 근방 \(U\)는 어떤 열린공 \(B_\varepsilon(p)\)를 포함한다(<a href="#i-3-1-5">정의 3.1.5</a>).
+        앞의 사실에서 “모든 근방이 \(A\)와 \(X \setminus A\)를 함께 만나면 모든 \(B_\varepsilon(p)\)도 그렇다”가 나온다. 뒤의 사실에서, 모든 열린공이 두 집합과 만나면 \(U \supseteq B_\varepsilon(p)\)도 두 집합과 만난다.</p>
+      </div>
+
+      <p>예를 들어 \(\R\)에서 \(\partial(0, 1) = \{0, 1\}\)이므로 \(\overline{(0, 1)} = [0, 1]\)이고(<a href="#i-3-1-18">예 3.1.18</a>(c)와 같다), 모든 열린구간이 유리수와 무리수를 함께 포함하므로
+      \(\partial\Q = \R\)이고 \(\overline{\Q} = \R\)이다(<a href="#i-3-1-18">예 3.1.18</a>(e)와 같다).</p>
+
+      <aside class="box backward">
+        <p class="box-title">2장과 비교: 경계점과 폐포의 약속</p>
+        <p><a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절 준비</a>는 \(D \subseteq \R^n\)에 대해 경계점 전체 \(\partial D\)(\(p\)를 중심으로 하는 모든 공이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함하는 점 \(p\) 전체)와
+        폐포 \(\overline{D} = D \cup \partial D\)를 미적분학의 약속으로 두었고, <a href="../02-calculus-rn/2-6-change-of-variables.html">2.6절</a>의 적분 영역(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6</a>)과
+        변수변환 공식(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">정리 2.6.9</a>)이 그 약속을 썼다. <a href="#i-3-1-27">명제 3.1.27</a>을 거리공간 \(\R^n\)에 쓰면 그 약속의 \(\partial D\)가 이 명제의 \(\partial D\)와 같고,
+        따라서 \(D \cup \partial D\)가 <a href="#i-3-1-15">정의 3.1.15</a>의 폐포와 같은 집합이다. 새로워진 것은 두 가지다. 경계점을 거리 없이 근방만으로 말할 수 있게 되었고,
+        2.1절 준비에서 따로 확인한 “\(\overline{D}\)는 닫힌집합이다”가 이제 <a href="#i-3-1-16">명제 3.1.16</a>(d)에서 바로 나온다.</p>
+      </aside>
+    </section>
+
     <section class="summary">
       <h2>요약</h2>
       <ul>
         <li>거리공간에서 \(U\)가 열린집합이라는 것은 \(U\)의 각 점을 중심으로 하는 어떤 열린공이 \(U\)에 들어간다는 뜻이다. 열린공 자신은 열린집합이다(<a href="#i-3-1-6">보조정리 3.1.6</a>).</li>
         <li>열린집합들은 임의의 합집합과 유한 교집합에 닫혀 있다(<a href="#i-3-1-9">정리 3.1.9</a>). 이 세 성질을 공리로 삼은 것이 위상이고, 위상이 주어진 집합이 위상공간이다.</li>
-        <li>닫힌집합은 여집합이 열린 집합이다. \(p \in \overline{A}\)일 필요충분조건은 \(p\)의 모든 근방이 \(A\)와 만나는 것이다(<a href="#i-3-1-17">명제 3.1.17</a>).</li>
+        <li>닫힌집합은 여집합이 열린 집합이다. \(p \in \overline{A}\)일 필요충분조건은 \(p\)의 모든 근방이 \(A\)와 만나는 것이다(<a href="#i-3-1-17">명제 3.1.17</a>). 따라서 폐포는 \(A\)에 경계점(모든 근방이 \(A\)와 \(X \setminus A\)를 함께 만나는 점)을 더한 것이다(<a href="#i-3-1-27">명제 3.1.27</a>).</li>
         <li>위상의 기저는 모든 열린집합을 합집합으로 조립하는 벽돌들이다. 거리공간에서는 열린공들이 기저다.</li>
         <li>\(\R^n\)의 거리 \(d, d_\infty, d_1\)은 값이 다르지만 같은 위상(표준 위상)을 준다(<a href="#i-3-1-26">예 3.1.26</a>).</li>
       </ul>
@@ -506,7 +543,7 @@
         <p><span class="thm-head">연습 3.1.1</span> <span class="level">★</span>
         다음 \(\R\)의 부분집합이 열린집합인지, 닫힌집합인지 판별하여라.
         (a) \((0, 1]\) (b) \(\Z\) (c) \(\{1/k : k = 1, 2, 3, \dots\}\) (d) \([0, \infty)\)</p>
-        <details class="hint"><summary>힌트</summary><p>열린지는 정의 3.1.5로, 닫혔는지는 여집합이 열렸는지로 판정한다. (c)는 \(0\)이 폐포에 들어가는지 <a href="#i-3-1-17">명제 3.1.17</a>로 본다.</p></details>
+        <details class="hint"><summary>힌트</summary><p>열린지는 <a href="#i-3-1-5">정의 3.1.5</a>로, 닫혔는지는 여집합이 열렸는지로 판정한다. (c)는 \(0\)이 폐포에 들어가는지 <a href="#i-3-1-17">명제 3.1.17</a>로 본다.</p></details>
         <details class="solution"><summary>풀이</summary>
           <p>(a) 둘 다 아니다. \(1 \in (0, 1]\)이지만 모든 \(B_r(1)\)이 \(1 + r/2\)를 포함하므로 열리지 않았다. 여집합 \((-\infty, 0] \cup (1, \infty)\)는 \(0\)을 포함하지만 모든 \(B_r(0)\)이 \((0, 1]\)의 점 \(\min(r, 1)/2\)를 포함하므로 열리지 않았다.</p>
           <p>(b) 닫혀 있고 열려 있지 않다. 열리지 않은 것은 <a href="#i-3-1-8">비예 3.1.8</a>(c)다. 여집합 \(\bigcup_{k \in \Z} (k, k + 1)\)은 열린구간들의 합집합이므로 열려 있다(<a href="#i-3-1-9">정리 3.1.9</a>(b)).</p>
@@ -520,8 +557,9 @@
         \(X = \{a, b, c\}\)의 다음 부분집합 모임이 위상인지 판별하여라.
         (a) \(\{\varnothing, \{a\}, \{b\}, \{a, b\}, \{b, c\}, X\}\) (b) \(\{\varnothing, \{a, b\}, \{b, c\}, X\}\) (c) \(\{\varnothing, \{b\}, X\}\)</p>
         <details class="solution"><summary>풀이</summary>
-          <p>(a) 위상이다. \(\varnothing\)과 \(X\)가 있다. 두 원소의 합집합은 \(\{a\} \cup \{b\} = \{a, b\}\), \(\{a\} \cup \{b, c\} = X\), \(\{b\} \cup \{b, c\} = \{b, c\}\), \(\{a, b\} \cup \{b, c\} = X\) 등으로 모두 모임 안에 있다.
-          두 원소의 교집합은 \(\{a\} \cap \{b\} = \varnothing\), \(\{a, b\} \cap \{b, c\} = \{b\}\), \(\{a\} \cap \{b, c\} = \varnothing\), \(\{b\} \cap \{a,b\} = \{b\}\) 등으로 역시 모임 안에 있다.
+          <p>(a) 위상이다. \(\varnothing\)과 \(X\)가 있다. \(\varnothing\)이나 \(X\)가 끼는 합집합·교집합은 다른 원소 자신이거나 \(\varnothing\), \(X\)이므로, 나머지 네 원소 \(\{a\}, \{b\}, \{a, b\}, \{b, c\}\)의 여섯 쌍만 보면 된다.
+          합집합은 \(\{a\} \cup \{b\} = \{a, b\}\), \(\{a\} \cup \{a, b\} = \{a, b\}\), \(\{a\} \cup \{b, c\} = X\), \(\{b\} \cup \{a, b\} = \{a, b\}\), \(\{b\} \cup \{b, c\} = \{b, c\}\), \(\{a, b\} \cup \{b, c\} = X\)이고 모두 모임 안에 있다.
+          교집합은 \(\{a\} \cap \{b\} = \varnothing\), \(\{a\} \cap \{a, b\} = \{a\}\), \(\{a\} \cap \{b, c\} = \varnothing\), \(\{b\} \cap \{a, b\} = \{b\}\), \(\{b\} \cap \{b, c\} = \{b\}\), \(\{a, b\} \cap \{b, c\} = \{b\}\)이고 역시 모임 안에 있다.
           유한 모임이므로 임의의 합집합과 교집합은 두 개씩 되풀이해 얻으므로 이것으로 충분하다.</p>
           <p>(b) 위상이 아니다. \(\{a, b\} \cap \{b, c\} = \{b\}\)가 모임에 없어 조건 3을 어긴다.</p>
           <p>(c) 위상이다. 모든 합집합과 교집합이 \(\varnothing, \{b\}, X\) 가운데 하나다.</p>
@@ -544,7 +582,7 @@
 
       <div class="exercise" id="ex-3-1-4" data-level="1">
         <p><span class="thm-head">연습 3.1.4</span> <span class="level">★</span>
-        \(\R\)에서 다음 집합의 폐포를 구하여라. (a) \((0, 1) \cup (1, 2)\) (b) \(\mathbb{Q} \cap [0, 1]\) (c) \(\{1/k : k = 1, 2, 3, \dots\}\)</p>
+        \(\R\)에서 다음 집합의 폐포를 구하여라. (a) \((0, 1) \cup (1, 2)\) (b) \(\Q \cap [0, 1]\) (c) \(\{1/k : k = 1, 2, 3, \dots\}\)</p>
         <details class="solution"><summary>풀이</summary>
           <p>(a) \([0, 2]\). \([0, 2]\)는 닫혀 있고 집합을 포함하므로 폐포는 그 안에 있다. \(0, 1, 2\)의 모든 공은 \((0,1) \cup (1,2)\)와 만나므로(예: \(B_\varepsilon(1)\)은 \(1 - \min(\varepsilon,1)/2\)를 포함) 이 세 점도 폐포에 있다.</p>
           <p>(b) \([0, 1]\). \([0, 1]\)은 닫혀 있고 집합을 포함한다. \(x \in [0, 1]\)이고 \(\varepsilon \gt 0\)이면 구간 \((x - \varepsilon, x + \varepsilon) \cap [0, 1]\)은 길이가 양수인 구간을 포함하므로 유리수를 포함한다.</p>

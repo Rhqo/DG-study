@@ -86,6 +86,12 @@ expect_msg  "summary p.next"                     'section.summary must end with 
 expect_msg  "exercise solution"                  'exercise needs <details class="solution">'
 expect_msg  "unclosed inline math"               "unclosed \\( (no matching \\))"
 
+expect_msg  "unlinked ref: 정리"                 "unlinked cross-reference '정리 7.1.1'"
+expect_msg  "unlinked ref: 식"                   "unlinked cross-reference '식 (7.1.2)'"
+expect_msg  "unlinked ref: 따름정리 (not 정리)"  "unlinked cross-reference '따름정리 7.1.3'"
+if grep -qF -- "cross-reference '예 7.1.4'" <<<"$out"; then bad "unlinked ref: <code> must be exempt"; else pass "unlinked ref: <code> exempt"; fi
+if [ "$(grep -cF -- "unlinked cross-reference" <<<"$out")" -eq 3 ]; then pass "unlinked ref: exactly 3 warnings"; else bad "unlinked ref: expected exactly 3 warnings"; fi
+
 echo "== 깨진 절 (check_math)"
 expect_fail "check_math: broken page fails"      node check_math.mjs --root "$BAD" "$BROKEN"
 expect_msg  "undefined macro"                    "Undefined control sequence \\foo"

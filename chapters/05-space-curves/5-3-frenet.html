@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>5.3 프레네-세레 공식 — 미분기하 스터디</title>
+  <meta name="dg-id" content="5.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="5.1, 5.2, 1.6, 4.5">
+  <meta name="dg-refs" content="dC §1-5 (Exercises 12, 13, 17); Pr Ch. 2">
+  <meta name="dg-updated" content="2026-10-01">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">5. 공간곡선과 프레네 틀</a> ›
+    <span>5.3 프레네-세레 공식</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>5.3 프레네-세레 공식</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#dC">[dC §1-5]</a>,
+        <a class="cite" href="../../references.html#Pr">[Pr 2장]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>프레네-세레 공식 \(\mathbf{t}' = \kappa\mathbf{n}\), \(\mathbf{n}' = -\kappa\mathbf{t} + \tau\mathbf{b}\), \(\mathbf{b}' = -\tau\mathbf{n}\)을 유도하고, 계수 행렬이 반대칭인 이유를 설명할 수 있다.</li>
+        <li>프레네 틀이 다르부 벡터 \(\boldsymbol{\omega} = \tau\mathbf{t} + \kappa\mathbf{b}\)를 각속도로 하여 회전함을 보일 수 있다.</li>
+        <li>일반 매개변수의 공식 \(\kappa = \abs{\gamma' \times \gamma''}/\abs{\gamma'}^3\), \(\tau = \inner{\gamma' \times \gamma''}{\gamma'''}/\abs{\gamma' \times \gamma''}^2\)을 유도하고 나선과 꼬인 삼차곡선에서 계산할 수 있다.</li>
+        <li>구면 위의 위도원과 대원의 프레네 틀을 구하고, 주법선 \(\mathbf{n}\)과 구면의 법벡터 \(\mathbf{N}\)의 관계를 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="5-1-curvature.html#i-5-1-8">정의 5.1.8 (주법선벡터)</a>, <a href="5-1-curvature.html#i-5-1-2">명제 5.1.2 (일반 매개변수의 곡률)</a>, <a href="5-1-curvature.html#ex-5-1-3">연습 5.1.3 (구면 위 곡선의 곡률)</a></li>
+        <li><a href="5-2-torsion.html#i-5-2-1">정의 5.2.1 (종법선벡터)</a>, <a href="5-2-torsion.html#i-5-2-2">명제 5.2.2 (프레네 틀)</a>, <a href="5-2-torsion.html#i-5-2-5">정의 5.2.5 (비틀림률)</a>, <a href="5-2-torsion.html#i-5-2-7">명제 5.2.7 (단위속력 공식)</a></li>
+        <li>외적의 성질과 양의 정규직교기저의 외적(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-17">명제 1.6.17</a>)</li>
+        <li>구면의 위도원과 대원(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-13">예 4.1.13</a>, <a href="../04-curves/4-5-osculating-circle.html#i-4-5-11">예 4.5.11</a>, <a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">예 4.5.12</a>)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="5-2-torsion.html">5.2절</a>까지 프레네 틀의 세 벡터 가운데 두 벡터의 도함수를 구했다. \(\mathbf{t}' = \kappa\mathbf{n}\)이 곡률을, \(\mathbf{b}' = -\tau\mathbf{n}\)이 비틀림률을 정의했다.
+      남은 것은 \(\mathbf{n}'\)이다. 이것도 프레네 틀로 전개하면, 틀의 세 벡터가 곡선을 따라 어떻게 변하는지가 \(\kappa\)와 \(\tau\) 두 함수만으로 완전히 기록된다.
+      이 절은 그 공식을 유도하고, 기하적인 뜻(틀의 회전)과 계산에 쓰는 공식(일반 매개변수)을 얻는다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 곡선을 따라 굴러가는 삼각대</p>
+        <p><a href="#fig-5-3-1">그림 5.3.1</a>은 나선의 네 점에 프레네 틀을 그린 것이다. 곡선을 따라 가면 삼각대 전체가 강체처럼 돈다. 늘어나거나 찌그러지지 않고(늘 정규직교이므로) 돌기만 한다.
+        그 회전의 축과 빠르기를 정하는 것이 \(\kappa\)와 \(\tau\)다. \(\kappa\)는 \(\mathbf{b}\)를 축으로 한 회전(\(\mathbf{t}\)가 \(\mathbf{n}\) 쪽으로 기움), \(\tau\)는 \(\mathbf{t}\)를 축으로 한 회전(\(\mathbf{n}\)과 \(\mathbf{b}\)가 서로 쪽으로 기움)이다.
+        나선에서는 두 회전이 합쳐져 틀이 \(z\)축 둘레를 일정한 빠르기로 돈다(<a href="#i-5-3-3">예 5.3.3</a>).</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-5-3-1">
+        <img src="figures/fig-5-3-1-helix-frenet.svg" alt="옅은 원기둥에 감긴 검은 나선이 두 바퀴 보이고, 가운데에 z축이 회색 점선으로 그려져 있다. 나선의 앞쪽 네 점에 파란 t, 주홍 n, 청록 b로 이루어진 삼각대가 그려져 있다. 모든 점에서 n은 수평으로 축을 향하고, b는 거의 위를 향하되 조금씩 기울어 있으며, t는 곡선을 따라 비스듬히 위로 향한다. 원기둥 뒤쪽의 나선은 옅은 점선이다.">
+        <figcaption><span class="fig-head">그림 5.3.1.</span>
+        나선 \(\gamma(t) = (a\cos t, a\sin t, bt)\), \(a = 1\), \(b = 0.3\), \(-2.6 \le t \le 7.4\)와 \(t = -1.7,\ -0.2,\ 4.6,\ 6.1\)에서의 프레네 틀 \(\mathbf{t}\)(파랑), \(\mathbf{n}\)(주홍), \(\mathbf{b}\)(청록).
+        벡터는 매개화에서 계산한 값을 실제 길이의 \(0.55\)배로 그렸다. 틀은 \(z\)축 둘레를 단위 길이당 \(1/\sqrt{a^2 + b^2} \approx 0.958\) 라디안씩 돈다(<a href="#i-5-3-3">예 5.3.3</a>).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-frenet-serret">
+      <h2>프레네-세레 공식</h2>
+
+      <div class="thm theorem" id="i-5-3-1">
+        <p><span class="thm-head">정리 5.3.1</span> <span class="thm-name">(프레네-세레 공식, Frenet–Serret formulas)</span>.
+        \(\gamma\colon I \to \R^3\)이 호의 길이로 매개화되어 있고 \(I\)에서 \(\kappa \gt 0\)이라 하자. 그러면</p>
+        <div class="equation" id="eq-5-3-1">
+        \[ \mathbf{t}' = \kappa\,\mathbf{n}, \qquad \mathbf{n}' = -\kappa\,\mathbf{t} + \tau\,\mathbf{b}, \qquad \mathbf{b}' = -\tau\,\mathbf{n} \tag{5.3.1} \]
+        </div>
+        <p>이다. 세 벡터를 열로 늘어놓은 \(3 \times 3\) 행렬 \(F = (\mathbf{t}\ \mathbf{n}\ \mathbf{b})\)로 쓰면</p>
+        <div class="equation" id="eq-5-3-2">
+        \[ F' = F\,K, \qquad K = \begin{pmatrix} 0 & -\kappa & 0 \\ \kappa & 0 & -\tau \\ 0 & \tau & 0 \end{pmatrix} \tag{5.3.2} \]
+        </div>
+        <p>이고, \(K\)는 반대칭이다(\(K^{\mathsf{T}} = -K\)).</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 틀의 변화율을 다시 그 틀로 쓰면 계수는 \(\kappa\)와 \(\tau\)뿐이다. 곡선의 모든 국소적인 정보가 이 두 함수에 들어 있다는 것의 첫 증거다. 이것을 거꾸로 푸는 것이 <a href="5-4-fundamental-theorem.html">5.4절</a>의 곡선론의 기본정리다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: 첫째와 셋째 식은 \(\kappa\)와 \(\tau\)의 정의다. 둘째 식은 \(\mathbf{n} = \mathbf{b} \times \mathbf{t}\)를 곱의 미분법으로 미분해 얻는다.</p>
+        <p><span class="proof-head">증명.</span>
+        첫째 식은 <a href="5-1-curvature.html#eq-5-1-4">(5.1.4)</a>, 셋째 식은 정의 <a href="5-2-torsion.html#eq-5-2-3">(5.2.3)</a>이다. <a href="5-2-torsion.html#i-5-2-2">명제 5.2.2</a>에서 \(\mathbf{n} = \mathbf{b} \times \mathbf{t}\)이므로 외적의 곱의 미분법
+        (<a href="../01-linear-algebra/1-6-determinant-orientation.html#sec-cross-product">1.6절</a>)과 앞의 두 식에서</p>
+        \[ \mathbf{n}' = \mathbf{b}' \times \mathbf{t} + \mathbf{b} \times \mathbf{t}' = -\tau\,\mathbf{n} \times \mathbf{t} + \kappa\,\mathbf{b} \times \mathbf{n} \]
+        <p>이다. <a href="5-2-torsion.html#i-5-2-2">명제 5.2.2</a>와 반대칭성(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16</a>(a))에서 \(\mathbf{n} \times \mathbf{t} = -\mathbf{t} \times \mathbf{n} = -\mathbf{b}\), \(\mathbf{b} \times \mathbf{n} = -\mathbf{n} \times \mathbf{b} = -\mathbf{t}\)이므로
+        \(\mathbf{n}' = \tau\mathbf{b} - \kappa\mathbf{t}\)이다.</p>
+        <p>행렬 꼴: \(FK\)의 \(j\)번째 열은 \(F\)의 열들을 \(K\)의 \(j\)번째 열의 성분으로 결합한 것이다. 첫째 열은 \(0\cdot\mathbf{t} + \kappa\mathbf{n} + 0\cdot\mathbf{b} = \mathbf{t}'\), 둘째 열은
+        \(-\kappa\mathbf{t} + 0\cdot\mathbf{n} + \tau\mathbf{b} = \mathbf{n}'\), 셋째 열은 \(0\cdot\mathbf{t} - \tau\mathbf{n} + 0\cdot\mathbf{b} = \mathbf{b}'\)이다. \(K\)의 반대칭성은 직접 보면 된다.</p>
+      </div>
+
+      <p>반대칭성은 우연이 아니다. \(e_1, e_2, e_3\)이 매끄럽게 움직이는 정규직교기저이고 \(e_j' = \sum_i K_{ij}e_i\)라 하면, \(\inner{e_i}{e_j}\)가 상수이므로
+      \(0 = \inner{e_i}{e_j}' = \inner{e_i'}{e_j} + \inner{e_i}{e_j'} = K_{ji} + K_{ij}\)이다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>). 곧 움직이는 정규직교기저의 변화율 행렬은 언제나 반대칭이다.
+      프레네 틀에서 새로 알려 주는 것은 \(K_{31} = \inner{\mathbf{t}'}{\mathbf{b}} = 0\), 곧 \(\mathbf{t}'\)에 \(\mathbf{b}\) 성분이 없다는 것뿐이다. 그것은 \(\mathbf{n}\)을 \(\mathbf{t}'\)의 방향으로 골랐기 때문이다.
+      이 관찰은 <a href="5-4-fundamental-theorem.html">5.4절</a>의 존재 증명에서 다시 쓴다.</p>
+
+      <p>반대칭 행렬로 하는 미분은 “돌기만 하는” 운동이다. 이것을 외적으로 쓰면 회전의 축과 빠르기가 드러난다.</p>
+
+      <div class="thm corollary" id="i-5-3-2">
+        <p><span class="thm-head">따름정리 5.3.2</span> <span class="thm-name">(프레네 틀의 회전)</span>.
+        <a href="#i-5-3-1">정리 5.3.1</a>의 상황에서</p>
+        <div class="equation" id="eq-5-3-3">
+        \[ \boldsymbol{\omega} = \tau\,\mathbf{t} + \kappa\,\mathbf{b} \tag{5.3.3} \]
+        </div>
+        <p>로 두면 \(\mathbf{t}' = \boldsymbol{\omega} \times \mathbf{t}\), \(\mathbf{n}' = \boldsymbol{\omega} \times \mathbf{n}\), \(\mathbf{b}' = \boldsymbol{\omega} \times \mathbf{b}\)이다. \(\boldsymbol{\omega}\)를 \(\gamma\)의 <dfn>다르부 벡터</dfn>(Darboux vector)라 한다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        <a href="5-2-torsion.html#i-5-2-2">명제 5.2.2</a>의 세 등식과 \(\mathbf{v} \times \mathbf{v} = 0\)에서 \(\boldsymbol{\omega} \times \mathbf{t} = \kappa\,\mathbf{b} \times \mathbf{t} = \kappa\mathbf{n}\),
+        \(\boldsymbol{\omega} \times \mathbf{n} = \tau\,\mathbf{t} \times \mathbf{n} + \kappa\,\mathbf{b} \times \mathbf{n} = \tau\mathbf{b} - \kappa\mathbf{t}\), \(\boldsymbol{\omega} \times \mathbf{b} = \tau\,\mathbf{t} \times \mathbf{b} = -\tau\mathbf{n}\)이다.
+        <a href="#eq-5-3-1">(5.3.1)</a>과 비교하면 된다.</p>
+      </div>
+
+      <p>강체가 축 \(\mathbf{u}\)(단위벡터) 둘레를 각속도 \(\lambda\)로 돌 때 그 위의 벡터 \(\mathbf{v}\)의 속도는 \(\lambda\,\mathbf{u} \times \mathbf{v}\)이다. 그러니 따름정리는 “프레네 틀은 매 순간 \(\boldsymbol{\omega}\)를 축으로,
+      단위 길이당 \(\abs{\boldsymbol{\omega}} = \sqrt{\kappa^2 + \tau^2}\) 라디안의 빠르기로 돈다”는 뜻이다. \(\tau = 0\)이면 \(\boldsymbol{\omega} = \kappa\mathbf{b}\)이므로 틀은 접촉평면 안에서만 돌고(평면곡선),
+      \(\kappa\)가 작고 \(\tau\)가 크면 틀은 주로 접선 둘레로 비틀린다.</p>
+
+      <div class="thm example" id="i-5-3-3">
+        <p><span class="thm-head">예 5.3.3</span> <span class="thm-name">(나선의 프레네 틀, 기준 예제)</span>.
+        나선의 호의 길이 매개화 <a href="../04-curves/4-3-reparametrization.html#eq-4-3-2">(4.3.2)</a>에서 \(c = \sqrt{a^2 + b^2}\)이고, <a href="5-1-curvature.html#i-5-1-10">예 5.1.10</a>, <a href="5-2-torsion.html#i-5-2-3">예 5.2.3</a>에서</p>
+        \[ \begin{aligned}
+          \mathbf{t} &= \big(-\tfrac ac\sin\tfrac sc,\ \tfrac ac\cos\tfrac sc,\ \tfrac bc\big), \qquad \mathbf{n} = -\big(\cos\tfrac sc,\ \sin\tfrac sc,\ 0\big),\\
+          \mathbf{b} &= \big(\tfrac bc\sin\tfrac sc,\ -\tfrac bc\cos\tfrac sc,\ \tfrac ac\big), \qquad \kappa = \frac{a}{c^2}, \qquad \tau = \frac{b}{c^2}
+        \end{aligned} \]
+        <p>이다. 둘째 공식을 직접 확인하자. \(\mathbf{n}' = \tfrac1c(\sin\tfrac sc, -\cos\tfrac sc, 0)\)이고, 우변은</p>
+        \[ \begin{aligned} -\frac{a}{c^2}\mathbf{t} + \frac{b}{c^2}\mathbf{b} &= \Big(\frac{a^2 + b^2}{c^3}\sin\frac sc,\ -\frac{a^2 + b^2}{c^3}\cos\frac sc,\ -\frac{ab}{c^3} + \frac{ab}{c^3}\Big)\\ &= \frac1c\Big(\sin\frac sc,\ -\cos\frac sc,\ 0\Big) \end{aligned} \]
+        <p>로 같다. 다르부 벡터는 \(\boldsymbol{\omega} = \tfrac{b}{c^2}\mathbf{t} + \tfrac{a}{c^2}\mathbf{b}\)이고, 성분을 더하면 \(\sin\)과 \(\cos\) 항이 상쇄되어</p>
+        \[ \boldsymbol{\omega} = \Big(0,\ 0,\ \frac{b^2 + a^2}{c^3}\Big) = \Big(0,\ 0,\ \frac1c\Big) \]
+        <p>로 상수다. 나선의 프레네 틀은 \(z\)축 둘레를 단위 길이당 \(1/c\) 라디안씩 돈다. 나선 한 바퀴의 길이가 \(2\pi c\)이므로 한 바퀴에 틀도 정확히 한 바퀴 돈다(<a href="#fig-5-3-1">그림 5.3.1</a>).</p>
+        <p class="verified">검증: <code>verify/v-5-3-frenet.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-general-parameter">
+      <h2>일반 매개변수의 공식</h2>
+      <p>일반 매개변수의 곡선에서 \(\kappa\), \(\tau\)와 프레네 틀은 방향을 보존하는 호의 길이 매개화로 정했다(<a href="5-1-curvature.html#i-5-1-1">정의 5.1.1</a>, <a href="5-2-torsion.html#i-5-2-5">정의 5.2.5</a>).
+      호의 길이 매개화를 식으로 구하기 어려운 곡선이 많으므로, 원래 매개변수로 바로 계산하는 공식을 만든다. 속력을 \(v(t) = \abs{\gamma'(t)}\)로 쓴다.</p>
+
+      <div class="thm proposition" id="i-5-3-4">
+        <p><span class="thm-head">명제 5.3.4</span> <span class="thm-name">(일반 매개변수에서의 곡률, 비틀림률, 프레네 틀)</span>.
+        \(\gamma\colon I \to \R^3\)이 정칙곡선이라 하자.</p>
+        <ul>
+          <li>(a) \(\kappa(t) = \abs{\gamma'(t) \times \gamma''(t)}/\abs{\gamma'(t)}^3\)이다. 특히 \(\kappa(t) \gt 0\)일 필요충분조건은 \(\gamma'(t) \times \gamma''(t) \neq 0\)이다.</li>
+          <li>(b) \(\kappa(t) \gt 0\)이면
+            <div class="equation" id="eq-5-3-4">
+            \[ \begin{aligned} &\mathbf{t} = \frac{\gamma'}{\abs{\gamma'}}, \qquad \mathbf{b} = \frac{\gamma' \times \gamma''}{\abs{\gamma' \times \gamma''}}, \qquad \mathbf{n} = \mathbf{b} \times \mathbf{t},\\
+               &\tau = \frac{\inner{\gamma' \times \gamma''}{\gamma'''}}{\abs{\gamma' \times \gamma''}^2} \end{aligned} \tag{5.3.4} \]
+            </div>
+          </li>
+          <li>(c) \(I\)에서 \(\kappa \gt 0\)이면 \(t\)에 대한 도함수는 다음과 같다.
+            <div class="equation" id="eq-5-3-5">
+            \[ \frac{d\mathbf{t}}{dt} = v\kappa\,\mathbf{n}, \qquad \frac{d\mathbf{n}}{dt} = v(-\kappa\,\mathbf{t} + \tau\,\mathbf{b}), \qquad \frac{d\mathbf{b}}{dt} = -v\tau\,\mathbf{n} \tag{5.3.5} \]
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: \(\gamma' = v\mathbf{t}\)를 미분하고 (c)를 쓰면 \(\gamma''\)과 \(\gamma'''\)을 프레네 틀로 전개할 수 있다. 외적 \(\gamma' \times \gamma''\)에서는 \(\mathbf{t}\) 방향 항이 사라져 \(v^3\kappa\,\mathbf{b}\)만 남는다.</p>
+        <p><span class="proof-head">증명.</span>
+        (c)부터 보인다. \(\beta\)를 방향을 보존하는 호의 길이 매개화라 하면 정의에서 \(\mathbf{t}(t) = \mathbf{t}^\beta(s(t))\)이고 \(\mathbf{n}\), \(\mathbf{b}\), \(\kappa\), \(\tau\)도 같다. 연쇄법칙과
+        \(s'(t) = v(t)\)(<a href="../04-curves/4-2-arc-length.html#eq-4-2-5">(4.2.5)</a>)에서 \(d\mathbf{t}/dt = v\,(\mathbf{t}^\beta)'(s(t))\)이고, \(\beta\)에 <a href="#eq-5-3-1">(5.3.1)</a>을 쓰면 (c)의 세 식이 나온다.</p>
+        <p>이제 \(\kappa(t) \gt 0\)인 점 근처에서 계산한다. \(\gamma' = v\mathbf{t}\)를 미분하면 (c)에서</p>
+        \[ \gamma'' = v'\,\mathbf{t} + v^2\kappa\,\mathbf{n}, \qquad
+           \gamma''' = (v'' - v^3\kappa^2)\,\mathbf{t} + (3vv'\kappa + v^2\kappa')\,\mathbf{n} + v^3\kappa\tau\,\mathbf{b} \]
+        <p>이다(둘째 식은 첫째 식을 한 번 더 미분하고 \(d\mathbf{t}/dt\), \(d\mathbf{n}/dt\)에 (c)를 넣어 정리한 것이다. \(\kappa'\)은 \(t\)에 대한 도함수다). \(\mathbf{t} \times \mathbf{t} = 0\), \(\mathbf{t} \times \mathbf{n} = \mathbf{b}\)에서</p>
+        \[ \gamma' \times \gamma'' = v\,\mathbf{t} \times (v'\,\mathbf{t} + v^2\kappa\,\mathbf{n}) = v^3\kappa\,\mathbf{b}, \qquad
+           \inner{\gamma' \times \gamma''}{\gamma'''} = v^3\kappa \cdot v^3\kappa\tau = v^6\kappa^2\tau \]
+        <p>이다(\((\mathbf{t}, \mathbf{n}, \mathbf{b})\)가 정규직교이므로 \(\gamma'''\)과 \(\mathbf{b}\)의 내적은 \(\mathbf{b}\) 성분이다). 첫 식의 크기를 재면 \(\abs{\gamma' \times \gamma''} = v^3\kappa\)이므로 (a)의 공식이 나오고,
+        \(\mathbf{b} = \gamma' \times \gamma''/\abs{\gamma' \times \gamma''}\)이다. 둘째 식을 \(\abs{\gamma' \times \gamma''}^2 = v^6\kappa^2\)으로 나누면 \(\tau\)의 공식이다. \(\mathbf{n} = \mathbf{b} \times \mathbf{t}\)는 <a href="5-2-torsion.html#i-5-2-2">명제 5.2.2</a>이다.</p>
+        <p>남은 것은 \(\kappa(t) = 0\)인 점에서 (a)의 공식이다. \(\mathbf{n}\)을 쓰지 않고 계산하면 된다. \(\gamma'' = v'\mathbf{t} + v\,d\mathbf{t}/dt\)이므로 \(\gamma' \times \gamma'' = v^2\,\mathbf{t} \times (d\mathbf{t}/dt)\)이고,
+        \(d\mathbf{t}/dt \perp \mathbf{t}\)(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">따름정리 4.1.12</a>)이므로 <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16</a>(d)에서 \(\abs{\gamma' \times \gamma''} = v^2\abs{d\mathbf{t}/dt} = v^3\kappa\)이다
+        (마지막 등호는 <a href="5-1-curvature.html#eq-5-1-2">(5.1.2)</a>). 이 계산은 모든 점에서 성립하므로 (a)가 증명되었고, \(v \gt 0\)이므로 \(\kappa \gt 0 \iff \gamma' \times \gamma'' \neq 0\)이다.</p>
+      </div>
+
+      <p>(a)의 공식은 곡률이 “\(\gamma'\)과 \(\gamma''\)이 만드는 평행사변형의 넓이를 속력의 세제곱으로 나눈 것”임을 말한다. \(\gamma''\)의 \(\mathbf{t}\) 방향 성분(속력이 변하는 몫)은 넓이에 기여하지 않는다.
+      평면곡선 \((x, y, 0)\)이면 \(\gamma' \times \gamma'' = (0, 0, x'y'' - x''y')\)이므로 (a)는 <a href="../04-curves/4-4-signed-curvature.html#eq-4-4-4">(4.4.4)</a>의 절댓값이다(<a href="5-1-curvature.html#i-5-1-5">명제 5.1.5</a>와 일치).
+      <a href="#eq-5-3-4">(5.3.4)</a>의 \(\tau\)는 호의 길이 매개화에서 <a href="5-2-torsion.html#eq-5-2-4">(5.2.4)</a>가 된다(\(v = 1\)이면 \(\abs{\gamma' \times \gamma''} = \kappa\)).</p>
+
+      <div class="thm example" id="i-5-3-5">
+        <p><span class="thm-head">예 5.3.5</span> <span class="thm-name">(나선을 일반 공식으로, 기준 예제)</span>.
+        \(\gamma(t) = (a\cos t, a\sin t, bt)\)이면 \(\gamma' = (-a\sin t, a\cos t, b)\), \(\gamma'' = (-a\cos t, -a\sin t, 0)\), \(\gamma''' = (a\sin t, -a\cos t, 0)\)이다. 외적의 성분 공식에서</p>
+        \[ \begin{aligned} \gamma' \times \gamma'' &= \big(a\cos t\cdot 0 - b\cdot(-a\sin t),\ \ b\cdot(-a\cos t) - (-a\sin t)\cdot 0,\ \ a^2\sin^2 t + a^2\cos^2 t\big)\\ &= (ab\sin t,\ -ab\cos t,\ a^2) \end{aligned} \]
+        <p>이므로 \(\abs{\gamma' \times \gamma''}^2 = a^2b^2 + a^4 = a^2(a^2 + b^2)\), \(\abs{\gamma'}^3 = (a^2 + b^2)^{3/2}\)이고 \(\inner{\gamma' \times \gamma''}{\gamma'''} = a^2b\sin^2 t + a^2b\cos^2 t = a^2b\)이다. 따라서</p>
+        \[ \kappa = \frac{a\sqrt{a^2 + b^2}}{(a^2 + b^2)^{3/2}} = \frac{a}{a^2 + b^2}, \qquad \tau = \frac{a^2b}{a^2(a^2 + b^2)} = \frac{b}{a^2 + b^2} \]
+        <p>이다. <a href="5-1-curvature.html#i-5-1-7">예 5.1.7</a>, <a href="5-2-torsion.html#i-5-2-6">예 5.2.6</a>에서 호의 길이 매개화로 구한 값과 같다. 두 경로가 같은 답을 주는 것은 공식이 맞다는 확인이기도 하다.</p>
+        <p class="verified">검증: <code>verify/v-5-3-frenet.py</code></p>
+      </div>
+
+      <div class="thm example" id="i-5-3-6">
+        <p><span class="thm-head">예 5.3.6</span> <span class="thm-name">(꼬인 삼차곡선)</span>.
+        \(\gamma(t) = (t, t^2, t^3)\)을 <dfn>꼬인 삼차곡선</dfn>(twisted cubic)이라 한다. \(\gamma' = (1, 2t, 3t^2)\), \(\gamma'' = (0, 2, 6t)\), \(\gamma''' = (0, 0, 6)\)이고</p>
+        \[ \gamma' \times \gamma'' = \big(2t\cdot 6t - 3t^2\cdot 2,\ \ 3t^2\cdot 0 - 1\cdot 6t,\ \ 1\cdot 2 - 2t\cdot 0\big) = (6t^2,\ -6t,\ 2) \]
+        <p>이다. \(\abs{\gamma' \times \gamma''}^2 = 36t^4 + 36t^2 + 4 = 4(9t^4 + 9t^2 + 1) \gt 0\)이므로 모든 점에서 \(\kappa \gt 0\)이고, \(\inner{\gamma' \times \gamma''}{\gamma'''} = 12\)이다. 따라서</p>
+        \[ \kappa(t) = \frac{2\sqrt{9t^4 + 9t^2 + 1}}{(1 + 4t^2 + 9t^4)^{3/2}}, \qquad \tau(t) = \frac{12}{4(9t^4 + 9t^2 + 1)} = \frac{3}{9t^4 + 9t^2 + 1} \]
+        <p>이다. 비틀림률은 어디서나 양수이고 \(t = 0\)에서 최대 \(3\)이다. \(t = 0\)에서 \(\kappa = 2\)이고, 프레네 틀은 \(\mathbf{t} = e_1\), \(\mathbf{b} = (0, 0, 2)/2 = e_3\), \(\mathbf{n} = e_3 \times e_1 = e_2\), 곧 표준기저다.
+        원점에서 꼬인 삼차곡선은 “자기 프레네 틀에 대해 좌표를 잡은” 곡선이다. <a href="5-5-local-canonical-form.html">5.5절</a>에서 이것이 모든 곡선의 국소적인 모양의 모형임을 본다.</p>
+        <p class="verified">검증: <code>verify/v-5-3-frenet.py</code> (<code>dgsym.curvature_torsion</code>과도 비교한다)</p>
+      </div>
+    </section>
+
+    <section id="sec-sphere">
+      <h2>구면 위 원의 프레네 틀</h2>
+      <p><a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">예 4.5.12</a>에서 위도원의 곡률과 곡률중심을 구했고, 곡률벡터가 구면에 수직이 아님을 보았다. 이제 프레네 틀 전체를 구하고 구면의 바깥쪽 단위법벡터
+      \(\mathbf{N} = \mathbf{x}/r\)(§7의 기준 방향)과 비교한다. 구면의 매개화 <a href="../04-curves/4-1-parametrized-curves.html#eq-4-1-8">(4.1.8)</a>을 쓴다.</p>
+
+      <div class="thm example" id="i-5-3-7">
+        <p><span class="thm-head">예 5.3.7</span> <span class="thm-name">(구면 위 원의 프레네 틀, 기준 예제)</span>.
+        (a) <em>위도원.</em> \(\gamma(\varphi) = \mathbf{x}(\theta_0, \varphi) = (r\sin\theta_0\cos\varphi,\ r\sin\theta_0\sin\varphi,\ r\cos\theta_0)\), \(0 \lt \theta_0 \lt \pi\)라 하자. \(\rho_0 = r\sin\theta_0 \gt 0\)으로 쓰면</p>
+        \[ \gamma' = \rho_0(-\sin\varphi, \cos\varphi, 0), \qquad \gamma'' = -\rho_0(\cos\varphi, \sin\varphi, 0), \qquad \gamma''' = \rho_0(\sin\varphi, -\cos\varphi, 0) \]
+        <p>이고 \(\gamma' \times \gamma'' = \rho_0^2\big(0, 0, \sin^2\varphi + \cos^2\varphi\big) = (0, 0, \rho_0^2)\)이다. <a href="#eq-5-3-4">(5.3.4)</a>에서</p>
+        <div class="equation" id="eq-5-3-6">
+        \[ \begin{aligned} &\mathbf{t} = (-\sin\varphi, \cos\varphi, 0), \qquad \mathbf{n} = -(\cos\varphi, \sin\varphi, 0), \qquad \mathbf{b} = e_3,\\ &\kappa = \frac{1}{r\sin\theta_0}, \qquad \tau = 0 \end{aligned} \tag{5.3.6} \]
+        </div>
+        <p>이다(\(\mathbf{n} = e_3 \times \mathbf{t}\), \(\gamma'''\)은 \(xy\)평면에 있으므로 \(\inner{\gamma' \times \gamma''}{\gamma'''} = 0\)). 곡률은 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">예 4.5.12</a>의 값과 같고, \(\tau = 0\)은 <a href="5-2-torsion.html#i-5-2-9">명제 5.2.9</a>와 맞는다.
+        구면의 법벡터는 \(\mathbf{N} = (\sin\theta_0\cos\varphi,\ \sin\theta_0\sin\varphi,\ \cos\theta_0)\)이므로</p>
+        \[ \mathbf{N} = -\sin\theta_0\,\mathbf{n} + \cos\theta_0\,\mathbf{b}, \qquad \inner{\mathbf{t}}{\mathbf{N}} = 0 \]
+        <p>이다. 곧 \(\mathbf{N}\)은 \(\mathbf{n}\)과 \(\mathbf{b}\)가 만드는 평면(<a href="5-5-local-canonical-form.html">5.5절</a>의 법평면) 안에 있고, 적도가 아니면 \(\mathbf{n}\)과 평행하지 않다(<a href="#fig-5-3-2">그림 5.3.2</a>(a)).
+        곡률벡터 \(\kappa\mathbf{n}\)을 \(\mathbf{N}\) 방향 성분과 나머지로 나누면, \(\mathbf{N}\) 방향 성분은 \(\kappa\inner{\mathbf{n}}{\mathbf{N}} = \dfrac{1}{r\sin\theta_0}(-\sin\theta_0) = -\dfrac1r\)이고
+        나머지의 크기는 \(\sqrt{\kappa^2 - 1/r^2} = \abs{\cot\theta_0}/r\)이다. <a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">예 4.5.12</a>에서 각으로 구한 값과 같다.</p>
+        <p>(b) <em>대원.</em> 경선 \(\sigma(\theta) = \mathbf{x}(\theta, \varphi_0)\)은 대원의 일부다(<a href="../04-curves/4-5-osculating-circle.html#i-4-5-11">예 4.5.11</a>). \(\sigma' = r(\cos\theta\cos\varphi_0, \cos\theta\sin\varphi_0, -\sin\theta)\), \(\sigma'' = -\sigma\)이므로
+        \(\kappa = 1/r\), \(\mathbf{n} = -\sigma/r = -\mathbf{N}\)이고, 같은 방식으로 계산하면 \(\mathbf{b} = (-\sin\varphi_0, \cos\varphi_0, 0)\)(대원이 놓인 평면의 법벡터, 상수), \(\tau = 0\)이다.
+        대원에서는 주법선이 구면의 법벡터와 정확히 반대이고, 곡률벡터 전체가 \(\mathbf{N}\) 방향이다(<a href="#fig-5-3-2">그림 5.3.2</a>(b)).</p>
+        <p>(c) <em>공통점.</em> \(\gamma\)가 \(S^2(r)\) 위의 <em>어떤</em> 단위속력 곡선이든 \(\inner{\gamma''}{\gamma} = -1\)이므로(<a href="5-1-curvature.html#ex-5-1-3">연습 5.1.3</a>)
+        \(\inner{\kappa\mathbf{n}}{\mathbf{N}} = \inner{\gamma''}{\gamma/r} = -1/r\)이다. 곡률벡터의 \(\mathbf{N}\) 방향 성분은 곡선에 무관하게 \(-1/r\)이다. 달라지는 것은 나머지 성분이고, 그것이 \(0\)인 것이 대원이다.</p>
+        <p class="verified">검증: <code>verify/v-5-3-frenet.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-5-3-2">
+        <img src="figures/fig-5-3-2-sphere-frenet.svg" alt="두 칸 그림. 두 칸 모두 반투명한 단위구면과 그 위의 점 p를 그렸다. (a) p를 지나는 수평한 위도원(검정)과 p에서의 파란 t(위도원의 접선), 주홍 n(z축 위의 위도원 중심을 향함, 회색 점선이 중심까지 이어짐), 청록 b(수직 위쪽), 주황 N(구면의 바깥쪽 법벡터). N과 n은 평행하지 않다. (b) p를 지나는 경선 방향의 대원(검정)과 p에서의 t(아래쪽, 대원의 접선), n(구의 중심을 향함), b(대원의 평면에 수직), N(바깥쪽). n은 N과 정확히 반대 방향이다.">
+        <figcaption><span class="fig-head">그림 5.3.2.</span>
+        구면 \(S^2(r)\), \(r = 1\) 위의 점 \(p = \mathbf{x}(\theta_0, \varphi_0)\), \(\theta_0 = \pi/3\), \(\varphi_0 = -0.35\). (a) 위도원 \(\theta = \theta_0\)의 프레네 틀: \(\mathbf{n}\)은 \(z\)축 위의 곡률중심 \((0, 0, r\cos\theta_0)\)을 향하고
+        \(-\mathbf{N}\)과 \(\pi/2 - \theta_0 = 30^\circ\)의 각을 이룬다. (b) \(p\)를 지나는 경선을 포함하는 대원의 프레네 틀: \(\mathbf{n} = -\mathbf{N}\)은 구의 중심을 향한다.
+        파랑 \(\mathbf{t}\), 주홍 \(\mathbf{n}\), 청록 \(\mathbf{b}\), 주황 \(\mathbf{N} = \mathbf{x}/r\)(바깥쪽)을 모두 실제 길이의 \(0.5\)배로 그렸다. 두 칸은 보는 방향이 다르다(<a href="#i-5-3-7">예 5.3.7</a>).</figcaption>
+      </figure>
+
+      <aside class="box warning">
+        <p class="box-title">흔한 오해</p>
+        <ul>
+          <li>“곡면 위 곡선의 주법선은 곡면의 법벡터다”: 대원 같은 특별한 곡선에서만 맞다. 위도원의 \(\mathbf{n}\)은 \(z\)축을 향하므로 \(\mathbf{N}\)과 평행하지 않다(<a href="#i-5-3-7">예 5.3.7</a>).
+          \(\mathbf{n}\)은 곡선만으로 정해지고 \(\mathbf{N}\)은 곡면으로 정해진다.</li>
+          <li>“프레네-세레 공식의 계수 행렬은 대칭이다”: 반대칭이다. 대칭이면 틀의 길이나 각이 변해 정규직교가 깨진다.</li>
+          <li>“\(\kappa = \abs{\gamma''}/\abs{\gamma'}^2\)이다”: \(\gamma''\)의 \(\mathbf{t}\) 성분 \(v'\)을 빼야 한다. 맞는 식은 \(\kappa = \abs{\gamma' \times \gamma''}/\abs{\gamma'}^3\)이다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교</p>
+        <p>do Carmo의 프레네 공식은 \(\mathbf{t}' = k\mathbf{n}\), \(\mathbf{n}' = -k\mathbf{t} - \tau\mathbf{b}\), \(\mathbf{b}' = \tau\mathbf{n}\)이다 <a class="cite" href="../../references.html#dC">[dC §1-5]</a>.
+        do Carmo의 \(\tau\)는 이 study set의 \(-\tau\)이므로(<a href="5-2-torsion.html#i-5-2-5">정의 5.2.5</a> 뒤의 규약 비교) \(\tau\)를 \(-\tau\)로 바꾸면 <a href="#eq-5-3-1">(5.3.1)</a>이 된다. 일반 매개변수의 공식도
+        do Carmo에서는 연습문제로 나오며, 곡률 공식은 같고 비틀림률 공식에는 \(-\)가 붙는다 <a class="cite" href="../../references.html#dC">[dC §1-5 연습문제 12]</a>. do Carmo는 프레네 틀을 “프레네 삼면체”(Frenet trihedron)라 부른다.
+        다르부 벡터는 do Carmo의 본문에 나오지 않는다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 곡면에 맞춘 틀</p>
+        <p>(c)에서 본 “곡률벡터의 \(\mathbf{N}\) 방향 성분”이 <a href="../08-gauss-map/index.html">8장</a>의 법곡률이다. 구면의 법곡률이 어느 방향으로나 \(-1/r\)이라는 것은 §7의 주곡률 \(\kappa_1 = \kappa_2 = -1/r\)(바깥쪽 \(\mathbf{N}\))과 같은 사실이다.
+        곡면 위의 곡선에는 프레네 틀 대신 \((\mathbf{t},\ \mathbf{N} \times \mathbf{t},\ \mathbf{N})\)이라는 곡면에 맞춘 틀을 쓰는 것이 편하고, 그 틀로 쓴 프레네-세레 공식의 계수에서 <a href="../09-intrinsic-geometry/index.html">9장</a>의 측지곡률이 나온다.
+        움직이는 정규직교틀의 변화율이 반대칭 행렬이라는 이 절의 관찰은 <a href="../22-connections/index.html">22장</a>의 접속 형식으로 일반화된다. 이 개념들은 이 장의 증명에 쓰지 않는다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>\(\kappa \gt 0\)이면 \(\mathbf{t}' = \kappa\mathbf{n}\), \(\mathbf{n}' = -\kappa\mathbf{t} + \tau\mathbf{b}\), \(\mathbf{b}' = -\tau\mathbf{n}\)이다. 계수 행렬은 반대칭이다(<a href="#i-5-3-1">정리 5.3.1</a>).</li>
+        <li>프레네 틀은 다르부 벡터 \(\boldsymbol{\omega} = \tau\mathbf{t} + \kappa\mathbf{b}\)를 축으로 단위 길이당 \(\sqrt{\kappa^2 + \tau^2}\) 라디안씩 돈다(<a href="#i-5-3-2">따름정리 5.3.2</a>). 나선에서 \(\boldsymbol{\omega} = (0, 0, 1/c)\)이다.</li>
+        <li>일반 매개변수에서 \(\kappa = \abs{\gamma' \times \gamma''}/\abs{\gamma'}^3\), \(\tau = \inner{\gamma' \times \gamma''}{\gamma'''}/\abs{\gamma' \times \gamma''}^2\), \(\mathbf{b} = \gamma' \times \gamma''/\abs{\gamma' \times \gamma''}\)이다(<a href="#i-5-3-4">명제 5.3.4</a>).</li>
+        <li>꼬인 삼차곡선 \((t, t^2, t^3)\)은 원점에서 \(\kappa = 2\), \(\tau = 3\)이고 프레네 틀이 표준기저다.</li>
+        <li>위도원의 틀은 \(\mathbf{n} = -(\cos\varphi, \sin\varphi, 0)\), \(\mathbf{b} = e_3\)이고 \(\mathbf{N} = -\sin\theta_0\mathbf{n} + \cos\theta_0\mathbf{b}\)이다. 대원은 \(\mathbf{n} = -\mathbf{N}\)이다. 구면 위 모든 곡선에서 곡률벡터의 \(\mathbf{N}\) 성분은 \(-1/r\)이다.</li>
+      </ul>
+      <p class="next">다음 절에서는 프레네-세레 공식을 거꾸로 읽는다. 곡률 \(\kappa \gt 0\)과 비틀림률 \(\tau\)를 함수로 주면 그런 곡선이 있는가, 있다면 하나뿐인가? 선형 상미분방정식의 이론으로 두 질문에 모두 답하고,
+      “하나뿐”의 정확한 뜻인 \(\R^3\)의 강체운동을 정의한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-5-3-1" data-level="1">
+        <p><span class="thm-head">연습 5.3.1</span> <span class="level">★</span>
+        \(\gamma(t) = (\cosh t, \sinh t, t)\)의 곡률과 비틀림률이 모두 \(1/(2\cosh^2 t)\)임을 <a href="#eq-5-3-4">(5.3.4)</a>로 보여라. (곡률은 <a href="5-1-curvature.html#ex-5-1-1">연습 5.1.1</a>에서 다른 방법으로 구했다.)</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\gamma' = (\sinh t, \cosh t, 1)\), \(\gamma'' = (\cosh t, \sinh t, 0)\), \(\gamma''' = (\sinh t, \cosh t, 0)\)이다. 성분 공식에서</p>
+          \[ \begin{aligned} \gamma' \times \gamma'' &= \big(\cosh t\cdot 0 - 1\cdot\sinh t,\ \ 1\cdot\cosh t - \sinh t\cdot 0,\ \ \sinh^2 t - \cosh^2 t\big)\\ &= (-\sinh t,\ \cosh t,\ -1) \end{aligned} \]
+          <p>이고 \(\abs{\gamma' \times \gamma''}^2 = \sinh^2 t + \cosh^2 t + 1 = 2\cosh^2 t\), \(\abs{\gamma'}^2 = 2\cosh^2 t\)이다. 따라서 \(\kappa = \sqrt2\cosh t/(2\sqrt2\cosh^3 t) = 1/(2\cosh^2 t)\)이다.
+          \(\inner{\gamma' \times \gamma''}{\gamma'''} = -\sinh^2 t + \cosh^2 t = 1\)이므로 \(\tau = 1/(2\cosh^2 t)\)이다. \(\tau/\kappa = 1\)이 상수이므로 이 곡선은 <a href="5-2-torsion.html#ex-5-2-5">연습 5.2.5</a>의 꼴,
+          곧 접선이 고정된 방향과 일정한 각을 이루는 곡선이다(<a href="#ex-5-3-7">연습 5.3.7</a>).</p>
+          <p class="verified">검증: <code>verify/v-5-3-frenet.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-3-2" data-level="1">
+        <p><span class="thm-head">연습 5.3.2</span> <span class="level">★</span>
+        꼬인 삼차곡선 \(\gamma(t) = (t, t^2, t^3)\)의 \(t = 1\)에서의 프레네 틀, 곡률, 비틀림률을 구하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\gamma'(1) = (1, 2, 3)\), \(\gamma''(1) = (0, 2, 6)\), \(\gamma'''(1) = (0, 0, 6)\)이다. <a href="#i-5-3-6">예 5.3.6</a>의 식에 \(t = 1\)을 넣으면 \(\gamma' \times \gamma'' = (6, -6, 2)\)이고 그 크기는 \(\sqrt{76} = 2\sqrt{19}\)이다.
+          따라서 \(\mathbf{t} = (1, 2, 3)/\sqrt{14}\), \(\mathbf{b} = (3, -3, 1)/\sqrt{19}\)이고,</p>
+          \[ \mathbf{n} = \mathbf{b} \times \mathbf{t} = \frac{\big((-3)\cdot 3 - 1\cdot 2,\ \ 1\cdot 1 - 3\cdot 3,\ \ 3\cdot 2 - (-3)\cdot 1\big)}{\sqrt{19}\sqrt{14}} = \frac{(-11,\ -8,\ 9)}{\sqrt{266}} \]
+          <p>이다(확인: \(121 + 64 + 81 = 266\)). \(\kappa(1) = 2\sqrt{19}/14^{3/2} \approx 0.166\), \(\tau(1) = 12/76 = 3/19 \approx 0.158\)이다.</p>
+          <p class="verified">검증: <code>verify/v-5-3-frenet.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-3-3" data-level="1">
+        <p><span class="thm-head">연습 5.3.3</span> <span class="level">★</span>
+        \(\kappa \gt 0\)인 단위속력 곡선에서 \(\abs{\mathbf{n}'}^2 = \abs{\boldsymbol{\omega}}^2 = \kappa^2 + \tau^2\)임을 보이고, 나선에서 이 값이 \(1/(a^2 + b^2)\)임을 확인하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="#eq-5-3-1">(5.3.1)</a>에서 \(\mathbf{n}' = -\kappa\mathbf{t} + \tau\mathbf{b}\)이고 \(\mathbf{t}, \mathbf{b}\)는 정규직교이므로 \(\abs{\mathbf{n}'}^2 = \kappa^2 + \tau^2\)이다. 같은 이유로 \(\abs{\boldsymbol{\omega}}^2 = \abs{\tau\mathbf{t} + \kappa\mathbf{b}}^2 = \tau^2 + \kappa^2\)이다.
+          나선에서는 \((a^2 + b^2)/(a^2 + b^2)^2 = 1/(a^2 + b^2) = 1/c^2\)이고, <a href="#i-5-3-3">예 5.3.3</a>의 \(\boldsymbol{\omega} = (0, 0, 1/c)\)과 맞는다.</p>
+          <p class="verified">검증: <code>verify/v-5-3-frenet.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-3-4" data-level="1">
+        <p><span class="thm-head">연습 5.3.4</span> <span class="level">★</span>
+        \(\kappa \gt 0\)인 단위속력 곡선에 대한 다음 주장이 참인지 거짓인지 판별하고 이유를 대어라.
+        (a) \(\mathbf{n}'\)은 \(\mathbf{n}\)과 수직이다.
+        (b) \(\mathbf{b}'\)은 \(\mathbf{t}\)와 수직이다.
+        (c) 구면 \(S^2(r)\) 위의 곡선이면 \(\mathbf{n} = -\mathbf{N}\)이다.
+        (d) \(\kappa\)와 \(\tau\)가 상수이면 다르부 벡터도 상수 벡터다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 참. \(\abs{\mathbf{n}} = 1\)(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">따름정리 4.1.12</a>). 실제로 \(\mathbf{n}' = -\kappa\mathbf{t} + \tau\mathbf{b}\)에는 \(\mathbf{n}\) 성분이 없다.
+          (b) 참. \(\mathbf{b}' = -\tau\mathbf{n}\).
+          (c) 거짓. 위도원이 반례다(<a href="#i-5-3-7">예 5.3.7</a>(a)). 대원에서만 성립한다(<a href="5-1-curvature.html#ex-5-1-3">연습 5.1.3</a>의 등호 조건).
+          (d) 참. \(\boldsymbol{\omega}' = \tau\mathbf{t}' + \kappa\mathbf{b}' = \tau\kappa\mathbf{n} - \kappa\tau\mathbf{n} = 0\)이다(상수 \(\kappa, \tau\)의 도함수는 \(0\)).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-3-5" data-level="2">
+        <p><span class="thm-head">연습 5.3.5</span> <span class="level">★★</span>
+        \(\gamma\)가 호의 길이로 매개화되어 있고 \(I\)에서 \(\kappa \gt 0\)이며, 모든 접촉평면이 한 점 \(p_0\)을 지난다고 하자. \(\gamma\)가 평면곡선임을 보여라.</p>
+        <details class="hint"><summary>힌트</summary><p>\(\inner{\gamma - p_0}{\mathbf{b}} = 0\)을 미분한다. \(\tau \neq 0\)인 곳이 있다고 가정하고 모순을 끌어낸다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>가정은 모든 \(s\)에서 \(\inner{\gamma(s) - p_0}{\mathbf{b}(s)} = 0\)이라는 것이다(<a href="5-2-torsion.html#i-5-2-2">명제 5.2.2</a>). 미분하면 \(\inner{\mathbf{t}}{\mathbf{b}} + \inner{\gamma - p_0}{-\tau\mathbf{n}} = -\tau\inner{\gamma - p_0}{\mathbf{n}} = 0\)이다.
+          어떤 \(s_1\)에서 \(\tau(s_1) \neq 0\)이라 하자. \(\tau\)가 연속이므로 \(s_1\)을 포함하는 열린구간 \(J\)에서 \(\tau \neq 0\)이고, 거기서 \(\inner{\gamma - p_0}{\mathbf{n}} = 0\)이다.
+          이것을 다시 미분하면 \(\inner{\mathbf{t}}{\mathbf{n}} + \inner{\gamma - p_0}{-\kappa\mathbf{t} + \tau\mathbf{b}} = -\kappa\inner{\gamma - p_0}{\mathbf{t}} = 0\)이고 \(\kappa \gt 0\)이므로 \(\inner{\gamma - p_0}{\mathbf{t}} = 0\)이다.
+          그러면 \(J\)에서 \(\gamma - p_0\)은 정규직교기저 \((\mathbf{t}, \mathbf{n}, \mathbf{b})\)의 모든 벡터와 수직이므로 \(0\), 곧 \(\gamma \equiv p_0\)이다. 이것은 \(\abs{\gamma'} = 1\)에 모순이다.
+          따라서 \(\tau \equiv 0\)이고, <a href="5-2-torsion.html#i-5-2-9">명제 5.2.9</a>에 의해 \(\gamma\)는 평면곡선이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-3-6" data-level="2">
+        <p><span class="thm-head">연습 5.3.6</span> <span class="level">★★</span>
+        \(\gamma\)가 호의 길이로 매개화되어 있고 \(\kappa \gt 0\), \(\tau \neq 0\)이며, 자취가 중심 \(p_0\), 반지름 \(r\)인 구면에 들어 있다고 하자. \(\rho = 1/\kappa\)로 두면
+        \(\gamma - p_0 = -\rho\,\mathbf{n} - (\rho'/\tau)\,\mathbf{b}\)이고, 따라서 \(r^2 = \rho^2 + (\rho'/\tau)^2\)임을 보여라. <a class="cite" href="../../references.html#dC">[dC §1-5 연습문제 13 변형]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(w = \gamma - p_0\)이라 하면 \(\abs{w}^2 = r^2\)이다. 미분하면 \(\inner{w}{\mathbf{t}} = 0\)이다(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">따름정리 4.1.12</a>). 이것을 미분하면
+          \(\inner{\mathbf{t}}{\mathbf{t}} + \inner{w}{\kappa\mathbf{n}} = 0\), 곧 \(\inner{w}{\mathbf{n}} = -1/\kappa = -\rho\)이다. 이것을 미분하면 프레네-세레 공식에서</p>
+          \[ \inner{\mathbf{t}}{\mathbf{n}} + \inner{w}{-\kappa\mathbf{t} + \tau\mathbf{b}} = -\rho', \qquad \text{곧}\quad \tau\inner{w}{\mathbf{b}} = -\rho' \]
+          <p>이다(\(\inner{\mathbf{t}}{\mathbf{n}} = 0\), \(\inner{w}{\mathbf{t}} = 0\)). 따라서 \(\inner{w}{\mathbf{b}} = -\rho'/\tau\)이고, 정규직교기저로 전개하면(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>)
+          \(w = 0\cdot\mathbf{t} - \rho\,\mathbf{n} - (\rho'/\tau)\mathbf{b}\), \(r^2 = \abs{w}^2 = \rho^2 + (\rho'/\tau)^2\)이다. (\(\rho' = 0\)인 곳에서는 \(\rho = r\)이고 곡률중심 \(\gamma + \rho\mathbf{n}\)이 구의 중심이다.)</p>
+          <p class="verified">검증: <code>verify/v-5-3-frenet.py</code> (단위구면 위의 곡선 \((\sin u\cos 2u, \sin u\sin 2u, \cos u)\)에서 수치 확인)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-3-7" data-level="3">
+        <p><span class="thm-head">연습 5.3.7</span> <span class="level">★★★</span>
+        \(\gamma\)가 호의 길이로 매개화되어 있고 \(\kappa \gt 0\)이라 하자. 단위벡터 \(\mathbf{u}\)와 \(0 \lt \alpha \lt \pi\)가 있어 모든 \(s\)에서 \(\inner{\mathbf{t}(s)}{\mathbf{u}} = \cos\alpha\)일 필요충분조건은
+        \(\tau/\kappa\)가 상수인 것임을 보여라(랑크레 정리). <a class="cite" href="../../references.html#dC">[dC §1-5 연습문제 17 변형]</a></p>
+        <details class="hint"><summary>힌트</summary><p>한쪽 방향: \(\inner{\mathbf{t}}{\mathbf{u}}\)를 미분한다. 다른 방향: \(\tau = c\kappa\)이면 다르부 벡터의 방향 \((c\,\mathbf{t} + \mathbf{b})/\sqrt{1 + c^2}\)가 상수다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>(\(\Rightarrow\)) \(\inner{\mathbf{t}}{\mathbf{u}} = \cos\alpha\)를 미분하면 \(\kappa\inner{\mathbf{n}}{\mathbf{u}} = 0\)이므로 \(\inner{\mathbf{n}}{\mathbf{u}} = 0\)이다. 전개하면 \(\mathbf{u} = \cos\alpha\,\mathbf{t} + \inner{\mathbf{u}}{\mathbf{b}}\mathbf{b}\)이고
+          \(\abs{\mathbf{u}} = 1\)에서 \(\inner{\mathbf{u}}{\mathbf{b}} = \pm\sin\alpha\)이다. 이 연속함수는 두 값 \(\pm\sin\alpha\)(\(\sin\alpha \gt 0\)) 가운데 하나만 가지므로(중간값 정리, <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>) 상수 \(\varepsilon\sin\alpha\)이다.
+          \(\mathbf{u}\)가 상수이므로 \(0 = \mathbf{u}' = \cos\alpha\,\kappa\mathbf{n} + \varepsilon\sin\alpha\,(-\tau\mathbf{n})\)이고, \(\kappa\cos\alpha = \varepsilon\tau\sin\alpha\), 곧 \(\tau/\kappa = \varepsilon\cot\alpha\)는 상수다.</p>
+          <p>(\(\Leftarrow\)) \(\tau = c\kappa\)(\(c\)는 상수)라 하고 \(\mathbf{u} = (c\,\mathbf{t} + \mathbf{b})/\sqrt{1 + c^2}\)로 두자. 프레네-세레 공식에서 \(\mathbf{u}' = (c\kappa\mathbf{n} - \tau\mathbf{n})/\sqrt{1 + c^2} = 0\)이므로 \(\mathbf{u}\)는 상수 단위벡터이고
+          \(\inner{\mathbf{t}}{\mathbf{u}} = c/\sqrt{1 + c^2}\)는 \((-1, 1)\) 안의 상수다. 그 값을 \(\cos\alpha\)로 두면 된다. \(\mathbf{u}\)는 다르부 벡터 \(\boldsymbol{\omega} = \kappa(c\,\mathbf{t} + \mathbf{b})\)의 방향이다.
+          <a href="#ex-5-3-1">연습 5.3.1</a>의 곡선은 \(c = 1\)이고 \(\mathbf{u} = e_2\), \(\alpha = \pi/4\)이다.</p>
+          <p class="verified">검증: <code>verify/v-5-3-frenet.py</code> (\((\cosh t, \sinh t, t)\)에서 \(\mathbf{u} = e_2\))</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="5-2-torsion.html">← 5.2 비틀림률</a>
+    <a rel="next" href="5-4-fundamental-theorem.html">5.4 곡선론의 기본정리 →</a>
+  </nav>
+</body>
+</html>

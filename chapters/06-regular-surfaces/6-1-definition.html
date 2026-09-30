@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>6.1 정칙곡면의 정의 — 미분기하 스터디</title>
+  <meta name="dg-id" content="6.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="4.2, 3.3, 3.2, 2.5, 2.3, 2.2, 2.1, 1.6, 1.3">
+  <meta name="dg-refs" content="dC §2-2; dC §2-4">
+  <meta name="dg-updated" content="2026-10-01">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">6. 정칙곡면</a> ›
+    <span>6.1 정칙곡면의 정의</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>6.1 정칙곡면의 정의</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#dC">[dC §2-2]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>정칙곡면의 정의를 정확히 진술하고, 세 조건(매끄러움, 위상동형, 전미분의 단사성)이 각각 무엇을 막는지 비예로 설명할 수 있다.</li>
+        <li>매끄러운 함수의 그래프가 정칙곡면임을 보이고, 이것으로 구면 \(S^2(r)\)이 정칙곡면임을 증명할 수 있다.</li>
+        <li>구면의 기준 매개화 \(\mathbf{x}(\theta, \varphi)\)가 매개화의 세 조건을 만족함을 직접 확인할 수 있다.</li>
+        <li>정칙곡면이 국소적으로 좌표평면 위의 그래프임을 역함수 정리로 증명하고, 이것으로 원뿔 같은 집합이 정칙곡면이 아님을 보일 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">정의 2.2.11 (매끄러운 사상)</a>, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">명제 2.2.12</a>, <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-16">예 2.1.16 (구면의 기준 매개화의 전미분)</a></li>
+        <li><a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-1">정의 2.3.1 (미분동형사상)</a>, <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-5">정리 2.3.5 (역함수 정리)</a></li>
+        <li><a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-12">정의 3.2.12 (위상동형사상)</a>, <a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-1">정의 3.3.1 (부분공간 위상)</a>, <a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-5">정리 3.3.5</a>, <a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-8">정의 3.3.8 (위상 매장)</a>, <a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-11">비예 3.3.11 (8자 곡선)</a></li>
+        <li><a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-9">정의 1.2.9 (계수)</a>, <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-13">따름정리 1.3.13 (행 계수 = 열 계수)</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16 (외적의 성질)</a></li>
+        <li><a href="../04-curves/4-1-parametrized-curves.html#i-4-1-1">정의 4.1.1 (매개곡선)</a>, <a href="../04-curves/4-2-arc-length.html#i-4-2-6">명제 4.2.6 (정칙곡선은 국소적으로 그래프다)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="../04-curves/index.html">4장</a>과 <a href="../05-space-curves/index.html">5장</a>에서는 곡선을 <em>사상</em> \(\gamma\colon I \to \R^3\)으로 다루었다(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-1">정의 4.1.1</a>).
+      속도, 길이, 곡률은 모두 사상에서 계산했고, 자취가 스스로 만나거나(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-10">예 4.1.10</a>) 뾰족해져도(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-9">비예 4.1.9</a>) 사상이 매끄럽기만 하면 이론은 그대로 돌아갔다.
+      <a href="../04-curves/4-2-arc-length.html">4.2절</a>의 주의 상자에는 “자취 전체가 좋은 모양인지는 6장에서 곡면을 정의할 때 다시 문제가 된다”고 적어 두었다. 이제 그 문제를 정면으로 다룬다.</p>
+      <p>구면, 원기둥, 원환면처럼 우리가 곡면이라 부르는 것은 \(\R^3\)의 <em>부분집합</em>이다. 앞으로 정의할 접평면, 넓이, 곡률은 그 집합 자체의 성질이어야 하고, 그것을 그리는 방법에 따라 달라져서는 안 된다.
+      한편 미분을 하려면 좌표가 필요하다. 그래서 집합을 작은 조각으로 덮고, 조각마다 평면의 열린집합에서 오는 좌표 \((u, v)\)를 준다. 조각을 좌표로 나타내는 사상이 <em>매개화</em>다.
+      남은 질문은 “매개화가 어떤 조건을 만족해야 그 조각을 매끄러운 곡면의 조각이라 부를 수 있는가”이다. 꼭짓점도, 모서리도, 자기 자신에게 달라붙는 곳도 없어야 하고, 각 점에 접평면이 있어야 한다.
+      이 절의 정의는 이 요구를 세 개의 조건으로 옮긴 것이다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 평면 조각을 구부려 덮기</p>
+        <p><a href="#fig-6-1-1">그림 6.1.1</a>은 평면의 직사각형 \(U\)를 구면 위에 휘어 붙이는 사상 \(\mathbf{x}\)이다. \(U\)의 세로선(\(\theta\) 고정)은 위도원으로, 가로선(\(\varphi\) 고정)은 경선으로 간다
+        (<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-13">예 4.1.13</a>). \(U\)는 열린집합이라 경계가 없고, \(U\)의 변에 해당하는 반원 \(C\)(주황)와 두 극은 \(\mathbf{x}(U)\)에 들어가지 않는다.
+        그래서 매개화 하나로는 구면 전체를 덮지 못하고, 조각을 여러 개 써야 한다. 조각이 겹치는 곳에서 두 좌표가 어떻게 맞물리는지는 <a href="6-3-smooth-functions.html">6.3절</a>의 주제다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-6-1-1">
+        <img src="figures/fig-6-1-1-sphere-parametrization.svg" alt="왼쪽은 하늘색으로 칠한 세로로 긴 직사각형 U로, 가로축이 θ(0부터 π), 세로축이 φ(0부터 2π)이고 좌표격자가 그려져 있다. 세로선 θ=θ₀(파랑)와 가로선 φ=φ₀(청록)이 점 q에서 만나고, 위아래 변 φ=0, φ=2π는 주황 점선이다. 곡선 화살표 x가 오른쪽의 반투명 구면을 가리킨다. 구면에는 위도원과 경선의 격자가 있고, 파란 위도원과 청록 경선이 점 p=x(q)에서 만난다. 북극에서 남극까지 이어진 주황 반원 C는 매개화의 상에 들어가지 않는다.">
+        <figcaption><span class="fig-head">그림 6.1.1.</span>
+        구면 \(S^2(1)\)의 기준 매개화 \(\mathbf{x}\colon U = (0, \pi) \times (0, 2\pi) \to S^2(1)\) (<a href="#i-6-1-7">예 6.1.7</a>). \(U\)의 좌표격자 \(\theta, \varphi = k\pi/6\)은 위도원과 경선의 격자로 간다.
+        \(q = (\theta_0, \varphi_0) = (\pi/3, \pi/4)\)을 지나는 좌표선 \(\theta = \theta_0\)(파랑)과 \(\varphi = \varphi_0\)(청록)은 \(p = \mathbf{x}(q)\)를 지나는 위도원과 경선이 된다.
+        \(U\)의 변 \(\varphi = 0\), \(\varphi = 2\pi\)(주황 점선)에 해당하는 반원 \(C = \{(x, y, z) \in S^2(1) : y = 0,\ x \ge 0\}\)(주황)은 \(\mathbf{x}(U)\)에 없다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-definition">
+      <h2>정의</h2>
+
+      <div class="thm definition" id="i-6-1-1">
+        <p><span class="thm-head">정의 6.1.1</span> <span class="thm-name">(정칙곡면, regular surface)</span>.
+        부분집합 \(S \subseteq \R^3\)이 다음 성질을 가지면 <dfn>정칙곡면</dfn>(regular surface)이라 한다.
+        모든 \(p \in S\)에 대하여 \(p\)를 포함하는 \(\R^3\)의 열린집합 \(V\), \(\R^2\)의 열린집합 \(U\), 그리고 \(U\)에서 \(V \cap S\) <em>위로</em> 가는 사상 \(\mathbf{x}\colon U \to V \cap S\)가 있어서 다음 세 조건이 성립한다.</p>
+        <ul>
+          <li>(1) \(\mathbf{x}\)는 매끄럽다. 즉 \(\mathbf{x}\)를 열린집합 \(U\)에서 \(\R^3\)으로 가는 사상으로 볼 때 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">정의 2.2.11</a>의 뜻으로 매끄럽다.</li>
+          <li>(2) \(\mathbf{x}\colon U \to V \cap S\)는 위상동형사상이다. 여기서 \(V \cap S\)에는 \(\R^3\)의 부분공간 위상(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-1">정의 3.3.1</a>)을 준다.</li>
+          <li>(3) 모든 \(q \in U\)에서 전미분 \(D\mathbf{x}(q)\colon \R^2 \to \R^3\)이 단사다.</li>
+        </ul>
+        <p>이런 \(\mathbf{x}\)를 (\(p\) 근처에서) \(S\)의 <dfn>매개화</dfn>(parametrization)라 한다. 국소 매개화라고도 한다. \(U\)의 점은 \(q = (u, v)\)로 쓴다.</p>
+      </div>
+
+      <p>정칙곡면은 사상이 아니라 집합이다. 매개화는 그 집합을 조각조각 좌표로 나타내는 도구이고, 한 곡면에 매개화는 무수히 많다. 세 조건을 하나씩 풀어 보자.</p>
+      <ul>
+        <li><em>조건 (1)</em>은 미분을 하기 위한 최소한의 요구다. 성분으로 \(\mathbf{x}(u, v) = \big(x(u, v),\ y(u, v),\ z(u, v)\big)\)라 쓰면 세 함수의 모든 계의 편미분이 연속이라는 뜻이다.</li>
+        <li><em>조건 (2)</em>에서 \(\mathbf{x}\)의 연속성은 (1)에서 이미 나오므로(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-5">정리 3.3.5</a>(c)), 실제 내용은 두 가지다. \(\mathbf{x}\)가 단사이고, 역사상 \(\mathbf{x}^{-1}\colon V \cap S \to U\)가 연속이다.
+        다르게 말하면 \(\mathbf{x}\)는 위상 매장(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-8">정의 3.3.8</a>)이고, 그 상 \(\mathbf{x}(U) = V \cap S\)는 \(S\)에서 열려 있다.</li>
+        <li><em>조건 (3)</em>은 좌표로 쓰면 더 익숙하다. 편미분을 \(\mathbf{x}_u = \partial\mathbf{x}/\partial u\), \(\mathbf{x}_v = \partial\mathbf{x}/\partial v\)로 쓰면 전미분의 행렬은</li>
+      </ul>
+      <div class="equation" id="eq-6-1-1">
+      \[ D\mathbf{x}(q) = \big(\,\mathbf{x}_u(q)\ \big|\ \mathbf{x}_v(q)\,\big) = \begin{pmatrix} x_u & x_v \\ y_u & y_v \\ z_u & z_v \end{pmatrix}\!(q) \tag{6.1.1} \]
+      </div>
+      <p>이다(<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-11">정리 2.1.11</a>). 선형사상이 단사일 필요충분조건은 행렬의 열들이 일차독립인 것이므로, 조건 (3)은 다음과 서로 동치다.</p>
+      <ul>
+        <li>(3a) \(\mathbf{x}_u(q)\)와 \(\mathbf{x}_v(q)\)가 일차독립이다. 즉 \(\rank D\mathbf{x}(q) = 2\)이다(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-9">정의 1.2.9</a>).</li>
+        <li>(3b) \(\mathbf{x}_u(q) \times \mathbf{x}_v(q) \neq 0\)이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16</a>(c)).</li>
+        <li>(3c) 세 \(2 \times 2\) 소행렬식 \(\dfrac{\partial(x, y)}{\partial(u, v)} = \det\begin{pmatrix} x_u & x_v \\ y_u & y_v \end{pmatrix}\), \(\dfrac{\partial(y, z)}{\partial(u, v)}\), \(\dfrac{\partial(x, z)}{\partial(u, v)}\) 가운데 적어도 하나가 \(q\)에서 \(0\)이 아니다.</li>
+      </ul>
+      <p>(3a)와 (3c)의 동치는 이렇다. 계수가 \(2\)이면 <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-13">따름정리 1.3.13</a>에 의해 일차독립인 행이 두 개 있고, 그 두 행으로 만든 \(2 \times 2\) 행렬은 행이 일차독립이므로 가역, 즉 행렬식이 \(0\)이 아니다.
+      거꾸로 어떤 \(2 \times 2\) 소행렬식이 \(0\)이 아니면 그 두 행이 일차독립이므로 계수가 \(2\)이다. (3b)의 외적의 세 성분이 바로 이 세 소행렬식(부호까지)이라는 것은 <a href="#i-6-1-7">예 6.1.7</a>에서 계산으로 보게 된다.</p>
+      <p>기하적으로 보자. \(v\)를 \(v_0\)로 고정한 곡선 \(u \mapsto \mathbf{x}(u, v_0)\)과 \(u\)를 \(u_0\)로 고정한 곡선 \(v \mapsto \mathbf{x}(u_0, v)\)을 매개화 \(\mathbf{x}\)의 <dfn>좌표곡선</dfn>(coordinate curve)이라 한다. 그 속도가 \(\mathbf{x}_u\)와 \(\mathbf{x}_v\)다.
+      조건 (3)은 “각 점을 지나는 두 좌표곡선이 모두 정칙곡선(<a href="../04-curves/4-2-arc-length.html#i-4-2-1">정의 4.2.1</a>)이고 서로 접하지 않는다”는 뜻이다.</p>
+
+      <div class="thm example" id="i-6-1-2">
+        <p><span class="thm-head">예 6.1.2</span> <span class="thm-name">(평면)</span>.
+        \(p_0 \in \R^3\)이고 \(w_1, w_2 \in \R^3\)이 일차독립일 때 평면 \(S = \{\, p_0 + a w_1 + b w_2 : a, b \in \R \,\}\)은 정칙곡면이다. 매개화 하나로 전체가 덮인다.
+        \(U = \R^2\), \(V = \R^3\), \(\mathbf{x}(u, v) = p_0 + u w_1 + v w_2\)로 두자. \(A = (w_1 \,|\, w_2)\)를 \(3 \times 2\) 행렬이라 하면 \(\mathbf{x}(q) = p_0 + Aq\)이다.</p>
+        <ul>
+          <li>(1) 성분이 일차식이므로 매끄럽다.</li>
+          <li>(2) \(\mathbf{x}\)는 \(S\) 위로의 사상이다. 역사상을 식으로 쓰자. \(A^{\mathsf{T}}A\)는 \(w_1, w_2\)의 그람 행렬이므로 가역이다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-13">명제 1.5.13</a>).
+          \(p = \mathbf{x}(q)\)이면 \((A^{\mathsf{T}}A)^{-1}A^{\mathsf{T}}(p - p_0) = (A^{\mathsf{T}}A)^{-1}A^{\mathsf{T}}Aq = q\)이다. 따라서 \(\mathbf{x}\)는 단사이고, 역사상은 선형사상 \(p \mapsto (A^{\mathsf{T}}A)^{-1}A^{\mathsf{T}}(p - p_0)\)을 \(S\)로 제한한 것이므로 연속이다(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-5">정리 3.3.5</a>(b)).</li>
+          <li>(3) \(D\mathbf{x}(q) = A\)이고 열 \(w_1, w_2\)가 일차독립이므로 단사다.</li>
+        </ul>
+        <p>특히 \(p_0 = 0\), \(w_1 = e_1\), \(w_2 = e_2\)이면 \(xy\) 평면 \(\{z = 0\}\)이고 \(\mathbf{x}(u, v) = (u, v, 0)\)이다.</p>
+        <p class="verified">검증: <code>verify/v-6-1-definition.py</code></p>
+      </div>
+
+      <p>다음 비예는 세 조건을 하나씩 어기는 사상 셋이다. (b)와 (c)는 나머지 두 조건을 모두 지키고, (a)는 (1)이 깨지는 한 점에서 (3)을 물을 수 없다는 점만 다르다. 셋 다 그 상에 “곡면이라 부르고 싶지 않은” 곳이 있다(<a href="#fig-6-1-2">그림 6.1.2</a>, <a href="#fig-6-1-3">그림 6.1.3</a>).</p>
+
+      <div class="thm nonexample" id="i-6-1-3">
+        <p><span class="thm-head">비예 6.1.3</span> <span class="thm-name">(조건을 하나씩 어기는 사상)</span>.
+        (a) <em>조건 (1)만 어긋남: 원뿔.</em> \(U = \R^2\), \(\mathbf{x}(u, v) = \big(u,\ v,\ \sqrt{u^2 + v^2}\big)\)이라 하자. 상은 한 겹 원뿔 \(K = \{(x, y, z) : z = \sqrt{x^2 + y^2}\}\)이다.
+        \(\mathbf{x}\)는 연속함수 \(\sqrt{u^2 + v^2}\)의 그래프 사상이므로 \(K\) 위로의 위상동형사상이다(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-9">예 3.3.9</a>(b); \(V = \R^3\)으로 둔다).
+        그러나 셋째 성분은 \((0, 0)\)에서 미분가능하지 않다. \(v = 0\)으로 두면 \(\abs{u}\)이고, 차분몫 \(\abs{h}/h\)는 \(h \to 0\)일 때 극한이 없다(<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-5">비예 2.1.5</a>).
+        원점 밖에서는 \(\rho = \sqrt{u^2 + v^2}\)로 쓸 때 \(\mathbf{x}_u = (1, 0, u/\rho)\), \(\mathbf{x}_v = (0, 1, v/\rho)\)가 일차독립이므로 (3)이 성립한다.
+        원점에서는 \(D\mathbf{x}(0, 0)\)이 없어서 (3)을 물을 수조차 없다. 곧 이 사상이 어기는 것은 (1)이고, 원점에서 (3)이 뜻을 잃는 것은 (1)이 깨진 결과다.</p>
+        <p>(b) <em>조건 (3)만 어긋남: 뾰족 기둥.</em> \(U = \R^2\), \(\mathbf{x}(u, v) = (u^2,\ u^3,\ v)\)라 하자. 상은 뾰족점 곡선 \((t^2, t^3)\)(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-9">비예 4.1.9</a>)을 \(z\)축 방향으로 쌓은
+        \(Z = \{(x, y, z) : x = \abs{y}^{2/3}\}\)이다. \(\mathbf{x}\)는 매끄럽고, \(u^3\)이 \(u\)를 결정하므로 단사이며, 역사상 \((x, y, z) \mapsto (y^{1/3}, z)\)는 연속이다. 따라서 (1)과 (2)가 성립한다.
+        그러나 \(\mathbf{x}_u = (2u, 3u^2, 0)\)이 \(u = 0\)에서 \(0\)이므로 \(D\mathbf{x}(0, v)\)의 계수는 \(1\)이다.</p>
+        <p>(c) <em>조건 (2)만 어긋남: 8자 기둥.</em> \(U = (-\pi, \pi) \times \R\), \(\mathbf{x}(u, v) = (\sin 2u,\ \sin u,\ v)\)라 하자. 상은 8자 곡선 \(E = \beta((-\pi, \pi))\)(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-11">비예 3.3.11</a>)를 쌓은 \(E \times \R\)이다.
+        \(\mathbf{x}\)는 매끄럽다. \(\mathbf{x}_u = (2\cos 2u,\ \cos u,\ 0)\), \(\mathbf{x}_v = (0, 0, 1)\)이고, \(\cos u = 0\)이면 \(u = \pm\pi/2\)라서 \(\cos 2u = -1\)이므로 \((2\cos 2u, \cos u) \neq 0\)이다. 따라서 두 편미분은 일차독립이고 (3)이 성립한다.
+        \(\mathbf{x}\)가 단사인 것은 <a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-11">비예 3.3.11</a>에서 \(\beta\)가 단사인 것과 같다. 그러나 \(\mathbf{x}\colon U \to E \times \R\)는 위상동형사상이 아니다.
+        \(u \to \pi\)이면 \(\mathbf{x}(u, 0) \to (0, 0, 0) = \mathbf{x}(0, 0)\)인데 \((u, 0)\)은 \((0, 0)\)으로 가지 않으므로, \(\mathbf{x}^{-1}\)은 원점에서 연속이 아니다(<a href="#fig-6-1-3">그림 6.1.3</a>).</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-6-1-2">
+        <img src="figures/fig-6-1-2-bad-maps.svg" alt="두 3차원 그림. (a) 원판 위의 한 겹 원뿔 z=√(x²+y²). 꼭짓점 O가 검은 점이고, 꼭짓점을 지나는 두 좌표선 u=0, v=0이 V자로 꺾인 검은 선이다. (b) 뾰족점 곡선을 수직으로 쌓은 곡면. 위아래 테두리가 뾰족점 모양의 곡선이고, 뾰족한 모서리 u=0이 주황 세로선으로 표시되어 있다.">
+        <figcaption><span class="fig-head">그림 6.1.2.</span>
+        (a) 한 겹 원뿔 \(K\)의 \(x^2 + y^2 \le 1\) 부분. \(\mathbf{x}(u, v) = (u, v, \sqrt{u^2 + v^2})\)의 좌표선 \(u = 0\), \(v = 0\)은 꼭짓점 \(O\)에서 꺾인다(<a href="#i-6-1-3">비예 6.1.3</a>(a)).
+        (b) 뾰족 기둥 \(Z\)의 \(\abs{u} \le 1\), \(\abs{v} \le 0.7\) 부분. \(\mathbf{x}(u, v) = (u^2, u^3, v)\)의 전미분은 모서리 \(u = 0\)(주황)에서 단사가 아니다(<a href="#i-6-1-3">비예 6.1.3</a>(b)).</figcaption>
+      </figure>
+
+      <figure class="dg-figure" id="fig-6-1-3">
+        <img src="figures/fig-6-1-3-figure-eight-cylinder.svg" alt="(a) 8자 모양 단면을 가진 기둥 곡면의 |v|≤0.6 부분. 파란 띠와 주황 띠가 원점 p를 지나는 세로선에서 서로 엇갈린다. (b) 하늘색 직사각형 U의 |v|≤0.6 부분. 가운데 q=(0,0) 근처의 좁은 세로 띠는 파랑, 왼쪽 끝 u≈−π와 오른쪽 끝 u≈π의 좁은 띠는 주황이다. 곡선 화살표 x가 (b)에서 (a)로 간다.">
+        <figcaption><span class="fig-head">그림 6.1.3.</span>
+        8자 기둥 \(\mathbf{x}(u, v) = (\sin 2u, \sin u, v)\)(<a href="#i-6-1-3">비예 6.1.3</a>(c)). \(U\)의 파란 띠 \(\abs{u} \lt 0.3\)과 주황 띠 \(\abs{u} \gt \pi - 0.3\)은 \(U\)에서 멀리 떨어져 있지만,
+        그 상은 둘 다 원점 \(p = \mathbf{x}(0, 0)\)을 지나는 세로선 근처에 있다. 그래서 \(p\) 근처의 점을 \(U\)로 되돌리는 \(\mathbf{x}^{-1}\)은 연속일 수 없다. \(\abs{v} \le 0.6\) 부분만 그렸다.</figcaption>
+      </figure>
+
+      <p>세 사상은 매개화가 아니다. 그리고 세 상은 모두 곡면으로 부르고 싶지 않은 곳(꼭짓점, 뾰족한 모서리, 자기 자신에게 달라붙는 선)을 가진다.
+      조건 (1), (3), (2)를 하나씩 빼면 이런 집합까지 정칙곡면으로 인정하게 된다. 단, 이 결론에는 한 단계가 빠져 있다. 사상 하나가 조건을 어긴다고 해서
+      그 상이 정칙곡면이 아니라는 것은 아니다. 다른 매개화가 있을 수도 있기 때문이다. 이 빈틈은 <a href="#i-6-1-8">명제 6.1.8</a>을 증명한 뒤 <a href="#i-6-1-9">비예 6.1.9</a>에서 메운다.</p>
+
+      <aside class="box warning">
+        <p class="box-title">흔한 오해: 조건은 집합이 아니라 사상에 대한 것이다</p>
+        <p>\(\mathbf{x}(u, v) = (u^3, v, 0)\)은 매끄럽고 \(xy\) 평면 위로의 위상동형사상이지만(역사상 \((x, y, 0) \mapsto (x^{1/3}, y)\)), \(\mathbf{x}_u = (3u^2, 0, 0)\)이 \(u = 0\)에서 \(0\)이므로 조건 (3)을 어긴다.
+        그렇다고 평면이 정칙곡면이 아닌 것은 아니다(<a href="#i-6-1-2">예 6.1.2</a>). 정칙곡선에서도 같은 일이 있었다. 직선 \(y = x\)를 \((t^3, t^3)\)으로 그리면 정칙이 아니다(<a href="../04-curves/4-2-arc-length.html#i-4-2-3">비예 4.2.3</a>(b)).
+        어떤 집합이 정칙곡면임을 보이려면 매개화를 <em>하나씩</em> 찾으면 되지만, 정칙곡면이 <em>아님</em>을 보이려면 가능한 모든 매개화를 배제해야 한다.</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교</p>
+        <p><a href="#i-6-1-1">정의 6.1.1</a>은 do Carmo의 정의와 같다 <a class="cite" href="../../references.html#dC">[dC §2-2 정의 1]</a>. 다만 표기가 두 군데 다르다.
+        do Carmo는 매개화의 전미분을 \(d\mathbf{x}_q\)로 쓰는데, 이 study set은 \(\mathbf{x}\)가 \(\R^2\)의 열린집합에서 \(\R^3\)으로 가는 사상이므로 <a href="../02-calculus-rn/index.html">2장</a>과 같이 \(D\mathbf{x}(q)\)로 쓴다.
+        \(d\varphi_p\)처럼 소문자 \(d\)는 곡면 <em>사이</em>의 사상의 미분(<a href="6-4-differential-of-a-map.html">6.4절</a>)에만 쓴다. 또 do Carmo는 \(V \cap S\)를 좌표근방(coordinate neighborhood)이라 부르는데,
+        이 study set에서는 이 말을 쓰지 않는다. <a href="../../glossary.html">용어집</a>에서 “좌표근방”을 차트(<a href="../11-smooth-manifolds/index.html">11장</a>)의 다른 이름으로 두었기 때문이다.
+        do Carmo의 “미분가능(differentiable)”은 \(C^\infty\)를 뜻하므로 이 study set의 “매끄러운”과 같다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-graphs">
+      <h2>그래프 곡면</h2>
+      <p>가장 쉬운 정칙곡면은 함수의 그래프다. 그래프는 좌표 \((u, v)\)를 그대로 쓰므로 역사상이 사영이 되고, 조건 (2)를 확인하는 수고가 거의 없다.</p>
+
+      <div class="thm proposition" id="i-6-1-4">
+        <p><span class="thm-head">명제 6.1.4</span> <span class="thm-name">(그래프는 정칙곡면이다)</span>.
+        \(U \subseteq \R^2\)가 열린집합이고 \(f\colon U \to \R\)가 매끄럽다고 하자. 그러면 \(f\)의 그래프 \(\Gamma(f) = \{(u, v, f(u, v)) : (u, v) \in U\}\)는 정칙곡면이고,</p>
+        <div class="equation" id="eq-6-1-2">
+        \[ \mathbf{x}(u, v) = \big(u,\ v,\ f(u, v)\big), \qquad (u, v) \in U \tag{6.1.2} \]
+        </div>
+        <p>는 \(\Gamma(f)\) 전체를 덮는 매개화다. \(y = f(x, z)\)나 \(x = f(y, z)\) 꼴의 그래프, 곧 \((u, f(u, v), v)\)나 \((f(u, v), u, v)\)의 상도 정칙곡면이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        모든 점에서 \(V = \R^3\)으로 두면 \(V \cap \Gamma(f) = \Gamma(f) = \mathbf{x}(U)\)이다. (1) 성분 \(u\), \(v\), \(f\)가 매끄럽다.
+        (3) \(D\mathbf{x} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ f_u & f_v \end{pmatrix}\)의 위쪽 \(2 \times 2\) 부분이 단위행렬이므로 \(\partial(x, y)/\partial(u, v) = 1 \neq 0\)이다(<a href="../02-calculus-rn/2-5-rank-theorem.html#i-2-5-6">예 2.5.6</a>).
+        (2) \(\mathbf{x}\)는 연속함수의 그래프 사상이므로 위상 매장이다. 즉 \(\Gamma(f)\) 위로의 위상동형사상이고, 역사상은 사영 \((x, y, z) \mapsto (x, y)\)의 제한이다(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-9">예 3.3.9</a>(b)).
+        나머지 두 꼴은 좌표의 순서를 바꾸는 선형 동형사상, 예를 들어 \(Q_{23}(a, b, c) = (a, c, b)\)를 합성한 \(Q_{23} \circ \mathbf{x}\)이다. \(Q_{23}\)는 \(\R^3\)의 위상동형사상이므로 \(\Gamma(f)\)를 \(Q_{23}(\Gamma(f))\) 위로 위상동형으로 보내고,
+        \(Q_{23}\)가 선형이고 가역이므로 \(D(Q_{23} \circ \mathbf{x}) = Q_{23}\,D\mathbf{x}\)는 단사다. 따라서 \(Q_{23} \circ \mathbf{x}\)도 (1)–(3)을 만족한다.</p>
+      </div>
+
+      <p>예를 들어 포물면 \(z = x^2 + y^2\)과 안장면 \(z = x^2 - y^2\)은 정칙곡면이다. 안장면은 이 study set의 기준 예제이고, <a href="../08-gauss-map/index.html">8장</a>에서 원점의 곡률을 계산한다.
+      식 <a href="#eq-6-1-2">(6.1.2)</a>를 <em>그래프 곡면의 기준 매개화</em>라 부른다.</p>
+
+      <div class="thm example" id="i-6-1-5">
+        <p><span class="thm-head">예 6.1.5</span> <span class="thm-name">(구면: 여섯 개의 반구)</span>.
+        반지름 \(r \gt 0\)인 구면 \(S^2(r) = \{p \in \R^3 : \abs{p} = r\}\)은 정칙곡면이다.
+        열린 반공간 \(V_1 = \{z \gt 0\}\)을 보자. \((x, y, z) \in S^2(r) \cap V_1\)이면 \(x^2 + y^2 = r^2 - z^2 \lt r^2\)이고 \(z = \sqrt{r^2 - x^2 - y^2}\)이다. 거꾸로 \(u^2 + v^2 \lt r^2\)이면 \((u, v, \sqrt{r^2 - u^2 - v^2})\)는 \(S^2(r) \cap V_1\)의 점이다. 따라서</p>
+        <p>\[ S^2(r) \cap V_1 = \big\{\, \big(u,\ v,\ \sqrt{r^2 - u^2 - v^2}\big) : (u, v) \in B_r(0) \,\big\} \]</p>
+        <p>는 열린 원판 \(B_r(0) \subseteq \R^2\) 위에서 매끄러운 함수 \(\sqrt{r^2 - u^2 - v^2}\)(양수의 제곱근, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-18">예 2.2.18</a>)의 그래프다.
+        <a href="#i-6-1-4">명제 6.1.4</a>의 매개화 \(\mathbf{x}_1(u, v) = (u, v, \sqrt{r^2 - u^2 - v^2})\)는 (1)–(3)을 만족하고 상이 \(V_1 \cap S^2(r)\)이다.
+        같은 방식으로 \(V_2 = \{z \lt 0\}\), \(V_3 = \{y \gt 0\}\), \(V_4 = \{y \lt 0\}\), \(V_5 = \{x \gt 0\}\), \(V_6 = \{x \lt 0\}\)에서 \(-\sqrt{\cdot}\)이나 다른 두 좌표평면 위의 그래프로 매개화 \(\mathbf{x}_2, \dots, \mathbf{x}_6\)을 얻는다.
+        \(S^2(r)\)의 점은 원점이 아니므로 어느 좌표가 \(0\)이 아니고, 따라서 여섯 \(V_i\) 가운데 하나에 들어간다. 그러므로 \(S^2(r)\)은 정칙곡면이다.
+        (<a href="../03-topology-basics/3-3-subspaces-products.html#ex-3-3-2">연습 3.3.2</a>에서 위쪽 반구와 원판의 위상동형을 보였고, <a href="../02-calculus-rn/2-4-implicit-function-theorem.html#i-2-4-9">예 2.4.9</a>에서 구면이 국소적으로 그래프임을 음함수 정리로 보았다.)</p>
+        <p class="verified">검증: <code>verify/v-6-1-definition.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-sphere">
+      <h2>구면의 기준 매개화</h2>
+      <p>반구 그래프는 정칙곡면임을 보이기에는 편하지만 계산에는 불편하다. 앞으로 구면을 계산할 때는 여위도 \(\theta\)와 경도 \(\varphi\)를 쓰는 기준 매개화를 쓴다.
+      <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-13">예 4.1.13</a>에서 “이 식이 구면의 매개화라는 것은 6장에서 다룬다”고 미루어 둔 것을 여기서 확인한다. 조건 (2)를 보이려면 경도를 점의 연속함수로 되찾아야 하는데,
+      <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-15">비예 3.2.15</a>에서 보았듯이 반열린구간 \([0, 2\pi)\)에서는 그렇게 되지 않는다. 열린구간에서는 된다.</p>
+
+      <div class="thm lemma" id="i-6-1-6">
+        <p><span class="thm-head">보조정리 6.1.6</span> <span class="thm-name">(각도 함수)</span>.
+        \(e\colon \R \to S^1\), \(e(t) = (\cos t, \sin t)\)라 하자. 모든 \(t_0 \in \R\)에 대하여 \(e\)를 \((t_0, t_0 + 2\pi)\)로 제한한 사상은 \(S^1 \setminus \{e(t_0)\}\) 위로의 위상동형사상이다.
+        \(t_0 = 0\)일 때 그 역사상은</p>
+        <div class="equation" id="eq-6-1-3">
+        \[ \operatorname{Arg}(a, b) = \pi - 2\arctan\frac{b}{1 - a}, \qquad (a, b) \in S^1 \setminus \{(1, 0)\} \tag{6.1.3} \]
+        </div>
+        <p>이다. 즉 \(\operatorname{Arg}\colon S^1 \setminus \{(1, 0)\} \to (0, 2\pi)\)는 연속이고 \(\big(\cos\operatorname{Arg}(a, b),\ \sin\operatorname{Arg}(a, b)\big) = (a, b)\)이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: \(b/(1 - a)\)는 점 \((1, 0)\)과 \((a, b)\)를 잇는 직선의 기울기에 \(-1\)을 곱한 것이고, 각 \(t\)로 쓰면 \(\cot(t/2)\)이다. 반각 공식으로 \(t\)를 연속적으로 되찾는다.</p>
+        <p><span class="proof-head">증명.</span>
+        먼저 \(t_0 = 0\)인 경우다. \(S^1\) 위에서 \(a = 1\)이면 \(b = 0\)이므로, \(S^1 \setminus \{(1, 0)\}\)의 점은 \(a \lt 1\)이고 식 <a href="#eq-6-1-3">(6.1.3)</a>은 뜻이 있다. 그 값은 \(\arctan\)의 값이 \((-\pi/2, \pi/2)\)에 있으므로 \((0, 2\pi)\)에 있다.
+        \(t \in (0, 2\pi)\)이면 \(\cos t \neq 1\)이므로 \(e(t) \in S^1 \setminus \{(1, 0)\}\)이다. 반각 공식과 \(\sin(t/2) \gt 0\)에서</p>
+        <p>\[ \frac{\sin t}{1 - \cos t} = \frac{2\sin(t/2)\cos(t/2)}{2\sin^2(t/2)} = \cot\frac{t}{2} \]</p>
+        <p>이다. \(s \in (0, \pi)\)이면 \(\cot s = \tan(\pi/2 - s)\)이고 \(\pi/2 - s \in (-\pi/2, \pi/2)\)이므로 \(\arctan(\cot s) = \pi/2 - s\)이다. \(s = t/2\)로 두면 \(\operatorname{Arg}(e(t)) = \pi - 2(\pi/2 - t/2) = t\)이다.
+        즉 \(\operatorname{Arg} \circ e = \id_{(0, 2\pi)}\)이고, 특히 \(e\)는 \((0, 2\pi)\)에서 단사다.</p>
+        <p>이제 \(e \circ \operatorname{Arg} = \id\)를 보이자. \(S^1 \setminus \{(1, 0)\}\)의 점 \((a, b)\)는 \(m = b/(1 - a)\)로 결정된다. 실제로 \(b = m(1 - a)\)를 \(a^2 + b^2 = 1\)에 넣으면
+        \((1 - a)\big((1 + a) - m^2(1 - a)\big) = 0\)이고, \(a \neq 1\)이므로 \(a = (m^2 - 1)/(m^2 + 1)\), \(b = 2m/(m^2 + 1)\)이다. \(t = \operatorname{Arg}(a, b)\)라 하면 \(\arctan m = (\pi - t)/2\)이므로 \(m = \tan(\pi/2 - t/2) = \cot(t/2)\)이다.
+        위의 계산에서 \(e(t)\)에 대한 같은 비 \(\sin t/(1 - \cos t)\)도 \(\cot(t/2) = m\)이므로, \(e(t)\)와 \((a, b)\)는 같은 \(m\)을 갖는 \(S^1 \setminus \{(1, 0)\}\)의 점이고 따라서 같다.
+        \(e\)와 \(\operatorname{Arg}\)는 연속함수(삼각함수, 분모가 \(0\)이 아닌 몫, \(\arctan\))의 합성이므로 연속이다. 그러므로 \(e|_{(0, 2\pi)}\)는 위상동형사상이다.</p>
+        <p>일반적인 \(t_0\): 회전 \(R_{t_0}(a, b) = (a\cos t_0 - b\sin t_0,\ a\sin t_0 + b\cos t_0)\)는 \(S^1\)의 위상동형사상이고(역사상 \(R_{-t_0}\)), 덧셈정리에서 \(e(t_0 + s) = R_{t_0}(e(s))\)이다.
+        따라서 \(e|_{(t_0, t_0 + 2\pi)}\)는 위상동형사상 \(t \mapsto t - t_0\), \(e|_{(0, 2\pi)}\), \(R_{t_0}\)의 합성이고, 상은 \(R_{t_0}(S^1 \setminus \{(1, 0)\}) = S^1 \setminus \{e(t_0)\}\)이다.</p>
+      </div>
+
+      <div class="thm example" id="i-6-1-7">
+        <p><span class="thm-head">예 6.1.7</span> <span class="thm-name">(구면의 기준 매개화)</span>.
+        반지름 \(r\)인 구면의 기준 매개화(<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-16">예 2.1.16</a>)</p>
+        <div class="equation" id="eq-6-1-4">
+        \[ \mathbf{x}(\theta, \varphi) = (r\sin\theta\cos\varphi,\ r\sin\theta\sin\varphi,\ r\cos\theta), \qquad U = (0, \pi) \times (0, 2\pi) \tag{6.1.4} \]
+        </div>
+        <p>를 보자. 반원 \(C = \{(x, y, z) \in S^2(r) : y = 0,\ x \ge 0\}\)(두 극을 포함한다)과 닫힌 반평면 \(\{(x, 0, z) : x \ge 0\}\)의 여집합 \(V\)를 잡으면 \(V\)는 열린집합이고 \(V \cap S^2(r) = S^2(r) \setminus C\)이다.
+        \(\mathbf{x}\)가 \(U\)에서 \(V \cap S^2(r)\) 위로 가는 매개화임을 보이자.</p>
+        <ul>
+          <li><em>(1) 매끄러움.</em> 성분이 삼각함수의 곱이다.</li>
+          <li><em>(3) 전미분의 단사성.</em> 편미분은</li>
+        </ul>
+        <p>\[ \mathbf{x}_\theta = (r\cos\theta\cos\varphi,\ r\cos\theta\sin\varphi,\ -r\sin\theta), \qquad \mathbf{x}_\varphi = (-r\sin\theta\sin\varphi,\ r\sin\theta\cos\varphi,\ 0) \]</p>
+        <p>이다. 외적을 성분마다 계산하면</p>
+        <p>\[ \begin{aligned}
+             (\mathbf{x}_\theta \times \mathbf{x}_\varphi)^1 &= (r\cos\theta\sin\varphi)(0) - (-r\sin\theta)(r\sin\theta\cos\varphi) = r^2\sin^2\theta\cos\varphi,\\
+             (\mathbf{x}_\theta \times \mathbf{x}_\varphi)^2 &= (-r\sin\theta)(-r\sin\theta\sin\varphi) - (r\cos\theta\cos\varphi)(0) = r^2\sin^2\theta\sin\varphi,\\
+             (\mathbf{x}_\theta \times \mathbf{x}_\varphi)^3 &= (r\cos\theta\cos\varphi)(r\sin\theta\cos\varphi) - (r\cos\theta\sin\varphi)(-r\sin\theta\sin\varphi) = r^2\sin\theta\cos\theta
+           \end{aligned} \]</p>
+        <p>이므로</p>
+        <div class="equation" id="eq-6-1-5">
+        \[ \mathbf{x}_\theta \times \mathbf{x}_\varphi = r\sin\theta\;\mathbf{x}(\theta, \varphi), \qquad \abs{\mathbf{x}_\theta \times \mathbf{x}_\varphi} = r^2\sin\theta \gt 0 \tag{6.1.5} \]
+        </div>
+        <p>이다(\(0 \lt \theta \lt \pi\)에서 \(\sin\theta \gt 0\)). 따라서 (3)이 성립한다. 셋째 성분 \(r^2\sin\theta\cos\theta\)는 \(\partial(x, y)/\partial(\theta, \varphi)\)이고, 첫째와 둘째 성분은 각각 \(\partial(y, z)/\partial(\theta, \varphi)\)와 \(-\partial(x, z)/\partial(\theta, \varphi)\)이다.
+        곧 조건 (3b)와 (3c)는 같은 계산이다. (\(\mathbf{x}_\theta, \mathbf{x}_\varphi\)의 일차독립성은 <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#ex-1-1-5">연습 1.1.5</a>에서도 직접 보였다.)</p>
+        <ul>
+          <li><em>(2) 위상동형.</em> \(\abs{\mathbf{x}}^2 = r^2\sin^2\theta(\cos^2\varphi + \sin^2\varphi) + r^2\cos^2\theta = r^2\)이므로 \(\mathbf{x}(U) \subseteq S^2(r)\)이다. \(y = r\sin\theta\sin\varphi = 0\)이면 \(\varphi = \pi\)이고 그때 \(x = -r\sin\theta \lt 0\)이므로 \(\mathbf{x}(U) \cap C = \varnothing\)이다.
+          거꾸로 \(p = (x, y, z) \in S^2(r) \setminus C\)라 하자. 두 극은 \(C\)에 있으므로 \(\rho = \sqrt{x^2 + y^2} \gt 0\)이고 \(\abs{z} \lt r\)이다. \(\theta = \arccos(z/r) \in (0, \pi)\)로 두면 \(\sin\theta = \sqrt{1 - z^2/r^2} = \rho/r\)이다.
+          \((x/\rho, y/\rho) \in S^1\)이고, \(p \notin C\)이므로 이 점은 \((1, 0)\)이 아니다(\((1, 0)\)이면 \(y = 0\), \(x = \rho \gt 0\)). \(\varphi = \operatorname{Arg}(x/\rho, y/\rho) \in (0, 2\pi)\)로 두면
+          <a href="#i-6-1-6">보조정리 6.1.6</a>에 의해 \((\cos\varphi, \sin\varphi) = (x/\rho, y/\rho)\)이고, \(\mathbf{x}(\theta, \varphi) = \big(r\tfrac{\rho}{r}\tfrac{x}{\rho},\ r\tfrac{\rho}{r}\tfrac{y}{\rho},\ r\tfrac{z}{r}\big) = p\)이다.
+          또 \(\mathbf{x}(\theta, \varphi) = p\)이면 \(\cos\theta = z/r\)에서 \(\theta\)가, \((\cos\varphi, \sin\varphi) = (x/\rho, y/\rho)\)에서 \(\varphi\)가 하나로 정해진다(\(\arccos\)와 <a href="#i-6-1-6">보조정리 6.1.6</a>의 단사성). 따라서 \(\mathbf{x}\)는 \(V \cap S^2(r)\) 위로의 전단사이고 그 역사상은</li>
+        </ul>
+        <div class="equation" id="eq-6-1-6">
+        \[ \mathbf{x}^{-1}(x, y, z) = \Big(\arccos\frac{z}{r},\ \operatorname{Arg}\Big(\frac{x}{\rho}, \frac{y}{\rho}\Big)\Big), \qquad \rho = \sqrt{x^2 + y^2} \tag{6.1.6} \]
+        </div>
+        <p>이다. \(\rho \gt 0\)인 곳에서 연속함수의 합성이므로 \(\mathbf{x}^{-1}\)은 연속이다. 그러므로 \(\mathbf{x}\)는 \(S^2(r) \setminus C\)의 매개화다(<a href="#fig-6-1-1">그림 6.1.1</a>).</p>
+        <p><em>빠진 반원 덮기.</em> 선형사상 \(Q(x, y, z) = (-x, z, y)\)는 \(\abs{Qp} = \abs{p}\)이고 \(Q \circ Q = \id\)이므로 \(S^2(r)\)을 자기 자신 위로 보내는 \(\R^3\)의 위상동형사상이다. \(\tilde{\mathbf{x}} = Q \circ \mathbf{x}\), 곧
+        \(\tilde{\mathbf{x}}(\theta, \varphi) = (-r\sin\theta\cos\varphi,\ r\cos\theta,\ r\sin\theta\sin\varphi)\)도 매개화다. (1)은 선형사상과의 합성이라서, (3)은 \(D\tilde{\mathbf{x}} = Q\,D\mathbf{x}\)이고 \(Q\)가 가역이라서,
+        (2)는 \(Q\)가 \(V \cap S^2(r)\)을 \(Q(V) \cap S^2(r)\) 위로 위상동형으로 보내고 \(Q(V)\)가 열린집합이라서 성립한다. \(\tilde{\mathbf{x}}\)가 빠뜨리는 곳은 \(Q(C) = \{(x, y, 0) \in S^2(r) : x \le 0\}\)(적도의 절반)이다.
+        \(C\)와 \(\{z = 0\}\)의 공통점은 \((r, 0, 0)\)뿐이고 이 점은 \(Q(C)\)에 없으므로 \(C \cap Q(C) = \varnothing\), 즉 \(S^2(r) = \mathbf{x}(U) \cup \tilde{\mathbf{x}}(U)\)이다.</p>
+        <p class="verified">검증: <code>verify/v-6-1-definition.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-local-graph">
+      <h2>정칙곡면은 국소적으로 그래프다</h2>
+      <p><a href="#i-6-1-4">명제 6.1.4</a>는 “그래프는 정칙곡면”이라고 말했다. 그 역이 국소적으로 성립한다. 이것이 이 장 전체의 기술적 핵심이다.
+      세 좌표평면으로의 사영을 \(P_{xy}(x, y, z) = (x, y)\), \(P_{yz}(x, y, z) = (y, z)\), \(P_{xz}(x, y, z) = (x, z)\)로 쓴다.</p>
+
+      <div class="thm proposition" id="i-6-1-8">
+        <p><span class="thm-head">명제 6.1.8</span> <span class="thm-name">(정칙곡면은 국소적으로 그래프다)</span>.
+        \(S\)가 정칙곡면이고 \(\mathbf{x}\colon U \to S\)가 매개화이며 \(q \in U\), \(p = \mathbf{x}(q)\)라 하자. 그러면 세 사영 가운데 하나 \(P\), \(q\)를 포함하는 열린집합 \(U_0 \subseteq U\), \(\R^3\)의 열린집합 \(W\)가 있어서 다음이 성립한다.</p>
+        <ul>
+          <li>(a) \(\Omega = P(\mathbf{x}(U_0))\)는 \(\R^2\)의 열린집합이고 \(P \circ \mathbf{x}|_{U_0}\colon U_0 \to \Omega\)는 미분동형사상이다.</li>
+          <li>(b) \(W \cap S = \mathbf{x}(U_0)\)이고, 이 집합은 \(\Omega\) 위의 매끄러운 함수의 그래프다. 예를 들어 \(P = P_{xy}\)이면 매끄러운 \(g\colon \Omega \to \R\)가 있어서 \(W \cap S = \{(a, b, g(a, b)) : (a, b) \in \Omega\}\)이다.</li>
+          <li>(c) \(\Pi = (P \circ \mathbf{x}|_{U_0})^{-1} \circ P\)는 \(\R^3\)의 열린집합 \(P^{-1}(\Omega)\)에서 정의된 매끄러운 사상이고, \(W \cap S \subseteq P^{-1}(\Omega)\) 위에서 \(\mathbf{x}^{-1}\)과 같다. 즉</li>
+        </ul>
+        <div class="equation" id="eq-6-1-7">
+        \[ \Pi(p') = \mathbf{x}^{-1}(p') \qquad (p' \in W \cap S) \tag{6.1.7} \]
+        </div>
+        <p>이다. 특히 정칙곡면의 모든 점은, \(S\)에서 열려 있으며 어느 좌표평면 위의 매끄러운 함수의 그래프인 근방을 갖는다.</p>
+      </div>
+      <p><strong>이 명제가 말하는 것.</strong> 정칙곡면을 한 점 근처에서 확대하면 세 좌표평면 가운데 하나 위의 매끄러운 그래프다. 게다가 \(\mathbf{x}^{-1}\)은 곡면 위에서만 정의된 사상이지만,
+      한 점 근처에서는 \(\R^3\)의 열린집합에서 정의된 매끄러운 사상 \(\Pi\)의 제한과 같다. (c)는 다음 두 절에서 접평면이 잘 정의됨(<a href="6-2-tangent-plane.html">6.2절</a>)과 매개변수 변환이 매끄러움(<a href="6-3-smooth-functions.html">6.3절</a>)을 증명하는 열쇠다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어(<a href="#fig-6-1-4">그림 6.1.4</a>): 조건 (3)에 의해 \(D\mathbf{x}(q)\)의 어떤 두 행이 가역인 \(2 \times 2\) 행렬을 이룬다. 그 두 좌표로의 사영과 \(\mathbf{x}\)를 합성하면 \(\R^2\)에서 \(\R^2\)로 가는 사상이 되고, 역함수 정리가 쓰인다. 조건 (2)는 \(\mathbf{x}(U_0)\)가 \(S\)에서 열려 있게 해 준다.</p>
+        <p><span class="proof-head">증명.</span>
+        조건 (3)에 의해 \(\rank D\mathbf{x}(q) = 2\)이고, (3a)⇔(3c)에서 보았듯이 어떤 두 행이 가역인 \(2 \times 2\) 행렬을 이룬다. 그 두 행이 \(x, y\) 성분의 행이라 하고 \(P = P_{xy}\)로 두자(다른 경우는 좌표의 이름만 바꾸면 된다).
+        \(P\)가 선형이므로 연쇄법칙에서 \(D(P \circ \mathbf{x})(q) = P\,D\mathbf{x}(q)\)는 \(D\mathbf{x}(q)\)의 첫 두 행, 곧 가역행렬이다.</p>
+        <p>(a) <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-5">역함수 정리</a>를 매끄러운 사상 \(P \circ \mathbf{x}\colon U \to \R^2\)에 쓰면 \(q\)를 포함하는 열린집합 \(U_0 \subseteq U\)와 \(P(p)\)를 포함하는 열린집합 \(\Omega\)가 있어서
+        \(P \circ \mathbf{x}|_{U_0}\colon U_0 \to \Omega\)가 미분동형사상이다. 특히 \(\Omega = P(\mathbf{x}(U_0))\)이다. 그 역사상을 \(k = (P \circ \mathbf{x}|_{U_0})^{-1}\colon \Omega \to U_0\)로 쓴다.</p>
+        <p>(b) 조건 (2)에 의해 \(\mathbf{x}\colon U \to \mathbf{x}(U)\)는 위상동형사상이므로 \(U\)의 열린집합 \(U_0\)의 상 \(\mathbf{x}(U_0)\)는 \(\mathbf{x}(U) = V \cap S\)에서 열려 있다. 부분공간 위상의 정의에서 \(\R^3\)의 열린집합 \(O\)가 있어
+        \(\mathbf{x}(U_0) = O \cap (V \cap S)\)이다. \(W = O \cap V\)로 두면 \(W\)는 열려 있고 \(W \cap S = \mathbf{x}(U_0)\)이다.
+        이제 \(\mathbf{x} = (x, y, z)\)의 셋째 성분으로 \(g = z \circ k\colon \Omega \to \R\)를 두면 \(g\)는 매끄럽다. \((a, b) \in \Omega\)이면 \(P(\mathbf{x}(k(a, b))) = (a, b)\)이므로 \(\mathbf{x}(k(a, b)) = (a, b, g(a, b))\)이다.
+        거꾸로 \(\mathbf{x}(U_0)\)의 점은 \(\mathbf{x}(u)\), \(u \in U_0\)이고, \(u = k(P(\mathbf{x}(u)))\)이므로 \(\mathbf{x}(u) = (P(\mathbf{x}(u)),\ g(P(\mathbf{x}(u))))\)이다. 따라서 \(\mathbf{x}(U_0)\)는 \(\Omega\) 위의 \(g\)의 그래프다.</p>
+        <p>(c) \(P^{-1}(\Omega) = \Omega \times \R\)는 열린집합이고, \(\Pi = k \circ P\)는 매끄러운 사상의 합성이므로 매끄럽다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">명제 2.2.12</a>(b)).
+        \(p' \in W \cap S = \mathbf{x}(U_0)\)이면 \(p' = \mathbf{x}(u)\), \(u \in U_0\)이고 \(P(p') \in \Omega\)이므로 \(p' \in P^{-1}(\Omega)\)이며, \(\Pi(p') = k(P(\mathbf{x}(u))) = u = \mathbf{x}^{-1}(p')\)이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-6-1-4">
+        <img src="figures/fig-6-1-4-local-graph.svg" alt="왼쪽은 하늘색 직사각형 U와 그 안의 진한 하늘색 작은 직사각형 U₀, 그리고 점 q이다. 곡선 화살표 x가 오른쪽 구면을 가리킨다. 구면 위에 x(U₀)가 하늘색 조각으로 칠해져 있고 점 p가 있다. 조각의 네 모서리에서 아래쪽의 회색 평면으로 수직 점선(사영 P_xy)이 내려가고, 평면 위에 조각의 사영 Ω가 하늘색 부채꼴 모양으로 칠해져 있다.">
+        <figcaption><span class="fig-head">그림 6.1.4.</span>
+        <a href="#i-6-1-8">명제 6.1.8</a>의 증명. 구면 \(S^2(1)\)의 기준 매개화에서 \(q = (\pi/3, \pi/4)\)이면 \(\partial(x, y)/\partial(\theta, \varphi) = \sin\theta\cos\theta \neq 0\)이므로 \(P = P_{xy}\)를 쓴다.
+        \(U_0 = (\pi/3 - 0.3,\ \pi/3 + 0.3) \times (\pi/4 - 0.45,\ \pi/4 + 0.45)\)의 상 \(\mathbf{x}(U_0)\)는 \(xy\) 평면으로 일대일로 사영되고, 그 사영 \(\Omega\) 위의 그래프 \(z = \sqrt{1 - x^2 - y^2}\)이다.
+        보기 쉽게 \(xy\) 평면을 아래로 옮겨 그렸다(평면 \(z = -1.35\)). 수직 점선은 사영 \(P_{xy}\)이다.</figcaption>
+      </figure>
+
+      <aside class="box backward">
+        <p class="box-title">앞에서 본 것과 비교: 곡선과 등위집합</p>
+        <p><a href="../04-curves/4-2-arc-length.html#i-4-2-6">명제 4.2.6</a>은 정칙곡선이 국소적으로 좌표축 위의 그래프라고 말했고, 증명은 1변수 역함수 정리였다.
+        <a href="../02-calculus-rn/2-4-implicit-function-theorem.html#i-2-4-8">따름정리 2.4.8</a>은 방정식 \(F = c\)의 해집합이 \(DF\)가 전사인 점 근처에서 그래프라고 말했고, 증명은 음함수 정리였다.
+        <a href="#i-6-1-8">명제 6.1.8</a>은 같은 결론을 <em>매개화</em>에서 출발해 얻는다. 새로워진 것은 두 가지다. 증명에 조건 (2)가 필요하다(\(\mathbf{x}(U_0)\)가 \(S\)에서 열려 있어야 “\(S\)의 근방”이 그래프라고 말할 수 있다).
+        그리고 (c)처럼 \(\mathbf{x}^{-1}\)을 \(\R^3\)의 열린집합 위의 매끄러운 사상으로 늘일 수 있다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-nonexamples">
+      <h2>정칙곡면이 아닌 집합</h2>
+      <p>이제 <a href="#i-6-1-3">비예 6.1.3</a>의 빈틈을 메울 수 있다. 어떤 집합이 정칙곡면이라면 <a href="#i-6-1-8">명제 6.1.8</a>에 의해 각 점 근처가 어느 좌표평면 위의 매끄러운 그래프여야 한다.
+      그래프라면 그 좌표평면으로의 사영이 근처에서 단사여야 하므로, 이것을 깨뜨리는 점 두 개를 찾으면 된다.</p>
+
+      <div class="thm nonexample" id="i-6-1-9">
+        <p><span class="thm-head">비예 6.1.9</span> <span class="thm-name">(정칙곡면이 아닌 집합)</span>.
+        다음 집합은 정칙곡면이 아니다. 모두 원점 \(0\)에서 <a href="#i-6-1-8">명제 6.1.8</a>의 결론이 성립하지 않음을 보인다. 즉 \(0\)을 포함하는 어떤 열린집합 \(W\)에 대해서도 \(W \cap S\)가 세 좌표평면 어느 것 위의 매끄러운 그래프도 아니다.
+        그래프라면 \(W\)가 \(0\)을 포함하는 열린공 \(B_\varepsilon(0)\)을 포함하므로, \(B_\varepsilon(0) \cap S\)의 점들이 그 사영으로 구별되어야 한다는 것을 쓴다.</p>
+        <p>(a) <em>한 겹 원뿔</em> \(K = \{z = \sqrt{x^2 + y^2}\}\) (<a href="../../references.html#dC" class="cite">[dC §2-2 예 5]</a>). 작은 \(t \gt 0\)에 대해 \((0, t, t)\)와 \((0, -t, t)\)는 \(K \cap B_\varepsilon(0)\)의 서로 다른 점인데 \(P_{xz}\)의 값이 \((0, t)\)로 같다.
+        마찬가지로 \((t, 0, t)\)와 \((-t, 0, t)\)는 \(P_{yz}\)의 값이 같다. \(xy\) 평면 위의 그래프 \(z = g(a, b)\)라면, \(K\)가 이미 \(\sqrt{x^2 + y^2}\)의 그래프이므로 \(g(a, b) = \sqrt{a^2 + b^2}\)여야 하고 이것은 원점에서 미분가능하지 않다.</p>
+        <p>(b) <em>두 평면의 합집합</em> \(S_0 = \{z = 0\} \cup \{x = 0\}\). \(P_{xy}\): \((0, 0, t)\)와 \((0, 0, 0)\)이 같은 값을 갖는다. \(P_{yz}\): \((t, 0, 0)\)과 \((0, 0, 0)\)이 같은 값을 갖는다.
+        \(P_{xz}\): \((0, t, 0)\)과 \((0, 0, 0)\)이 같은 값 \((0, 0)\)을 갖는다. 여기서 \(t\)는 \(0\)이 아닌 작은 수이고, 모든 점이 \(S_0 \cap B_\varepsilon(0)\)에 있다.</p>
+        <p>(c) <em>뾰족 기둥</em> \(Z = \{x = \abs{y}^{2/3}\}\). \(P_{xy}\): \((0, 0, t)\)와 \((0, 0, 0)\). \(P_{xz}\): \((t^2, t^3, 0)\)과 \((t^2, -t^3, 0)\). \(yz\) 평면 위의 그래프 \(x = h(y, z)\)라면 \(h(y, z) = \abs{y}^{2/3}\)이어야 하는데,
+        이것은 \(y = 0\)에서 \(y\)에 대해 미분가능하지 않다(차분몫 \(\abs{y}^{2/3}/y = \pm\abs{y}^{-1/3}\)이 발산한다). 뾰족점이 매개화가 아니라 자취 자체의 성질이라는 것은 곡선에서도 보았다(<a href="../04-curves/4-2-arc-length.html#ex-4-2-8">연습 4.2.8</a>).</p>
+        <p>(d) <em>8자 기둥</em> \(E \times \R\). \(P_{xy}\): \((0, 0, t)\)와 \((0, 0, 0)\). 작은 \(s \gt 0\)에 대하여 \(\beta(s) = (\sin 2s, \sin s)\), \(\beta(\pi - s) = (-\sin 2s, \sin s)\), \(\beta(s - \pi) = (\sin 2s, -\sin s)\)는 모두 \(E\)의 점이다.
+        \(P_{yz}\): \((\sin 2s, \sin s, 0)\)과 \((-\sin 2s, \sin s, 0)\). \(P_{xz}\): \((\sin 2s, \sin s, 0)\)과 \((\sin 2s, -\sin s, 0)\). \(s \to 0\)이면 이 점들은 모두 원점으로 간다.</p>
+        <p class="verified">검증: <code>verify/v-6-1-definition.py</code></p>
+      </div>
+
+      <p>(a), (c), (d)는 <a href="#i-6-1-3">비예 6.1.3</a>의 세 상이다. 따라서 <a href="#i-6-1-1">정의 6.1.1</a>의 세 조건은 모두 꼭 필요하다. 어느 하나를 빼면 원뿔, 뾰족 기둥, 8자 기둥 가운데 하나가 정칙곡면으로 인정된다(원뿔은 (1)을 빼고 (3)을 미분가능한 점에서만 요구할 때).
+      (d)에서는 원점 근처의 두 조각이 서로 다른 평면처럼 엇갈린다. 그래서 이 점에서는 “접평면”을 하나로 정할 수 없다(<a href="6-2-tangent-plane.html">6.2절</a>에서 정확히 본다).</p>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 일반화: 차트와 매장</p>
+        <p><a href="../11-smooth-manifolds/index.html">11장</a>의 매끄러운 다양체에서는 매개화 \(\mathbf{x}\) 대신 그 역사상 \(\mathbf{x}^{-1}\colon \mathbf{x}(U) \to U\)를 <em>차트</em>라 부르고, 둘러싼 \(\R^3\) 없이 차트들만으로 공간을 정의한다.
+        거기서 “정칙곡면은 2차원 매끄러운 다양체이고, 매개화의 역사상은 매끄러운 차트다”라는 호환성 명제를 증명한다.
+        <a href="../14-submanifolds/index.html">14장</a>에서는 조건 (1)과 (3)을 만족하는 사상을 몰입(immersion), 여기에 (2)까지 만족하는 것을 매장(embedding)이라 부른다. 8자 기둥은 몰입이지만 매장이 아닌 표준적인 예다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>정칙곡면은 각 점 근처가 매개화 \(\mathbf{x}\colon U \to V \cap S\)의 상인 \(\R^3\)의 부분집합이다. 매개화는 (1) 매끄럽고, (2) 위상동형사상이며, (3) \(D\mathbf{x}(q)\)가 단사, 곧 \(\mathbf{x}_u \times \mathbf{x}_v \neq 0\)이다.</li>
+        <li>세 조건은 각각 꼭짓점(원뿔), 자기 자신에게 달라붙는 곳(8자 기둥), 뾰족한 모서리(뾰족 기둥)를 막는다. 조건은 사상에 대한 것이므로, 집합이 정칙곡면이 아님을 보이려면 모든 매개화를 배제해야 한다.</li>
+        <li>매끄러운 함수의 그래프는 정칙곡면이다(<a href="#i-6-1-4">명제 6.1.4</a>). 구면 \(S^2(r)\)은 여섯 반구의 그래프로 덮이므로 정칙곡면이다.</li>
+        <li>구면의 기준 매개화 \(\mathbf{x}(\theta, \varphi)\)는 반원 \(C\)를 뺀 \(S^2(r) \setminus C\)의 매개화이고 \(\mathbf{x}_\theta \times \mathbf{x}_\varphi = r\sin\theta\,\mathbf{x}\)이다. 회전시킨 매개화와 함께 구면 전체를 덮는다.</li>
+        <li>정칙곡면은 국소적으로 좌표평면 위의 매끄러운 그래프이고, \(\mathbf{x}^{-1}\)은 국소적으로 \(\R^3\)의 열린집합 위의 매끄러운 사상 \(\Pi\)의 제한이다(<a href="#i-6-1-8">명제 6.1.8</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 정칙곡면의 각 점에서 접평면을 정의한다. 곡면 위에 놓여 한 점을 지나는 곡선들의 속도벡터를 모두 모으면 정말 평면이 되는가, 그리고 그 평면은 매개화를 고르는 방법에 무관한가? <a href="#i-6-1-8">명제 6.1.8</a>의 (c)가 답의 열쇠다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-6-1-1" data-level="1">
+        <p><span class="thm-head">연습 6.1.1</span> <span class="level">★</span>
+        열린 원판 \(D = \{(x, y, 0) : x^2 + y^2 \lt 1\}\)은 정칙곡면이고, 닫힌 원판 \(\bar D = \{(x, y, 0) : x^2 + y^2 \le 1\}\)과 그 경계원 \(\partial D = \{(x, y, 0) : x^2 + y^2 = 1\}\)은 정칙곡면이 아님을 보여라.
+        <a class="cite" href="../../references.html#dC">[dC §2-2 연습문제 2 변형]</a></p>
+        <details class="hint"><summary>힌트</summary><p>\(\bar D\)나 \(\partial D\)가 정칙곡면이라면 점 \((1, 0, 0)\)에서 <a href="#i-6-1-8">명제 6.1.8</a>을 쓴다. 그 결론 (a)에서 사영의 상 \(\Omega\)는 \(\R^2\)의 열린집합이다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p><em>\(D\)는 정칙곡면이다.</em> \(V = \{(x, y, z) : x^2 + y^2 \lt 1\}\)(열린 원기둥)과 \(U = B_1(0) \subseteq \R^2\), \(\mathbf{x}(u, v) = (u, v, 0)\)을 잡으면 \(V \cap D = D = \mathbf{x}(U)\)이다.
+          \(\mathbf{x}\)는 영함수의 그래프 사상이므로 <a href="#i-6-1-4">명제 6.1.4</a>에 의해 (1)–(3)을 만족한다.</p>
+          <p><em>\(\bar D\)는 정칙곡면이 아니다.</em> 정칙곡면이라 하고 \(p = (1, 0, 0)\)에 <a href="#i-6-1-8">명제 6.1.8</a>을 쓰자. \(p\)를 포함하는 열린집합 \(W\)가 있어서 \(W \cap \bar D\)가 어느 좌표평면 위의 그래프다.
+          \(W \supseteq B_\varepsilon(p)\)라 하자. \(P_{xz}\)라면: 작은 \(\delta \gt 0\)에 대해 \((1 - \delta^2, \pm\delta, 0)\)은 \(\bar D \cap B_\varepsilon(p)\)의 서로 다른 두 점인데 사영이 같으므로 모순이다. \(P_{yz}\)라면: \((1, 0, 0)\)과 \((1 - \delta, 0, 0)\)의 사영이 같다.
+          \(P_{xy}\)라면: 그래프의 정의역 \(\Omega = P_{xy}(W \cap \bar D)\)는 \((1, 0)\)을 포함하는 열린집합이므로 어떤 \(\delta \gt 0\)에 대해 \((1 + \delta, 0) \in \Omega\)이고, 그 위의 그래프 점 \((1 + \delta, 0, g)\)가 \(\bar D\)에 있어야 하는데 \(\bar D\)의 점은 \(x \le 1\)이므로 모순이다.</p>
+          <p><em>\(\partial D\)는 정칙곡면이 아니다.</em> 정칙곡면이라 하고 \(p = (1, 0, 0)\)에 <a href="#i-6-1-8">명제 6.1.8</a>을 쓰면, 어느 사영 \(P\)와 \(p\)를 포함하는 열린집합 \(W\)가 있어서 \(\Omega = P(W \cap \partial D)\)가 \(\R^2\)의 공집합이 아닌 열린집합이다.
+          그런데 \(P_{xy}(\partial D)\)는 단위원이고 \(P_{xz}(\partial D)\), \(P_{yz}(\partial D)\)는 선분 \([-1, 1] \times \{0\}\)이다. 셋 모두 \(\R^2\)의 어떤 열린공도 포함하지 않으므로 \(\Omega\)가 그 안에 들어갈 수 없다. 모순이다.
+          (\(\partial D\)는 곡선이지 곡면이 아니다. 2차원 조각으로 매개화할 수 없다는 것이 이 모순의 내용이다.)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-6-1-2" data-level="1">
+        <p><span class="thm-head">연습 6.1.2</span> <span class="level">★</span>
+        <a href="#i-6-1-7">예 6.1.7</a>의 \(\tilde{\mathbf{x}}(\theta, \varphi) = (-r\sin\theta\cos\varphi,\ r\cos\theta,\ r\sin\theta\sin\varphi)\)에 대하여 \(\tilde{\mathbf{x}}_\theta \times \tilde{\mathbf{x}}_\varphi\)를 직접 계산하고, 북극 \((0, 0, r)\)이 \(\tilde{\mathbf{x}}(\theta, \varphi)\)가 되는 \((\theta, \varphi)\)를 구하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\tilde{\mathbf{x}}_\theta = (-r\cos\theta\cos\varphi,\ -r\sin\theta,\ r\cos\theta\sin\varphi)\), \(\tilde{\mathbf{x}}_\varphi = (r\sin\theta\sin\varphi,\ 0,\ r\sin\theta\cos\varphi)\)이다. 외적은</p>
+          <p>\[ \begin{aligned}
+               (\tilde{\mathbf{x}}_\theta \times \tilde{\mathbf{x}}_\varphi)^1 &= (-r\sin\theta)(r\sin\theta\cos\varphi) - (r\cos\theta\sin\varphi)(0) = -r^2\sin^2\theta\cos\varphi,\\
+               (\tilde{\mathbf{x}}_\theta \times \tilde{\mathbf{x}}_\varphi)^2 &= (r\cos\theta\sin\varphi)(r\sin\theta\sin\varphi) - (-r\cos\theta\cos\varphi)(r\sin\theta\cos\varphi) = r^2\sin\theta\cos\theta,\\
+               (\tilde{\mathbf{x}}_\theta \times \tilde{\mathbf{x}}_\varphi)^3 &= (-r\cos\theta\cos\varphi)(0) - (-r\sin\theta)(r\sin\theta\sin\varphi) = r^2\sin^2\theta\sin\varphi
+             \end{aligned} \]</p>
+          <p>이므로 \(\tilde{\mathbf{x}}_\theta \times \tilde{\mathbf{x}}_\varphi = r\sin\theta\,\tilde{\mathbf{x}}(\theta, \varphi)\)이다(<a href="#eq-6-1-5">(6.1.5)</a>에 \(Q\)를 곱한 것과 같다. \(Q\)는 행렬식이 \(1\)인 직교변환이라 외적을 보존한다).
+          크기가 \(r^2\sin\theta \gt 0\)이므로 조건 (3)이 다시 확인된다. \(\tilde{\mathbf{x}} = (0, 0, r)\)이려면 \(r\sin\theta\sin\varphi = r\), 즉 \(\sin\theta = \sin\varphi = 1\)이므로 \((\theta, \varphi) = (\pi/2, \pi/2)\)이다.
+          실제로 \(\tilde{\mathbf{x}}(\pi/2, \pi/2) = (0, 0, r)\)이다. 북극은 \(\mathbf{x}(U)\)에는 없지만 \(\tilde{\mathbf{x}}(U)\)에는 있다.</p>
+          <p class="verified">검증: <code>verify/v-6-1-definition.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-6-1-3" data-level="1">
+        <p><span class="thm-head">연습 6.1.3</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 대어라.
+        (a) \(\mathbf{x}\colon U \to \R^3\)이 매끄럽고 단사이며 모든 점에서 \(D\mathbf{x}\)가 단사이면 \(\mathbf{x}(U)\)는 정칙곡면이다.
+        (b) 정칙곡면은 직선 전체를 포함할 수 없다.
+        (c) \(S\)가 정칙곡면이고 사상 \(\mathbf{x}\colon U \to S\)가 조건 (1), (2)를 만족하지만 어떤 점에서 (3)을 어기면, \(S\)는 정칙곡면이 아니다.
+        (d) 정칙곡면 \(S\)의 열린 부분집합(\(S\)의 부분공간 위상에서 열린 집합) \(S'\)은 정칙곡면이다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 거짓. 8자 기둥(<a href="#i-6-1-3">비예 6.1.3</a>(c), <a href="#i-6-1-9">비예 6.1.9</a>(d)).</p>
+          <p>(b) 거짓. 평면(<a href="#i-6-1-2">예 6.1.2</a>)은 직선을 포함한다.</p>
+          <p>(c) 거짓. \(\mathbf{x}(u, v) = (u^3, v, 0)\)과 평면(흔한 오해 상자).</p>
+          <p>(d) 참. \(S' = O \cap S\)(\(O\)는 \(\R^3\)의 열린집합)라 하고 \(p \in S'\)라 하자. \(S\)의 매개화 \(\mathbf{x}\colon U \to V \cap S\)(\(p \in V\))를 잡고 \(U' = \mathbf{x}^{-1}(O \cap V \cap S)\)로 두면,
+          \(\mathbf{x}\)가 연속이므로 \(U'\)은 \(U\)에서 열린집합, 곧 \(\R^2\)의 열린집합이다. \(\mathbf{x}|_{U'}\colon U' \to (O \cap V) \cap S'\)은 전사이고, (1), (3)은 그대로 성립하며,
+          위상동형사상의 열린 부분집합으로의 제한이므로 (2)도 성립한다. \(O \cap V\)는 \(p\)를 포함하는 열린집합이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-6-1-4" data-level="1">
+        <p><span class="thm-head">연습 6.1.4</span> <span class="level">★</span>
+        \(a, b \gt 0\)일 때 두 겹 타원뿔 \(K_{a,b} = \{(x, y, z) : x^2/a^2 + y^2/b^2 = z^2\}\)은 정칙곡면이 아님을 보여라. 특히 \(a = b = 1\)인 두 겹 원뿔 \(K_2 = \{x^2 + y^2 = z^2\}\)은 정칙곡면이 아니다.
+        <a class="cite" href="../../references.html#dC">[dC §2-2 연습문제 3 변형]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p>정칙곡면이라면 <a href="#i-6-1-8">명제 6.1.8</a>에 의해 원점을 포함하는 열린집합 \(W \supseteq B_\varepsilon(0)\)에서 \(W \cap K_{a,b}\)가 어느 좌표평면 위의 그래프이고, 그 좌표평면으로의 사영은 \(W \cap K_{a,b}\)에서 단사다.
+          그러나 작은 \(t \gt 0\)에 대해 \((at, 0, t)\)와 \((at, 0, -t)\)는 \(P_{xy}\)의 값이 같고, \((0, bt, t)\)와 \((0, -bt, t)\)는 \(P_{xz}\)의 값이 같으며, \((at, 0, t)\)와 \((-at, 0, t)\)는 \(P_{yz}\)의 값이 같다.
+          이 점들은 모두 \(K_{a,b} \cap B_\varepsilon(0)\)에 있으므로 모순이다. \(a = b = 1\)인 경우의 같은 결론을 <a href="../02-calculus-rn/2-4-implicit-function-theorem.html#ex-2-4-5">연습 2.4.5</a>에서 다른 방식으로 보였다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-6-1-5" data-level="2">
+        <p><span class="thm-head">연습 6.1.5</span> <span class="level">★★</span>
+        <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-14">예 3.2.14</a>(c)의 입체사영의 역사상 \(\sigma^{-1}(u, v) = \dfrac{(2u,\ 2v,\ u^2 + v^2 - 1)}{u^2 + v^2 + 1}\)은 \(\R^2\)에서 \(S^2(1) \setminus \{(0, 0, 1)\}\) 위로 가는 매개화임을 보여라.
+        \(\abs{\sigma^{-1}_u \times \sigma^{-1}_v}\)를 구하여라.</p>
+        <details class="hint"><summary>힌트</summary><p>조건 (2)는 3장에서 보였다. \(w = u^2 + v^2 + 1\)로 두고 편미분을 계산한다. \(\sigma^{-1}_u\)와 \(\sigma^{-1}_v\)가 서로 수직이고 길이가 같음을 먼저 보이면 외적의 크기가 쉽게 나온다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(V = \R^3 \setminus \{(0, 0, 1)\}\)은 열린집합이고 \(V \cap S^2(1) = S^2(1) \setminus \{(0, 0, 1)\}\)이다. (1) 성분은 분모가 양수인 유리함수이므로 매끄럽다. (2) <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-14">예 3.2.14</a>(c)에서
+          \(\sigma^{-1}\)이 \(\R^2\)에서 \(S^2(1) \setminus \{(0, 0, 1)\}\) 위로 가는 위상동형사상임을 보였다(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-9">예 3.3.9</a>(c)).
+          (3) \(w = u^2 + v^2 + 1\)이라 하자. 몫의 미분으로</p>
+          <p>\[ \begin{aligned}
+               \sigma^{-1}_u &= \frac{1}{w^2}\big(2w - 4u^2,\ -4uv,\ 4u\big) = \frac{2}{w^2}\big(1 - u^2 + v^2,\ -2uv,\ 2u\big),\\
+               \sigma^{-1}_v &= \frac{2}{w^2}\big(-2uv,\ 1 + u^2 - v^2,\ 2v\big)
+             \end{aligned} \]</p>
+          <p>이다. 셋째 성분은 \(\partial_u\big((w - 2)/w\big) = 2\cdot 2u/w^2\)에서 나온다. 내적은
+          \(\tfrac{4}{w^4}\big(-2uv(1 - u^2 + v^2) - 2uv(1 + u^2 - v^2) + 4uv\big) = \tfrac{4}{w^4}(-4uv + 4uv) = 0\)이고,
+          길이의 제곱은 \(\tfrac{4}{w^4}\big((1 - u^2 + v^2)^2 + 4u^2v^2 + 4u^2\big) = \tfrac{4}{w^4}(1 + u^2 + v^2)^2 = \tfrac{4}{w^2}\)이다(전개해서 정리하면 \((1 + u^2 + v^2)^2\)이 된다). \(\sigma^{-1}_v\)도 같다.
+          두 벡터가 수직이고 길이가 \(2/w\)이므로 <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16</a>(d)에서 \(\abs{\sigma^{-1}_u \times \sigma^{-1}_v} = 4/w^2 = 4/(1 + u^2 + v^2)^2 \gt 0\)이다. 따라서 (3)이 성립한다.
+          (두 편미분이 수직이고 길이가 같다는 사실은 <a href="../07-first-fundamental-form/index.html">7장</a>에서 입체사영이 각을 보존한다는 것으로 다시 나온다.)</p>
+          <p class="verified">검증: <code>verify/v-6-1-definition.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-6-1-6" data-level="2">
+        <p><span class="thm-head">연습 6.1.6</span> <span class="level">★★</span>
+        \(f(x, y) = (x^2 + y^2)^{2/3}\)이라 하자. \(f\)는 \(\R^2\)에서 \(C^1\)급이고 \(Df(0, 0) = 0\)이지만, 그래프 \(S = \{z = f(x, y)\}\)는 정칙곡면이 아님을 보여라.
+        <a class="cite" href="../../references.html#dC">[dC §2-4 예 3 변형]</a></p>
+        <details class="hint"><summary>힌트</summary><p><a href="#i-6-1-8">명제 6.1.8</a>을 원점에서 쓴다. \(xy\) 평면 위의 그래프라면 그 함수는 \(f\) 자신이어야 한다. \(f(x, 0) = \abs{x}^{4/3}\)의 이계도함수를 본다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p><em>\(C^1\)급.</em> \((x, y) \neq 0\)에서 \(f_x = \tfrac43 x (x^2 + y^2)^{-1/3}\), \(f_y = \tfrac43 y(x^2 + y^2)^{-1/3}\)이고 \(\abs{f_x}, \abs{f_y} \le \tfrac43 (x^2 + y^2)^{1/6} \to 0\)이다.
+          원점에서는 \(\abs{f(h, 0) - f(0, 0)}/\abs{h} = \abs{h}^{1/3} \to 0\)이므로 \(f_x(0, 0) = 0\)이고, 같은 방식으로 \(f_y(0, 0) = 0\)이다. 편미분이 연속이므로 \(f\)는 \(C^1\)급이고 \(Df(0, 0) = 0\)이다.</p>
+          <p><em>정칙곡면이 아님.</em> 정칙곡면이라 하고 원점에 <a href="#i-6-1-8">명제 6.1.8</a>을 쓰자. \(P_{xz}\): 작은 \(t \gt 0\)에 대해 \((0, t, t^{4/3})\)과 \((0, -t, t^{4/3})\)이 \(S\)의 서로 다른 점인데 사영이 같다. \(P_{yz}\)도 \((\pm t, 0, t^{4/3})\)으로 같다.
+          \(P_{xy}\): 원점 근처의 \(S\)가 매끄러운 \(g\)의 그래프라면, \(S\)가 \(f\)의 그래프이므로 \(g = f\)가 원점 근처에서 성립한다. 그런데 \(x \neq 0\)에서 \(\partial_x^2 f(x, 0) = \tfrac{4}{9}\abs{x}^{-2/3} \to \infty\)이므로
+          \(\partial_x^2 f\)는 원점 근처에서 유계가 아니고, 따라서 \(f\)는 \(C^2\)급조차 아니다. 모순이다. (원점에서 “접평면” \(z = 0\)은 그럴듯하게 있지만, <a href="#i-6-1-1">정의 6.1.1</a>은 \(C^\infty\)를 요구한다.)</p>
+          <p class="verified">검증: <code>verify/v-6-1-definition.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="../05-space-curves/index.html">← 5. 공간곡선과 프레네 틀</a>
+    <a rel="next" href="6-2-tangent-plane.html">6.2 접평면 →</a>
+  </nav>
+</body>
+</html>

@@ -78,6 +78,23 @@ def curvature_torsion(gamma, t, positive=()):
     return kappa, tau
 
 
+def signed_curvature(gamma, t, positive=()):
+    """평면곡선 ``gamma(t)``의 부호곡률 κ_s (GUIDELINES.md §6.2, 04장 정의 4.4.2).
+
+    ``gamma``는 성분이 2개 또는 3개인 Matrix다. 3개면 셋째 성분은 0이어야 한다(xy평면의 곡선).
+    κ_s = det(γ', γ'')/|γ'|³. n_s = J t (t를 반시계 방향으로 90° 돌린 것) 규약이므로
+    반시계 방향으로 도는 원에서 κ_s > 0이다.
+    """
+    gamma = sp.Matrix(gamma)
+    if gamma.shape[0] == 3:
+        if sp.simplify(gamma[2]) != 0:
+            raise ValueError("signed_curvature: 셋째 성분이 0인 평면곡선만 받는다")
+        gamma = gamma[:2, :]
+    d1, d2 = gamma.diff(t), gamma.diff(t, 2)
+    det = d1[0] * d2[1] - d1[1] * d2[0]
+    return simp(det / sp.sqrt(d1.dot(d1)) ** 3, positive)
+
+
 def frenet_frame(gamma, t, positive=()):
     """프레네 틀 (t, n, b) (각각 3×1 Matrix). b = t × n."""
     gamma = sp.Matrix(gamma)
@@ -379,7 +396,62 @@ def _examples():
     return ex
 
 
+
+def stereographic(n):
+    """Sⁿ ⊆ ℝⁿ⁺¹의 두 입체사영 (GUIDELINES.md §7, 03장 예 3.2.14, 11장 11.3절).
+
+    북극 N = (0,…,0,1)에서의 σ(x) = (x¹,…,xⁿ)/(1 − xⁿ⁺¹),
+    남극에서의 σ̃(x) = −σ(−x) = (x¹,…,xⁿ)/(1 + xⁿ⁺¹).
+    반환 dict:
+      coords          (x1, …, x_{n+1})     ℝⁿ⁺¹의 좌표
+      chart_coords    (u1, …, un)          차트 치역 ℝⁿ의 좌표
+      sigma, sigma_south                   위 두 사상 (n×1 Matrix, x의 식)
+      sigma_inv, sigma_south_inv           역사상 (n+1)×1 Matrix, u의 식
+                                           σ⁻¹(u) = (2u, |u|² − 1)/(|u|² + 1)
+      transition                           σ̃∘σ⁻¹(u) = u/|u|²  (u ≠ 0)
+    """
+    X = sp.symbols(f"x1:{n + 2}", real=True)
+    U = sp.symbols(f"u1:{n + 1}", real=True)
+    r2 = sum(u ** 2 for u in U)
+    return dict(
+        kind="chart", name=f"S^{n}의 입체사영", params=(n,), coords=X, chart_coords=U,
+        sigma=sp.Matrix([X[i] / (1 - X[n]) for i in range(n)]),
+        sigma_south=sp.Matrix([X[i] / (1 + X[n]) for i in range(n)]),
+        sigma_inv=sp.Matrix([2 * U[i] / (r2 + 1) for i in range(n)] + [(r2 - 1) / (r2 + 1)]),
+        sigma_south_inv=sp.Matrix([2 * U[i] / (r2 + 1) for i in range(n)] + [(1 - r2) / (r2 + 1)]),
+        transition=sp.Matrix([U[i] / r2 for i in range(n)]),
+    )
+
+
+def rpn_charts(n):
+    """ℝℙⁿ의 표준 차트 (GUIDELINES.md §7, 03장 3.4절, 11장 11.4절). 인덱스는 0부터 센다.
+
+    U_i = {[x] : xⁱ⁺¹ ≠ 0}, φ_i[x] = (x¹/xⁱ⁺¹, …, (i+1번째 성분 제외), …, xⁿ⁺¹/xⁱ⁺¹).
+    반환 dict:
+      phi(i)          φ_i를 동차좌표 x의 식으로 (n×1 Matrix)
+      psi(i)          φ_i⁻¹(u)의 동차좌표 대표 (u¹, …, 1(i번째 자리), …, uⁿ) ((n+1)×1 Matrix)
+      transition(i,j) φ_j∘φ_i⁻¹ (u의 식, φ_i(U_i ∩ U_j) 위에서)
+    """
+    X = sp.symbols(f"x1:{n + 2}", real=True)
+    U = sp.symbols(f"u1:{n + 1}", real=True)
+
+    def phi(i):
+        return sp.Matrix([X[j] / X[i] for j in range(n + 1) if j != i])
+
+    def psi(i):
+        return sp.Matrix(list(U[:i]) + [sp.Integer(1)] + list(U[i:]))
+
+    def transition(i, j):
+        rep = psi(i)
+        return sp.Matrix([sp.simplify(rep[k] / rep[j]) for k in range(n + 1) if k != j])
+
+    return dict(kind="chart", name=f"RP^{n}의 표준 차트", params=(n,), coords=X, chart_coords=U,
+                phi=phi, psi=psi, transition=transition)
+
+
 EXAMPLES = _examples()
+EXAMPLES["stereographic"] = stereographic(2)
+EXAMPLES["rpn"] = rpn_charts(2)
 
 
 # ---------------------------------------------------------------------------
@@ -411,6 +483,35 @@ def _selftest():
     sym_equal("§6.2 나선: db/dt = −τ|γ'| n (b′ = −τn 규약)", B.diff(t), -tau * speed * Nn, e["domain"])
     kappa, _ = curvature_torsion(e["expr"], t)
     sym_equal("§6.2 나선: dt/dt = κ|γ'| n", T.diff(t), kappa * speed * Nn, e["domain"])
+
+    # 입체사영 (§7): σ̃∘σ⁻¹ = u/|u|², σ∘σ⁻¹ = id, σ⁻¹(u) ∈ Sⁿ
+    for n in (1, 2, 3):
+        st = stereographic(n)
+        X, U = st["coords"], st["chart_coords"]
+        inv = st["sigma_inv"]
+        dom = {u: (0.2, 1.5) for u in U}
+        sym_equal(f"§7 입체사영 S^{n}: σ⁻¹(u) ∈ S^{n}", sp.Matrix([sum(c ** 2 for c in inv)]), sp.Matrix([1]), dom)
+        sub = dict(zip(X, inv))
+        sym_equal(f"§7 입체사영 S^{n}: σ∘σ⁻¹ = id", st["sigma"].subs(sub), sp.Matrix(U), dom)
+        sym_equal(f"§7 입체사영 S^{n}: σ̃∘σ⁻¹(u) = u/|u|²", st["sigma_south"].subs(sub), st["transition"], dom)
+    # ℝℙ²: φ_j∘φ_i⁻¹를 정의에서 직접 계산한 것과 transition이 같다
+    rp = rpn_charts(2)
+    X, U = rp["coords"], rp["chart_coords"]
+    for i in range(3):
+        for j in range(3):
+            if i == j:
+                continue
+            direct = rp["phi"](j).subs(dict(zip(X, rp["psi"](i))))
+            sym_equal(f"§7 ℝℙ²: φ_{j}∘φ_{i}⁻¹", direct, rp["transition"](i, j), {u: (0.3, 2.0) for u in U})
+
+    # 부호곡률: 반시계 방향 원은 +1/r, 시계 방향 원은 −1/r (n_s = J t 규약)
+    e = ex["circle"]
+    (t,) = e["coords"]
+    ks = signed_curvature(e["expr"], t)
+    kappa, _ = curvature_torsion(e["expr"], t)
+    sym_equal("§6.2 원(반시계): κ_s = κ = 1/r", ks, kappa, e["domain"])
+    rev = e["expr"].subs(t, -t)
+    sym_equal("§6.2 원(시계 방향): κ_s = −κ", signed_curvature(rev, t), -kappa, e["domain"])
 
     # 곡면
     for key in ("sphere", "cylinder", "torus", "revolution"):

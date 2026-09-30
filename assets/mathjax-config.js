@@ -9,6 +9,7 @@ window.MathJax = {
     macros: {
       R: '\\mathbb{R}',
       Z: '\\mathbb{Z}',
+      Q: '\\mathbb{Q}',
       RP: '\\mathbb{RP}',
       inner: ['\\langle #1,\\, #2 \\rangle', 2],   // \inner{v}{w}_g
       abs: ['\\lvert #1 \\rvert', 1],
@@ -31,7 +32,10 @@ window.MathJax = {
       Rc: '\\operatorname{Rc}',
       inj: '\\operatorname{inj}',
       vol: '\\operatorname{vol}',
-      sgn: '\\operatorname{sgn}'
+      sgn: '\\operatorname{sgn}',
+      im: '\\operatorname{im}',
+      Span: '\\operatorname{span}',     // \\span은 TeX 원시 명령이라 쓰지 않는다
+      diag: '\\operatorname{diag}'
     }
   }
 };

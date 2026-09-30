@@ -125,19 +125,11 @@ check("연습 4.1.5: t = 0에서 거리² = 1 (극대)", dist2.subs(t, 0) == 1)
 tt0 = 1 / sp.sqrt(2)
 check("연습 4.1.5: γ(t0) − p ⊥ γ'(t0)", sp.simplify((par - p0).dot(par.diff(t)).subs(t, tt0)) == 0)
 
-# 연습 4.1.7: h(t) = e^{−1/t²} 의 도함수는 p_k(1/t) e^{−1/t²} 꼴이고 t → 0+에서 0으로 간다 --------
+# 연습 4.1.7: f(t) = e^{−1/t} (예 2.2.20)는 (0, ∞)에서 (0, 1) 위로 가는 증가함수, f'(t) → 0 (t → 0+)
 tp = sp.symbols("t", positive=True)
-hfun = sp.exp(-1 / tp ** 2)
-ok = True
-for k in range(0, 5):
-    dk = sp.diff(hfun, tp, k)
-    q = sp.simplify(dk / hfun)          # 1/t의 다항식이어야 한다
-    w = sp.symbols("w")
-    poly = sp.simplify(q.subs(tp, 1 / w))
-    ok &= poly.is_polynomial(w)
-    ok &= sp.limit(dk, tp, 0, "+") == 0
-check("연습 4.1.7: h^(k)(t) = p_k(1/t) e^{−1/t²}, lim_{t→0+} h^(k) = 0 (k = 0..4)", ok)
-# γ(t) = (h(t) − h(−t), h(t) + h(−t)): t > 0이면 h(−t) = 0이므로 (h(t), h(t)), 자취는 y = |x|, |x| < 1
-check("연습 4.1.7: lim_{t→∞} h(t) = 1 (자취는 |x| < 1 부분)", sp.limit(hfun, tp, sp.oo) == 1)
+fexp = sp.exp(-1 / tp)
+check("연습 4.1.7: f'(t) = e^{−1/t}/t² > 0", sp.simplify(sp.diff(fexp, tp) - sp.exp(-1 / tp) / tp ** 2) == 0)
+check("연습 4.1.7: lim_{t→0+} f = 0, lim_{t→∞} f = 1", sp.limit(fexp, tp, 0, "+") == 0 and sp.limit(fexp, tp, sp.oo) == 1)
+check("연습 4.1.7: lim_{t→0+} f'(t) = 0 (γ'(0) = 0과 일치)", sp.limit(sp.diff(fexp, tp), tp, 0, "+") == 0)
 
 summary()

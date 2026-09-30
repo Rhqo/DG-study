@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>5.5 국소 표준형 — 미분기하 스터디</title>
+  <meta name="dg-id" content="5.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="5.3, 5.1, 2.2, 3.6">
+  <meta name="dg-refs" content="dC §1-6 (Exercises 1, 2); dC §1-5 (Exercise 13)">
+  <meta name="dg-updated" content="2026-10-01">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">5. 공간곡선과 프레네 틀</a> ›
+    <span>5.5 국소 표준형</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>5.5 국소 표준형</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#dC">[dC §1-6]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>한 점의 프레네 틀을 좌표축으로 삼아 곡선을 \(3\)차까지 테일러 전개한 국소 표준형을 유도할 수 있다.</li>
+        <li>접촉평면, 전직평면, 법평면에 비친 곡선이 각각 포물선, 삼차곡선, 뾰족점 곡선을 닮음을 설명할 수 있다.</li>
+        <li>곡선이 전직평면의 한쪽에 놓이고, \(\tau \neq 0\)이면 접촉평면을 뚫고 지나가며 그 방향이 \(\tau\)의 부호로 정해짐을 증명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="5-3-frenet.html#i-5-3-1">정리 5.3.1 (프레네-세레 공식)</a>, <a href="5-3-frenet.html#i-5-3-6">예 5.3.6 (꼬인 삼차곡선)</a>, <a href="5-3-frenet.html#i-5-3-3">예 5.3.3 (나선의 프레네 틀)</a></li>
+        <li><a href="5-1-curvature.html#i-5-1-9">정의 5.1.9 (접촉평면)</a>, <a href="5-1-curvature.html#i-5-1-14">정리 5.1.14 (접촉평면은 곡선에 가장 가깝다)</a>, <a href="5-2-torsion.html#i-5-2-11">비고 5.2.11</a></li>
+        <li>1변수 테일러 정리(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">보조정리 2.2.16</a>), 최댓값·최솟값 정리(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">정리 3.6.10</a>), 적분의 삼각부등식(<a href="../04-curves/4-2-arc-length.html#i-4-2-9">보조정리 4.2.9</a>)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="5-4-fundamental-theorem.html#i-5-4-8">정리 5.4.8</a>은 \(\kappa\)와 \(\tau\)가 곡선을 결정한다고 말한다. 그러나 “결정한다”는 것만으로는 \(\kappa\)와 \(\tau\)가 곡선의 모양을 <em>어떻게</em> 정하는지 보이지 않는다.
+      이 절은 한 점 근처의 모양을 직접 계산한다. 방법은 간단하다. 그 점의 프레네 틀을 좌표축으로 잡고 곡선을 테일러 전개하면, 각 좌표의 첫 몇 항의 계수가 \(\kappa\), \(\kappa'\), \(\tau\)로 쓰인다.
+      <a href="5-3-frenet.html#i-5-3-6">예 5.3.6</a>의 꼬인 삼차곡선 \((t, t^2, t^3)\)은 원점에서 틀이 표준기저였다. 그 곡선이 모든 곡선의 국소적인 모형이라는 것이 이 절의 결론이다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 세 방향에서 본 그림자</p>
+        <p><a href="#fig-5-5-1">그림 5.5.1</a>처럼 한 점에서 프레네 틀의 세 벡터가 세 평면을 만든다. 곡선을 세 평면에 비추면(<a href="#fig-5-5-2">그림 5.5.2</a>), \(\mathbf{b}\) 쪽에서 내려다본 그림자는 \(\mathbf{n}\) 쪽으로 휘는 포물선이고,
+        \(\mathbf{n}\) 쪽에서 본 그림자는 \(\mathbf{b}\) 방향으로 \(S\)자로 비틀린 삼차곡선이며, \(\mathbf{t}\) 방향에서 곡선을 정면으로 보면 뾰족점이 보인다. 첫째 그림자의 휘는 정도가 \(\kappa\), 둘째 그림자의 비틀린 정도가 \(\kappa\tau\)다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-5-5-1">
+        <img src="figures/fig-5-5-1-three-planes.svg" alt="한 점 γ(s₀)에서 파랑 t, 주홍 n, 청록 b 화살표와 세 평면 조각이 서로 수직으로 만난다. 하늘색은 t와 n이 만드는 접촉평면, 회색은 t와 b가 만드는 전직평면, 연한 주황은 n과 b가 만드는 법평면이다. 검은 나선 조각이 γ(s₀)를 지나는데, t 방향으로 나아가면서 n 쪽으로 휘고, 접촉평면의 b 쪽(실선)과 반대쪽(점선)을 오간다.">
+        <figcaption><span class="fig-head">그림 5.5.1.</span>
+        나선 \((a\cos t, a\sin t, bt)\), \(a = 1\), \(b = 0.6\) 위의 점 \(\gamma(s_0)\)(\(t = 0\))에서의 프레네 틀(실제 길이의 \(0.7\)배)과 접촉평면(하늘색, \(\mathbf{t}, \mathbf{n}\)), 전직평면(회색, \(\mathbf{t}, \mathbf{b}\)),
+        법평면(연한 주황, \(\mathbf{n}, \mathbf{b}\)). 곡선(\(\abs{t} \le 1.15\))은 접촉평면의 \(+\mathbf{b}\) 쪽을 실선, \(-\mathbf{b}\) 쪽을 점선으로 그렸다. \(\tau \gt 0\)이므로 \(s\)가 늘 때 \(-\mathbf{b}\) 쪽에서 \(+\mathbf{b}\) 쪽으로 지나간다(<a href="#i-5-5-5">따름정리 5.5.5</a>).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-canonical-form">
+      <h2>국소 표준형</h2>
+      <p>접촉평면(<a href="5-1-curvature.html#i-5-1-9">정의 5.1.9</a>) 말고도 프레네 틀의 두 벡터가 만드는 평면이 둘 더 있다.</p>
+
+      <div class="thm definition" id="i-5-5-1">
+        <p><span class="thm-head">정의 5.5.1</span> <span class="thm-name">(법평면과 전직평면, normal plane and rectifying plane)</span>.
+        \(\gamma\)가 호의 길이로 매개화되어 있고 \(\kappa(s) \gt 0\)이라 하자.</p>
+        <ul>
+          <li>\(\gamma(s)\)를 지나고 \(\mathbf{n}(s)\), \(\mathbf{b}(s)\)가 생성하는 평면을 \(s\)에서 \(\gamma\)의 <dfn>법평면</dfn>(normal plane)이라 한다. 접선에 수직인 평면이다.</li>
+          <li>\(\gamma(s)\)를 지나고 \(\mathbf{t}(s)\), \(\mathbf{b}(s)\)가 생성하는 평면을 \(s\)에서 \(\gamma\)의 <dfn>전직평면</dfn>(rectifying plane)이라 한다. 주법선에 수직인 평면이다.</li>
+        </ul>
+      </div>
+
+      <p>법평면은 \(\kappa = 0\)이어도 뜻이 있다(접선에 수직인 평면). 예를 들어 원의 법평면은 원의 중심을 지나고 원의 평면에 수직인 평면이고, 전직평면은 원에 접하고 원의 평면에 수직인 평면이다.
+      \(xy\)평면의 곡선이면 접촉평면이 \(xy\)평면이고, 나머지 두 평면은 \(xy\)평면에 수직이다. 세 평면의 단위법벡터는 각각 \(\mathbf{b}\)(접촉평면), \(\mathbf{t}\)(법평면), \(\mathbf{n}\)(전직평면)이다.</p>
+
+      <p>이제 \(s_0 \in I\)을 고정하고 \(\mathbf{t}_0 = \mathbf{t}(s_0)\) 등으로 쓰자. \(\gamma(s_0)\)를 원점으로, \((\mathbf{t}_0, \mathbf{n}_0, \mathbf{b}_0)\)를 좌표축으로 하는 좌표로 곡선을 나타낸다. \(h = s - s_0\)으로 두고</p>
+      <div class="equation" id="eq-5-5-1">
+      \[ \begin{aligned} x(h) &= \inner{\gamma(s_0 + h) - \gamma(s_0)}{\mathbf{t}_0},\\ y(h) &= \inner{\gamma(s_0 + h) - \gamma(s_0)}{\mathbf{n}_0},\\ z(h) &= \inner{\gamma(s_0 + h) - \gamma(s_0)}{\mathbf{b}_0} \end{aligned} \tag{5.5.1} \]
+      </div>
+      <p>라 하면 정규직교기저로 전개해 \(\gamma(s_0 + h) = \gamma(s_0) + x(h)\mathbf{t}_0 + y(h)\mathbf{n}_0 + z(h)\mathbf{b}_0\)이다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>).
+      \(z\)는 접촉평면까지의 부호 있는 거리, \(y\)는 전직평면까지의, \(x\)는 법평면까지의 부호 있는 거리다.</p>
+
+      <div class="thm theorem" id="i-5-5-2">
+        <p><span class="thm-head">정리 5.5.2</span> <span class="thm-name">(국소 표준형, local canonical form)</span>.
+        \(\gamma\colon I \to \R^3\)이 호의 길이로 매개화되어 있고 \(I\)에서 \(\kappa \gt 0\)이며 \([s_0 - \delta, s_0 + \delta] \subseteq I\)이라 하자. \(\kappa, \kappa', \tau\)를 \(s_0\)에서의 값으로 쓰면,
+        \(M \ge 0\)이 있어 \(\abs{h} \le \delta\)일 때</p>
+        <div class="equation" id="eq-5-5-2">
+        \[ \begin{aligned}
+          x(h) &= h - \frac{\kappa^2}{6}h^3 + R_x(h),\\
+          y(h) &= \frac{\kappa}{2}h^2 + \frac{\kappa'}{6}h^3 + R_y(h),\\
+          z(h) &= \frac{\kappa\tau}{6}h^3 + R_z(h),
+        \end{aligned} \qquad \abs{R_x(h)},\ \abs{R_y(h)},\ \abs{R_z(h)} \le M h^4 \tag{5.5.2} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 한 점 근처에서 곡선은 \(1\)차로는 접선을 따라가고(\(x \approx h\)), \(2\)차로는 곡률 \(\kappa\)만큼 주법선 쪽으로 휘며(\(y \approx \kappa h^2/2\)),
+      \(3\)차로는 \(\kappa\tau\)에 비례해 접촉평면을 벗어난다(\(z \approx \kappa\tau h^3/6\)). 비틀림률은 \(3\)차 항에서야 처음 나타나는 “더 미세한” 정보다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: \(\gamma(s_0 + h)\)를 \(3\)차까지 테일러 전개하고, \(\gamma' = \mathbf{t}\), \(\gamma'' = \kappa\mathbf{n}\), \(\gamma'''\)을 프레네-세레 공식으로 틀에 대해 전개한 뒤 각 성분을 읽는다.</p>
+        <p><span class="proof-head">증명.</span>
+        프레네-세레 공식(<a href="5-3-frenet.html#i-5-3-1">정리 5.3.1</a>)에서 \(\gamma' = \mathbf{t}\), \(\gamma'' = \mathbf{t}' = \kappa\mathbf{n}\)이고, 곱의 미분법으로</p>
+        <div class="equation" id="eq-5-5-3">
+        \[ \gamma''' = (\kappa\mathbf{n})' = \kappa'\mathbf{n} + \kappa(-\kappa\mathbf{t} + \tau\mathbf{b}) = -\kappa^2\,\mathbf{t} + \kappa'\,\mathbf{n} + \kappa\tau\,\mathbf{b} \tag{5.5.3} \]
+        </div>
+        <p>이다. \(J = [s_0 - \delta, s_0 + \delta]\)는 컴팩트이므로 연속함수 \(\abs{\gamma''''}\)은 \(J\)에서 최댓값 \(M_4\)를 가진다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">정리 3.6.10</a>).
+        \(\gamma\)의 각 성분에 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">보조정리 2.2.16</a>을 \(k = 3\)으로 쓰면</p>
+        \[ \begin{aligned} \gamma(s_0 + h) - \gamma(s_0) &= h\,\gamma'(s_0) + \frac{h^2}{2}\gamma''(s_0) + \frac{h^3}{6}\gamma'''(s_0) + R(h),\\ R(h) &= \frac{1}{6}\int_0^h (h - u)^3\,\gamma''''(s_0 + u)\,du \end{aligned} \]
+        <p>이고, <a href="../04-curves/4-2-arc-length.html#i-4-2-9">보조정리 4.2.9</a>에서 \(\abs{R(h)} \le \frac16\big\lvert\int_0^h \abs{h - u}^3 M_4\,du\big\rvert = M_4 h^4/24\)이다. 이 식과 \(\mathbf{t}_0, \mathbf{n}_0, \mathbf{b}_0\)의 내적을 취하면,
+        \(\gamma'(s_0) = \mathbf{t}_0\), \(\gamma''(s_0) = \kappa\mathbf{n}_0\)과 <a href="#eq-5-5-3">(5.5.3)</a>에서</p>
+        \[ \begin{aligned} x &= h - \frac{\kappa^2}{6}h^3 + \inner{R}{\mathbf{t}_0}, \qquad y = \frac{\kappa}{2}h^2 + \frac{\kappa'}{6}h^3 + \inner{R}{\mathbf{n}_0},\\ z &= \frac{\kappa\tau}{6}h^3 + \inner{R}{\mathbf{b}_0} \end{aligned} \]
+        <p>이다. 코시-슈바르츠 부등식에서 세 나머지는 모두 \(\abs{R(h)} \le M_4h^4/24\) 이하이므로 \(M = M_4/24\)로 두면 된다.</p>
+      </div>
+
+      <p>이 전개를 \(\gamma\)의 \(s_0\) 근처의 <dfn>국소 표준형</dfn>(local canonical form)이라 한다. <a href="5-1-curvature.html#i-5-1-14">정리 5.1.14</a>(a)에서는 접촉평면까지의 거리가 \(\abs{h}^3\) 정도라는 것만 알았는데,
+      이제 그 계수가 \(\kappa\tau/6\)임을 안다. 이 계수가 \(0\)이 아니면 거리는 정확히 \(3\)차로 작아진다.</p>
+
+      <div class="thm example" id="i-5-5-3">
+        <p><span class="thm-head">예 5.5.3</span> <span class="thm-name">(나선의 국소 표준형, 기준 예제)</span>.
+        나선의 호의 길이 매개화 <a href="../04-curves/4-3-reparametrization.html#eq-4-3-2">(4.3.2)</a>와 <a href="5-3-frenet.html#i-5-3-3">예 5.3.3</a>의 틀에서 \(s_0 = 0\)이면 \(\mathbf{t}_0 = (0, a/c, b/c)\), \(\mathbf{n}_0 = (-1, 0, 0)\), \(\mathbf{b}_0 = (0, -b/c, a/c)\)이고
+        \(\gamma(s) - \gamma(0) = (a\cos\tfrac sc - a,\ a\sin\tfrac sc,\ \tfrac{bs}{c})\)이다. 내적을 계산하면 국소 표준형이 정확한 식으로 나온다.</p>
+        <div class="equation" id="eq-5-5-4">
+        \[ \begin{aligned} x(s) &= \frac{a^2}{c}\sin\frac sc + \frac{b^2}{c^2}s, \qquad y(s) = a\Big(1 - \cos\frac sc\Big),\\ z(s) &= \frac{ab}{c}\Big(\frac sc - \sin\frac sc\Big) \end{aligned} \tag{5.5.4} \]
+        </div>
+        <p>\(\sin u = u - u^3/6 + \cdots\), \(1 - \cos u = u^2/2 - \cdots\)을 넣으면 \(x = s - \tfrac{a^2}{6c^4}s^3 + \cdots\), \(y = \tfrac{a}{2c^2}s^2 + \cdots\), \(z = \tfrac{ab}{6c^4}s^3 + \cdots\)이다.
+        \(\kappa = a/c^2\), \(\tau = b/c^2\), \(\kappa' = 0\)이므로 이것은 <a href="#eq-5-5-2">(5.5.2)</a>와 정확히 같다(\(\kappa^2 = a^2/c^4\), \(\kappa\tau = ab/c^4\)).</p>
+        <p class="verified">검증: <code>verify/v-5-5-local-canonical-form.py</code></p>
+      </div>
+
+      <div class="thm example" id="i-5-5-4">
+        <p><span class="thm-head">예 5.5.4</span> <span class="thm-name">(세 평면에 비친 모양)</span>.
+        국소 표준형의 주요항만 남기면 \(x \approx h\), \(y \approx \tfrac{\kappa}{2}h^2\), \(z \approx \tfrac{\kappa\tau}{6}h^3\)이다. \(h\)를 소거하면 세 평면에 비친 곡선의 근사식을 얻는다.</p>
+        <div class="equation" id="eq-5-5-5">
+        \[ \text{접촉평면}: \ y \approx \frac{\kappa}{2}x^2, \qquad \text{전직평면}: \ z \approx \frac{\kappa\tau}{6}x^3, \qquad \text{법평면}: \ z^2 \approx \frac{2\tau^2}{9\kappa}\,y^3 \tag{5.5.5} \]
+        </div>
+        <p>(셋째 식: \(z^2 \approx \kappa^2\tau^2h^6/36\), \(y^3 \approx \kappa^3h^6/8\).) 곧 \(\mathbf{b}\) 쪽에서 보면 곡선은 곡률 \(\kappa\)인 포물선처럼 보이고(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-6">예 4.4.6</a>(a)에서 꼭짓점의 곡률이 \(\kappa\)),
+        \(\mathbf{n}\) 쪽에서 보면 변곡점을 가진 삼차곡선, \(\mathbf{t}\) 쪽에서 보면 뾰족점을 가진 반삼차 포물선(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-9">비예 4.1.9</a>와 같은 모양)이다.
+        \(\tau = 0\)이면 둘째와 셋째 그림자는 \(3\)차까지 평평하다. <a href="#fig-5-5-2">그림 5.5.2</a>는 나선의 실제 그림자와 이 근사식을 비교한 것이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-5-5-2">
+        <img src="figures/fig-5-5-2-projections.svg" alt="세 칸 그림. (a) t 축(가로)과 n 축(세로) 위에 위로 열린 포물선 모양의 검은 곡선과, 거의 겹치는 주황 점선 y=κx²/2. (b) t 축과 b 축 위에 원점을 지나며 왼쪽 아래에서 오른쪽 위로 가는 완만한 S자 모양의 검은 곡선과 주황 점선 z=κτx³/6. (c) n 축(가로)과 b 축(세로) 위에서 원점에 뾰족점이 있고 오른쪽 위와 오른쪽 아래로 벌어지는 검은 곡선과 주황 점선 z²=(2τ²/9κ)y³.">
+        <figcaption><span class="fig-head">그림 5.5.2.</span>
+        나선 \(a = 1\), \(b = 0.6\)(\(\kappa \approx 0.735\), \(\tau \approx 0.441\))을 \(s_0 = 0\)의 프레네 좌표로 쓴 곡선(검정, \(\abs{s} \le 2\))을 (a) 접촉평면, (b) 전직평면, (c) 법평면에 비춘 것.
+        주황 점선은 국소 표준형의 \(3\)차 근사 \((s - \kappa^2s^3/6,\ \kappa s^2/2,\ \kappa\tau s^3/6)\)를 비춘 것이다(<a href="#i-5-5-4">예 5.5.4</a>). 세 칸은 같은 축척이 아니다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-consequences">
+      <h2>곡선이 놓이는 쪽</h2>
+      <p>국소 표준형은 곡선이 세 평면의 어느 쪽에 있는지를 알려 준다. 평면곡선의 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-4">명제 4.5.4</a>(곡선은 접선의 어느 쪽에 있는가)의 공간판이다.</p>
+
+      <div class="thm corollary" id="i-5-5-5">
+        <p><span class="thm-head">따름정리 5.5.5</span> <span class="thm-name">(곡선이 놓이는 쪽과 비틀림률의 부호)</span>.
+        <a href="#i-5-5-2">정리 5.5.2</a>의 상황에서 \(\delta' \gt 0\)가 있어 다음이 성립한다.</p>
+        <ul>
+          <li>(a) \(0 \lt \abs{h} \lt \delta'\)이면 \(y(h) \gt 0\)이다. 곧 \(s_0\) 근처에서 곡선은 전직평면의 \(\mathbf{n}_0\) 쪽에 있고, 전직평면과는 \(\gamma(s_0)\)에서만 만난다.</li>
+          <li>(b) \(\tau(s_0) \gt 0\)이면 \(0 \lt \abs{h} \lt \delta'\)에서 \(z(h)\)는 \(h\)와 부호가 같다. 곧 \(s\)가 늘어날 때 곡선은 \(\gamma(s_0)\)에서 접촉평면을 \(-\mathbf{b}_0\) 쪽에서 \(+\mathbf{b}_0\) 쪽으로 뚫고 지나간다.
+          \(\tau(s_0) \lt 0\)이면 \(+\mathbf{b}_0\) 쪽에서 \(-\mathbf{b}_0\) 쪽으로 지나간다.</li>
+          <li>(c) \(x\)는 \(h = 0\) 근처에서 순증가한다. 곧 곡선은 법평면을 \(-\mathbf{t}_0\) 쪽에서 \(+\mathbf{t}_0\) 쪽으로 가로지른다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) <a href="#eq-5-5-2">(5.5.2)</a>에서 \(y(h)/h^2 = \kappa/2 + \kappa'h/6 + R_y/h^2\)이고 \(\abs{R_y/h^2} \le Mh^2\)이므로 \(h \to 0\)이면 \(y(h)/h^2 \to \kappa/2 \gt 0\)이다.
+        따라서 \(\delta' \gt 0\)가 있어 \(0 \lt \abs{h} \lt \delta'\)이면 \(y(h)/h^2 \gt 0\), 곧 \(y(h) \gt 0\)이다.
+        (b) 같은 방식으로 \(z(h)/h^3 = \kappa\tau/6 + R_z/h^3 \to \kappa\tau/6\)이고 \(\kappa \gt 0\)이다. \(\tau \gt 0\)이면 \(h\)가 \(0\)에 가까울 때 \(z(h)/h^3 \gt 0\), 곧 \(z(h)\)와 \(h^3\)(따라서 \(h\))의 부호가 같다.
+        \(\tau \lt 0\)이면 반대다.
+        (c) \(x'(h) = \inner{\mathbf{t}(s_0 + h)}{\mathbf{t}_0}\)은 연속이고 \(h = 0\)에서 \(1\)이므로 \(0\) 근처에서 양수다.
+        세 경우 모두 \(\delta'\)을 셋 가운데 가장 작은 값으로 잡으면 된다.</p>
+      </div>
+
+      <p>(b)가 <a href="5-2-torsion.html#i-5-2-11">비고 5.2.11</a>에서 예고한 비틀림률의 부호의 뜻이다. 오른손 나선(\(\tau \gt 0\))을 따라 올라가면 곡선은 매 순간 접촉평면을 \(\mathbf{b}\) 쪽으로 뚫고 나간다(<a href="#fig-5-5-1">그림 5.5.1</a>).
+      (a)는 곡선이 전직평면을 “가로지르지 않고 스친다”는 것이고, 주법선이 곡선이 휘어 들어가는 쪽이라는 말을 정확히 한 것이다. (b)에서 \(\tau(s_0) \neq 0\)은 빠질 수 없다.</p>
+
+      <div class="thm nonexample" id="i-5-5-6">
+        <p><span class="thm-head">비예 5.5.6</span> <span class="thm-name">(\(\tau = 0\)인 점에서는 접촉평면을 지나가지 않을 수 있다)</span>.
+        \(\gamma(t) = (t, t^2, t^4)\)는 \(\gamma' = (1, 2t, 4t^3)\), \(\gamma'' = (0, 2, 12t^2)\), \(\gamma''' = (0, 0, 24t)\)이고 \(\gamma' \times \gamma'' = (16t^3, -12t^2, 2)\)이다.
+        <a href="5-3-frenet.html#i-5-3-4">명제 5.3.4</a>에서 \(\tau = 48t/\abs{\gamma' \times \gamma''}^2\)이므로 \(\tau(0) = 0\)이고, \(t = 0\)에서 \(\kappa = 2\), 틀은 표준기저다. 접촉평면은 \(xy\)평면이고
+        \(z = t^4 \ge 0\)이므로 곡선은 \(t = 0\)에서 접촉평면에 닿기만 하고 \(+\mathbf{b}_0\) 쪽에 머문다. \(3\)차 항이 사라지면 부호를 정하는 것은 더 높은 차수의 항이다.</p>
+        <p class="verified">검증: <code>verify/v-5-5-local-canonical-form.py</code></p>
+      </div>
+
+      <div class="thm example" id="i-5-5-7">
+        <p><span class="thm-head">예 5.5.7</span> <span class="thm-name">(꼬인 삼차곡선은 표준형의 모형이다)</span>.
+        꼬인 삼차곡선 \((t, t^2, t^3)\)은 원점에서 \(\kappa = 2\), \(\tau = 3\)이고 틀이 표준기저였다(<a href="5-3-frenet.html#i-5-3-6">예 5.3.6</a>). 곡률은 \(t\)의 짝함수이므로 \(\kappa'(0) = 0\)이다.
+        속력은 \(\sqrt{1 + 4t^2 + 9t^4} = 1 + 2t^2 + O(t^4)\)이므로 \(s = t + \tfrac23t^3 + O(t^5)\)이고, 거꾸로 \(t = s - \tfrac23s^3 + O(s^5)\)이다. 이것을 넣으면</p>
+        \[ x = t = s - \tfrac23s^3 + \cdots, \qquad y = t^2 = s^2 + \cdots, \qquad z = t^3 = s^3 + \cdots \]
+        <p>이다(\(\cdots\)는 \(4\)차 이상). 국소 표준형의 계수 \(\kappa^2/6 = 2/3\), \(\kappa/2 = 1\), \(\kappa\tau/6 = 1\)과 정확히 맞는다. 일반적으로 \(\kappa\tau \neq 0\)인 점에서 좌표축의 길이 단위를 적당히 바꾸면
+        곡선은 \(3\)차까지 \((u, u^2, u^3)\)과 같다(<a href="#ex-5-5-4">연습 5.5.4</a>). 꼬인 삼차곡선이 모든 “일반적인” 공간곡선의 국소 모형인 셈이다.</p>
+        <p class="verified">검증: <code>verify/v-5-5-local-canonical-form.py</code> (호의 길이의 역함수 급수)</p>
+      </div>
+
+      <div class="thm remark" id="i-5-5-8">
+        <p><span class="thm-head">비고 5.5.8</span> <span class="thm-name">(비틀림률의 부호와 오른손 나사)</span>.
+        \((\mathbf{t}, \mathbf{n}, \mathbf{b})\)는 양의 방향이므로, \(+\mathbf{b}\) 쪽에서 접촉평면을 내려다보면 \(\mathbf{t}\)에서 \(\mathbf{n}\)으로 가는 회전은 반시계 방향이다(오른손 규칙, <a href="../01-linear-algebra/1-6-determinant-orientation.html#fig-1-6-2">그림 1.6.2</a>).
+        국소 표준형에서 곡선은 접촉평면 안에서 \(\mathbf{t}\)에서 \(\mathbf{n}\) 쪽으로 휘고(\(y \gt 0\)), 동시에 \(\tau \gt 0\)이면 \(+\mathbf{b}\) 쪽으로 올라간다. 반시계 방향으로 돌면서 엄지 방향으로 나아가는 것이 오른손 나사다.
+        그래서 \(\tau \gt 0\)인 곡선은 국소적으로 오른손 나사처럼 감기고, <a href="5-2-torsion.html#i-5-2-6">예 5.2.6</a>에서 오른손 나선의 비틀림률이 양수였던 것과 맞는다. 이 해석이 이 study set이 \(\mathbf{b}' = -\tau\mathbf{n}\) 규약을 고른 이유다.</p>
+      </div>
+
+      <aside class="box warning">
+        <p class="box-title">흔한 오해</p>
+        <ul>
+          <li>“곡선은 접촉평면의 한쪽에 머문다”: \(\tau \neq 0\)이면 반대로 반드시 가로지른다(<a href="#i-5-5-5">따름정리 5.5.5</a>(b)). 한쪽에 머무는 것은 전직평면이다.</li>
+          <li>“비틀림률은 곡선이 접촉평면에서 벗어나는 거리다”: 거리의 주요항은 \(\kappa\tau h^3/6\)이므로 \(\kappa\)가 함께 들어 있다. 곡률이 작으면 비틀림률이 커도 평면에서 조금만 벗어난다.</li>
+          <li>“법평면에 비친 그림자는 곡선의 모양을 잃는다”: 뾰족점 \(z^2 \approx (2\tau^2/9\kappa)y^3\)의 벌어진 정도가 \(\tau^2/\kappa\)를 기록한다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교</p>
+        <p>do Carmo는 국소 표준형을 \(z(s) = -\tfrac{k\tau}{6}s^3 + R_z\)로 쓴다 <a class="cite" href="../../references.html#dC">[dC §1-6]</a>. do Carmo의 \(\tau\)는 이 study set의 \(-\tau\)이므로(<a href="5-2-torsion.html#i-5-2-5">정의 5.2.5</a> 뒤의 규약 비교) 같은 식이다.
+        그래서 do Carmo는 “\(\tau \lt 0\)이면 곡선이 접촉평면을 \(\mathbf{b}\) 쪽으로 지나간다”고 말하고 §1-5 연습문제 1의 나선을 음의 비틀림률의 예로 든다. 여기서는 같은 현상이 \(\tau \gt 0\)이다.
+        do Carmo는 나머지가 \(s^3\)보다 빨리 \(0\)으로 간다고만 적는데, 곡선이 매끄러우므로 여기서는 \(\abs{R} \le Mh^4\)을 증명했다. do Carmo의 “rectifying plane”과 “normal plane”을 각각 전직평면, 법평면이라 옮긴다 <a class="cite" href="../../references.html#dC">[dC §1-5]</a>.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>한 점에서 프레네 틀의 두 벡터씩이 접촉평면(\(\mathbf{t}, \mathbf{n}\)), 법평면(\(\mathbf{n}, \mathbf{b}\)), 전직평면(\(\mathbf{t}, \mathbf{b}\))을 만든다(<a href="#i-5-5-1">정의 5.5.1</a>).</li>
+        <li>프레네 좌표로 쓰면 \(x = h - \kappa^2h^3/6\), \(y = \kappa h^2/2 + \kappa'h^3/6\), \(z = \kappa\tau h^3/6\)에 \(O(h^4)\)의 나머지가 붙는다(<a href="#i-5-5-2">정리 5.5.2</a>). 나선에서는 정확한 식 <a href="#eq-5-5-4">(5.5.4)</a>로 확인된다.</li>
+        <li>세 평면에 비친 곡선은 포물선, 삼차곡선, 뾰족점 곡선을 닮는다(<a href="#i-5-5-4">예 5.5.4</a>). 꼬인 삼차곡선이 그 모형이다(<a href="#i-5-5-7">예 5.5.7</a>).</li>
+        <li>곡선은 전직평면의 \(\mathbf{n}\) 쪽에 있고, \(\tau \gt 0\)이면 접촉평면을 \(-\mathbf{b}\) 쪽에서 \(+\mathbf{b}\) 쪽으로 지나간다. \(\tau = 0\)인 점에서는 지나가지 않을 수도 있다(<a href="#i-5-5-5">따름정리 5.5.5</a>, <a href="#i-5-5-6">비예 5.5.6</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 국소적인 성질에서 전역적인 성질로 넘어간다. 닫힌 평면곡선을 한 바퀴 돌 때 접선이 몇 바퀴 도는지를 회전지수로 세고,
+      스스로 만나지 않는 닫힌 곡선의 회전지수는 \(\pm 1\)이라는 호프의 접선회전정리를 증명한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-5-5-1" data-level="1">
+        <p><span class="thm-head">연습 5.5.1</span> <span class="level">★</span>
+        \(a = b = 1\)인 나선에 대해 <a href="#eq-5-5-4">(5.5.4)</a>를 쓰고, \(3\)차까지의 전개가 <a href="#eq-5-5-2">(5.5.2)</a>와 같음을 확인하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(c = \sqrt2\)이므로 \(x = \tfrac{1}{\sqrt2}\sin\tfrac{s}{\sqrt2} + \tfrac s2\), \(y = 1 - \cos\tfrac{s}{\sqrt2}\), \(z = \tfrac{1}{\sqrt2}\big(\tfrac{s}{\sqrt2} - \sin\tfrac{s}{\sqrt2}\big)\)이다. 전개하면
+          \(x = \tfrac{1}{\sqrt2}\big(\tfrac{s}{\sqrt2} - \tfrac{s^3}{6 \cdot 2\sqrt2}\big) + \tfrac s2 + \cdots = s - \tfrac{s^3}{24} + \cdots\), \(y = \tfrac{s^2}{4} + \cdots\), \(z = \tfrac{1}{\sqrt2}\cdot\tfrac{s^3}{6 \cdot 2\sqrt2} + \cdots = \tfrac{s^3}{24} + \cdots\)이다.
+          \(\kappa = \tau = 1/2\)이므로 (5.5.2)의 계수는 \(\kappa^2/6 = 1/24\), \(\kappa/2 = 1/4\), \(\kappa\tau/6 = 1/24\)로 같다.</p>
+          <p class="verified">검증: <code>verify/v-5-5-local-canonical-form.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-5-2" data-level="1">
+        <p><span class="thm-head">연습 5.5.2</span> <span class="level">★</span>
+        국소 표준형에서 \(\kappa(s_0) = \lim_{h \to 0} 2y(h)/h^2\), \(\tau(s_0) = \lim_{h \to 0} 6z(h)/(\kappa(s_0)h^3)\)임을 보여라. 곧 곡률과 비틀림률은 곡선이 전직평면과 접촉평면에서 벗어나는 빠르기로 잴 수 있다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="#eq-5-5-2">(5.5.2)</a>에서 \(2y/h^2 = \kappa + \kappa'h/3 + 2R_y/h^2\)이고 \(\abs{2R_y/h^2} \le 2Mh^2\)이므로 극한은 \(\kappa\)이다. \(6z/(\kappa h^3) = \tau + 6R_z/(\kappa h^3)\)이고
+          \(\abs{6R_z/(\kappa h^3)} \le 6M\abs{h}/\kappa\)이므로 극한은 \(\tau\)이다(\(\kappa \gt 0\)).</p>
+          <p class="verified">검증: <code>verify/v-5-5-local-canonical-form.py</code> (나선)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-5-3" data-level="1">
+        <p><span class="thm-head">연습 5.5.3</span> <span class="level">★</span>
+        \(\kappa \gt 0\)인 단위속력 곡선에 대한 다음 주장이 참인지 거짓인지 판별하고 이유를 대어라.
+        (a) \(s_0\) 근처에서 곡선은 \(s_0\)에서의 법평면의 한쪽에 있다.
+        (b) \(s_0\) 근처에서 곡선은 \(s_0\)에서의 전직평면의 한쪽에 있다.
+        (c) 평면곡선의 접촉평면에 비친 그림자는 곡선 자신이다.
+        (d) 왼손 나선은 접촉평면을 \(+\mathbf{b}\) 쪽에서 \(-\mathbf{b}\) 쪽으로 지나간다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 거짓. \(x\)는 \(h\)와 부호가 같으므로(<a href="#i-5-5-5">따름정리 5.5.5</a>(c)) 법평면을 가로지른다.
+          (b) 참. <a href="#i-5-5-5">따름정리 5.5.5</a>(a).
+          (c) 참. <a href="5-1-curvature.html#i-5-1-13">명제 5.1.13</a>에서 평면곡선의 접촉평면은 곡선이 놓인 평면이다. \(z \equiv 0\)이다.
+          (d) 참. 왼손 나선은 \(\tau \lt 0\)이다(<a href="5-2-torsion.html#i-5-2-6">예 5.2.6</a>). <a href="#i-5-5-5">따름정리 5.5.5</a>(b).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-5-4" data-level="1">
+        <p><span class="thm-head">연습 5.5.4</span> <span class="level">★</span>
+        \(\kappa(s_0)\tau(s_0) \neq 0\)이라 하자. 새 좌표 \(X = \alpha x\), \(Y = \beta y\), \(Z = \mu z\)와 새 매개변수 \(u = \lambda h\)를 적당히 골라(\(\alpha, \beta, \mu, \lambda\)는 \(0\)이 아닌 상수)
+        국소 표준형의 주요항이 \(X \approx u\), \(Y \approx u^2\), \(Z \approx u^3\)이 되게 하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>주요항은 \(x \approx h\), \(y \approx \tfrac\kappa2h^2\), \(z \approx \tfrac{\kappa\tau}{6}h^3\)이다. \(\lambda = 1\), \(\alpha = 1\), \(\beta = 2/\kappa\), \(\mu = 6/(\kappa\tau)\)로 두면 \(X \approx h = u\), \(Y \approx h^2 = u^2\), \(Z \approx h^3 = u^3\)이다.
+          곧 좌표축의 눈금만 바꾸면 곡선의 \(3\)차까지의 모양은 꼬인 삼차곡선이다(<a href="#i-5-5-7">예 5.5.7</a>). 꼬인 삼차곡선에서는 \(\beta = 2/2 = 1\), \(\mu = 6/6 = 1\)이 되어 좌표를 바꿀 필요가 없다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-5-5" data-level="2">
+        <p><span class="thm-head">연습 5.5.5</span> <span class="level">★★</span>
+        \(\kappa(s_0) \gt 0\)이라 하자. \(h \neq 0\)이 충분히 작으면 \(s_0\)에서의 접선과 점 \(\gamma(s_0 + h)\)를 포함하는 평면이 꼭 하나 있고, \(h \to 0\)이면 그 평면의 단위법벡터가 \(\pm\mathbf{b}_0\)으로 수렴함을 보여라.
+        (접촉평면은 “접선과 이웃한 점이 정하는 평면의 극한”이다.) <a class="cite" href="../../references.html#dC">[dC §1-6 변형]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p>프레네 좌표에서 접선은 \(x\)축이므로, 접선을 포함하는 평면의 단위법벡터는 \(\nu = \cos\varphi\,\mathbf{n}_0 + \sin\varphi\,\mathbf{b}_0\) 꼴이다(\(\mathbf{t}_0\)에 수직). 이 평면이 \(\gamma(s_0 + h)\)를 지날 조건은
+          \(y(h)\cos\varphi + z(h)\sin\varphi = 0\)이다. <a href="#i-5-5-5">따름정리 5.5.5</a>(a)에서 \(y(h) \gt 0\)이므로 \((y, z) \neq 0\)이고, 이 조건을 만족하는 \(\nu\)는 \(\pm(-z(h)\,\mathbf{n}_0 + y(h)\,\mathbf{b}_0)/\sqrt{y^2 + z^2}\)뿐이다.
+          따라서 평면은 하나다. \(z/y = (\kappa\tau h^3/6 + R_z)/(\kappa h^2/2 + \kappa'h^3/6 + R_y) \to 0\)(분자는 \(O(h^3)\), 분모는 \(h^2\) 정도)이므로 \(\nu = \pm(-(z/y)\mathbf{n}_0 + \mathbf{b}_0)/\sqrt{1 + (z/y)^2} \to \pm\mathbf{b}_0\)이다.</p>
+          <p class="verified">검증: <code>verify/v-5-5-local-canonical-form.py</code> (나선에서 \(z/y \to 0\))</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-5-6" data-level="2">
+        <p><span class="thm-head">연습 5.5.6</span> <span class="level">★★</span>
+        \(\kappa(s_0) \gt 0\)이라 하자. 평면 \(P\)가 \(s_0\)에서의 접선을 포함하고, \(s_0\)의 어떤 근방을 잡아도 그 근방의 \(s\)에 대한 점 \(\gamma(s)\)들이 \(P\)의 양쪽에 모두 있다면, \(P\)는 접촉평면임을 보여라.
+        거꾸로 \(\tau(s_0) \neq 0\)이면 접촉평면은 이 성질을 가진다. <a class="cite" href="../../references.html#dC">[dC §1-6 연습문제 1 변형]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="#ex-5-5-5">연습 5.5.5</a>처럼 \(P\)의 단위법벡터를 \(\nu = \cos\varphi\,\mathbf{n}_0 + \sin\varphi\,\mathbf{b}_0\)로 쓰면 \(\gamma(s_0 + h)\)의 \(P\)까지의 부호 있는 거리는 \(d(h) = y(h)\cos\varphi + z(h)\sin\varphi\)이다.
+          \(\cos\varphi \neq 0\)이면 \(d(h)/h^2 \to (\kappa/2)\cos\varphi \neq 0\)이므로 \(0\)이 아닌 작은 \(h\)에서 \(d(h)\)는 부호가 일정하고, 곡선은 그 근방에서 \(P\)의 한쪽(과 \(P\) 위의 점 \(\gamma(s_0)\))에만 있다. 가정에 어긋나므로 \(\cos\varphi = 0\),
+          곧 \(\nu = \pm\mathbf{b}_0\)이고 \(P\)는 접촉평면이다. 거꾸로 \(\tau(s_0) \neq 0\)이면 <a href="#i-5-5-5">따름정리 5.5.5</a>(b)에서 \(z(h)\)가 \(h \gt 0\)과 \(h \lt 0\)에서 부호가 반대이므로 곡선은 접촉평면의 양쪽에 있다.
+          \(\tau(s_0) = 0\)이면 이 역은 성립하지 않을 수 있다(<a href="#i-5-5-6">비예 5.5.6</a>).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-5-5-7" data-level="3">
+        <p><span class="thm-head">연습 5.5.7</span> <span class="level">★★★</span>
+        \(\gamma\)가 호의 길이로 매개화되어 있고 \(\kappa \gt 0\), \(\tau(s_0) \neq 0\)이라 하자. \(\rho = 1/\kappa\)로 두고 \(s_0\)에서의 값으로
+        \(q = \gamma(s_0) + \rho\,\mathbf{n}_0 + (\rho'/\tau)\,\mathbf{b}_0\), \(r^2 = \rho^2 + (\rho'/\tau)^2\)이라 하자. \(f(s) = \abs{\gamma(s) - q}^2 - r^2\)이 \(f(s_0) = f'(s_0) = f''(s_0) = f'''(s_0) = 0\)을 만족함을 보여라.
+        (중심 \(q\), 반지름 \(r\)인 구면을 접촉구면이라 한다. <a href="5-3-frenet.html#ex-5-3-6">연습 5.3.6</a>과 비교하여라.)</p>
+        <details class="hint"><summary>힌트</summary><p>\(q\)는 상수다. \(f' = 2\inner{\mathbf{t}}{\gamma - q}\)를 프레네-세레 공식으로 두 번 더 미분하고 \(s_0\)에서 \(\gamma - q = -\rho\mathbf{n}_0 - (\rho'/\tau)\mathbf{b}_0\)을 넣는다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(w = \gamma - q\)라 하면 \(w(s_0) = -\rho\mathbf{n}_0 - (\rho'/\tau)\mathbf{b}_0\)이다. \(f(s_0) = \abs{w(s_0)}^2 - r^2 = \rho^2 + (\rho'/\tau)^2 - r^2 = 0\)이다. 미분하면(\(q\)는 상수)</p>
+          \[ \begin{aligned}
+            f' &= 2\inner{\mathbf{t}}{w}, \qquad f'' = 2\inner{\kappa\mathbf{n}}{w} + 2\inner{\mathbf{t}}{\mathbf{t}} = 2\kappa\inner{\mathbf{n}}{w} + 2,\\
+            f''' &= 2\kappa'\inner{\mathbf{n}}{w} + 2\kappa\inner{-\kappa\mathbf{t} + \tau\mathbf{b}}{w} + 2\kappa\inner{\mathbf{n}}{\mathbf{t}}
+          \end{aligned} \]
+          <p>이다. \(s_0\)에서 \(\inner{\mathbf{t}_0}{w} = 0\), \(\inner{\mathbf{n}_0}{w} = -\rho\), \(\inner{\mathbf{b}_0}{w} = -\rho'/\tau\)이므로 \(f'(s_0) = 0\), \(f''(s_0) = -2\kappa\rho + 2 = 0\)이고
+          \(f'''(s_0) = -2\kappa'\rho - 2\kappa\tau\rho'/\tau = -2(\kappa'\rho + \kappa\rho')\)이다. \(\rho = 1/\kappa\)이므로 \(\rho' = -\kappa'/\kappa^2\)이고 \(\kappa'\rho + \kappa\rho' = \kappa'/\kappa - \kappa'/\kappa = 0\)이다.
+          곧 이 구면은 곡선과 \(3\)차까지 맞닿는다. 곡선이 구면 위에 있으면 그 구면이 모든 점에서 접촉구면이 되고, <a href="5-3-frenet.html#ex-5-3-6">연습 5.3.6</a>의 식 \(\gamma - p_0 = -\rho\mathbf{n} - (\rho'/\tau)\mathbf{b}\)가 바로 “\(p_0 = q\)”라는 말이다.</p>
+          <p class="verified">검증: <code>verify/v-5-5-local-canonical-form.py</code> (꼬인 삼차곡선의 \(t = 1\)에서 \(f\)와 세 도함수가 \(0\), 넷째 도함수는 \(0\)이 아님)</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="5-4-fundamental-theorem.html">← 5.4 곡선론의 기본정리</a>
+    <a rel="next" href="5-6-rotation-index.html">5.6 회전지수와 접선회전정리 →</a>
+  </nav>
+</body>
+</html>

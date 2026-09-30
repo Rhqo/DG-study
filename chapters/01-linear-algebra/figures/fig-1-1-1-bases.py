@@ -1,4 +1,4 @@
-"""그림 1.1.1: 기저 = 생성 + 일차독립 (1.1절, 예 1.1.14와 비예 1.1.15).
+"""그림 1.1.1: 기저 = 생성 + 일차독립 (1.1절, 예 1.1.15와 비예 1.1.16).
 
 (a) 기저 b_1 = (2, 1), b_2 = (-1, 1)의 비스듬한 좌표격자와 v = (1, 2) = b_1 + b_2
 (b) 목록 (b_1, -b_1): 생성하는 것은 직선 하나뿐이고 v는 그 위에 없다
@@ -17,7 +17,7 @@ import numpy as np
 C = dgfig.COLORS
 LW = dgfig.LW
 
-# 본문(예 1.1.14, 비예 1.1.15)과 같은 값
+# 본문(예 1.1.15, 비예 1.1.16)과 같은 값
 b1 = np.array([2.0, 1.0])
 b2 = np.array([-1.0, 1.0])
 w = np.array([0.0, 1.0])
@@ -44,7 +44,7 @@ def frame(ax, xlim, ylim, title):
     ax.plot(list(xlim), [0, 0], color=C["aux"], lw=0.5, zorder=0)
     ax.plot([0, 0], list(ylim), color=C["aux"], lw=0.5, zorder=0)
     ax.plot(0, 0, "o", color=C["main"], ms=2.5, zorder=6)
-    ax.text(0.02, 0.98, title, transform=ax.transAxes, ha="left", va="top", fontsize=11)
+    ax.text(0.02, 0.98, title, transform=ax.transAxes, ha="left", va="top", fontsize=12)
 
 
 XL, YL = (-2.4, 3.4), (-1.6, 3.3)
@@ -65,7 +65,7 @@ ax.plot(*np.array([b1, v]).T, color=C["tangent"], lw=0.8, ls="--", zorder=3)
 ax.plot(*np.array([b2, v]).T, color=C["tangent"], lw=0.8, ls="--", zorder=3)
 ax.text(*(b1 + [0.08, -0.38]), r"$b_1$", color=C["tangent"], fontsize=12)
 ax.text(*(b2 + [-0.55, -0.05]), r"$b_2$", color=C["tangent"], fontsize=12)
-ax.text(*(v + [-1.35, 0.22]), r"$v = b_1 + b_2$", color=C["main"], fontsize=11)
+ax.text(*(v + [-1.35, 0.22]), r"$v = b_1 + b_2$", color=C["main"], fontsize=12)
 
 # (b) 생성하지 못하는 목록 -------------------------------------------------------
 ax = axs[1]
@@ -78,7 +78,7 @@ arrow(ax, (0, 0), v, C["main"], lw=1.8)
 ax.text(*(b1 + [-0.25, 0.25]), r"$b_1$", color=C["tangent"], fontsize=12)
 ax.text(*(-b1 + [-0.2, 0.3]), r"$-b_1$", color=C["tangent"], fontsize=12)
 ax.text(*(v + [0.1, 0.05]), r"$v$", color=C["main"], fontsize=12)
-ax.text(1.35, -1.2, r"$\mathrm{span}(b_1, -b_1)$", color=C["tangent"], fontsize=10)
+ax.text(1.35, -1.2, r"$\mathrm{span}(b_1, -b_1)$", color=C["tangent"], fontsize=12)
 
 # (c) 일차독립이 아닌 목록: 표현이 두 가지 ---------------------------------------
 ax = axs[2]

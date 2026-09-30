@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4.5 접촉원과 곡률중심 — 미분기하 스터디</title>
+  <meta name="dg-id" content="4.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="4.1, 4.4, 1.5, 2.2, 3.6">
+  <meta name="dg-refs" content="dC §1-5, §1-6 (Exercise 2); Pr Ch. 2">
+  <meta name="dg-updated" content="2026-09-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">4. 곡선의 기초</a> ›
+    <span>4.5 접촉원과 곡률중심</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>4.5 접촉원과 곡률중심</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#dC">[dC §1-5, §1-6 연습문제 2]</a>,
+        <a class="cite" href="../../references.html#Pr">[Pr 2장]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>\(\kappa_s \neq 0\)인 점에서 곡률중심, 곡률반지름, 접촉원을 정의하고 계산할 수 있다.</li>
+        <li>접촉원이 곡선과 2차까지 맞닿는 유일한 원이며, 곡선 위의 가까운 세 점을 지나는 원의 극한임을 증명할 수 있다.</li>
+        <li>\(\kappa_s\)의 부호가 곡선이 접선의 어느 쪽에 놓이는지 정함을 보일 수 있다.</li>
+        <li>공간 속 평면에 놓인 곡선에 이 결과를 옮겨, 구면 위 대원과 위도원의 곡률 \(1/r\), \(1/(r\sin\theta_0)\)과 곡률중심을 구할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="4-4-signed-curvature.html#i-4-4-2">정의 4.4.2 (부호곡률)</a>, <a href="4-4-signed-curvature.html#i-4-4-5">명제 4.4.5 (일반 매개변수의 공식)</a>, <a href="4-4-signed-curvature.html#i-4-4-3">예 4.4.3 (원)</a></li>
+        <li><a href="4-1-parametrized-curves.html#i-4-1-13">예 4.1.13 (구면 위의 위도원과 경선)</a></li>
+        <li>코시-슈바르츠 부등식(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-5">정리 1.5.5</a>), 최댓값·최솟값 정리(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">정리 3.6.10</a>), 1변수 테일러 정리(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">보조정리 2.2.16</a>)</li>
+        <li>1변수 미적분의 롤의 정리와 로피탈의 정리</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="4-4-signed-curvature.html#i-4-4-3">예 4.4.3</a>에서 반지름 \(r\)인 원의 부호곡률이 \(\pm 1/r\)임을 보았고, <a href="4-4-signed-curvature.html#i-4-4-10">정리 4.4.10</a>에서
+      부호곡률이 상수인 곡선은 원뿐임을 보았다. 그렇다면 거꾸로, 곡률이 \(\kappa_s(s_0) \neq 0\)인 점에서 곡선을 원으로 근사하면 그 원의 반지름은 \(1/\abs{\kappa_s(s_0)}\)이어야 하지 않을까?
+      이 절은 이 기대가 정확히 맞음을 보인다.</p>
+      <p>“곡선에 가장 잘 맞는 원”은 여러 방식으로 정의할 수 있다. 곡선 위의 가까운 세 점을 지나는 원을 그리고 세 점을 한 점으로 모으는 방법이 있고
+      (<a href="#fig-4-5-1">그림 4.5.1</a>), 곡선과의 차이가 가장 빨리 줄어드는 원을 고르는 방법도 있다. 두 방법은 같은 원을 준다. 그 원의 반지름이 \(1/\abs{\kappa_s}\)이다.
+      이렇게 해서 곡률은 “단위 길이당 접선이 도는 각”(<a href="4-4-signed-curvature.html#i-4-4-9">정리 4.4.9</a>)이라는 뜻에 더해 “가장 잘 맞는 원의 반지름의 역수”라는 뜻을 얻는다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 세 점을 모으기</p>
+        <p>한 직선 위에 있지 않은 세 점은 꼭 하나의 원 위에 있다. <a href="#fig-4-5-1">그림 4.5.1</a>은 포물선 위의 점 \(\gamma(x_0)\)과 그 양옆의 두 점을 지나는 원들을 그린 것이다.
+        양옆의 점을 \(\gamma(x_0)\)에 가까이 가져갈수록(옅은 회색에서 진한 회색으로) 원은 한 원(주황)으로 모이고, 그 중심은 한 점 \(c\)로 모인다. 극한의 원은 \(\gamma(x_0)\)에서 곡선과 접할 뿐 아니라
+        휘는 정도까지 같다. 이것이 <em>접촉원</em>이다. 영어 osculating은 라틴어로 “입맞춤”이라는 뜻이다. 그냥 닿는 것이 아니라 가장 가깝게 닿는다는 뜻이다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-4-5-1">
+        <img src="figures/fig-4-5-1-three-point-circles.svg" alt="포물선 y=x²/2와 그 위의 점 γ(x0), x0=0.5. 이 점과 양옆 두 점을 지나는 원 세 개가 회색 점선으로 그려져 있고, 양옆의 점이 가까울수록 원이 진한 회색이다. 세 원의 중심(회색 점)은 주황 원(접촉원)의 중심인 청록 점 c로 다가간다. γ(x0)에서 c로 가는 주홍 선분이 곡률반지름이다.">
+        <figcaption><span class="fig-head">그림 4.5.1.</span>
+        곡선 \(\gamma(x) = (x, x^2/2)\), \(x_0 = 0.5\). 세 점 \(\gamma(x_0 - h)\), \(\gamma(x_0)\), \(\gamma(x_0 + h)\)를 지나는 원(\(h = 1,\ 0.55,\ 0.25\), 회색 점선)과
+        접촉원(주황). 곡률중심은 \(c = (-1/8,\ 11/8)\)(청록)이고 곡률반지름은 \((5/4)^{3/2} \approx 1.398\)이다(<a href="#i-4-5-2">예 4.5.2</a>(b), <a href="#i-4-5-7">명제 4.5.7</a>).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-osculating-circle">
+      <h2>접촉원의 정의</h2>
+
+      <div class="thm definition" id="i-4-5-1">
+        <p><span class="thm-head">정의 4.5.1</span> <span class="thm-name">(곡률중심과 접촉원, center of curvature and osculating circle)</span>.
+        \(\gamma\colon I \to \R^2\)가 호의 길이로 매개화된 평면곡선이고 \(\kappa_s(s_0) \neq 0\)이라 하자.</p>
+        <div class="equation" id="eq-4-5-1">
+        \[ c(s_0) = \gamma(s_0) + \frac{1}{\kappa_s(s_0)}\,\mathbf{n}_s(s_0) \tag{4.5.1} \]
+        </div>
+        <p>를 \(s_0\)에서 \(\gamma\)의 <dfn>곡률중심</dfn>(center of curvature), \(1/\abs{\kappa_s(s_0)}\)을 <dfn>곡률반지름</dfn>(radius of curvature)이라 하고,
+        중심이 \(c(s_0)\)이고 반지름이 \(1/\abs{\kappa_s(s_0)}\)인 원을 \(s_0\)에서 \(\gamma\)의 <dfn>접촉원</dfn>(osculating circle)이라 한다.
+        일반 매개변수의 정칙곡선에서는 방향을 보존하는 호의 길이 매개화로 정한다. <a href="4-4-signed-curvature.html#sec-general-parameter">4.4절</a>의 약속(<a href="4-4-signed-curvature.html#i-4-4-5">명제 4.4.5</a> 앞)을 따르면 식은 같은 모양
+        \(c(t) = \gamma(t) + \mathbf{n}_s(t)/\kappa_s(t)\)이다.</p>
+      </div>
+
+      <p>\(\kappa_s \lt 0\)이면 \(1/\kappa_s \lt 0\)이므로 곡률중심은 \(-\mathbf{n}_s\) 쪽에 있다. 어느 경우든 곡률중심은 곡선이 휘어 들어가는 쪽에 있다.
+      실제로 단위속력 곡선에서는 \(\gamma'' = \mathbf{t}' = \kappa_s\mathbf{n}_s\)이므로 \(\mathbf{n}_s/\kappa_s = \kappa_s\mathbf{n}_s/\kappa_s^2\)이고,</p>
+      <div class="equation" id="eq-4-5-2">
+      \[ c(s) = \gamma(s) + \frac{\gamma''(s)}{\abs{\gamma''(s)}^2} \qquad (\gamma \text{는 단위속력}) \tag{4.5.2} \]
+      </div>
+      <p>이다. 이 식에는 \(J\)도 부호도 없다. 곡선의 방향을 뒤집으면 \(\kappa_s\)와 \(\mathbf{n}_s\)의 부호가 함께 바뀌지만 \(\gamma''\)은 그대로이므로(<a href="4-3-reparametrization.html#ex-4-3-3">연습 4.3.3</a>),
+      곡률중심과 접촉원은 곡선의 방향에 무관하다. 평면을 반사해도 마찬가지다. 곡률반지름과 곡률중심은 부호곡률보다 “더 기하적인” 양이다.</p>
+
+      <div class="thm example" id="i-4-5-2">
+        <p><span class="thm-head">예 4.5.2</span>.
+        (a) <em>원 (기준 예제).</em> 반지름 \(r\)인 원을 반시계 방향으로 돌면 \(\kappa_s = 1/r\), \(\mathbf{n}_s = -\gamma/r\)이므로(식 <a href="4-4-signed-curvature.html#eq-4-4-3">4.4.3</a>)
+        \(c = \gamma + r(-\gamma/r) = 0\)이다. 모든 점의 곡률중심이 원의 중심이고 접촉원은 원 자신이다. 원의 “곡률 \(1/r\)”이 곧 “반지름 \(r\)”인 셈이다.</p>
+        <p>(b) <em>포물선.</em> \(\gamma(x) = (x, x^2/2)\)에서 \(\kappa_s = (1 + x^2)^{-3/2}\)이고(<a href="4-4-signed-curvature.html#i-4-4-6">예 4.4.6</a>(b)),
+        \(\mathbf{n}_s = J(1, x)/\sqrt{1 + x^2} = (-x, 1)/\sqrt{1 + x^2}\)이다. 따라서</p>
+        \[ \begin{aligned} c(x) &= (x,\ x^2/2) + (1 + x^2)^{3/2}\,\frac{(-x,\ 1)}{\sqrt{1 + x^2}}\\ &= \big(x - x(1 + x^2),\ \tfrac{x^2}{2} + 1 + x^2\big) = \big(-x^3,\ 1 + \tfrac32 x^2\big) \end{aligned} \]
+        <p>이다. 꼭짓점 \(x = 0\)에서 곡률반지름은 \(1\), 곡률중심은 \((0, 1)\)이다. <a href="#fig-4-5-1">그림 4.5.1</a>의 \(x_0 = 1/2\)에서는 \(c = (-1/8,\ 11/8)\)이고 반지름은 \((5/4)^{3/2}\)이다.</p>
+        <p>(c) <em>타원의 꼭짓점.</em> \(A \gt B \gt 0\)인 타원 \((A\cos t, B\sin t)\)의 부호곡률은 \(AB/(A^2\sin^2 t + B^2\cos^2 t)^{3/2}\)이다(<a href="4-4-signed-curvature.html#ex-4-4-1">연습 4.4.1</a>).
+        긴 축의 끝 \((A, 0)\)에서 곡률반지름은 \(B^2/A\)이고, 짧은 축의 끝 \((0, B)\)에서는 \(A^2/B\)이다. \(A = 2\), \(B = 1\)이면 각각 \(1/2\)과 \(4\)다. 뾰족한 끝에는 작은 원이,
+        납작한 옆구리에는 큰 원이 맞는다(<a href="#fig-4-5-2">그림 4.5.2</a>).</p>
+        <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code></p>
+      </div>
+
+      <div class="thm nonexample" id="i-4-5-3">
+        <p><span class="thm-head">비예 4.5.3</span>.
+        (a) \(\kappa_s = 0\)인 점에서는 접촉원이 없다. \(y = x^3\)의 그래프는 \(\kappa_s = 6x/(1 + 9x^4)^{3/2}\)이므로 \(x = 0\)에서 \(\kappa_s = 0\)이다(식 <a href="4-4-signed-curvature.html#eq-4-4-5">4.4.5</a>).
+        그곳에서 곡선은 접선 \(y = 0\)을 가로지른다. 원은 늘 한쪽으로 휘므로 이 곡선에 2차까지 맞출 수 없다. 이런 점에서는 접선 자체가 “반지름이 무한대인 접촉원”의 역할을 한다.</p>
+        <p>(b) 접한다고 모두 접촉원은 아니다. 포물선 \(y = x^2/2\)의 꼭짓점에서 반지름 \(2\)인 원 \(x^2 + (y - 2)^2 = 4\)도 원점에서 곡선과 접한다. 그러나 이 원의 아래쪽 반은
+        \(y = 2 - \sqrt{4 - x^2} = x^2/4 + \cdots\)이고 곡선은 \(y = x^2/2\)이므로, 둘의 차이는 \(x^2/4\)로 2차에서 벌어진다. 접촉원 \(y = 1 - \sqrt{1 - x^2} = x^2/2 + x^4/8 + \cdots\)은
+        곡선과의 차이가 \(x^4/8\)로 훨씬 작다.</p>
+      </div>
+    </section>
+
+    <section id="sec-contact">
+      <h2>접선의 어느 쪽에, 얼마나 가깝게</h2>
+      <p>먼저 \(\kappa_s\)의 부호가 무엇을 말하는지 정확히 하자. 다음 명제는 “\(\kappa_s \gt 0\)이면 왼쪽으로 돈다”를 “곡선이 접선의 왼쪽에 있다”로 바꾸어 말한 것이다.</p>
+
+      <div class="thm proposition" id="i-4-5-4">
+        <p><span class="thm-head">명제 4.5.4</span> <span class="thm-name">(곡선은 접선의 어느 쪽에 있는가)</span>.
+        \(\gamma\)가 호의 길이로 매개화된 평면곡선이고 \(\kappa_s(s_0) \gt 0\)이라 하자. 그러면 \(\delta \gt 0\)가 있어 \(0 \lt \abs{s - s_0} \lt \delta\)이면
+        \(\inner{\gamma(s) - \gamma(s_0)}{\mathbf{n}_s(s_0)} \gt 0\)이다. 곧 \(s_0\) 근처에서 곡선은 \(s_0\)에서의 접선의 \(\mathbf{n}_s(s_0)\) 쪽에 있다. \(\kappa_s(s_0) \lt 0\)이면 반대쪽에 있다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        \(g(s) = \inner{\gamma(s) - \gamma(s_0)}{\mathbf{n}_s(s_0)}\)으로 두자. \(g(s_0) = 0\), \(g'(s) = \inner{\mathbf{t}(s)}{\mathbf{n}_s(s_0)}\)이므로 \(g'(s_0) = 0\)이고,
+        \(g''(s) = \kappa_s(s)\inner{\mathbf{n}_s(s)}{\mathbf{n}_s(s_0)}\)이므로 \(g''(s_0) = \kappa_s(s_0) \gt 0\)이다. \(g''\)이 연속이므로 \(\delta \gt 0\)가 있어 \((s_0 - \delta, s_0 + \delta)\)에서 \(g'' \gt 0\)이다.
+        그 구간에서 \(g'\)은 순증가하고 \(g'(s_0) = 0\)이므로 \(s \lt s_0\)에서 \(g' \lt 0\), \(s \gt s_0\)에서 \(g' \gt 0\)이다. 따라서 \(g\)는 \(s_0\)의 왼쪽에서 감소, 오른쪽에서 증가하고,
+        \(0 \lt \abs{s - s_0} \lt \delta\)이면 \(g(s) \gt g(s_0) = 0\)이다. \(\kappa_s(s_0) \lt 0\)이면 \(-g\)에 같은 논증을 쓴다.</p>
+      </div>
+
+      <p>이제 접촉원이 “가장 잘 맞는 원”이라는 것을 정확히 하자. 중심이 \(c\)이고 반지름이 \(\rho \gt 0\)인 원 \(C\)에 대하여</p>
+      <div class="equation" id="eq-4-5-3">
+      \[ f_C(s) = \abs{\gamma(s) - c}^2 - \rho^2 \tag{4.5.3} \]
+      </div>
+      <p>로 두자. \(f_C(s) = 0\)은 \(\gamma(s)\)가 \(C\) 위에 있다는 뜻이고, \(\abs{f_C(s)}\)는 \(\gamma(s)\)가 \(C\)에서 떨어진 정도를 잰다(<a href="#i-4-5-6">따름정리 4.5.6</a>의 증명).
+      단위속력 곡선에서 \(\mathbf{t}' = \kappa_s\mathbf{n}_s\)와 \(\abs{\mathbf{t}} = 1\)을 쓰면</p>
+      <div class="equation" id="eq-4-5-4">
+      \[ f_C' = 2\inner{\mathbf{t}}{\gamma - c}, \qquad f_C'' = 2\kappa_s\inner{\mathbf{n}_s}{\gamma - c} + 2 \tag{4.5.4} \]
+      </div>
+      <p>이다(<a href="4-1-parametrized-curves.html#i-4-1-11">명제 4.1.11</a>).</p>
+
+      <div class="thm theorem" id="i-4-5-5">
+        <p><span class="thm-head">정리 4.5.5</span> <span class="thm-name">(접촉원은 2차까지 맞닿는 유일한 원이다)</span>.
+        \(\gamma\)가 호의 길이로 매개화된 평면곡선이고 \(s_0 \in I\)이며 \(C\)가 중심 \(c\), 반지름 \(\rho \gt 0\)인 원이라 하자.</p>
+        <ul>
+          <li>(a) \(f_C(s_0) = f_C'(s_0) = 0\)일 필요충분조건은 \(C\)가 \(\gamma(s_0)\)을 지나고 거기서 \(\gamma\)와 접하는 것, 곧 어떤 \(\lambda \neq 0\)에 대해 \(c = \gamma(s_0) + \lambda\,\mathbf{n}_s(s_0)\), \(\rho = \abs{\lambda}\)인 것이다.</li>
+          <li>(b) \(f_C(s_0) = f_C'(s_0) = f_C''(s_0) = 0\)일 필요충분조건은 \(\kappa_s(s_0) \neq 0\)이고 \(C\)가 \(s_0\)에서의 접촉원인 것이다.</li>
+        </ul>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 한 점에서 곡선에 접하는 원은 법선 위에 중심을 둔 원들로 한 가족을 이룬다. 그 가운데 곡선과 “2차까지”, 곧 휘는 정도까지 맞는 원은 접촉원 하나뿐이고,
+      곡률이 \(0\)이면 그런 원이 없다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: \(f_C' = 0\)은 반지름이 접선과 수직이라는 조건, \(f_C'' = 0\)은 식 <a href="#eq-4-5-4">(4.5.4)</a>에서 반지름의 길이를 \(1/\kappa_s\)로 고정하는 조건이다.</p>
+        <p><span class="proof-head">증명.</span>
+        (a) \(f_C(s_0) = 0\)은 \(\abs{\gamma(s_0) - c} = \rho\), 곧 \(\gamma(s_0) \in C\)이다. <a href="#eq-4-5-4">(4.5.4)</a>에서 \(f_C'(s_0) = 0\)은 \(\gamma(s_0) - c \perp \mathbf{t}(s_0)\)이다.
+        \((\mathbf{t}(s_0), \mathbf{n}_s(s_0))\)가 정규직교기저이므로 이것은 \(c - \gamma(s_0) = \lambda\,\mathbf{n}_s(s_0)\)인 \(\lambda\)가 있다는 것과 같고, \(\rho \gt 0\)이므로 \(\lambda \neq 0\), \(\rho = \abs{\lambda}\)이다.
+        원의 접선은 반지름과 수직이므로 이 조건은 원의 접선이 곡선의 접선과 같다는 뜻이다.</p>
+        <p>(b) (a)의 \(c = \gamma(s_0) + \lambda\,\mathbf{n}_s(s_0)\)을 <a href="#eq-4-5-4">(4.5.4)</a>에 넣으면</p>
+        \[ f_C''(s_0) = 2\kappa_s(s_0)\inner{\mathbf{n}_s(s_0)}{-\lambda\,\mathbf{n}_s(s_0)} + 2 = 2\big(1 - \kappa_s(s_0)\,\lambda\big) \]
+        <p>이다. 이것이 \(0\)이려면 \(\kappa_s(s_0)\lambda = 1\)이어야 한다. \(\kappa_s(s_0) = 0\)이면 불가능하고, \(\kappa_s(s_0) \neq 0\)이면 \(\lambda = 1/\kappa_s(s_0)\), 곧 \(c = c(s_0)\), \(\rho = 1/\abs{\kappa_s(s_0)}\)이다.
+        거꾸로 \(C\)가 접촉원이면 \(\lambda = 1/\kappa_s(s_0)\)이므로 세 값이 모두 \(0\)이다.</p>
+      </div>
+
+      <div class="thm corollary" id="i-4-5-6">
+        <p><span class="thm-head">따름정리 4.5.6</span> <span class="thm-name">(접촉원과의 거리는 3차로 작다)</span>.
+        \(\gamma\)가 호의 길이로 매개화된 평면곡선이고 \(\kappa_s(s_0) \neq 0\)이며, \(C_0\)가 \(s_0\)에서의 접촉원, \(\rho_0 = 1/\abs{\kappa_s(s_0)}\)이라 하자. 점과 원 사이의 거리를 \(\operatorname{dist}\)로 쓴다.</p>
+        <ul>
+          <li>(a) \(\delta \gt 0\)와 \(M \ge 0\)가 있어 \(\abs{s - s_0} \le \delta\)이면 \(\operatorname{dist}(\gamma(s), C_0) \le M\abs{s - s_0}^3\)이다.</li>
+          <li>(b) \(C\)가 \(s_0\)에서 \(\gamma\)에 접하는 다른 원(반지름 \(\rho\))이면 \(\displaystyle\lim_{s \to s_0} \frac{\operatorname{dist}(\gamma(s), C)}{(s - s_0)^2} = \frac{\abs{f_C''(s_0)}}{4\rho} \gt 0\)이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        먼저 \(p \neq c\)이면 \(\operatorname{dist}(p, C) = \big\lvert \abs{p - c} - \rho \big\rvert\)이다. \(q \in C\)이면 삼각부등식에서 \(\abs{p - q} \ge \big\lvert\abs{p - c} - \abs{q - c}\big\rvert = \big\lvert\abs{p - c} - \rho\big\rvert\)이고,
+        \(q = c + \rho(p - c)/\abs{p - c}\)에서 등호가 성립하기 때문이다. \(p = c\)이면 \(C\)의 모든 점까지의 거리가 \(\rho\)이므로 이 식은 그때도 성립한다. 따라서 모든 \(s\)에서</p>
+        \[ \operatorname{dist}(\gamma(s), C) = \frac{\abs{f_C(s)}}{\abs{\gamma(s) - c} + \rho}. \]
+        <p>(a) \(\delta\)를 \([s_0 - \delta, s_0 + \delta] \subseteq I\)이 되게 잡고 \(M_3 = \max \abs{f_{C_0}'''}\)(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">정리 3.6.10</a>)이라 하자. <a href="#i-4-5-5">정리 4.5.5</a>(b)에서 \(f = f_{C_0}\)는 \(f(s_0) = f'(s_0) = f''(s_0) = 0\)이다.
+        \(\abs{f''(u)} = \abs{\int_{s_0}^u f'''} \le M_3\abs{u - s_0}\)이고, 한 번 더 적분하면 \(\abs{f'(u)} \le M_3\abs{u - s_0}^2/2\), 또 한 번 적분하면 \(\abs{f(s)} \le M_3\abs{s - s_0}^3/6\)이다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">보조정리 2.2.16</a>의 적분 나머지를 \(k = 2\)로 쓴 것과 같다).
+        분모는 \(\rho_0\) 이상이므로 \(M = M_3/(6\rho_0)\)로 두면 된다.</p>
+        <p>(b) \(f = f_C\)는 \(f(s_0) = f'(s_0) = 0\)이고 <a href="#i-4-5-5">정리 4.5.5</a>(b)에 의해 \(f''(s_0) \neq 0\)이다. 로피탈의 정리를 두 번 쓰면 \(f(s)/(s - s_0)^2 \to f''(s_0)/2\)이다.
+        또 \(\abs{\gamma(s) - c} + \rho \to 2\rho\)이다. 두 극한을 나누면 된다.</p>
+      </div>
+
+      <p>곧 접촉원은 곡선에서 \(\abs{s - s_0}^3\) 정도로만 벗어나지만, 접하는 다른 원과 접선은 \((s - s_0)^2\) 정도로 벗어난다. <a href="#i-4-5-3">비예 4.5.3</a>(b)에서 본 차이가 이것이다.
+      이제 동기에서 말한 두 번째 성질, 세 점의 원의 극한을 증명하자.</p>
+
+      <div class="thm proposition" id="i-4-5-7">
+        <p><span class="thm-head">명제 4.5.7</span> <span class="thm-name">(가까운 세 점을 지나는 원의 극한)</span>.
+        \(\gamma\)가 호의 길이로 매개화된 평면곡선이고 \(\kappa_s(s_0) \neq 0\)이라 하자. \(\delta \gt 0\)가 있어 다음이 성립한다.</p>
+        <ul>
+          <li>(a) 서로 다른 \(s_1, s_2, s_3 \in (s_0 - \delta, s_0 + \delta)\)에 대하여 세 점 \(\gamma(s_1), \gamma(s_2), \gamma(s_3)\)은 한 직선 위에 있지 않다. 따라서 세 점을 지나는 원이 꼭 하나 있다.
+          그 중심을 \(q(s_1, s_2, s_3)\)이라 하자.</li>
+          <li>(b) \(s_1, s_2, s_3 \to s_0\)이면 \(q(s_1, s_2, s_3) \to c(s_0)\)이고, 원의 반지름은 \(1/\abs{\kappa_s(s_0)}\)로 간다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: 원 위에 세 점이 있으면 \(f_C\)의 영점이 셋이다. 롤의 정리를 두 번 쓰면 \(f_C'\)과 \(f_C''\)의 영점이 세 점 사이에 생긴다. 그 두 조건은 중심에 대한 연립일차방정식이고, 극한에서 <a href="#i-4-5-5">정리 4.5.5</a>(b)의 조건이 된다.</p>
+        <p><span class="proof-head">증명.</span>
+        \(D(u, w) = \det\begin{pmatrix} \gamma'(u) \\ \gamma''(w) \end{pmatrix}\)(두 행벡터로 만든 행렬식)이라 하자. \(\mathbf{t}(s_0) = (a, b)\)이면 \(J\mathbf{t}(s_0) = (-b, a)\)이므로
+        \(D(s_0, s_0) = \kappa_s(s_0)\det\begin{pmatrix} a & b \\ -b & a \end{pmatrix} = \kappa_s(s_0)(a^2 + b^2) = \kappa_s(s_0) \neq 0\)이다. \(D\)는 연속이므로 \(\delta \gt 0\)가 있어
+        \(u, w \in (s_0 - \delta, s_0 + \delta)\)이면 \(D(u, w) \neq 0\)이다. \(s_1 \lt s_2 \lt s_3\)이라 해도 된다.</p>
+        <p>(a) 세 점이 단위법벡터가 \(\nu\)인 직선 위에 있다고 하자. \(g(s) = \inner{\gamma(s) - \gamma(s_1)}{\nu}\)는 \(s_1, s_2, s_3\)에서 \(0\)이다. 롤의 정리에 의해 \(g'(\xi_1) = g'(\xi_2) = 0\)인
+        \(s_1 \lt \xi_1 \lt s_2 \lt \xi_2 \lt s_3\)이 있고, 다시 롤의 정리에 의해 \(g''(\eta) = 0\)인 \(\eta \in (\xi_1, \xi_2)\)가 있다. 곧 \(\inner{\gamma'(\xi_1)}{\nu} = \inner{\gamma''(\eta)}{\nu} = 0\)이다.
+        영이 아닌 벡터 \(\nu\)가 행렬 \(\begin{pmatrix} \gamma'(\xi_1) \\ \gamma''(\eta) \end{pmatrix}\)의 두 행과 모두 직교하므로 이 행렬은 가역이 아니고 \(D(\xi_1, \eta) = 0\)이다. \(\delta\)의 선택에 모순이다.
+        세 점이 한 직선 위에 있지 않으면 세 점에서 같은 거리에 있는 점 \(q\)는 \(2\inner{p_2 - p_1}{q} = \abs{p_2}^2 - \abs{p_1}^2\), \(2\inner{p_3 - p_1}{q} = \abs{p_3}^2 - \abs{p_1}^2\)
+        (\(p_i = \gamma(s_i)\))의 해이고, 계수 행렬의 두 행 \(p_2 - p_1\), \(p_3 - p_1\)이 일차독립이므로 해가 꼭 하나다.</p>
+        <p>(b) \(C\)를 세 점을 지나는 원, \(q\)를 그 중심, \(\rho\)를 반지름이라 하자. \(f_C\)는 \(s_1, s_2, s_3\)에서 \(0\)이므로 (a)와 같이 롤의 정리를 두 번 쓰면
+        \(f_C'(\xi_1) = 0\), \(f_C''(\eta) = 0\)인 \(\xi_1, \eta \in [s_1, s_3]\)이 있다. <a href="#eq-4-5-4">(4.5.4)</a>를 \(\gamma''\)으로 다시 쓰면 이것은</p>
+        <div class="equation" id="eq-4-5-5">
+        \[ \inner{\gamma'(\xi_1)}{q} = \inner{\gamma'(\xi_1)}{\gamma(\xi_1)}, \qquad \inner{\gamma''(\eta)}{q} = \inner{\gamma''(\eta)}{\gamma(\eta)} + 1 \tag{4.5.5} \]
+        </div>
+        <p>이다. \(D(\xi_1, \eta) \neq 0\)이므로 크라메르 공식으로 \(q\)를 풀 수 있고, 그 해는 \(\xi_1, \eta\)의 연속함수다. \(s_1, s_3 \to s_0\)이면 \(\xi_1, \eta \to s_0\)이므로
+        \(q\)는 \(\xi_1 = \eta = s_0\)인 연립방정식의 해 \(q^*\)로 간다. 그 식은 \(\inner{\mathbf{t}(s_0)}{q^* - \gamma(s_0)} = 0\), \(\kappa_s(s_0)\inner{\mathbf{n}_s(s_0)}{q^* - \gamma(s_0)} = 1\)이므로
+        \(q^* - \gamma(s_0) = \mathbf{n}_s(s_0)/\kappa_s(s_0)\), 곧 \(q^* = c(s_0)\)이다. 반지름 \(\rho = \abs{\gamma(s_1) - q}\)는 \(\abs{\gamma(s_0) - c(s_0)} = 1/\abs{\kappa_s(s_0)}\)로 간다.</p>
+      </div>
+
+      <div class="thm remark" id="i-4-5-8">
+        <p><span class="thm-head">비고 4.5.8</span> <span class="thm-name">(접촉원은 보통 곡선을 가로지른다)</span>.
+        곡선이 접촉원의 한쪽에 머문다고 생각하기 쉽지만 대개는 그렇지 않다. 접촉원 \(C_0\)에 대해 <a href="#eq-4-5-4">(4.5.4)</a>를 한 번 더 미분하면, \(\mathbf{n}_s' = J\mathbf{t}' = \kappa_s J\mathbf{n}_s = -\kappa_s\mathbf{t}\)이므로
+        \(f''' = 2\kappa_s'\inner{\mathbf{n}_s}{\gamma - c} - 2\kappa_s^2\inner{\mathbf{t}}{\gamma - c}\)이다. \(s_0\)에서 \(\gamma - c = -\mathbf{n}_s/\kappa_s\)이므로</p>
+        \[ f_{C_0}'''(s_0) = -\frac{2\kappa_s'(s_0)}{\kappa_s(s_0)} \]
+        <p>이다. \(\kappa_s'(s_0) \neq 0\)이면 \(f_{C_0}\)는 \(s_0\)에서 부호를 바꾸므로(\(f = f''' (s_0)(s - s_0)^3/6 + \cdots\)) 곡선은 접촉원의 안에서 밖으로(또는 밖에서 안으로) 건너간다.
+        \(\kappa_s' = 0\)인 점을 곡선의 꼭짓점이라 부르는데, 한쪽에 머물 수 있는 것은 꼭짓점에서뿐이다. <a href="#fig-4-5-2">그림 4.5.2</a>에서 타원의 꼭짓점 \(\gamma(0)\)의 작은 접촉원은 타원 안에 머물지만,
+        \(\gamma(\pi/6)\)의 접촉원은 그 점에서 타원을 가로지른다(<a href="#ex-4-5-5">연습 4.5.5</a>).</p>
+      </div>
+    </section>
+
+    <section id="sec-evolute">
+      <h2>축폐선</h2>
+      <p>곡률이 \(0\)이 되지 않는 구간에서 곡률중심은 매개변수를 따라 움직이며 새 곡선을 그린다.</p>
+
+      <div class="thm example" id="i-4-5-9">
+        <p><span class="thm-head">예 4.5.9</span> <span class="thm-name">(타원의 축폐선)</span>.
+        정칙 평면곡선의 부호곡률이 구간 \(I\)에서 \(0\)이 되지 않을 때, 곡률중심들이 그리는 곡선 \(t \mapsto c(t)\)를 \(\gamma\)의 <dfn>축폐선</dfn>(evolute)이라 한다.
+        타원 \(\gamma(t) = (A\cos t, B\sin t)\)에서 \(\mathbf{n}_s = J\gamma'/\abs{\gamma'} = (-B\cos t,\ -A\sin t)/w\), \(w = \sqrt{A^2\sin^2 t + B^2\cos^2 t}\)이고 \(1/\kappa_s = w^3/(AB)\)이므로</p>
+        \[ \begin{aligned} c(t) &= (A\cos t,\ B\sin t) + \frac{w^2}{AB}\,(-B\cos t,\ -A\sin t)\\ &= \Big(\frac{A^2 - B^2}{A}\cos^3 t,\ -\frac{A^2 - B^2}{B}\sin^3 t\Big) \end{aligned} \]
+        <p>이다(첫 성분: \(A\cos t - (A^2\sin^2 t + B^2\cos^2 t)\cos t/A = (A^2 - B^2)\cos^3 t/A\), 둘째 성분도 같은 방식이다). \(A = 2\), \(B = 1\)이면 \(c(t) = (1.5\cos^3 t,\ -3\sin^3 t)\)이다.
+        \(c'(t) = 3(A^2 - B^2)\sin t\cos t\,\big(-\cos t/A,\ -\sin t/B\big)\)이므로 축폐선은 \(t = k\pi/2\)(타원의 네 꼭짓점)에서 특이점을 갖고, 자취는 그곳에서 뾰족하다(<a href="#fig-4-5-2">그림 4.5.2</a>).
+        꼭짓점에서 축폐선이 뾰족해지는 이유는 <a href="#ex-4-5-6">연습 4.5.6</a>에서 본다.</p>
+        <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-4-5-2">
+        <img src="figures/fig-4-5-2-evolute.svg" alt="가로로 긴 타원(검정)과 그 축폐선(청록). 축폐선은 위아래로 길쭉한 별 모양으로, 위아래 끝 c(3π/2), c(π/2)와 좌우 두 곳에 뾰족점이 있다. 타원 위의 세 점 γ(0), γ(π/6), γ(5π/6)에서 주황 접촉원을 그렸고, 각 점에서 곡률중심(청록 점)까지 주홍 선분이 이어져 있다. γ(0)의 접촉원은 작고 타원 안쪽에 있으며, γ(π/6)과 γ(5π/6)의 접촉원은 크다.">
+        <figcaption><span class="fig-head">그림 4.5.2.</span>
+        타원 \(\gamma(t) = (2\cos t, \sin t)\)와 축폐선 \(c(t) = (1.5\cos^3 t,\ -3\sin^3 t)\)(청록). \(t = 0,\ \pi/6,\ 5\pi/6\)에서의 접촉원(주황)과 곡률반지름(주홍).
+        꼭짓점 \(t = 0\)의 곡률반지름은 \(1/2\), \(t = \pi/6\)과 \(5\pi/6\)에서는 약 \(1.158\)이다. 축폐선의 네 뾰족점은 타원의 네 꼭짓점의 곡률중심이다(<a href="#i-4-5-2">예 4.5.2</a>(c), <a href="#i-4-5-9">예 4.5.9</a>).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-plane-curves-in-space">
+      <h2>공간 속 평면곡선: 구면 위의 원</h2>
+      <p>구면 위의 위도원과 대원은 \(\R^3\)의 곡선이지만 각각 한 평면 안에 놓여 있다. 그 평면에 좌표를 주면 지금까지의 이론을 그대로 쓸 수 있다.
+      다만 좌표를 고르는 방법이 여러 가지이므로, 결과가 그 선택에 무관한지 확인해야 한다.</p>
+      <p>\(\Pi \subseteq \R^3\)을 평면, 곧 \(\Pi = \{p_0 + x a_1 + y a_2 : x, y \in \R\}\)이라 하자. 여기서 \(p_0 \in \Pi\)이고 \((a_1, a_2)\)는 서로 직교하는 단위벡터다.
+      자취가 \(\Pi\)에 들어 있는 단위속력 곡선 \(\gamma\)는 \(x(s) = \inner{\gamma(s) - p_0}{a_1}\), \(y(s) = \inner{\gamma(s) - p_0}{a_2}\)로 두면</p>
+      <div class="equation" id="eq-4-5-6">
+      \[ \gamma(s) = p_0 + x(s)\,a_1 + y(s)\,a_2 \tag{4.5.6} \]
+      </div>
+      <p>로 쓸 수 있다(\(\gamma(s) - p_0\)이 \(a_1, a_2\)가 생성하는 평면 안에 있으므로 정규직교기저로 전개된다). \(\hat\gamma = (x, y)\)는 평면곡선이고, \((a_1, a_2)\)가 정규직교이므로
+      \(\abs{\hat\gamma'} = \abs{x'a_1 + y'a_2} = \abs{\gamma'} = 1\)이다. \(\hat\gamma\)의 부호곡률을 “\((a_1, a_2)\)에 대한 \(\gamma\)의 부호곡률”이라 부르자.</p>
+
+      <div class="thm proposition" id="i-4-5-10">
+        <p><span class="thm-head">명제 4.5.10</span> <span class="thm-name">(평면에 놓인 공간곡선의 곡률과 곡률중심)</span>.
+        위의 상황에서 \(\kappa_s\)를 \((a_1, a_2)\)에 대한 \(\gamma\)의 부호곡률이라 하자.</p>
+        <ul>
+          <li>(a) \(\abs{\kappa_s(s)} = \abs{\gamma''(s)}\)이다.</li>
+          <li>(b) \(\kappa_s(s) \neq 0\)이면 \(\hat\gamma\)의 곡률중심에 대응하는 \(\Pi\)의 점은 \(\gamma(s) + \gamma''(s)/\abs{\gamma''(s)}^2\)이다.</li>
+        </ul>
+        <p>따라서 곡률의 크기 \(\abs{\kappa_s}\), 곡률중심, 그리고 \(\Pi\) 안의 접촉원은 \(p_0, a_1, a_2\)의 선택에 무관하다. (부호는 \((a_1, a_2)\)의 방향에 달려 있다. 예를 들어 \((a_1, a_2)\)를 \((a_2, a_1)\)로 바꾸면 부호가 바뀐다.)</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) <a href="#eq-4-5-6">(4.5.6)</a>을 두 번 미분하면 \(\gamma'' = x''a_1 + y''a_2\)이고, 정규직교성에서 \(\abs{\gamma''}^2 = (x'')^2 + (y'')^2 = \abs{\hat\gamma''}^2\)이다.
+        <a href="4-4-signed-curvature.html#i-4-4-2">정의 4.4.2</a> 뒤의 설명대로 \(\abs{\hat\gamma''} = \abs{\kappa_s}\)이다.
+        (b) <a href="#eq-4-5-2">(4.5.2)</a>에서 \(\hat\gamma\)의 곡률중심은 \(\hat c = \hat\gamma + \hat\gamma''/\abs{\hat\gamma''}^2\)이다. 이 좌표에 대응하는 점은
+        \(p_0 + (x + x''/\abs{\gamma''}^2)a_1 + (y + y''/\abs{\gamma''}^2)a_2 = \gamma + \gamma''/\abs{\gamma''}^2\)이다. (a)와 (b)의 우변에는 \(p_0, a_1, a_2\)가 나오지 않는다.
+        좌표 \((x, y) \mapsto p_0 + xa_1 + ya_2\)는 거리를 보존하므로 \(\hat\gamma\)의 접촉원은 \(\Pi\) 안에서 중심이 \(\gamma + \gamma''/\abs{\gamma''}^2\)이고 반지름이 \(1/\abs{\gamma''}\)인 원으로 간다.</p>
+      </div>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 공간곡선의 곡률</p>
+        <p><a href="#i-4-5-10">명제 4.5.10</a>의 우변 \(\abs{\gamma''(s)}\)와 \(\gamma + \gamma''/\abs{\gamma''}^2\)은 곡선이 평면에 있는지와 상관없이 정의된다. <a href="../05-space-curves/index.html">5장</a>은 이것을 출발점으로 삼아
+        모든 공간곡선의 곡률을 \(\kappa = \abs{\gamma''(s)}\)로, 주법선벡터를 \(\mathbf{n} = \gamma''/\kappa\)로 정의하고, 접촉원을 \(\mathbf{t}\)와 \(\mathbf{n}\)이 생성하는 접촉평면 안의 원으로 정의한다.
+        평면곡선에서는 \(\kappa = \abs{\kappa_s}\)가 된다. 그러나 이 절에서는 평면에 놓인 곡선만 다룬다.</p>
+      </aside>
+
+      <p>이제 <a href="4-1-parametrized-curves.html#i-4-1-13">예 4.1.13</a>의 구면 \(S^2(r)\)과 그 위의 곡선으로 돌아가자. 이 절에서 \(O\)는 원점, 곧 구의 중심이다.</p>
+
+      <div class="thm example" id="i-4-5-11">
+        <p><span class="thm-head">예 4.5.11</span> <span class="thm-name">(대원, 기준 예제)</span>.
+        대원은 원점을 지나는 평면 \(\Pi\)와 구면의 교선이다. \(\Pi\)의 정규직교기저 \((a_1, a_2)\)를 고르면 호의 길이로 매개화된 대원은
+        \(\gamma(s) = r\cos(s/r)\,a_1 + r\sin(s/r)\,a_2\)이다(\(p_0 = O\)). 좌표 곡선 \(\hat\gamma(s) = (r\cos(s/r), r\sin(s/r))\)은 반지름 \(r\)인 원이므로 \(\kappa_s = 1/r\)이고,
+        \(\gamma'' = -\gamma/r^2\)이므로 \(\abs{\gamma''} = 1/r\), 곡률중심은 \(\gamma + \gamma''/\abs{\gamma''}^2 = \gamma - \gamma = O\)이다.
+        <strong>대원의 곡률은 \(1/r\)이고 곡률중심은 구의 중심이다.</strong></p>
+        <p>경선 \(\sigma(\theta) = \mathbf{x}(\theta, \varphi_0)\)은 \(a_1 = e_3\), \(a_2 = (\cos\varphi_0, \sin\varphi_0, 0)\)으로 \(\sigma(\theta) = r\cos\theta\,a_1 + r\sin\theta\,a_2\)이므로
+        대원의 일부이고(<a href="4-1-parametrized-curves.html#i-4-1-13">예 4.1.13</a>), \(\theta = s/r\)이 호의 길이 매개화다. 따라서 경선도 곡률이 \(1/r\)이고 곡률중심이 \(O\)이다. 적도도 대원이다.</p>
+        <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code></p>
+      </div>
+
+      <div class="thm example" id="i-4-5-12">
+        <p><span class="thm-head">예 4.5.12</span> <span class="thm-name">(위도원, 기준 예제)</span>.
+        여위도 \(\theta_0 \in (0, \pi)\)인 위도원 \(\gamma(\varphi) = \mathbf{x}(\theta_0, \varphi)\)은 \(p_0 = (0, 0, r\cos\theta_0)\), \(\rho_0 = r\sin\theta_0\)으로 두면</p>
+        \[ \gamma(\varphi) = p_0 + \rho_0\cos\varphi\,e_1 + \rho_0\sin\varphi\,e_2 \]
+        <p>이므로 평면 \(z = r\cos\theta_0\) 안의 반지름 \(\rho_0\)인 원이다. 속력이 \(\rho_0\)이므로 \(\varphi = s/\rho_0\)이 호의 길이 매개화이고, \((a_1, a_2) = (e_1, e_2)\)에 대한 좌표 곡선은
+        반지름 \(\rho_0\)인 원을 반시계 방향으로 돈다. <a href="4-4-signed-curvature.html#i-4-4-3">예 4.4.3</a>과 <a href="#i-4-5-2">예 4.5.2</a>(a)에서</p>
+        <div class="equation" id="eq-4-5-7">
+        \[ \kappa_s = \frac{1}{r\sin\theta_0}, \qquad \text{곡률중심} = p_0 = (0,\ 0,\ r\cos\theta_0) \tag{4.5.7} \]
+        </div>
+        <p>이다. 직접 확인하면 \(\gamma(s) = \big(\rho_0\cos(s/\rho_0),\ \rho_0\sin(s/\rho_0),\ r\cos\theta_0\big)\), \(\gamma'' = -\big(\cos(s/\rho_0),\ \sin(s/\rho_0),\ 0\big)/\rho_0\)이므로
+        \(\abs{\gamma''} = 1/\rho_0\)이고 \(\gamma + \gamma''/\abs{\gamma''}^2 = \gamma - \rho_0(\cos, \sin, 0) = p_0\)이다. 몇 가지를 읽어 내자.</p>
+        <ul>
+          <li>\(\sin\theta_0 \le 1\)이므로 위도원의 곡률은 \(1/r\) 이상이고, 등호는 적도(\(\theta_0 = \pi/2\))에서만 성립한다. 극에 가까울수록(\(\theta_0 \to 0\) 또는 \(\pi\)) 위도원은 작아지고 곡률은 한없이 커진다.</li>
+          <li>곡률중심 \(p_0\)은 \(z\)축 위에 있고, 적도가 아니면 구의 중심 \(O\)가 아니다. 곡률벡터 \(\gamma''\)은 \(z\)축을 향하므로 구면에 수직이지 않다.</li>
+          <li>바깥쪽 단위법벡터 \(\mathbf{N} = \gamma/r\)(구면의 기준 예제에서 쓰는 방향)에 대하여 \(\gamma''/\abs{\gamma''}\)과 \(-\mathbf{N}\) 사이의 각 \(\alpha\)는 \(\cos\alpha = \inner{-(\cos\varphi, \sin\varphi, 0)}{-\gamma/r} = \sin\theta_0\)을 만족한다.
+          \(0 \lt \theta_0 \le \pi/2\)이면 \(\alpha = \pi/2 - \theta_0\)이다(<a href="#fig-4-5-3">그림 4.5.3</a>).</li>
+        </ul>
+        <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code> (공간곡선으로 본 곡률 공식과도 비교한다)</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-4-5-3">
+        <img src="figures/fig-4-5-3-sphere-circles.svg" alt="반투명한 단위구면과 그 위의 두 원. 검정 위도원은 북반구의 수평한 원이고, 주황 대원은 z축을 포함하는 비스듬한 원이다. 두 원이 만나는 점 p에서 두 개의 주홍 선분이 뻗는다. 하나는 z축 위의 점 c(위도원의 중심)로, 다른 하나는 구의 중심 O로 간다. p에서 두 곡선의 파란 단위접벡터가 서로 수직으로 그려져 있다. 원의 가려진 부분은 옅은 점선이다.">
+        <figcaption><span class="fig-head">그림 4.5.3.</span>
+        구면 \(S^2(r)\), \(r = 1\) 위의 점 \(p = \mathbf{x}(\theta_0, \varphi_p)\), \(\theta_0 = \pi/3\), \(\varphi_p = 0.05\). 위도원 \(\theta = \theta_0\)(검정)의 곡률중심은 \(c = (0, 0, r\cos\theta_0) = (0, 0, 0.5)\)이고
+        곡률반지름은 \(r\sin\theta_0 \approx 0.866\)이다. \(p\)를 지나는 경선을 포함하는 대원(주황)의 곡률중심은 \(O\)이고 곡률반지름은 \(1\)이다. 두 곡률반지름(주홍 선분) 사이의 각은
+        \(\pi/2 - \theta_0 = 30^\circ\)이다. 파란 화살표는 두 곡선의 단위접벡터를 실제 길이의 \(0.45\)배로 그린 것이다(<a href="#i-4-5-11">예 4.5.11</a>, <a href="#i-4-5-12">예 4.5.12</a>).</figcaption>
+      </figure>
+
+      <aside class="box warning">
+        <p class="box-title">흔한 오해</p>
+        <ul>
+          <li>“구면 위 곡선의 곡률중심은 구의 중심이다”: 거짓이다. 위도원의 곡률중심은 \(z\)축 위의 \((0, 0, r\cos\theta_0)\)이다. 구의 중심이 곡률중심인 것은 대원뿐이다(<a href="#ex-4-5-7">연습 4.5.7</a>).</li>
+          <li>“구면 위의 곡선은 모두 곡률이 \(1/r\)이다”: 거짓이다. 곡률은 \(1/r\) 이상이고, 작은 원일수록 크다. 곡률 가운데 “구면이 휜 몫”은 모든 곡선에서 같지만, 그것은 곡률 전체가 아니라 법선 방향 성분이다(아래 상자).</li>
+          <li>“접촉원은 곡선의 한쪽에 놓인다”: 꼭짓점이 아니면 대개 가로지른다(<a href="#i-4-5-8">비고 4.5.8</a>).</li>
+        </ul>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 곡률벡터를 곡면에 대해 나누기</p>
+        <p>위도원의 곡률벡터 \(\gamma''\)(크기 \(1/(r\sin\theta_0)\))을 구면의 법선 방향과 접평면 방향으로 나누면, 법선 성분의 크기는 \(\abs{\gamma''}\cos\alpha = 1/r\)이고
+        접평면 성분의 크기는 \(\abs{\gamma''}\sin\alpha = \abs{\cot\theta_0}/r\)이다. 법선 성분 \(1/r\)은 구면 위의 어느 곡선, 어느 방향에서나 같다. 이것이 <a href="../08-gauss-map/index.html">8장</a>의 법곡률이고,
+        구면이 “모든 방향으로 똑같이 휘었다”는 사실의 표현이다. 접평면 성분은 곡면 안에서 본 휘어짐, 곧 <a href="../09-intrinsic-geometry/index.html">9장</a>의 측지곡률의 크기이며,
+        적도에서만 \(0\)이다. 그래서 대원이 구면의 “직선”(측지선)이 된다. 또 북반구(\(0 \lt \theta_0 \le \pi/2\))의 위도원 한 바퀴의 길이 \(2\pi r\sin\theta_0\)에 이 값을 곱하면 \(2\pi\cos\theta_0\)이 되는데,
+        이 수는 9장의 평행이동 회전각과 <a href="../10-gauss-bonnet/index.html">10장</a>의 가우스-보네 정리(\(2\pi\cos\theta_0 + 2\pi(1 - \cos\theta_0) = 2\pi\))에 다시 나타난다.
+        이 상자의 개념들은 아직 정의하지 않았으므로 이 장의 증명에는 쓰지 않는다.</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교</p>
+        <p>do Carmo는 곡률의 역수 \(R = 1/k\)를 곡률반지름이라 부르고 <a class="cite" href="../../references.html#dC">[dC §1-5]</a>, 접촉원은 가까운 세 점을 지나는 원의 극한으로 연습문제에서 정의한다
+        <a class="cite" href="../../references.html#dC">[dC §1-6 연습문제 2]</a>. 축폐선도 연습문제로 나온다 <a class="cite" href="../../references.html#dC">[dC §1-5 연습문제 7]</a>.
+        이 study set은 접촉원을 곡률중심의 식 <a href="#eq-4-5-1">(4.5.1)</a>로 정의하고, 세 점 원의 극한임을 <a href="#i-4-5-7">명제 4.5.7</a>로 증명한다.
+        곡률반지름에 \(R\)이라는 문자를 쓰지 않는 것은 \(R\)을 곡률텐서와 원환면의 반지름에 남겨 두기 위해서다(<a href="../../notation.html#sec-conflicts">기호 충돌</a>).</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>\(\kappa_s \neq 0\)인 점의 곡률중심은 \(c = \gamma + \mathbf{n}_s/\kappa_s = \gamma + \gamma''/\abs{\gamma''}^2\)(단위속력)이고, 접촉원은 중심 \(c\), 반지름 \(1/\abs{\kappa_s}\)인 원이다. 곡률중심은 곡선과 평면의 방향에 무관하다.</li>
+        <li>\(\kappa_s \gt 0\)이면 곡선은 국소적으로 접선의 \(\mathbf{n}_s\) 쪽에 있다(<a href="#i-4-5-4">명제 4.5.4</a>).</li>
+        <li>접촉원은 곡선과 2차까지 맞닿는 유일한 원이고(<a href="#i-4-5-5">정리 4.5.5</a>), 곡선과의 거리가 3차로 작으며(<a href="#i-4-5-6">따름정리 4.5.6</a>), 가까운 세 점을 지나는 원의 극한이다(<a href="#i-4-5-7">명제 4.5.7</a>).</li>
+        <li>공간 속 평면에 놓인 곡선의 곡률 크기는 \(\abs{\gamma''}\)이고 곡률중심은 \(\gamma + \gamma''/\abs{\gamma''}^2\)이다(<a href="#i-4-5-10">명제 4.5.10</a>).</li>
+        <li>구면 \(S^2(r)\)에서 대원은 곡률 \(1/r\), 곡률중심 \(O\)이고, 위도원은 곡률 \(1/(r\sin\theta_0)\), 곡률중심 \((0, 0, r\cos\theta_0)\)이다.</li>
+      </ul>
+      <p class="next">다음 장에서는 평면에 놓이지 않은 곡선, 곧 공간곡선으로 넘어간다. 부호는 잃지만 곡률의 크기 \(\kappa = \abs{\gamma''(s)}\)와 접촉원은 그대로 남고,
+      곡선이 접촉평면을 벗어나는 정도를 재는 비틀림률이 새로 등장한다(<a href="../05-space-curves/index.html">5장</a>).</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-4-5-1" data-level="1">
+        <p><span class="thm-head">연습 4.5.1</span> <span class="level">★</span>
+        포물선 \(y = x^2\)의 축폐선이 \(c(x) = (-4x^3,\ 3x^2 + \tfrac12)\)임을 보여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\gamma(x) = (x, x^2)\)에서 \(f' = 2x\), \(f'' = 2\)이므로 \(\kappa_s = 2/(1 + 4x^2)^{3/2} \gt 0\)이고(식 <a href="4-4-signed-curvature.html#eq-4-4-5">(4.4.5)</a>), \(\mathbf{n}_s = J(1, 2x)/\sqrt{1 + 4x^2} = (-2x, 1)/\sqrt{1 + 4x^2}\)이다. 따라서</p>
+          \[ \begin{aligned} c(x) &= (x, x^2) + \frac{(1 + 4x^2)^{3/2}}{2}\cdot\frac{(-2x,\ 1)}{\sqrt{1 + 4x^2}}\\ &= (x, x^2) + \frac{1 + 4x^2}{2}(-2x,\ 1) = \big(-4x^3,\ 3x^2 + \tfrac12\big) \end{aligned} \]
+          <p>이다. 이 축폐선은 \(x = 0\)에서 뾰족한 반삼차 포물선 \((y - \tfrac12)^3 = \tfrac{27}{16}x^2\)이다.</p>
+          <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-4-5-2" data-level="1">
+        <p><span class="thm-head">연습 4.5.2</span> <span class="level">★</span>
+        \(A \gt B \gt 0\)인 타원 \((A\cos t, B\sin t)\)의 네 꼭짓점에서 곡률중심과 곡률반지름을 구하여라. \(A = 2\), \(B = 1\)이면 어떤 값인가?</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="#i-4-5-9">예 4.5.9</a>의 식에 \(t = 0, \pi/2, \pi, 3\pi/2\)를 넣는다. \((\pm A, 0)\)에서 곡률중심은 \((\pm(A^2 - B^2)/A,\ 0)\)이고 반지름은 \(B^2/A\)이다
+          (\(A - (A^2 - B^2)/A = B^2/A\)). \((0, \pm B)\)에서 곡률중심은 \((0,\ \mp(A^2 - B^2)/B)\)이고 반지름은 \(B + (A^2 - B^2)/B = A^2/B\)이다.
+          \(A = 2\), \(B = 1\)이면 \((\pm 2, 0)\)에서 중심 \((\pm 1.5, 0)\), 반지름 \(0.5\)이고, \((0, \pm 1)\)에서 중심 \((0, \mp 3)\), 반지름 \(4\)이다.</p>
+          <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-4-5-3" data-level="1">
+        <p><span class="thm-head">연습 4.5.3</span> <span class="level">★</span>
+        반지름 \(r\)인 구면에서 곡률이 \(2/r\)인 위도원을 모두 구하여라. 지구를 반지름 \(r\)인 구로 보면 어느 위도의 위도원인가?</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="#eq-4-5-7">(4.5.7)</a>에서 \(1/(r\sin\theta_0) = 2/r\), 곧 \(\sin\theta_0 = 1/2\)이다. \(\theta_0 \in (0, \pi)\)에서 해는 \(\theta_0 = \pi/6\)과 \(5\pi/6\)이다.
+          여위도 \(30^\circ\)는 위도 \(90^\circ - 30^\circ = 60^\circ\)이므로 북위 \(60^\circ\)와 남위 \(60^\circ\)의 위도원이다. 이 원들의 반지름은 \(r/2\)이다.</p>
+          <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-4-5-4" data-level="1">
+        <p><span class="thm-head">연습 4.5.4</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 대어라.
+        (a) 원의 모든 점에서 접촉원은 그 원 자신이다.
+        (b) 구면 위에 놓이고 한 평면에 들어 있는 곡선의 곡률중심은 언제나 구의 중심이다.
+        (c) 정칙 평면곡선의 모든 점에서 접촉원이 정의된다.
+        (d) 곡선의 방향을 뒤집으면 곡률중심이 곡선의 반대쪽으로 옮겨 간다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 참. <a href="#i-4-5-2">예 4.5.2</a>(a).</p>
+          <p>(b) 거짓. 위도원이 반례다(<a href="#i-4-5-12">예 4.5.12</a>).</p>
+          <p>(c) 거짓. \(\kappa_s = 0\)인 점에서는 정의되지 않는다(<a href="#i-4-5-3">비예 4.5.3</a>(a)).</p>
+          <p>(d) 거짓. \(\kappa_s\)와 \(\mathbf{n}_s\)의 부호가 함께 바뀌어 \(\mathbf{n}_s/\kappa_s\)는 그대로다. 식 <a href="#eq-4-5-2">(4.5.2)</a>에는 방향이 들어 있지 않다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-4-5-5" data-level="2">
+        <p><span class="thm-head">연습 4.5.5</span> <span class="level">★★</span>
+        타원 \(\gamma(t) = (2\cos t, \sin t)\)의 부호곡률이 \(\kappa_s = 2/(1 + 3\sin^2 t)^{3/2}\)임을 보이고, \(t = \pi/6\)에서 곡선이 접촉원을 가로지름을 <a href="#i-4-5-8">비고 4.5.8</a>로 설명하여라.
+        꼭짓점 \(t = 0\)에서는 어떤가?</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="4-4-signed-curvature.html#ex-4-4-1">연습 4.4.1</a>의 식에 \(A = 2\), \(B = 1\)을 넣으면 \(\kappa_s = 2/(4\sin^2 t + \cos^2 t)^{3/2} = 2/(1 + 3\sin^2 t)^{3/2}\)이다.
+          미분하면 \(d\kappa_s/dt = -18\sin t\cos t\,(1 + 3\sin^2 t)^{-5/2}\)이고, 호의 길이에 대한 도함수는 \(\kappa_s' = (d\kappa_s/dt)/\abs{\gamma'}\)이다.
+          \(t = \pi/6\)에서 \(\sin t\cos t = \sqrt3/4 \neq 0\)이므로 \(\kappa_s' \neq 0\)이고, <a href="#i-4-5-8">비고 4.5.8</a>에 의해 \(f_{C_0}'''(s_0) \neq 0\)이므로 \(f_{C_0}\)이 부호를 바꾼다. 곧 곡선은 그 점에서 접촉원을 가로지른다.
+          \(t = 0\)에서는 \(\sin t = 0\)이므로 \(\kappa_s' = 0\)이고 비고의 논증은 결론을 주지 않는다. 실제로 타원은 긴 축 끝의 작은 접촉원 바깥에 머문다(<a href="#fig-4-5-2">그림 4.5.2</a>).</p>
+          <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code>, 그림 스크립트 <code>figures/fig-4-5-2-evolute.py</code>의 자기검사</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-4-5-6" data-level="2">
+        <p><span class="thm-head">연습 4.5.6</span> <span class="level">★★</span>
+        \(\gamma\)가 호의 길이로 매개화된 평면곡선이고 \(I\)에서 \(\kappa_s \neq 0\)이라 하자. 축폐선 \(c = \gamma + \mathbf{n}_s/\kappa_s\)에 대하여 \(c' = (1/\kappa_s)'\,\mathbf{n}_s\)임을 보여라.
+        이로부터 \(\kappa_s'(s) \neq 0\)인 곳에서 축폐선은 정칙이고 그 접선이 \(\gamma\)의 \(s\)에서의 법선 \(\{\gamma(s) + \lambda\mathbf{n}_s(s)\}\)과 같음을, \(\kappa_s' = 0\)인 곳(꼭짓점)에서는 축폐선이 특이점을 가짐을 보여라.
+        <a class="cite" href="../../references.html#dC">[dC §1-5 연습문제 7 변형]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\mathbf{n}_s' = J\mathbf{t}' = \kappa_s J\mathbf{n}_s = \kappa_s J^2\mathbf{t} = -\kappa_s\mathbf{t}\)이다. 곱의 미분법으로</p>
+          \[ c' = \mathbf{t} + \Big(\frac{1}{\kappa_s}\Big)'\mathbf{n}_s + \frac{1}{\kappa_s}(-\kappa_s\mathbf{t}) = \Big(\frac{1}{\kappa_s}\Big)'\mathbf{n}_s \]
+          <p>이다. \((1/\kappa_s)' = -\kappa_s'/\kappa_s^2\)이므로 \(\kappa_s'(s) \neq 0\)이면 \(c'(s) \neq 0\)이고, 축폐선의 접선은 \(c(s)\)를 지나고 방향이 \(\mathbf{n}_s(s)\)인 직선이다.
+          \(c(s) = \gamma(s) + \mathbf{n}_s(s)/\kappa_s(s)\)는 \(\gamma\)의 \(s\)에서의 법선 위에 있으므로 두 직선은 같다. \(\kappa_s'(s) = 0\)이면 \(c'(s) = 0\)이므로 특이점이다.
+          타원의 네 꼭짓점에서 축폐선이 뾰족한 것(<a href="#i-4-5-9">예 4.5.9</a>)이 이것이다.</p>
+          <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-4-5-7" data-level="2">
+        <p><span class="thm-head">연습 4.5.7</span> <span class="level">★★</span>
+        \(\gamma\)가 호의 길이로 매개화되어 있고 자취가 구면 \(S^2(r)\)과 한 평면 \(\Pi\)에 모두 들어 있다고 하자. 모든 \(s\)에서 \(\abs{\kappa_s(s)} \ge 1/r\)이고,
+        등호가 성립할 필요충분조건이 그 점의 곡률중심이 구의 중심 \(O\)인 것임을 보여라.</p>
+        <details class="hint"><summary>힌트</summary><p>\(\abs{\gamma}^2 = r^2\)을 두 번 미분해 \(\inner{\gamma}{\gamma''} = -1\)을 얻고, 코시-슈바르츠 부등식을 쓴다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="4-1-parametrized-curves.html#i-4-1-12">따름정리 4.1.12</a>에서 \(\inner{\gamma}{\gamma'} = 0\)이다. 다시 미분하면 \(\inner{\gamma'}{\gamma'} + \inner{\gamma}{\gamma''} = 0\)이므로 \(\inner{\gamma}{\gamma''} = -1\)이다.
+          코시-슈바르츠 부등식에서 \(1 = \abs{\inner{\gamma}{\gamma''}} \le \abs{\gamma}\,\abs{\gamma''} = r\abs{\gamma''}\)이므로 \(\abs{\gamma''} \ge 1/r\)이고, <a href="#i-4-5-10">명제 4.5.10</a>(a)에서 \(\abs{\kappa_s} = \abs{\gamma''} \ge 1/r\)이다.</p>
+          <p>등호가 성립하면 코시-슈바르츠의 등호 조건에서 \(\gamma''\)은 \(\gamma\)의 스칼라배이고, \(\inner{\gamma}{\gamma''} = -1\), \(\abs{\gamma''} = 1/r\)에서 \(\gamma'' = -\gamma/r^2\)이다.
+          그러면 곡률중심은 \(\gamma + \gamma''/\abs{\gamma''}^2 = \gamma - \gamma = O\)이다. 거꾸로 곡률중심이 \(O\)이면 \(\gamma''/\abs{\gamma''}^2 = -\gamma\)이므로 \(\abs{\gamma''} = 1/\abs{\gamma} = 1/r\)이다.
+          (이 논증은 \(\Pi\)를 쓰지 않으므로, 5장에서 공간곡선의 곡률을 정의하면 구면 위의 모든 곡선에 대해 \(\kappa \ge 1/r\)이 성립한다.)</p>
+          <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code> (위도원에서 \(\inner{\gamma}{\gamma''} = -1\))</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-4-5-8" data-level="3">
+        <p><span class="thm-head">연습 4.5.8</span> <span class="level">★★★</span>
+        \(\gamma\)가 호의 길이로 매개화된 평면곡선이고 \(\kappa_s(s_0) \neq 0\)이라 하자. \(s_1 \neq s_0\)이 \(s_0\)에 충분히 가까우면 \(s_0\)과 \(s_1\)에서의 두 법선
+        \(\{\gamma(s_0) + \lambda\mathbf{n}_s(s_0)\}\), \(\{\gamma(s_1) + \mu\mathbf{n}_s(s_1)\}\)이 한 점 \(P(s_1)\)에서 만나고, \(s_1 \to s_0\)이면 \(P(s_1) \to c(s_0)\)임을 보여라.
+        <a class="cite" href="../../references.html#dC">[dC §1-5 연습문제 7 변형]</a></p>
+        <details class="hint"><summary>힌트</summary><p>교점의 식 \(\gamma(s_0) + \lambda\mathbf{n}_s(s_0) = \gamma(s_1) + \mu\mathbf{n}_s(s_1)\)에 \(\mathbf{t}(s_1)\)을 내적하면 \(\mu\)가 사라진다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(g(s) = \inner{\mathbf{n}_s(s_0)}{\mathbf{t}(s)}\)로 두면 \(g(s_0) = 0\)이고 \(g'(s_0) = \inner{\mathbf{n}_s(s_0)}{\kappa_s(s_0)\mathbf{n}_s(s_0)} = \kappa_s(s_0) \neq 0\)이다.
+          따라서 \(s_0\) 근처의 \(s_1 \neq s_0\)에서 \(g(s_1) \neq 0\)이다(\(g(s_1)/(s_1 - s_0) \to \kappa_s(s_0)\)). 이것은 \(\mathbf{n}_s(s_0)\)이 \(\mathbf{n}_s(s_1)\)과 평행하지 않다는 뜻이므로
+          (\(\mathbf{n}_s(s_1) \perp \mathbf{t}(s_1)\)) 두 법선은 한 점에서 만난다.</p>
+          <p>교점의 식 \(\gamma(s_0) + \lambda\mathbf{n}_s(s_0) = \gamma(s_1) + \mu\mathbf{n}_s(s_1)\)에 \(\mathbf{t}(s_1)\)을 내적하면 \(\inner{\mathbf{n}_s(s_1)}{\mathbf{t}(s_1)} = 0\)이므로</p>
+          \[ \lambda(s_1) = \frac{\inner{\gamma(s_1) - \gamma(s_0)}{\mathbf{t}(s_1)}}{\inner{\mathbf{n}_s(s_0)}{\mathbf{t}(s_1)}} = \frac{h(s_1)}{g(s_1)}, \qquad h(s) = \inner{\gamma(s) - \gamma(s_0)}{\mathbf{t}(s)} \]
+          <p>이다. \(h(s_0) = 0\), \(h'(s) = \inner{\mathbf{t}(s)}{\mathbf{t}(s)} + \inner{\gamma(s) - \gamma(s_0)}{\mathbf{t}'(s)}\)이므로 \(h'(s_0) = 1\)이다.
+          로피탈의 정리에서 \(\lambda(s_1) \to h'(s_0)/g'(s_0) = 1/\kappa_s(s_0)\)이다. 따라서 \(P(s_1) = \gamma(s_0) + \lambda(s_1)\mathbf{n}_s(s_0) \to \gamma(s_0) + \mathbf{n}_s(s_0)/\kappa_s(s_0) = c(s_0)\)이다.
+          곡률중심은 “이웃한 법선들이 모이는 점”이기도 하다.</p>
+          <p class="verified">검증: <code>verify/v-4-5-osculating-circle.py</code> (타원에서 수치 확인)</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="4-4-signed-curvature.html">← 4.4 평면곡선의 부호곡률</a>
+    <a rel="next" href="../05-space-curves/index.html">5. 공간곡선과 프레네 틀 →</a>
+  </nav>
+</body>
+</html>

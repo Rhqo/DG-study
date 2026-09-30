@@ -149,4 +149,26 @@ for _ in range(500):
     ok &= bool(abs(np.linalg.norm(x - y) - 2 * np.sin(t / 2)) < 1e-12)
 check("연습 3.1.7: 구면 위 무작위 점에서 |x-y| = 2 sin(θ/2)", ok)
 
+# 명제 3.1.27: 폐포(A를 포함하는 닫힌집합들의 교집합) = A ∪ ∂A.
+# {a,b,c} 위의 모든 위상(부분집합 모임 256개 가운데 위상인 것)과 모든 A에 대해 전수 확인한다.
+from itertools import chain
+Xf = frozenset(X)
+subsets = [frozenset(c) for c in chain.from_iterable(combinations(X, k) for k in range(len(X) + 1))]
+tops = []
+for mask in range(1 << len(subsets)):
+    T = [subsets[i] for i in range(len(subsets)) if mask >> i & 1]
+    if is_topology(X, T):
+        tops.append(T)
+ok = len(tops) == 29                              # 세 점 집합 위의 위상은 29개
+for T in tops:
+    closed = [Xf - U for U in T]
+    for A in subsets:
+        clos = Xf
+        for C in closed:
+            if A <= C:
+                clos = clos & C
+        bd = {p for p in X if all((U & A) and (U - A) for U in T if p in U)}
+        ok &= clos == (A | bd)
+check("명제 3.1.27: {a,b,c}의 위상 29개, 모든 A에서 closure(A) = A ∪ ∂A", ok)
+
 summary()

@@ -75,7 +75,7 @@ ax.plot(*p, "o", color=C["main"], ms=4, zorder=6)
 ax.text(p[0] - 0.06, p[1] - 0.06, r"$p$", fontsize=12, ha="right", va="top", zorder=7,
         bbox=dict(fc="white", ec="none", alpha=0.85, pad=0.3))
 ax.text(p[0] + d + 0.04, p[1] + 0.05, r"$\frac{1}{2}e_1$", color=C["tangent"], fontsize=11)
-ax.text(p[0] - 0.04, p[1] + d - 0.02, r"$\frac{1}{2}e_2$", color=C["tangent"], fontsize=11, ha="right")
+ax.text(p[0] - 0.1, p[1] + d - 0.06, r"$\frac{1}{2}e_2$", color=C["tangent"], fontsize=11, ha="right")
 ax.set_xlim(-0.15, 2.55)
 ax.set_ylim(-0.15, 1.5)
 

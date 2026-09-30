@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>2.1 전미분: 선형근사로서의 미분 — 미분기하 스터디</title>
   <meta name="dg-id" content="2.1">
-  <meta name="dg-status" content="draft">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="1.1, 1.2">
   <meta name="dg-refs" content="Sp-CoM Ch. 2; Lee-ISM App. C; dC Ch. 2 Appendix">
-  <meta name="dg-updated" content="2026-09-30">
+  <meta name="dg-updated" content="2026-10-01">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
@@ -83,9 +83,10 @@
     </section>
 
     <section id="sec-preliminaries">
-      <h2>준비: 거리, 공, 열린집합, 극한</h2>
+      <h2>준비: 거리, 공, 열린집합, 극한, 폐포, 컴팩트 집합, 완비성</h2>
       <p>극한을 말하려면 “가깝다”는 말이 필요하다. 이 장은 위상을 다루는 <a href="../03-topology-basics/index.html">3장</a>보다 앞에 있으므로, 미적분학에서 쓰던 다음 약속을 그대로 쓴다.
       이 개념들은 3장에서 거리공간과 위상공간의 언어로 정식으로 정의한다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-5">정의 3.1.5</a>,
+      <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-15">정의 3.1.15</a>,
       <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-1">정의 3.2.1</a>, <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-3">명제 3.2.3</a>).
       여기서는 이 장에 필요한 만큼만 상기한다.</p>
       <ul>
@@ -99,6 +100,37 @@
         \(x \in U\)이고 \(0 \lt \abs{x - p} \lt \delta\)이면 \(\abs{F(x) - q} \lt \varepsilon\)”이라는 뜻이다. \(\lim_{x \to p} F(x) = F(p)\)이면 \(F\)가 \(p\)에서 연속이라 한다.</li>
         <li><strong>성분별 극한.</strong> \(v \in \R^m\)의 각 성분은 \(\abs{v^i} \le \abs{v} \le \abs{v^1} + \dots + \abs{v^m}\)을 만족한다(첫 부등식은 \(\abs{v}^2\)이 \((v^i)^2\)을 포함하는 합이기 때문이고, 둘째는 \(v = \sum_i v^i e_i\)에 삼각부등식을 쓴 것이다).
         따라서 \(F = (F^1, \dots, F^m)\)이 \(q\)로 수렴할 필요충분조건은 각 성분 \(F^i\)가 \(q^i\)로 수렴하는 것이다.</li>
+        <li><strong>연속사상과 열린집합.</strong> \(U \subseteq \R^n\)이 열린집합이고 \(F\colon U \to \R^m\)이 연속이며 \(V \subseteq \R^m\)이 열린집합이면
+        \(F^{-1}(V) = \{x \in U : F(x) \in V\}\)는 열린집합이다. \(x \in F^{-1}(V)\)이면 \(B_\varepsilon(F(x)) \subseteq V\)인 \(\varepsilon \gt 0\)이 있고,
+        \(x\)에서의 연속성에서 \(x' \in U\), \(\abs{x' - x} \lt \delta\)이면 \(\abs{F(x') - F(x)} \lt \varepsilon\)인 \(\delta \gt 0\)이 있다. \(\delta\)를 줄여 \(B_\delta(x) \subseteq U\)가 되게 하면
+        \(B_\delta(x) \subseteq F^{-1}(V)\)이기 때문이다. (3장은 이 성질을 연속의 정의로 삼는다.)</li>
+        <li><strong>닫힌집합과 유계집합.</strong> 여집합 \(\R^n \setminus A\)가 열린집합이면 \(A\)를 닫힌집합이라 한다. 닫힌 공 \(\{x : \abs{x - p} \le r\}\)과 닫힌 직사각형
+        \([a^1, b^1] \times \dots \times [a^n, b^n]\)은 닫힌집합이다. 여집합의 점 \(x\) 둘레에, 앞의 경우는 반지름 \(\abs{x - p} - r\)인 공이, 뒤의 경우는 구간 \([a^i, b^i]\)를 벗어난 좌표 \(x^i\)에서
+        그 구간까지의 거리를 반지름으로 하는 공이 여집합에 들어가기 때문이다. 유한개의 닫힌집합의 합집합도 닫힌집합이다(여집합의 점마다 각 여집합에서 잡은 반지름들 가운데 가장 작은 것을 쓴다).
+        닫힌집합 \(A\) 안의 수열이 수렴하면 그 극한도 \(A\)에 있다. 극한이 열린집합 \(\R^n \setminus A\)에 있다면 그 둘레의 어떤 공이 \(A\)와 만나지 않는데, 수열의 항은 결국 그 공에 들어가기 때문이다.
+        어떤 공 \(B_R(0)\)에 포함되는 집합을 유계라 한다.</li>
+        <li><strong>내부, 경계, 폐포.</strong> \(D \subseteq \R^n\)이고 \(p \in \R^n\)이라 하자. 어떤 공 \(B_r(p)\)가 \(D\)에 포함되면 \(p\)를 \(D\)의 <em>내점</em>이라 하고, 내점 전체를 \(D\)의 <em>내부</em>라 한다.
+        \(p\)를 중심으로 하는 모든 공이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함하면 \(p\)를 \(D\)의 <em>경계점</em>이라 하고, 경계점 전체를 \(\partial D\)로 쓴다.
+        \(\overline{D} = D \cup \partial D\)를 \(D\)의 <em>폐포</em>라 한다. 정의에서 곧바로 \(\R^n\)의 각 점은 \(D\)의 내점, \(\R^n \setminus D\)의 내점, \(D\)의 경계점 가운데 정확히 하나다.
+        앞의 둘이 모두 아니라는 것은 \(p\)를 중심으로 하는 모든 공이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함한다는 뜻이고, 앞의 둘이 동시에 성립하면 \(p\)가 \(D\)와 \(\R^n \setminus D\)에 함께 속하게 되기 때문이다.
+        따라서 \(\overline{D}\)의 여집합은 \(\R^n \setminus D\)의 내부이고, 이것은 열린집합이다. \(B_r(q) \subseteq \R^n \setminus D\)이고 \(x \in B_r(q)\)이면 삼각부등식에서 \(B_{r - \abs{x - q}}(x) \subseteq B_r(q)\)이므로 \(x\)도 내점이기 때문이다.
+        즉 \(\overline{D}\)는 닫힌집합이다. 또 \(D \subseteq B_R(0)\)이고 \(\abs{q} \gt R\)이면 공 \(B_{\abs{q} - R}(q)\)는 \(B_R(0)\)과 만나지 않으므로(그 점 \(y\)는 \(\abs{y} \ge \abs{q} - \abs{y - q} \gt R\)) \(q \notin \overline{D}\)이다. 즉 \(D\)가 유계이면 \(\overline{D}\)도 유계이다.
+        3장은 폐포를 위상공간에서 “\(D\)를 포함하는 모든 닫힌집합의 교집합”으로 정의한다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-15">정의 3.1.15</a>).
+        \(\R^n\)에서 그 정의가 여기의 \(D \cup \partial D\)와 같은 집합을 준다는 것은 <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-27">명제 3.1.27</a>에서 증명한다.</li>
+        <li><strong>컴팩트 집합에 관한 세 사실.</strong> 이 장에서는 미적분학의 관습대로 \(\R^n\)의 유계인 닫힌집합을 <em>컴팩트</em> 집합이라고도 부른다. 컴팩트 집합 \(K\)에 관한 다음 세 사실은
+        <strong>미적분학에서 알려진 사실로 받아들인다</strong>.
+        (i) <em>하이네-보렐 정리.</em> 열린집합들이 \(K\)를 덮으면 그 가운데 유한개가 이미 \(K\)를 덮는다.
+        (ii) <em>최댓값·최솟값 정리.</em> \(K \neq \varnothing\)이면 \(K\) 위의 연속함수는 최댓값과 최솟값을 가진다. 특히 유계이다.
+        (iii) <em>균등연속성.</em> \(K\) 위의 연속사상 \(F\)는 균등연속이다. 즉 모든 \(\varepsilon \gt 0\)에 대하여 어떤 \(\delta \gt 0\)이 있어서, \(x, x' \in K\)이고 \(\abs{x - x'} \lt \delta\)이면 \(\abs{F(x) - F(x')} \lt \varepsilon\)이다.
+        3장은 컴팩트성을 열린덮개로 정의하고(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-1">정의 3.6.1</a>) 이 세 사실을 증명한다
+        (<a href="../03-topology-basics/3-6-compactness.html#i-3-6-7">하이네-보렐 정리 3.6.7</a>, <a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">최댓값·최솟값 정리 3.6.10</a>,
+        <a href="../03-topology-basics/3-6-compactness.html#i-3-6-19">따름정리 3.6.19</a>). 이 장의 증명이 3장의 결과를 쓰는 곳은 이 세 사실과 아래의 중간값 정리 (v)뿐이다.</li>
+        <li><strong>완비성.</strong> \(\R^n\)의 수열 \((x_k)\)가 “모든 \(\varepsilon \gt 0\)에 대하여 어떤 \(N\)이 있어서 \(k, m \ge N\)이면 \(\abs{x_k - x_m} \lt \varepsilon\)”을 만족하면 코시 수열이라 한다.
+        (iv) <em>\(\R^n\)의 완비성.</em> \(\R^n\)의 코시 수열은 수렴한다. 이것도 <strong>미적분학에서 알려진 사실로 받아들인다</strong>.
+        (각 성분 \((x_k^i)\)는 \(\abs{x_k^i - x_m^i} \le \abs{x_k - x_m}\)이므로 \(\R\)의 코시 수열이고, 실수의 완비성에 의해 수렴한다. 그러면 위의 성분별 극한에 의해 \((x_k)\)도 수렴한다.)
+        3장은 이 사실을 다루지 않는다. 이 장에서는 <a href="2-3-inverse-function-theorem.html#i-2-3-6">축소사상 원리</a>의 증명에 쓴다.</li>
+        <li><strong>중간값 정리.</strong> (v) 구간 \(I \subseteq \R\) 위의 연속함수 \(f\)가 \(a, b \in I\)에서 \(f(a) \lt c \lt f(b)\)이면 \(f(t) = c\)인 \(t \in I\)가 있다. 따라서 연속함수에 의한 구간의 상은 구간이다.
+        이것도 1변수 미적분학에서 <strong>알려진 사실로 받아들인다</strong>. 3장은 이것을 연결성으로 증명한다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>).</li>
       </ul>
       <p>미분을 정의할 때 정의역을 <em>열린집합</em>으로 두는 이유는 간단하다. \(p \in U\)이고 \(U\)가 열린집합이면 \(\abs{h}\)가 충분히 작은 모든 \(h\)에 대하여 \(p + h \in U\)이다.
       그래서 \(F(p + h)\)를 모든 방향의 작은 \(h\)에 대해 생각할 수 있다.</p>
@@ -205,7 +237,7 @@
 
     <section id="sec-partials">
       <h2>편미분, 방향미분, 야코비 행렬</h2>
-      <p>정의 2.1.1은 \(DF(p)\)가 무엇이어야 하는지 말해 주지만, 어떻게 구하는지는 말해 주지 않는다. 계산은 1변수 미분으로 한다.
+      <p><a href="#i-2-1-1">정의 2.1.1</a>은 \(DF(p)\)가 무엇이어야 하는지 말해 주지만, 어떻게 구하는지는 말해 주지 않는다. 계산은 1변수 미분으로 한다.
       한 방향으로만 움직이면 변수가 하나가 되기 때문이다.</p>
 
       <div class="thm definition" id="i-2-1-8">
@@ -258,10 +290,11 @@
       <p><strong>이 정리가 말하는 것.</strong> 전미분이 존재한다는 것을 알기만 하면, 그것은 편미분으로 계산된다. 그래서 앞으로는 전미분 \(DF(p)\)와
       그 행렬인 야코비 행렬을 같은 기호 \(DF(p)\)로 쓴다. 다만 이 정리는 <em>미분가능성을 가정</em>한다. 편미분이 있다고 해서 미분가능한 것은 아니다(<a href="#i-2-1-12">비예 2.1.12</a>).</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 정의 2.1.1의 \(h\)를 한 직선 \(h = tv\) 위로만 움직인다.</p>
+        <p class="proof-idea">증명 아이디어: <a href="#i-2-1-1">정의 2.1.1</a>의 \(h\)를 한 직선 \(h = tv\) 위로만 움직인다.</p>
         <p><span class="proof-head">증명.</span>
         (a) \(v = 0\)이면 양변이 \(0\)이다. \(v \neq 0\)이라 하자. \(t \neq 0\)이 충분히 작으면 \(p + tv \in U\)이고, \(DF(p)\)의 선형성에 의해
-        \[ \Big\lvert \frac{F(p + tv) - F(p)}{t} - DF(p)v \Big\rvert = \frac{\abs{F(p + tv) - F(p) - DF(p)(tv)}}{\abs{t}} = \abs{v}\,\frac{\abs{F(p + tv) - F(p) - DF(p)(tv)}}{\abs{tv}} \]
+        \[ \begin{aligned} \Big\lvert \frac{F(p + tv) - F(p)}{t} - DF(p)v \Big\rvert &= \frac{\abs{F(p + tv) - F(p) - DF(p)(tv)}}{\abs{t}} \\
+           &= \abs{v}\,\frac{\abs{F(p + tv) - F(p) - DF(p)(tv)}}{\abs{tv}} \end{aligned} \]
         이다. \(t \to 0\)이면 \(tv \to 0\)이므로 <a href="#eq-2-1-2">(2.1.2)</a>에 의해 우변은 \(0\)으로 간다. 따라서 \(D_vF(p)\)가 존재하고 \(DF(p)v\)와 같다.</p>
         <p>(b) (a)에서 \(v = e_j\)로 두면 \(\partial_j F(p) = D_{e_j}F(p) = DF(p)e_j\)가 존재한다. 이 벡터의 성분이 \(\partial_j F^1(p), \dots, \partial_j F^m(p)\)이다.
         <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-13">정의 1.2.13</a>에 의해 표준기저에 대한 \(DF(p)\)의 행렬의 \(j\)번째 열은 \(DF(p)e_j\)의 성분이므로, 그 행렬은 \(i\)행 \(j\)열 성분이 \(\partial_j F^i(p)\)인 행렬,
@@ -359,7 +392,7 @@
         \(\gamma'(t) = (-r\sin t,\ r\cos t,\ 0)\)이고 \(\abs{\gamma'(t)} = r\)이다. 나선 \(\gamma(t) = (a\cos t,\ a\sin t,\ bt)\) (\(a \gt 0\), \(b \neq 0\))에서는
         \(\gamma'(t) = (-a\sin t,\ a\cos t,\ b)\)이고 \(\abs{\gamma'(t)} = \sqrt{a^2 + b^2}\)이다. 두 곡선 모두 빠르기가 일정하다.
         원의 매개화는 극좌표 사상에서 \(r\)을 고정한 것이므로 \(\gamma'(t)\)의 앞 두 성분은 <a href="#eq-2-1-5">(2.1.5)</a>의 둘째 열과 같다.
-        이 벡터들은 <a href="../04-curves/index.html">4장</a>에서 곡선의 속도벡터로 다시 나온다.</p>
+        이 벡터들은 <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-8">예 4.1.8</a>에서 곡선의 속도벡터(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-7">정의 4.1.7</a>)로 다시 나온다.</p>
         <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
       </div>
 
@@ -376,10 +409,10 @@
            \end{pmatrix} \tag{2.1.6} \]
         </div>
         <p>이다. 편미분이 모두 연속이므로 \(\mathbf{x}\)는 \(U\)에서 미분가능하다. 두 열은 \(\mathbf{x}_\theta = \partial_\theta\mathbf{x}\)와 \(\mathbf{x}_\varphi = \partial_\varphi\mathbf{x}\)이고,
-        <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#ex-1-1-5">연습 1.1.5</a>에서 \(0 \lt \theta \lt \pi\)이면 이 두 벡터가 일차독립임을 보였다.
+        \(0 \lt \theta \lt \pi\)이면 이 두 벡터는 일차독립이다. \(a\mathbf{x}_\theta + c\mathbf{x}_\varphi = 0\)이면 셋째 성분 \(-ar\sin\theta = 0\)에서 \(a = 0\)이고, \(\mathbf{x}_\varphi \neq 0\)(\(\abs{\mathbf{x}_\varphi} = r\sin\theta \gt 0\))이므로 \(c = 0\)이기 때문이다(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#ex-1-1-5">연습 1.1.5</a>에서 미리 해 보았다).
         따라서 \(D\mathbf{x}(\theta, \varphi)\)의 계수(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-9">정의 1.2.9</a>)는 \(U\)의 모든 점에서 \(2\)이다.
         \(\theta = 0\)이면 둘째 열이 \(0\)이 되어 계수가 \(1\)로 떨어진다. 이 사실은 <a href="2-5-rank-theorem.html">2.5절</a>의 계수정리와
-        <a href="../06-regular-surfaces/index.html">6장</a>의 정칙곡면의 정의에서 중요해진다.</p>
+        <a href="../06-regular-surfaces/index.html">6장</a>의 정칙곡면의 정의(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">정의 6.1.1</a>)에서 중요해진다.</p>
         <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
       </div>
 
@@ -395,7 +428,7 @@
       <aside class="box forward">
         <p class="box-title">나중에 보게 될 것: 미분과 접공간 (줄기 T2)</p>
         <p>전미분 \(DF(p)\)는 study set 전체를 꿰는 줄기 T2의 출발점이다. <a href="../06-regular-surfaces/index.html">6장</a>에서는 매개화 \(\mathbf{x}\)의 전미분의 상
-        \(D\mathbf{x}(q)(\R^2)\)로 곡면의 접평면을 만들고 곡면 사이 사상의 미분 \(d\varphi_p\)를 정의한다. <a href="../13-tangent-spaces/index.html">13장</a>에서는 둘러싼 \(\R^N\) 없이
+        \(D\mathbf{x}(q)(\R^2)\)로 곡면의 접평면을 만들고(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">명제 6.2.4</a>) 곡면 사이 사상의 미분 \(d\varphi_p\)를 정의한다(<a href="../06-regular-surfaces/6-4-differential-of-a-map.html#i-6-4-1">정의 6.4.1</a>). <a href="../13-tangent-spaces/index.html">13장</a>에서는 둘러싼 \(\R^N\) 없이
         다양체 사이의 미분 \(dF_p\colon T_pM \to T_{F(p)}N\)을 정의하는데, 그 동기가 이 절의 방향미분이다. 또 함수 \(f\colon U \to \R\)의 전미분 \(Df(p)\)는
         \(\R^n\)에서 \(\R\)로 가는 선형사상, 즉 쌍대공간 \((\R^n)^*\)의 원소(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-1">정의 1.3.1</a>)이다.
         이것은 <a href="../16-covectors-tensors/index.html">16장</a>의 1-형식 \(df\)로 이어진다.</p>
@@ -429,7 +462,7 @@
 
       <div class="exercise" id="ex-2-1-2" data-level="1">
         <p><span class="thm-head">연습 2.1.2</span> <span class="level">★</span>
-        반지름 \(r\)인 원기둥의 기준 매개화 \(\mathbf{x}(u, v) = (r\cos u,\ r\sin u,\ v)\)의 전미분을 구하고, 모든 점에서 계수가 \(2\)임을 보여라.</p>
+        반지름 \(r\)인 원기둥의 기준 매개화 \(\mathbf{x}(u, v) = (r\cos u,\ r\sin u,\ v)\)의 전미분을 구하고, 모든 점에서 계수가 \(2\)임을 보여라. (<a href="../06-regular-surfaces/index.html">6장</a>(<a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-7">예 6.5.7</a>: 원기둥이 정칙곡면임)에서 사용)</p>
         <details class="solution"><summary>풀이</summary>
           <p>성분의 편미분은 모두 연속이므로 \(\mathbf{x}\)는 미분가능하고
           \[ D\mathbf{x}(u, v) = \begin{pmatrix} -r\sin u & 0 \\ r\cos u & 0 \\ 0 & 1 \end{pmatrix} \]
@@ -440,7 +473,7 @@
 
       <div class="exercise" id="ex-2-1-3" data-level="1">
         <p><span class="thm-head">연습 2.1.3</span> <span class="level">★</span>
-        \(A\)가 \(n \times n\) 행렬이고 \(f(x) = \inner{x}{Ax}\)일 때, 정의 2.1.1만 써서 \(Df(p)h = \inner{h}{Ap} + \inner{p}{Ah}\)임을 보여라.</p>
+        \(A\)가 \(n \times n\) 행렬이고 \(f(x) = \inner{x}{Ax}\)일 때, <a href="#i-2-1-1">정의 2.1.1</a>만 써서 \(Df(p)h = \inner{h}{Ap} + \inner{p}{Ah}\)임을 보여라.</p>
         <details class="hint"><summary>힌트</summary><p><a href="#i-2-1-4">예 2.1.4</a>(a)처럼 \(f(p + h)\)를 전개하고, 나머지를 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">명제 1.5.7</a>로 누른다.</p></details>
         <details class="solution"><summary>풀이</summary>
           <p>내적의 쌍선형성과 \(A\)의 선형성에 의해
@@ -459,7 +492,7 @@
           \[ \inner{\mathbf{x}}{\mathbf{x}_\theta} = r^2\sin\theta\cos\theta\cos^2\varphi + r^2\sin\theta\cos\theta\sin^2\varphi - r^2\cos\theta\sin\theta = 0 \]
           이고, 둘째 열로 계산하면 \(\inner{\mathbf{x}}{\mathbf{x}_\varphi} = -r^2\sin^2\theta\cos\varphi\sin\varphi + r^2\sin^2\theta\sin\varphi\cos\varphi + 0 = 0\)이다.
           뜻: \(f\)는 원점까지 거리의 제곱이고 구면 위에서 \(f = r^2\)으로 일정하다. 구면을 따라 움직이는 방향으로는 \(f\)가 (1차 근사로) 변하지 않는다.
-          <a href="../06-regular-surfaces/index.html">6장</a>에서 이것을 “구면의 접평면은 위치벡터에 수직이다”로 다시 본다.</p>
+          <a href="../06-regular-surfaces/index.html">6장</a>(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-8">예 6.2.8</a>)에서 이것을 “구면의 접평면은 위치벡터에 수직이다”로 다시 본다.</p>
           <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
         </details>
       </div>
@@ -501,7 +534,7 @@
         <p><span class="thm-head">연습 2.1.7</span> <span class="level">★★★</span>
         \(f\colon \R^2 \to \R\)을 \(x \neq 0\)이면 \(f(x) = \abs{x}^2\sin(1/\abs{x})\), \(f(0) = 0\)으로 정의하자.
         (a) \(f\)가 \(\R^2\)의 모든 점에서 미분가능함을 보여라. (b) \(\partial_1 f\)가 원점에서 연속이 아님을 보여라. 이로써 <a href="#i-2-1-13">정리 2.1.13</a>의 역이 거짓임을 확인하여라.</p>
-        <details class="hint"><summary>힌트</summary><p>원점에서는 \(\abs{f(h)} \le \abs{h}^2\)를 쓴다. 원점 밖에서는 편미분을 계산해 정리 2.1.13를 쓴다.</p></details>
+        <details class="hint"><summary>힌트</summary><p>원점에서는 \(\abs{f(h)} \le \abs{h}^2\)를 쓴다. 원점 밖에서는 편미분을 계산해 <a href="#i-2-1-13">정리 2.1.13</a>을 쓴다.</p></details>
         <details class="solution"><summary>풀이</summary>
           <p>(a) 원점에서: \(\abs{f(h) - f(0) - 0 \cdot h}/\abs{h} = \abs{h}\,\abs{\sin(1/\abs{h})} \le \abs{h} \to 0\)이므로 \(f\)는 원점에서 미분가능하고 \(Df(0) = 0\)이다.
           원점 밖에서: \(\rho(x) = \abs{x} = \sqrt{(x^1)^2 + (x^2)^2}\)는 \(x \neq 0\)에서 \(\partial_1\rho = x^1/\rho\)로 연속인 편미분을 가지므로(1변수 연쇄법칙)

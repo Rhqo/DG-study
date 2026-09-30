@@ -63,6 +63,9 @@ SKIP_DIRS = {"tools", "refs", "assets", "node_modules", ".git"}
 SECTION_RE = re.compile(r"^(\d+)-(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*\.html$")
 CHAPTER_DIR_RE = re.compile(r"^(\d{2})-[a-z0-9]+(?:-[a-z0-9]+)*$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+UNLINKED_REF_RE = re.compile(
+    r"(?<![가-힣])(?:(?:정의|정리|명제|보조정리|따름정리|예|비예|비고|연습|그림)\s*\d+\.\d+\.\d+"
+    r"|식\s*\(\d+\.\d+\.\d+\))")
 
 
 # ---------------------------------------------------------------- DOM
@@ -769,6 +772,22 @@ class SiteChecker:
         if summ is not None and summ.find("p", "next") is None:
             rep.error(rel, summ.line, "section.summary must end with <p class=\"next\">다음 절에서는 …</p> (§3.2)")
         self.check_numbering(page, n, m)
+        self.check_unlinked_refs(page)
+
+    def check_unlinked_refs(self, page):
+        """본문의 '정리 N.M.K', '식 (N.M.K)' 같은 상호참조는 링크여야 한다 (§11.5). WARN만 낸다."""
+        rep, rel = self.rep, page.rel
+        skip_tags = {"a", "code", "pre", "title", "head", "script", "style"}
+        skip_classes = {"thm-head", "fig-head"}
+        for t in page.dom.iter_text():
+            if not UNLINKED_REF_RE.search(t.data):
+                continue
+            anc = list(_text_ancestors(t))
+            if any(a.tag in skip_tags or skip_classes & set(a.classes) for a in anc):
+                continue
+            for m in UNLINKED_REF_RE.finditer(t.data):
+                rep.warn(rel, t.line + t.data.count("\n", 0, m.start()),
+                         f"unlinked cross-reference '{m.group(0)}': wrap it in <a href=\"…\"> (§11.5)")
 
     def check_numbering(self, page, n, m):
         rep, rel = self.rep, page.rel

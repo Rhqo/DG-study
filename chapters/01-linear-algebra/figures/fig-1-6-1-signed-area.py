@@ -47,7 +47,7 @@ def frame(ax, xlim, ylim, tag):
     ax.plot(list(xlim), [0, 0], color=C["aux"], lw=0.5, zorder=0)
     ax.plot([0, 0], list(ylim), color=C["aux"], lw=0.5, zorder=0)
     ax.plot(0, 0, "o", color=C["main"], ms=2.5, zorder=8)
-    ax.text(0.0, 1.0, tag, transform=ax.transAxes, ha="left", va="top", fontsize=11)
+    ax.text(0.0, 1.0, tag, transform=ax.transAxes, ha="left", va="top", fontsize=12)
 
 
 WB = dict(facecolor="white", edgecolor="none", pad=0.3)
@@ -62,7 +62,7 @@ arrow(ax, (0, 0), b1, C["tangent"]); arrow(ax, (0, 0), b2, C["tangent"])
 turn(ax, b1, b2, C["main"], rad=0.45)
 ax.text(*(b1 + [-0.2, -0.38]), r"$b_1$", color=C["tangent"], fontsize=12, bbox=WB, zorder=9)
 ax.text(*(b2 + [-0.25, 0.1]), r"$b_2$", color=C["tangent"], fontsize=12, bbox=WB, zorder=9)
-ax.text(1.0, 2.5, r"$\det(b_1, b_2) = 3$", color=C["main"], fontsize=11, bbox=WB, zorder=9, ha="center")
+ax.text(1.0, 2.5, r"$\det(b_1, b_2) = 3$", color=C["main"], fontsize=12, bbox=WB, zorder=9, ha="center")
 ax.set_xlim(*XL); ax.set_ylim(*YL)
 
 # (b) 음의 방향
@@ -73,7 +73,7 @@ arrow(ax, (0, 0), b2, C["tangent"]); arrow(ax, (0, 0), b1, C["tangent"])
 turn(ax, b2, b1, C["main"], rad=-0.45)
 ax.text(*(b2 + [-0.25, 0.1]), r"$b_2$", color=C["tangent"], fontsize=12, bbox=WB, zorder=9)
 ax.text(*(b1 + [-0.2, -0.38]), r"$b_1$", color=C["tangent"], fontsize=12, bbox=WB, zorder=9)
-ax.text(1.0, 2.5, r"$\det(b_2, b_1) = -3$", color=C["main"], fontsize=11, bbox=WB, zorder=9, ha="center")
+ax.text(1.0, 2.5, r"$\det(b_2, b_1) = -3$", color=C["main"], fontsize=12, bbox=WB, zorder=9, ha="center")
 ax.set_xlim(*XL); ax.set_ylim(*YL)
 
 # (c) 밀기
@@ -83,7 +83,7 @@ ax.add_patch(Polygon([[0, 0], b1, b1 + b2, b2], closed=True, fill=False, ec=C["a
 c1 = b1 + b2
 ax.add_patch(Polygon([[0, 0], c1, c1 + b2, b2], closed=True, color=C["region"], alpha=0.3, lw=0, zorder=1))
 arrow(ax, (0, 0), c1, C["tangent"]); arrow(ax, (0, 0), b2, C["tangent"])
-ax.text(*(c1 + [0.1, -0.15]), r"$b_1 + b_2$", color=C["tangent"], fontsize=11, bbox=WB, zorder=9)
+ax.text(*(c1 + [0.1, -0.15]), r"$b_1 + b_2$", color=C["tangent"], fontsize=12, bbox=WB, zorder=9)
 ax.text(*(b2 + [-0.25, 0.1]), r"$b_2$", color=C["tangent"], fontsize=12, bbox=WB, zorder=9)
 ax.set_xlim(-1.5, 2.4); ax.set_ylim(*YL)
 

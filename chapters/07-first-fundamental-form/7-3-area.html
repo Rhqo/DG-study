@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>7.3 넓이 — 미분기하 스터디</title>
+  <meta name="dg-id" content="7.3">
+  <meta name="dg-status" content="draft">
+  <meta name="dg-prereq" content="7.1, 7.2, 6.3, 2.6, 1.6, 3.6">
+  <meta name="dg-refs" content="dC §2-5">
+  <meta name="dg-updated" content="2026-10-01">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">7. 제1기본형식</a> ›
+    <span>7.3 넓이</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>7.3 넓이</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#dC">[dC §2-5]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>곡면 위 좌표 영역의 넓이와 함수의 적분을 \(\sqrt{EG - F^2}\)로 정의할 수 있다.</li>
+        <li>넓이가 매개화의 선택에 무관함을 변수변환 공식으로 증명할 수 있다.</li>
+        <li>구면, 원환면, 원기둥, 회전면의 넓이를 계산하고, 매개화 하나가 거의 다 덮는 곡면 전체의 넓이를 극한으로 이해할 수 있다.</li>
+        <li>등거리사상이 넓이를 보존함을 보이고, 넓이를 보존하지만 등거리사상이 아닌 예를 들 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="7-1-first-fundamental-form.html#i-7-1-1">정의 7.1.1 (제1기본형식)</a>, <a href="7-1-first-fundamental-form.html#eq-7-1-3">(7.1.3)</a>, <a href="7-1-first-fundamental-form.html#i-7-1-7">명제 7.1.7</a>, 기준 예제의 \(E, F, G\)(<a href="7-1-first-fundamental-form.html#i-7-1-2">예 7.1.2</a>, <a href="7-1-first-fundamental-form.html#i-7-1-4">예 7.1.4</a>, <a href="7-1-first-fundamental-form.html#i-7-1-5">예 7.1.5</a>, <a href="7-1-first-fundamental-form.html#i-7-1-6">예 7.1.6</a>)</li>
+        <li><a href="7-2-isometries.html#i-7-2-1">정의 7.2.1 (등거리사상)</a>, <a href="7-2-isometries.html#i-7-2-8">따름정리 7.2.8</a></li>
+        <li><a href="../06-regular-surfaces/6-3-smooth-functions.html#i-6-3-1">정리 6.3.1 (매개변수 변환)</a>, <a href="../06-regular-surfaces/6-3-smooth-functions.html#i-6-3-4">명제 6.3.4</a></li>
+        <li><a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6 (적분 영역과 부피)</a>, <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-7">정리 2.6.7 (푸비니 정리)</a>, <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">정리 2.6.9 (변수변환 공식)</a></li>
+        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-9">따름정리 1.6.9 (그람 행렬식과 부피)</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16 (외적의 성질)</a>, <a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>, <a href="../03-topology-basics/3-6-compactness.html#i-3-6-7">정리 3.6.7 (하이네-보렐)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="7-1-first-fundamental-form.html">7.1절</a>과 <a href="7-2-isometries.html">7.2절</a>에서 길이와 각을 제1기본형식으로 재고, 그것을 보존하는 사상을 보았다. 7장의 첫 질문 가운데 넓이가 남았다. 지구 표면에서 한 나라의 넓이는 어떻게 재는가?</p>
+      <p>평면에서는 영역을 작은 직사각형으로 나누고 넓이를 더했다(<a href="../02-calculus-rn/2-6-change-of-variables.html">2.6절</a>). 곡면에서도 매개화 \(\mathbf{x}\)로 좌표 칸을 만든다. 크기가 \(\Delta u \times \Delta v\)인 칸의 상은 굽어 있지만,
+      선형근사를 쓰면 두 변이 \(\Delta u\,\mathbf{x}_u\), \(\Delta v\,\mathbf{x}_v\)인 평행사변형과 거의 같다. 그 넓이는 \(\abs{\mathbf{x}_u \times \mathbf{x}_v}\,\Delta u\,\Delta v\)이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16</a>(d)).
+      이것을 모두 더한 극한, 곧 \(\int\abs{\mathbf{x}_u \times \mathbf{x}_v}\,du\,dv\)를 넓이로 삼으면 된다. 그리고 <a href="7-1-first-fundamental-form.html#eq-7-1-3">(7.1.3)</a>에 의해 피적분함수는 \(\sqrt{EG - F^2}\), 곧 제1기본형식만으로 정해진다.</p>
+      <p>남는 문제는 하나다. 매개화를 바꾸면 적분이 달라지지 않는가? 매개화에 따라 넓이가 달라진다면 그것은 곡면의 넓이라 부를 수 없다. <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">변수변환 공식</a>이 이 문제를 해결한다. 2.6절의 예고 상자에서 미리 적어 둔 계획이다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 굽은 칸 ≈ 평행사변형</p>
+        <p><a href="#fig-7-3-1">그림 7.3.1</a>에서 \(U\)의 정사각형 \(Q\)는 구면 위의 굽은 사각형 \(\mathbf{x}(Q)\)로 간다. 한 꼭짓점 \(p\)에 붙인 평행사변형(주황 점선)의 두 변은 \(\Delta\,\mathbf{x}_\theta\)와 \(\Delta\,\mathbf{x}_\varphi\)이다.
+        두 도형은 모양이 조금 다르지만 \(\Delta\)가 작아질수록 넓이의 비가 \(1\)로 간다(<a href="#ex-7-3-5">연습 7.3.5</a>). 넓이를 “작은 평행사변형 넓이의 합의 극한”으로 정의하는 까닭이다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-7-3-1">
+        <img src="figures/fig-7-3-1-area-element.svg" alt="왼쪽은 격자가 있는 하늘색 평면 영역과 그 안의 진한 하늘색 정사각형 Q, 왼쪽 아래 꼭짓점 q, 변의 길이 Δ 표시다. 곡선 화살표 x가 오른쪽 구면의 일부를 가리킨다. 구면 위에 굽은 사각형 x(Q)가 하늘색으로 칠해져 있고, 한 꼭짓점 p에서 파란 화살표 Δx_θ, Δx_φ가 뻗어 있으며, 두 화살표가 만드는 평행사변형이 주황 점선으로 그려져 x(Q)와 거의 겹친다.">
+        <figcaption><span class="fig-head">그림 7.3.1.</span>
+        단위구면(\(r = 1\))의 좌표 칸 \(Q = [\theta_0, \theta_0 + \Delta] \times [\varphi_0, \varphi_0 + \Delta]\), \(\theta_0 = \pi/4\), \(\varphi_0 = \pi/6\), \(\Delta = 0.5\)와 그 상 \(\mathbf{x}(Q)\)(하늘색).
+        주황 점선은 \(p = \mathbf{x}(\theta_0, \varphi_0)\)에 붙인 평행사변형 \(\{p + s\,\Delta\,\mathbf{x}_\theta + t\,\Delta\,\mathbf{x}_\varphi : 0 \le s, t \le 1\}\)이다. 넓이는 \(\mathbf{x}(Q)\)가 \(\Delta(\cos\theta_0 - \cos(\theta_0 + \Delta)) \approx 0.213\), 평행사변형이 \(\sin\theta_0\,\Delta^2 \approx 0.177\)이다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-definition">
+      <h2>좌표 영역의 넓이</h2>
+      <p>먼저 매개화를 바꿀 때 외적이 어떻게 변하는지 적어 둔다. 이 보조정리는 <a href="7-5-orientation.html">7.5절</a>에서 방향을 다룰 때 다시 쓴다.</p>
+
+      <div class="thm lemma" id="i-7-3-1">
+        <p><span class="thm-head">보조정리 7.3.1</span> <span class="thm-name">(매개화를 바꿀 때 외적의 변환)</span>.
+        <a href="../06-regular-surfaces/6-3-smooth-functions.html#i-6-3-1">정리 6.3.1</a>의 상황에서 \(h = \mathbf{x}^{-1} \circ \mathbf{y}\)이고 \(\mathbf{y}\)의 변수를 \((\bar u, \bar v)\)라 하면, 모든 \(\bar q \in \mathbf{y}^{-1}(W)\)에서</p>
+        <div class="equation" id="eq-7-3-1">
+        \[ \mathbf{y}_{\bar u} \times \mathbf{y}_{\bar v}\,(\bar q) = \det Dh(\bar q)\;\big(\mathbf{x}_u \times \mathbf{x}_v\big)\big(h(\bar q)\big) \tag{7.3.1} \]
+        </div>
+        <p>이다. 특히 \(\abs{\mathbf{y}_{\bar u} \times \mathbf{y}_{\bar v}} = \abs{\det Dh}\,\abs{\mathbf{x}_u \times \mathbf{x}_v} \circ h\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        \(h = (u(\bar u, \bar v), v(\bar u, \bar v))\)로 쓰면 <a href="../06-regular-surfaces/6-3-smooth-functions.html#eq-6-3-5">(6.3.5)</a>에서 \(\mathbf{y}_{\bar u} = u_{\bar u}\,\mathbf{x}_u + v_{\bar u}\,\mathbf{x}_v\), \(\mathbf{y}_{\bar v} = u_{\bar v}\,\mathbf{x}_u + v_{\bar v}\,\mathbf{x}_v\)이다. 외적의 쌍선형성과 \(\mathbf{x}_u \times \mathbf{x}_u = \mathbf{x}_v \times \mathbf{x}_v = 0\), \(\mathbf{x}_v \times \mathbf{x}_u = -\mathbf{x}_u \times \mathbf{x}_v\)(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16</a>(a))에서</p>
+        <p>\[ \mathbf{y}_{\bar u} \times \mathbf{y}_{\bar v} = u_{\bar u}v_{\bar v}\,\mathbf{x}_u \times \mathbf{x}_v + v_{\bar u}u_{\bar v}\,\mathbf{x}_v \times \mathbf{x}_u = \big(u_{\bar u}v_{\bar v} - u_{\bar v}v_{\bar u}\big)\,\mathbf{x}_u \times \mathbf{x}_v \]</p>
+        <p>이고, 괄호 안이 \(\det Dh\)이다. 절댓값을 취하면 둘째 식이다.</p>
+      </div>
+
+      <p>넓이를 잴 집합은 “매개화 하나의 상 안에 들어 있고 경계가 얇은” 집합이다. 적분 영역(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6</a>)을 매개화로 옮긴 것을 쓴다.</p>
+
+      <div class="thm definition" id="i-7-3-2">
+        <p><span class="thm-head">정의 7.3.2</span> <span class="thm-name">(좌표 영역과 넓이, coordinate region and area)</span>.
+        \(S\)가 정칙곡면이라 하자. 매개화 \(\mathbf{x}\colon U \to S\)와 폐포가 \(U\)에 포함되는 적분 영역 \(Q\)(\(\overline{Q} \subseteq U\))가 있어서 \(R = \mathbf{x}(Q)\)이면 \(R\)을 \(S\)의 <dfn>좌표 영역</dfn>(coordinate region)이라 한다. 그 <dfn data-generalizes="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">넓이</dfn>(area)를</p>
+        <div class="equation" id="eq-7-3-2">
+        \[ A(R) = \int_Q \abs{\mathbf{x}_u \times \mathbf{x}_v}\,du\,dv = \int_Q \sqrt{EG - F^2}\;du\,dv \tag{7.3.2} \]
+        </div>
+        <p>로 정의한다. 또 \(\mathbf{x}(\overline{Q})\)에서 연속인 함수 \(f\)의 \(R\) 위의 적분을</p>
+        <div class="equation" id="eq-7-3-3">
+        \[ \iint_R f\,dA = \int_Q (f \circ \mathbf{x})\,\sqrt{EG - F^2}\;du\,dv \tag{7.3.3} \]
+        </div>
+        <p>로 정의한다. \(f = 1\)이면 \(A(R)\)이다.</p>
+      </div>
+
+      <p>피적분함수는 \(U\)에서 연속이고 \(\overline{Q}\)는 컴팩트하므로(유계 닫힌집합, <a href="../03-topology-basics/3-6-compactness.html#i-3-6-7">정리 3.6.7</a>) 유계다. 따라서 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6</a>에 의해 적분이 존재한다. 두 표현이 같은 것은 <a href="7-1-first-fundamental-form.html#eq-7-1-3">(7.1.3)</a>이다.
+      기호 \(dA = \sqrt{EG - F^2}\,du\,dv\)를 매개화 \(\mathbf{x}\)의 <dfn>넓이요소</dfn>(area element)라 부른다. 이것은 “좌표 칸 \(du\,dv\)의 실제 넓이의 배율이 \(\sqrt{EG - F^2}\)”라는 뜻을 담은 기호이고, 계산에서는 <a href="#eq-7-3-3">(7.3.3)</a>의 적분을 줄여 쓴 것으로만 쓴다.
+      <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-9">따름정리 1.6.9</a>로 말하면 \(\sqrt{EG - F^2}\)은 기저 \((\mathbf{x}_u, \mathbf{x}_v)\)의 그람 행렬식의 제곱근, 곧 두 벡터가 만드는 평행사변형의 넓이다.</p>
+
+      <div class="thm example" id="i-7-3-3">
+        <p><span class="thm-head">예 7.3.3</span> <span class="thm-name">(평면 영역과 원기둥 조각)</span>.
+        (a) 평면 \(\{z = 0\}\)의 매개화 \(\iota(u, v) = (u, v, 0)\)은 \(E = G = 1\), \(F = 0\)이므로, 적분 영역 \(Q\)에 대해 \(A(\iota(Q)) = \int_Q 1 = \vol(Q)\)이다. 새 정의는 평면에서 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6</a>의 넓이와 같다. 이름을 같이 쓸 자격이 있다.</p>
+        <p>(b) 원기둥의 기준 매개화는 \(E = r^2\), \(F = 0\), \(G = 1\)이므로(<a href="7-1-first-fundamental-form.html#i-7-1-4">예 7.1.4</a>) \(\sqrt{EG - F^2} = r\)이다. \(0 \lt a \lt b \lt 2\pi\)이면 \(R = \mathbf{x}([a, b] \times [c, d])\)는 좌표 영역이고, 푸비니 정리(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-7">정리 2.6.7</a>)에서</p>
+        <p>\[ A(R) = \int_c^d\int_a^b r\,du\,dv = r(b - a)(d - c) \]</p>
+        <p>이다. 밑변이 호의 길이 \(r(b - a)\), 높이가 \(d - c\)인 “굽은 직사각형”의 넓이다.</p>
+        <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+      </div>
+
+      <p>정의에서 매개화를 요구한 이유 가운데 하나는 단사성이다. 단사가 아닌 사상으로 같은 적분을 하면 겹친 부분을 여러 번 센다.</p>
+
+      <div class="thm nonexample" id="i-7-3-4">
+        <p><span class="thm-head">비예 7.3.4</span> <span class="thm-name">(단사가 아니면 두 번 센다)</span>.
+        원기둥의 기준 매개화와 같은 식 \(\mathbf{z}(u, v) = (r\cos u, r\sin u, v)\)를 \((0, 4\pi) \times \R\)에서 생각하자. \(\mathbf{z}\)는 매끄럽고 \(D\mathbf{z}\)가 단사이지만 \(\mathbf{z}(u + 2\pi, v) = \mathbf{z}(u, v)\)이므로 매개화가 아니다.
+        \(Q = \big([\pi/2, 3\pi/2] \cup [5\pi/2, 7\pi/2]\big) \times [0, 1]\)은 적분 영역이고 \(\mathbf{z}(Q) = R\)는 <a href="#i-7-3-3">예 7.3.3</a>(b)의 좌표 영역 \(\mathbf{x}([\pi/2, 3\pi/2] \times [0, 1])\), 곧 넓이가 \(\pi r\)인 반원기둥 조각이다.
+        그런데 \(\int_Q \abs{\mathbf{z}_u \times \mathbf{z}_v} = \pi r + \pi r = 2\pi r\)이다. 두 직사각형이 같은 조각으로 가기 때문이다. <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-12">비예 2.6.12</a>(a)의 곡면판이다.</p>
+        <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+      </div>
+
+      <p>이제 이 절의 중심 정리다. 증명은 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">정리 2.6.9</a>(a)를 매개변수 변환에 쓰는 것인데, 그 정리의 가정 “폐포가 정의역 안에 있다”를 확인하는 단계가 필요하다.</p>
+
+      <div class="thm theorem" id="i-7-3-5">
+        <p><span class="thm-head">정리 7.3.5</span> <span class="thm-name">(넓이는 매개화에 무관하다)</span>.
+        \(R\)이 두 매개화 \(\mathbf{x}\colon U \to S\), \(\mathbf{y}\colon \bar U \to S\)에 대해 좌표 영역이라 하자. 곧 \(\overline{Q} \subseteq U\), \(\overline{\bar Q} \subseteq \bar U\)인 적분 영역 \(Q\), \(\bar Q\)가 있어 \(R = \mathbf{x}(Q) = \mathbf{y}(\bar Q)\)라 하자. 그러면</p>
+        <p>\[ \int_Q \abs{\mathbf{x}_u \times \mathbf{x}_v}\,du\,dv = \int_{\bar Q} \abs{\mathbf{y}_{\bar u} \times \mathbf{y}_{\bar v}}\,d\bar u\,d\bar v \]</p>
+        <p>이다. \(\overline{R}\)에서 연속인 \(f\)에 대해서도 <a href="#eq-7-3-3">(7.3.3)</a>의 두 적분이 같다. 따라서 \(A(R)\)과 \(\iint_R f\,dA\)는 매개화에 무관하다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 넓이는 좌표를 어떻게 까느냐와 상관없이 곡면의 조각 자체에 속한 값이다. 이유는 두 가지가 정확히 상쇄되기 때문이다. 좌표를 바꾸면 넓이요소에 \(\abs{\det Dh}\)가 곱해지고(<a href="#i-7-3-1">보조정리 7.3.1</a>), 적분 변수를 바꾸면 \(\abs{\det Dh}\)로 나누어진다(변수변환 공식).</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: 매개변수 변환 \(h = \mathbf{x}^{-1} \circ \mathbf{y}\)가 \(\bar Q\)를 \(Q\)로 보내는 미분동형사상이므로 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">정리 2.6.9</a>(a)를 쓴다. 가정 “\(\overline{\bar Q}\)가 \(h\)의 정의역 안에 있다”는 \(R\)의 폐포가 두 매개화의 상에 모두 들어 있다는 것에서 나온다.</p>
+        <p><span class="proof-head">증명.</span>
+        <em>1단계: \(R\)의 폐포.</em> \(\overline{R}\)을 \(\R^3\)에서의 폐포라 하자. \(Q\)는 유계이므로 \(\overline{Q}\)는 유계 닫힌집합, 곧 컴팩트하고(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-7">정리 3.6.7</a>), \(\mathbf{x}(\overline{Q})\)는 컴팩트 집합의 연속상이므로 컴팩트하다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>(c)).
+        하우스도르프 공간 \(\R^3\)의 컴팩트 부분집합은 닫혀 있으므로(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>(b)) \(\mathbf{x}(\overline{Q})\)는 \(R\)을 포함하는 닫힌집합이고, 따라서 \(\overline{R} \subseteq \mathbf{x}(\overline{Q})\)이다.
+        거꾸로 \(q \in \overline{Q}\)이면 \(Q\)의 점으로 이루어진 수열 \(q_k \to q\)가 있고(<a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-17">명제 3.2.17</a>(c)), \(\mathbf{x}(q_k) \in R\)이며 \(\mathbf{x}(q_k) \to \mathbf{x}(q)\)이므로(같은 명제 (a)) \(\mathbf{x}(q) \in \overline{R}\)이다. 곧 \(\overline{R} = \mathbf{x}(\overline{Q}) \subseteq \mathbf{x}(U)\)이다. 같은 방법으로 \(\overline{R} = \mathbf{y}(\overline{\bar Q}) \subseteq \mathbf{y}(\bar U)\)이다.
+        따라서 \(\overline{R} \subseteq W = \mathbf{x}(U) \cap \mathbf{y}(\bar U)\)이다.</p>
+        <p><em>2단계: 매개변수 변환.</em> <a href="../06-regular-surfaces/6-3-smooth-functions.html#i-6-3-1">정리 6.3.1</a>에 의해 \(h = \mathbf{x}^{-1} \circ \mathbf{y}\colon \mathbf{y}^{-1}(W) \to \mathbf{x}^{-1}(W)\)는 열린집합 사이의 미분동형사상이다. 1단계에서 \(\mathbf{y}(\overline{\bar Q}) = \overline{R} \subseteq W\)이므로 \(\overline{\bar Q} \subseteq \mathbf{y}^{-1}(W)\)이다.
+        또 \(\mathbf{x}\)가 단사이므로 \(h(\bar Q) = \mathbf{x}^{-1}(\mathbf{y}(\bar Q)) = \mathbf{x}^{-1}(R) = Q\)이다.</p>
+        <p><em>3단계: 변수변환.</em> \(g = \abs{\mathbf{x}_u \times \mathbf{x}_v}\)는 \(U\)에서, 특히 \(h(\overline{\bar Q}) = \overline{Q}\)에서 연속이다. <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">정리 2.6.9</a>(a)를 \(F = h\), \(D = \bar Q\), 함수 \(g\)에 쓰고 <a href="#i-7-3-1">보조정리 7.3.1</a>을 쓰면</p>
+        <p>\[ \int_Q g = \int_{h(\bar Q)} g = \int_{\bar Q} (g \circ h)\,\abs{\det Dh} = \int_{\bar Q} \abs{\mathbf{y}_{\bar u} \times \mathbf{y}_{\bar v}} \]</p>
+        <p>이다. 함수 \(f\)가 있으면 \(g\) 대신 \((f \circ \mathbf{x})\,g\)를 쓴다. \((f \circ \mathbf{x}) \circ h = f \circ \mathbf{y}\)이므로 같은 계산이 된다.</p>
+      </div>
+
+      <div class="thm example" id="i-7-3-6">
+        <p><span class="thm-head">예 7.3.6</span> <span class="thm-name">(구면 조각)</span>.
+        \(0 \lt \theta_1 \lt \theta_2 \lt \pi\), \(0 \lt \varphi_1 \lt \varphi_2 \lt 2\pi\)이면 \(R = \mathbf{x}([\theta_1, \theta_2] \times [\varphi_1, \varphi_2])\)는 구면의 좌표 영역이다. <a href="7-1-first-fundamental-form.html#i-7-1-2">예 7.1.2</a>에서 \(\sqrt{EG - F^2} = \sqrt{r^4\sin^2\theta} = r^2\sin\theta\)(\(\sin\theta \gt 0\))이므로, 푸비니 정리에서</p>
+        <div class="equation" id="eq-7-3-4">
+        \[ A(R) = \int_{\varphi_1}^{\varphi_2}\int_{\theta_1}^{\theta_2} r^2\sin\theta\,d\theta\,d\varphi = r^2(\varphi_2 - \varphi_1)(\cos\theta_1 - \cos\theta_2) \tag{7.3.4} \]
+        </div>
+        <p>이다. 넓이요소 \(r^2\sin\theta\,d\theta\,d\varphi\)는 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-11">예 2.6.11</a>에서 공의 부피를 구할 때 \(\rho = r\)로 고정한 “구면 위 넓이요소”로 미리 나왔다. 그때의 예고가 여기서 확인된다.
+        <a href="#eq-7-3-4">(7.3.4)</a>는 \(\theta\)에 \(\cos\theta = z/r\)을 통해서만 의존한다. 곧 넓이는 조각의 높이 차 \(r(\cos\theta_1 - \cos\theta_2)\)와 경도 폭 \(\varphi_2 - \varphi_1\)만으로 정해진다. 이 관찰은 <a href="#i-7-3-12">예 7.3.12</a>에서 다시 쓴다.</p>
+        <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-whole">
+      <h2>곡면 전체의 넓이</h2>
+      <p>구면 전체는 좌표 영역이 아니다. 기준 매개화는 반원 \(C\)를 빠뜨리고, 폐포 조건 \(\overline{Q} \subseteq U\)를 만족하는 \(Q\)로는 \(U = (0, \pi) \times (0, 2\pi)\) 전체를 쓸 수 없다. 그러나 빠진 곳은 곡선뿐이고, 곡선은 넓이에 기여하지 않을 것이다.
+      <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">예 2.6.10</a>에서 원판의 넓이를 구할 때 “부피가 \(0\)인 가장자리를 떼어 내고 극한을 취한” 것과 같은 방법을 쓴다.</p>
+
+      <div class="thm definition" id="i-7-3-7">
+        <p><span class="thm-head">정의 7.3.7</span> <span class="thm-name">(매개화 하나가 거의 덮는 집합의 넓이)</span>.
+        \(R \subseteq S\)이고 매개화 \(\mathbf{x}\colon U \to S\)가 다음을 만족한다고 하자.</p>
+        <ul>
+          <li>(i) \(Q = \mathbf{x}^{-1}(R)\)은 적분 영역이다(\(\overline{Q} \subseteq U\)일 필요는 없다).</li>
+          <li>(ii) \(\abs{\mathbf{x}_u \times \mathbf{x}_v}\)는 \(Q\)에서 유계다.</li>
+          <li>(iii) \(R \setminus \mathbf{x}(U)\)는 유한개의 정칙곡선 \(\gamma_i\colon [a_i, b_i] \to S\)의 자취의 합집합에 포함된다.</li>
+        </ul>
+        <p>이때 \(R\)의 넓이를 <a href="#eq-7-3-2">(7.3.2)</a>와 같은 식 \(A(R) = \int_Q \abs{\mathbf{x}_u \times \mathbf{x}_v}\,du\,dv\)로 정의한다. \(R\)에서 유계이고 연속인 \(f\)에 대해 \(\iint_R f\,dA\)도 <a href="#eq-7-3-3">(7.3.3)</a>의 식으로 정의한다.</p>
+      </div>
+
+      <p>(ii)와 (i)에서 피적분함수는 적분 영역 위의 유계 연속함수이므로 적분이 존재한다(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6</a>). \(R\)이 \(\mathbf{x}\)에 대한 좌표 영역이면 (iii)의 집합이 비어 있고 값은 <a href="#i-7-3-2">정의 7.3.2</a>의 것과 같다.
+      이 정의가 합리적이라는 근거는 다음 명제다. 새 넓이는 안쪽의 좌표 영역들의 넓이의 극한이다.</p>
+
+      <div class="thm proposition" id="i-7-3-8">
+        <p><span class="thm-head">명제 7.3.8</span> <span class="thm-name">(안쪽에서의 근사)</span>.
+        <a href="#i-7-3-7">정의 7.3.7</a>의 상황에서 적분 영역 \(Q_n\)이 \(\overline{Q_n} \subseteq U\), \(Q_n \subseteq Q\), \(\vol(Q \setminus Q_n) \to 0\)을 만족하면 \(R_n = \mathbf{x}(Q_n)\)은 \(R\) 안의 좌표 영역이고 \(A(R_n) \to A(R)\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        \(R_n\)이 좌표 영역인 것은 정의 그대로다. \(M\)을 \(Q\)에서 \(\abs{\mathbf{x}_u \times \mathbf{x}_v}\)의 상계라 하자. \(Q \setminus Q_n\)은 유계이고 경계가 \(\partial Q \cup \partial Q_n\)에 포함되므로 적분 영역이다. 적분의 가법성과 단조성(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6</a> 뒤)에서</p>
+        <p>\[ 0 \le A(R) - A(R_n) = \int_{Q \setminus Q_n} \abs{\mathbf{x}_u \times \mathbf{x}_v} \le M\,\vol(Q \setminus Q_n) \to 0 \]</p>
+        <p>이다.</p>
+      </div>
+
+      <div class="thm remark" id="i-7-3-9">
+        <p><span class="thm-head">비고 7.3.9</span> <span class="thm-name">(거의 덮는 매개화의 선택)</span>.
+        <a href="#i-7-3-7">정의 7.3.7</a>의 값은 조건 (i)–(iii)을 만족하는 매개화 \(\mathbf{x}\)의 선택에 무관하다. 이 study set은 이 사실을 증명 스케치로만 둔다.
+        스케치: 두 매개화 \(\mathbf{x}\), \(\mathbf{y}\)가 조건을 만족한다고 하자. \(R\) 가운데 \(W = \mathbf{x}(U) \cap \mathbf{y}(\bar U)\) 밖에 있는 부분은 (iii)의 곡선들의 자취에 포함된다. 그 자취의 \(\mathbf{x}\)에 의한 원상은 평면의 매끄러운 곡선 조각들이고, 그런 조각은 부피가 \(0\)이다(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-3">예 2.6.3</a>).
+        그러므로 두 적분은 각각 \(\mathbf{x}^{-1}(R \cap W)\)와 \(\mathbf{y}^{-1}(R \cap W)\) 위의 적분과 같고, 이 두 집합은 매개변수 변환으로 서로 옮겨 가므로 <a href="#i-7-3-5">정리 7.3.5</a>와 <a href="#i-7-3-8">명제 7.3.8</a>의 극한 논법으로 같은 값을 준다.
+        곡선 조각이 \(U\)의 경계로 다가가는 부분을 다루는 세부는 생략한다. 곡면 전체의 적분을 매개화에 무관하게 정의하는 일반적인 방법은 <a href="../12-smooth-maps/index.html">12장</a>의 단위분할을 써서 <a href="../18-integration-stokes/index.html">18장</a>에서 한다.</p>
+      </div>
+
+      <div class="thm example" id="i-7-3-10">
+        <p><span class="thm-head">예 7.3.10</span> <span class="thm-name">(구면과 원환면의 넓이)</span>.
+        (a) <em>구면.</em> \(R = S^2(r)\), \(\mathbf{x}\)는 기준 매개화라 하자. \(Q = \mathbf{x}^{-1}(S^2(r)) = U = (0, \pi) \times (0, 2\pi)\)는 적분 영역이고, \(\abs{\mathbf{x}_\theta \times \mathbf{x}_\varphi} = r^2\sin\theta \le r^2\)이며,
+        빠진 반원 \(C\)는 정칙곡선 \(\gamma(t) = (r\sin t, 0, r\cos t)\), \(t \in [0, \pi]\)의 자취다(\(\abs{\gamma'} = r\)). <a href="#i-7-3-7">정의 7.3.7</a>에서</p>
+        <p>\[ A\big(S^2(r)\big) = \int_0^{2\pi}\int_0^\pi r^2\sin\theta\,d\theta\,d\varphi = r^2 \cdot 2\pi \cdot \big[-\cos\theta\big]_0^\pi = 4\pi r^2 \]</p>
+        <p>이다. <a href="#i-7-3-8">명제 7.3.8</a>로 보면 \(Q_n = [1/n,\ \pi - 1/n] \times [1/n,\ 2\pi - 1/n]\)의 상의 넓이 \(r^2(2\pi - 2/n)\cdot 2\cos(1/n)\)가 \(4\pi r^2\)으로 간다.</p>
+        <p>(b) <em>원환면.</em> 원환면 전체 \(T_{R,r}\)와 기준 매개화의 정의역 \(U = (0, 2\pi)^2\)에 <a href="#i-7-3-7">정의 7.3.7</a>을 쓰자. <a href="7-1-first-fundamental-form.html#i-7-1-5">예 7.1.5</a>에서 \(\sqrt{EG - F^2} = r(R + r\cos u) \le r(R + r)\)이고, 빠진 곳은 원 두 개(\(u = 0\)과 \(v = 0\), <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-8">예 6.5.8</a>)다. 따라서</p>
+        <p>\[ A(T_{R,r}) = \int_0^{2\pi}\int_0^{2\pi} r(R + r\cos u)\,du\,dv = 2\pi\big(2\pi rR + r^2[\sin u]_0^{2\pi}\big) = 4\pi^2Rr \]</p>
+        <p>이다. <a href="../02-calculus-rn/2-6-change-of-variables.html#ex-2-6-6">연습 2.6.6</a>에서 원환면이 둘러싼 입체의 부피가 \(V(r) = 2\pi^2Rr^2\)임을 보았다. \(dV/dr = 4\pi^2Rr\)는 넓이와 같다. 관의 반지름을 \(dr\)만큼 늘리면 부피가 대략 “겉넓이 × \(dr\)”만큼 늘어난다는 뜻이다. 구면에서도 \(\tfrac{d}{dr}\tfrac43\pi r^3 = 4\pi r^2\)이다.</p>
+        <p>(c) <em>구면 띠.</em> \(0 \le \theta_1 \lt \theta_2 \le \pi\)일 때 \(R = \{p \in S^2(r) : r\cos\theta_2 \le z \le r\cos\theta_1\}\)이라 하자(\(\theta_1 = 0\)이면 극관이다). \(Q = \mathbf{x}^{-1}(R)\)은 \(\theta_1 \le \theta \le \theta_2\), \(0 \lt \varphi \lt 2\pi\)인 점들이고(\(\theta_1 = 0\)이나 \(\theta_2 = \pi\)이면 그 끝은 열려 있다) 적분 영역이다. \(R \setminus \mathbf{x}(U)\)는 \(C\)의 호다. <a href="#eq-7-3-4">(7.3.4)</a>와 같은 계산으로</p>
+        <p>\[ A(R) = 2\pi r^2(\cos\theta_1 - \cos\theta_2) = 2\pi r\,h, \qquad h = r(\cos\theta_1 - \cos\theta_2) \]</p>
+        <p>이다. \(h\)는 띠의 높이다. 같은 높이의 띠는 구면의 어디에 있든 넓이가 같다(아르키메데스).</p>
+        <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+      </div>
+
+      <aside class="box backward">
+        <p class="box-title">앞에서 본 것과 비교: 부피와 넓이</p>
+        <p><a href="../02-calculus-rn/2-6-change-of-variables.html">2.6절</a>에서 \(\abs{\det DF}\)는 “부피의 국소 배율”이었고, 변수변환 공식은 그 배율을 적분한 것이었다. 곡면의 넓이요소 \(\sqrt{EG - F^2}\)는 같은 역할을 하는 “넓이의 국소 배율”이다.
+        새로워진 것은 두 가지다. \(\mathbf{x}\)는 \(\R^2\)에서 \(\R^3\)으로 가는 사상이라 정사각 야코비 행렬식이 없으므로, 그 자리를 그람 행렬식의 제곱근 \(\sqrt{\det(D\mathbf{x}^{\mathsf{T}}D\mathbf{x})} = \sqrt{EG - F^2}\)(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-9">따름정리 1.6.9</a>)이 대신한다.
+        그리고 넓이가 매개화에 무관하다는 사실 자체가 변수변환 공식의 결과다(<a href="#i-7-3-5">정리 7.3.5</a>).</p>
+      </aside>
+    </section>
+
+    <section id="sec-maps">
+      <h2>넓이를 보존하는 사상</h2>
+      <p>등거리사상은 제1기본형식을 보존하므로 넓이요소도 보존할 것이다.</p>
+
+      <div class="thm proposition" id="i-7-3-11">
+        <p><span class="thm-head">명제 7.3.11</span> <span class="thm-name">(등거리사상은 넓이를 보존한다)</span>.
+        \(\varphi\colon S_1 \to S_2\)가 등거리사상이고 \(R\)이 \(S_1\)의 좌표 영역이면 \(\varphi(R)\)는 \(S_2\)의 좌표 영역이고 \(A(\varphi(R)) = A(R)\)이다. 또 \(\overline{\varphi(R)}\)에서 연속인 \(f\)에 대해 \(\iint_{\varphi(R)} f\,dA = \iint_R (f \circ \varphi)\,dA\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        \(R = \mathbf{x}(Q)\), \(\overline{Q} \subseteq U\)라 하자. <a href="7-2-isometries.html#i-7-2-8">따름정리 7.2.8</a>(b)에 의해 \(\mathbf{y} = \varphi \circ \mathbf{x}\)는 \(S_2\)의 매개화이고 계수가 \(\mathbf{x}\)의 계수와 같다. \(\varphi(R) = \mathbf{y}(Q)\)이므로 좌표 영역이고,
+        <a href="#eq-7-3-2">(7.3.2)</a>의 두 피적분함수 \(\sqrt{EG - F^2}\)이 같으므로 넓이가 같다. 적분은 \(f \circ \mathbf{y} = (f \circ \varphi) \circ \mathbf{x}\)이므로 같다.</p>
+      </div>
+
+      <p>예를 들어 <a href="7-2-isometries.html#i-7-2-9">예 7.2.9</a>의 등거리사상 \(\varphi|_{P_0}\)는 평면의 직사각형 \([ra, rb] \times [c, d]\)를 원기둥의 조각 \(\mathbf{x}([a, b] \times [c, d])\)로 보내고, 두 넓이는 모두 \(r(b - a)(d - c)\)이다(<a href="#i-7-3-3">예 7.3.3</a>). 역은 성립하지 않는다.</p>
+
+      <div class="thm example" id="i-7-3-12">
+        <p><span class="thm-head">예 7.3.12</span> <span class="thm-name">(아르키메데스의 투영: 넓이는 보존하지만 등거리사상이 아니다)</span>.
+        구면 \(S^2(r)\)에서 두 극과 반원 \(C\)를 뺀 부분 \(\mathbf{x}(U)\)의 점을 \(z\)축에서 수평으로 바깥쪽으로 밀어 외접 원기둥 \(C_r\)로 보내는 사상을 \(\psi\)라 하자. 곧 \(\psi(x, y, z) = \big(rx/\sqrt{x^2 + y^2},\ ry/\sqrt{x^2 + y^2},\ z\big)\)이고, 기준 매개화로 쓰면</p>
+        <p>\[ \mathbf{y}(\theta, \varphi) = \psi\big(\mathbf{x}(\theta, \varphi)\big) = (r\cos\varphi,\ r\sin\varphi,\ r\cos\theta) \]</p>
+        <p>이다. 이것은 원기둥의 기준 매개화에 \((\theta, \varphi) \mapsto (\varphi, r\cos\theta)\)를 합성한 것이고, 이 변환은 \((0, \pi) \times (0, 2\pi)\)에서 \((0, 2\pi) \times (-r, r)\) 위로 가는 미분동형사상이므로 \(\mathbf{y}\)는 원기둥의 매개화다.
+        \(\mathbf{y}_\theta = (0, 0, -r\sin\theta)\), \(\mathbf{y}_\varphi = (-r\sin\varphi, r\cos\varphi, 0)\)이므로 \(\bar E = r^2\sin^2\theta\), \(\bar F = 0\), \(\bar G = r^2\)이고</p>
+        <p>\[ \sqrt{\bar E\bar G - \bar F^2} = r^2\sin\theta = \sqrt{EG - F^2} \]</p>
+        <p>이다. 따라서 \(\mathbf{x}(U)\) 안의 모든 좌표 영역 \(R = \mathbf{x}(Q)\)에 대해 \(\psi(R) = \mathbf{y}(Q)\)의 넓이는 \(A(R)\)과 같다. <a href="#eq-7-3-4">(7.3.4)</a>에서 본 “넓이는 높이 차로만 정해진다”는 것이 이것이다(<a href="#fig-7-3-2">그림 7.3.2</a>).
+        그러나 \(\bar E = r^2\sin^2\theta \neq r^2 = E\)(적도 \(\theta = \pi/2\) 밖)이므로 <a href="7-2-isometries.html#i-7-2-7">정리 7.2.7</a>에 의해 \(\psi\)는 어떤 열린집합에서도 국소 등거리사상이 아니다. 극 근처의 경선 방향은 \(\sin\theta\)배로 줄고 위도원 방향은 \(1/\sin\theta\)배로 늘어서, 모양은 찌그러지지만 넓이는 그대로다.</p>
+        <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-7-3-2">
+        <img src="figures/fig-7-3-2-archimedes.svg" alt="왼쪽은 반투명 구면과 위도원들, 북반구 위쪽에 하늘색으로 칠한 굽은 사각형 R이 있다. R은 위쪽이 좁고 아래쪽이 넓다. 곡선 화살표 ψ가 오른쪽의 반투명 원기둥을 가리킨다. 원기둥에는 수평 원들이 있고, 위쪽에 주황으로 칠한 가로로 긴 직사각형 모양의 조각 ψ(R)가 있다.">
+        <figcaption><span class="fig-head">그림 7.3.2.</span>
+        아르키메데스의 투영 \(\psi\) (<a href="#i-7-3-12">예 7.3.12</a>), \(r = 1\). 구면 조각 \(R = \mathbf{x}([0.5, 1] \times [0.2, 1.4])\)(하늘색)과 그 상 \(\psi(R)\)(주황).
+        \(R\)은 세로로 길고 \(\psi(R)\)는 가로로 길지만 넓이는 둘 다 \(1.2(\cos 0.5 - \cos 1) \approx 0.405\)이다. 수평 원은 구면의 위도원 \(\theta = k\pi/6\)의 상이다.</figcaption>
+      </figure>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교</p>
+        <p>do Carmo는 곡면의 <em>영역</em>을 “경계가 원의 상인 열린 연결집합과 그 경계의 합집합”으로 정의하고, 좌표근방 안의 유계 영역에 대해 넓이를 \(\iint_Q \abs{\mathbf{x}_u \wedge \mathbf{x}_v}\,du\,dv\)로 정의한다 <a class="cite" href="../../references.html#dC">[dC §2-5 정의 2]</a>. 매개화 무관성의 논증은 이 절과 같이 변수변환 공식이다.
+        이 study set은 영역의 모양 대신 “적분 영역의 상”(<a href="#i-7-3-2">정의 7.3.2</a>)이라는 조건을 쓰고, 변수변환 공식의 가정(폐포가 정의역 안에 있음)을 명시적으로 확인했다(<a href="#i-7-3-5">정리 7.3.5</a> 1단계).
+        do Carmo는 원환면 전체의 넓이를 \(\varepsilon\)만큼 떼어 낸 영역의 극한으로 구한다 <a class="cite" href="../../references.html#dC">[dC §2-5 예 5]</a>. <a href="#i-7-3-7">정의 7.3.7</a>과 <a href="#i-7-3-8">명제 7.3.8</a>은 그 방법을 정의와 명제로 정리한 것이다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 곡률의 적분과 넓이 형식</p>
+        <p><a href="../10-gauss-bonnet/index.html">10장</a>의 가우스-보네 정리는 가우스 곡률의 적분 \(\iint_S K\,dA\)에 관한 것이고, 그 적분은 <a href="#eq-7-3-3">(7.3.3)</a>의 뜻이다. 원환면에서 이 적분이 \(0\)이 됨을 거기서 본다.
+        <a href="../18-integration-stokes/index.html">18장</a>에서는 곡면 위의 2-형식 \(\iota_{\mathbf{N}}(dx \wedge dy \wedge dz)\)(넓이 형식)를 정의하고, 곡면의 넓이(이 절)가 그 형식의 적분과 같다는 호환성 명제를 증명한다.
+        <a href="../21-riemannian-metrics/index.html">21장</a>의 리만 체적형식 \(dV_g = \sqrt{\det(g_{ij})}\,dx^1 \wedge dx^2\)은 넓이요소 \(\sqrt{EG - F^2}\)를 일반화한 것이다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>좌표 영역 \(R = \mathbf{x}(Q)\)(\(Q\)는 폐포가 \(U\)에 들어가는 적분 영역)의 넓이는 \(\int_Q \abs{\mathbf{x}_u \times \mathbf{x}_v} = \int_Q \sqrt{EG - F^2}\)이다. 넓이요소 \(\sqrt{EG - F^2}\)은 제1기본형식만으로 정해진다.</li>
+        <li>매개화를 바꾸면 외적이 \(\det Dh\)배가 되고(<a href="#i-7-3-1">보조정리 7.3.1</a>), 변수변환 공식이 그것을 상쇄하므로 넓이는 매개화에 무관하다(<a href="#i-7-3-5">정리 7.3.5</a>).</li>
+        <li>매개화 하나가 곡선 몇 개를 빼고 다 덮는 집합의 넓이는 같은 적분으로 정의하고, 안쪽 좌표 영역들의 넓이의 극한과 같다. 구면은 \(4\pi r^2\), 원환면은 \(4\pi^2Rr\), 높이 \(h\)인 구면 띠는 \(2\pi rh\)이다.</li>
+        <li>등거리사상은 넓이를 보존한다. 역은 거짓이다. 아르키메데스의 투영은 넓이를 보존하지만 길이를 보존하지 않는다.</li>
+      </ul>
+      <p class="next">다음 절에서는 길이는 보존하지 않지만 각은 보존하는 사상, 곧 등각사상을 다룬다. 넓이를 보존하는 지도(아르키메데스)가 있듯이 각을 보존하는 지도도 있는가? 입체사영과 메르카토르 지도가 그 답이다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-7-3-1" data-level="1">
+        <p><span class="thm-head">연습 7.3.1</span> <span class="level">★</span>
+        \(f\colon \Omega \to \R\)가 매끄럽고 \(Q\)가 \(\overline{Q} \subseteq \Omega\)인 적분 영역일 때, 그래프 \(\Gamma(f)\)의 조각 \(R = \{(u, v, f(u, v)) : (u, v) \in Q\}\)의 넓이가 그림자 \(Q\)의 넓이 이상임을 보이고, 등호가 성립할 조건을 구하여라.
+        포물면 \(z = x^2 + y^2\)에서 \(x^2 + y^2 \le a^2\)인 부분의 넓이를 구하여라. <a class="cite" href="../../references.html#dC">[dC §2-5 연습문제 5 변형]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="7-1-first-fundamental-form.html#ex-7-1-1">연습 7.1.1</a>에서 그래프 매개화의 \(EG - F^2 = 1 + f_u^2 + f_v^2\)이므로 \(A(R) = \int_Q\sqrt{1 + f_u^2 + f_v^2} \ge \int_Q 1 = \vol(Q)\)이다.
+          등호이면 연속함수 \(\sqrt{1 + f_u^2 + f_v^2} - 1 \ge 0\)의 적분이 \(0\)이므로 \(Q\)의 내점마다 이 함수가 \(0\)이다(내점에서 양수이면 그 둘레의 작은 정사각형 위의 적분이 양수다). 곧 \(Q\)의 내부에서 \(f_u = f_v = 0\)이다. 거꾸로 그러면 등호다. 기울어진 곳이 있으면 곡면이 그림자보다 넓다.</p>
+          <p>포물면에서 \(f_u^2 + f_v^2 = 4(u^2 + v^2)\)이다. <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">예 2.6.10</a>의 극좌표 계산을 쓰면(\(\rho^2 = u^2 + v^2\))</p>
+          <p>\[ A = \int_0^{2\pi}\int_0^a \sqrt{1 + 4\rho^2}\,\rho\,d\rho\,d\varphi = 2\pi\cdot\frac{1}{12}\Big[(1 + 4\rho^2)^{3/2}\Big]_0^a = \frac{\pi}{6}\Big((1 + 4a^2)^{3/2} - 1\Big) \]</p>
+          <p>이다. (\(a \to 0\)이면 \(\pi a^2 + O(a^4)\)로 그림자의 넓이에 가까워진다.)</p>
+          <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-7-3-2" data-level="1">
+        <p><span class="thm-head">연습 7.3.2</span> <span class="level">★</span>
+        원기둥 \(C_r\)의 띠 \(\{0 \le z \le h\}\)의 넓이를 <a href="#i-7-3-7">정의 7.3.7</a>로 구하여라. 또 평면의 극좌표 매개화(<a href="7-1-first-fundamental-form.html#i-7-1-8">예 7.1.8</a>)의 넓이요소를 구하고 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">예 2.6.10</a>과 비교하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>기준 매개화에서 \(Q = \mathbf{x}^{-1}(\text{띠}) = (0, 2\pi) \times [0, h]\)는 적분 영역이고, \(\abs{\mathbf{x}_u \times \mathbf{x}_v} = r\)은 유계이며, 빠진 곳은 선분 \(\{(r, 0, z) : 0 \le z \le h\}\)(정칙곡선의 자취)이다. 따라서 넓이는 \(\int_0^h\int_0^{2\pi} r\,du\,dv = 2\pi rh\)이다.
+          극좌표 매개화는 \(\bar E = 1\), \(\bar F = 0\), \(\bar G = \rho^2\)이므로 넓이요소는 \(\sqrt{\rho^2}\,d\rho\,d\varphi = \rho\,d\rho\,d\varphi\)이다. <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">예 2.6.10</a>의 \(dx\,dy = r\,dr\,d\theta\)와 같다. 평면에서는 새 넓이가 옛 넓이와 같으므로(<a href="#i-7-3-3">예 7.3.3</a>(a)) 당연한 일이다.</p>
+          <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-7-3-3" data-level="1">
+        <p><span class="thm-head">연습 7.3.3</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 대어라.
+        (a) 좌표 영역의 넓이는 매개화에 따라 달라질 수 있다.
+        (b) 넓이요소는 언제나 \(\abs{\mathbf{x}_u}\,\abs{\mathbf{x}_v}\,du\,dv\)이다.
+        (c) 넓이를 보존하는 미분동형사상은 등거리사상이다.
+        (d) 좌표 영역의 넓이는 \(0\)보다 크거나 같고, \(Q\)의 부피가 양수이면 양수다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 거짓. <a href="#i-7-3-5">정리 7.3.5</a>.</p>
+          <p>(b) 거짓. \(\sqrt{EG - F^2} = \abs{\mathbf{x}_u}\abs{\mathbf{x}_v}\sin\vartheta_{uv}\)이므로 \(F = 0\)인 점에서만 성립한다. <a href="7-1-first-fundamental-form.html#ex-7-1-3">연습 7.1.3</a>의 매개화에서는 \(\sqrt{\bar E\bar G - \bar F^2} = r^2\sin s \lt r^2\sin s\sqrt{1 + \sin^2 s} = \abs{\mathbf{y}_s}\abs{\mathbf{y}_t}\)이다.</p>
+          <p>(c) 거짓. <a href="#i-7-3-12">예 7.3.12</a>의 아르키메데스의 투영.</p>
+          <p>(d) 참. 피적분함수가 양수이고 연속이므로 \(\overline Q\)에서 양의 최솟값 \(m\)을 가지며(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">정리 3.6.10</a>) \(A(R) \ge m\,\vol(Q)\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-7-3-4" data-level="1">
+        <p><span class="thm-head">연습 7.3.4</span> <span class="level">★</span>
+        회전면의 조각 \(R = \mathbf{x}([a, b] \times [v_1, v_2])\)(<a href="7-1-first-fundamental-form.html#i-7-1-6">예 7.1.6</a>)의 넓이를 생성곡선 \(\alpha = (\rho, z)\)로 나타내어라. 이것으로 현수면의 \(\abs{z} \le 1\)인 부분의 넓이를 구하고, 그것을 허리 원(반지름 \(1\))을 따라 세운 높이 \(2\)의 원기둥 띠의 넓이 \(4\pi\)와 비교하여라. <a class="cite" href="../../references.html#dC">[dC §2-5 연습문제 11 변형]</a></p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="7-1-first-fundamental-form.html#eq-7-1-4">(7.1.4)</a>에서 \(EG - F^2 = \rho^2\abs{\alpha'}^2\)이므로 \(A(R) = (v_2 - v_1)\int_a^b \rho(u)\abs{\alpha'(u)}\,du\)이다. 한 바퀴 전체(\(v_2 - v_1 \to 2\pi\), <a href="#i-7-3-7">정의 7.3.7</a>)이면 \(2\pi\int_a^b \rho\,\abs{\alpha'}\,du\)이다. 곧 “생성곡선의 각 점이 그리는 원의 둘레 \(2\pi\rho\)를 생성곡선의 길이를 따라 적분한 것”이다.
+          현수면은 \(\rho = \cosh u\), \(\abs{\alpha'} = \cosh u\)이므로 넓이는 \(2\pi\int_{-1}^1\cosh^2 u\,du = \pi\int_{-1}^1(1 + \cosh 2u)\,du = \pi(2 + \sinh 2) \approx 17.68\)이다.
+          원기둥 띠의 넓이 \(4\pi \approx 12.57\)보다 크다. 현수면은 위아래로 갈수록 반지름이 커지기 때문이다(\(\cosh u \ge 1\)).</p>
+          <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-7-3-5" data-level="2">
+        <p><span class="thm-head">연습 7.3.5</span> <span class="level">★★</span>
+        (넓이요소의 뜻) \(q \in U\)이고 \(\varepsilon \gt 0\)이 작아서 정사각형 \(Q_\varepsilon = q + [0, \varepsilon]^2\)의 폐포가 \(U\)에 들어간다고 하자. \(\lim_{\varepsilon \to 0} A(\mathbf{x}(Q_\varepsilon))/\varepsilon^2 = \sqrt{EG - F^2}\,(q)\)임을 보여라.
+        또 \(\mathbf{x}(Q_\varepsilon)\)의 넓이와 \(\mathbf{x}(q)\)에 붙인 평행사변형(두 변 \(\varepsilon\,\mathbf{x}_u(q)\), \(\varepsilon\,\mathbf{x}_v(q)\))의 넓이의 비가 \(1\)로 감을 보여라(<a href="#fig-7-3-1">그림 7.3.1</a>).</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(g = \sqrt{EG - F^2}\)는 \(q\)에서 연속이다. \(\eta \gt 0\)이 주어지면 \(\delta \gt 0\)이 있어 \(\abs{q' - q} \lt \delta\)일 때 \(\abs{g(q') - g(q)} \lt \eta\)이다. \(\sqrt2\,\varepsilon \lt \delta\)이면 \(Q_\varepsilon\)의 모든 점이 그 범위에 있으므로</p>
+          <p>\[ \Big\lvert A(\mathbf{x}(Q_\varepsilon)) - g(q)\,\varepsilon^2\Big\rvert = \Big\lvert\int_{Q_\varepsilon}\big(g - g(q)\big)\Big\rvert \le \eta\,\varepsilon^2 \]</p>
+          <p>이다. 양변을 \(\varepsilon^2\)으로 나누면 첫 주장이다. 평행사변형의 넓이는 \(\abs{\varepsilon\,\mathbf{x}_u \times \varepsilon\,\mathbf{x}_v} = g(q)\,\varepsilon^2\)이고 \(g(q) \gt 0\)이므로(<a href="7-1-first-fundamental-form.html#eq-7-1-3">(7.1.3)</a>) 비는 \(A(\mathbf{x}(Q_\varepsilon))/(g(q)\varepsilon^2) \to 1\)이다.
+          구면에서 \(q = (\pi/3, 1)\)이면 \(A = \varepsilon r^2(\cos\tfrac\pi3 - \cos(\tfrac\pi3 + \varepsilon))\)이고, \(\varepsilon \to 0\)이면 \(A/\varepsilon^2 \to r^2\sin\tfrac\pi3\)으로 확인된다.</p>
+          <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-7-3-6" data-level="2">
+        <p><span class="thm-head">연습 7.3.6</span> <span class="level">★★</span>
+        \(0 \lt \theta_0 \lt \pi/2\)일 때 구면의 극관 \(\{p \in S^2(r) : z \ge r\cos\theta_0\}\)의 넓이를 두 가지 매개화로 구하여라. 하나는 기준 매개화(<a href="#i-7-3-7">정의 7.3.7</a>), 다른 하나는 위쪽 반구의 그래프 매개화 \((u, v, \sqrt{r^2 - u^2 - v^2})\)이다. 두 값이 같음을 확인하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><em>기준 매개화.</em> 극관의 원상은 \(Q = (0, \theta_0] \times (0, 2\pi)\)이고 빠진 곳은 북극과 \(C\)의 호다. <a href="#i-7-3-10">예 7.3.10</a>(c)에서 \(\theta_1 = 0\), \(\theta_2 = \theta_0\)으로 두면 넓이는 \(2\pi r^2(1 - \cos\theta_0)\)이다.</p>
+          <p><em>그래프 매개화.</em> 극관은 원판 \(\bar B = \{u^2 + v^2 \le r^2\sin^2\theta_0\}\) 위의 그래프이고 \(\bar B\)는 정의역 \(\{u^2 + v^2 \lt r^2\}\) 안에 있으므로 좌표 영역이다. \(f = \sqrt{r^2 - u^2 - v^2}\)이면 \(f_u = -u/f\), \(f_v = -v/f\)이므로 \(1 + f_u^2 + f_v^2 = (f^2 + u^2 + v^2)/f^2 = r^2/(r^2 - u^2 - v^2)\)이다(<a href="7-1-first-fundamental-form.html#ex-7-1-1">연습 7.1.1</a>). 극좌표로</p>
+          <p>\[ A = \int_0^{2\pi}\int_0^{r\sin\theta_0}\frac{r\rho}{\sqrt{r^2 - \rho^2}}\,d\rho\,d\varphi = 2\pi r\Big[-\sqrt{r^2 - \rho^2}\Big]_0^{r\sin\theta_0} = 2\pi r\,(r - r\cos\theta_0) \]</p>
+          <p>이다(\(0 \lt \theta_0 \lt \pi/2\)에서 \(\sqrt{r^2 - r^2\sin^2\theta_0} = r\cos\theta_0\)). 두 값이 같다. 기준 매개화 쪽은 좌표 영역이 아니라서 <a href="#i-7-3-5">정리 7.3.5</a>가 직접 적용되지 않지만, 값은 <a href="#i-7-3-9">비고 7.3.9</a>대로 같다.</p>
+          <p class="verified">검증: <code>verify/v-7-3-area.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-7-3-7" data-level="3">
+        <p><span class="thm-head">연습 7.3.7</span> <span class="level">★★★</span>
+        미분동형사상 \(\varphi\colon S_1 \to S_2\)가 모든 좌표 영역의 넓이를 보존할 필요충분조건은, \(S_1\)의 모든 매개화 \(\mathbf{x}\)에 대하여 \(\mathbf{y} = \varphi \circ \mathbf{x}\)의 계수가 \(\bar E\bar G - \bar F^2 = EG - F^2\)을 만족하는 것임을 보여라. 이 조건은 \(\mathrm{I}\)의 계수가 아니라 그 행렬식만의 조건이다.</p>
+        <details class="hint"><summary>힌트</summary><p>\(\mathbf{y}\)가 매개화임은 <a href="7-2-isometries.html#i-7-2-8">따름정리 7.2.8</a>(b)의 증명과 같다. (⇒)에는 <a href="#ex-7-3-5">연습 7.3.5</a>의 극한을 양쪽에 쓴다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\varphi\)가 미분동형사상이므로 \(\mathbf{y} = \varphi \circ \mathbf{x}\)는 \(S_2\)의 매개화다(<a href="7-2-isometries.html#i-7-2-8">따름정리 7.2.8</a>(b)의 증명에서 등거리라는 가정은 계수 비교에만 쓰였다). 좌표 영역 \(R = \mathbf{x}(Q)\)의 상은 좌표 영역 \(\varphi(R) = \mathbf{y}(Q)\)이다.</p>
+          <p>(⇐) \(A(\varphi(R)) = \int_Q\sqrt{\bar E\bar G - \bar F^2} = \int_Q\sqrt{EG - F^2} = A(R)\)이다.</p>
+          <p>(⇒) \(q \in U\)와 <a href="#ex-7-3-5">연습 7.3.5</a>의 정사각형 \(Q_\varepsilon\)을 잡자. 가정에서 \(A(\mathbf{y}(Q_\varepsilon)) = A(\mathbf{x}(Q_\varepsilon))\)이다. 양변을 \(\varepsilon^2\)으로 나누고 \(\varepsilon \to 0\)으로 보내면 <a href="#ex-7-3-5">연습 7.3.5</a>를 \(\mathbf{y}\)와 \(\mathbf{x}\)에 각각 써서
+          \(\sqrt{\bar E\bar G - \bar F^2}\,(q) = \sqrt{EG - F^2}\,(q)\)이다. \(q\)가 임의이므로 원하는 등식이다.
+          <a href="#i-7-3-12">예 7.3.12</a>는 행렬식은 같지만 \(\bar E \neq E\)인 경우다. 등거리사상은 세 계수가 모두 같아야 하므로(<a href="7-2-isometries.html#i-7-2-7">정리 7.2.7</a>) 넓이 보존보다 훨씬 강한 조건이다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="7-2-isometries.html">← 7.2 등거리사상</a>
+    <a rel="next" href="7-4-conformal-maps.html">7.4 등각사상 →</a>
+  </nav>
+</body>
+</html>

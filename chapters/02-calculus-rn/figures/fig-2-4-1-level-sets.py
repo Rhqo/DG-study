@@ -97,7 +97,7 @@ arrow(ax, q, 0.5 * tan_q, C["tangent"])
 ax.plot(*q, "o", color=C["main"], ms=4, zorder=7)
 ax.text(q[0] - 0.3, q[1] + 0.02, r"$q$", fontsize=12)
 ax.text(0.5, -0.33, r"$c=1$", fontsize=10)
-ax.text(0.08, 1.08, r"$c=-1$", fontsize=10)
+ax.text(0.08, 1.15, r"$c=-1$", fontsize=10)
 ax.text(-2.1, 2.15, "(b)", fontsize=11)
 
 fig.subplots_adjust(wspace=0.08, left=0.01, right=0.99, top=0.98, bottom=0.02)

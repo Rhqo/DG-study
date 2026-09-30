@@ -124,15 +124,15 @@ th = sp.Function("theta")(s)
 Tth = sp.Matrix([sp.cos(th), sp.sin(th)])
 sym_equal("정리 4.4.9: t = (cos θ, sin θ)이면 t' = θ' Jt", Tth.diff(s), th.diff(s) * J(Tth))
 sym_equal("정리 4.4.9: <t', Jt> = θ'", Tth.diff(s).dot(J(Tth)), th.diff(s))
-# 보조정리의 F, G가 상수: a' = −θ'b, b' = θ'a 이면 F' = G' = 0
+# 보조정리의 P, Q가 상수: a' = −θ'b, b' = θ'a 이면 P' = Q' = 0
 a_, b_ = sp.Function("a")(s), sp.Function("b")(s)
 subs_ab = {a_.diff(s): -th.diff(s) * b_, b_.diff(s): th.diff(s) * a_}
-F = a_ * sp.cos(th) + b_ * sp.sin(th)
-Gf = b_ * sp.cos(th) - a_ * sp.sin(th)
-sym_equal("보조정리 4.4.8: F' = 0", sp.diff(F, s).subs(subs_ab), 0)
-sym_equal("보조정리 4.4.8: G' = 0", sp.diff(Gf, s).subs(subs_ab), 0)
-sym_equal("보조정리 4.4.8: a = F cos θ − G sin θ", F * sp.cos(th) - Gf * sp.sin(th), a_)
-sym_equal("보조정리 4.4.8: b = F sin θ + G cos θ", F * sp.sin(th) + Gf * sp.cos(th), b_)
+Pf = a_ * sp.cos(th) + b_ * sp.sin(th)
+Qf = b_ * sp.cos(th) - a_ * sp.sin(th)
+sym_equal("보조정리 4.4.8: P' = 0", sp.diff(Pf, s).subs(subs_ab), 0)
+sym_equal("보조정리 4.4.8: Q' = 0", sp.diff(Qf, s).subs(subs_ab), 0)
+sym_equal("보조정리 4.4.8: a = P cos θ − Q sin θ", Pf * sp.cos(th) - Qf * sp.sin(th), a_)
+sym_equal("보조정리 4.4.8: b = P sin θ + Q cos θ", Pf * sp.sin(th) + Qf * sp.cos(th), b_)
 # 원: 한 바퀴의 전체 곡률 2π
 check("정리 4.4.9: 원 한 바퀴 ∫κ_s ds = (1/r)(2πr) = 2π", sp.simplify(sp.integrate(1 / r, (s, 0, 2 * sp.pi * r)) - 2 * sp.pi) == 0)
 

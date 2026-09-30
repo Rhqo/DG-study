@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>11.5 경계를 갖는 다양체 — 미분기하 스터디</title>
+  <meta name="dg-id" content="11.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="11.1, 11.2, 11.3, 11.4, 2.3">
+  <meta name="dg-refs" content="Lee-ISM Ch. 1">
+  <meta name="dg-updated" content="2026-10-01">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">11. 매끄러운 다양체</a> ›
+    <span>11.5 경계를 갖는 다양체</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>11.5 경계를 갖는 다양체</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 1장]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>상반공간 \(\mathbb{H}^n\)을 모형으로 하는 경계를 갖는 위상다양체와 매끄러운 다양체를 정의하고, \([0, 1]\)과 닫힌 공 \(\overline{B}{}^n\)에 차트를 줄 수 있다.</li>
+        <li>내부점과 경계점을 정의하고, 매끄러운 경우 두 종류가 겹치지 않음을 역함수 정리로 증명할 수 있다(위상적 경우는 진술만 한다).</li>
+        <li>\(\partial M\)이 \((n-1)\)차원 매끄러운 다양체임을 보이고, 다양체의 경계와 부분집합의 위상적 경계를 구별할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="11-1-topological-manifolds.html#i-11-1-3">정의 11.1.3 (위상다양체)</a>, <a href="11-1-topological-manifolds.html#i-11-1-12">정리 11.1.12 (위상적 차원 불변성)</a>, <a href="11-1-topological-manifolds.html#i-11-1-11">비예 11.1.11 (십자 모양)</a></li>
+        <li><a href="11-2-smooth-structures.html#i-11-2-1">정의 11.2.1 (매끄러운 호환)</a>, <a href="11-2-smooth-structures.html#i-11-2-9">정의 11.2.9 (매끄러운 구조)</a>, <a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a></li>
+        <li><a href="11-3-spheres-stereographic.html#i-11-3-4">예 11.3.4 (반구 차트)</a>, <a href="11-3-spheres-stereographic.html#i-11-3-6">정리 11.3.6</a></li>
+        <li><a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-1">정리 2.2.1 (연쇄법칙)</a>, <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-5">정리 2.3.5 (역함수 정리)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="11-4-more-examples.html#i-11-4-6">비예 11.4.6</a>(b)에서 \([0, 1)\)이 \(\R\)의 열린부분다양체가 아님을 보았다. 실은 \([0, 1)\)은 어떤 차원의 위상다양체도 아니다(<a href="#i-11-5-3">비예 11.5.3</a>).
+      끝점 \(0\)의 근방은 \([0, \varepsilon)\)처럼 한쪽으로만 뻗고, 이것은 \(\R\)의 열린구간과 위상동형이 될 수 없다. 닫힌 원판의 가장자리 점, 닫힌 반구의 적도 위의 점도 마찬가지다.</p>
+      <p>그런데 이런 공간은 버릴 수 없다. <a href="../10-gauss-bonnet/index.html">10장</a>의 가우스-보네 정리는 곡면 위의 <em>경계가 있는 영역</em>에 대한 정리이고, 미적분학의 기본정리 \(\int_a^b f' = f(b) - f(a)\)는 구간 \([a, b]\)와 그 끝점 사이의 관계다.
+      이런 정리를 다양체 위에서 하나로 모으는 스토크스 정리는 <a href="../18-integration-stokes/index.html">18장</a>에서 다루는데, 그곳의 무대가 바로 이 절에서 정의하는 “경계를 갖는 다양체”다.
+      해결책은 간단하다. 모형 공간을 \(\R^n\)에서 <em>닫힌 상반공간</em>으로 바꾸면 된다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 가장자리를 바닥에 펴기</p>
+        <p><a href="#fig-11-5-1">그림 11.5.1</a>에서 닫힌 원판의 위쪽 반을 경계 차트 \(\psi_2^+\)로 옮기면, 가장자리 호(주황)가 상반평면의 바닥 \(\partial\mathbb{H}^2\) 위에 펴진다. 원판 안쪽의 점 \(p\)는 바닥에서 떨어진 곳으로,
+        가장자리의 점 \(q\)는 바닥 위로 간다. “경계를 갖는 다양체”는 모든 점이 이런 차트 안에 있는 공간이다. 안쪽 점은 \(\R^n\)처럼, 가장자리 점은 \(\mathbb{H}^n\)의 바닥처럼 보인다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-11-5-1">
+        <img src="figures/fig-11-5-1-boundary-chart.svg" alt="왼쪽에 닫힌 원판이 있고, 위쪽 반원판 V₂⁺가 하늘색이며 그 위의 경계 호가 주황 굵은 선이다. 호의 양 끝 (±1, 0)은 빈 원이다. 반원판 안에는 세로 직선들과 경계 호를 아래로 민 곡선들로 된 격자가 있고, 안쪽 점 p와 경계 위의 주황 점 q가 있다. 오른쪽에는 상반평면 ℍ²가 회색이고, 그 안에 하늘색 반원판 모양 영역과 곧은 격자가 있다. 바닥 ∂ℍ²의 선분 (-1, 1)이 주황 굵은 선이고, 그 위에 ψ₂⁺(q), 영역 안에 ψ₂⁺(p)가 있다. 두 그림 사이에 ψ₂⁺ 화살표가 있다.">
+        <figcaption><span class="fig-head">그림 11.5.1.</span>
+        닫힌 원판 \(\overline{B}{}^2\)의 경계 차트 \(\psi_2^+(x) = \big(x^1,\ \sqrt{1 - (x^1)^2} - x^2\big)\), 정의역 \(V_2^+ = \{x \in \overline{B}{}^2 : x^2 \gt 0\}\)(<a href="#i-11-5-13">예 11.5.13</a>).
+        격자는 \(x^1 = -0.75, \dots, 0.75\)와 \(t = 0.15, \dots, 0.75\)(\(t\)는 둘째 좌표)의 선이다. 경계 호(주황)는 \(\partial\mathbb{H}^2 = \{t = 0\}\) 위로 간다.
+        \(p = (0.3, 0.45) \mapsto (0.3,\ \sqrt{0.91} - 0.45)\), \(q = (-0.6, 0.8) \mapsto (-0.6, 0)\).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-half-space">
+      <h2>상반공간과 경계를 갖는 위상다양체</h2>
+      <p>\(n \ge 1\)일 때 \(\R^n\)의 부분공간</p>
+      <div class="equation" id="eq-11-5-1">
+      \[ \mathbb{H}^n = \{x = (x^1, \dots, x^n) \in \R^n : x^n \ge 0\} \tag{11.5.1} \]
+      </div>
+      <p>을 <dfn>상반공간</dfn>(closed upper half-space)이라 한다. \(\partial\mathbb{H}^n = \{x \in \R^n : x^n = 0\}\), \(\operatorname{Int}\mathbb{H}^n = \{x \in \R^n : x^n \gt 0\}\)으로 쓴다.
+      \(\mathbb{H}^1 = [0, \infty)\)이다. \(\mathbb{H}^n\)은 쌍곡공간의 상반공간 모형 \(\mathbb{U}^n = \{x^n \gt 0\}\)(<a href="../21-riemannian-metrics/index.html">21장</a>)과 다른 대상이다.
+      \(\mathbb{H}^n\)의 열린집합은 부분공간 위상의 열린집합, 즉 \(\R^n\)의 열린집합 \(O\)에 대해 \(O \cap \mathbb{H}^n\) 꼴의 집합이다(<a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-1">정의 3.3.1</a>).
+      예를 들어 \([0, 1) = (-1, 1) \cap \mathbb{H}^1\)은 \(\mathbb{H}^1\)에서 열려 있지만 \(\R\)에서는 열려 있지 않다.</p>
+
+      <div class="thm definition" id="i-11-5-1">
+        <p><span class="thm-head">정의 11.5.1</span> <span class="thm-name">(경계를 갖는 위상다양체, topological manifold with boundary)</span>.
+        \(n \ge 1\)이라 하자. 하우스도르프이고 제2가산인 위상공간 \(M\)의 모든 점이 \(\mathbb{H}^n\)의 열린집합과 위상동형인 근방을 가지면, \(M\)을 \(n\)차원 <dfn>경계를 갖는 위상다양체</dfn>(topological manifold with boundary)라 한다.
+        \(M\)의 열린집합 \(U\)와, \(U\)에서 \(\mathbb{H}^n\)의 열린집합 또는 \(\R^n\)의 열린집합 위로 가는 위상동형사상 \(\varphi\)의 짝 \((U, \varphi)\)를 \(M\)의 차트라 한다.
+        \(\varphi(U)\)가 \(\R^n\)의 열린집합이면 <dfn>내부 차트</dfn>(interior chart), \(\varphi(U)\)가 \(\mathbb{H}^n\)의 열린집합이고 \(\varphi(U) \cap \partial\mathbb{H}^n \ne \varnothing\)이면 <dfn>경계 차트</dfn>(boundary chart)라 한다.</p>
+      </div>
+
+      <p>\(\R^n\)의 열린공은 평행이동하면 \(\operatorname{Int}\mathbb{H}^n\) 안에 들어가므로 \(\mathbb{H}^n\)의 열린집합과 위상동형이다. 그래서 위상다양체(<a href="11-1-topological-manifolds.html#i-11-1-3">정의 11.1.3</a>)는 경계를 갖는 위상다양체이기도 하다.
+      “경계를 갖는”은 경계가 <em>있어도 된다</em>는 뜻이지 반드시 있다는 뜻이 아니다. 앞으로 그냥 “다양체”라고 하면 지금까지처럼 경계가 없는 것을 뜻한다.</p>
+
+      <div class="thm example" id="i-11-5-2">
+        <p><span class="thm-head">예 11.5.2</span> <span class="thm-name">(경계를 갖는 위상다양체)</span>.
+        (a) \(\mathbb{H}^n\) 자신. \((\mathbb{H}^n, \id)\)는 경계 차트다.</p>
+        <p>(b) 닫힌 구간 \([0, 1]\). \(\R\)의 부분공간이므로 하우스도르프이고 제2가산이다. 세 차트 \(((0, 1), \id)\)(내부 차트), \(\psi_0\colon [0, 1) \to [0, 1)\), \(\psi_0(x) = x\)와
+        \(\psi_1\colon (0, 1] \to [0, 1)\), \(\psi_1(x) = 1 - x\)(경계 차트)가 \([0, 1]\)을 덮는다. \([0, 1)\)은 \(\mathbb{H}^1\)의 열린집합이다. \(\psi_0\)과 \(\psi_1\)은 끝점 \(0\)과 \(1\)을 각각 \(\partial\mathbb{H}^1 = \{0\}\)으로 보낸다.</p>
+        <p>(c) 닫힌 공 \(\overline{B}{}^n = \{x \in \R^n : \abs{x} \le 1\}\). 차트는 <a href="#i-11-5-13">예 11.5.13</a>에서 구체적으로 만든다.</p>
+      </div>
+
+      <div class="thm nonexample" id="i-11-5-3">
+        <p><span class="thm-head">비예 11.5.3</span>.
+        (a) <em>\([0, 1)\)은 (경계가 없는) 위상다양체가 아니다.</em> \([0, 1)\)이 위상 \(n\)-다양체라면 열린부분집합 \((0, 1)\)도 위상 \(n\)-다양체인데(<a href="11-1-topological-manifolds.html#i-11-1-5">명제 11.1.5</a>(a)),
+        \((0, 1)\)은 \(\R\)과 위상동형인 1차원 다양체이므로 <a href="11-1-topological-manifolds.html#i-11-1-12">정리 11.1.12</a>에 의해 \(n = 1\)이다. \(0\)의 근방 \(W\)와 위상동형사상 \(h\colon W \to \hat W \subseteq \R\) (\(\hat W\) 열림)이 있다고 하자.
+        \(W\)는 어떤 \([0, \varepsilon)\)을 포함하고, \([0, \varepsilon)\)은 \(W\)에서 열려 있으므로 \(h([0, \varepsilon))\)은 \(\R\)의 열린집합이며 연결이다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-5">명제 3.7.5</a>). 따라서 \(c = h(0)\)을 포함하는 열린구간 \(I\)다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-4">정리 3.7.4</a>).
+        그러면 \(h\)는 연결인 \((0, \varepsilon)\)을 연결이 아닌 \(I \setminus \{c\}\) 위로 보내는 위상동형사상이 되어 모순이다. 반면 \([0, 1)\)은 차트 \(\id\colon [0, 1) \to [0, 1) \subseteq \mathbb{H}^1\) 하나로 덮이는 경계를 갖는 위상다양체다.</p>
+        <p>(b) <em>십자 \(X = \{xy = 0\}\)은 경계를 갖는 위상다양체도 아니다.</em> <a href="11-1-topological-manifolds.html#i-11-1-11">비예 11.1.11</a>의 논증에서 \(\R^n\)의 공 대신 \(\mathbb{H}^n\)의 “반공” \(B_\delta(c) \cap \mathbb{H}^n\)을 쓰면 된다.
+        반공은 볼록하고 \(n \ge 2\)이면 한 직선 안에 들어가지 않으므로, 한 점을 빼도 <a href="11-1-topological-manifolds.html#i-11-1-11">비예 11.1.11</a>과 같은 우회 경로로 경로연결이다. \(n = 1\)에서 \(c = 0\)이면 \([0, \delta) \setminus \{0\}\)은 구간 하나이고, \(c \gt 0\)이면 \(\delta \le c\)로 잡아 반공이 열린구간 \((c - \delta, c + \delta)\)가 되므로 한 점을 빼면 구간 두 개다. 어느 경우든 한 점을 뺀 반공은 많아야 두 조각이므로, 원점을 빼면 네 조각이 되는 \(X\)와 모순이다.</p>
+        <p class="verified">검증: <code>verify/v-11-5-manifolds-with-boundary.py</code> (반공 안의 우회 경로)</p>
+      </div>
+    </section>
+
+    <section id="sec-interior-boundary">
+      <h2>내부점과 경계점</h2>
+
+      <div class="thm definition" id="i-11-5-4">
+        <p><span class="thm-head">정의 11.5.4</span> <span class="thm-name">(내부점과 경계점, interior point and boundary point)</span>.
+        \(M\)이 경계를 갖는 위상 \(n\)-다양체라 하자. 점 \(p \in M\)이 어떤 내부 차트의 정의역에 들어 있으면 \(p\)를 \(M\)의 <dfn>내부점</dfn>(interior point)이라 한다.
+        \(p\)를 \(\partial\mathbb{H}^n\)으로 보내는 경계 차트가 있으면 \(p\)를 \(M\)의 <dfn>경계점</dfn>(boundary point)이라 한다. 내부점 전체를 \(\operatorname{Int} M\), 경계점 전체를 \(\partial M\)으로 쓰고 \(\partial M\)을 \(M\)의 <dfn>경계</dfn>(boundary)라 한다.</p>
+      </div>
+
+      <div class="thm lemma" id="i-11-5-5">
+        <p><span class="thm-head">보조정리 11.5.5</span>.
+        경계를 갖는 위상다양체의 모든 점은 내부점이거나 경계점이다. 또 \(p\)를 \(\operatorname{Int}\mathbb{H}^n\)으로 보내는 차트 \((V, \psi)\)가 있으면 \(p\)는 내부점이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        뒤의 주장부터 보이자. \(\psi(V)\)가 \(\R^n\)에서 열려 있으면 \((V, \psi)\)가 내부 차트다. \(\psi(V) = O \cap \mathbb{H}^n\) (\(O\)는 \(\R^n\)에서 열림)이면 \(V' = \psi^{-1}(\operatorname{Int}\mathbb{H}^n)\)은 \(p\)를 포함하는 \(V\)의 열린집합이고,
+        \(\psi(V') = O \cap \operatorname{Int}\mathbb{H}^n\)은 \(\R^n\)의 두 열린집합의 교집합이므로 열려 있다. 따라서 \((V', \psi|_{V'})\)는 \(p\)를 포함하는 내부 차트다.
+        앞의 주장: \(p\) 둘레의 차트 \((U, \varphi)\)가 있다. \(\varphi(p) \in \operatorname{Int}\mathbb{H}^n\)이거나 \(\varphi(U)\)가 \(\R^n\)에서 열려 있으면 \(p\)는 내부점이다. 그렇지 않으면 \(\varphi(U)\)는 \(\mathbb{H}^n\)의 열린집합이고 \(\varphi(p) \in \partial\mathbb{H}^n\)이므로 \((U, \varphi)\)는 \(p\)를 \(\partial\mathbb{H}^n\)으로 보내는 경계 차트이고, \(p\)는 경계점이다.</p>
+      </div>
+
+      <p>그러면 한 점이 내부점이면서 동시에 경계점일 수 있을까? 어떤 차트로는 \(\R^n\)의 열린집합 안쪽에 있는 것처럼 보이고, 다른 차트로는 \(\mathbb{H}^n\)의 바닥에 있는 것처럼 보이는 점이 있다면
+      “경계”라는 말은 차트에 따라 달라진다. 그런 일은 없다는 것이 다음 정리다.</p>
+
+      <div class="thm theorem" id="i-11-5-6">
+        <p><span class="thm-head">정리 11.5.6</span> <span class="thm-name">(위상적 경계의 불변성, topological invariance of the boundary)</span>.
+        경계를 갖는 위상다양체 \(M\)에서 내부점이면서 경계점인 점은 없다. 따라서 \(M = \operatorname{Int} M \cup \partial M\)이고 \(\operatorname{Int} M \cap \partial M = \varnothing\)이다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 한 점이 경계에 있는지는 차트를 어떻게 고르든 같다. 경계는 공간 자신의 성질이다.</p>
+      <p><em>증명에 대하여.</em> 이 정리는 “\(\R^n\)의 열린집합에서 \(\R^n\)으로 가는 연속 단사는 열린사상이다”라는 브라우어의 영역 불변성 정리(invariance of domain)에서 나온다. 영역 불변성의 증명에는 호몰로지 같은 대수적 위상수학이 필요하다.
+      이 도구는 이 study set이 다루는 범위를 넘으므로 <a href="11-1-topological-manifolds.html#i-11-1-12">정리 11.1.12</a>와 마찬가지로 <strong>진술만 하고 증명은 참고문헌으로 돌린다</strong>
+      <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM]</a>, <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 1장]</a>.
+      \(n = 1\)인 경우는 연결성만으로 증명할 수 있다(<a href="#ex-11-5-5">연습 11.5.5</a>). 매끄러운 다양체에서는 역함수 정리로 같은 결론을 완전히 증명한다(<a href="#i-11-5-11">정리 11.5.11</a>). 이 study set의 뒤 장은 매끄러운 경우만 쓴다.</p>
+    </section>
+
+    <section id="sec-smooth-boundary">
+      <h2>경계를 갖는 매끄러운 다양체</h2>
+      <p>경계 차트 사이의 좌표변환은 \(\mathbb{H}^n\)의 열린집합, 예를 들어 \([0, 1)\)에서 정의된다. 이런 집합은 \(\R^n\)에서 열려 있지 않으므로 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">정의 2.2.11</a>의 편미분을 바닥의 점에서 그대로 쓸 수 없다.
+      그래서 매끄러움의 뜻을 넓힌다. 요지는 “열린집합으로 매끄럽게 확장된다”이다.</p>
+
+      <div class="thm definition" id="i-11-5-7">
+        <p><span class="thm-head">정의 11.5.7</span> <span class="thm-name">(임의의 부분집합에서 정의된 사상의 매끄러움)</span>.
+        \(A \subseteq \R^n\)이 임의의 부분집합이고 \(F\colon A \to \R^k\)라 하자. 모든 \(a \in A\)에 대하여 \(a\)를 포함하는 \(\R^n\)의 열린집합 \(W\)와 매끄러운 사상 \(\tilde F\colon W \to \R^k\)(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">정의 2.2.11</a>)가 있어서
+        \(W \cap A\) 위에서 \(\tilde F = F\)이면, \(F\)가 <dfn data-generalizes="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">매끄러운</dfn>(smooth) 사상이라 한다. \(\tilde F\)를 \(a\) 근처에서의 \(F\)의 매끄러운 확장이라 한다.</p>
+      </div>
+
+      <p>이것이 같은 이름을 쓸 자격이 있는지, 즉 열린집합에서는 원래 정의와 같은지 확인하자.</p>
+
+      <div class="thm proposition" id="i-11-5-8">
+        <p><span class="thm-head">명제 11.5.8</span> <span class="thm-name">(넓힌 정의의 성질)</span>.</p>
+        <ul>
+          <li>(a) \(A \subseteq \R^n\)이 열린집합이면, \(F\colon A \to \R^k\)가 <a href="#i-11-5-7">정의 11.5.7</a>의 뜻으로 매끄러울 필요충분조건은 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">정의 2.2.11</a>의 뜻으로 매끄러운 것이다.</li>
+          <li>(b) \(F\colon A \to \R^k\)와 \(G\colon B \to \R^l\)이 <a href="#i-11-5-7">정의 11.5.7</a>의 뜻으로 매끄럽고 \(F(A) \subseteq B\)이면 \(G \circ F\)도 매끄럽다.</li>
+          <li>(c) \(A\)의 모든 점이 \(F\)를 \(A \cap W'\) (\(W'\)은 \(\R^n\)의 열린집합)로 제한한 것이 매끄러운 근방 \(W'\)을 가지면 \(F\)는 매끄럽다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">정의 2.2.11</a>의 뜻으로 매끄러우면 \(W = A\), \(\tilde F = F\)로 두면 된다. 거꾸로 \(a \in A\)마다 확장 \(\tilde F\colon W \to \R^k\)가 있으면, 열린집합 \(W \cap A\) 위에서 \(F = \tilde F\)이므로 \(F\)는 \(a\)의 열린 근방 \(W \cap A\)에서 매끄럽다.
+        매끄러움은 국소적인 성질이므로(<a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a>의 증명 첫 문단) \(F\)는 \(A\)에서 매끄럽다.
+        (b) \(a \in A\)라 하자. \(G\)의 \(F(a)\) 근처 확장 \(\tilde G\colon W' \to \R^l\)과 \(F\)의 \(a\) 근처 확장 \(\tilde F\colon W \to \R^k\)를 잡는다. \(\tilde F\)는 연속이므로 \(W_0 = W \cap \tilde F^{-1}(W')\)은 \(a\)를 포함하는 열린집합이다.
+        \(x \in W_0 \cap A\)이면 \(\tilde F(x) = F(x) \in B \cap W'\)이므로 \(\tilde G(\tilde F(x)) = G(F(x))\)이다. 따라서 \(\tilde G \circ \tilde F\colon W_0 \to \R^l\)(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">명제 2.2.12</a>(b)에 의해 매끄러움)이 \(G \circ F\)의 확장이다.
+        (c) \(a \in A\)이고 \(W'\)이 가정의 근방이라 하자. \(F|_{A \cap W'}\)의 \(a\) 근처 확장 \(\tilde F\colon W \to \R^k\)를 \(W \cap W'\)으로 제한하면, \((W \cap W') \cap A\) 위에서 \(\tilde F = F\)이다. 즉 이것이 \(a\) 근처에서의 \(F\)의 매끄러운 확장이다. <a href="#i-11-5-7">정의 11.5.7</a>의 조건은 점마다의 조건이므로 \(F\)는 매끄럽다.</p>
+      </div>
+
+      <p>이제 <a href="11-2-smooth-structures.html">11.2절</a>의 정의를 글자 그대로 되풀이한다. 달라지는 것은 좌표변환의 정의역이 \(\mathbb{H}^n\)의 열린집합일 수 있다는 것과, 그때의 매끄러움을 <a href="#i-11-5-7">정의 11.5.7</a>의 뜻으로 읽는다는 것뿐이다.</p>
+
+      <div class="thm definition" id="i-11-5-9">
+        <p><span class="thm-head">정의 11.5.9</span> <span class="thm-name">(경계를 갖는 매끄러운 다양체, smooth manifold with boundary)</span>.
+        \(M\)이 경계를 갖는 위상 \(n\)-다양체라 하자. 두 차트 \((U, \varphi)\), \((V, \psi)\)는 \(U \cap V = \varnothing\)이거나 두 좌표변환 \(\psi \circ \varphi^{-1}\), \(\varphi \circ \psi^{-1}\)이 모두 <a href="#i-11-5-7">정의 11.5.7</a>의 뜻으로 매끄러울 때 매끄럽게 호환된다고 한다.
+        매끄러운 아틀라스, 극대 아틀라스, 매끄러운 구조는 <a href="11-2-smooth-structures.html#i-11-2-5">정의 11.2.5</a>, <a href="11-2-smooth-structures.html#i-11-2-8">정의 11.2.8</a>, <a href="11-2-smooth-structures.html#i-11-2-9">정의 11.2.9</a>와 같은 말로 정의한다.
+        매끄러운 구조를 준 \(M\)을 \(n\)차원 <dfn>경계를 갖는 매끄러운 다양체</dfn>(smooth manifold with boundary)라 한다.</p>
+      </div>
+
+      <div class="thm remark" id="i-11-5-10">
+        <p><span class="thm-head">비고 11.5.10</span> <span class="thm-name">(11.2절의 결과는 그대로 성립한다)</span>.
+        <a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a>과 <a href="11-2-smooth-structures.html#i-11-2-14">명제 11.2.14</a>(a)의 증명이 쓴 것은 매끄러움의 국소성, 합성의 매끄러움, 매끄러운 사상의 제한이 매끄럽다는 것뿐이다.
+        세 가지 모두 넓힌 정의에서도 성립하므로(<a href="#i-11-5-8">명제 11.5.8</a>(b), (c), 그리고 확장을 그대로 쓰면 되는 제한), 경계를 갖는 경우에도 매끄러운 아틀라스는 매끄러운 구조를 꼭 하나 정하고 매끄러운 차트는 열린집합으로 줄여도 매끄러운 차트다.
+        내부점과 경계점은 이제 <em>매끄러운</em> 차트로 정의한다. <a href="#i-11-5-5">보조정리 11.5.5</a>의 증명에서 차트를 줄인 것은 여전히 매끄러운 차트이므로, 모든 점은 매끄러운 차트의 뜻으로 내부점이거나 경계점이다.</p>
+      </div>
+
+      <p>매끄러운 경우에는 경계의 불변성을 완전히 증명할 수 있다. 핵심은 역함수 정리다. 내부 차트에서 경계 차트로 가는 좌표변환의 전미분이 가역이면, 그 좌표변환은 열린집합을 열린집합으로 보내야 한다.
+      그런데 \(\partial\mathbb{H}^n\)의 점의 열린 근방은 \(\mathbb{H}^n\)에 들어가지 않는다.</p>
+
+      <div class="thm theorem" id="i-11-5-11">
+        <p><span class="thm-head">정리 11.5.11</span> <span class="thm-name">(매끄러운 경계의 불변성, smooth invariance of the boundary)</span>.
+        \(M\)이 경계를 갖는 매끄러운 \(n\)-다양체이고 \(p \in M\)이 어떤 매끄러운 내부 차트의 정의역에 들어 있으면, \(p\)를 \(\partial\mathbb{H}^n\)으로 보내는 매끄러운 경계 차트는 없다.
+        따라서 매끄러운 차트로 정의한 \(\operatorname{Int} M\)과 \(\partial M\)은 서로소이고 합집합이 \(M\)이다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 매끄러운 다양체에서는 경계가 매끄러운 차트의 선택에 무관하다. 증명에는 위상수학의 무거운 정리 대신 2장의 역함수 정리만 쓴다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: 내부 차트 \(\varphi\)와 경계 차트 \(\psi\)가 모두 \(p\)를 덮는다고 하자. \(\eta = \psi \circ \varphi^{-1}\)은 \(\R^n\)의 열린집합에서 정의되고, 그 역의 매끄러운 확장과 연쇄법칙으로 \(D\eta\)가 가역임을 안다.
+        역함수 정리에 의해 \(\eta\)의 상은 \(\psi(p)\)의 \(\R^n\) 속 열린 근방을 포함해야 하는데, \(\psi(p) \in \partial\mathbb{H}^n\)이면 그 근방은 \(\mathbb{H}^n\)을 벗어난다.</p>
+        <p><span class="proof-head">증명.</span>
+        \((U, \varphi)\)가 \(p\)를 포함하는 매끄러운 내부 차트이고, \((V, \psi)\)가 \(\psi(p) \in \partial\mathbb{H}^n\)인 매끄러운 경계 차트라 가정하고 모순을 이끌어 내자. \(U_0 = U \cap V\)라 하고 \(a = \varphi(p)\), \(b = \psi(p)\)라 두자.</p>
+        <ul>
+          <li><em>두 좌표변환.</em> \(\varphi(U_0)\)는 \(\R^n\)의 열린집합 \(\varphi(U)\)의 열린부분집합이므로 \(\R^n\)에서 열려 있고, \(\psi(U_0)\)는 \(\mathbb{H}^n\)의 열린집합이다.
+          \(\eta = \psi \circ \varphi^{-1}\colon \varphi(U_0) \to \psi(U_0)\)는 열린집합에서 정의되었으므로 <a href="#i-11-5-8">명제 11.5.8</a>(a)에 의해 보통의 뜻으로 매끄럽다. 역 \(\tau = \varphi \circ \psi^{-1}\colon \psi(U_0) \to \varphi(U_0)\)은 <a href="#i-11-5-7">정의 11.5.7</a>의 뜻으로 매끄러우므로,
+          \(b\)를 포함하는 \(\R^n\)의 열린집합 \(W\)와 매끄러운 \(\tilde\tau\colon W \to \R^n\)이 있어서 \(W \cap \psi(U_0)\) 위에서 \(\tilde\tau = \tau\)이다.</li>
+          <li><em>\(D\eta(a)\)는 가역이다.</em> \(O = \eta^{-1}(W)\)는 \(\eta\)가 연속이므로 \(a\)를 포함하는 \(\R^n\)의 열린집합이다. \(x \in O\)이면 \(\eta(x) \in W \cap \psi(U_0)\)이므로 \(\tilde\tau(\eta(x)) = \tau(\eta(x)) = x\)이다.
+          즉 열린집합 \(O\) 위에서 \(\tilde\tau \circ \eta = \id\)이다. 연쇄법칙(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-1">정리 2.2.1</a>)으로 \(a\)에서 미분하면 \(D\tilde\tau(b)\,D\eta(a) = \id_{\R^n}\)이다(<a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-4">명제 2.3.4</a>의 증명과 같은 계산).
+          \(n \times n\) 행렬 \(D\eta(a)\)가 왼쪽 역을 가지므로 \(\det D\tilde\tau(b) \cdot \det D\eta(a) = 1\)이고, \(\det D\eta(a) \ne 0\)이다.</li>
+          <li><em>역함수 정리.</em> <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-5">정리 2.3.5</a>를 \(O\) 위의 매끄러운 사상 \(\eta\)에 쓰면, \(a\)를 포함하는 열린집합 \(U_1 \subseteq O\)와 \(b\)를 포함하는 \(\R^n\)의 열린집합 \(V_1\)이 있어서 \(\eta(U_1) = V_1\)이다.
+          그런데 \(\eta\)의 값은 \(\psi(U_0) \subseteq \mathbb{H}^n\)에 있으므로 \(V_1 \subseteq \mathbb{H}^n\)이다.</li>
+          <li><em>모순.</em> \(V_1\)은 \(\R^n\)에서 열려 있으므로 어떤 \(\varepsilon \gt 0\)에 대해 \(B_\varepsilon(b) \subseteq V_1\)이다. \(b^n = 0\)이므로 점 \(b - \tfrac{\varepsilon}{2}e_n\)은 \(B_\varepsilon(b)\)에 있고 \(n\)번째 성분이 \(-\varepsilon/2 \lt 0\)이어서 \(\mathbb{H}^n\)에 있지 않다. 이것은 \(V_1 \subseteq \mathbb{H}^n\)과 모순이다.</li>
+        </ul>
+        <p>따라서 매끄러운 내부 차트에 들어 있는 점은 매끄러운 경계점이 아니다. <a href="#i-11-5-10">비고 11.5.10</a>에 의해 모든 점은 둘 중 하나이므로 \(M = \operatorname{Int} M \cup \partial M\)은 서로소인 합집합이다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-11-5-12">
+        <p><span class="thm-head">명제 11.5.12</span> <span class="thm-name">(내부와 경계의 구조)</span>.
+        \(M\)이 경계를 갖는 매끄러운 \(n\)-다양체라 하자.</p>
+        <ul>
+          <li>(a) \(\operatorname{Int} M\)은 \(M\)의 열린집합이고, 매끄러운 내부 차트들로 \(n\)차원 (경계가 없는) 매끄러운 다양체가 된다.</li>
+          <li>(b) \(\partial M\)은 \(M\)의 닫힌집합이다. 매끄러운 경계 차트 \((V, \psi)\)마다 \(V \cap \partial M = \psi^{-1}(\partial\mathbb{H}^n)\)이고,
+          \(\hat\psi = \mathrm{pr} \circ \psi|_{V \cap \partial M}\) (\(\mathrm{pr}(x^1, \dots, x^n) = (x^1, \dots, x^{n-1})\))들의 모임은 \(\partial M\)의 매끄러운 아틀라스다. 따라서 \(\partial M\)은 \((n-1)\)차원 매끄러운 다양체다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) 내부 차트의 정의역의 점은 모두 내부점이므로 \(\operatorname{Int} M\)은 매끄러운 내부 차트의 정의역들의 합집합이고, 따라서 열려 있다. 부분공간이므로 하우스도르프이고 제2가산이며,
+        매끄러운 내부 차트들은 \(\operatorname{Int} M\)을 덮는다. 이 차트들의 좌표변환은 \(\R^n\)의 열린집합 사이의 사상이므로 <a href="#i-11-5-8">명제 11.5.8</a>(a)에 의해 보통의 뜻으로 미분동형사상이다. 따라서 매끄러운 아틀라스이고 매끄러운 구조를 정한다.</p>
+        <p>(b) <a href="#i-11-5-11">정리 11.5.11</a>에 의해 \(\partial M = M \setminus \operatorname{Int} M\)이므로 닫혀 있다. \((V, \psi)\)가 매끄러운 경계 차트이고 \(q \in V\)라 하자. \(\psi(q) \in \partial\mathbb{H}^n\)이면 정의에 의해 \(q \in \partial M\)이다.
+        \(\psi(q) \in \operatorname{Int}\mathbb{H}^n\)이면 <a href="#i-11-5-5">보조정리 11.5.5</a>(와 <a href="#i-11-5-10">비고 11.5.10</a>)에 의해 \(q\)는 내부점이므로 <a href="#i-11-5-11">정리 11.5.11</a>에 의해 \(q \notin \partial M\)이다. 따라서 \(V \cap \partial M = \psi^{-1}(\partial\mathbb{H}^n)\)이다.</p>
+        <p><em>차트.</em> \(\psi(V) = O \cap \mathbb{H}^n\) (\(O\)는 \(\R^n\)에서 열림)라 하고 \(\iota(y) = (y, 0)\)이라 하자. \(\hat\psi\)는 \(V \cap \partial M\)에서 \(\iota^{-1}(O) = \{y \in \R^{n-1} : (y, 0) \in O\}\) 위로 가는 전단사다. 이 집합은 연속사상 \(\iota\)에 의한 열린집합의 역상이므로 \(\R^{n-1}\)에서 열려 있다.
+        \(\hat\psi\)는 연속이고 역사상 \(y \mapsto \psi^{-1}(y, 0)\)도 연속이므로 위상동형사상이다. \(\partial M\)은 \(M\)의 부분공간이므로 하우스도르프이고 제2가산이다. 따라서 \(\partial M\)은 위상 \((n-1)\)-다양체다.
+        (\(n = 1\)이면 \(\R^0\)은 한 점이고, \(\partial M\)은 이산공간이다.)</p>
+        <p><em>좌표변환.</em> \((V, \psi)\), \((V', \psi')\)이 매끄러운 경계 차트라 하자. \(y \in \hat\psi(V \cap V' \cap \partial M)\)이면 \(\psi^{-1}(y, 0) \in \partial M\)이므로 \(\psi'(\psi^{-1}(y, 0)) \in \partial\mathbb{H}^n\)이고,
+        \(\hat\psi' \circ \hat\psi^{-1}(y) = \mathrm{pr}\big(\psi' \circ \psi^{-1}(y, 0)\big)\)이다. \(\psi' \circ \psi^{-1}\)은 \((y, 0)\) 근처에서 매끄러운 확장 \(\tilde\tau\colon W \to \R^n\)을 가지므로, 열린집합 \(\iota^{-1}(W)\) 위에서 \(\mathrm{pr} \circ \tilde\tau \circ \iota\)는 매끄럽고 \(\hat\psi' \circ \hat\psi^{-1}\)과 같다.
+        매끄러움은 국소적이므로 \(\hat\psi' \circ \hat\psi^{-1}\)은 매끄럽고, 같은 논증으로 역방향도 매끄럽다. 따라서 \(\{\hat\psi\}\)는 \(\partial M\)의 매끄러운 아틀라스다.</p>
+      </div>
+
+      <p>\(\partial M\)은 경계가 없는 다양체다. 즉 \(\partial(\partial M) = \varnothing\)이다. \(\partial M\)의 구조가 \(M\)의 부분다양체 구조라는 것은 <a href="../14-submanifolds/index.html">14장</a>의 언어로 다시 볼 수 있다.</p>
+    </section>
+
+    <section id="sec-closed-ball">
+      <h2>계산 예: 닫힌 공</h2>
+      <p>닫힌 공에 경계 차트를 구체적으로 주자. 처음 하는 계산이므로 단계를 모두 쓴다. 아이디어는 <a href="11-3-spheres-stereographic.html#i-11-3-4">예 11.3.4</a>의 반구 차트와 같다. 한 좌표를 “경계 구면까지 남은 거리”로 바꾼다.</p>
+
+      <div class="thm example" id="i-11-5-13">
+        <p><span class="thm-head">예 11.5.13</span> <span class="thm-name">(닫힌 공 \(\overline{B}{}^n\))</span>.
+        \(n \ge 1\)이고 \(M = \overline{B}{}^n = \{x \in \R^n : \abs{x} \le 1\}\)이라 하자. \(\R^n\)의 부분공간이므로 하우스도르프이고 제2가산이다.</p>
+        <ul>
+          <li><em>내부 차트.</em> 열린 공 \(B^n = B_1(0)\)은 \(M\)에서 열려 있고 \((B^n, \id)\)는 내부 차트다.</li>
+          <li><em>경계 차트.</em> \(i = 1, \dots, n\)과 부호 \(\pm\)에 대해 \(V_i^\pm = \{x \in M : \pm x^i \gt 0\}\)이라 하자(\(M\)에서 열림). \(x \in V_i^\pm\)의 \(i\)번째 성분을 뺀 것을 \(y = (x^1, \dots, \widehat{x^i}, \dots, x^n) \in \R^{n-1}\)이라 하면
+          \(\abs{y}^2 = \abs{x}^2 - (x^i)^2 \lt 1\)이다. 이제</li>
+        </ul>
+        <div class="equation" id="eq-11-5-2">
+        \[ \begin{aligned} \psi_i^\pm(x) &= \big(y,\ \sqrt{1 - \abs{y}^2} \mp x^i\big), \\
+           (\psi_i^\pm)^{-1}(y, t) &= \big(y^1, \dots, y^{i-1},\ \pm\big(\sqrt{1 - \abs{y}^2} - t\big), \\ &\qquad\ y^i, \dots, y^{n-1}\big) \end{aligned} \tag{11.5.2} \]
+        </div>
+        <p>로 두자. 마지막 좌표 \(t = \sqrt{1 - \abs{y}^2} \mp x^i\)를 조사한다. \(\abs{x} \le 1\)이므로 \((x^i)^2 \le 1 - \abs{y}^2\), 즉 \(\pm x^i \le \sqrt{1 - \abs{y}^2}\)이고 따라서 \(t \ge 0\)이다.
+        등호는 \(\pm x^i = \sqrt{1 - \abs{y}^2}\), 즉 \(\abs{x} = 1\)일 때만 성립한다. 또 \(\pm x^i \gt 0\)은 \(t \lt \sqrt{1 - \abs{y}^2}\)과 같다. 그러므로 \(\psi_i^\pm\)는 \(V_i^\pm\)에서</p>
+        <div class="equation" id="eq-11-5-3">
+        \[ \begin{aligned} D = \big\{(y, t) \in \mathbb{H}^n :\ & \abs{y} \lt 1, \\ & t \lt \sqrt{1 - \abs{y}^2}\big\} \end{aligned} \tag{11.5.3} \]
+        </div>
+        <p>위로 가는 전단사이고 역사상이 (11.5.2)의 둘째 식이다. \(D\)는 \(\mathbb{H}^n\)과 \(\R^n\)의 열린집합 \(\{\abs{y} \lt 1,\ t \lt \sqrt{1 - \abs{y}^2}\}\)의 교집합이므로 \(\mathbb{H}^n\)에서 열려 있고 \(\partial\mathbb{H}^n\)과 만난다.
+        두 사상은 성분이 연속이므로 \(\psi_i^\pm\)는 위상동형사상, 즉 경계 차트다. \(\abs{x} = 1\)인 점은 어떤 성분이 \(0\)이 아니므로 어떤 \(V_i^\pm\)에 들어 있고, \(\abs{x} \lt 1\)인 점은 \(B^n\)에 들어 있다. 따라서 이 \(2n + 1\)개의 차트가 \(M\)을 덮는다.
+        \(n = 1\)이면 \(y\)는 없고 \(\psi_1^+(x) = 1 - x\), \(\psi_1^-(x) = 1 + x\)이다(<a href="#i-11-5-2">예 11.5.2</a>(b)의 끝점 차트와 같은 꼴).</p>
+        <p><em>매끄러운 호환.</em> (11.5.2)의 두 식은 각각 \(\R^n\)의 열린집합 \(\{x : \abs{y} \lt 1\}\)과 \(\{(y, t) : \abs{y} \lt 1\}\)에서 정의된 매끄러운 사상을 제한한 것이다(\(\sqrt{\ }\)는 \((0, \infty)\)에서 매끄럽다).
+        그러므로 이 차트들 사이의 좌표변환은 모두 열린집합에서 정의된 매끄러운 사상들의 합성을 제한한 것이고, 그 합성 자체가 매끄러운 확장이 된다(<a href="#i-11-5-8">명제 11.5.8</a>(b)). 예를 들어 \(n = 2\)에서
+        \(\psi_1^+ \circ (\psi_2^+)^{-1}(w^1, w^2) = \big(\sqrt{1 - (w^1)^2} - w^2,\ \sqrt{1 - (x^2)^2} - w^1\big)\), \(x^2 = \sqrt{1 - (w^1)^2} - w^2\)이다(정의역은 \(w^1 \gt 0\)인 부분).
+        따라서 \(\overline{B}{}^n\)은 경계를 갖는 매끄러운 \(n\)-다양체다.</p>
+        <p><em>경계.</em> \(\abs{x} = 1\)인 점은 경계 차트가 \(t = 0\), 즉 \(\partial\mathbb{H}^n\)으로 보내므로 경계점이고, \(\abs{x} \lt 1\)인 점은 내부 차트 \(B^n\)에 들어 있으므로 내부점이다. <a href="#i-11-5-11">정리 11.5.11</a>에 의해</p>
+        <div class="equation" id="eq-11-5-4">
+        \[ \operatorname{Int}\overline{B}{}^n = B^n, \qquad \partial\overline{B}{}^n = S^{n-1} \tag{11.5.4} \]
+        </div>
+        <p>이다. <a href="#i-11-5-12">명제 11.5.12</a>(b)의 경계 차트는 \(\hat\psi_i^\pm(x) = y\)(\(i\)번째 성분 빼기)이고, 이것은 \(S^{n-1}\)의 반구 차트 \(\varphi_i^\pm\)(<a href="11-3-spheres-stereographic.html#i-11-3-4">예 11.3.4</a>)와 같다.
+        따라서 \(n \ge 2\)이면 \(\partial\overline{B}{}^n\)의 매끄러운 구조는 \(S^{n-1}\)의 표준 구조다(<a href="11-3-spheres-stereographic.html#i-11-3-6">정리 11.3.6</a>).</p>
+        <p class="verified">검증: <code>verify/v-11-5-manifolds-with-boundary.py</code> (\(n = 1, 2, 3\))</p>
+      </div>
+
+      <div class="thm remark" id="i-11-5-14">
+        <p><span class="thm-head">비고 11.5.14</span> <span class="thm-name">(경계점에서의 전미분)</span>.
+        \(U\)가 \(\mathbb{H}^n\)의 열린집합이고 \(F\colon U \to \R^k\)가 매끄러우며 \(b \in U \cap \partial\mathbb{H}^n\)이라 하자. \(b\) 근처의 매끄러운 확장 \(\tilde F\)는 여러 가지일 수 있지만 \(D\tilde F(b)\)는 확장에 무관하다.
+        \(W\)에서 \(\tilde F\)의 편미분은 연속이고, 점 \(b + se_n\) (\(s \gt 0\) 작음)은 \(U \cap \operatorname{Int}\mathbb{H}^n\)에 있어서 그 근처에서 \(\tilde F = F\)이므로 \(\partial_j\tilde F(b) = \lim_{s \to 0^+}\partial_jF(b + se_n)\)이기 때문이다.
+        (\(U\)는 \(b\)의 \(\mathbb{H}^n\) 속 근방이므로 작은 \(s\)에 대해 \(b + se_n\)의 근방이 \(U \cap \operatorname{Int}\mathbb{H}^n\) 안에 있다.) 그래서 경계점에서도 \(DF(b)\)라 쓸 수 있다. 이 사실은 <a href="../13-tangent-spaces/index.html">13장</a>에서 경계점의 접공간을 다룰 때 쓰인다.</p>
+        <p class="verified">검증: <code>verify/v-11-5-manifolds-with-boundary.py</code> (확장이 다른 두 함수의 예)</p>
+      </div>
+
+      <aside class="box warning">
+        <p class="box-title">흔한 오해: 다양체의 경계와 위상적 경계는 다르다</p>
+        <p><a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절 준비</a>와 <a href="../02-calculus-rn/2-6-change-of-variables.html">2.6절</a>은 \(\R^n\)의 부분집합 \(D\)의 위상적 경계(모든 근방이 \(D\)의 점과 \(D\) 밖의 점을 모두 포함하는 점 전체, 위상공간에서는 <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-27">명제 3.1.27</a>)를 \(\partial D\)로 썼다. 이것은 \(D\)가 <em>어느 공간 안에 놓여 있는지</em>에 따라 정해진다.
+        다양체의 경계 \(\partial M\)은 \(M\) 자신의 차트로 정해진다. 둘은 다를 수 있다.</p>
+        <ul>
+          <li>열린 공 \(B^n\)은 경계가 없는 다양체이므로 다양체의 경계는 \(\varnothing\)이다. 그러나 \(\R^n\)의 부분집합으로서의 위상적 경계는 \(S^{n-1}\)이다.</li>
+          <li>\(\mathbb{H}^n\)을 그 자체로 공간으로 보면, 자기 자신 안에서의 위상적 경계는 \(\varnothing\)이다(전체 공간은 열려 있고 닫혀 있다). 그러나 다양체의 경계는 \(\partial\mathbb{H}^n \ne \varnothing\)이다.</li>
+          <li>\(\overline{B}{}^n \subseteq \R^n\)에서는 두 경계가 모두 \(S^{n-1}\)이다(식 <a href="#eq-11-5-4">(11.5.4)</a>). 이런 “좋은 영역”에서 둘이 일치한다는 것은 <a href="../18-integration-stokes/index.html">18장</a>에서 쓰인다.</li>
+        </ul>
+        <p>\(\operatorname{Int} M\)과 부분집합의 위상적 내부도 같은 이유로 구별한다.</p>
+      </aside>
+
+      <aside class="box warning">
+        <p class="box-title">주의: 모서리</p>
+        <p>경계를 갖는 두 다양체의 곱은 일반적으로 이 절의 뜻의 다양체가 아니다. 예를 들어 \([0, 1] \times [0, 1]\)의 꼭짓점 \((0, 0)\)에서 곱 차트 \(\psi_0 \times \psi_0\)의 상은 \([0, \varepsilon)^2\) 꼴인데, 이것은 \(\mathbb{H}^2\)의 열린집합이 아니다.
+        (위상적으로는 정사각형이 닫힌 원판과 위상동형이므로 경계를 갖는 위상다양체이지만, 곱 차트로는 그것을 볼 수 없다.) 모서리를 다루는 이론은 이 study set에서 다루지 않는다.
+        반면 경계가 없는 다양체와 경계를 갖는 다양체의 곱, 예를 들어 \(M \times [0, 1]\)은 경계를 갖는 다양체다(<a href="#ex-11-5-6">연습 11.5.6</a>).</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교: 모형 반공간</p>
+        <p>이 study set은 Lee를 따라 \(\mathbb{H}^n = \{x^n \ge 0\}\)을 쓴다 <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 1장]</a>. 일부 교재는 \(\{x^1 \le 0\}\)이나 \(\{x^1 \ge 0\}\)을 모형으로 쓴다.
+        어느 반공간을 고르느냐는 <a href="../18-integration-stokes/index.html">18장</a>에서 경계에 방향을 주는 규약과 맞물리므로, 다른 교재의 스토크스 정리를 읽을 때 확인해야 한다. 기호 \(\mathbb{H}^n\)은 상반공간 전용이고, 쌍곡공간의 상반공간 모형은 \(\mathbb{U}^n\)으로 쓴다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 경계와 스토크스 정리</p>
+        <p><a href="../18-integration-stokes/index.html">18장</a>의 스토크스 정리 \(\int_M d\omega = \int_{\partial M}\omega\)는 경계를 갖는 매끄러운 다양체 \(M\)과 그 경계 \(\partial M\)(<a href="#i-11-5-12">명제 11.5.12</a>)을 잇는다.
+        \(M = [a, b]\)이면 \(\partial M = \{a, b\}\)이고 미적분학의 기본정리가 된다. 이때 \(\partial M\)에는 “바깥쪽”을 기준으로 방향을 주는데, 그 정의에 이 절의 경계 차트가 쓰인다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>상반공간 \(\mathbb{H}^n = \{x^n \ge 0\}\)을 모형으로 하면 \([0, 1]\), 닫힌 공처럼 가장자리가 있는 공간을 다룰 수 있다. 차트는 \(\R^n\)의 열린집합으로 가는 내부 차트와 \(\partial\mathbb{H}^n\)과 만나는 경계 차트로 나뉜다.</li>
+        <li>내부점은 내부 차트에 들어가는 점, 경계점은 경계 차트가 \(\partial\mathbb{H}^n\)으로 보내는 점이다. 모든 점은 둘 중 하나다.</li>
+        <li>두 종류가 겹치지 않는다는 것은 위상적 경우 영역 불변성이 필요하므로 진술만 했다(<a href="#i-11-5-6">정리 11.5.6</a>). 매끄러운 경우는 역함수 정리로 완전히 증명했다(<a href="#i-11-5-11">정리 11.5.11</a>).</li>
+        <li>경계점에서의 매끄러움은 “열린집합으로 매끄럽게 확장된다”로 정의하고, 이 정의는 열린집합에서는 원래 정의와 같다. \(\operatorname{Int} M\)은 \(n\)차원, \(\partial M\)은 \((n-1)\)차원 매끄러운 다양체다.</li>
+        <li>\(\partial\overline{B}{}^n = S^{n-1}\)이고 유도된 차트는 반구 차트다. 다양체의 경계는 부분집합의 위상적 경계와 다른 개념이다.</li>
+      </ul>
+      <p class="next">다음 절(11.6)에서는 Part I의 정칙곡면으로 돌아가, 매개화의 역사상이 매끄러운 차트이고 정칙곡면이 2차원 매끄러운 다양체임을 증명한다. 이로써 둘러싼 공간 안의 곡면과 둘러싼 공간 없는 다양체가 하나의 이야기로 이어진다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-11-5-1" data-level="1">
+        <p><span class="thm-head">연습 11.5.1</span> <span class="level">★</span>
+        <a href="#i-11-5-2">예 11.5.2</a>(b)의 세 차트가 \([0, 1]\)의 매끄러운 아틀라스임을 보이고, \(\operatorname{Int}[0, 1]\)과 \(\partial[0, 1]\)을 구하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\psi_0\)과 \(\psi_1\)이 겹치는 곳은 \((0, 1)\)이고 \(\psi_0((0, 1)) = (0, 1)\)이다. \(\psi_1 \circ \psi_0^{-1}(s) = 1 - s\)이고 역도 \(s \mapsto 1 - s\)이므로 매끄럽다.
+          내부 차트 \(\id\)와의 좌표변환은 \((0, 1)\) 위의 \(\id\) 또는 \(s \mapsto 1 - s\)이다. 따라서 매끄러운 아틀라스다. \((0, 1)\)의 점은 내부 차트에 들어 있으므로 내부점이고,
+          \(0\)과 \(1\)은 각각 \(\psi_0\), \(\psi_1\)이 \(\partial\mathbb{H}^1 = \{0\}\)으로 보내므로 경계점이다. <a href="#i-11-5-11">정리 11.5.11</a>에 의해 \(\operatorname{Int}[0, 1] = (0, 1)\), \(\partial[0, 1] = \{0, 1\}\)이다.</p>
+          <p class="verified">검증: <code>verify/v-11-5-manifolds-with-boundary.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-11-5-2" data-level="1">
+        <p><span class="thm-head">연습 11.5.2</span> <span class="level">★</span>
+        \(\mathbb{H}^n\)을 차트 \((\mathbb{H}^n, \id)\)로 경계를 갖는 매끄러운 다양체로 볼 때 \(\operatorname{Int}\mathbb{H}^n\)과 \(\partial\mathbb{H}^n\)(다양체의 뜻)을 구하고, 식 <a href="#eq-11-5-1">(11.5.1)</a> 아래에서 정한 기호와 일치함을 확인하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\id\)는 \(x^n = 0\)인 점을 \(\partial\mathbb{H}^n\)으로 보내는 경계 차트이므로 그런 점은 경계점이다. \(x^n \gt 0\)인 점은 \(\id\)가 \(\operatorname{Int}\mathbb{H}^n\)으로 보내므로 <a href="#i-11-5-5">보조정리 11.5.5</a>에 의해 내부점이다.
+          <a href="#i-11-5-11">정리 11.5.11</a>에 의해 두 집합은 서로소이므로 다양체의 뜻으로 \(\partial\mathbb{H}^n = \{x^n = 0\}\), \(\operatorname{Int}\mathbb{H}^n = \{x^n \gt 0\}\)이고, 앞에서 정한 기호와 같다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-11-5-3" data-level="1">
+        <p><span class="thm-head">연습 11.5.3</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. (a) 경계를 갖는 매끄러운 다양체의 경계는 닫힌집합이다. (b) \(\R^n\)의 부분집합이 경계를 갖는 다양체이면 다양체의 경계는 위상적 경계와 같다.
+        (c) 모든 매끄러운 다양체는 경계가 공집합인 경계를 갖는 매끄러운 다양체다. (d) \(\partial(\partial M) = \varnothing\)이다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 참. <a href="#i-11-5-12">명제 11.5.12</a>(b).
+          (b) 거짓. 열린 공 \(B^n\)은 다양체의 경계가 \(\varnothing\)이지만 위상적 경계는 \(S^{n-1}\)이다(흔한 오해 상자).
+          (c) 참. 차트가 모두 내부 차트이므로 경계점이 없다(\(\R^n\)의 열린집합으로 가는 차트는 <a href="#i-11-5-1">정의 11.5.1</a>의 차트이고, <a href="#i-11-5-11">정리 11.5.11</a>에 의해 내부점은 경계점이 아니다).
+          (d) 참. <a href="#i-11-5-12">명제 11.5.12</a>(b)에 의해 \(\partial M\)은 경계가 없는 매끄러운 다양체다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-11-5-4" data-level="1">
+        <p><span class="thm-head">연습 11.5.4</span> <span class="level">★</span>
+        \(F\colon \mathbb{H}^1 = [0, \infty) \to \R\), \(F(x) = \sqrt{x}\)가 <a href="#i-11-5-7">정의 11.5.7</a>의 뜻으로 매끄럽지 않음을 보여라. \(G(x) = e^x\)는 매끄러운가?</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(F\)가 매끄럽다면 \(0\) 근처의 매끄러운 확장 \(\tilde F\colon (-\delta, \delta) \to \R\)가 있고 \(\tilde F'(0)\)이 존재한다. 그러면 오른쪽 차분몫 \((\tilde F(h) - \tilde F(0))/h = \sqrt{h}/h = h^{-1/2}\)이 \(h \to 0^+\)일 때 수렴해야 하는데 발산한다.
+          따라서 \(F\)는 매끄럽지 않다. \(G(x) = e^x\)는 \(\R\) 전체에서 매끄러운 \(e^x\) 자신이 확장이므로 매끄럽다. \(F\)는 \((0, \infty)\)에서는 매끄럽다는 데 주의하자. 문제는 경계점뿐이다.</p>
+          <p class="verified">검증: <code>verify/v-11-5-manifolds-with-boundary.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-11-5-5" data-level="2">
+        <p><span class="thm-head">연습 11.5.5</span> <span class="level">★★</span>
+        \(n = 1\)일 때 <a href="#i-11-5-6">정리 11.5.6</a>을 증명하여라. 즉 경계를 갖는 위상 1-다양체에서 내부 차트 \((U, \varphi)\)와 경계 차트 \((V, \psi)\)가 모두 \(p\)를 덮고 \(\psi(p) = 0\)인 일은 없음을 보여라.</p>
+        <details class="hint"><summary>힌트</summary><p>\(p\)의 작은 연결 근방에서 \(p\)를 빼면 \(\varphi\)로 보면 두 조각, \(\psi\)로 보면 한 조각이다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>그런 두 차트가 있다고 하자. \(\psi(U \cap V)\)는 \(0\)을 포함하는 \(\mathbb{H}^1\)의 열린집합이므로 어떤 \([0, \varepsilon)\)을 포함한다. \(J = \psi^{-1}([0, \varepsilon))\)은 \(p\)를 포함하는 \(M\)의 열린집합이고 \(J \subseteq U\)이며,
+          \(\psi\)에 의해 \([0, \varepsilon)\)과 위상동형이다. 따라서 \(J\)는 연결이고 \(J \setminus \{p\} \cong (0, \varepsilon)\)도 연결이다(여기서 \(\cong\)는 위상동형).
+          한편 \(\varphi(J)\)는 \(\R\)의 열린집합이고(\(J\)가 \(U\)에서 열려 있고 \(\varphi(U)\)가 \(\R\)에서 열려 있음) 연결이므로 \(c = \varphi(p)\)를 포함하는 열린구간 \(I\)다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-4">정리 3.7.4</a>).
+          \(\varphi\)는 \(J \setminus \{p\}\)를 \(I \setminus \{c\}\) 위로 보내는 위상동형사상인데, 앞의 것은 연결이고 뒤의 것은 두 구간으로 나뉘어 연결이 아니므로 모순이다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-5">명제 3.7.5</a>).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-11-5-6" data-level="2">
+        <p><span class="thm-head">연습 11.5.6</span> <span class="level">★★</span>
+        \(M\)이 (경계가 없는) 매끄러운 \(m\)-다양체이면 \(M \times [0, 1]\)이 경계를 갖는 매끄러운 \((m+1)\)-다양체이고 \(\partial(M \times [0, 1]) = M \times \{0, 1\}\)임을 보여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(M \times [0, 1]\)은 하우스도르프이고 제2가산이다(<a href="../03-topology-basics/3-5-hausdorff-second-countable.html#i-3-5-5">명제 3.5.5</a>, <a href="../03-topology-basics/3-5-hausdorff-second-countable.html#i-3-5-10">명제 3.5.10</a>).
+          \(M\)의 매끄러운 차트 \((U, \varphi)\)와 \([0, 1]\)의 차트 \(\chi \in \{\id|_{(0, 1)}, \psi_0, \psi_1\}\)(<a href="#i-11-5-2">예 11.5.2</a>(b))로 곱 차트 \(\varphi \times \chi\colon U \times I_\chi \to \varphi(U) \times \chi(I_\chi)\)를 만든다.
+          \(\chi = \psi_0, \psi_1\)이면 \(\varphi(U) \times [0, 1)\)은 \(\R^{m+1}\)의 열린집합 \(\varphi(U) \times (-1, 1)\)과 \(\mathbb{H}^{m+1}\)의 교집합이므로 \(\mathbb{H}^{m+1}\)에서 열려 있다(마지막 좌표가 \([0, 1]\)의 좌표). 곱 차트가 위상동형사상임은 <a href="11-1-topological-manifolds.html#i-11-1-5">명제 11.1.5</a>(b)의 증명과 같다.
+          좌표변환은 \((\varphi' \circ \varphi^{-1}) \times (\chi' \circ \chi^{-1})\)이고, 각 성분이 열린집합으로 매끄럽게 확장되므로(\(\chi' \circ \chi^{-1}\)은 \(s\) 또는 \(1 - s\)) 곱도 매끄럽게 확장된다. 따라서 매끄러운 아틀라스다.
+          \(\chi\)가 \(\partial\mathbb{H}^1\)으로 보내는 점은 \(0\)과 \(1\)이므로, 곱 차트가 \(\partial\mathbb{H}^{m+1}\)으로 보내는 점은 \(M \times \{0, 1\}\)의 점이고 나머지는 내부 차트에 들어 있다. <a href="#i-11-5-11">정리 11.5.11</a>에 의해 \(\partial(M \times [0, 1]) = M \times \{0, 1\}\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-11-5-7" data-level="2">
+        <p><span class="thm-head">연습 11.5.7</span> <span class="level">★★</span>
+        닫힌 윗반구 \(\overline{S}{}^n_+ = \{x \in S^n : x^{n+1} \ge 0\}\)이 경계를 갖는 매끄러운 \(n\)-다양체이고 그 경계가 적도 \(\{x \in S^n : x^{n+1} = 0\}\)임을 보여라.</p>
+        <details class="hint"><summary>힌트</summary><p>사영 \(p(x) = (x^1, \dots, x^n)\)이 \(\overline{S}{}^n_+\)를 \(\overline{B}{}^n\) 위로 보내는 위상동형사상임을 보이고, <a href="#i-11-5-13">예 11.5.13</a>의 차트와 합성한다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(p\colon \overline{S}{}^n_+ \to \overline{B}{}^n\)은 연속이고(선형사상의 제한), \(\abs{x'}^2 = 1 - (x^{n+1})^2 \le 1\)이므로 값이 \(\overline{B}{}^n\)에 있다. 역사상 \(w \mapsto (w, \sqrt{1 - \abs{w}^2})\)는 \(\abs{w} \le 1\)에서 연속이고 값이 \(\overline{S}{}^n_+\)에 있으며,
+          \(x^{n+1} \ge 0\)이므로 \(x^{n+1} = \sqrt{1 - \abs{x'}^2}\)이어서 두 사상은 서로 역이다. 따라서 \(p\)는 위상동형사상이다. \(\overline{S}{}^n_+\)는 \(\R^{n+1}\)의 부분공간이므로 하우스도르프이고 제2가산이다.
+          <a href="#i-11-5-13">예 11.5.13</a>의 차트 \((V, \theta)\)마다 \((p^{-1}(V), \theta \circ p)\)는 \(\overline{S}{}^n_+\)의 차트이고, 좌표변환은 \((\theta' \circ p) \circ (\theta \circ p)^{-1} = \theta' \circ \theta^{-1}\)으로 <a href="#i-11-5-13">예 11.5.13</a>의 것과 같으므로 매끄럽다.
+          경계점은 \(\theta \circ p\)가 \(\partial\mathbb{H}^n\)으로 보내는 점, 즉 \(\abs{p(x)} = 1\)인 점이고, 이것은 \(x^{n+1} = 0\)과 같다. 따라서 경계는 적도 \(S^{n-1} \times \{0\}\)이다.</p>
+          <p class="verified">검증: <code>verify/v-11-5-manifolds-with-boundary.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="11-4-more-examples.html">← 11.4 여러 가지 예</a>
+    <a rel="next" href="index.html">11. 매끄러운 다양체 (장 개요) →</a>
+  </nav>
+</body>
+</html>

@@ -1,7 +1,7 @@
 """4.5절 접촉원과 곡률중심: 본문과 연습문제의 계산 검증 (GUIDELINES.md §13).
 
 구면의 위도원·대원은 dgsym.EXAMPLES["sphere"]의 매개화에서 가져온다. 부호곡률은 정의(명제 4.4.5의 공식)로
-계산하고, 공간 속 평면곡선의 곡률 |γ''| (명제 4.5.9)는 dgsym.curvature_torsion의 κ와 교차검증한다.
+계산하고, 공간 속 평면곡선의 곡률 |γ''| (명제 4.5.10)는 dgsym.curvature_torsion의 κ와 교차검증한다.
 
 실행: 프로젝트 루트에서 ``PYTHONPATH=tools python3 chapters/04-curves/verify/v-4-5-osculating-circle.py``
 """
@@ -52,7 +52,7 @@ sym_equal("그림 4.5.1: 곡률반지름 (5/4)^{3/2}", 1 / kappa_s(par, t).subs(
 A_, B_ = sp.symbols("A B", positive=True)
 ell = sp.Matrix([A_ * sp.cos(t), B_ * sp.sin(t)])
 c_ell = center(ell, t)
-sym_equal("예 4.5.12: 타원의 축폐선 ((A²−B²)/A cos³t, −(A²−B²)/B sin³t)", c_ell,
+sym_equal("예 4.5.9: 타원의 축폐선 ((A²−B²)/A cos³t, −(A²−B²)/B sin³t)", c_ell,
           sp.Matrix([(A_ ** 2 - B_ ** 2) / A_ * sp.cos(t) ** 3, -(A_ ** 2 - B_ ** 2) / B_ * sp.sin(t) ** 3]),
           {A_: (1.5, 3), B_: (0.5, 1.4)})
 sym_equal("예 4.5.2(c)/연습 4.5.2: (A,0)에서 반지름 B²/A", 1 / kappa_s(ell, t).subs(t, 0), B_ ** 2 / A_)
@@ -124,7 +124,7 @@ check("명제 4.5.7: 비대칭인 세 점에서도 중심이 곡률중심으로 
 tv = sp.Matrix([sp.cos(sp.Symbol("a")), sp.sin(sp.Symbol("a"))])
 check("명제 4.5.7: det[t; Jt] = 1", sp.simplify(sp.Matrix.hstack(tv, Jm * tv).T.det() - 1) == 0)
 
-# 명제 4.5.9: 평면 안의 공간곡선 — 무작위 정규직교기저로 독립성 확인 (수치) ---------------------------
+# 명제 4.5.10: 평면 안의 공간곡선 — 무작위 정규직교기저로 독립성 확인 (수치) ---------------------------
 rng = np.random.default_rng(3)
 Q, _ = np.linalg.qr(rng.normal(size=(3, 3)))
 a1, a2 = Q[:, 0], Q[:, 1]
@@ -147,9 +147,9 @@ for tv_ in tvals:
     acc = (D2 - (D2 @ T) * T) / (D1 @ D1)
     ok &= abs(np.linalg.norm(acc) - abs(k)) < 1e-12
     ok &= np.allclose(G + acc / (acc @ acc), p0 + c_hat[0] * a1 + c_hat[1] * a2)
-check("명제 4.5.9: |γ''| = |κ_s|, c = γ + γ''/|γ''|² (무작위 평면, 타원)", ok)
+check("명제 4.5.10: |γ''| = |κ_s|, c = γ + γ''/|γ''|² (무작위 평면, 타원)", ok)
 
-# 예 4.5.10, 4.5.11: 구면의 대원과 위도원 (EXAMPLES["sphere"]) --------------------------------------
+# 예 4.5.11, 4.5.12: 구면의 대원과 위도원 (EXAMPLES["sphere"]) --------------------------------------
 e = EX["sphere"]
 tht, phi = e["coords"]
 (rs,) = e["params"]
@@ -161,17 +161,17 @@ dom = {th0: (0.1, 3.0), rs: (0.5, 2), ph0: (0, 6)}
 lat = X.subs(tht, th0)
 rho0 = rs * sp.sin(th0)
 lat_s = lat.subs(phi, s / rho0)
-sym_equal("예 4.5.11: 위도원의 호의 길이 매개화는 단위속력", sp.simplify(lat_s.diff(s).dot(lat_s.diff(s))), 1, dom)
+sym_equal("예 4.5.12: 위도원의 호의 길이 매개화는 단위속력", sp.simplify(lat_s.diff(s).dot(lat_s.diff(s))), 1, dom)
 acc = lat_s.diff(s, 2)
-sym_equal("예 4.5.11: |γ''|² = 1/(r sin θ0)²", sp.simplify(acc.dot(acc)), 1 / (rs * sp.sin(th0)) ** 2, dom)
+sym_equal("예 4.5.12: |γ''|² = 1/(r sin θ0)²", sp.simplify(acc.dot(acc)), 1 / (rs * sp.sin(th0)) ** 2, dom)
 c_lat = sp.simplify(lat_s + acc / acc.dot(acc))
-sym_equal("예 4.5.11: 곡률중심 (0, 0, r cos θ0)", c_lat, sp.Matrix([0, 0, rs * sp.cos(th0)]), dom)
+sym_equal("예 4.5.12: 곡률중심 (0, 0, r cos θ0)", c_lat, sp.Matrix([0, 0, rs * sp.cos(th0)]), dom)
 k_dg, tau_dg = dgsym.curvature_torsion(lat, phi, (sp.sin(th0),))
-sym_equal("예 4.5.11: dgsym κ (공간곡선 공식) = 1/(r sin θ0)", k_dg, 1 / (rs * sp.sin(th0)), dom)
-sym_equal("예 4.5.11: 위도원은 평면곡선 (dgsym τ = 0)", tau_dg, 0, dom)
+sym_equal("예 4.5.12: dgsym κ (공간곡선 공식) = 1/(r sin θ0)", k_dg, 1 / (rs * sp.sin(th0)), dom)
+sym_equal("예 4.5.12: 위도원은 평면곡선 (dgsym τ = 0)", tau_dg, 0, dom)
 Nout = lat_s / rs                              # 바깥쪽 단위법벡터 N = x/r (§7)
 cosang = sp.simplify((acc / sp.sqrt(acc.dot(acc))).dot(-Nout))
-sym_equal("예 4.5.11: 곡률벡터와 안쪽 법선 사이 각의 cos = sin θ0", cosang, sp.sin(th0), dom)
+sym_equal("예 4.5.12: 곡률벡터와 안쪽 법선 사이 각의 cos = sin θ0", cosang, sp.sin(th0), dom)
 # 앞으로 볼 것 상자: 법선 성분 1/r, 접선 성분의 크기 |cot θ0|/r, 길이 × 접선 성분 = 2π cos θ0
 normal_comp = sp.simplify(acc.dot(-Nout))
 sym_equal("상자(8·9장 예고): 법선 성분 = 1/r", normal_comp, 1 / rs, dom)
@@ -184,11 +184,11 @@ sym_equal("상자(10장 예고): 2π cos θ0 + (1/r²)·2πr²(1 − cos θ0) = 
 # 대원: 경선 φ = φ0, 호의 길이 θ = s/r
 mer_s = X.subs(phi, ph0).subs(tht, s / rs)
 accm = mer_s.diff(s, 2)
-sym_equal("예 4.5.10: 경선의 |γ''| = 1/r", sp.simplify(accm.dot(accm)), 1 / rs ** 2, {rs: (0.5, 2), s: (0.1, 3), ph0: (0, 6)})
-sym_equal("예 4.5.10: 대원의 곡률중심 = O", sp.simplify(mer_s + accm / accm.dot(accm)), sp.zeros(3, 1), {rs: (0.5, 2), s: (0.1, 3), ph0: (0, 6)})
+sym_equal("예 4.5.11: 경선의 |γ''| = 1/r", sp.simplify(accm.dot(accm)), 1 / rs ** 2, {rs: (0.5, 2), s: (0.1, 3), ph0: (0, 6)})
+sym_equal("예 4.5.11: 대원의 곡률중심 = O", sp.simplify(mer_s + accm / accm.dot(accm)), sp.zeros(3, 1), {rs: (0.5, 2), s: (0.1, 3), ph0: (0, 6)})
 k_mer, _ = dgsym.curvature_torsion(X.subs(phi, ph0), tht, (sp.sin(tht),))
-sym_equal("예 4.5.10: dgsym κ(경선) = 1/r (§7의 대원)", k_mer, 1 / rs, {rs: (0.5, 2), tht: (0.1, 3), ph0: (0, 6)})
-check("예 4.5.11: θ0 = π/2(적도)일 때만 κ = 1/r", sp.solve(sp.Eq(1 / (rs * sp.sin(th0)), 1 / rs), th0) == [sp.pi / 2])
+sym_equal("예 4.5.11: dgsym κ(경선) = 1/r (§7의 대원)", k_mer, 1 / rs, {rs: (0.5, 2), tht: (0.1, 3), ph0: (0, 6)})
+check("예 4.5.12: θ0 = π/2(적도)일 때만 κ = 1/r", sp.solve(sp.Eq(1 / (rs * sp.sin(th0)), 1 / rs), th0) == [sp.pi / 2])
 
 # 연습 4.5.1: y = x² ------------------------------------------------------------------
 sym_equal("연습 4.5.1: y = x²의 축폐선 (−4x³, 3x² + 1/2)", center(sp.Matrix([t, t ** 2]), t), sp.Matrix([-4 * t ** 3, 3 * t ** 2 + sp.Rational(1, 2)]))

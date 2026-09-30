@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>12.4 컴팩트 소진과 단위분할 — 미분기하 스터디</title>
+  <meta name="dg-id" content="12.4">
+  <meta name="dg-status" content="draft">
+  <meta name="dg-prereq" content="12.3, 12.1, 11.1, 11.5, 3.1, 3.5, 3.6">
+  <meta name="dg-refs" content="Lee-ISM Ch. 2">
+  <meta name="dg-updated" content="2026-10-01">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">12. 매끄러운 사상과 단위분할</a> ›
+    <span>12.4 컴팩트 소진과 단위분할</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>12.4 컴팩트 소진과 단위분할</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 2장]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>국소 유한한 모임과 단위분할을 정의하고, 국소 유한성이 왜 필요한지 예로 설명할 수 있다.</li>
+        <li>하우스도르프·제2가산 조건과 국소 컴팩트성에서 컴팩트 소진을 만들 수 있다.</li>
+        <li>매끄러운 다양체의 모든 열린덮개에 종속된 매끄러운 단위분할이 있음을 증명하고, 증명에서 위상다양체의 세 조건이 각각 어디에 쓰이는지 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="12-3-bump-functions.html#i-12-3-2">정의 12.3.2 (받침)</a>, <a href="12-3-bump-functions.html#i-12-3-4">보조정리 12.3.4</a>, <a href="12-3-bump-functions.html#i-12-3-6">보조정리 12.3.6 (한 점 둘레의 범프 함수)</a>, <a href="12-3-bump-functions.html#i-12-3-7">명제 12.3.7</a></li>
+        <li><a href="12-1-smooth-maps.html#i-12-1-5">명제 12.1.5</a>, <a href="12-1-smooth-maps.html#i-12-1-7">명제 12.1.7</a>(c) (국소성), <a href="12-1-smooth-maps.html#i-12-1-12">비고 12.1.12</a></li>
+        <li><a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-15">명제 11.1.15</a>(b) (폐포가 컴팩트한 좌표공들의 가산 기저), <a href="../11-smooth-manifolds/11-5-manifolds-with-boundary.html#i-11-5-1">정의 11.5.1</a></li>
+        <li><a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-16">명제 3.1.16</a>, <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-17">명제 3.1.17 (폐포의 점)</a>, <a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>, <a href="../03-topology-basics/3-6-compactness.html#i-3-6-15">명제 3.6.15 (린델뢰프 성질)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="12-3-bump-functions.html">12.3절</a>에서 컴팩트 집합마다 범프 함수를 만들었다. 이것으로 차트 하나 위의 함수를 다양체 전체로 늘일 수 있었다. 그러나 많은 경우 필요한 것은 한 조각이 아니라 <em>여러 조각을 이어 붙이는</em> 일이다. 몇 가지 예를 보자.</p>
+      <ul>
+        <li>정칙곡면 위의 매끄러운 함수는 점마다 근처에서 \(\R^3\)의 매끄러운 함수의 제한이다(<a href="../06-regular-surfaces/6-3-smooth-functions.html#ex-6-3-7">연습 6.3.7</a>). 이 국소적인 확장들을 이어 붙여 \(\R^3\) 전체의 함수 하나로 만들 수 있는가?</li>
+        <li><a href="../18-integration-stokes/index.html">18장</a>에서는 다양체 위의 적분을 정의한다. 차트 하나 안에서는 \(\R^n\)의 적분으로 정의하면 되지만, 여러 차트에 걸친 대상은 조각내서 적분한 뒤 더해야 한다.</li>
+        <li><a href="../21-riemannian-metrics/index.html">21장</a>에서는 모든 다양체에 리만 계량이 있음을 보인다. 차트마다 유클리드 계량을 옮겨 오고, 이들을 섞어야 한다.</li>
+      </ul>
+      <p>세 경우 모두 해법은 같다. 열린덮개 \(\{U_\alpha\}\)에 맞추어, 받침이 \(U_\alpha\)에 있고 합이 \(1\)인 함수들 \(\psi_\alpha\)를 만든다. 그러면 \(U_\alpha\)마다 만든 대상 \(f_\alpha\)를 \(\sum_\alpha \psi_\alpha f_\alpha\)로 섞을 수 있다.
+      이런 함수들의 모임이 단위분할이다. 덮개가 무한하면 무한합을 다루어야 하므로, 먼저 무한합이 뜻을 갖는 조건을 정한다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 합이 1이 되도록 나누어 맡기기</p>
+        <p><a href="#fig-12-4-1">그림 12.4.1</a>은 \(\R\)을 구간 \(U_k = (k - 1, k + 1)\)로 덮고, 구간마다 범프 함수를 하나씩 두어 합이 \(1\)이 되게 나눈 것이다. 각 점에서 \(1\)이라는 “몫”을 가까운 한두 개의 함수가 나누어 가진다.
+        어느 점 근처에서도 \(0\)이 아닌 함수는 몇 개뿐이므로, 무한히 많은 함수를 더해도 그 근처에서는 유한합이다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-12-4-1">
+        <img src="figures/fig-12-4-1-partition-line.svg" alt="위쪽 그래프에 봉우리가 평평한 곡선 다섯 개 ψ₋₂, …, ψ₂가 정수 −2, …, 2를 중심으로 색을 번갈아 그려져 있고, 이웃한 두 곡선이 겹치는 곳에서 하나는 올라가고 하나는 내려간다. 높이 1에 검은 점선이 있다. 아래쪽에는 각 k에 대해 가는 선으로 구간 (k−1, k+1)이, 굵은 선으로 받침 [k−3/4, k+3/4]가 그려져 있다.">
+        <figcaption><span class="fig-head">그림 12.4.1.</span>
+        \(\R\)의 열린덮개 \(U_k = (k - 1, k + 1)\) (\(k \in \Z\))에 종속된 단위분할 \(\psi_k\) (<a href="#i-12-4-6">예 12.4.6</a>(b), \(-2.6 \le t \le 2.6\)). 위: \(\psi_{-2}, \dots, \psi_2\)와 합 \(\sum_k \psi_k = 1\)(점선).
+        아래: \(U_k\)(가는 선, 끝점은 빈 원)와 받침 \(\supp\psi_k = [k - 3/4, k + 3/4]\)(굵은 선).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-locally-finite">
+      <h2>국소 유한성</h2>
+
+      <div class="thm definition" id="i-12-4-1">
+        <p><span class="thm-head">정의 12.4.1</span> <span class="thm-name">(국소 유한, locally finite)</span>.
+        \(X\)가 위상공간이고 \(\{A_\alpha\}_{\alpha \in \mathcal{I}}\)가 \(X\)의 부분집합들의 모임이라 하자. 모든 \(p \in X\)가 근방 \(W\)를 가져서 \(W \cap A_\alpha \ne \varnothing\)인 \(\alpha\)가 유한개뿐이면, \(\{A_\alpha\}\)를 <dfn>국소 유한</dfn>(locally finite)하다고 한다.</p>
+      </div>
+
+      <p>예를 들어 \(\R\)에서 \(\{(k - 1, k + 1)\}_{k \in \Z}\)는 국소 유한하다. \(p\)의 근방 \((p - 1, p + 1)\)은 \(\abs{k - p} \lt 2\)인 \(k\), 곧 많아야 네 개의 구간과만 만난다.
+      반면 \(\{(-1/k, 1/k)\}_{k \ge 1}\)은 국소 유한하지 않다. \(0\)의 모든 근방이 모든 구간과 만나기 때문이다. 국소 유한성은 공간에 달려 있다. \(\{(1/(k+1), 1/k)\}_{k \ge 1}\)은 \((0, 1)\)에서는 국소 유한하지만 \(\R\)에서는 \(0\)에서 국소 유한하지 않다(<a href="#ex-12-4-1">연습 12.4.1</a>).</p>
+
+      <div class="thm lemma" id="i-12-4-2">
+        <p><span class="thm-head">보조정리 12.4.2</span> <span class="thm-name">(국소 유한한 모임의 폐포)</span>.
+        \(\{A_\alpha\}\)가 위상공간 \(X\)의 국소 유한한 모임이면 다음이 성립한다.</p>
+        <ul>
+          <li>(a) 폐포들의 모임 \(\{\overline{A_\alpha}\}\)도 국소 유한하다.</li>
+          <li>(b) \(\overline{\bigcup_\alpha A_\alpha} = \bigcup_\alpha \overline{A_\alpha}\)이다. 특히 국소 유한한 닫힌집합들의 합집합은 닫혀 있다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) \(W\)가 열린집합이고 \(W \cap \overline{A_\alpha} \ne \varnothing\)이면 \(W \cap A_\alpha \ne \varnothing\)이다. \(W \cap \overline{A_\alpha}\)의 점 \(q\)에 대해 \(W\)는 \(q\)의 근방이므로 \(A_\alpha\)와 만나기 때문이다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-17">명제 3.1.17</a>).
+        \(p\)의 근방 \(W\)가 유한개의 \(A_\alpha\)와만 만나면 \(W\)를 열린 근방으로 바꾸어도 마찬가지이고, 그 열린 근방은 같은 유한개의 \(\overline{A_\alpha}\)와만 만난다.</p>
+        <p>(b) 각 \(\overline{A_\alpha}\)는 \(\overline{\bigcup_\beta A_\beta}\)에 들어 있으므로 오른쪽이 왼쪽에 들어 있다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-16">명제 3.1.16</a>(d)).
+        거꾸로 \(x \in \overline{\bigcup_\alpha A_\alpha}\)라 하고, \(x\)의 열린 근방 \(W\)가 \(A_{\alpha_1}, \dots, A_{\alpha_m}\)과만 만난다고 하자. \(x\)가 어느 \(\overline{A_{\alpha_i}}\)에도 속하지 않는다면
+        \(W' = W \setminus (\overline{A_{\alpha_1}} \cup \dots \cup \overline{A_{\alpha_m}})\)은 \(x\)의 열린 근방이고(유한개의 닫힌집합의 합집합은 닫혀 있다) 어떤 \(A_\alpha\)와도 만나지 않는다. 이것은 <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-17">명제 3.1.17</a>에 어긋난다.
+        따라서 \(x\)는 어떤 \(\overline{A_{\alpha_i}}\)에 속한다. 마지막 주장은 \(A_\alpha\)가 닫혀 있으면 \(\overline{A_\alpha} = A_\alpha\)이기 때문이다.</p>
+      </div>
+
+      <p>국소 유한성의 쓸모는 무한합을 국소적으로 유한합으로 만든다는 데 있다.</p>
+
+      <div class="thm lemma" id="i-12-4-3">
+        <p><span class="thm-head">보조정리 12.4.3</span> <span class="thm-name">(국소 유한한 합)</span>.
+        \(M\)이 매끄러운 다양체(경계가 있어도 된다)이고 \(\{f_\alpha\}\)가 \(M\) 위의 매끄러운 \(\R^k\)값 함수들이며 \(\{\supp f_\alpha\}\)가 국소 유한하다고 하자. 그러면 각 \(p\)에서 \(f_\alpha(p) \ne 0\)인 \(\alpha\)는 유한개이고, 합 \(f = \sum_\alpha f_\alpha\)는 매끄럽다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        \(p\)의 열린 근방 \(W\)가 \(\supp f_{\alpha_1}, \dots, \supp f_{\alpha_m}\)과만 만난다고 하자. 다른 \(\alpha\)에 대해서는 \(W \cap \supp f_\alpha = \varnothing\)이므로 \(f_\alpha\)가 \(W\)에서 \(0\)이다.
+        따라서 \(W\)의 모든 점에서 합은 유한합이고, \(W\) 위에서 \(f = f_{\alpha_1} + \dots + f_{\alpha_m}\)은 매끄럽다(<a href="12-1-smooth-maps.html#i-12-1-5">명제 12.1.5</a>). \(p\)는 임의였으므로 <a href="12-1-smooth-maps.html#i-12-1-7">명제 12.1.7</a>(c)에 의해 \(f\)는 매끄럽다.</p>
+      </div>
+
+      <div class="thm nonexample" id="i-12-4-4">
+        <p><span class="thm-head">비예 12.4.4</span> <span class="thm-name">(국소 유한하지 않으면 합이 연속조차 아닐 수 있다)</span>.
+        \(k \ge 1\)이면 \(c_k = 1/k\)와 \(s_k = 1/(4k^2)\)에 대해 보조정리 <a href="12-3-bump-functions.html#i-12-3-4">12.3.4</a>의 범프 \(H_k\)(\(n = 1\), \(c = c_k\), \(r_1 = s_k/2\), \(r_2 = s_k\))를 잡자. 받침 \([c_k - s_k, c_k + s_k]\)들은 서로소이다.
+        (\(\abs{c_k - c_{k+1}} = 1/(k(k+1)) \gt s_k + s_{k+1}\).) 따라서 각 점에서 \(0\)이 아닌 \(H_k\)는 많아야 하나이고 \(F = \sum_k H_k\)는 점마다 잘 정의된다.
+        그러나 \(F(1/k) = 1\)이고 \(1/k \to 0\)인데 \(F(0) = 0\)이므로 \(F\)는 \(0\)에서 연속이 아니다. 받침들이 \(0\)에 쌓여서 \(0\)에서 국소 유한하지 않기 때문이다.</p>
+        <p class="verified">검증: <code>verify/v-12-4-partitions-of-unity.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-partition">
+      <h2>단위분할</h2>
+
+      <div class="thm definition" id="i-12-4-5">
+        <p><span class="thm-head">정의 12.4.5</span> <span class="thm-name">(단위분할, partition of unity)</span>.
+        \(M\)이 매끄러운 다양체(경계가 있어도 된다)이고 \(\mathcal{U} = \{U_\alpha\}_{\alpha \in \mathcal{I}}\)가 \(M\)의 열린덮개라 하자. 매끄러운 함수들의 모임 \(\{\psi_\alpha\}_{\alpha \in \mathcal{I}}\) (\(\psi_\alpha\colon M \to \R\))이 다음 네 조건을 만족하면 \(\mathcal{U}\)에 종속된(subordinate to \(\mathcal{U}\)) <dfn>단위분할</dfn>(partition of unity)이라 한다.</p>
+        <ul>
+          <li>(i) 모든 \(\alpha\)에 대하여 \(0 \le \psi_\alpha \le 1\)이다.</li>
+          <li>(ii) 모든 \(\alpha\)에 대하여 \(\supp\psi_\alpha \subseteq U_\alpha\)이다.</li>
+          <li>(iii) 받침들의 모임 \(\{\supp\psi_\alpha\}\)는 국소 유한하다.</li>
+          <li>(iv) 모든 \(p \in M\)에 대하여 \(\sum_\alpha \psi_\alpha(p) = 1\)이다.</li>
+        </ul>
+      </div>
+
+      <p>(iii)에 의해 (iv)의 합은 점마다 유한합이다(<a href="#i-12-4-3">보조정리 12.4.3</a>). 단위분할은 덮개와 <em>같은 첨자</em>를 쓴다는 데 주의하자. 첨자 \(\alpha\)의 함수는 \(\alpha\)번째 열린집합을 맡는다. 어떤 \(\psi_\alpha\)는 \(0\)이어도 된다.</p>
+
+      <div class="thm example" id="i-12-4-6">
+        <p><span class="thm-head">예 12.4.6</span> <span class="thm-name">(단위분할의 예)</span>.
+        (a) 덮개가 \(\{M\}\) 하나이면 \(\psi = 1\)이 단위분할이다. \(\supp 1 = M\)이다.</p>
+        <p>(b) <em>\(\R\)의 구간 덮개.</em> \(U_k = (k - 1, k + 1)\) (\(k \in \Z\))라 하자. <a href="12-3-bump-functions.html#i-12-3-4">보조정리 12.3.4</a>의 범프를 \(n = 1\), \(c = 0\), \(r_1 = 1/4\), \(r_2 = 3/4\)로 잡은 것을 \(b\)라 하면 \(b(s) = h(1/2 + 2\abs{s})\)이고 \(\supp b = [-3/4, 3/4]\)이다.
+        \(g_k(t) = b(t - k)\)로 두면 \(\supp g_k = [k - 3/4, k + 3/4] \subseteq U_k\)이고, 받침들의 모임은 국소 유한하다(\((p - 1/4, p + 1/4)\)는 많아야 세 개의 받침과 만난다).
+        모든 \(t\)에서 가장 가까운 정수 \(k\)는 \(\abs{t - k} \le 1/2 \lt 3/4\)이므로 \(g_k(t) \gt 0\)이다. 따라서 \(G = \sum_k g_k\)는 매끄럽고(<a href="#i-12-4-3">보조정리 12.4.3</a>) 양수이며, \(\psi_k = g_k/G\)가 \(\{U_k\}\)에 종속된 단위분할이다(<a href="#fig-12-4-1">그림 12.4.1</a>).</p>
+        <p>(c) <em>구면의 두 입체사영 영역.</em> \(S^n\)을 \(U_1 = S^n \setminus \{N\}\), \(U_2 = S^n \setminus \{S\}\)로 덮자. \(k(s) = 1 - h(1 + s)\)(<a href="12-3-bump-functions.html#sec-step">12.3절</a>)로 \(\rho(t) = k(t + 1/2)\)라 하면 \(\rho\)는 \(t \le -1/2\)에서 \(0\), \(t \ge 1/2\)에서 \(1\)이다.
+        \(\psi_2(x) = \rho(x^{n+1})\), \(\psi_1 = 1 - \psi_2\)로 두면 둘 다 매끄럽고(높이함수가 매끄러우므로, <a href="12-1-smooth-maps.html#i-12-1-3">예 12.1.3</a>(c)) \(0\)과 \(1\) 사이의 값을 가지며 합이 \(1\)이다.
+        \(\{\psi_2 \ne 0\} = \{x^{n+1} \gt -1/2\}\)이므로 \(\supp\psi_2 = \{x^{n+1} \ge -1/2\} \subseteq U_2\)이고, \(\{\psi_1 \ne 0\} = \{x^{n+1} \lt 1/2\}\)이므로 \(\supp\psi_1 = \{x^{n+1} \le 1/2\} \subseteq U_1\)이다. 따라서 \(\{\psi_1, \psi_2\}\)는 \(\{U_1, U_2\}\)에 종속된 단위분할이다.</p>
+        <p class="verified">검증: <code>verify/v-12-4-partitions-of-unity.py</code></p>
+      </div>
+
+      <p>이 예들은 특별한 식(구간의 규칙성, 전역 좌표 \(x^{n+1}\))에 기대었다. 일반적인 다양체와 일반적인 열린덮개에서는 이런 식이 없다. 다음 두 소절에서 식 없이 단위분할을 만든다.
+      전략은 이렇다. 다양체를 커져 가는 컴팩트 집합들로 차례로 덮고(컴팩트 소진), 컴팩트 집합 하나를 둘러싼 “고리” 모양 조각마다 범프 함수를 유한개 둔다.</p>
+    </section>
+
+    <section id="sec-exhaustion">
+      <h2>컴팩트 소진</h2>
+      <p>먼저 다양체의 모든 점이 “작은 컴팩트 동네”를 가진다는 것을 확인하자. 이 절에서 \(D\)는 <a href="12-3-bump-functions.html#sec-manifolds">12.3절</a>처럼 차트의 모형 공간 \(\R^n\) 또는 \(\mathbb{H}^n\)이다.</p>
+
+      <div class="thm lemma" id="i-12-4-7">
+        <p><span class="thm-head">보조정리 12.4.7</span> <span class="thm-name">(폐포가 컴팩트한 근방)</span>.
+        \(M\)이 위상다양체이거나 경계를 갖는 위상다양체이면, \(M\)의 모든 점은 폐포가 컴팩트한 열린 근방을 가진다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        경계가 없으면 <a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-15">명제 11.1.15</a>(b)의 기저에서 그 점을 포함하는 원소를 고르면 된다. 일반적인 경우도 같은 생각이다.
+        \(p\) 둘레의 차트 \((U, \varphi)\)를 잡으면 <a href="12-3-bump-functions.html#i-12-3-6">보조정리 12.3.6</a>의 증명 1, 2단계처럼 \(\varepsilon \gt 0\)이 있어서 \(B_\varepsilon(\varphi(p)) \cap D \subseteq \varphi(U)\)이고, \(C = \varphi^{-1}\big(\overline{B}_{\varepsilon/2}(\varphi(p)) \cap D\big)\)는 컴팩트하며 닫혀 있다.
+        \(V = \varphi^{-1}\big(B_{\varepsilon/2}(\varphi(p)) \cap D\big)\)는 \(p\)의 열린 근방이고 \(V \subseteq C\)이므로 \(\overline{V} \subseteq C\)이다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-16">명제 3.1.16</a>(d)). 컴팩트 집합의 닫힌부분집합이므로 \(\overline{V}\)는 컴팩트하다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>(a)).</p>
+      </div>
+
+      <p>하우스도르프 공간의 모든 점이 폐포가 컴팩트한 근방을 가지면 그 공간을 <dfn>국소 컴팩트</dfn>(locally compact)라 한다. <a href="#i-12-4-7">보조정리 12.4.7</a>은 (경계를 갖는) 위상다양체가 국소 컴팩트하다는 뜻이다. 이제 이런 근방들을 가산개 모아 다양체를 차례로 채운다.</p>
+
+      <div class="thm definition" id="i-12-4-8">
+        <p><span class="thm-head">정의 12.4.8</span> <span class="thm-name">(컴팩트 소진, exhaustion by compact sets)</span>.
+        위상공간 \(M\)의 컴팩트 부분집합들 \(K_1, K_2, \dots\)과 열린집합들 \(V_1, V_2, \dots\)이 모든 \(j \ge 1\)에 대하여</p>
+        <div class="equation" id="eq-12-4-1">
+        \[ V_j \subseteq K_j \subseteq V_{j+1}, \qquad \bigcup_{j \ge 1} K_j = M \tag{12.4.1} \]
+        </div>
+        <p>를 만족하면, 이 열 \((K_j, V_j)_{j \ge 1}\)을 \(M\)의 <dfn>컴팩트 소진</dfn>(exhaustion by compact sets)이라 한다.</p>
+      </div>
+
+      <p><a href="#eq-12-4-1">(12.4.1)</a>에서 \(V_1 \subseteq K_1 \subseteq V_2 \subseteq K_2 \subseteq \cdots\)이므로 두 열은 모두 증가하고, \(\bigcup_j V_j = M\)이다. 요점은 각 \(K_j\)가 다음 단계의 <em>열린</em>집합 \(V_{j+1}\) 안에 들어간다는 것이다.
+      그래서 모든 컴팩트 집합 \(C \subseteq M\)은 어떤 \(K_m\)에 들어간다. 증가하는 열린덮개 \(\{V_j\}\)의 유한개가 \(C\)를 덮으므로 가장 큰 것 \(V_m\)이 \(C\)를 덮고, \(V_m \subseteq K_m\)이다.</p>
+
+      <div class="thm example" id="i-12-4-9">
+        <p><span class="thm-head">예 12.4.9</span> <span class="thm-name">(컴팩트 소진의 예)</span>.
+        (a) \(M\)이 컴팩트하면 \(K_j = V_j = M\)이 컴팩트 소진이다.</p>
+        <p>(b) \(\R^n\)에서 \(K_j = \overline{B}_j(0)\), \(V_j = B_j(0)\)은 컴팩트 소진이다. \(\overline{B}_j(0) \subseteq B_{j+1}(0)\)이고 모든 점은 어떤 공에 들어간다.</p>
+        <p>(c) \(\R\)에서 \(K_j = [-j, 0] \cup [1/j, j]\)는 컴팩트 집합의 증가하는 열이고 합집합이 \(\R\)이지만, <a href="#eq-12-4-1">(12.4.1)</a>을 만족하는 열린집합 \(V_j\)는 없다. \(0 \in K_1\)인데 \(0\)의 어떤 근방도 \(K_{j}\)에 들어가지 않기 때문이다.
+        실제로 컴팩트 집합 \([0, 1]\)은 어느 \(K_j\)에도 들어가지 않는다. 컴팩트 소진의 조건은 “증가하고 모두를 덮는다”보다 강하다.</p>
+      </div>
+
+      <div class="thm example" id="i-12-4-10">
+        <p><span class="thm-head">예 12.4.10</span> <span class="thm-name">(구멍 뚫린 평면)</span>.
+        \(M = \R^2 \setminus \{0\}\)에서 \(K_j = \{x : 1/(j+1) \le \abs{x} \le j\}\), \(V_j = \{x : 1/(j+1) \lt \abs{x} \lt j\}\)로 두자. \(K_j\)는 \(\R^2\)에서 닫혀 있고 유계이며 원점을 포함하지 않으므로 \(M\)의 컴팩트 부분집합이고, \(V_j\)는 \(M\)에서 열려 있다.
+        \(1/(j+2) \lt 1/(j+1)\)이고 \(j \lt j + 1\)이므로 \(V_j \subseteq K_j \subseteq V_{j+1}\)이다. \(x \ne 0\)이면 \(1/(j+1) \le \abs{x} \le j\)인 \(j\)가 있으므로 \(\bigcup_j K_j = M\)이다.
+        원점이 빠져 있으므로 \(K_j\)는 무한대 쪽과 원점 쪽으로 동시에 자라야 한다(<a href="#fig-12-4-2">그림 12.4.2</a>).</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-12-4-2">
+        <img src="figures/fig-12-4-2-exhaustion.svg" alt="두 정사각형 그림. (a) 원점을 중심으로 하는 세 개의 닫힌 원환 K₁, K₂, K₃가 각각 파랑, 청록, 주황으로 반투명하게 칠해져 있고 차례로 더 크다. 원점은 빈 원이다. (b) 원점 근처를 확대한 그림으로, 안쪽 반지름 1/2, 1/3, 1/4인 세 원이 보이고 원점 둘레는 비어 있다.">
+        <figcaption><span class="fig-head">그림 12.4.2.</span>
+        \(\R^2 \setminus \{0\}\)의 컴팩트 소진 \(K_j = \{1/(j+1) \le \abs{x} \le j\}\) (<a href="#i-12-4-10">예 12.4.10</a>, \(j = 1, 2, 3\)). (a) \(\abs{x^i} \le 3.3\), (b) 원점 근처 \(\abs{x^i} \le 0.62\) 확대. \(K_j\)는 안쪽 반지름 \(1/(j+1)\)과 바깥쪽 반지름 \(j\)로 양쪽으로 자란다. 원점(빈 원)은 \(M\)에 없다.</figcaption>
+      </figure>
+
+      <div class="thm proposition" id="i-12-4-11">
+        <p><span class="thm-head">명제 12.4.11</span> <span class="thm-name">(컴팩트 소진의 존재)</span>.
+        위상다양체와 경계를 갖는 위상다양체는 컴팩트 소진을 가진다.</p>
+      </div>
+      <p><strong>이 명제가 말하는 것.</strong> 다양체는 컴팩트하지 않아도 “셀 수 있는 단계”에 걸쳐 컴팩트 조각으로 다 채울 수 있다. 가산성은 제2가산 조건에서, 조각의 컴팩트성은 국소 유클리드 조건과 하우스도르프 조건에서 온다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: 폐포가 컴팩트한 열린집합들로 \(M\)을 가산개로 덮는다(린델뢰프). \(K_j\)가 정해지면, 그것을 덮는 데 필요한 만큼(그리고 적어도 \(j+1\)개) 앞에서부터 모아 다음 단계로 삼는다.</p>
+        <p><span class="proof-head">증명.</span>
+        <a href="#i-12-4-7">보조정리 12.4.7</a>에 의해 폐포가 컴팩트한 열린집합들이 \(M\)을 덮는다. \(M\)은 제2가산이므로 이 덮개는 가산 부분덮개 \(\{W_i\}_{i \ge 1}\)을 가진다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-15">명제 3.6.15</a>). 유한개이면 같은 집합을 되풀이해서 무한열로 만든다.
+        (경계가 없으면 <a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-15">명제 11.1.15</a>(b)의 가산 기저를 그대로 \(\{W_i\}\)로 써도 된다.)</p>
+        <p>자연수 \(m_1 \lt m_2 \lt \cdots\)을 귀납적으로 고른다. \(m_1 = 1\)이라 하자. \(m_j\)가 정해졌을 때 \(K_j = \overline{W_1} \cup \dots \cup \overline{W_{m_j}}\)로 두면, 유한개의 컴팩트 집합의 합집합이므로 \(K_j\)는 컴팩트하다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>(d)).
+        \(\{W_i\}\)는 \(K_j\)를 덮으므로 유한개가 \(K_j\)를 덮는다. 그 첨자들과 \(m_j\)보다 큰 수 \(m\)을 고르고, \(m_{j+1}\)을 \(m\)과 그 첨자들 가운데 가장 큰 수로 두면 \(K_j \subseteq W_1 \cup \dots \cup W_{m_{j+1}}\)이다.
+        \(V_j = W_1 \cup \dots \cup W_{m_j}\)로 두자. 그러면 \(V_j\)는 열려 있고, \(V_j \subseteq K_j\)이며, 방금 본 것에서 \(K_j \subseteq V_{j+1}\)이다.
+        \(m_j \ge j\)이므로 \(W_j \subseteq V_j \subseteq K_j\)이고, 따라서 \(\bigcup_j K_j \supseteq \bigcup_j W_j = M\)이다.</p>
+      </div>
+    </section>
+
+    <section id="sec-existence">
+      <h2>단위분할의 존재</h2>
+
+      <div class="thm theorem" id="i-12-4-12">
+        <p><span class="thm-head">정리 12.4.12</span> <span class="thm-name">(단위분할의 존재, existence of partitions of unity)</span>.
+        \(M\)이 매끄러운 다양체(경계가 있어도 된다)이면 \(M\)의 모든 열린덮개 \(\mathcal{U} = \{U_\alpha\}_{\alpha \in \mathcal{I}}\)에 대하여 \(\mathcal{U}\)에 종속된 매끄러운 단위분할이 있다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 어떤 열린덮개를 주더라도, 각 열린집합에 하나씩 맡겨 합이 \(1\)이 되는 매끄러운 함수들을 만들 수 있다. 덮개의 원소가 셀 수 없이 많아도, 서로 얽혀 있어도 된다.</p>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: 컴팩트 소진 \((K_j, V_j)\)로 \(M\)을 “고리” \(A_j = K_j \setminus V_{j-1}\)들로 나눈다. 컴팩트한 고리마다 범프 함수를 유한개 두되, 받침이 이웃 고리 근처를 벗어나지 않게 한다. 그러면 전체가 국소 유한하다.
+        범프 함수들의 합으로 나누어 합을 \(1\)로 맞추고, 마지막으로 같은 \(U_\alpha\)에 속한 것끼리 묶어 첨자를 덮개의 첨자로 바꾼다.</p>
+        <p><span class="proof-head">증명.</span>
+        <a href="#i-12-4-11">명제 12.4.11</a>의 컴팩트 소진 \((K_j, V_j)_{j \ge 1}\)을 잡고 \(K_0 = K_{-1} = V_0 = \varnothing\)으로 둔다.</p>
+        <p><em>1단계: 고리.</em> \(j \ge 1\)에 대하여 \(A_j = K_j \setminus V_{j-1}\), \(O_j = V_{j+1} \setminus K_{j-2}\)로 두자.</p>
+        <ul>
+          <li>\(A_j = K_j \cap (M \setminus V_{j-1})\)은 컴팩트 집합 \(K_j\)의 닫힌부분집합이므로 컴팩트하다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>(a)).</li>
+          <li>\(K_{j-2}\)는 컴팩트하고 \(M\)은 하우스도르프이므로 \(K_{j-2}\)는 닫혀 있고(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>(b)), 따라서 \(O_j\)는 열려 있다.</li>
+          <li>\(A_j \subseteq O_j\)이다. \(A_j \subseteq K_j \subseteq V_{j+1}\)이고, \(K_{j-2} \subseteq V_{j-1}\)인데 \(A_j\)는 \(V_{j-1}\)과 만나지 않기 때문이다.</li>
+          <li>\(\bigcup_j A_j = M\)이다. \(x \in M\)이면 \(x \in K_j\)인 가장 작은 \(j\)가 있고, \(x \notin K_{j-1} \supseteq V_{j-1}\)이므로 \(x \in A_j\)이다.</li>
+        </ul>
+        <p><em>2단계: 범프 함수 고르기.</em> \(j \ge 1\)이고 \(p \in A_j\)라 하자. \(\mathcal{U}\)가 덮개이므로 \(p \in U_{\alpha}\)인 \(\alpha\)가 있고, 그런 \(\alpha\)를 하나 골라 \(\alpha(p)\)로 쓴다.
+        <a href="12-3-bump-functions.html#i-12-3-6">보조정리 12.3.6</a>을 \(p\)와 열린집합 \(U_{\alpha(p)} \cap O_j\)에 쓰면, \(p\)의 열린 근방 \(W_p\)와 매끄러운 \(g_p\colon M \to [0, 1]\)이 있어서 \(W_p\)에서 \(g_p \equiv 1\)이고 \(\supp g_p\)는 \(U_{\alpha(p)} \cap O_j\)에 들어 있는 컴팩트 집합이다.
+        \(A_j\)가 컴팩트하므로 유한개의 점 \(p_{j,1}, \dots, p_{j,l_j}\)의 \(W_{p_{j,l}}\)이 \(A_j\)를 덮는다. 이렇게 모든 \(j\)에서 고른 함수들을 한 줄로 늘어놓아 \(g_1, g_2, \dots\)라 하고, \(g_i\)에 붙은 첨자 \(\alpha(p)\)를 \(\alpha(i)\)로 쓴다. 함수는 가산개다.</p>
+        <p><em>3단계: 국소 유한성.</em> \(x \in M\)이면 어떤 \(m\)에 대해 \(x \in V_m\)이다. \(g_i\)가 \(j\)단계에서 골라졌고 \(j \ge m + 2\)이면, \(\supp g_i \subseteq O_j \subseteq M \setminus K_{j-2}\)이고 \(V_m \subseteq K_m \subseteq K_{j-2}\)이므로 \(V_m \cap \supp g_i = \varnothing\)이다.
+        따라서 \(x\)의 열린 근방 \(V_m\)은 \(j \le m + 1\)단계의 받침, 곧 유한개의 받침하고만 만난다. \(\{\supp g_i\}\)는 국소 유한하다.</p>
+        <p><em>4단계: 합으로 나누기.</em> <a href="#i-12-4-3">보조정리 12.4.3</a>에 의해 \(G = \sum_i g_i\)는 매끄럽다. \(x \in M\)이면 1단계에서 \(x \in A_j\)인 \(j\)가 있고, 2단계에서 \(x \in W_{p_{j,l}}\)인 \(l\)이 있어서 그 함수는 \(x\)에서 \(1\)이다. 모든 \(g_i \ge 0\)이므로 \(G(x) \ge 1\)이다.
+        따라서 \(\tilde\psi_i = g_i/G\)는 매끄럽고(<a href="12-1-smooth-maps.html#i-12-1-5">명제 12.1.5</a>) \(0 \le \tilde\psi_i \le 1\), \(\supp\tilde\psi_i = \supp g_i\), \(\sum_i \tilde\psi_i = 1\)이다.</p>
+        <p><em>5단계: 첨자 바꾸기.</em> \(\alpha \in \mathcal{I}\)마다</p>
+        <div class="equation" id="eq-12-4-2">
+        \[ \psi_\alpha = \sum_{i\,:\,\alpha(i) = \alpha} \tilde\psi_i \tag{12.4.2} \]
+        </div>
+        <p>로 둔다(해당하는 \(i\)가 없으면 \(\psi_\alpha = 0\)). 국소 유한한 모임의 부분모임은 국소 유한하므로 \(\psi_\alpha\)는 매끄럽고(<a href="#i-12-4-3">보조정리 12.4.3</a>), \(0 \le \psi_\alpha \le \sum_i \tilde\psi_i = 1\)이다.
+        \(\{\psi_\alpha \ne 0\} \subseteq \bigcup_{\alpha(i) = \alpha} \supp g_i\)이고, 오른쪽은 국소 유한한 닫힌집합들의 합집합이므로 닫혀 있다(<a href="#i-12-4-2">보조정리 12.4.2</a>(b)). 따라서 \(\supp\psi_\alpha \subseteq \bigcup_{\alpha(i) = \alpha} \supp g_i \subseteq U_\alpha\)이다.
+        \(V_m\)이 \(\supp\psi_\alpha\)와 만나면 \(\alpha(i) = \alpha\)인 어떤 \(\supp g_i\)와 만나는데, 3단계에서 그런 \(i\)는 유한개이므로 그런 \(\alpha\)도 유한개다. 곧 \(\{\supp\psi_\alpha\}\)는 국소 유한하다.
+        마지막으로 각 \(i\)는 꼭 하나의 \(\alpha\)에 속하므로, 점마다 유한합을 다시 묶어 \(\sum_\alpha \psi_\alpha = \sum_i \tilde\psi_i = 1\)이다.</p>
+      </div>
+
+      <div class="thm remark" id="i-12-4-13">
+        <p><span class="thm-head">비고 12.4.13</span> <span class="thm-name">(증명이 쓴 것과 파라컴팩트성)</span>.
+        증명을 되돌아보면 위상다양체의 세 조건이 모두 쓰였다. <em>국소 유클리드</em> 조건은 차트로 범프 함수와 컴팩트한 근방을 만드는 데(<a href="12-3-bump-functions.html#i-12-3-6">보조정리 12.3.6</a>, <a href="#i-12-4-7">보조정리 12.4.7</a>),
+        <em>제2가산</em> 조건은 컴팩트 소진을 가산 단계로 만드는 데(린델뢰프 성질), <em>하우스도르프</em> 조건은 컴팩트 집합이 닫혀 있다는 것(범프 함수를 \(0\)으로 늘이기, \(O_j\)가 열려 있음)에 쓰였다. 하우스도르프 조건이 없으면 정리가 틀릴 수 있다(<a href="#ex-12-4-5">연습 12.4.5</a>).</p>
+        <p>또 증명의 3, 4단계는 열린집합들 \(\{g_i \ne 0\}\)이 \(M\)을 덮고, 각각 덮개의 어떤 원소 \(U_{\alpha(i)}\)에 들어 있으며, 국소 유한하다는 것을 보여 준다.
+        모든 열린덮개에 대해 이런 열린덮개(각 원소가 원래 덮개의 어떤 원소에 들어 있고 국소 유한한 열린덮개)가 있는 하우스도르프 공간을 <dfn>파라컴팩트</dfn>(paracompact)라 한다. 따라서 (경계를 갖는) 매끄러운 다양체는 파라컴팩트하다.
+        이 study set에서는 파라컴팩트성 자체를 쓰지 않고 <a href="#i-12-4-12">정리 12.4.12</a>만 쓴다. 증명의 4단계까지가 준 가산개의 \(\tilde\psi_i\)는 받침이 모두 컴팩트한 단위분할이라는 것도 기억해 두자(첨자가 덮개와 다를 뿐이다).</p>
+      </div>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교: 컴팩트 소진과 단위분할의 첨자</p>
+        <p>Lee는 컴팩트 소진을 컴팩트 집합의 열 \((K_j)\)만으로, “\(K_j\)가 \(K_{j+1}\)의 내부에 들어간다”는 조건으로 정의한다 <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 2장]</a>.
+        이 study set은 위상적 내부를 따로 정의하지 않았고 \(\operatorname{Int} M\)이 경계를 갖는 다양체의 내부를 뜻하므로(<a href="../11-smooth-manifolds/11-5-manifolds-with-boundary.html#i-11-5-4">정의 11.5.4</a>), 열린집합 \(V_j\)를 함께 적는 <a href="#eq-12-4-1">(12.4.1)</a>의 꼴을 쓴다. 두 정의는 같은 열 \((K_j)\)를 준다(\(V_{j+1}\)로 \(K_{j+1}\)의 내부를 잡으면 된다).
+        또 일부 교재는 단위분할의 첨자를 덮개와 따로 두고 “각 받침이 덮개의 어떤 원소에 들어 있다”만 요구한다. 증명의 5단계가 보이듯 두 방식은 서로 바꿀 수 있다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>부분집합들의 모임이 국소 유한하면 모든 점 근처에서 유한개만 보인다. 받침이 국소 유한한 매끄러운 함수들의 합은 매끄럽다. 국소 유한하지 않으면 합이 연속조차 아닐 수 있다.</li>
+        <li>열린덮개 \(\{U_\alpha\}\)에 종속된 단위분할은 \(0 \le \psi_\alpha \le 1\), \(\supp\psi_\alpha \subseteq U_\alpha\), 받침이 국소 유한, \(\sum_\alpha\psi_\alpha = 1\)인 매끄러운 함수들이다.</li>
+        <li>(경계를 갖는) 위상다양체는 국소 컴팩트하고, 린델뢰프 성질로 컴팩트 소진 \(V_j \subseteq K_j \subseteq V_{j+1}\)을 가진다.</li>
+        <li>매끄러운 다양체의 모든 열린덮개에 종속된 매끄러운 단위분할이 있다(<a href="#i-12-4-12">정리 12.4.12</a>). 국소 유클리드·제2가산·하우스도르프 조건이 모두 쓰인다.</li>
+      </ul>
+      <p class="next">다음 절에서는 단위분할을 써서 국소적인 대상을 이어 붙인다. 닫힌집합의 범프 함수, 닫힌집합 위의 매끄러운 함수의 확장(특히 정칙곡면 위의 함수를 \(\R^3\) 전체로 늘이기), 그리고 소진 함수를 만든다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-12-4-1" data-level="1">
+        <p><span class="thm-head">연습 12.4.1</span> <span class="level">★</span>
+        다음 모임이 주어진 공간에서 국소 유한한지 판정하여라.
+        (a) \(\{[k, k + 1]\}_{k \in \Z}\), \(\R\)에서
+        (b) \(\{(1/(k+1), 1/k)\}_{k \ge 1}\), \((0, 1)\)에서, 그리고 \(\R\)에서
+        (c) \(\{S^1 \setminus \{e(2\pi/k)\}\}_{k \ge 1}\), \(S^1\)에서 (\(e(t) = (\cos t, \sin t)\))</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 국소 유한하다. \(p\)의 근방 \((p - 1/2, p + 1/2)\)은 많아야 세 구간과 만난다.
+          (b) \((0, 1)\)에서는 국소 유한하다. \(p \in (0, 1)\)이면 \(1/(k+1) \lt p/2\)인 \(k\)에 대해 구간 \((1/(k+1), 1/k)\)은 \(p\)의 근방 \((p/2, 1)\)과 만나지 않으므로 만나는 구간은 유한개다.
+          \(\R\)에서는 \(0\)의 모든 근방 \((-\varepsilon, \varepsilon)\)이 \(1/k \lt \varepsilon\)인 모든 구간과 만나므로 국소 유한하지 않다.
+          (c) 국소 유한하지 않다. 각 원소가 원 전체에서 한 점만 뺀 것이므로 모든 공집합이 아닌 열린집합이 모든 원소와 만난다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-12-4-2" data-level="1">
+        <p><span class="thm-head">연습 12.4.2</span> <span class="level">★</span>
+        열린구간 \(M = (0, 1)\)의 컴팩트 소진을 하나 식으로 주고 <a href="#eq-12-4-1">(12.4.1)</a>을 확인하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(K_j = [1/(j+2),\ 1 - 1/(j+2)]\), \(V_j = (1/(j+2),\ 1 - 1/(j+2))\)로 두자. \(K_j\)는 닫힌구간이므로 컴팩트하고 \(V_j\)는 열려 있다. \(V_j \subseteq K_j\)이고, \(1/(j+3) \lt 1/(j+2)\)이므로 \(K_j \subseteq V_{j+1}\)이다.
+          \(x \in (0, 1)\)이면 \(1/(j+2) \le \min(x, 1 - x)\)인 \(j\)가 있으므로 \(x \in K_j\)이다.</p>
+          <p class="verified">검증: <code>verify/v-12-4-partitions-of-unity.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-12-4-3" data-level="1">
+        <p><span class="thm-head">연습 12.4.3</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라.
+        (a) 컴팩트 공간에서 공집합이 아닌 집합들의 국소 유한한 모임은 유한하다.
+        (b) 단위분할의 모든 \(\psi_\alpha\)는 어딘가에서 \(0\)이 아니다.
+        (c) 주어진 열린덮개에 종속된 단위분할은 하나뿐이다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 참. 모든 점이 유한개의 원소와만 만나는 열린 근방을 가지고, 이 근방들의 유한개가 공간을 덮는다. 각 원소는 공집합이 아니므로 그 가운데 어떤 근방과 만나고, 따라서 원소는 유한개다.
+          (b) 거짓. 덮개 \(\{M, M\}\)에 대해 \(\psi_1 = 1\), \(\psi_2 = 0\)은 단위분할이다.
+          (c) 거짓. 덮개 \(\{M, M\}\)에 대해 \((\psi_1, \psi_2) = (1, 0)\), \((0, 1)\), \((1/2, 1/2)\)이 모두 단위분할이다. 두 원소가 겹치는 덮개에서는 보통 단위분할이 무수히 많다. 예를 들어 \(\{\psi_\alpha\}\)와 \(\{\psi'_\alpha\}\)가 단위분할이면 \(0 \le t \le 1\)에 대해 \(\{t\psi_\alpha + (1 - t)\psi'_\alpha\}\)도 단위분할이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-12-4-4" data-level="1">
+        <p><span class="thm-head">연습 12.4.4</span> <span class="level">★</span>
+        <a href="#i-12-4-6">예 12.4.6</a>(b)에서 \(G = \sum_k g_k\)가 주기 \(1\)인 함수(\(G(t + 1) = G(t)\))이고, \(\psi_0(t) = 1\)인 \(t\)의 집합이 \([-1/4, 1/4]\)임을 보여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(G(t + 1) = \sum_k b(t + 1 - k) = \sum_{k'} b(t - k')\) (\(k' = k - 1\))이므로 주기 \(1\)이다. \(\psi_0(t) = 1\)은 \(g_0(t) = G(t)\), 곧 \(k \ne 0\)인 모든 \(g_k(t) = 0\)이고 \(g_0(t) \gt 0\)이라는 뜻이다.
+          \(g_{\pm 1}(t) = 0\)은 \(\abs{t \mp 1} \ge 3/4\), 곧 \(t \le 1/4\)이고 \(t \ge -1/4\)이다. 이때 \(\abs{t} \le 1/4\)이므로 다른 \(g_k\)도 \(0\)이고 \(g_0(t) = b(t) = 1 \gt 0\)이다. 거꾸로 \(\abs{t} \gt 1/4\)이면 \(g_1\)이나 \(g_{-1}\)이 \(t\)에서 양수이므로 \(\psi_0(t) \lt 1\)이다.</p>
+          <p class="verified">검증: <code>verify/v-12-4-partitions-of-unity.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-12-4-5" data-level="2">
+        <p><span class="thm-head">연습 12.4.5</span> <span class="level">★★</span>
+        원점이 두 개인 직선 \(L\)(<a href="../03-topology-basics/3-5-hausdorff-second-countable.html#i-3-5-6">비예 3.5.6</a>, <a href="../11-smooth-manifolds/11-2-smooth-structures.html#ex-11-2-5">연습 11.2.5</a>)의 열린덮개 \(\{V_1, V_2\}\)(\(V_k\)는 \(0_k\)를 포함하고 다른 원점은 포함하지 않는다)에 대해,
+        \(\psi_1 + \psi_2 = 1\), \(\supp\psi_k \subseteq V_k\)인 <em>연속</em>함수 \(\psi_1, \psi_2\colon L \to [0, 1]\)이 없음을 보여라. 하우스도르프 조건 없이는 <a href="#i-12-4-12">정리 12.4.12</a>가 성립하지 않는다.</p>
+        <details class="hint"><summary>힌트</summary><p>수열 \([1/k]\)은 \(0_1\)과 \(0_2\)에 동시에 수렴한다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>그런 \(\psi_1, \psi_2\)가 있다고 하자. \(0_2 \notin V_1 \supseteq \supp\psi_1\)이므로 \(\psi_1(0_2) = 0\)이고, 같은 이유로 \(\psi_2(0_1) = 0\)이다. 따라서 \(\psi_1(0_1) = 1 - \psi_2(0_1) = 1\)이다.
+          수열 \(x_k = [1/k]\)는 \(0_1\)과 \(0_2\)에 모두 수렴한다(두 원점의 모든 근방이 \(0\)이 아닌 작은 실수들을 포함한다, <a href="../03-topology-basics/3-5-hausdorff-second-countable.html#i-3-5-6">비예 3.5.6</a>).
+          연속함수는 수렴하는 수열을 수렴하는 수열로 보내므로(<a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-17">명제 3.2.17</a>) \(\psi_1(x_k) \to \psi_1(0_1) = 1\)이고 동시에 \(\psi_1(x_k) \to \psi_1(0_2) = 0\)이다.
+          \(\R\)에서 수열의 극한은 하나이므로 모순이다. (\(L\)은 국소 유클리드이고 제2가산이지만 하우스도르프가 아니다. <a href="#i-12-4-12">정리 12.4.12</a>의 증명에서 하우스도르프 조건이 쓰인 곳, 곧 컴팩트 집합이 닫혀 있다는 것이 \(L\)에서는 성립하지 않는다.)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-12-4-6" data-level="2">
+        <p><span class="thm-head">연습 12.4.6</span> <span class="level">★★</span>
+        \(M\)이 컴팩트한 매끄러운 다양체일 때, 컴팩트 소진을 쓰지 않고 <a href="12-3-bump-functions.html#i-12-3-6">보조정리 12.3.6</a>만으로 <a href="#i-12-4-12">정리 12.4.12</a>를 증명하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(p \in M\)마다 \(p \in U_{\alpha(p)}\)인 \(\alpha(p)\)를 고르고 <a href="12-3-bump-functions.html#i-12-3-6">보조정리 12.3.6</a>을 \(p\)와 \(U_{\alpha(p)}\)에 써서 \(W_p\), \(g_p\)를 얻는다. \(M\)이 컴팩트하므로 유한개 \(W_{p_1}, \dots, W_{p_m}\)이 \(M\)을 덮는다.
+          \(G = g_{p_1} + \dots + g_{p_m}\)은 매끄럽고 모든 점에서 \(1\) 이상이다. \(\tilde\psi_l = g_{p_l}/G\)와 \(\psi_\alpha = \sum_{l : \alpha(p_l) = \alpha} \tilde\psi_l\)로 두면, 유한개의 함수만 \(0\)이 아니므로 받침은 자명하게 국소 유한하고,
+          \(\supp\psi_\alpha\)는 유한개의 \(\supp g_{p_l} \subseteq U_\alpha\)의 합집합(닫혀 있음)에 들어 있다. 나머지 조건은 정리의 4, 5단계와 같다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-12-4-7" data-level="2">
+        <p><span class="thm-head">연습 12.4.7</span> <span class="level">★★</span>
+        \(F\colon N \to M\)이 매끄럽고 \(\{\psi_\alpha\}\)가 \(M\)의 열린덮개 \(\{U_\alpha\}\)에 종속된 단위분할이면, \(\{\psi_\alpha \circ F\}\)는 \(N\)의 열린덮개 \(\{F^{-1}(U_\alpha)\}\)에 종속된 단위분할임을 보여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(F\)가 연속이므로 \(F^{-1}(U_\alpha)\)는 열려 있고 \(N\)을 덮는다. \(\psi_\alpha \circ F\)는 매끄럽고(<a href="12-1-smooth-maps.html#i-12-1-7">명제 12.1.7</a>(d)) 값이 \([0, 1]\)에 있으며 합이 \(1\)이다.
+          \(\{\psi_\alpha \circ F \ne 0\} = F^{-1}(\{\psi_\alpha \ne 0\}) \subseteq F^{-1}(\supp\psi_\alpha)\)이고 오른쪽은 닫혀 있으므로 \(\supp(\psi_\alpha \circ F) \subseteq F^{-1}(\supp\psi_\alpha) \subseteq F^{-1}(U_\alpha)\)이다.
+          \(q \in N\)이면 \(F(q)\)의 열린 근방 \(W\)가 유한개의 \(\supp\psi_\alpha\)와만 만나므로, \(q\)의 열린 근방 \(F^{-1}(W)\)도 유한개의 \(F^{-1}(\supp\psi_\alpha)\), 따라서 유한개의 \(\supp(\psi_\alpha \circ F)\)와만 만난다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="12-3-bump-functions.html">← 12.3 범프 함수</a>
+    <a rel="next" href="12-5-applications.html">12.5 단위분할의 응용 →</a>
+  </nav>
+</body>
+</html>

@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>1.6 행렬식, 방향, 외적 — 미분기하 스터디</title>
   <meta name="dg-id" content="1.6">
-  <meta name="dg-status" content="draft">
-  <meta name="dg-prereq" content="1.1, 1.2, 1.4, 1.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="1.1, 1.2, 1.3, 1.4, 1.5">
   <meta name="dg-refs" content="Ax Ch. 9; dC §1-4; Lee-IRM App. B pp. 400–403">
-  <meta name="dg-updated" content="2026-09-30">
+  <meta name="dg-updated" content="2026-10-01">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
@@ -44,6 +44,7 @@
       <ul>
         <li><a href="1-1-vector-spaces-bases.html#i-1-1-18">정리 1.1.18</a>, <a href="1-1-vector-spaces-bases.html#i-1-1-21">따름정리 1.1.21</a></li>
         <li><a href="1-2-linear-maps.html#i-1-2-16">정리 1.2.16 (합성과 행렬곱)</a>, <a href="1-2-linear-maps.html#i-1-2-17">따름정리 1.2.17</a></li>
+        <li><a href="1-3-dual-spaces.html#i-1-3-4">정의 1.3.4 (쌍대기저)</a></li>
         <li><a href="1-4-change-of-basis.html#i-1-4-1">정의 1.4.1 (기저변환 행렬)</a>, <a href="1-4-change-of-basis.html#i-1-4-4">명제 1.4.4</a>, <a href="1-4-change-of-basis.html#i-1-4-12">정리 1.4.12</a></li>
         <li><a href="1-5-inner-products.html#i-1-5-5">정리 1.5.5 (코시-슈바르츠)</a>, <a href="1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>, <a href="1-5-inner-products.html#i-1-5-15">명제 1.5.15 (내적이 주는 동형)</a></li>
       </ul>
@@ -191,6 +192,12 @@
         <p class="verified">검증: <code>verify/v-1-6-determinant-orientation.py</code></p>
       </div>
 
+      <aside class="box warning">
+        <p class="box-title">흔한 오해: 행렬식은 행렬에 대해 선형이 아니다</p>
+        <p>“다중선형”은 다른 열을 고정하고 <em>한 열씩</em> 볼 때 선형이라는 뜻이다. 행렬 전체를 변수로 보면 \(\det\)은 선형이 아니다.
+        두 행렬을 더하면 모든 열이 한꺼번에 바뀌고, 행렬에 \(c\)를 곱하면 \(n\)개의 열이 모두 \(c\)배가 되기 때문이다(<a href="#ex-1-6-4">연습 1.6.4</a>(a), (b)).</p>
+      </aside>
+
       <div class="thm theorem" id="i-1-6-8">
         <p><span class="thm-head">정리 1.6.8</span> <span class="thm-name">(행렬식의 성질)</span>.
         \(A, B\)가 \(n \times n\) 행렬이면 다음이 성립한다.</p>
@@ -200,6 +207,8 @@
           <li>(c) \(\det A^{\mathsf{T}} = \det A\). 따라서 \(\det\)은 행에 대해서도 다중선형이고 교대이다.</li>
         </ul>
       </div>
+      <p><strong>이 정리가 말하는 것.</strong> 행렬식은 행렬의 곱을 수의 곱으로 바꾸고, \(0\)인지 아닌지로 가역성을 판정하며, 행과 열을 구별하지 않는다.
+      (a)를 부피로 읽으면 “\(A\)를 적용하면 부호 있는 부피가 \(\det A\)배가 된다”는 뜻이다.</p>
       <div class="proof">
         <p class="proof-idea">증명 아이디어: (a)는 \(v \mapsto \det(Av_1, \dots, Av_n)\)도 다중선형 교대 함수라는 것에 <a href="#i-1-6-5">정리 1.6.5</a>의 <a href="#eq-1-6-1">(1.6.1)</a>을 쓴다. (b)는 (a)와 <a href="#i-1-6-2">보조정리 1.6.2</a>(c). (c)는 <a href="#eq-1-6-3">(1.6.3)</a>을 전치에 맞춰 다시 센다.</p>
         <p><span class="proof-head">증명.</span>
@@ -260,26 +269,39 @@
       <div class="thm definition" id="i-1-6-11">
         <p><span class="thm-head">정의 1.6.11</span> <span class="thm-name">(방향, orientation)</span>.
         \(V\)가 \(n\)차원 벡터공간(\(n \ge 1\))이라 하자. 두 기저 \(\mathcal{B}, \tilde{\mathcal{B}}\)에 대하여 \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 기저변환 행렬의 행렬식이 양수이면
-        두 기저가 <em>같은 방향</em>이라 하고 \(\mathcal{B} \sim \tilde{\mathcal{B}}\)로 쓴다. 이 관계의 동치류(<a href="#i-1-6-12">명제 1.6.12</a>) 하나를 \(V\)의 <dfn>방향</dfn>(orientation)이라 한다.
+        두 기저가 <em>같은 방향</em>이라 하고 \(\mathcal{B} \sim \tilde{\mathcal{B}}\)로 쓴다. 기저 \(\mathcal{B}\)와 같은 방향인 기저 전체의 모임
+        \([\mathcal{B}] = \{\tilde{\mathcal{B}} : \mathcal{B} \sim \tilde{\mathcal{B}}\}\)을 이 관계의 <em>동치류</em>라 부르고, 동치류 하나를 \(V\)의 <dfn>방향</dfn>(orientation)이라 한다(<a href="#i-1-6-12">명제 1.6.12</a>).
         방향을 하나 정한 벡터공간을 <em>방향이 주어진</em> 벡터공간이라 하고, 정한 방향에 속한 기저를 <em>양의 방향</em>(positively oriented), 나머지 기저를 <em>음의 방향</em>이라 한다.
         \(\R^n\)의 <em>표준 방향</em>은 표준기저 \((e_1, \dots, e_n)\)이 속한 방향이다.</p>
       </div>
 
       <div class="thm proposition" id="i-1-6-12">
         <p><span class="thm-head">명제 1.6.12</span> <span class="thm-name">(방향은 정확히 두 개다)</span>.
-        \(\sim\)은 \(V\)의 기저들 위의 동치관계이고, 동치류는 정확히 두 개다.</p>
+        \(V\)의 기저들 위의 관계 \(\sim\)은 다음 세 법칙(반사율, 대칭률, 추이율)을 만족한다. 즉 <em>동치관계</em>다.
+        (반사율) \(\mathcal{B} \sim \mathcal{B}\). (대칭률) \(\mathcal{B} \sim \tilde{\mathcal{B}}\)이면 \(\tilde{\mathcal{B}} \sim \mathcal{B}\).
+        (추이율) \(\mathcal{B} \sim \tilde{\mathcal{B}}\)이고 \(\tilde{\mathcal{B}} \sim \hat{\mathcal{B}}\)이면 \(\mathcal{B} \sim \hat{\mathcal{B}}\).
+        또 동치류는 정확히 두 개다.</p>
       </div>
       <div class="proof">
         <p><span class="proof-head">증명.</span>
         기저변환 행렬에 대한 명제 <a href="1-4-change-of-basis.html#i-1-4-4">1.4.4</a>와 <a href="#i-1-6-8">정리 1.6.8</a>을 쓴다.
-        (반사) \(\mathcal{B}\)에서 \(\mathcal{B}\)로의 행렬은 \(I\)이고 \(\det I = 1 \gt 0\).
-        (대칭) \(\mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬이 \(B\)이면 \(\tilde{\mathcal{B}} \to \mathcal{B}\)의 행렬은 \(B^{-1}\)이고 \(\det B^{-1} = 1/\det B\)는 \(\det B\)와 부호가 같다.
-        (추이) \(\mathcal{B} \to \tilde{\mathcal{B}}\)가 \(B\), \(\tilde{\mathcal{B}} \to \hat{\mathcal{B}}\)가 \(C\)이면 \(\mathcal{B} \to \hat{\mathcal{B}}\)는 \(BC\)이고 \(\det(BC) = \det B\det C \gt 0\).</p>
-        <p>이제 기저 \(\mathcal{B} = (b_1, \dots, b_n)\)을 하나 고정하고 \(\mathcal{B}' = (-b_1, b_2, \dots, b_n)\)이라 하자. \(\mathcal{B} \to \mathcal{B}'\)의 행렬은 \(\operatorname{diag}(-1, 1, \dots, 1)\)이고 행렬식이 \(-1\)이므로
-        \(\mathcal{B} \not\sim \mathcal{B}'\)이다. 따라서 동치류는 적어도 두 개다. 임의의 기저 \(\tilde{\mathcal{B}}\)에 대해 \(\mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬 \(B\)는 가역이므로 \(\det B \neq 0\)이다.
-        \(\det B \gt 0\)이면 \(\tilde{\mathcal{B}} \sim \mathcal{B}\)이다. \(\det B \lt 0\)이면 \(\mathcal{B}' \to \mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬 \(\operatorname{diag}(-1, 1, \dots, 1)B\)의 행렬식이 \(-\det B \gt 0\)이므로
-        \(\tilde{\mathcal{B}} \sim \mathcal{B}'\)이다. 따라서 동치류는 정확히 두 개다.</p>
+        (반사율) \(\mathcal{B}\)에서 \(\mathcal{B}\)로의 행렬은 \(I\)이고 \(\det I = 1 \gt 0\).
+        (대칭률) \(\mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬이 \(B\)이면 \(\tilde{\mathcal{B}} \to \mathcal{B}\)의 행렬은 \(B^{-1}\)이고 \(\det B^{-1} = 1/\det B\)는 \(\det B\)와 부호가 같다.
+        (추이율) \(\mathcal{B} \to \tilde{\mathcal{B}}\)가 \(B\), \(\tilde{\mathcal{B}} \to \hat{\mathcal{B}}\)이 \(C\)이면 \(\mathcal{B} \to \hat{\mathcal{B}}\)은 \(BC\)이고 \(\det(BC) = \det B\det C \gt 0\).</p>
+        <p>이 세 법칙에서 두 동치류는 같거나 겹치지 않는다. \([\mathcal{B}_1]\)과 \([\mathcal{B}_2]\)에 공통인 기저 \(\hat{\mathcal{B}}\)가 있으면 \(\mathcal{B}_1 \sim \hat{\mathcal{B}}\)이고
+        (대칭률에서) \(\hat{\mathcal{B}} \sim \mathcal{B}_2\)이므로 (추이율에서) \(\mathcal{B}_1 \sim \mathcal{B}_2\)이다. 그러면 \(\mathcal{B}_1 \sim \mathcal{X}\)인 모든 \(\mathcal{X}\)에 대해
+        \(\mathcal{B}_2 \sim \mathcal{B}_1 \sim \mathcal{X}\)이므로 \([\mathcal{B}_1] \subseteq [\mathcal{B}_2]\)이고, 같은 방법으로 \([\mathcal{B}_2] \subseteq [\mathcal{B}_1]\)이다. 또 반사율에서 모든 기저 \(\mathcal{B}\)는 \([\mathcal{B}]\)에 속한다.</p>
+        <p>이제 기저 \(\mathcal{B} = (b_1, \dots, b_n)\)을 하나 고정하고 \(\mathcal{B}' = (-b_1, b_2, \dots, b_n)\)이라 하자. \(\mathcal{B} \to \mathcal{B}'\)의 행렬은 \(\diag(-1, 1, \dots, 1)\)이고 행렬식이 \(-1\)이므로
+        \(\mathcal{B} \not\sim \mathcal{B}'\)이다. 즉 \(\mathcal{B}' \notin [\mathcal{B}]\)이고 \(\mathcal{B}' \in [\mathcal{B}']\)이므로 \([\mathcal{B}] \neq [\mathcal{B}']\), 따라서 동치류는 적어도 두 개다. 임의의 기저 \(\tilde{\mathcal{B}}\)에 대해 \(\mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬 \(B\)는 가역이므로 \(\det B \neq 0\)이다.
+        \(\det B \gt 0\)이면 \(\tilde{\mathcal{B}} \in [\mathcal{B}]\)이다. \(\det B \lt 0\)이면 \(\mathcal{B}' \to \mathcal{B} \to \tilde{\mathcal{B}}\)의 행렬 \(\diag(-1, 1, \dots, 1)B\)의 행렬식이 \(-\det B \gt 0\)이므로
+        \(\tilde{\mathcal{B}} \in [\mathcal{B}']\)이다. 모든 기저가 두 동치류 가운데 하나에 속하고 두 동치류는 겹치지 않으므로, 동치류는 정확히 두 개다.</p>
       </div>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 동치관계와 몫집합</p>
+        <p>여기서는 “같은 방향”이라는 관계 하나에 대해서만 반사율·대칭률·추이율과 동치류를 직접 다루었다.
+        <a href="../03-topology-basics/3-4-quotient-spaces.html#i-3-4-1">3장의 정의 3.4.1</a>에서 일반적인 집합 위의 동치관계와 동치류를 정의하고, 동치류 전체의 집합(몫집합)에 위상을 주어 토러스 같은 공간을 만든다.</p>
+      </aside>
 
       <div class="thm example" id="i-1-6-13">
         <p><span class="thm-head">예 1.6.13</span>.
@@ -291,7 +313,7 @@
 
       <div class="thm nonexample" id="i-1-6-14">
         <p><span class="thm-head">비예 1.6.14</span> <span class="thm-name">(모양이 같아도 방향은 다를 수 있다)</span>.
-        \((e_1, e_2)\)와 \((e_1, -e_2)\)는 둘 다 정규직교기저이고 길이와 각이 모두 같지만 방향이 반대다(행렬 \(\operatorname{diag}(1, -1)\)의 행렬식이 \(-1\)). 방향은 길이와 각으로 정해지지 않는다.
+        \((e_1, e_2)\)와 \((e_1, -e_2)\)는 둘 다 정규직교기저이고 길이와 각이 모두 같지만 방향이 반대다(행렬 \(\diag(1, -1)\)의 행렬식이 \(-1\)). 방향은 길이와 각으로 정해지지 않는다.
         또 추상적인 벡터공간에는 “표준” 방향이 없다. 예를 들어 <a href="1-1-vector-spaces-bases.html#i-1-1-22">예 1.1.22</a>의 평면 \(W \subseteq \R^3\)에서 \((c_1, c_2)\)와 \((c_2, c_1)\)은 서로 다른 방향이고, \(W\) 자체에는 어느 쪽을 택할 이유가 없다.
         (\(\R^3\) 안에서 \(W\)에 수직인 벡터를 하나 고르면 한쪽이 정해진다. <a href="#ex-1-6-7">연습 1.6.7</a> 참고.)</p>
       </div>
@@ -509,7 +531,8 @@
 
       <div class="exercise" id="ex-1-6-6" data-level="2">
         <p><span class="thm-head">연습 1.6.6</span> <span class="level">★★</span>
-        \((u \times v) \times w = \inner{u}{w}\,v - \inner{v}{w}\,u\)임을 보여라.</p>
+        \((u \times v) \times w = \inner{u}{w}\,v - \inner{v}{w}\,u\)임을 보여라.
+        <a class="cite" href="../../references.html#dC">[dC §1-4 참고]</a></p>
         <details class="hint"><summary>힌트</summary><p>양변이 \(u, v, w\)에 대해 각각 선형이므로 \(u, v, w\)가 표준기저벡터일 때만 확인하면 된다.</p></details>
         <details class="solution"><summary>풀이</summary>
           <p>양변은 <a href="#i-1-6-16">정리 1.6.16</a>(a)와 내적의 쌍선형성에 의해 \(u, v, w\) 각각에 대해 선형이다. 따라서 \(u = e_i\), \(v = e_j\), \(w = e_k\)일 때 성립하면 일반적으로 성립한다(각 벡터를 표준기저로 전개해 선형성으로 푼다).
@@ -541,11 +564,11 @@
         <p><span class="thm-head">연습 1.6.8</span> <span class="level">★★★</span>
         \(v_1, \dots, v_k \in \R^n\)(\(k \le n\))의 그람 행렬 \(G = (\inner{v_i}{v_j})\)에 대하여 \(\det G \ge 0\)이고, 등호는 \((v_1, \dots, v_k)\)가 일차종속일 때 그리고 그때만 성립함을 보여라.
         (\(\sqrt{\det G}\)를 \(v_1, \dots, v_k\)가 만드는 \(k\)차원 평행체의 부피로 정의한다. \(k = 2\), \(n = 3\)이면 \(\abs{v_1 \times v_2}\)이다.)</p>
-        <details class="hint"><summary>힌트</summary><p>일차독립이면 \(W = \operatorname{span}(v_1, \dots, v_k)\)의 정규직교기저를 잡고, \(G\)를 \(k \times k\) 행렬 \(C\)로 \(C^{\mathsf{T}}C\)라 쓴다.</p></details>
+        <details class="hint"><summary>힌트</summary><p>일차독립이면 \(W = \Span(v_1, \dots, v_k)\)의 정규직교기저를 잡고, \(G\)를 \(k \times k\) 행렬 \(C\)로 \(C^{\mathsf{T}}C\)라 쓴다.</p></details>
         <details class="solution"><summary>풀이</summary>
           <p>열이 \(v_j\)인 \(n \times k\) 행렬을 \(M\)이라 하면 <a href="#i-1-6-9">따름정리 1.6.9</a>의 증명처럼 \(G = M^{\mathsf{T}}M\)이다.</p>
           <p><em>일차종속이면.</em> 모두 \(0\)은 아닌 \(a\)로 \(Ma = \sum_j a^j v_j = 0\)이면 \(Ga = M^{\mathsf{T}}Ma = 0\)이므로 \(G\)는 가역이 아니고 \(\det G = 0\)이다(<a href="#i-1-6-8">정리 1.6.8</a>(b)).</p>
-          <p><em>일차독립이면.</em> \(W = \operatorname{span}(v_1, \dots, v_k)\)는 \(k\)차원이다. \(W\)에 유클리드 내적을 제한한 내적공간에서 그람-슈미트(정리 <a href="1-5-inner-products.html#i-1-5-10">1.5.10</a>)로 정규직교기저 \((w_1, \dots, w_k)\)를 잡고
+          <p><em>일차독립이면.</em> \(W = \Span(v_1, \dots, v_k)\)는 \(k\)차원이다. \(W\)에 유클리드 내적을 제한한 내적공간에서 그람-슈미트(정리 <a href="1-5-inner-products.html#i-1-5-10">1.5.10</a>)로 정규직교기저 \((w_1, \dots, w_k)\)를 잡고
           \(v_j = \sum_i C^i_j w_i\)라 하자. \(C\)는 \((w_i)\)에서 \((v_j)\)로의 기저변환 행렬이므로 가역이다. <a href="1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>(b)에서 \(\inner{v_i}{v_j} = \sum_l C^l_i C^l_j\)이므로 \(G = C^{\mathsf{T}}C\)이고,
           \(\det G = (\det C)^2 \gt 0\)이다.</p>
           <p class="verified">검증: <code>verify/v-1-6-determinant-orientation.py</code> (무작위 수치 확인)</p>
