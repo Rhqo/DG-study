@@ -31,7 +31,7 @@ def h_num(x):
     return a / (a + b)
 
 
-def k_num(x):
+def lam_num(x):
     return 1 - h_num(1 + np.asarray(x, float))
 
 
@@ -55,11 +55,11 @@ for kk in range(4):
     lim = sp.limit(d, u, 0, "+")
     check(f"보조정리 12.3.1: t → 1+에서 (1-h)^({kk}) → 0", lim == 0)
 
-# k(s) = 1 - h(1 + s)
+# λ(s) = 1 - h(1 + s)
 ss = np.linspace(-3, 4, 7001)
-check("본문: k(s) = 0 (s ≤ 0), k(s) = 1 (s ≥ 1), 0 ≤ k ≤ 1",
-      np.all(k_num(ss[ss <= 0]) == 0) and np.all(k_num(ss[ss >= 1]) == 1) and np.all((k_num(ss) >= 0) & (k_num(ss) <= 1)))
-check("본문: s > 0.05이면 k(s) > 0 (수치)", np.all(k_num(ss[ss > 0.05]) > 0))
+check("본문: λ(s) = 0 (s ≤ 0), λ(s) = 1 (s ≥ 1), 0 ≤ λ ≤ 1",
+      np.all(lam_num(ss[ss <= 0]) == 0) and np.all(lam_num(ss[ss >= 1]) == 1) and np.all((lam_num(ss) >= 0) & (lam_num(ss) <= 1)))
+check("본문: s > 0.05이면 λ(s) > 0 (수치)", np.all(lam_num(ss[ss > 0.05]) > 0))
 
 # ---------------------------------------------------------------- 연습 12.3.1: h(3 - t) = 1 - h(t), h(3/2) = 1/2
 close("연습 12.3.1: h(3-t) = 1 - h(t) (수치)", h_num(3 - ts), 1 - h_num(ts), 1e-14)
@@ -92,9 +92,9 @@ r1s, r2s, d = sp.symbols("r1 r2 d", positive=True)
 sarg = 1 + (d - r1s) / (r2s - r1s)
 check("보조정리 12.3.4: s(r1) = 1, s(r2) = 2", sp.simplify(sarg.subs(d, r1s) - 1) == 0 and sp.simplify(sarg.subs(d, r2s) - 2) == 0)
 
-# ---------------------------------------------------------------- 예 12.3.9: S² 위의 ψ(x) = k(2x³)
+# ---------------------------------------------------------------- 예 12.3.9: S² 위의 ψ(x) = λ(2x³)
 z = np.linspace(-1, 1, 20001)
-psi = k_num(2 * z)
+psi = lam_num(2 * z)
 check("예 12.3.9: x³ ≥ 1/2이면 ψ = 1", np.all(psi[z >= 0.5] == 1))
 check("예 12.3.9: x³ ≤ 0이면 ψ = 0", np.all(psi[z <= 0] == 0))
 check("예 12.3.9: x³ > 0.03이면 ψ > 0 (수치)", np.all(psi[z > 0.03] > 0))

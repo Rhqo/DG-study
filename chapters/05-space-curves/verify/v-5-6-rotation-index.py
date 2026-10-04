@@ -5,6 +5,10 @@
 - 접선회전정리의 증명 구조를 수치로 재현: 할선 사상 ψ를 삼각형의 경계에서 들어 올려 변 AB, BC에서 각각 π,
   대각선에서 2π·(회전지수)가 됨 (정리 5.6.7). 부호곡률은 dgsym.signed_curvature(n_s = J t 규약)로 계산한다.
 - 곡선다각형 (정리 5.6.11): 곧은 삼각형, 오목한 곡선 삼각형(가장 낮은 점이 꼭짓점), 뢸로 삼각형에서 Σ∫κ_s + Σε = ±2π.
+- 양의 방향이면 +1 (명제 5.6.12): 오목한 곡선 삼각형(h = 0.25, 0.12)을 평면에서 5°씩 돌려도 가장 낮은 점은 꼭짓점이고,
+  영역이 왼쪽인 방향(그린 정리의 넓이 부호 > 0, 매끄러운 점의 왼쪽 점의 감는 수 1)은 +2π, 반대 방향은 -2π.
+  반대 방향 곡선에서 증명의 4-8단계(α, β, δ, 가르는 벡터 m, 왼쪽 법선 반직선이 곡선을 만나지 않고 y < y0로 들어감)를
+  수치로 따라가고, 증명의 삼각함수 계산을 sympy로 확인한다. 연습 5.6.8(원의 방향, 뒤집으면 부호가 바뀜).
 
 실행: 프로젝트 루트에서 ``PYTHONPATH=tools python3 chapters/05-space-curves/verify/v-5-6-rotation-index.py``
 """
@@ -271,5 +275,265 @@ tot_reu, eps_reu, _ = polygon_total(reu)
 close("연습 5.6.6: 뢸로 삼각형: 각 호의 중심각 π/3", [b - a for _, a, b in reu], [math.pi / 3] * 3, tol=1e-12)
 close("연습 5.6.6: 뢸로 삼각형: 외각 π/3씩", eps_reu, [math.pi / 3] * 3, tol=1e-9)
 close("연습 5.6.6: 뢸로 삼각형: Σ∫κ_s + Σε = 2π", tot_reu, TWO_PI, tol=1e-8)
+
+# 명제 5.6.12: 양의 방향이면 회전지수 +1 --------------------------------------------------------------
+# 곡선은 조각마다 u ∈ [0, 1]로 매개화한다. 양의 방향(정리 2.6.13)은 두 방법으로 판정한다.
+#  (i) 부호 있는 넓이 ½∮(x dy - y dx)의 부호 (그린 정리: 양의 방향이면 넓이 > 0),
+#  (ii) 매끄러운 점 γ(u)에서 γ + η Jγ'이 둘러싼 영역 안에 있는지 (감는 수 ±1이면 안, 0이면 밖).
+def _ev(fn, x):
+    return np.array([np.broadcast_to(c, np.shape(x)) for c in fn(x)], float)
+
+
+def _J(v):
+    v = np.asarray(v, float)
+    return np.stack([-v[..., 1], v[..., 0]], axis=-1)
+
+
+class PWCurve:
+    """조각마다 매끄러운 닫힌 곡선의 수치 표현. 조각 i는 u ∈ [0, 1]에서 R·γ_i(u)."""
+
+    def __init__(self, pieces_sym, R=None, n=8001, funcs=None):
+        self.R = np.eye(2) if R is None else np.asarray(R, float)
+        if funcs is None:
+            funcs = ([sp.lambdify(t, list(e), "numpy") for e, _, _ in pieces_sym],
+                     [sp.lambdify(t, list(sp.diff(e, t)), "numpy") for e, _, _ in pieces_sym])
+        self.f, self.df = funcs
+        self.us = np.linspace(0, 1, n)
+        self.pts = [self.pos(i, self.us) for i in range(len(self.f))]
+        self.poly = np.concatenate([q[:-1] for q in self.pts] + [self.pts[0][:1]])
+
+    def rotated(self, R, n):
+        return PWCurve(None, R, n, (self.f, self.df))
+
+    def pos(self, i, u):
+        return (self.R @ _ev(self.f[i], np.atleast_1d(np.asarray(u, float)))).T
+
+    def der(self, i, u):
+        return (self.R @ _ev(self.df[i], np.atleast_1d(np.asarray(u, float)))).T
+
+    def area(self):
+        tot = 0.0
+        for i in range(len(self.f)):
+            q, dq = self.pts[i], self.der(i, self.us)
+            tot += 0.5 * np.trapezoid(q[:, 0] * dq[:, 1] - q[:, 1] * dq[:, 0], self.us)
+        return tot
+
+    def winding(self, q):
+        v = self.poly - np.asarray(q, float)[None]
+        v = v / np.linalg.norm(v, axis=1)[:, None]
+        return float(np.sum(ang(v[:-1], v[1:])) / TWO_PI)
+
+    def left_point(self, i, u0, dist=2e-3):
+        """γ + η Jγ' (η|γ'| = dist): 양의 방향이면 Ω 안이어야 하는 점."""
+        d = self.der(i, u0)[0]
+        return self.pos(i, u0)[0] + dist * _J(d / np.linalg.norm(d))
+
+
+def crosses(a, b, pts):
+    """선분 ab가 꺾은선 pts와 만나는가 (방향 판정)."""
+    q0, q1 = pts[:-1], pts[1:]
+
+    def orient(x, y, z):
+        return (y[..., 0] - x[..., 0]) * (z[..., 1] - x[..., 1]) - (y[..., 1] - x[..., 1]) * (z[..., 0] - x[..., 0])
+
+    o1, o2 = orient(a[None], b[None], q0), orient(a[None], b[None], q1)
+    o3, o4 = orient(q0, q1, a[None]), orient(q0, q1, b[None])
+    return bool(np.any((o1 * o2 < 0) & (o3 * o4 < 0)))
+
+
+def unit(v):
+    v = np.asarray(v, float)
+    return v / np.linalg.norm(v)
+
+
+def e_(phi):
+    return np.array([math.cos(phi), math.sin(phi)])
+
+
+def lowest_vertex(cv):
+    """가장 낮은 점이 꼭짓점인지 확인하고 그 꼭짓점의 조각 번호를 돌려준다 (없으면 None)."""
+    vy = [cv.pts[i][0, 1] for i in range(len(cv.pts))]
+    j = int(np.argmin(vy))
+    k = len(cv.us) // 100
+    inner = min(np.min(q[k:-k, 1]) for q in cv.pts)                  # 꼭짓점에서 떨어진 점들
+    return j if inner > vy[j] + 1e-6 and np.min(cv.poly[:, 1]) >= vy[j] - 1e-12 else None
+
+
+def proof_steps(cv, j):
+    """명제 5.6.12 증명의 4-7단계를 곡선 cv(회전지수 -1)의 가장 낮은 꼭짓점 j에서 수치로 따라간다.
+
+    돌려주는 값: (α, β, ε, δ, 경우, 검사 결과 dict)
+    """
+    nP = len(cv.pts)
+    p = cv.pos(j, 0.0)[0]
+    y0 = p[1]
+    tp = unit(cv.der(j, 0.0)[0])                      # 나가는 조각 j의 시작
+    tm = unit(cv.der((j - 1) % nP, 1.0)[0])           # 들어오는 조각 j-1의 끝
+    eps0 = float(ang(tm, tp))
+    beta = math.atan2(tp[1], tp[0]) % TWO_PI
+    alpha = math.atan2(-tm[1], -tm[0]) % TWO_PI
+    delta = min(math.pi / 8, (beta - alpha) / 4) if beta > alpha else float("nan")
+    res = {"(5.6.7) 0 ≤ α < β ≤ π": 0 <= alpha < beta <= math.pi,
+           "(5.6.7) β - α = π + ε": abs(beta - alpha - (math.pi + eps0)) < 1e-12}
+    caseA = beta >= math.pi / 2 + 2 * delta - 1e-12
+    caseB = alpha <= math.pi / 2 - 2 * delta + 1e-12
+    res["8단계: 6단계나 7단계의 경우가 성립"] = caseA or caseB
+    us = cv.us
+    # 5단계: r (u 단위, 두 조각에서 같은 길이)과 d
+    Tout = np.array([unit(v) for v in cv.der(j, us)])
+    Tin = np.array([unit(v) for v in cv.der((j - 1) % nP, us)])
+    ok_out = Tout @ tp > math.cos(delta)
+    ok_in = (Tin @ tm > math.cos(delta))[::-1]         # 꼭짓점에서 거꾸로
+    n_r = min(np.argmin(ok_out) if not ok_out.all() else len(us), np.argmin(ok_in) if not ok_in.all() else len(us))
+    n_r = min(n_r - 1, len(us) // 2 - 1)
+    r = us[n_r]
+    rest = [cv.pts[j][n_r:], cv.pts[(j - 1) % nP][:len(us) - n_r]] + [cv.pts[i] for i in range(nP) if i not in (j, (j - 1) % nP)]
+    d = min(np.min(np.linalg.norm(q - p[None], axis=1)) for q in rest)
+    res["5단계: d > 0"] = d > 0
+    sd = math.sin(delta)
+    # 6단계(나가는 조각) 또는 7단계(들어오는 조각)
+    if caseA:
+        idx = np.arange(1, n_r)
+        seg_pts, seg_der = cv.pts[j][idx], cv.der(j, us[idx])
+        other = cv.pts[(j - 1) % nP][len(us) - n_r:-1]                # 들어오는 조각의 [a - r, a)
+        m = e_(beta - 2 * delta + math.pi / 2)
+        case = "6단계"
+    else:
+        idx = np.arange(len(us) - 2, len(us) - n_r - 1, -1)          # 꼭짓점에서 거꾸로
+        seg_pts, seg_der = cv.pts[(j - 1) % nP][idx], cv.der((j - 1) % nP, us[idx])
+        other = cv.pts[j][1:n_r + 1]                                   # 나가는 조각의 (a, a + r]
+        m = e_(alpha + 2 * delta - math.pi / 2)
+        case = "7단계"
+    rho = np.linalg.norm(seg_pts - p[None], axis=1)
+    good = np.nonzero(rho * (1 + 1 / sd) < 0.9 * d)[0]
+    k1 = good[-1]
+    x1, T1 = seg_pts[k1], unit(seg_der[k1])
+    nu = _J(T1)
+    rho1 = rho[k1]
+    res["y성분: <Jt1, e2> < -sin δ"] = nu[1] < -sd
+    res["<γ(t) - p, m> < 0 (다른 조각)"] = bool(np.all((other - p[None]) @ m < 0))
+    lam = np.linspace(0, rho1 / sd, 400)
+    ray = x1[None] + lam[:, None] * nu[None]
+    res["<x_λ - p, m> > 0 (0 ≤ λ ≤ ρ1/sin δ)"] = bool(np.all((ray - p[None]) @ m > 0))
+    res["|x_λ - p| < d (0 ≤ λ ≤ ρ1/sin δ)"] = bool(np.all(np.linalg.norm(ray - p[None], axis=1) < d))
+    arc_der = np.array([unit(v) for v in (cv.der(j, us[1:n_r + 1]) if caseA else cv.der((j - 1) % nP, us[len(us) - n_r - 1:-1]))])
+    res["f' = <γ', t1> > 0 (고른 조각)"] = bool(np.all(arc_der @ T1 > 0))
+    lam_end = (y0 - 1.0 - x1[1]) / nu[1]
+    res["반직선이 곡선과 만나지 않음"] = not crosses(x1 + 1e-7 * nu, x1 + lam_end * nu, cv.poly)
+    res["반직선이 y < y0로 들어감"] = x1[1] + (rho1 / sd) * nu[1] < y0
+    q_left = x1 + min(2e-3, 0.3 * rho1) * nu
+    res["γ(t1) + η Jγ'(t1)은 Ω 밖 (감는 수 0)"] = abs(cv.winding(q_left)) < 1e-6
+    return alpha, beta, eps0, delta, case, res
+
+
+concave12 = [(edge(P[i], P[(i + 1) % 3], 0.12), 0, 1) for i in range(3)]   # 그림 5.6.3, 5.6.4의 곡선
+for hgt, ccw_pieces in ((0.25, concave), (0.12, concave12)):
+    rev_pieces = [(e.subs(t, 1 - t), 0, 1) for e, _, _ in reversed(ccw_pieces)]
+    area_exact = 3 * math.sqrt(3) / 4 - 3 * math.sqrt(3) * hgt * 2 / math.pi   # 곧은 삼각형 - 볼록한 세 조각
+    cv_p, cv_n = PWCurve(ccw_pieces), PWCurve(rev_pieces)
+    close(f"명제 5.6.12: 오목한 곡선 삼각형(h = {hgt}, 반시계)의 부호 있는 넓이 = 3√3/4 - 6√3h/π (그린 정리)",
+          cv_p.area(), area_exact, tol=1e-8)
+    close(f"명제 5.6.12: 같은 곡선을 시계 방향으로 돌면 부호 있는 넓이 = -(넓이)", cv_n.area(), -area_exact, tol=1e-8)
+    pos_ok = all(abs(cv_p.winding(cv_p.left_point(i, u0)) - 1) < 1e-6 for i in range(3) for u0 in (0.1, 0.3, 0.5, 0.7, 0.9))
+    neg_out = all(abs(cv_n.winding(cv_n.left_point(i, u0))) < 1e-6 for i in range(3) for u0 in (0.1, 0.3, 0.5, 0.7, 0.9))
+    check(f"명제 5.6.12(h = {hgt}): 반시계 방향은 양의 방향 (15개 매끄러운 점에서 γ + ηJγ'의 감는 수 1)", pos_ok)
+    check(f"명제 5.6.12(h = {hgt}): 시계 방향은 양의 방향이 아님 (같은 점에서 감는 수 0)", neg_out)
+    tot_p, _, _ = polygon_total(ccw_pieces)
+    tot_n, _, _ = polygon_total(rev_pieces)
+    close(f"명제 5.6.12(h = {hgt}): 양의 방향(넓이 > 0)이면 Σ∫κ_s + Σε = +2π", tot_p, TWO_PI, tol=1e-7)
+    close(f"명제 5.6.12(h = {hgt}): 반대 방향(넓이 < 0)이면 -2π", tot_n, -TWO_PI, tol=1e-7)
+    # 평면을 돌려도: 가장 낮은 점은 늘 꼭짓점, 부호와 넓이의 부호가 맞고, 반대 방향에서 증명의 단계가 성립
+    all_vertex, sign_ok, steps_ok, cases = True, True, True, set()
+    failed_steps = []
+    for kdeg in range(0, 360, 5):
+        R = rot(math.radians(kdeg))
+        cp, cn = cv_p.rotated(R, 4001), cv_n.rotated(R, 4001)
+        jp, jn = lowest_vertex(cp), lowest_vertex(cn)
+        if jp is None or jn is None:
+            all_vertex = False
+            continue
+        tp_, tm_ = unit(cp.der(jp, 0.0)[0]), unit(cp.der((jp - 1) % 3, 1.0)[0])
+        sign_ok &= contains_e1(tm_, tp_, float(ang(tm_, tp_))) and cp.area() > 0      # 정리 5.6.11: +1
+        alpha_, beta_, eps_, delta_, case_, res_ = proof_steps(cn, jn)
+        cases.add(case_)
+        bad = [k_ for k_, v_ in res_.items() if not v_]
+        if bad:
+            steps_ok = False
+            failed_steps.append((kdeg, bad))
+    check(f"명제 5.6.12 동기(h = {hgt}): 평면을 5°씩 72번 돌려도 가장 낮은 점은 늘 꼭짓점", all_vertex)
+    check(f"명제 5.6.12(h = {hgt}): 72번 모두 반시계 방향은 넓이 > 0이고 가장 낮은 꼭짓점의 호가 e1을 지난다 (+1)", sign_ok)
+    check(f"명제 5.6.12 증명(h = {hgt}): 72번 모두 시계 방향 곡선에서 4-8단계의 부등식과 반직선이 성립", steps_ok,
+          f"실패: {failed_steps[:3]}")
+    check(f"명제 5.6.12 증명(h = {hgt}): 6단계와 7단계의 경우가 모두 나타난다", cases == {"6단계", "7단계"}, f"{cases}")
+
+# 그림 5.6.4의 값: 시계 방향, 돌리지 않은 곡선 (h = 0.12)
+cv_fig = PWCurve([(e.subs(t, 1 - t), 0, 1) for e, _, _ in reversed(concave12)])
+a_fig, b_fig, e_fig, d_fig, c_fig, r_fig = proof_steps(cv_fig, 0)
+close("그림 5.6.4: α ≈ 72.3°, β ≈ 107.7°", (round(math.degrees(a_fig), 1), round(math.degrees(b_fig), 1)), (72.3, 107.7), tol=1e-9)
+check("그림 5.6.4: 좌우 대칭이라 α = π - β (6단계의 조건이 경계에서 성립)", abs(a_fig + b_fig - math.pi) < 1e-12
+      and abs(b_fig - (math.pi / 2 + 2 * d_fig)) < 1e-12)
+check("그림 5.6.4: 증명의 단계가 모두 성립", all(r_fig.values()), f"{r_fig}")
+
+# 매끄러운 점이 가장 낮은 경우 (3단계): 콩 모양 곡선과 그 반대 방향
+bean_p = bean
+bean_n = bean.subs(t, -t)
+for name_, curve_, want in (("반시계", bean_p, 1), ("시계", bean_n, 0)):
+    cvb = PWCurve([(curve_.subs(t, TWO_PI * t), 0, 1)], n=40001)
+    iy = int(np.argmin(cvb.pts[0][:, 1]))
+    ul = cvb.us[iy]
+    for _ in range(30):                                                # 가장 낮은 점을 뉴턴법으로
+        dd = cvb.der(0, ul)[0][1]
+        h_ = 1e-6
+        ul -= dd / ((cvb.der(0, ul + h_)[0][1] - cvb.der(0, ul - h_)[0][1]) / (2 * h_))
+    q_ = cvb.left_point(0, ul)
+    below = q_[1] < cvb.pos(0, ul)[0][1]
+    check(f"명제 5.6.12 증명 3단계: 콩 모양({name_}): 가장 낮은 점의 왼쪽 점은 감는 수 {want}"
+          + (" (y < y0이므로 Ω 밖)" if want == 0 else ""), abs(cvb.winding(q_) - want) < 1e-6 and (below == (want == 0)))
+
+# 연습 5.6.8(a): 시계 방향 원은 Jγ' = γ, 반시계 방향 원은 Jγ' = -γ
+rr_ = sp.symbols("r", positive=True)
+cw = sp.Matrix([rr_ * sp.cos(t), -rr_ * sp.sin(t)])
+cc = sp.Matrix([rr_ * sp.cos(t), rr_ * sp.sin(t)])
+Jm = sp.Matrix([[0, -1], [1, 0]])
+sym_equal("연습 5.6.8(a): 시계 방향 원에서 Jγ'(t) = γ(t) (왼쪽 점 (1 + η)γ는 원판 밖)", Jm * sp.diff(cw, t), cw)
+sym_equal("연습 5.6.8(a): 반시계 방향 원에서 Jγ'(t) = -γ(t) (왼쪽 점 (1 - η)γ는 원판 안)", Jm * sp.diff(cc, t), -cc)
+check("연습 5.6.8(b): 방향을 뒤집으면 회전지수의 부호가 바뀐다 (오목한 곡선 삼각형, 위의 ±2π)", abs(tot_r + tot_c) < 1e-6)
+check("연습 5.6.8(b): ∠(-u, -v) = ∠(u, v), ∠(v, u) = -∠(u, v) (무작위 100개)", all(
+    abs(ang(-uu, -vv) - ang(uu, vv)) < 1e-12 and abs(ang(vv, uu) + ang(uu, vv)) < 1e-12
+    for uu, vv in ((e_(a1), e_(a1 + b1)) for a1, b1 in zip(rng.uniform(-4, 4, 100), rng.uniform(-3, 3, 100)))))
+
+# 명제 5.6.12 증명의 삼각함수 계산
+al, be, de, th1, lam0, ep = sp.symbols("alpha beta delta theta_1 lambda_0 varepsilon", real=True)
+E = lambda a_: sp.Matrix([sp.cos(a_), sp.sin(a_)])
+dot = lambda x_, y_: (x_.T * y_)[0]
+sym_equal("명제 5.6.12 증명 0단계: J e(φ) = e(φ + π/2)", Jm * E(th1), E(th1 + sp.pi / 2))
+sym_equal("명제 5.6.12 증명 4단계: t⁻ = e(π - λ0ε)이면 -t⁻ = e(α), α = -λ0ε", -E(sp.pi - lam0 * ep), E(-lam0 * ep))
+sym_equal("명제 5.6.12 증명 4단계: β - α = π + ε", (sp.pi + (1 - lam0) * ep) - (-lam0 * ep), sp.pi + ep)
+sym_equal("명제 5.6.12 증명 4단계: t⁻, t⁺의 y성분 = sin(λ0ε), -sin((1-λ0)ε)",
+          [E(sp.pi - lam0 * ep)[1], E(sp.pi + (1 - lam0) * ep)[1]], [sp.sin(lam0 * ep), -sp.sin((1 - lam0) * ep)])
+m6 = E(be - 2 * de + sp.pi / 2)
+sym_equal("명제 5.6.12 증명 6단계: <e(θ), m> = sin(θ - β + 2δ)", dot(E(th1), m6), sp.sin(th1 - be + 2 * de))
+sym_equal("명제 5.6.12 증명 6단계: <J e(θ1), m> = cos(θ1 - β + 2δ)", dot(Jm * E(th1), m6), sp.cos(th1 - be + 2 * de))
+sym_equal("명제 5.6.12 증명 6단계: <J e(θ1), e2> = cos θ1 = -sin(θ1 - π/2)", [(Jm * E(th1))[1], sp.cos(th1)], [sp.cos(th1), -sp.sin(th1 - sp.pi / 2)])
+m7 = E(al + 2 * de - sp.pi / 2)
+sym_equal("명제 5.6.12 증명 7단계: J(-e(θ1)) = e(θ1 - π/2)", Jm * (-E(th1)), E(th1 - sp.pi / 2))
+sym_equal("명제 5.6.12 증명 7단계: <e(θ), m> = sin(α + 2δ - θ)", dot(E(th1), m7), sp.sin(al + 2 * de - th1))
+sym_equal("명제 5.6.12 증명 7단계: <e(θ1 - π/2), m> = cos(θ1 - α - 2δ)", dot(E(th1 - sp.pi / 2), m7), sp.cos(th1 - al - 2 * de))
+# 구간 주장: 무작위 0 ≤ α < β ≤ π와 δ = min(π/8, (β - α)/4)
+ok_rng, ok_case, ok_bounds = True, True, True
+for _ in range(4000):
+    a1, b1 = sorted(rng.uniform(0, math.pi, 2))
+    if b1 - a1 < 1e-9:
+        continue
+    d1 = min(math.pi / 8, (b1 - a1) / 4)
+    ok_case &= (b1 >= math.pi / 2 + 2 * d1) or (a1 <= math.pi / 2 - 2 * d1)
+    lo, hi = a1 - b1 + d1, a1 - b1 + 3 * d1
+    ok_rng &= (-math.pi < lo) and (hi <= 0) and (3 * d1 < math.pi / 2)
+    xs_s = np.linspace(d1, math.pi / 2 + d1, 2001)[1:-1]
+    xs_c = np.linspace(-d1, math.pi / 2 - d1, 2001)[1:-1]
+    ok_bounds &= bool(np.all(np.sin(xs_s) > math.sin(d1)) and np.all(np.cos(xs_c) > math.sin(d1)))
+check("명제 5.6.12 증명 8단계: 0 ≤ α < β ≤ π이면 β ≥ π/2 + 2δ 또는 α ≤ π/2 - 2δ (무작위 4000개)", ok_case)
+check("명제 5.6.12 증명 6·7단계: (α - β + δ, α - β + 3δ) ⊆ (-π, 0), 3δ < π/2", ok_rng)
+check("명제 5.6.12 증명 6·7단계: (δ, π/2 + δ)에서 sin > sin δ, (-δ, π/2 - δ)에서 cos > sin δ", ok_bounds)
 
 summary()

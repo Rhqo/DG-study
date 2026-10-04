@@ -39,10 +39,10 @@ psi = g / g.sum(axis=0)
 fexh = (np.abs(ks)[:, None] + 1) * psi
 fexh = fexh.sum(axis=0)
 
-# 자기검사: f ≥ 1, |t| ≥ N + 1이면 f(t) ≥ N + 2 (따라서 {f ≤ N + 1} ⊆ [−N − 1, N + 1]), 정수 근처 평평함
+# 자기검사: f ≥ 1, |t| ≥ m + 1이면 f(t) ≥ m + 2 (따라서 {f ≤ m + 1} ⊆ [−m − 1, m + 1]), 정수 근처 평평함
 assert np.all(fexh >= 1 - 1e-12)
-for N in range(0, 3):
-    assert np.all(fexh[np.abs(t) >= N + 1] >= N + 2 - 1e-12)
+for m0 in range(0, 3):
+    assert np.all(fexh[np.abs(t) >= m0 + 1] >= m0 + 2 - 1e-12)
 for q in range(-3, 4):
     m = np.abs(t - q) <= 0.25
     assert np.allclose(fexh[m], abs(q) + 1)

@@ -107,6 +107,29 @@ sym_equal("비예 7.4.11: Ē/E = sin²θ, Ḡ/G = 1/sin²θ", sp.Matrix([Ia[0] /
 # 연습 7.4.2: (s, φ) ↦ (e^s cos φ, e^s sin φ, 0) 은 등온 --------------------------------------------
 check("연습 7.4.2: 로그 극좌표는 등온 매개화", ratio_const((1, 0, 1), first_ff(Yexp, u, v)) is not None)
 
+# 연습 7.4.3: 넓이요소는 λ²배, 입체사영으로 본 남반구의 넓이 --------------------------------------
+Eg3, Fg3, Gg3, mu3 = sp.symbols("E F G mu", positive=True)
+check("연습 7.4.3: (Ē, F̄, Ḡ) = μ(E, F, G)이면 ĒḠ − F̄² = μ²(EG − F²)",
+      sp.expand((mu3 * Eg3) * (mu3 * Gg3) - (mu3 * Fg3) ** 2 - mu3 ** 2 * (Eg3 * Gg3 - Fg3 ** 2)) == 0)
+rho3 = sp.symbols("rho3", positive=True)
+lam2 = (2 / (1 + rho3 ** 2)) ** 2  # σ⁻¹의 배율의 제곱, u² + v² = ρ²
+A_south = sp.integrate(sp.integrate(lam2 * rho3, (rho3, 0, 1)), (tt, 0, 2 * sp.pi))
+check("연습 7.4.3(b): ∬_{원판} λ² dA = 2π (닫힌 남반구의 넓이)", sp.simplify(A_south - 2 * sp.pi) == 0)
+check("연습 7.4.3(b): 예 7.3.10(c)의 2πr²(cos θ₁ − cos θ₂) (r = 1, θ₁ = π/2, θ₂ = π)와 같다",
+      sp.simplify(2 * sp.pi * (sp.cos(sp.pi / 2) - sp.cos(sp.pi)) - A_south) == 0)
+# 같은 값을 σ⁻¹의 넓이요소 √(EG − F²)로 직접 (수치, 극좌표 격자)
+inv_np = sp.lambdify((U1, U2), list(inv), "numpy")
+rr3 = np.linspace(0.0, 1.0, 1201)
+aa3 = np.linspace(0.0, 2 * np.pi, 1201)
+RR3, AA3 = np.meshgrid(rr3, aa3, indexing="ij")
+h3 = 1e-6
+P0 = np.array(inv_np(RR3 * np.cos(AA3), RR3 * np.sin(AA3)), dtype=float)
+Pu = (np.array(inv_np(RR3 * np.cos(AA3) + h3, RR3 * np.sin(AA3)), dtype=float) - np.array(inv_np(RR3 * np.cos(AA3) - h3, RR3 * np.sin(AA3)), dtype=float)) / (2 * h3)
+Pv = (np.array(inv_np(RR3 * np.cos(AA3), RR3 * np.sin(AA3) + h3), dtype=float) - np.array(inv_np(RR3 * np.cos(AA3), RR3 * np.sin(AA3) - h3), dtype=float)) / (2 * h3)
+dA3 = np.linalg.norm(np.cross(Pu, Pv, axis=0), axis=0) * RR3
+close("연습 7.4.3(b): |σ⁻¹_u × σ⁻¹_v|를 원판에서 적분 = 2π (수치)", float(np.trapezoid(np.trapezoid(dA3, aa3, axis=1), rr3)), 2 * math.pi, tol=1e-5)
+check("연습 7.4.3(b): 원판의 상은 z ≤ 0 (경계 원은 적도)", sp.simplify(inv[2].subs({U1: 1, U2: 0})) == 0 and float(inv[2].subs({U1: 0.3, U2: 0.4})) < 0)
+
 # 연습 7.4.4: 배율의 합성 규칙 (수치 예: 닮음 두 개) --------------------------------------------------
 check("연습 7.4.4: λ_{ψ∘φ} = (λ_ψ∘φ)λ_φ (닮음 c₁, c₂의 합성은 c₁c₂)", ratio_const(Is, first_ff(2 * 3 * sph["expr"], th, ph, sph["positive"])) == 36)
 
@@ -115,10 +138,10 @@ be = sp.symbols("beta", positive=True)
 # 메르카토르 직선 ds/dt = tan β, t = log cot(θ/2): dφ/dθ = tan β · dt/dθ = −tan β/sin θ
 dphi = -sp.tan(be) / sp.sin(th)
 speed2 = Is[0] * 1 + Is[2] * dphi ** 2
-sym_equal("연습 7.4.5: |α'(θ)|² = r²/cos²β (상수)", speed2, r ** 2 / sp.cos(be) ** 2, {th: (0.2, 3.0), be: (0.2, 1.3), r: (0.5, 2)})
-check("연습 7.4.5: 적도에서 북극까지 길이 = πr/(2 cos β)", sp.simplify(sp.integrate(r / sp.cos(be), (th, 0, sp.pi / 2)) - sp.pi * r / (2 * sp.cos(be))) == 0)
+sym_equal("연습 7.4.5: |α'(θ)|² = r²/cos²ϑ₀ (상수)", speed2, r ** 2 / sp.cos(be) ** 2, {th: (0.2, 3.0), be: (0.2, 1.3), r: (0.5, 2)})
+check("연습 7.4.5: 적도에서 북극까지 길이 = πr/(2 cos ϑ₀)", sp.simplify(sp.integrate(r / sp.cos(be), (th, 0, sp.pi / 2)) - sp.pi * r / (2 * sp.cos(be))) == 0)
 # 각: 경선 방향 (1, 0)과 (1, dφ/dθ) 사이의 cos = √E/|α'| = cos β
-sym_equal("연습 7.4.5: 경선과 이루는 각의 cos = cos β", sp.sqrt(Is[0]) / sp.sqrt(speed2), sp.cos(be), {th: (0.2, 3.0), be: (0.2, 1.3), r: (0.5, 2)})
+sym_equal("연습 7.4.5: 경선과 이루는 각의 cos = cos ϑ₀", sp.sqrt(Is[0]) / sp.sqrt(speed2), sp.cos(be), {th: (0.2, 3.0), be: (0.2, 1.3), r: (0.5, 2)})
 
 # 연습 7.4.6: 입체사영은 원을 원으로 --------------------------------------------------------------
 a, b, cc, d = sp.symbols("a b c d", real=True)

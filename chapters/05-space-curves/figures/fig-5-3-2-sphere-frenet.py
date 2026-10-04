@@ -4,7 +4,8 @@
 점 p = x(θ0, φ0), θ0 = π/3, φ0 = -0.35.
 (a) 위도원 θ = θ0: t = (-sin φ, cos φ, 0), n = -(cos φ, sin φ, 0) (z축을 향함), b = e3.  N은 n과 각 π/2 - θ0 = 30°.
 (b) p를 지나는 경선을 포함하는 대원: t = ∂x/∂θ/|∂x/∂θ|, n = -N (구의 중심을 향함), b는 상수(대원의 평면의 법벡터).
-프레네 틀은 dgsym.frenet_frame으로 계산하고 실제 길이의 0.5배, N은 주황 점선 화살표로 0.5배로 그린다.
+프레네 틀은 dgsym.frenet_frame으로 계산하고 실제 길이의 0.5배로 그린다. 곡면의 N과 곡선의 n이 한 그림에 함께 나오므로
+§12.3의 규칙대로 N은 주홍 실선, n은 주황 점선이다 (t는 파랑, b는 청록). N도 0.5배로 그린다.
 
 실행: 프로젝트 루트에서 ``PYTHONPATH=tools python3 chapters/05-space-curves/figures/fig-5-3-2-sphere-frenet.py``
 """
@@ -62,13 +63,18 @@ def base(ax):
     return V, ang
 
 
+DASH = (0, (3, 2))                                  # 곡선의 주법선 n: 주황 점선 (§12.3)
+
+
 def frame(ax, fr, labels):
-    for v, role, lab, off in zip(fr, ("tangent", "normal", "third"), labels,
+    for v, role, lab, off in zip(fr, ("tangent", "accent", "third"), labels,
                                  ((0.05, 0.0, 0.03), (0.0, 0.0, -0.1), (0.04, 0.0, 0.05))):
-        dgfig.arrow3d(ax, p, v, role=role, scale=SC, zorder=11, head=10)
+        arr = dgfig.arrow3d(ax, p, v, role=role, scale=SC, zorder=11, head=10)
+        if role == "accent":
+            arr.set_linestyle(DASH)
         ax.text(*(p + SC * v + np.array(off)), lab, color=C[role], fontsize=12, zorder=12)
-    dgfig.arrow3d(ax, p, Nsph, role="accent", scale=SC, zorder=10, head=10, ls=(0, (3, 2)))
-    ax.text(*(p + SC * Nsph + np.array([0.04, 0.0, 0.06])), r"$\mathbf{N}$", color=C["accent"], fontsize=12, zorder=12)
+    dgfig.arrow3d(ax, p, Nsph, role="normal", scale=SC, zorder=10, head=10)   # 곡면의 N: 주홍 실선
+    ax.text(*(p + SC * Nsph + np.array([0.04, 0.0, 0.06])), r"$\mathbf{N}$", color=C["normal"], fontsize=12, zorder=12)
     dgfig.point3d(ax, p, size=16, zorder=12)
 
 

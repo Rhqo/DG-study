@@ -1,4 +1,4 @@
-"""그림 12.3.3: S² 위의 범프 함수 ψ(x) = k(2x³), k(s) = 1 − h(1 + s) (12.3절, 예 12.3.9).
+"""그림 12.3.3: S² 위의 범프 함수 ψ(x) = λ(2x³), λ(s) = 1 − h(1 + s) (12.3절, 예 12.3.9).
 
 곡면의 색은 ψ의 값이다(연회색 0 → 파랑 1). ψ는 북극 쪽 닫힌 극관 K = {x³ ≥ 1/2}(주황 원 위쪽)에서 1이고,
 아래 반구 {x³ ≤ 0}(적도 = 회색 원 아래)에서 0이다. 받침은 닫힌 위 반구 {x³ ≥ 0}이다.
@@ -32,17 +32,17 @@ def h(t):
     return a / (a + b)
 
 
-def k(s):
+def lam(s):
     return 1 - h(1 + np.asarray(s, float))
 
 
 def psi(x3):
-    return k(2 * np.asarray(x3, float))
+    return lam(2 * np.asarray(x3, float))
 
 
-# 자기검사: k = 0 (s ≤ 0), k = 1 (s ≥ 1), 0 ≤ k ≤ 1; ψ = 1 on x³ ≥ 1/2, ψ = 0 on x³ ≤ 0, ψ > 0 on x³ > 0.05
+# 자기검사: λ = 0 (s ≤ 0), λ = 1 (s ≥ 1), 0 ≤ λ ≤ 1; ψ = 1 on x³ ≥ 1/2, ψ = 0 on x³ ≤ 0, ψ > 0 on x³ > 0.05
 s = np.linspace(-2, 3, 5001)
-assert np.all(k(s[s <= 0]) == 0) and np.all(k(s[s >= 1]) == 1) and np.all((k(s) >= 0) & (k(s) <= 1))
+assert np.all(lam(s[s <= 0]) == 0) and np.all(lam(s[s >= 1]) == 1) and np.all((lam(s) >= 0) & (lam(s) <= 1))
 z = np.linspace(-1, 1, 4001)
 assert np.all(psi(z[z >= 0.5]) == 1) and np.all(psi(z[z <= 0]) == 0) and np.all(psi(z[z > 0.05]) > 0)
 

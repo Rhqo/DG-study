@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>8.2 제2기본형식과 법곡률 — 미분기하 스터디</title>
+  <meta name="dg-id" content="8.2">
+  <meta name="dg-status" content="draft">
+  <meta name="dg-prereq" content="8.1, 7.1, 6.2, 6.1, 5.1, 5.3, 4.5, 2.3, 1.5">
+  <meta name="dg-refs" content="dC §3-2">
+  <meta name="dg-updated" content="2026-10-01">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">전체 목차</a> ›
+    <a href="index.html">8. 가우스 사상과 제2기본형식</a> ›
+    <span>8.2 제2기본형식과 법곡률</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>8.2 제2기본형식과 법곡률</h1>
+      <p class="meta">대응 교재:
+        <a class="cite" href="../../references.html#dC">[dC §3-2]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>이 절의 목표</h2>
+      <ul>
+        <li>형태작용소로 제2기본형식 \(\mathrm{II}_p\)를 정의하고, 기준 예제에서 계산할 수 있다.</li>
+        <li>곡면 위 곡선의 가속도의 법선 성분이 \(\mathrm{II}_p(\gamma')\)임을 증명하고, 법곡률과 뫼니에 정리를 설명할 수 있다.</li>
+        <li>곡면을 접평면 위의 그래프로 쓰고, 법단면을 정의하며, 법곡률을 법단면의 곡률로 해석할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>선수 지식</h2>
+      <ul>
+        <li><a href="8-1-gauss-map.html#i-8-1-4">명제 8.1.4</a>, <a href="8-1-gauss-map.html#i-8-1-10">정리 8.1.10</a>, <a href="8-1-gauss-map.html#i-8-1-12">정의 8.1.12 (형태작용소)</a>, <a href="8-1-gauss-map.html#i-8-1-13">예 8.1.13</a>, <a href="8-1-gauss-map.html#i-8-1-14">비고 8.1.14 (법벡터 규약)</a></li>
+        <li><a href="../05-space-curves/5-1-curvature.html#i-5-1-1">정의 5.1.1 (곡률)</a>, <a href="../05-space-curves/5-1-curvature.html#i-5-1-8">정의 5.1.8 (주법선벡터)</a>, <a href="../05-space-curves/5-3-frenet.html#i-5-3-4">명제 5.3.4</a>, <a href="../05-space-curves/5-3-frenet.html#i-5-3-7">예 5.3.7 (구면 위 원의 프레네 틀)</a>, <a href="../05-space-curves/5-1-curvature.html#i-5-1-10">예 5.1.10 (나선의 주법선)</a></li>
+        <li><a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">정의 6.2.1 (접평면)</a>, <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-3">보조정리 6.2.3</a>, <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-8">명제 6.1.8 (국소 그래프)</a>, <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-5">정리 2.3.5 (역함수 정리)</a></li>
+        <li><a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">명제 1.5.9 (정규직교기저에서의 계산)</a>, <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-1">정의 7.1.1 (제1기본형식)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>동기</h2>
+      <p><a href="8-1-gauss-map.html">8.1절</a>에서 곡면이 휘는 정도를 형태작용소 \(W_p = -d\mathbf{N}_p\)라는 선형변환으로 담았다. 이제 이것을 곡면 위의 곡선과 잇는다.
+      <a href="../05-space-curves/index.html">5장</a>은 “곡면 위 곡선의 곡률 가운데 곡면이 휘어서 생기는 몫은 얼마인가?”라는 질문을 남겼다. 곡선의 곡률벡터 \(\gamma'' = \kappa\mathbf{n}\)은 곡면에 대해 법선 성분과 접평면 성분으로 나뉜다. 곡면이 곡선에 강요하는 것은 법선 성분일 것이다. 곡면을 벗어나지 않으려면 곡면이 휘는 만큼 따라 휘어야 하기 때문이다.</p>
+      <p>구면에서는 답을 이미 보았다. <a href="../05-space-curves/5-3-frenet.html#i-5-3-7">예 5.3.7</a>(c)에서 \(S^2(r)\) 위의 모든 단위속력 곡선은 \(\inner{\gamma''}{\mathbf{N}} = -1/r\)(바깥쪽 \(\mathbf{N}\))이었다. 곡선마다 곡률은 제각각이지만 법선 성분은 늘 같다.
+      원기둥에서는 사정이 다르다. 수평 원은 법선 성분이 \(-1/r\)이고 모선은 \(0\)이다. 그러면 무엇이 법선 성분을 정하는가? 이 절의 답은 “접선 방향 하나뿐”이고, 그 값을 주는 것이 \(\inner{W_p(w)}{w}\)다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">직관: 한 점에서 방향마다 다르게 휘는 곡면</p>
+        <p>곡면의 한 점 \(p\)에서 접벡터 \(w\)와 법벡터 \(\mathbf{N}(p)\)가 만드는 평면으로 곡면을 자르면 평면곡선이 하나 생긴다(<a href="#fig-8-2-1">그림 8.2.1</a>). 이 곡선은 \(p\)에서 \(w\) 방향으로 움직이면서 곡면이 얼마나 휘는지를 그대로 보여 준다.
+        안장면의 원점에서는 \(w\)를 돌림에 따라 자른 곡선이 위로 열린 포물선(\(\beta = 0\))에서 직선(\(\beta = \pi/4\))을 거쳐 아래로 열린 포물선(\(\beta = \pi/2\))으로 바뀐다. 곡면의 휘어짐은 방향의 함수다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-8-2-1">
+        <img src="figures/fig-8-2-1-normal-sections.svg" alt="원판 모양의 회색 안장면 조각. 가운데 점 p에서 주홍 법벡터 N(p)가 위로 뻗고 파란 접벡터 w가 오른쪽으로 뻗어 있다. w와 N(p)가 만드는 하늘색 반투명 평면이 곡면을 자른다. p를 지나는 주황 곡선 네 개가 있는데, β=0은 위로 열린 포물선, β=π/6은 덜 휜 위로 열린 포물선, β=π/4는 직선, β=π/2는 아래로 열린 포물선이다.">
+        <figcaption><span class="fig-head">그림 8.2.1.</span>
+        안장면 \(z = x^2 - y^2\)의 원점 \(p\)에서의 법단면(주황). 방향 \(w(\beta) = (\cos\beta, \sin\beta, 0)\)의 법단면은 \(\gamma_\beta(s) = (s\cos\beta,\ s\sin\beta,\ s^2\cos 2\beta)\)이고 \(\beta = 0, \pi/6, \pi/4, \pi/2\)를 그렸다.
+        하늘색은 \(\beta = \pi/6\)의 법평면 \(\Span\{w, \mathbf{N}(p)\}\) 조각, 파랑은 \(w(\pi/6)\)(\(0.55\)배), 주홍은 위쪽 \(\mathbf{N}(p) = e_3\)(\(0.6\)배)이다. 곡선 \(\gamma_\beta\)의 \(p\)에서의 법곡률은 \(2\cos 2\beta\)이다(<a href="#i-8-2-11">예 8.2.11</a>).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-second-form">
+      <h2>제2기본형식</h2>
+      <p>이 절에서도 \(\mathbf{N}\)은 열린집합 \(O \subseteq S\) 위의 단위법벡터장이고, \(W_p\)는 그 \(\mathbf{N}\)에 대한 형태작용소다. 제1기본형식이 \(T_pS\)의 내적 \(\inner{w}{w}\)였듯이, 형태작용소는 이차형식 하나를 준다.</p>
+
+      <div class="thm definition" id="i-8-2-1">
+        <p><span class="thm-head">정의 8.2.1</span> <span class="thm-name">(제2기본형식, second fundamental form)</span>.
+        \(p \in O\)에서 이차형식</p>
+        <div class="equation" id="eq-8-2-1">
+        \[ \mathrm{II}_p\colon T_pS \to \R, \qquad \mathrm{II}_p(w) = \inner{W_p(w)}{w} = -\inner{d\mathbf{N}_p(w)}{w} \tag{8.2.1} \]
+        </div>
+        <p>를 \(\mathbf{N}\)에 대한 \(p\)에서 \(S\)의 <dfn>제2기본형식</dfn>(second fundamental form)이라 한다. 대응하는 쌍선형형식 \(\mathrm{II}_p(w_1, w_2) = \inner{W_p(w_1)}{w_2}\)도 같은 이름으로 부른다.</p>
+      </div>
+
+      <p>\(W_p\)가 자기수반이므로(<a href="8-1-gauss-map.html#i-8-1-10">정리 8.1.10</a>) \(\mathrm{II}_p(w_1, w_2) = \mathrm{II}_p(w_2, w_1)\)은 대칭이다. 그리고 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-1">정의 7.1.1</a> 뒤의 편극 등식과 같은 계산으로 \(\mathrm{II}_p(w_1, w_2) = \tfrac12\big(\mathrm{II}_p(w_1 + w_2) - \mathrm{II}_p(w_1) - \mathrm{II}_p(w_2)\big)\)이므로, 이차형식과 쌍선형형식은 서로를 결정한다.
+      거꾸로 \(\mathrm{II}_p\)가 \(W_p\)를 결정한다. \(\inner{W_p(w_1)}{w_2}\)를 모든 \(w_2\)에 대해 알면 \(W_p(w_1)\)이 정해지기 때문이다. \(\mathbf{N}\)을 \(-\mathbf{N}\)으로 바꾸면 \(\mathrm{II}_p\)는 \(-\mathrm{II}_p\)가 된다.</p>
+
+      <div class="thm example" id="i-8-2-2">
+        <p><span class="thm-head">예 8.2.2</span> <span class="thm-name">(기준 예제의 제2기본형식)</span>.
+        <a href="8-1-gauss-map.html#i-8-1-13">예 8.1.13</a>의 형태작용소를 <a href="#eq-8-2-1">(8.2.1)</a>에 넣는다. \(E, F, G\)는 <a href="../07-first-fundamental-form/index.html">7장</a>에서 구한 값이다.</p>
+        <ul>
+          <li>(a) 평면: \(\mathrm{II}_p = 0\).</li>
+          <li>(b) 구면(바깥쪽): \(\mathrm{II}_p(w) = \inner{-\tfrac1r w}{w} = -\tfrac1r\abs{w}^2\).</li>
+          <li>(c) 원기둥(바깥쪽): \(w = a\,\mathbf{x}_u + b\,\mathbf{x}_v\)이면 \(\mathrm{II}_p(w) = \inner{-\tfrac ar\mathbf{x}_u}{a\,\mathbf{x}_u + b\,\mathbf{x}_v} = -\tfrac{a^2}{r}E - \tfrac{ab}{r}F = -ra^2\)이다(<a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-4">예 7.1.4</a>: \(E = r^2\), \(F = 0\)).</li>
+          <li>(d) 안장면의 원점(위쪽): \(\mathrm{II}_0(a\,e_1 + b\,e_2) = \inner{2a\,e_1 - 2b\,e_2}{a\,e_1 + b\,e_2} = 2a^2 - 2b^2\).</li>
+          <li>(e) 원환면(\(\mathbf{N}_{\mathbf{x}}\), 안쪽): <a href="8-1-gauss-map.html#eq-8-1-6">(8.1.6)</a>과 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-5">예 7.1.5</a>의 \(E = r^2\), \(F = 0\), \(G = (R + r\cos u)^2\)에서</li>
+        </ul>
+        <div class="equation" id="eq-8-2-2">
+        \[ \mathrm{II}_p(a\,\mathbf{x}_u + b\,\mathbf{x}_v) = \frac{a^2}{r}E + \frac{b^2\cos u}{R + r\cos u}\,G = r\,a^2 + \cos u\,(R + r\cos u)\,b^2 \tag{8.2.2} \]
+        </div>
+        <ul>
+          <li>이다(\(F = 0\)이라 \(ab\) 항이 없다).</li>
+        </ul>
+        <p>이 계수들은 <a href="8-5-local-coordinates.html">8.5절</a>에서 \(L, M, N\)이라는 이름을 얻는다.</p>
+        <p class="verified">검증: <code>verify/v-8-2-normal-curvature.py</code></p>
+      </div>
+
+      <aside class="box warning">
+        <p class="box-title">흔한 오해: 제2기본형식은 두 번째 내적이 아니다</p>
+        <p>이름이 비슷하지만 \(\mathrm{II}_p\)는 내적이 아니다. 양의 정부호일 필요가 없다. 구면(바깥쪽)에서는 음의 정부호이고, 원기둥에서는 \(\mathrm{II}(\mathbf{x}_v) = 0\)이라 퇴화되어 있으며, 안장면의 원점에서는 양수와 음수를 모두 가진다(<a href="#i-8-2-2">예 8.2.2</a>).
+        또 \(\mathrm{I}_p\)는 곡면만으로 정해지지만 \(\mathrm{II}_p\)는 법벡터의 선택에 따라 부호가 바뀐다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-normal-curvature">
+      <h2>가속도의 법선 성분과 법곡률</h2>
+      <p>곡면 위의 곡선을 따라 가며 법벡터와 속도가 늘 수직이라는 사실을 미분하면, 이 절의 중심 등식이 나온다.</p>
+
+      <div class="thm proposition" id="i-8-2-3">
+        <p><span class="thm-head">명제 8.2.3</span> <span class="thm-name">(가속도의 법선 성분)</span>.
+        \(\gamma\colon I \to \R^3\)이 매끄러운 곡선이고 값이 \(O\)에 있다고 하자. 모든 \(t \in I\)에서</p>
+        <div class="equation" id="eq-8-2-3">
+        \[ \inner{\gamma''(t)}{\mathbf{N}(\gamma(t))} = \mathrm{II}_{\gamma(t)}\big(\gamma'(t)\big) \tag{8.2.3} \]
+        </div>
+        <p>이다. 매개변수는 호의 길이가 아니어도 된다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: \(\inner{\gamma'}{\mathbf{N} \circ \gamma} = 0\)을 미분하면 \(\inner{\gamma''}{\mathbf{N}} = -\inner{\gamma'}{(\mathbf{N} \circ \gamma)'}\)이고, \((\mathbf{N} \circ \gamma)'\)은 정의에 의해 \(d\mathbf{N}(\gamma')\)이다.</p>
+        <p><span class="proof-head">증명.</span>
+        \(t_0 \in I\)이고 \(p = \gamma(t_0)\)라 하자. \(s \mapsto \gamma(t_0 + s)\)는 \(p\)를 속도 \(\gamma'(t_0)\)로 지나는 \(S\) 위의 곡선이므로 \(\gamma'(t_0) \in T_pS\)이고(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">정의 6.2.1</a>), 따라서 모든 \(t\)에서 \(\inner{\gamma'(t)}{\mathbf{N}(\gamma(t))} = 0\)이다.
+        \(\mathbf{N} \circ \gamma\)는 매끄럽다. \(p\) 근처에서 \(\mathbf{x}(U) \subseteq O\)인 매개화를 잡으면 \(t_0\) 근처에서 \(\mathbf{N} \circ \gamma = (\mathbf{N} \circ \mathbf{x}) \circ (\mathbf{x}^{-1} \circ \gamma)\)이고 \(\mathbf{x}^{-1} \circ \gamma\)가 매끄럽기 때문이다(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-3">보조정리 6.2.3</a>).
+        곱의 미분법으로 \(\inner{\gamma''}{\mathbf{N} \circ \gamma} + \inner{\gamma'}{(\mathbf{N} \circ \gamma)'} = 0\)이고, 정의 <a href="../06-regular-surfaces/6-4-differential-of-a-map.html#eq-6-4-1">(6.4.1)</a>에서 \((\mathbf{N} \circ \gamma)'(t_0) = d\mathbf{N}_p(\gamma'(t_0))\)이다. 그러므로</p>
+        <p>\[ \inner{\gamma''(t_0)}{\mathbf{N}(p)} = -\inner{\gamma'(t_0)}{d\mathbf{N}_p(\gamma'(t_0))} = \inner{W_p(\gamma'(t_0))}{\gamma'(t_0)} = \mathrm{II}_p\big(\gamma'(t_0)\big) \]</p>
+        <p>이다.</p>
+      </div>
+
+      <p>호의 길이로 매개화된 곡선이면 \(\gamma'' = \kappa\mathbf{n}\)이므로 <a href="#eq-8-2-3">(8.2.3)</a>의 좌변은 곡률벡터의 법선 성분이다. 이것에 이름을 붙인다.</p>
+
+      <div class="thm definition" id="i-8-2-4">
+        <p><span class="thm-head">정의 8.2.4</span> <span class="thm-name">(법곡률, normal curvature)</span>.
+        (a) \(\gamma\colon I \to S\)가 호의 길이로 매개화된 정칙곡선이고 값이 \(O\)에 있으면</p>
+        <div class="equation" id="eq-8-2-4">
+        \[ \kappa_n(s) = \inner{\gamma''(s)}{\mathbf{N}(\gamma(s))} \tag{8.2.4} \]
+        </div>
+        <p>를 \(\gamma(s)\)에서 \(\gamma\)의 (\(\mathbf{N}\)에 대한) <dfn>법곡률</dfn>(normal curvature)이라 한다. \(\kappa(s) \gt 0\)이고 \(\vartheta(s) \in [0, \pi]\)가 주법선 \(\mathbf{n}(s)\)과 \(\mathbf{N}(\gamma(s))\)가 이루는 각이면 \(\kappa_n = \kappa\inner{\mathbf{n}}{\mathbf{N}} = \kappa\cos\vartheta\)이다.
+        (b) \(p \in O\)이고 \(w \in T_pS\)가 단위벡터이면 \(\kappa_n(w) = \mathrm{II}_p(w)\)를 \(p\)에서 \(w\) 방향의 법곡률이라 한다.</p>
+      </div>
+
+      <p>정의에 두 가지가 있다. (a)는 곡선의 양이고 (b)는 곡면과 방향의 양이다. 둘이 같다는 것이 다음 정리다.</p>
+
+      <div class="thm theorem" id="i-8-2-5">
+        <p><span class="thm-head">정리 8.2.5</span> <span class="thm-name">(뫼니에 정리, Meusnier's theorem)</span>.
+        \(\gamma\colon I \to S\)가 호의 길이로 매개화된 정칙곡선이고 값이 \(O\)에 있으며, \(p = \gamma(s_0)\), \(\mathbf{t} = \gamma'(s_0)\)라 하자.</p>
+        <ul>
+          <li>(a) \(\kappa_n(s_0) = \kappa_n(\mathbf{t}) = \mathrm{II}_p(\mathbf{t})\)이다. 따라서 \(p\)에서 같은 접선을 갖는 \(S\) 위의 곡선들은 \(p\)에서 법곡률이 모두 같다.</li>
+          <li>(b) \(\kappa(s_0) \gt 0\)이면</li>
+        </ul>
+        <div class="equation" id="eq-8-2-5">
+        \[ \kappa(s_0)\cos\vartheta(s_0) = \mathrm{II}_p(\mathbf{t}) \tag{8.2.5} \]
+        </div>
+        <ul>
+          <li>이고, 따라서 \(\kappa(s_0) \ge \abs{\mathrm{II}_p(\mathbf{t})}\)이다. 등호는 \(\mathbf{n}(s_0) = \pm\mathbf{N}(p)\)일 때, 곧 접촉평면이 \(\mathbf{N}(p)\)를 포함할 때 성립한다.</li>
+        </ul>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 곡선의 곡률 가운데 곡면이 강요하는 몫(법선 성분)은 곡면과 접선 방향만으로 정해진다. 곡선이 스스로 고를 수 있는 것은 나머지, 곧 접평면 안에서 얼마나 휘는가뿐이다. 5장이 남긴 질문의 답이 \(\mathrm{II}_p(\mathbf{t})\)다.</p>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) <a href="#eq-8-2-3">(8.2.3)</a>에 \(t = s_0\)을 넣으면 \(\kappa_n(s_0) = \mathrm{II}_p(\mathbf{t})\)이다. 같은 접선을 갖는 다른 단위속력 곡선의 \(p\)에서의 속도는 \(\pm\mathbf{t}\)이고, \(\mathrm{II}_p(-\mathbf{t}) = \mathrm{II}_p(\mathbf{t})\)이다(이차형식).
+        (b) \(\gamma'' = \kappa\mathbf{n}\)(<a href="../05-space-curves/5-1-curvature.html#i-5-1-8">정의 5.1.8</a>)이므로 \(\kappa_n = \kappa\inner{\mathbf{n}}{\mathbf{N}} = \kappa\cos\vartheta\)이고 (a)와 합치면 <a href="#eq-8-2-5">(8.2.5)</a>다. \(\abs{\cos\vartheta} \le 1\)이므로 부등식이 나오고, 등호는 \(\abs{\cos\vartheta} = 1\), 곧 \(\mathbf{n} = \pm\mathbf{N}\)일 때다.</p>
+      </div>
+
+      <p>곡선의 방향을 거꾸로 해도 \(\gamma''\)은 그대로이므로 법곡률은 곡선의 방향에 무관하다. 반면 \(\mathbf{N}\)을 \(-\mathbf{N}\)으로 바꾸면 법곡률의 부호가 바뀐다. 호의 길이가 아닌 매개변수에서는 \(\kappa_n = \mathrm{II}(\gamma')/\abs{\gamma'}^2\)이다(<a href="#ex-8-2-3">연습 8.2.3</a>).</p>
+
+      <div class="thm example" id="i-8-2-6">
+        <p><span class="thm-head">예 8.2.6</span> <span class="thm-name">(구면 위의 곡선)</span>.
+        \(S^2(r)\)에 바깥쪽 \(\mathbf{N}\)을 주면 <a href="#i-8-2-2">예 8.2.2</a>(b)에서 모든 단위벡터 \(w\)에 대해 \(\kappa_n(w) = -1/r\)이다. 뫼니에 정리에 의해 구면 위의 모든 곡선은 모든 점에서 법곡률이 \(-1/r\)이다. <a href="../05-space-curves/5-3-frenet.html#i-5-3-7">예 5.3.7</a>(c)에서 곡선마다 계산했던 사실이 이제 곡면의 성질로 설명된다(<a href="#fig-8-2-2">그림 8.2.2</a>).</p>
+        <ul>
+          <li>여위도 \(\theta_0\)인 위도원은 \(\kappa = 1/(r\sin\theta_0)\)이고 \(\mathbf{n}\)은 \(z\)축 위의 중심을 향한다. <a href="../05-space-curves/5-3-frenet.html#i-5-3-7">예 5.3.7</a>(a)에서 \(\inner{\mathbf{n}}{\mathbf{N}} = -\sin\theta_0\)이므로 \(\kappa\cos\vartheta = -1/r\)이다.</li>
+          <li>같은 점에서 위도원에 접하는 대원은 \(\kappa = 1/r\), \(\mathbf{n} = -\mathbf{N}\)이므로 \(\kappa\cos\vartheta = -1/r\)이다(<a href="../05-space-curves/5-3-frenet.html#i-5-3-7">예 5.3.7</a>(b)).</li>
+        </ul>
+        <p>두 곡선은 접선이 같고 법곡률도 같다. 위도원은 곡률이 더 크지만 그 초과분은 접평면 안에서 휘는 몫이다. <a href="#eq-8-2-5">(8.2.5)</a>의 등호가 성립하는 것은 대원 쪽이다.</p>
+        <p class="verified">검증: <code>verify/v-8-2-normal-curvature.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-8-2-2">
+        <img src="figures/fig-8-2-2-meusnier.svg" alt="반투명 단위구면 위에 수평한 주황 위도원 γ1과, 점 p에서 위도원에 접하는 검은 대원 γ2가 있다. p에서 주홍 실선 화살표 N이 바깥으로, 파란 화살표 t가 두 곡선의 공통 접선 방향으로 뻗는다. 주황 점선 화살표 κ1n1은 p에서 수평으로 축을 향하고, 주황 점선 화살표 κ2n2는 p에서 구의 중심을 향한다. κ1n1의 끝에서 회색 점선이 κ2n2의 끝으로 이어진다.">
+        <figcaption><span class="fig-head">그림 8.2.2.</span>
+        뫼니에 정리. 단위구면(\(r = 1\)), 바깥쪽 \(\mathbf{N}\), \(p = \mathbf{x}(\pi/3, 0)\). 위도원 \(\gamma_1\)(주황)과 \(p\)에서 같은 접벡터 \(\mathbf{t}\)(파랑, \(0.5\)배)를 갖는 대원 \(\gamma_2\)(검정).
+        \(\mathbf{N}\)은 주홍 실선(\(0.5\)배), 두 곡선의 곡률벡터 \(\kappa_1\mathbf{n}_1\)(길이 \(1/\sin(\pi/3) \approx 1.15\))과 \(\kappa_2\mathbf{n}_2 = -\mathbf{N}\)(길이 \(1\))은 주황 점선(실제 길이)이다.
+        회색 점선은 \(\kappa_1\mathbf{n}_1\)의 끝에서 \(\mathbf{N}\) 방향 직선에 내린 수선이고, 발이 \(\kappa_2\mathbf{n}_2\)의 끝이다. 두 곡률벡터의 \(\mathbf{N}\) 성분은 모두 \(-1\)이다(<a href="#i-8-2-6">예 8.2.6</a>).</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-8-2-7">
+        <p><span class="thm-head">예 8.2.7</span> <span class="thm-name">(원기둥 위의 나선)</span>.
+        나선 \(\gamma(t) = (a\cos t, a\sin t, bt)\)는 반지름 \(a\)인 원기둥 위에 있고, 원기둥의 기준 매개화(\(r = a\))로 \(\gamma(t) = \mathbf{x}(t, bt)\)이다. 따라서 \(\gamma'(t) = \mathbf{x}_u + b\,\mathbf{x}_v\)이고, \(c = \sqrt{a^2 + b^2}\)이라 하면 단위접벡터는 \(\mathbf{t} = (\mathbf{x}_u + b\,\mathbf{x}_v)/c\)이다.
+        <a href="#i-8-2-2">예 8.2.2</a>(c)(바깥쪽 \(\mathbf{N}\))에서 \(\mathrm{II}(\mathbf{t}) = -a \cdot (1/c)^2 = -a/(a^2 + b^2)\)이다.
+        한편 나선의 곡률은 \(\kappa = a/(a^2 + b^2)\)이고 주법선은 수평으로 축을 향하므로(<a href="../05-space-curves/5-1-curvature.html#i-5-1-10">예 5.1.10</a>(b)) \(\mathbf{n} = -\mathbf{N}\), \(\cos\vartheta = -1\)이다. 과연 \(\kappa\cos\vartheta = -a/(a^2 + b^2)\)으로 <a href="#eq-8-2-5">(8.2.5)</a>와 맞는다.
+        나선의 곡률은 전부 법선 성분이다. 이 성질은 <a href="../09-intrinsic-geometry/index.html">9장</a>에서 나선이 원기둥의 측지선이라는 사실로 이어진다.
+        같은 원기둥에서 수평 원(\(b = 0\))의 법곡률은 \(-1/a\), 모선(\(\mathbf{t} = \mathbf{x}_v\))의 법곡률은 \(0\)이다.</p>
+        <p class="verified">검증: <code>verify/v-8-2-normal-curvature.py</code></p>
+      </div>
+
+      <aside class="box backward">
+        <p class="box-title">앞에서 본 것과 비교: 구면 위 곡선의 곡률 분해</p>
+        <p><a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">예 4.5.12</a>와 <a href="../05-space-curves/5-3-frenet.html#i-5-3-7">예 5.3.7</a>은 구면 위의 원을 하나씩 골라 곡률벡터를 법선 성분과 나머지로 나누었고, 법선 성분이 늘 \(1/r\)(또는 바깥쪽 \(\mathbf{N}\)에 대해 \(-1/r\))이라는 것을 계산으로 확인했다.
+        새로워진 것은 이유다. 구면의 형태작용소가 \(-\tfrac1r\id\)라서 모든 방향의 \(\mathrm{II}\)가 같고, 뫼니에 정리가 그 값을 모든 곡선에 나누어 준다. 나머지 성분(접평면 성분)은 <a href="../09-intrinsic-geometry/index.html">9장</a>의 측지곡률이 된다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-normal-section">
+      <h2>접평면 위의 그래프와 법단면</h2>
+      <p>뫼니에 정리에 의하면 \(\mathrm{II}_p(w)\)는 \(w\)에 접하는 <em>아무</em> 곡선으로 계산할 수 있다. 그 가운데 가장 자연스러운 곡선이 <a href="#fig-8-2-1">그림 8.2.1</a>의 법단면이다. 법단면을 정확히 정의하려면 곡면을 접평면 위의 그래프로 쓰는 것이 편하다.</p>
+
+      <div class="thm lemma" id="i-8-2-8">
+        <p><span class="thm-head">보조정리 8.2.8</span> <span class="thm-name">(접평면 위의 그래프)</span>.
+        \(S\)가 정칙곡면이고 \(p \in S\), \((e_1, e_2)\)가 \(T_pS\)의 정규직교기저이며 \(e_3 = e_1 \times e_2\)라 하자. 그러면 \(0\)을 포함하는 열린집합 \(\Omega \subseteq \R^2\)와 매끄러운 함수 \(f\colon \Omega \to \R\)가 있어서 \(f(0, 0) = 0\), \(f_\xi(0, 0) = f_\eta(0, 0) = 0\)이고</p>
+        <div class="equation" id="eq-8-2-6">
+        \[ \mathbf{y}(\xi, \eta) = p + \xi\,e_1 + \eta\,e_2 + f(\xi, \eta)\,e_3, \qquad (\xi, \eta) \in \Omega \tag{8.2.6} \]
+        </div>
+        <p>는 \(S\)의 매개화이고 그 상은 \(p\)의 열린 근방이다. 곧 \(p\) 근처에서 \(S\)는 접평면 위의 그래프이고, \(f\)는 접평면에서 잰 높이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">증명 아이디어: <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-8">명제 6.1.8</a>과 같다. 좌표평면 대신 접평면 위로 사영하면 그 사영의 미분이 \(p\)에서 가역이고, 역함수 정리가 쓰인다.</p>
+        <p><span class="proof-head">증명.</span>
+        \(\mathbf{x}\colon U \to S\)가 \(\mathbf{x}(q) = p\)인 매개화라 하고, \(P\colon \R^3 \to \R^2\), \(P(y) = \big(\inner{y - p}{e_1},\ \inner{y - p}{e_2}\big)\)로 두자. \(\Phi = P \circ \mathbf{x}\colon U \to \R^2\)은 매끄럽고 \(\Phi(q) = 0\)이다.
+        \(D\Phi(q)(a, b) = \big(\inner{w}{e_1},\ \inner{w}{e_2}\big)\) (\(w = a\,\mathbf{x}_u + b\,\mathbf{x}_v\))이다. \(D\mathbf{x}(q)\)는 \(\R^2\)에서 \(T_pS\) 위로의 동형사상이고, \(w \mapsto (\inner{w}{e_1}, \inner{w}{e_2})\)는 \(T_pS\)에서 정규직교기저에 대한 성분을 읽는 동형사상이므로(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>), \(D\Phi(q)\)는 가역이다.
+        역함수 정리(<a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-5">정리 2.3.5</a>)에 의해 \(q\)를 포함하는 열린집합 \(U_0 \subseteq U\)와 \(0\)을 포함하는 열린집합 \(\Omega\)가 있어서 \(\Phi|_{U_0}\colon U_0 \to \Omega\)가 미분동형사상이다.</p>
+        <p>\(\mathbf{y} = \mathbf{x} \circ (\Phi|_{U_0})^{-1}\colon \Omega \to S\)로 두자. \(\mathbf{y}\)는 매끄럽고, 위상동형사상 두 개의 합성이므로 \(\mathbf{x}(U_0)\) 위로의 위상동형사상이며(\(\mathbf{x}(U_0)\)는 \(S\)에서 열려 있다), \(D\mathbf{y} = D\mathbf{x}\;D(\Phi|_{U_0})^{-1}\)은 단사이다. 따라서 \(\mathbf{y}\)는 매개화다.
+        \(P(\mathbf{y}(\xi, \eta)) = \Phi\big((\Phi|_{U_0})^{-1}(\xi, \eta)\big) = (\xi, \eta)\)이므로, \(\mathbf{y}(\xi, \eta) - p\)를 정규직교기저 \((e_1, e_2, e_3)\)로 전개하면(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>) 처음 두 성분이 \(\xi, \eta\)이고, 셋째 성분 \(f = \inner{\mathbf{y} - p}{e_3}\)는 매끄럽다. 이것이 <a href="#eq-8-2-6">(8.2.6)</a>이다.
+        \(\mathbf{y}(0, 0) = p\)이므로 \(f(0, 0) = 0\)이다. 또 \(\mathbf{y}_\xi(0, 0) = e_1 + f_\xi(0, 0)\,e_3 \in T_pS\)이고 \(e_3 \perp T_pS\)이므로 \(f_\xi(0, 0) = \inner{\mathbf{y}_\xi(0, 0)}{e_3} = 0\)이다. \(f_\eta\)도 같다.</p>
+      </div>
+
+      <p>\(e_3 = e_1 \times e_2\)는 \(p\)에서의 단위법벡터다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">정리 1.6.16</a>). 주어진 \(\mathbf{N}\)에 대해 \(e_3 = \mathbf{N}(p)\)가 되게 하려면 필요하면 \(e_2\)를 \(-e_2\)로 바꾸면 된다. 이제 제2기본형식은 높이 \(f\)의 이계도함수로 읽힌다. 두 변수 함수의 이계 편미분이 이루는 대칭행렬 \(\begin{pmatrix} f_{\xi\xi} & f_{\xi\eta} \\ f_{\xi\eta} & f_{\eta\eta} \end{pmatrix}\)을 \(f\)의 <dfn>헤세 행렬</dfn>(Hessian matrix)이라 하고, 그것이 정하는 이차형식 \(f_{\xi\xi}a^2 + 2f_{\xi\eta}ab + f_{\eta\eta}b^2\)을 헤세 형식이라 한다. 테일러 전개 <a href="../02-calculus-rn/2-2-chain-rule.html#eq-2-2-6">(2.2.6)</a>의 2차항이 헤세 형식의 절반이다.</p>
+
+      <div class="thm definition" id="i-8-2-9">
+        <p><span class="thm-head">정의 8.2.9</span> <span class="thm-name">(법단면, normal section)</span>.
+        \(p \in S\)이고 \(w \in T_pS\)가 단위벡터라 하자. <a href="#i-8-2-8">보조정리 8.2.8</a>을 \(e_1 = w\)인 정규직교기저로 쓰고, 곡선</p>
+        <p>\[ \gamma_w(\xi) = \mathbf{y}(\xi, 0) = p + \xi\,w + f(\xi, 0)\,e_3 \qquad \big((\xi, 0) \in \Omega\big) \]</p>
+        <p>을 \(p\)에서 \(w\) 방향의 \(S\)의 <dfn>법단면</dfn>(normal section)이라 한다. 그 자취는 \(\mathbf{y}(\Omega)\)와 법평면 \(p + \Span\{w, e_3\}\)의 교집합이다.</p>
+      </div>
+
+      <p>자취에 대한 주장은 \(\mathbf{y}(\xi, \eta)\)가 평면 \(p + \Span\{w, e_3\}\) 위에 있을 필요충분조건이 \(\inner{\mathbf{y} - p}{e_2} = \eta = 0\)이라는 데서 나온다. 곧 법단면은 \(p\) 근처에서 곡면을 \(w\)와 법선이 만드는 평면으로 자른 것이다.
+      \(e_2\)를 \(-e_2\)로 바꾸면 \(e_3\)과 \(f\)의 부호가 바뀔 뿐 자취는 같다. 법단면은 \(\xi\)에 대해 정칙곡선이다(\(\gamma_w' = w + f_\xi e_3 \neq 0\)).</p>
+
+      <div class="thm proposition" id="i-8-2-10">
+        <p><span class="thm-head">명제 8.2.10</span> <span class="thm-name">(제2기본형식은 높이의 헤세 형식이다)</span>.
+        <a href="#i-8-2-8">보조정리 8.2.8</a>에서 \(e_3 = \mathbf{N}(p)\)라 하자.</p>
+        <ul>
+          <li>(a) 모든 \(a, b \in \R\)에 대하여</li>
+        </ul>
+        <div class="equation" id="eq-8-2-7">
+        \[ \mathrm{II}_p(a\,e_1 + b\,e_2) = f_{\xi\xi}(0, 0)\,a^2 + 2f_{\xi\eta}(0, 0)\,ab + f_{\eta\eta}(0, 0)\,b^2 \tag{8.2.7} \]
+        </div>
+        <ul>
+          <li>이다. 곧 \(e_i\)에 대한 \(W_p\)의 행렬은 \(f\)의 헤세 행렬 \(\begin{pmatrix} f_{\xi\xi} & f_{\xi\eta} \\ f_{\xi\eta} & f_{\eta\eta} \end{pmatrix}(0, 0)\)이다.</li>
+          <li>(b) \(e_1 = w\)이면 법단면 \(\gamma_w\)는 \(\gamma_w'(0) = w\), \(\gamma_w''(0) = \kappa_n(w)\,\mathbf{N}(p)\)를 만족한다. 따라서 \(p\)에서 법단면의 곡률은 \(\abs{\kappa_n(w)}\)이고, \(\kappa_n(w) \neq 0\)이면 주법선은 \(\sgn(\kappa_n(w))\,\mathbf{N}(p)\)이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">증명.</span>
+        (a) 곡선 \(\sigma(t) = \mathbf{y}(ta, tb)\)는 \(S\) 위에 있고, 연쇄법칙으로 \(\sigma'(t) = a\,e_1 + b\,e_2 + (a f_\xi + b f_\eta)\,e_3\), \(\sigma''(t) = (a^2 f_{\xi\xi} + 2ab f_{\xi\eta} + b^2 f_{\eta\eta})\,e_3\)이다(편미분은 \((ta, tb)\)에서, 정리 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-14">2.2.14</a>로 \(f_{\xi\eta} = f_{\eta\xi}\)).
+        \(f_\xi(0, 0) = f_\eta(0, 0) = 0\)이므로 \(\sigma'(0) = a\,e_1 + b\,e_2\)이다. <a href="#i-8-2-3">명제 8.2.3</a>에서 \(\mathrm{II}_p(a\,e_1 + b\,e_2) = \inner{\sigma''(0)}{\mathbf{N}(p)} = \inner{\sigma''(0)}{e_3}\)이고, 이것이 <a href="#eq-8-2-7">(8.2.7)</a>의 우변이다.
+        행렬에 대한 주장: \(\mathrm{II}_p(e_i, e_j) = \inner{W_p e_i}{e_j}\)이고 \((e_1, e_2)\)는 정규직교이므로 이것이 \(W_p\)의 행렬의 \((j, i)\) 성분이다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">명제 1.5.9</a>). 편극 등식으로 (a)에서 \(\mathrm{II}_p(e_1, e_1) = f_{\xi\xi}\), \(\mathrm{II}_p(e_1, e_2) = f_{\xi\eta}\), \(\mathrm{II}_p(e_2, e_2) = f_{\eta\eta}\)(\((0, 0)\)에서)를 읽는다.</p>
+        <p>(b) \(\gamma_w = \sigma\)(\(a = 1\), \(b = 0\))이므로 \(\gamma_w'(0) = e_1 = w\), \(\gamma_w''(0) = f_{\xi\xi}(0, 0)\,e_3 = \mathrm{II}_p(w)\,\mathbf{N}(p) = \kappa_n(w)\,\mathbf{N}(p)\)이다. \(\gamma_w\)는 단위속력이 아니므로 호의 길이로 재매개화한 \(\beta(s) = \gamma_w(\xi(s))\), \(\xi(0) = 0\)을 보자.
+        \(\xi' = 1/\abs{\gamma_w'(\xi)}\)이고 \(\tfrac{d}{d\xi}\abs{\gamma_w'} = \inner{\gamma_w'}{\gamma_w''}/\abs{\gamma_w'}\)이므로 \(\xi'' = -\inner{\gamma_w'}{\gamma_w''}/\abs{\gamma_w'}^4\)(\(\xi(s)\)에서)이다. \(s = 0\)에서 \(\xi'(0) = 1\), \(\xi''(0) = -\inner{w}{\kappa_n(w)\mathbf{N}(p)} = 0\)이므로
+        \(\beta''(0) = \gamma_w''(0)\,\xi'(0)^2 + \gamma_w'(0)\,\xi''(0) = \kappa_n(w)\,\mathbf{N}(p)\)이다. 곡률은 \(\abs{\beta''(0)} = \abs{\kappa_n(w)}\)이고(<a href="../05-space-curves/5-1-curvature.html#i-5-1-1">정의 5.1.1</a>), \(\kappa_n(w) \neq 0\)이면 주법선은 \(\beta''(0)/\abs{\beta''(0)} = \sgn(\kappa_n(w))\,\mathbf{N}(p)\)이다(<a href="../05-space-curves/5-1-curvature.html#i-5-1-8">정의 5.1.8</a>).</p>
+      </div>
+
+      <p>(b)는 뫼니에 정리의 그림 버전이다. \(w\)에 접하는 모든 곡선 가운데 법단면은 곡률벡터 전체가 법선 방향인 곡선이고, <a href="#eq-8-2-5">(8.2.5)</a>의 등호가 성립한다. 다른 곡선의 곡률은 \(\kappa = \abs{\kappa_n(w)}/\abs{\cos\vartheta}\)로 더 크다.
+      (a)는 “제2기본형식은 접평면에서 잰 높이의 2차 테일러 계수”라는 뜻이다. <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-18">예 2.2.18</a>에서 북극 근처의 구면을 \(z = r - (x^2 + y^2)/(2r) + \cdots\)로 전개한 계수가 바로 이것이고, <a href="8-5-local-coordinates.html">8.5절</a>에서 이 관점으로 곡면의 국소 모양을 읽는다.</p>
+
+      <div class="thm example" id="i-8-2-11">
+        <p><span class="thm-head">예 8.2.11</span> <span class="thm-name">(안장면의 법단면)</span>.
+        안장면의 원점 \(p = 0\)에서 \(T_pS\)는 \(xy\) 평면이고 위쪽 \(\mathbf{N}(p) = e_3\)이다(<a href="8-1-gauss-map.html#eq-8-1-1">(8.1.1)</a>). \(w = e_1' = (\cos\beta, \sin\beta, 0)\), \(e_2' = (-\sin\beta, \cos\beta, 0)\)으로 두면 \(e_1' \times e_2' = e_3\)이다.
+        점 \(\xi e_1' + \eta e_2' + z e_3\)의 \(x, y\) 좌표는 \(x = \xi\cos\beta - \eta\sin\beta\), \(y = \xi\sin\beta + \eta\cos\beta\)이므로, 안장면 위의 점은 \(z = x^2 - y^2\)인 점, 곧</p>
+        <p>\[ f(\xi, \eta) = (\xi\cos\beta - \eta\sin\beta)^2 - (\xi\sin\beta + \eta\cos\beta)^2 = (\xi^2 - \eta^2)\cos 2\beta - 2\xi\eta\sin 2\beta \]</p>
+        <p>이다. 이 경우에는 \(\Omega = \R^2\)이다. \(f(\xi, 0) = \xi^2\cos 2\beta\)이므로 법단면은 \(\gamma_w(\xi) = (\xi\cos\beta,\ \xi\sin\beta,\ \xi^2\cos 2\beta)\)이고(<a href="#fig-8-2-1">그림 8.2.1</a>), \(\kappa_n(w) = f_{\xi\xi}(0, 0) = 2\cos 2\beta\)이다.
+        <a href="#i-8-2-2">예 8.2.2</a>(d)의 \(\mathrm{II}_0(\cos\beta\,e_1 + \sin\beta\,e_2) = 2\cos^2\beta - 2\sin^2\beta\)와 같다.
+        \(\beta = \pm\pi/4\)에서는 \(f(\xi, 0) = 0\)이라 법단면이 직선이다. 실제로 \(z = x^2 - y^2 = (x - y)(x + y)\)이므로 두 직선 \(\{x = \pm y,\ z = 0\}\)은 통째로 안장면 위에 있다. 이런 방향은 <a href="8-4-gaussian-mean-curvature.html">8.4절</a>에서 점근방향이라는 이름을 얻는다.</p>
+        <p class="verified">검증: <code>verify/v-8-2-normal-curvature.py</code></p>
+      </div>
+
+      <aside class="box convention">
+        <p class="box-title">규약 비교</p>
+        <p>do Carmo는 \(\mathrm{II}_p(v) = -\inner{d\mathbf{N}_p(v)}{v}\)로 제2기본형식을 정의한다 <a class="cite" href="../../references.html#dC">[dC §3-2 정의 2]</a>. <a href="#eq-8-2-1">(8.2.1)</a>과 같은 식이다.
+        법곡률은 곡률 \(k\)와 \(\cos\theta = \inner{\mathbf{n}}{\mathbf{N}}\)으로 \(k_n = k\cos\theta\)라 정의하고 <a class="cite" href="../../references.html#dC">[dC §3-2 정의 3]</a>, 뫼니에 정리를 명제로 증명한다 <a class="cite" href="../../references.html#dC">[dC §3-2 명제 2]</a>. 이 study set의 정의 <a href="#eq-8-2-4">(8.2.4)</a>는 \(\kappa = 0\)인 점에서도 뜻이 있다(그때 \(\kappa_n = 0\)).
+        do Carmo는 법단면을 곡면과 평면 \(p + \Span\{v, \mathbf{N}(p)\}\)의 교선이라 부르고 그것이 정칙곡선임은 그림으로 받아들인다. 이 절은 <a href="#i-8-2-8">보조정리 8.2.8</a>로 그것을 증명했다.
+        do Carmo의 구면과 원기둥은 안쪽 법벡터라서 법곡률이 \(1\)(단위구면)이고 원기둥은 \(1\)에서 \(0\) 사이다 <a class="cite" href="../../references.html#dC">[dC §3-2 예 7]</a>. 이 study set(바깥쪽)에서는 \(-1/r\)과 \(-1/r\)에서 \(0\) 사이다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">나중에 보게 될 것: 측지곡률과 벡터값 제2기본형식</p>
+        <p>단위속력 곡선의 가속도는 \(\gamma'' = \kappa_n\mathbf{N} + (\text{접평면 성분})\)으로 나뉜다. 접평면 성분의 크기(부호 포함)가 <a href="../09-intrinsic-geometry/index.html">9장</a>의 측지곡률이고, \(\kappa^2 = \kappa_n^2 + \kappa_g^2\)이 된다. 곡면 안에 사는 존재에게 보이는 것은 측지곡률 쪽이다.
+        <a href="../25-submanifold-geometry/index.html">25장</a>에서는 제2기본형식을 “접벡터장의 도함수의 법성분” \(\mathrm{II}(X, Y) = (\tilde\nabla_XY)^\perp\)라는 벡터값 형식으로 정의한다. \(\R^3\)의 곡면에서는 이것이 \(\mathrm{II}_p(X, Y)\,\mathbf{N}\)이 되고, <a href="#i-8-2-3">명제 8.2.3</a>은 그 특수한 경우 \(X = Y = \gamma'\)이다. 이 개념들은 이 장에서 쓰지 않는다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>요약</h2>
+      <ul>
+        <li>제2기본형식은 \(\mathrm{II}_p(w) = \inner{W_p(w)}{w}\)다. 대칭 쌍선형형식이지만 내적은 아니며, \(\mathbf{N}\)을 바꾸면 부호가 바뀐다. 원환면(안쪽)에서 \(\mathrm{II}(a\,\mathbf{x}_u + b\,\mathbf{x}_v) = ra^2 + \cos u\,(R + r\cos u)\,b^2\)이다.</li>
+        <li>곡면 위의 어떤 곡선이든 \(\inner{\gamma''}{\mathbf{N}} = \mathrm{II}(\gamma')\)이다(<a href="#i-8-2-3">명제 8.2.3</a>). 단위속력이면 좌변이 법곡률 \(\kappa_n = \kappa\cos\vartheta\)다.</li>
+        <li>뫼니에 정리: 법곡률은 접선 방향만으로 정해지고 \(\kappa\cos\vartheta = \mathrm{II}_p(\mathbf{t})\)이다. 구면(바깥쪽)은 모든 방향에서 \(-1/r\), 원기둥 위의 나선은 \(-a/(a^2 + b^2)\)이다.</li>
+        <li>곡면은 한 점 근처에서 접평면 위의 그래프 \(p + \xi e_1 + \eta e_2 + f e_3\)이고, \(\mathrm{II}_p\)는 높이 \(f\)의 헤세 형식이다. 법단면의 곡률벡터는 \(\kappa_n(w)\mathbf{N}(p)\)이다.</li>
+      </ul>
+      <p class="next">다음 절에서는 한 점에서 방향 \(w\)를 돌릴 때 \(\kappa_n(w)\)가 어떻게 변하는지 묻는다. 안장면에서는 \(2\cos 2\beta\)로 최댓값과 최솟값이 직교하는 두 방향에서 나왔다. 이것은 일반적인 사실이고, 그 두 방향이 \(W_p\)의 고유벡터다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>연습문제</h2>
+
+      <div class="exercise" id="ex-8-2-1" data-level="1">
+        <p><span class="thm-head">연습 8.2.1</span> <span class="level">★</span>
+        원환면(\(\mathbf{N}_{\mathbf{x}}\), 안쪽)의 점 \(p = \mathbf{x}(u, v)\)에서 세 단위벡터 \(e_1 = \mathbf{x}_u/r\), \(e_2 = \mathbf{x}_v/(R + r\cos u)\), \((e_1 + e_2)/\sqrt2\) 방향의 법곡률을 구하여라. \(u = \pi/2\)(원환면의 맨 위 원)에서 법곡률이 \(0\)인 방향을 모두 구하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p><a href="#eq-8-2-2">(8.2.2)</a>에 넣는다. \(e_1\): \((a, b) = (1/r, 0)\)이므로 \(\kappa_n = r/r^2 = 1/r\). \(e_2\): \((a, b) = (0, 1/(R + r\cos u))\)이므로 \(\kappa_n = \cos u\,(R + r\cos u)/(R + r\cos u)^2 = \cos u/(R + r\cos u)\).
+          \((e_1 + e_2)/\sqrt2\): \(F = 0\)이라 교차항이 없으므로 \(\kappa_n = \tfrac12\big(1/r + \cos u/(R + r\cos u)\big)\)이다.</p>
+          <p>\(u = \pi/2\)이면 단위벡터 \(w = \cos\beta\,e_1 + \sin\beta\,e_2\)에 대해 \(\kappa_n(w) = \cos^2\beta/r + 0\)이므로 \(\kappa_n = 0\)인 방향은 \(\beta = \pm\pi/2\), 곧 \(\pm e_2\)(위도원 방향)뿐이다. 맨 위 원은 \(\mathbf{N}_{\mathbf{x}} = -e_3\)에 수직인 수평 원이므로 그 법단면은 원 자신이 아니라, 원에 접하는 수직 평면으로 자른 곡선이다.</p>
+          <p class="verified">검증: <code>verify/v-8-2-normal-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-8-2-2" data-level="1">
+        <p><span class="thm-head">연습 8.2.2</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 대어라.
+        (a) 법곡률이 늘 \(0\)인 곡면 위의 곡선은 직선이다.
+        (b) 곡면 위 곡선의 곡률은 그 점, 그 접선 방향의 \(\abs{\kappa_n}\) 이상이다.
+        (c) \(\mathbf{N}\)을 \(-\mathbf{N}\)으로 바꾸면 모든 법곡률의 부호가 바뀐다.
+        (d) 곡선의 방향을 거꾸로 하면 법곡률의 부호가 바뀐다.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>(a) 거짓. 평면 위의 원은 \(\gamma'' \perp \mathbf{N}\)이라 법곡률이 \(0\)이지만 직선이 아니다.</p>
+          <p>(b) 참. <a href="#i-8-2-5">정리 8.2.5</a>(b)에서 \(\kappa \ge \abs{\kappa\cos\vartheta} = \abs{\kappa_n}\)이다. \(\kappa = 0\)이면 \(\gamma'' = 0\)이라 \(\kappa_n = 0\)이다.</p>
+          <p>(c) 참. <a href="#eq-8-2-4">(8.2.4)</a>는 \(\mathbf{N}\)에 대해 선형이다.</p>
+          <p>(d) 거짓. \(\bar\gamma(s) = \gamma(-s)\)이면 \(\bar\gamma''(s) = \gamma''(-s)\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-8-2-3" data-level="1">
+        <p><span class="thm-head">연습 8.2.3</span> <span class="level">★</span>
+        \(\gamma\colon I \to O\)가 정칙곡선(매개변수는 아무것이나)이면 \(\gamma(t)\)에서의 법곡률(호의 길이로 재매개화한 곡선의 법곡률)은 \(\mathrm{II}(\gamma'(t))/\abs{\gamma'(t)}^2\)임을 보여라. 이 식으로 나선 \(\gamma(t) = (a\cos t, a\sin t, bt)\)의 법곡률을 다시 구하여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>호의 길이 재매개화 \(\beta(s) = \gamma(t(s))\)에서 \(\beta'(s) = \gamma'(t)/\abs{\gamma'(t)}\)이므로 \(\kappa_n = \mathrm{II}(\beta') = \mathrm{II}(\gamma')/\abs{\gamma'}^2\)이다(\(\mathrm{II}\)는 이차형식이고 <a href="#i-8-2-5">정리 8.2.5</a>(a)). <a href="#i-8-2-3">명제 8.2.3</a>을 쓰면 \(\kappa_n = \inner{\gamma''}{\mathbf{N}}/\abs{\gamma'}^2\)이라고도 쓸 수 있다.
+          나선은 \(\gamma' = \mathbf{x}_u + b\,\mathbf{x}_v\)이므로 <a href="#i-8-2-2">예 8.2.2</a>(c)(\(r = a\))에서 \(\mathrm{II}(\gamma') = -a\)이고 \(\abs{\gamma'}^2 = a^2 + b^2\)이다. 따라서 \(\kappa_n = -a/(a^2 + b^2)\)로 <a href="#i-8-2-7">예 8.2.7</a>과 같다. 직접 확인하면 \(\gamma'' = (-a\cos t, -a\sin t, 0)\)이고 \(\mathbf{N} = (\cos t, \sin t, 0)\)이므로 \(\inner{\gamma''}{\mathbf{N}} = -a\)이다.</p>
+          <p class="verified">검증: <code>verify/v-8-2-normal-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-8-2-4" data-level="1">
+        <p><span class="thm-head">연습 8.2.4</span> <span class="level">★</span>
+        <a href="../05-space-curves/5-1-curvature.html#ex-5-1-3">연습 5.1.3</a>의 부등식 “구면 \(S^2(r)\) 위 곡선의 곡률은 \(1/r\) 이상”을 뫼니에 정리로 다시 얻어라. 어떤 점에서 등호가 성립할 필요충분조건이 그 점에서 접촉평면이 구의 중심을 지나는 것임을 보여라.</p>
+        <details class="solution"><summary>풀이</summary>
+          <p>바깥쪽 \(\mathbf{N}\)에 대해 모든 방향의 법곡률은 \(-1/r\)이다(<a href="#i-8-2-6">예 8.2.6</a>). <a href="#i-8-2-5">정리 8.2.5</a>(b)에서 \(\kappa \ge \abs{\kappa_n} = 1/r\)이다. (\(\kappa = 0\)인 점이 있다면 그 점에서 \(\gamma'' = 0\)이라 \(\kappa_n = 0\)이 되어 모순이므로, 늘 \(\kappa \gt 0\)이고 <a href="#i-8-2-5">정리 8.2.5</a>(b)를 쓸 수 있다.)
+          등호는 \(\mathbf{n} = \pm\mathbf{N}(p) = \pm p/r\)일 때다. 접촉평면은 \(p + \Span\{\mathbf{t}, \mathbf{n}\}\)이므로, \(\mathbf{n} \parallel p\)이면 \(p \in \Span\{\mathbf{t}, \mathbf{n}\}\)이고 \(0 = p - p\)가 그 평면 위에 있다. 거꾸로 중심 \(0\)이 접촉평면 \(p + \Span\{\mathbf{t}, \mathbf{n}\}\) 위에 있으면 \(p \in \Span\{\mathbf{t}, \mathbf{n}\}\)이고 \(p \perp \mathbf{t}\)이므로 \(p \parallel \mathbf{n}\)이다.
+          (\(\kappa\cos\vartheta = -1/r \lt 0\)이므로 등호일 때 \(\mathbf{n} = -\mathbf{N}\), 곡률중심이 구의 중심이다.)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-8-2-5" data-level="2">
+        <p><span class="thm-head">연습 8.2.5</span> <span class="level">★★</span>
+        원기둥 \(C_r\)의 점 \(p = (r, 0, 0)\)에서 단위벡터 \(w = (0, \cos\beta, \sin\beta)\) (\(\cos\beta \neq 0\)) 방향의 법단면이 타원의 일부임을 보이고 반축의 길이를 구하여라. 타원의 꼭짓점에서의 곡률 공식으로 법단면의 \(p\)에서의 곡률을 구해 \(\abs{\kappa_n(w)}\)와 비교하여라.</p>
+        <details class="hint"><summary>힌트</summary><p>법평면의 점을 \(p + s\,w + t\,e_1\)로 쓰고 \(x^2 + y^2 = r^2\)에 넣는다. 반축이 \(A\), \(B\)인 타원의 \(B\)축 끝점에서의 곡률은 \(B/A^2\)이다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>바깥쪽 \(\mathbf{N}(p) = e_1\)이고 \(w \in T_pC_r = \Span\{e_2, e_3\}\)이다. 법평면 \(p + \Span\{w, e_1\}\)의 점 \(p + s\,w + t\,e_1 = (r + t,\ s\cos\beta,\ s\sin\beta)\)가 원기둥 위에 있을 조건은 \((r + t)^2 + s^2\cos^2\beta = r^2\), 곧</p>
+          <p>\[ \frac{(t + r)^2}{r^2} + \frac{s^2}{(r/\abs{\cos\beta})^2} = 1 \]</p>
+          <p>이다. \((s, t)\) 평면에서 중심 \((0, -r)\), \(s\) 방향 반축 \(A = r/\abs{\cos\beta}\), \(t\) 방향 반축 \(B = r\)인 타원이고, \(p\)는 \((s, t) = (0, 0)\), 곧 \(B\)축의 끝점이다.
+          그 점에서 타원의 곡률은 \(B/A^2 = r\cos^2\beta/r^2 = \cos^2\beta/r\)이다. (타원 \((A\cos\tau, B\sin\tau)\)를 <a href="../04-curves/4-4-signed-curvature.html#i-4-4-5">명제 4.4.5</a>에 넣으면 \(\tau = \pi/2\)에서 \(\abs{\kappa_s} = AB/A^3 = B/A^2\)이다.)</p>
+          <p>한편 \(w = \cos\beta\,(\mathbf{x}_u/r) + \sin\beta\,\mathbf{x}_v\)(\(p = \mathbf{x}(0, 0)\), \(\mathbf{x}_u = (0, r, 0)\))이므로 <a href="#i-8-2-2">예 8.2.2</a>(c)에서 \(\kappa_n(w) = -r(\cos\beta/r)^2 = -\cos^2\beta/r\)이다. <a href="#i-8-2-10">명제 8.2.10</a>(b)대로 곡률은 \(\abs{\kappa_n(w)}\)과 같다. 법단면은 \(\beta = 0\)이면 수평 원, \(\beta \to \pm\pi/2\)이면 점점 길쭉한 타원이 되어 모선(직선)에 가까워진다.</p>
+          <p class="verified">검증: <code>verify/v-8-2-normal-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-8-2-6" data-level="2">
+        <p><span class="thm-head">연습 8.2.6</span> <span class="level">★★</span>
+        \(p \in S\), 단위벡터 \(\mathbf{t} \in T_pS\)이고 \(\kappa_n(\mathbf{t}) \neq 0\)이라 하자. \(p\)를 속도 \(\mathbf{t}\)로 지나고 \(p\)에서 곡률이 양수인 \(S\) 위의 단위속력 곡선들의 곡률중심 \(c = p + \mathbf{n}/\kappa\)(<a href="../05-space-curves/5-1-curvature.html#i-5-1-12">정의 5.1.12</a>)은 모두 \(\mathbf{t}\)에 수직인 평면 안의 한 원 위에 있음을 보여라. 그 원의 중심과 반지름을 구하여라.</p>
+        <details class="hint"><summary>힌트</summary><p>\(\mathbf{n} = \cos\vartheta\,\mathbf{N} + \sin\vartheta\,\mathbf{m}\)(\(\mathbf{m} = \pm\mathbf{N} \times \mathbf{t}\))로 쓰고 \(\kappa = \kappa_n/\cos\vartheta\)를 쓴다.</p></details>
+        <details class="solution"><summary>풀이</summary>
+          <p>\(\mathbf{n} \perp \mathbf{t}\)이므로 \(\mathbf{n}\)은 \(\mathbf{t}^\perp = \Span\{\mathbf{N}(p),\ \mathbf{m}\}\)(\(\mathbf{m} = \mathbf{N}(p) \times \mathbf{t}\)) 안의 단위벡터이고, \(\inner{\mathbf{n}}{\mathbf{N}} = \cos\vartheta\)이므로 \(\mathbf{n} = \cos\vartheta\,\mathbf{N} + \epsilon\sin\vartheta\,\mathbf{m}\)(\(\epsilon = \pm 1\))으로 쓸 수 있다. 뫼니에 정리에서 \(\kappa\cos\vartheta = \kappa_n\)이고 \(\kappa_n \neq 0\)이므로 \(\cos\vartheta \neq 0\), \(1/\kappa = \cos\vartheta/\kappa_n\)이다. 따라서</p>
+          <p>\[ c - p = \frac{\cos\vartheta}{\kappa_n}\big(\cos\vartheta\,\mathbf{N} + \epsilon\sin\vartheta\,\mathbf{m}\big) = \frac{1}{2\kappa_n}\mathbf{N} + \frac{1}{2\kappa_n}\big(\cos 2\vartheta\,\mathbf{N} + \epsilon\sin 2\vartheta\,\mathbf{m}\big) \]</p>
+          <p>이다(\(2\cos^2\vartheta = 1 + \cos 2\vartheta\), \(2\cos\vartheta\sin\vartheta = \sin 2\vartheta\)). 괄호 안은 단위벡터이므로 \(\abs{c - (p + \mathbf{N}/(2\kappa_n))} = 1/(2\abs{\kappa_n})\)이다.
+          곧 곡률중심은 \(p\)를 지나고 \(\mathbf{t}\)에 수직인 평면 안에서 중심 \(p + \mathbf{N}(p)/(2\kappa_n)\), 반지름 \(1/(2\abs{\kappa_n})\)인 원 위에 있다. 이 원은 \(p\)와 법단면의 곡률중심 \(p + \mathbf{N}/\kappa_n\)을 지름의 양 끝으로 갖는다.</p>
+          <p class="verified">검증: <code>verify/v-8-2-normal-curvature.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="8-1-gauss-map.html">← 8.1 가우스 사상과 형태작용소</a>
+    <a rel="next" href="8-3-principal-curvatures.html">8.3 주곡률과 주방향 →</a>
+  </nav>
+</body>
+</html>

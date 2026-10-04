@@ -4,7 +4,7 @@
 (b) σ̃ 차트: h∘σ̃^{-1}(v) = (1 − |v|²)/(1 + |v|²)의 등위선.
 등위값 c = −0.8, −0.6, …, 0.8. 등위선 h = c는 위도원이고, σ 차트에서 반지름 √((1 + c)/(1 − c)),
 σ̃ 차트에서 반지름 √((1 − c)/(1 + c))인 원이다(두 반지름은 서로 역수, 좌표변환 u ↦ u/|u|²).
-적도 h = 0은 두 차트 모두에서 단위원(주황)이다. 점 0은 (a)에서 남극 S, (b)에서 북극 N이다.
+적도 h = 0은 두 차트 모두에서 단위원(주황)이다. 점 0은 (a)에서 남극 −N, (b)에서 북극 N이다.
 식은 dgsym.stereographic(2)에서 가져온다.
 
 실행: 프로젝트 루트에서 ``PYTHONPATH=tools python3 chapters/12-smooth-maps/figures/fig-12-1-2-height-function.py``
@@ -46,7 +46,7 @@ L = 3.2
 g = np.linspace(-L, L, 321)
 X, Y = np.meshgrid(g, g)
 fig, axes = plt.subplots(1, 2, figsize=(6.4, 3.3))
-for ax, f, lab, pole, title in ((axes[0], fN, r"$\hat h = h\circ\sigma^{-1}$", r"$\sigma(S)=0$", "(a)"),
+for ax, f, lab, pole, title in ((axes[0], fN, r"$\hat h = h\circ\sigma^{-1}$", r"$\sigma(-N)=0$", "(a)"),
                                 (axes[1], fS, r"$h\circ\tilde\sigma^{-1}$", r"$\tilde\sigma(N)=0$", "(b)")):
     Z = f(X, Y)
     ax.set_aspect("equal")

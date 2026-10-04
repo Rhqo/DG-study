@@ -25,15 +25,15 @@ def h(t):
     return p / (p + q)
 
 
-def k(s):
+def lam(s):
     return 1 - h(1 + np.asarray(s, float))
 
 
 rng = np.random.default_rng(125)
 
-# ---------------------------------------------------------------- 본문: ℝ의 우릉 예 ψ(t) = k(2t + 1)
+# ---------------------------------------------------------------- 본문: ℝ의 우리손 예 ψ(t) = λ(2t + 1)
 t = np.linspace(-3, 3, 60001)
-psi = k(2 * t + 1)
+psi = lam(2 * t + 1)
 check("정리 12.5.1 뒤의 예: t ≥ 0이면 ψ = 1", np.all(psi[t >= 0] == 1))
 check("정리 12.5.1 뒤의 예: t ≤ -1/2이면 ψ = 0 (supp ψ = [-1/2, ∞) ⊆ (-1, ∞))", np.all(psi[t <= -0.5] == 0) and np.all(t[psi != 0] > -0.5))
 
@@ -52,11 +52,11 @@ for Rv, rv in ((2.0, 0.8), (1.5, 0.3), (3.0, 2.5)):
     uu, vv = rng.uniform(-np.pi, np.pi, (2, 2000))
     P = np.array([(Rv + rv * np.cos(uu)) * np.cos(vv), (Rv + rv * np.cos(uu)) * np.sin(vv), rv * np.sin(uu)])
     rr = np.hypot(P[0], P[1])
-    F = k((rr - a) / (b - a)) * (rr - Rv) / rv
+    F = lam((rr - a) / (b - a)) * (rr - Rv) / rv
     close(f"예 12.5.6: 원환면 위에서 F = cos u (R = {Rv}, r = {rv})", F, np.cos(uu), 1e-12)
     Q = rng.uniform(-1, 1, (3, 2000)) * np.array([[a], [a], [5]])
     Qr = np.hypot(Q[0], Q[1])
-    FQ = k((Qr - a) / (b - a)) * (Qr - Rv) / rv
+    FQ = lam((Qr - a) / (b - a)) * (Qr - Rv) / rv
     check(f"예 12.5.6: ρ ≤ a (z축 근처)에서 F = 0 (R = {Rv}, r = {rv})", np.all(FQ[Qr <= a] == 0))
 
 # ---------------------------------------------------------------- 예 12.5.8(d), 그림 12.5.2: ℝ의 소진 함수
@@ -67,8 +67,8 @@ g = np.array([b1(tt - q) for q in ks])
 ps = g / g.sum(axis=0)
 fx = ((np.abs(ks)[:, None] + 1) * ps).sum(axis=0)
 check("예 12.5.8(d): f ≥ 1", np.all(fx >= 1 - 1e-12))
-for N in range(0, 5):
-    check(f"예 12.5.8(d): |t| ≥ {N + 1}이면 f(t) ≥ {N + 2}", np.all(fx[np.abs(tt) >= N + 1] >= N + 2 - 1e-12))
+for m in range(0, 5):
+    check(f"예 12.5.8(d): |t| ≥ {m + 1}이면 f(t) ≥ {m + 2}", np.all(fx[np.abs(tt) >= m + 1] >= m + 2 - 1e-12))
 sub = fx <= 3
 check("그림 12.5.2: f^{-1}((-∞, 3]) = [-9/4, 9/4] (수치, 경계 여유 0.05)",
       np.all(sub[np.abs(tt) <= 2.25]) and not np.any(sub[(np.abs(tt) > 2.30) & (np.abs(tt) < 6)]))
@@ -76,10 +76,10 @@ check("그림 12.5.2: f^{-1}((-∞, 3]) = [-9/4, 9/4] (수치, 경계 여유 0.0
 # ---------------------------------------------------------------- 명제 12.5.9의 부등식 (12.5.2)
 ok = True
 for _ in range(2000):
-    w = rng.dirichlet(np.ones(12))              # ψ_j(x) (j = N+1, …, N+12), 합 1
-    N = int(rng.integers(0, 20)); js = np.arange(N + 1, N + 13)
-    ok &= (js * w).sum() >= N + 1 - 1e-12
-check("명제 12.5.9 (12.5.2): 무작위 2000개에서 Σ_{j>N} jψ_j ≥ N + 1", ok)
+    w = rng.dirichlet(np.ones(12))              # ψ_j(x) (j = m+1, …, m+12), 합 1
+    m = int(rng.integers(0, 20)); js = np.arange(m + 1, m + 13)
+    ok &= (js * w).sum() >= m + 1 - 1e-12
+check("명제 12.5.9 (12.5.2): 무작위 2000개에서 Σ_{j>m} jψ_j ≥ m + 1", ok)
 
 # ---------------------------------------------------------------- 연습 12.5.1
 ts = np.linspace(-3, 3, 60001)

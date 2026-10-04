@@ -24,7 +24,7 @@ def h(t):
     return a / (a + b)
 
 
-def k(s):
+def lam(s):
     return 1 - h(1 + np.asarray(s, float))
 
 
@@ -66,7 +66,7 @@ check("연습 12.4.4: ψ_0 = 1 ⇔ |t| ≤ 1/4 (수치, 경계 근처 0.05 제�
       np.all(one[np.abs(t) <= 0.25]) and not np.any(one[(np.abs(t) > 0.30) & (np.abs(t) < 2)]))
 
 # ---------------------------------------------------------------- 예 12.4.6(c): S^n의 두 영역
-rho = lambda x: k(x + 0.5)
+rho = lambda x: lam(x + 0.5)
 z = np.linspace(-1, 1, 20001)
 psi2 = rho(z)
 psi1 = 1 - psi2

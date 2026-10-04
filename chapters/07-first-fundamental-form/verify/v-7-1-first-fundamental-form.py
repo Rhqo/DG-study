@@ -181,11 +181,30 @@ Esd = [c.subs({u: 1, v: 1}) for c in first_ff(sad, u, v)]
 check("연습 7.1.1: 안장면의 (1, 1)에서 E, F, G = 5, −4, 5", Esd == [5, -4, 5])
 check("연습 7.1.1: 안장면의 (1, 1)에서 좌표곡선의 cos = −4/5", sp.Rational(-4, 5) == Esd[1] / sp.sqrt(Esd[0] * Esd[2]))
 
-# 연습 7.1.2: 평면 극좌표의 곡선 ρ = e^{−t}, φ = t ---------------------------------------------
-sp_sq = (sp.diff(sp.exp(-t), t)) ** 2 + sp.exp(-2 * t) * 1
-check("연습 7.1.2: 속력의 제곱 = 2e^{−2t}", sp.simplify(sp_sq - 2 * sp.exp(-2 * t)) == 0)
-Lsp = sp.integrate(sp.sqrt(2) * sp.exp(-t), (t, 0, 2 * sp.pi))
-check("연습 7.1.2: 길이 = √2(1 − e^{−2π})", sp.simplify(Lsp - sp.sqrt(2) * (1 - sp.exp(-2 * sp.pi))) == 0)
+# 연습 7.1.2: 평면 극좌표의 등각나선 ρ = e^{−ct}, φ = t -----------------------------------------
+cpos = sp.symbols("c", positive=True)
+rho_t = sp.exp(-cpos * t)
+sp_sq = sp.diff(rho_t, t) ** 2 * 1 + rho_t ** 2 * 1  # Ē(ρ')² + Ḡ(φ')², Ē = 1, Ḡ = ρ²
+check("연습 7.1.2: 속력의 제곱 = (1 + c²)e^{−2ct}", sp.simplify(sp_sq - (1 + cpos ** 2) * sp.exp(-2 * cpos * t)) == 0)
+cos_sp = (1 * sp.diff(rho_t, t) * 1) / (sp.sqrt(sp_sq) * 1)  # (7.1.7): (Ē a₁·1)/(|α'|·√Ē)
+check("연습 7.1.2(a): y_ρ와 이루는 각의 cos = −c/√(1 + c²) (t에 무관)", sp.simplify(cos_sp + cpos / sp.sqrt(1 + cpos ** 2)) == 0)
+# 직접 계산: α(t) = (e^{−ct} cos t, e^{−ct} sin t, 0)
+al_sp = sp.Matrix([rho_t * sp.cos(t), rho_t * sp.sin(t), 0])
+check("연습 7.1.2: 직접 미분한 |α'|²과 같다", sp.simplify(al_sp.diff(t).dot(al_sp.diff(t)) - sp_sq) == 0)
+Tsym = sp.symbols("T", positive=True)
+Lsp = sp.integrate(sp.sqrt(1 + cpos ** 2) * sp.exp(-cpos * t), (t, 0, Tsym))
+check("연습 7.1.2(b): L([0, T]) = √(1 + c²)(1 − e^{−cT})/c", sp.simplify(Lsp - sp.sqrt(1 + cpos ** 2) * (1 - sp.exp(-cpos * Tsym)) / cpos) == 0)
+Linf = sp.limit(Lsp, Tsym, sp.oo)
+check("연습 7.1.2(b): L([0, ∞)) = √(1 + c²)/c", sp.simplify(Linf - sp.sqrt(1 + cpos ** 2) / cpos) == 0)
+check("연습 7.1.2(b): c = 1이면 √2 (연습 4.2.5)", sp.simplify(Linf.subs(cpos, 1) - sp.sqrt(2)) == 0)
+check("연습 7.1.2(b): c → ∞이면 길이 → 1, c → 0이면 → ∞",
+      sp.limit(Linf, cpos, sp.oo) == 1 and sp.limit(Linf, cpos, 0, "+") == sp.oo)
+# 수치: 꺾은선 길이로 c = 0.3의 [0, 40] 부분
+cn = 0.3
+tn = np.linspace(0.0, 40.0, 400001)
+pts = np.stack([np.exp(-cn * tn) * np.cos(tn), np.exp(-cn * tn) * np.sin(tn)])
+close("연습 7.1.2(b): c = 0.3, [0, 40]의 꺾은선 길이 (수치)", float(np.sum(np.linalg.norm(np.diff(pts, axis=1), axis=0))),
+      math.sqrt(1 + cn ** 2) * (1 - math.exp(-cn * 40.0)) / cn, tol=1e-6)
 
 # 연습 7.1.3: 구면의 다른 매개화 y(s, t) = x(s, s + t) ----------------------------------------
 check("연습 7.1.3: E = r²(1 + sin²s), F = G = r² sin²s",

@@ -34,14 +34,14 @@ check("예 7.2.2: 직교행렬은 내적을 보존한다 <Aw1, Aw2> = <w1, w2>",
 tor = EX["torus"]
 tu, tv = tor["coords"]
 Xt = tor["expr"]
-check("예 7.2.2: 원환면에서 R_z,α ∘ x(u, v) = x(u, v + α)", sp.simplify(Rz * Xt - Xt.subs(tv, tv + al)) == sp.zeros(3, 1))
-check("예 7.2.2: x와 R∘x의 E, F, G가 같다 (원환면)", same_fff(Xt, Rz * Xt, tu, tv, tor["positive"]))
+check("예 7.2.2: 원환면에서 A_b x(u, v) = x(u, v + b)", sp.simplify(Rz * Xt - Xt.subs(tv, tv + al)) == sp.zeros(3, 1))
+check("예 7.2.2: x와 A_b x의 E, F, G가 같다 (원환면)", same_fff(Xt, Rz * Xt, tu, tv, tor["positive"]))
 cyl = EX["cylinder"]
 cu, cv = cyl["coords"]
 (cr,) = cyl["params"]
 c0 = sp.symbols("c", real=True)
 Xc = cyl["expr"]
-check("예 7.2.2: 원기둥을 축 방향으로 c만큼 옮기면 x(u, v + c)", sp.simplify(Xc + sp.Matrix([0, 0, c0]) - Xc.subs(cv, cv + c0)) == sp.zeros(3, 1))
+check("예 7.2.2: 원기둥을 축 방향으로 b만큼 옮기면 x(u, v + b)", sp.simplify(Xc + sp.Matrix([0, 0, c0]) - Xc.subs(cv, cv + c0)) == sp.zeros(3, 1))
 
 # 비예 7.2.3: 닮음 p ↦ λp -----------------------------------------------------------------------
 lam = sp.symbols("lambda", positive=True)
@@ -96,16 +96,16 @@ check("비예 7.2.10: u ≠ 0이면 E ≠ 1 (국소 등거리가 아님)", Ee[0]
 xs, ys, zs = sp.symbols("xs ys zs", real=True)
 fH = xs * sp.sin(zs) - ys * sp.cos(zs)
 Phi_a = sp.Matrix([xs * sp.cos(al) - ys * sp.sin(al), xs * sp.sin(al) + ys * sp.cos(al), zs + al])
-check("연습 7.2.1: f(Φ_α(p)) = f(p) (f = x sin z − y cos z)", sp.simplify(fH.subs({xs: Phi_a[0], ys: Phi_a[1], zs: Phi_a[2]}, simultaneous=True) - fH) == 0)
+check("연습 7.2.1: f(Φ_b(p)) = f(p) (f = x sin z − y cos z)", sp.simplify(fH.subs({xs: Phi_a[0], ys: Phi_a[1], zs: Phi_a[2]}, simultaneous=True) - fH) == 0)
 Xhel0 = sp.Matrix([sp.sinh(u) * sp.cos(v), sp.sinh(u) * sp.sin(v), v])
-check("연습 7.2.1: Φ_α(y(u, v)) = y(u, v + α)",
+check("연습 7.2.1: Φ_b(y(u, v)) = y(u, v + b)",
       sp.simplify(Phi_a.subs({xs: Xhel0[0], ys: Xhel0[1], zs: Xhel0[2]}, simultaneous=True) - Xhel0.subs(v, v + al)) == sp.zeros(3, 1))
 check("연습 7.2.1: y의 계수는 v에 무관", all(sp.diff(c, v) == 0 for c in (sp.simplify(c) for c in first_ff(Xhel0, u, v))))
 # (회전면의 회전: 예 7.2.2와 같은 논법)
 rev = EX["revolution"]
 ru, rv = rev["coords"]
 Xr = rev["expr"]
-check("예 7.2.2 (회전면): R_z,α ∘ x(u, v) = x(u, v + α)", sp.simplify(Rz * Xr - Xr.subs(rv, rv + al)) == sp.zeros(3, 1))
+check("예 7.2.2 (회전면): A_b x(u, v) = x(u, v + b)", sp.simplify(Rz * Xr - Xr.subs(rv, rv + al)) == sp.zeros(3, 1))
 
 # 연습 7.2.2: 반지름이 다른 두 원기둥 -------------------------------------------------------------
 r1, r2 = sp.symbols("r1 r2", positive=True)
@@ -153,7 +153,7 @@ close("연습 7.2.6(a): 곡선 (sin t, 2t)의 상의 길이가 두 곡면에서 
 be = sp.symbols("beta", positive=True)
 Ysh = sp.Matrix([u + v * sp.cos(be), v * sp.sin(be), 0])
 Esh = tuple(sp.simplify(c) for c in first_ff(Ysh, u, v))
-check("연습 7.2.7: 층밀림의 계수 = (1, cos β, 1)", Esh == (1, sp.cos(be), 1))
-check("연습 7.2.7: 대각선 길이의 제곱 = 2 + 2cos β ≠ 2", sp.simplify(Esh[0] + 2 * Esh[1] + Esh[2] - (2 + 2 * sp.cos(be))) == 0)
+check("연습 7.2.7: 층밀림의 계수 = (1, cos ϑ₀, 1)", Esh == (1, sp.cos(be), 1))
+check("연습 7.2.7: 대각선 길이의 제곱 = 2 + 2cos ϑ₀ ≠ 2", sp.simplify(Esh[0] + 2 * Esh[1] + Esh[2] - (2 + 2 * sp.cos(be))) == 0)
 
 summary()
