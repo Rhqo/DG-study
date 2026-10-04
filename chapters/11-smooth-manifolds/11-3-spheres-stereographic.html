@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>11.3 구면과 입체사영 — 미분기하 스터디</title>
+  <title>11.3 Spheres and Stereographic Projection — DG Study</title>
   <meta name="dg-id" content="11.3">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="11.1, 11.2, 3.2, 2.3">
@@ -15,62 +15,62 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">11. 매끄러운 다양체</a> ›
-    <span>11.3 구면과 입체사영</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">11. Smooth Manifolds</a> ›
+    <span>11.3 Spheres and Stereographic Projection</span>
   </nav>
 
   <main>
     <header>
-      <h1>11.3 구면과 입체사영</h1>
-      <p class="meta">대응 교재:
-        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 1장]</a></p>
+      <h1>11.3 Spheres and Stereographic Projection</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM Ch. 1]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>두 입체사영 차트 사이의 좌표변환 \(\tilde\sigma \circ \sigma^{-1}(u) = u/\abs{u}^2\)을 계산하고, 이것이 미분동형사상임을 보여 \(S^n\)에 표준 매끄러운 구조를 줄 수 있다.</li>
-        <li>반구를 그래프로 보는 차트(반구 차트)를 정의하고, 반구 차트와 입체사영 차트가 같은 매끄러운 구조를 줌을 증명할 수 있다.</li>
-        <li>\(S^1\)의 각 차트가 표준 구조에 속함을 보이고, \(S^n\)을 차트 하나로 덮을 수 없음을 증명할 수 있다.</li>
+        <li>두 stereographic projection chart 사이의 transition map \(\tilde\sigma \circ \sigma^{-1}(u) = u/\abs{u}^2\)을 계산하고, 이것이 diffeomorphism임을 보여 \(S^n\)에 표준 smooth structure를 줄 수 있다.</li>
+        <li>hemisphere를 그래프로 보는 chart(hemisphere charts)를 정의하고, hemisphere charts와 stereographic projection chart가 같은 smooth structure를 줌을 증명할 수 있다.</li>
+        <li>\(S^1\)의 각 chart가 표준 구조에 속함을 보이고, \(S^n\)을 chart 하나로 덮을 수 없음을 증명할 수 있다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="11-1-topological-manifolds.html#i-11-1-6">예 11.1.6 (구면 \(S^n\), 두 입체사영)</a>, <a href="11-1-topological-manifolds.html#i-11-1-8">예 11.1.8 (그래프)</a></li>
-        <li><a href="11-2-smooth-structures.html#i-11-2-1">정의 11.2.1 (좌표변환과 매끄러운 호환)</a>, <a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10 (매끄러운 아틀라스가 정하는 구조)</a></li>
-        <li><a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-14">예 3.2.14</a>(c) (입체사영은 위상동형사상)</li>
-        <li><a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">명제 2.2.12 (\(C^k\)급 사상의 연산)</a>, <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-11">예 2.3.11 (1변수 역함수)</a></li>
+        <li><a href="11-1-topological-manifolds.html#i-11-1-6">Example 11.1.6 (sphere \(S^n\), 두 stereographic projection)</a>, <a href="11-1-topological-manifolds.html#i-11-1-8">Example 11.1.8 (그래프)</a></li>
+        <li><a href="11-2-smooth-structures.html#i-11-2-1">Definition 11.2.1 (transition map과 smooth compatibility)</a>, <a href="11-2-smooth-structures.html#i-11-2-10">Proposition 11.2.10 (smooth atlas가 정하는 구조)</a></li>
+        <li><a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-14">Example 3.2.14</a>(c) (stereographic projection은 homeomorphism)</li>
+        <li><a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">Proposition 2.2.12 (\(C^k\)급 map의 연산)</a>, <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-11">Example 2.3.11 (1변수 역함수)</a></li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p><a href="11-2-smooth-structures.html">11.2절</a>에서 매끄러운 다양체를 정의했다. 위상다양체 위에 매끄러운 아틀라스를 하나 주면 된다(<a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a>).
-      \(\R^n\) 다음으로 살펴볼 예는 구면 \(S^n\)이다. <a href="11-1-topological-manifolds.html#i-11-1-6">예 11.1.6</a>에서 두 입체사영 \(\sigma\)와 \(\tilde\sigma\)가 \(S^n\)을 덮는 차트임을 보였다.
-      남은 질문은 하나다. 두 차트가 겹치는 곳 \(S^n \setminus \{N, S\}\)에서 좌표변환이 매끄러운가?</p>
-      <p>\(S^n\)은 \(\R^{n+1}\) 안에 놓여 있으므로 “당연히 매끄러운 것 아닌가”라고 생각할 수 있다. 그러나 11.2절의 정의는 둘러싼 공간을 전혀 쓰지 않는다. \(S^n\)의 매끄러운 구조는 차트와 좌표변환만으로 정해지므로 직접 계산해야 한다.
-      이 절에서는 그 계산을 하고, 반구를 그래프로 보는 또 다른 차트들이 같은 구조를 준다는 것도 확인한다. \(S^n\)을 \(\R^{n+1}\)의 부분다양체로 보는 관점은 <a href="../14-submanifolds/index.html">14장</a>에서 다시 만난다.</p>
+      <h2>Motivation</h2>
+      <p><a href="11-2-smooth-structures.html">Section 11.2</a>에서 smooth manifold를 정의했다. topological manifold 위에 smooth atlas를 하나 주면 된다(<a href="11-2-smooth-structures.html#i-11-2-10">Proposition 11.2.10</a>).
+      \(\R^n\) 다음으로 살펴볼 예는 sphere \(S^n\)이다. <a href="11-1-topological-manifolds.html#i-11-1-6">Example 11.1.6</a>에서 두 stereographic projection \(\sigma\)와 \(\tilde\sigma\)가 \(S^n\)을 덮는 chart임을 보였다.
+      남은 질문은 하나다. 두 chart가 겹치는 곳 \(S^n \setminus \{N, S\}\)에서 transition map이 smooth한가?</p>
+      <p>\(S^n\)은 \(\R^{n+1}\) 안에 놓여 있으므로 “당연히 smooth한 것 아닌가”라고 생각할 수 있다. 그러나 Section 11.2의 정의는 둘러싼 공간을 전혀 쓰지 않는다. \(S^n\)의 smooth structure는 chart와 transition map만으로 정해지므로 직접 계산해야 한다.
+      이 절에서는 그 계산을 하고, hemisphere를 그래프로 보는 또 다른 chart들이 같은 구조를 준다는 것도 확인한다. \(S^n\)을 \(\R^{n+1}\)의 submanifold로 보는 관점은 <a href="../14-submanifolds/index.html">Chapter 14</a>에서 다시 만난다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 두 사영은 서로 “뒤집기”다</p>
-        <p><a href="#fig-11-3-1">그림 11.3.1</a>은 \(n = 1\)인 경우다. 점 \(x = (3/5, 4/5)\)을 북극에서 사영하면 \(\sigma(x) = 3\)이고, 남극에서 사영하면 \(\tilde\sigma(x) = 1/3\)이다.
-        남반구의 점 \(z = (-4/5, -3/5)\)에서는 \(\sigma(z) = -1/2\), \(\tilde\sigma(z) = -2\)이다. 두 값의 곱이 언제나 \(1\)이다. 북극 가까이 가면 \(\sigma\)는 무한대로 달아나고 \(\tilde\sigma\)는 \(0\)으로 다가간다.
-        일반적으로 \(\tilde\sigma(x)\)는 \(\sigma(x)\)와 같은 방향에 있고 길이는 역수다. 이것을 <em>단위구면에 대한 반전</em>(inversion)이라 한다.</p>
+        <p class="box-title">Intuition: 두 projection은 서로 “뒤집기”다</p>
+        <p><a href="#fig-11-3-1">Figure 11.3.1</a>은 \(n = 1\)인 경우다. 점 \(x = (3/5, 4/5)\)을 북극에서 projection하면 \(\sigma(x) = 3\)이고, 남극에서 projection하면 \(\tilde\sigma(x) = 1/3\)이다.
+        southern hemisphere의 점 \(z = (-4/5, -3/5)\)에서는 \(\sigma(z) = -1/2\), \(\tilde\sigma(z) = -2\)이다. 두 값의 곱이 언제나 \(1\)이다. 북극 가까이 가면 \(\sigma\)는 무한대로 달아나고 \(\tilde\sigma\)는 \(0\)으로 다가간다.
+        일반적으로 \(\tilde\sigma(x)\)는 \(\sigma(x)\)와 같은 방향에 있고 길이는 역수다. 이것을 unit sphere에 대한 <dfn>inversion</dfn>(반전)이라 한다.</p>
       </aside>
 
       <figure class="dg-figure" id="fig-11-3-1">
-        <img src="figures/fig-11-3-1-two-projections.svg" alt="단위원과 가로축. 북극 N(빈 원)에서 원 위의 점 x를 지나 가로축의 σ(x)=3까지 파란 직선이 뻗고, 남극 S(빈 원)에서 x로 가는 주황 직선은 가로축의 σ̃(x)=1/3을 지난다. 남반구의 점 z에 대해서는 N에서 z로 가는 파란 직선이 가로축의 σ(z)=-1/2를, S에서 z를 지나는 주황 직선이 가로축의 σ̃(z)=-2를 지난다. 파란 교점은 원, 주황 교점은 사각형으로 표시했다.">
-        <figcaption><span class="fig-head">그림 11.3.1.</span>
-        \(S^1\)의 두 입체사영. \(x = (3/5, 4/5)\)에서 \(\sigma(x) = 3\), \(\tilde\sigma(x) = 1/3\)이고 \(z = (-4/5, -3/5)\)에서 \(\sigma(z) = -1/2\), \(\tilde\sigma(z) = -2\)이다.
-        두 경우 모두 \(\sigma \cdot \tilde\sigma = 1\)이다(<a href="#i-11-3-1">명제 11.3.1</a>에서 \(n = 1\)).</figcaption>
+        <img src="figures/fig-11-3-1-two-projections.svg" alt="단위원과 가로축. 북극 N(빈 원)에서 원 위의 점 x를 지나 가로축의 σ(x)=3까지 파란 직선이 뻗고, 남극 S(빈 원)에서 x로 가는 주황 직선은 가로축의 σ̃(x)=1/3을 지난다. southern hemisphere의 점 z에 대해서는 N에서 z로 가는 파란 직선이 가로축의 σ(z)=-1/2를, S에서 z를 지나는 주황 직선이 가로축의 σ̃(z)=-2를 지난다. 파란 교점은 원, 주황 교점은 사각형으로 표시했다.">
+        <figcaption><span class="fig-head">Figure 11.3.1.</span>
+        \(S^1\)의 두 stereographic projection. \(x = (3/5, 4/5)\)에서 \(\sigma(x) = 3\), \(\tilde\sigma(x) = 1/3\)이고 \(z = (-4/5, -3/5)\)에서 \(\sigma(z) = -1/2\), \(\tilde\sigma(z) = -2\)이다.
+        두 경우 모두 \(\sigma \cdot \tilde\sigma = 1\)이다(<a href="#i-11-3-1">Proposition 11.3.1</a>에서 \(n = 1\)).</figcaption>
       </figure>
     </section>
 
     <section id="sec-stereographic">
-      <h2>입체사영 아틀라스</h2>
+      <h2>The Stereographic Projection Atlas</h2>
       <p>\(\sigma\)와 \(\tilde\sigma\)의 식을 상기하자(<a href="../03-topology-basics/3-2-continuity-homeomorphism.html#eq-3-2-4">(3.2.4)</a>, <a href="11-1-topological-manifolds.html#eq-11-1-1">(11.1.1)</a>).
       \(x = (x', x^{n+1})\), \(x' = (x^1, \dots, x^n)\)으로 쓰면</p>
       <div class="equation" id="eq-11-3-1">
@@ -80,19 +80,19 @@
       <p>이다. 여기서 \((2u,\ \abs{u}^2 - 1)\)은 \((2u^1, \dots, 2u^n,\ \abs{u}^2 - 1) \in \R^{n+1}\)을 줄여 쓴 것이다.</p>
 
       <div class="thm proposition" id="i-11-3-1">
-        <p><span class="thm-head">명제 11.3.1</span> <span class="thm-name">(입체사영의 좌표변환)</span>.
-        \(n \ge 1\)이라 하자. 두 차트 \((S^n \setminus \{N\}, \sigma)\)와 \((S^n \setminus \{S\}, \tilde\sigma)\)가 겹치는 곳의 상은 \(\sigma(S^n \setminus \{N, S\}) = \tilde\sigma(S^n \setminus \{N, S\}) = \R^n \setminus \{0\}\)이고, 두 좌표변환은</p>
+        <p><span class="thm-head">Proposition 11.3.1</span> <span class="thm-name">(stereographic projection의 transition map)</span>.
+        \(n \ge 1\)이라 하자. 두 chart \((S^n \setminus \{N\}, \sigma)\)와 \((S^n \setminus \{S\}, \tilde\sigma)\)가 겹치는 곳의 image는 \(\sigma(S^n \setminus \{N, S\}) = \tilde\sigma(S^n \setminus \{N, S\}) = \R^n \setminus \{0\}\)이고, 두 transition map은</p>
         <div class="equation" id="eq-11-3-2">
         \[ \begin{aligned} \tilde\sigma \circ \sigma^{-1}(u) &= \frac{u}{\abs{u}^2}, \\ \sigma \circ \tilde\sigma^{-1}(v) &= \frac{v}{\abs{v}^2} \end{aligned} \tag{11.3.2} \]
         </div>
-        <p>이다(\(u, v \in \R^n \setminus \{0\}\)). 이 사상 \(I(u) = u/\abs{u}^2\)은 \(\R^n \setminus \{0\}\)의 미분동형사상이고 \(I \circ I = \id\)이다. 따라서 \(\{(S^n \setminus \{N\}, \sigma),\ (S^n \setminus \{S\}, \tilde\sigma)\}\)는 \(S^n\)의 매끄러운 아틀라스다.</p>
+        <p>이다(\(u, v \in \R^n \setminus \{0\}\)). 이 map \(I(u) = u/\abs{u}^2\)은 \(\R^n \setminus \{0\}\)의 diffeomorphism이고 \(I \circ I = \id\)이다. 따라서 \(\{(S^n \setminus \{N\}, \sigma),\ (S^n \setminus \{S\}, \tilde\sigma)\}\)는 \(S^n\)의 smooth atlas다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(\sigma^{-1}(u)\)의 성분을 \(\tilde\sigma\)의 식에 그대로 넣는다. 분모 \(1 + x^{n+1}\)이 \(2\abs{u}^2/(\abs{u}^2 + 1)\)이 되어 깔끔하게 약분된다.</p>
-        <p><span class="proof-head">증명.</span>
-        <em>겹치는 곳.</em> 두 정의역의 교집합은 \(S^n \setminus \{N, S\}\)이다. \(\sigma\)는 \(S^n \setminus \{N\}\)에서 \(\R^n\) 위로 가는 전단사이고 \(\sigma(S) = 0/(1 + 1) = 0\)이므로
+        <p class="proof-idea">Proof idea: \(\sigma^{-1}(u)\)의 성분을 \(\tilde\sigma\)의 식에 그대로 넣는다. 분모 \(1 + x^{n+1}\)이 \(2\abs{u}^2/(\abs{u}^2 + 1)\)이 되어 깔끔하게 약분된다.</p>
+        <p><span class="proof-head">Proof.</span>
+        <em>겹치는 곳.</em> 두 정의역의 교집합은 \(S^n \setminus \{N, S\}\)이다. \(\sigma\)는 \(S^n \setminus \{N\}\)에서 \(\R^n\) 위로 가는 bijective이고 \(\sigma(S) = 0/(1 + 1) = 0\)이므로
         \(\sigma(S^n \setminus \{N, S\}) = \R^n \setminus \{0\}\)이다. 같은 이유로 \(\tilde\sigma(N) = 0\)이므로 \(\tilde\sigma(S^n \setminus \{N, S\}) = \R^n \setminus \{0\}\)이다.</p>
-        <p><em>첫째 좌표변환.</em> \(u \ne 0\)이고 \(x = \sigma^{-1}(u)\)라 하자. (11.3.1)에서 \(x' = 2u/(\abs{u}^2 + 1)\), \(x^{n+1} = (\abs{u}^2 - 1)/(\abs{u}^2 + 1)\)이므로</p>
+        <p><em>첫째 transition map.</em> \(u \ne 0\)이고 \(x = \sigma^{-1}(u)\)라 하자. (11.3.1)에서 \(x' = 2u/(\abs{u}^2 + 1)\), \(x^{n+1} = (\abs{u}^2 - 1)/(\abs{u}^2 + 1)\)이므로</p>
         <div class="equation" id="eq-11-3-3">
         \[ \begin{aligned} 1 + x^{n+1} &= \frac{(\abs{u}^2 + 1) + (\abs{u}^2 - 1)}{\abs{u}^2 + 1} \\ &= \frac{2\abs{u}^2}{\abs{u}^2 + 1} \end{aligned} \tag{11.3.3} \]
         </div>
@@ -100,250 +100,250 @@
         <div class="equation" id="eq-11-3-4">
         \[ \begin{aligned} \tilde\sigma(\sigma^{-1}(u)) &= \frac{x'}{1 + x^{n+1}} \\ &= \frac{2u}{\abs{u}^2 + 1} \cdot \frac{\abs{u}^2 + 1}{2\abs{u}^2} = \frac{u}{\abs{u}^2} \end{aligned} \tag{11.3.4} \]
         </div>
-        <p>이다. <em>둘째 좌표변환.</em> \(v \ne 0\)이고 \(y = \tilde\sigma^{-1}(v)\)이면 \(y' = 2v/(\abs{v}^2 + 1)\), \(y^{n+1} = (1 - \abs{v}^2)/(\abs{v}^2 + 1)\)이므로
+        <p>이다. <em>둘째 transition map.</em> \(v \ne 0\)이고 \(y = \tilde\sigma^{-1}(v)\)이면 \(y' = 2v/(\abs{v}^2 + 1)\), \(y^{n+1} = (1 - \abs{v}^2)/(\abs{v}^2 + 1)\)이므로
         \(1 - y^{n+1} = 2\abs{v}^2/(\abs{v}^2 + 1)\)이고, 같은 약분으로 \(\sigma(\tilde\sigma^{-1}(v)) = v/\abs{v}^2\)이다.</p>
-        <p><em>미분동형사상.</em> \(I(u) = u/\abs{u}^2\)의 성분 \(u^i/\big((u^1)^2 + \dots + (u^n)^2\big)\)은 분모가 \(\R^n \setminus \{0\}\)에서 \(0\)이 아닌 다항식의 몫이므로 매끄럽다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">명제 2.2.12</a>).
-        \(\abs{I(u)} = 1/\abs{u}\)이므로 \(I(u) \ne 0\)이고 \(I(I(u)) = \dfrac{u/\abs{u}^2}{1/\abs{u}^2} = u\)이다. 따라서 \(I\)는 매끄러운 역사상 \(I\) 자신을 가지는 전단사, 즉 미분동형사상이다.
-        두 차트가 매끄럽게 호환되고 정의역이 \(S^n\)을 덮으므로 매끄러운 아틀라스다.</p>
-        <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+        <p><em>diffeomorphism.</em> \(I(u) = u/\abs{u}^2\)의 성분 \(u^i/\big((u^1)^2 + \dots + (u^n)^2\big)\)은 분모가 \(\R^n \setminus \{0\}\)에서 \(0\)이 아닌 다항식의 몫이므로 매끄럽다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">Proposition 2.2.12</a>).
+        \(\abs{I(u)} = 1/\abs{u}\)이므로 \(I(u) \ne 0\)이고 \(I(I(u)) = \dfrac{u/\abs{u}^2}{1/\abs{u}^2} = u\)이다. 따라서 \(I\)는 smooth inverse map \(I\) 자신을 가지는 bijective, 즉 diffeomorphism이다.
+        두 chart가 smoothly compatible이고 정의역이 \(S^n\)을 덮으므로 smooth atlas다.</p>
+        <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
       </div>
 
       <div class="thm definition" id="i-11-3-2">
-        <p><span class="thm-head">정의 11.3.2</span> <span class="thm-name">(\(S^n\)의 표준 매끄러운 구조)</span>.
-        \(n \ge 1\)일 때 매끄러운 아틀라스 \(\{(S^n \setminus \{N\}, \sigma),\ (S^n \setminus \{S\}, \tilde\sigma)\}\)가 정하는 매끄러운 구조(<a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a>(b))를 \(S^n\)의 <em>표준 매끄러운 구조</em>라 한다.
+        <p><span class="thm-head">Definition 11.3.2</span> <span class="thm-name">(\(S^n\)의 표준 smooth structure)</span>.
+        \(n \ge 1\)일 때 smooth atlas \(\{(S^n \setminus \{N\}, \sigma),\ (S^n \setminus \{S\}, \tilde\sigma)\}\)가 정하는 smooth structure(<a href="11-2-smooth-structures.html#i-11-2-10">Proposition 11.2.10</a>(b))를 \(S^n\)의 <em>표준 smooth structure</em>라 한다.
         따로 말하지 않으면 \(S^n\)에는 이 구조를 준다.</p>
       </div>
 
-      <p>\(n = 1\)이면 (11.3.2)는 \(u \mapsto 1/u\)이다. 이것은 \(\RP^1\)의 두 차트 사이의 관계 \(\varphi_2 = 1/\varphi_1\)(<a href="../03-topology-basics/3-4-quotient-spaces.html#i-3-4-16">예 3.4.16</a>)과 같은 꼴이다.
-      \(\RP^1\)과 \(S^1\)이 위상동형이라는 사실(<a href="11-1-topological-manifolds.html#ex-11-1-6">연습 11.1.6</a>)을 떠올리면 우연이 아니다. 좌표변환의 모양을 좀 더 자세히 보자.</p>
+      <p>\(n = 1\)이면 (11.3.2)는 \(u \mapsto 1/u\)이다. 이것은 \(\RP^1\)의 두 chart 사이의 관계 \(\varphi_2 = 1/\varphi_1\)(<a href="../03-topology-basics/3-4-quotient-spaces.html#i-3-4-16">Example 3.4.16</a>)과 같은 꼴이다.
+      \(\RP^1\)과 \(S^1\)이 homeomorphic이라는 사실(<a href="11-1-topological-manifolds.html#ex-11-1-6">Exercise 11.1.6</a>)을 떠올리면 우연이 아니다. transition map의 모양을 좀 더 자세히 보자.</p>
 
       <div class="thm example" id="i-11-3-3">
-        <p><span class="thm-head">예 11.3.3</span> <span class="thm-name">(반전의 야코비 행렬)</span>.
-        \(I(u) = u/\abs{u}^2\)의 편미분을 구하자. \(\rho = \abs{u}^2 = \sum_k (u^k)^2\)으로 두면 \(\partial_j\rho = 2u^j\)이고, 몫의 미분법에서</p>
+        <p><span class="thm-head">Example 11.3.3</span> <span class="thm-name">(inversion의 Jacobian matrix)</span>.
+        \(I(u) = u/\abs{u}^2\)의 partial derivative를 구하자. \(\rho = \abs{u}^2 = \sum_k (u^k)^2\)으로 두면 \(\partial_j\rho = 2u^j\)이고, 몫의 미분법에서</p>
         <div class="equation" id="eq-11-3-5">
         \[ \begin{aligned} \pd{}{u^j}\Big(\frac{u^i}{\rho}\Big) &= \frac{\delta^i_j\,\rho - u^i \cdot 2u^j}{\rho^2} \\ &= \frac{1}{\abs{u}^2}\Big(\delta^i_j - \frac{2u^iu^j}{\abs{u}^2}\Big) \end{aligned} \tag{11.3.5} \]
         </div>
-        <p>이다(\(\delta^i_j\)는 크로네커 델타). 즉 \(DI(u) = \abs{u}^{-2}\big(I_n - 2\hat u\hat u^{\mathsf T}\big)\), \(\hat u = u/\abs{u}\)이다(\(I_n\)은 \(n \times n\) 단위행렬이다. 이 절에서는 \(I\)가 반전이므로 단위행렬은 반드시 \(I_n\)으로 쓴다). \(n = 2\)이고 \(u = (a, b)\)로 쓰면 성분으로</p>
+        <p>이다(\(\delta^i_j\)는 Kronecker delta). 즉 \(DI(u) = \abs{u}^{-2}\big(I_n - 2\hat u\hat u^{\mathsf T}\big)\), \(\hat u = u/\abs{u}\)이다(\(I_n\)은 \(n \times n\) identity matrix다. 이 절에서는 \(I\)가 inversion이므로 identity matrix는 반드시 \(I_n\)으로 쓴다). \(n = 2\)이고 \(u = (a, b)\)로 쓰면 성분으로</p>
         <div class="equation" id="eq-11-3-6">
         \[ DI(u) = \frac{1}{(a^2 + b^2)^2}\begin{pmatrix} b^2 - a^2 & -2ab \\ -2ab & a^2 - b^2 \end{pmatrix} \tag{11.3.6} \]
         </div>
-        <p>이고, 행렬식은 \(\dfrac{-(a^2 - b^2)^2 - 4a^2b^2}{(a^2 + b^2)^4} = -\dfrac{(a^2 + b^2)^2}{(a^2 + b^2)^4} = -\dfrac{1}{\abs{u}^4}\)이다. 일반적으로 \(I_n - 2\hat u\hat u^{\mathsf T}\)는 \(\hat u\)에 수직인 초평면에 대한 반사이므로
-        고윳값이 \(-1\) 하나와 \(1\) \((n-1)\)개이고, \(\det DI(u) = -\abs{u}^{-2n}\)이다(<a href="#ex-11-3-6">연습 11.3.6</a>). 행렬식이 \(0\)이 아니라는 것은 <a href="#i-11-3-1">명제 11.3.1</a>과 맞고(<a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-4">명제 2.3.4</a>),
-        <em>음수</em>라는 것은 두 입체사영이 “방향을 반대로 준다”는 뜻이다. 이 부호의 의미는 <a href="../18-integration-stokes/index.html">18장</a>에서 방향을 다룰 때 다시 본다.</p>
-        <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+        <p>이고, determinant는 \(\dfrac{-(a^2 - b^2)^2 - 4a^2b^2}{(a^2 + b^2)^4} = -\dfrac{(a^2 + b^2)^2}{(a^2 + b^2)^4} = -\dfrac{1}{\abs{u}^4}\)이다. 일반적으로 \(I_n - 2\hat u\hat u^{\mathsf T}\)는 \(\hat u\)에 수직인 hyperplane에 대한 반사이므로
+        eigenvalue가 \(-1\) 하나와 \(1\) \((n-1)\)개이고, \(\det DI(u) = -\abs{u}^{-2n}\)이다(<a href="#ex-11-3-6">Exercise 11.3.6</a>). determinant가 \(0\)이 아니라는 것은 <a href="#i-11-3-1">Proposition 11.3.1</a>과 맞고(<a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-4">Proposition 2.3.4</a>),
+        <em>음수</em>라는 것은 두 stereographic projection이 “방향을 반대로 준다”는 뜻이다. 이 부호의 의미는 <a href="../18-integration-stokes/index.html">Chapter 18</a>에서 방향을 다룰 때 다시 본다.</p>
+        <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
       </div>
     </section>
 
     <section id="sec-graph-charts">
-      <h2>반구 차트</h2>
-      <p>입체사영은 \(S^n\)을 차트 두 개로 덮는 경제적인 방법이다. 반면 반구 차트는 차트가 더 많이 필요하지만 식이 단순하다. 한 좌표를 버리기만 하면 된다.</p>
+      <h2>Hemisphere Charts</h2>
+      <p>stereographic projection은 \(S^n\)을 chart 두 개로 덮는 경제적인 방법이다. 반면 hemisphere charts는 chart가 더 많이 필요하지만 식이 단순하다. 한 좌표를 버리기만 하면 된다.</p>
 
       <div class="thm example" id="i-11-3-4">
-        <p><span class="thm-head">예 11.3.4</span> <span class="thm-name">(반구 차트)</span>.
-        \(i = 1, \dots, n+1\)에 대하여 열린 반구 \(U_i^+ = \{x \in S^n : x^i \gt 0\}\), \(U_i^- = \{x \in S^n : x^i \lt 0\}\)과 사상</p>
+        <p><span class="thm-head">Example 11.3.4</span> <span class="thm-name">(hemisphere charts)</span>.
+        \(i = 1, \dots, n+1\)에 대하여 열린 hemisphere \(U_i^+ = \{x \in S^n : x^i \gt 0\}\), \(U_i^- = \{x \in S^n : x^i \lt 0\}\)과 map</p>
         <div class="equation" id="eq-11-3-7">
         \[ \begin{aligned} \varphi_i^\pm(x) &= (x^1, \dots, \widehat{x^i}, \dots, x^{n+1}), \\
            (\varphi_i^\pm)^{-1}(w) &= \big(w^1, \dots, w^{i-1},\ \pm\sqrt{1 - \abs{w}^2}, \\ &\qquad\ w^i, \dots, w^n\big) \end{aligned} \tag{11.3.7} \]
         </div>
-        <p>를 생각하자(\(\varphi_i^\pm\colon U_i^\pm \to B^n\), \((\varphi_i^\pm)^{-1}\colon B^n \to U_i^\pm\)). 여기서 \(B^n = B_1(0) \subseteq \R^n\)이고 모자는 그 성분을 뺀다는 뜻이다. \(U_i^\pm\)는 연속함수 \(x \mapsto x^i\)에 의한 열린 반직선의 역상이므로 \(S^n\)에서 열려 있다.</p>
-        <p>\(U_i^\pm\)는 그래프다. 좌표의 순서를 바꾸면 \(U_i^\pm\)는 \(B^n\) 위의 연속함수 \(w \mapsto \pm\sqrt{1 - \abs{w}^2}\)의 그래프이고, \(\varphi_i^\pm\)는 그 그래프에서 정의역으로 가는 사영이다.
-        그러므로 <a href="11-1-topological-manifolds.html#i-11-1-8">예 11.1.8</a>과 같은 이유로 \(\varphi_i^\pm\)는 위상동형사상이고 역사상은 (11.3.7)의 둘째 식이다. 실제로 \(w \in B^n\)이면 \(1 - \abs{w}^2 \gt 0\)이고,
-        \((\varphi_i^\pm)^{-1}(w)\)의 길이의 제곱은 \(\abs{w}^2 + (1 - \abs{w}^2) = 1\)이며 \(i\)번째 성분의 부호가 \(\pm\)이다. \(S^n\)의 점은 어떤 성분이 \(0\)이 아니므로 \(2(n+1)\)개의 반구가 \(S^n\)을 덮는다.
-        이 차트들을 <em>반구 차트</em>라 한다(<a href="#fig-11-3-2">그림 11.3.2</a>). \(n = 2\)이면 이 여섯 반구는 <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-5">예 6.1.5</a>에서 \(S^2\)를 정칙곡면으로 덮은 여섯 그래프와 같고, 둘의 관계는 <a href="index.html#toc-11-6">11.6절</a>에서 다룬다.</p>
-        <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+        <p>를 생각하자(\(\varphi_i^\pm\colon U_i^\pm \to B^n\), \((\varphi_i^\pm)^{-1}\colon B^n \to U_i^\pm\)). 여기서 \(B^n = B_1(0) \subseteq \R^n\)이고 모자는 그 성분을 뺀다는 뜻이다. \(U_i^\pm\)는 연속함수 \(x \mapsto x^i\)에 의한 열린 반직선의 preimage이므로 \(S^n\)에서 열려 있다.</p>
+        <p>\(U_i^\pm\)는 그래프다. 좌표의 순서를 바꾸면 \(U_i^\pm\)는 \(B^n\) 위의 연속함수 \(w \mapsto \pm\sqrt{1 - \abs{w}^2}\)의 그래프이고, \(\varphi_i^\pm\)는 그 그래프에서 정의역으로 가는 projection이다.
+        그러므로 <a href="11-1-topological-manifolds.html#i-11-1-8">Example 11.1.8</a>과 같은 이유로 \(\varphi_i^\pm\)는 homeomorphism이고 inverse map은 (11.3.7)의 둘째 식이다. 실제로 \(w \in B^n\)이면 \(1 - \abs{w}^2 \gt 0\)이고,
+        \((\varphi_i^\pm)^{-1}(w)\)의 길이의 제곱은 \(\abs{w}^2 + (1 - \abs{w}^2) = 1\)이며 \(i\)번째 성분의 부호가 \(\pm\)이다. \(S^n\)의 점은 어떤 성분이 \(0\)이 아니므로 \(2(n+1)\)개의 hemisphere가 \(S^n\)을 덮는다.
+        이 chart들을 <em>hemisphere charts</em>라 한다(<a href="#fig-11-3-2">Figure 11.3.2</a>). \(n = 2\)이면 이 여섯 hemisphere는 <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-5">Example 6.1.5</a>에서 \(S^2\)를 regular surface로 덮은 여섯 그래프와 같고, 둘의 관계는 <a href="index.html#toc-11-6">Section 11.6</a>에서 다룬다.</p>
+        <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
       </div>
 
       <figure class="dg-figure" id="fig-11-3-2">
         <img src="figures/fig-11-3-2-graph-charts.svg" alt="두 원. (a) 위 반원이 파란 굵은 호로 강조되어 있고 U₂⁺라 적혀 있다. 호 위의 점 여섯 개에서 세로 점선이 원 아래의 파란 선분 (-1, 1)로 내려가고, 선분 아래에 φ₂⁺(x) = x¹이라 적혀 있다. 양 끝은 빈 원이다. (b) 오른쪽 반원이 주황 굵은 호로 강조되어 있고 U₁⁺라 적혀 있다. 호 위의 점 여섯 개에서 가로 점선이 원 왼쪽의 주황 세로 선분으로 이어지고, 옆에 φ₁⁺(x) = x²이라 적혀 있다.">
-        <figcaption><span class="fig-head">그림 11.3.2.</span>
-        \(S^1\)의 반구 차트 두 개. (a) \(U_2^+ = \{x^2 \gt 0\}\)와 \(\varphi_2^+(x) = x^1\): 세로로 내려 \((-1, 1)\)에 사영한다. (b) \(U_1^+ = \{x^1 \gt 0\}\)와 \(\varphi_1^+(x) = x^2\): 가로로 사영한다.
-        표본점의 방향각은 (a) \(20^\circ, 50^\circ, \dots, 160^\circ\), (b) \(-70^\circ, -40^\circ, \dots, 80^\circ\)이다. 끝점 \((\pm 1, 0)\), \((0, \pm 1)\)은 각 반원에 들어가지 않는다(<a href="#i-11-3-4">예 11.3.4</a>).</figcaption>
+        <figcaption><span class="fig-head">Figure 11.3.2.</span>
+        \(S^1\)의 hemisphere charts 두 개. (a) \(U_2^+ = \{x^2 \gt 0\}\)와 \(\varphi_2^+(x) = x^1\): 세로로 내려 \((-1, 1)\)에 projection한다. (b) \(U_1^+ = \{x^1 \gt 0\}\)와 \(\varphi_1^+(x) = x^2\): 가로로 projection한다.
+        표본점의 방향각은 (a) \(20^\circ, 50^\circ, \dots, 160^\circ\), (b) \(-70^\circ, -40^\circ, \dots, 80^\circ\)이다. endpoint \((\pm 1, 0)\), \((0, \pm 1)\)은 각 반원에 들어가지 않는다(<a href="#i-11-3-4">Example 11.3.4</a>).</figcaption>
       </figure>
 
       <div class="thm proposition" id="i-11-3-5">
-        <p><span class="thm-head">명제 11.3.5</span> <span class="thm-name">(반구 아틀라스)</span>.
-        반구 차트 \(2(n+1)\)개의 모임 \(\mathcal{A}_{\text{반구}} = \{(U_i^\pm, \varphi_i^\pm)\}\)는 \(S^n\)의 매끄러운 아틀라스다.</p>
+        <p><span class="thm-head">Proposition 11.3.5</span> <span class="thm-name">(hemisphere atlas)</span>.
+        hemisphere charts \(2(n+1)\)개의 모임 \(\mathcal{A}_{\text{hemisphere}} = \{(U_i^\pm, \varphi_i^\pm)\}\)는 \(S^n\)의 smooth atlas다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 좌표변환은 “\(\pm\sqrt{1 - \abs{w}^2}\)를 끼워 넣고, 다른 성분 하나를 뺀다”이다. 끼워 넣기는 매끄럽고 빼기는 선형이다.</p>
-        <p><span class="proof-head">증명.</span>
-        \((U_i^\pm, \varphi_i^\pm)\)와 \((U_j^{\epsilon}, \varphi_j^{\epsilon})\) (\(\epsilon\)은 \(+\) 또는 \(-\))가 겹친다고 하자. \(\varphi_i^\pm(U_i^\pm \cap U_j^\epsilon)\)는 \(B^n\)의 열린집합이고(<a href="11-2-smooth-structures.html#sec-transition-maps">11.2절</a>), 그 위에서</p>
+        <p class="proof-idea">Proof idea: transition map은 “\(\pm\sqrt{1 - \abs{w}^2}\)를 끼워 넣고, 다른 성분 하나를 뺀다”이다. 끼워 넣기는 매끄럽고 빼기는 linear다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \((U_i^\pm, \varphi_i^\pm)\)와 \((U_j^{\epsilon}, \varphi_j^{\epsilon})\) (\(\epsilon\)은 \(+\) 또는 \(-\))가 겹친다고 하자. \(\varphi_i^\pm(U_i^\pm \cap U_j^\epsilon)\)는 \(B^n\)의 open set이고(<a href="11-2-smooth-structures.html#sec-transition-maps">Section 11.2</a>), 그 위에서</p>
         <div class="equation" id="eq-11-3-8">
         \[ \varphi_j^\epsilon \circ (\varphi_i^\pm)^{-1} = \mathrm{del}_j \circ (\varphi_i^\pm)^{-1} \tag{11.3.8} \]
         </div>
-        <p>이다. 여기서 \(\mathrm{del}_j\colon \R^{n+1} \to \R^n\)은 \(j\)번째 성분을 빼는 선형사상이다. \((\varphi_i^\pm)^{-1}\colon B^n \to \R^{n+1}\)은 매끄럽다. 성분이 좌표함수 \(w^k\)이거나 \(\pm\sqrt{1 - \abs{w}^2}\)인데,
-        \(\sqrt{\ }\)은 \((0, \infty)\)에서 매끄럽고 \(B^n\)에서 \(1 - \abs{w}^2 \gt 0\)이므로 합성이 매끄럽다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">명제 2.2.12</a>(b)). 선형사상은 매끄러우므로 (11.3.8)은 매끄럽다.
-        두 차트의 역할을 바꾸면 역방향 좌표변환도 같은 꼴이므로 매끄럽다. 따라서 좌표변환은 미분동형사상이다. \(i = j\)이고 부호가 다르면 \(U_i^+ \cap U_i^- = \varnothing\)이다.</p>
+        <p>이다. 여기서 \(\mathrm{del}_j\colon \R^{n+1} \to \R^n\)은 \(j\)번째 성분을 빼는 linear map이다. \((\varphi_i^\pm)^{-1}\colon B^n \to \R^{n+1}\)은 매끄럽다. 성분이 coordinate functions \(w^k\)이거나 \(\pm\sqrt{1 - \abs{w}^2}\)인데,
+        \(\sqrt{\ }\)은 \((0, \infty)\)에서 매끄럽고 \(B^n\)에서 \(1 - \abs{w}^2 \gt 0\)이므로 합성이 매끄럽다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">Proposition 2.2.12</a>(b)). linear map은 매끄러우므로 (11.3.8)은 매끄럽다.
+        두 chart의 역할을 바꾸면 역방향 transition map도 같은 꼴이므로 매끄럽다. 따라서 transition map은 diffeomorphism이다. \(i = j\)이고 부호가 다르면 \(U_i^+ \cap U_i^- = \varnothing\)이다.</p>
       </div>
 
-      <p>예를 들어 \(S^1\)에서 \(U_1^+ \cap U_2^+\)는 제1사분면의 호이고, \(\varphi_1^+(U_1^+ \cap U_2^+) = (0, 1)\) 위에서 \(\varphi_2^+ \circ (\varphi_1^+)^{-1}(w) = \sqrt{1 - w^2}\)이다(<a href="#ex-11-3-3">연습 11.3.3</a>).
-      이제 두 아틀라스가 같은 구조를 주는지 확인하자.</p>
+      <p>예를 들어 \(S^1\)에서 \(U_1^+ \cap U_2^+\)는 제1사분면의 호이고, \(\varphi_1^+(U_1^+ \cap U_2^+) = (0, 1)\) 위에서 \(\varphi_2^+ \circ (\varphi_1^+)^{-1}(w) = \sqrt{1 - w^2}\)이다(<a href="#ex-11-3-3">Exercise 11.3.3</a>).
+      이제 두 atlas가 같은 구조를 주는지 확인하자.</p>
 
       <div class="thm theorem" id="i-11-3-6">
-        <p><span class="thm-head">정리 11.3.6</span> <span class="thm-name">(반구 차트와 입체사영 차트는 같은 구조를 준다)</span>.
-        \(n \ge 1\)이면 반구 차트는 모두 \(\sigma\), \(\tilde\sigma\)와 매끄럽게 호환된다. 따라서 \(\mathcal{A}_{\text{반구}}\)가 정하는 매끄러운 구조는 \(S^n\)의 표준 매끄러운 구조와 같다.</p>
+        <p><span class="thm-head">Theorem 11.3.6</span> <span class="thm-name">(hemisphere charts와 stereographic projection chart는 같은 구조를 준다)</span>.
+        \(n \ge 1\)이면 hemisphere charts는 모두 \(\sigma\), \(\tilde\sigma\)와 smoothly compatible. 따라서 \(\mathcal{A}_{\text{hemisphere}}\)가 정하는 smooth structure는 \(S^n\)의 표준 smooth structure와 같다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> \(S^n\)의 “매끄러움”은 어느 차트로 계산하든 같다. 입체사영으로 계산하기 편한 것은 입체사영으로, 반구 차트로 계산하기 편한 것은 반구 차트로 계산해도 된다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> \(S^n\)의 “smoothness”는 어느 chart로 계산하든 같다. stereographic projection으로 계산하기 편한 것은 stereographic projection으로, hemisphere charts로 계산하기 편한 것은 hemisphere charts로 계산해도 된다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(\sigma^{-1}\)과 \((\varphi_i^\pm)^{-1}\)은 \(\R^{n+1}\)으로 가는 매끄러운 사상이고, \(\sigma\)와 \(\varphi_i^\pm\)는 \(\R^{n+1}\)의 열린집합에서 정의된 매끄러운 사상을 \(S^n\)으로 제한한 것이다. 좌표변환은 이런 사상들의 합성이다.</p>
-        <p><span class="proof-head">증명.</span>
-        <em>\(\sigma\)와의 호환.</em> 겹치는 곳은 \(U_i^\pm \setminus \{N\}\)이다. 한쪽 방향은 \(\varphi_i^\pm \circ \sigma^{-1} = \mathrm{del}_i \circ \sigma^{-1}\)이고, \(\sigma^{-1}\)은 성분의 분모 \(\abs{u}^2 + 1\)이 양수인 유리함수이므로 \(\R^n\) 전체에서 매끄럽다.
-        따라서 열린집합 \(\sigma(U_i^\pm \setminus \{N\})\)에서 매끄럽다. 다른 방향은 \(\sigma \circ (\varphi_i^\pm)^{-1}\)이다. \(\sigma\)는 열린집합 \(\{x \in \R^{n+1} : x^{n+1} \ne 1\}\)에서 정의된 매끄러운 사상 \(x \mapsto x'/(1 - x^{n+1})\)을 제한한 것이므로,
-        매끄러운 사상 \((\varphi_i^\pm)^{-1}\)과의 합성은 열린집합 \(\varphi_i^\pm(U_i^\pm \setminus \{N\})\)에서 매끄럽다. 식으로 쓰면 다음과 같다.</p>
+        <p class="proof-idea">Proof idea: \(\sigma^{-1}\)과 \((\varphi_i^\pm)^{-1}\)은 \(\R^{n+1}\)으로 가는 smooth map이고, \(\sigma\)와 \(\varphi_i^\pm\)는 \(\R^{n+1}\)의 open set에서 정의된 smooth map을 \(S^n\)으로 제한한 것이다. transition map은 이런 map들의 합성이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        <em>\(\sigma\)와의 compatibility.</em> 겹치는 곳은 \(U_i^\pm \setminus \{N\}\)이다. 한쪽 방향은 \(\varphi_i^\pm \circ \sigma^{-1} = \mathrm{del}_i \circ \sigma^{-1}\)이고, \(\sigma^{-1}\)은 성분의 분모 \(\abs{u}^2 + 1\)이 양수인 유리함수이므로 \(\R^n\) 전체에서 매끄럽다.
+        따라서 open set \(\sigma(U_i^\pm \setminus \{N\})\)에서 매끄럽다. 다른 방향은 \(\sigma \circ (\varphi_i^\pm)^{-1}\)이다. \(\sigma\)는 open set \(\{x \in \R^{n+1} : x^{n+1} \ne 1\}\)에서 정의된 smooth map \(x \mapsto x'/(1 - x^{n+1})\)을 제한한 것이므로,
+        smooth map \((\varphi_i^\pm)^{-1}\)과의 합성은 open set \(\varphi_i^\pm(U_i^\pm \setminus \{N\})\)에서 매끄럽다. 식으로 쓰면 다음과 같다.</p>
         <div class="equation" id="eq-11-3-9">
         \[ \sigma \circ (\varphi_i^\pm)^{-1}(w) = \begin{cases} \dfrac{\mathrm{del}_{n+1}\big((\varphi_i^\pm)^{-1}(w)\big)}{1 - w^n}, & i \le n, \\[2ex] \dfrac{w}{1 \mp \sqrt{1 - \abs{w}^2}}, & i = n + 1. \end{cases} \tag{11.3.9} \]
         </div>
         <p>첫째 줄은 \(i \le n\)이면 \((\varphi_i^\pm)^{-1}(w)\)의 마지막 성분이 \(w^n\)이기 때문이다. \(i \le n\)이면 \(N \notin U_i^\pm\)(\(N\)의 \(i\)번째 성분이 \(0\))이므로 정의역은 \(B^n\) 전체이고, \(\abs{w} \lt 1\)이므로 분모 \(1 - w^n\)은 양수다.
         \(i = n+1\)이고 부호가 \(-\)이면 분모 \(1 + \sqrt{1 - \abs{w}^2}\)은 양수다. \(i = n+1\)이고 부호가 \(+\)이면 \(N \in U_{n+1}^+\), \(\varphi_{n+1}^+(N) = 0\)이므로 정의역은 \(B^n \setminus \{0\}\)이고, 거기서 \(\sqrt{1 - \abs{w}^2} \lt 1\)이어서 분모가 양수다.</p>
-        <p><em>\(\tilde\sigma\)와의 호환.</em> 대척사상 \(a(x) = -x\)를 쓴다. \(\tilde\sigma = (-\id) \circ \sigma \circ a\)이고(<a href="11-1-topological-manifolds.html#i-11-1-6">예 11.1.6</a>), \(\mathrm{del}_i\)가 선형이므로 \(y \in U_i^\mp\)에 대해 \(\varphi_i^\pm(a(y)) = -\varphi_i^\mp(y)\)이다. 따라서 겹치는 곳에서</p>
+        <p><em>\(\tilde\sigma\)와의 compatibility.</em> antipodal map \(a(x) = -x\)를 쓴다. \(\tilde\sigma = (-\id) \circ \sigma \circ a\)이고(<a href="11-1-topological-manifolds.html#i-11-1-6">Example 11.1.6</a>), \(\mathrm{del}_i\)가 linear이므로 \(y \in U_i^\mp\)에 대해 \(\varphi_i^\pm(a(y)) = -\varphi_i^\mp(y)\)이다. 따라서 겹치는 곳에서</p>
         <p>\(\tilde\sigma \circ (\varphi_i^\pm)^{-1}(w) = -\sigma\big(-(\varphi_i^\pm)^{-1}(w)\big) = -\sigma \circ (\varphi_i^\mp)^{-1}(-w)\), &nbsp; \(\varphi_i^\pm \circ \tilde\sigma^{-1}(v) = -\varphi_i^\mp \circ \sigma^{-1}(-v)\)</p>
-        <p>이다. 오른쪽은 앞 문단의 매끄러운 좌표변환과 \(\pm\id\)의 합성이므로 매끄럽다.</p>
-        <p><em>결론.</em> 반구 차트는 매끄러운 아틀라스 \(\{\sigma, \tilde\sigma\}\)의 모든 차트와 호환되므로 표준 구조에 속한다(<a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a>(b)). 즉 \(\mathcal{A}_{\text{반구}} \cup \{\sigma, \tilde\sigma\}\)는 표준 구조의 부분집합이므로 매끄러운 아틀라스이고,
-        <a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a>(c)에 의해 두 아틀라스는 같은 구조를 정한다.</p>
-        <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code> (\(n = 2\)의 모든 경우)</p>
+        <p>이다. 오른쪽은 앞 문단의 smooth transition map과 \(\pm\id\)의 합성이므로 매끄럽다.</p>
+        <p><em>결론.</em> hemisphere charts는 smooth atlas \(\{\sigma, \tilde\sigma\}\)의 모든 chart와 compatible이므로 표준 구조에 속한다(<a href="11-2-smooth-structures.html#i-11-2-10">Proposition 11.2.10</a>(b)). 즉 \(\mathcal{A}_{\text{hemisphere}} \cup \{\sigma, \tilde\sigma\}\)는 표준 구조의 부분집합이므로 smooth atlas이고,
+        <a href="11-2-smooth-structures.html#i-11-2-10">Proposition 11.2.10</a>(c)에 의해 두 atlas는 같은 구조를 정한다.</p>
+        <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code> (\(n = 2\)의 모든 경우)</p>
       </div>
 
-      <p>이 증명은 <a href="#i-11-3-1">명제 11.3.1</a>의 또 다른 증명을 준다. \(\sigma\)와 \(\tilde\sigma\)는 둘 다 매끄러운 아틀라스 \(\mathcal{A}_{\text{반구}}\)의 모든 차트와 호환되므로, <a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a>(a)에 의해 서로 호환된다.
-      직접 계산 (11.3.4)는 좌표변환이 구체적으로 무엇인지(반전)까지 알려 준다는 점에서 더 많은 정보를 준다.</p>
+      <p>이 증명은 <a href="#i-11-3-1">Proposition 11.3.1</a>의 또 다른 증명을 준다. \(\sigma\)와 \(\tilde\sigma\)는 둘 다 smooth atlas \(\mathcal{A}_{\text{hemisphere}}\)의 모든 chart와 compatible이므로, <a href="11-2-smooth-structures.html#i-11-2-10">Proposition 11.2.10</a>(a)에 의해 서로 compatible이다.
+      직접 계산 (11.3.4)는 transition map이 구체적으로 무엇인지(inversion)까지 알려 준다는 점에서 더 많은 정보를 준다.</p>
     </section>
 
     <section id="sec-circle">
-      <h2>원 \(S^1\)의 각 차트</h2>
-      <p>\(S^1\)의 점은 흔히 각 \(t\)로 부른다. 이것도 표준 구조의 차트인지 확인하자. 처음 하는 계산이므로 단계를 모두 쓴다.</p>
+      <h2>Angle Charts on the Circle \(S^1\)</h2>
+      <p>\(S^1\)의 점은 흔히 각 \(t\)로 부른다. 이것도 표준 구조의 chart인지 확인하자. 처음 하는 계산이므로 단계를 모두 쓴다.</p>
 
       <div class="thm example" id="i-11-3-7">
-        <p><span class="thm-head">예 11.3.7</span> <span class="thm-name">(각 차트)</span>.
-        \(e(t) = (\cos t, \sin t)\)를 \((-\pi, \pi)\)로 제한하면 \(S^1 \setminus \{(-1, 0)\}\) 위로 가는 연속 전단사다. 역사상은</p>
+        <p><span class="thm-head">Example 11.3.7</span> <span class="thm-name">(각 chart)</span>.
+        \(e(t) = (\cos t, \sin t)\)를 \((-\pi, \pi)\)로 제한하면 \(S^1 \setminus \{(-1, 0)\}\) 위로 가는 연속 bijective다. inverse map은</p>
         <div class="equation" id="eq-11-3-10">
         \[ \alpha(x) = 2\arctan\frac{x^2}{1 + x^1} \tag{11.3.10} \]
         </div>
         <p>이다(\(\alpha\colon S^1 \setminus \{(-1, 0)\} \to (-\pi, \pi)\)). 실제로 \(x = e(t)\)이면 \(\dfrac{\sin t}{1 + \cos t} = \dfrac{2\sin(t/2)\cos(t/2)}{2\cos^2(t/2)} = \tan\dfrac{t}{2}\)이고 \(t/2 \in (-\pi/2, \pi/2)\)이므로 \(2\arctan\tan(t/2) = t\)이다.
-        \(1 + x^1 \gt 0\)인 곳에서 \(\alpha\)는 연속이므로 \(\alpha\)는 위상동형사상이고, \((S^1 \setminus \{(-1, 0)\}, \alpha)\)는 차트다.</p>
-        <p><em>\(\sigma\)와의 호환.</em> 겹치는 곳은 \(S^1 \setminus \{(-1, 0), N\}\)이고 \(\alpha\)에 의한 상은 \((-\pi, \pi) \setminus \{\pi/2\}\)이다. 그 위에서 \(\sigma \circ \alpha^{-1}(t) = \sigma(\cos t, \sin t) = \cos t/(1 - \sin t)\)이다. 미분하면</p>
+        \(1 + x^1 \gt 0\)인 곳에서 \(\alpha\)는 연속이므로 \(\alpha\)는 homeomorphism이고, \((S^1 \setminus \{(-1, 0)\}, \alpha)\)는 chart다.</p>
+        <p><em>\(\sigma\)와의 compatibility.</em> 겹치는 곳은 \(S^1 \setminus \{(-1, 0), N\}\)이고 \(\alpha\)에 의한 image는 \((-\pi, \pi) \setminus \{\pi/2\}\)이다. 그 위에서 \(\sigma \circ \alpha^{-1}(t) = \sigma(\cos t, \sin t) = \cos t/(1 - \sin t)\)이다. 미분하면</p>
         <div class="equation" id="eq-11-3-11">
         \[ \begin{aligned} \frac{d}{dt}\,\frac{\cos t}{1 - \sin t} &= \frac{-\sin t\,(1 - \sin t) + \cos^2 t}{(1 - \sin t)^2} \\ &= \frac{1 - \sin t}{(1 - \sin t)^2} \\ &= \frac{1}{1 - \sin t} \gt 0 \end{aligned} \tag{11.3.11} \]
         </div>
-        <p>이다(분자에서 \(\sin^2 t + \cos^2 t = 1\)을 썼다). 따라서 두 구간 \((-\pi, \pi/2)\), \((\pi/2, \pi)\) 각각에서 \(\sigma \circ \alpha^{-1}\)은 도함수가 \(0\)이 아닌 매끄러운 함수이고,
-        <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-11">예 2.3.11</a>에 의해 상 위로의 미분동형사상이다. 즉 역방향 좌표변환 \(\alpha \circ \sigma^{-1}\)도 매끄럽다.</p>
-        <p><em>\(\tilde\sigma\)와의 호환.</em> 같은 방식으로 \((-\pi, \pi) \setminus \{-\pi/2\}\) 위에서 \(\tilde\sigma \circ \alpha^{-1}(t) = \cos t/(1 + \sin t)\)이고 도함수는 \(-1/(1 + \sin t) \lt 0\)이다.</p>
-        <p>\(\alpha\)가 매끄러운 아틀라스 \(\{\sigma, \tilde\sigma\}\)의 두 차트와 모두 호환되므로 \(\alpha\)는 \(S^1\)의 표준 구조에 속한다. 덧붙여 \(\cos t \ne 0\)이면 \(\dfrac{\cos t}{1 - \sin t} = \dfrac{1 + \sin t}{\cos t}\)(분모·분자에 \(1 + \sin t\)를 곱함)이다. \(t = -\pi/2\)에서는 오른쪽 식이 정의되지 않으므로 왼쪽 식을 써야 한다.</p>
-        <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+        <p>이다(분자에서 \(\sin^2 t + \cos^2 t = 1\)을 썼다). 따라서 두 구간 \((-\pi, \pi/2)\), \((\pi/2, \pi)\) 각각에서 \(\sigma \circ \alpha^{-1}\)은 도함수가 \(0\)이 아닌 smooth function이고,
+        <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-11">Example 2.3.11</a>에 의해 image 위로의 diffeomorphism이다. 즉 역방향 transition map \(\alpha \circ \sigma^{-1}\)도 매끄럽다.</p>
+        <p><em>\(\tilde\sigma\)와의 compatibility.</em> 같은 방식으로 \((-\pi, \pi) \setminus \{-\pi/2\}\) 위에서 \(\tilde\sigma \circ \alpha^{-1}(t) = \cos t/(1 + \sin t)\)이고 도함수는 \(-1/(1 + \sin t) \lt 0\)이다.</p>
+        <p>\(\alpha\)가 smooth atlas \(\{\sigma, \tilde\sigma\}\)의 두 chart와 모두 compatible이므로 \(\alpha\)는 \(S^1\)의 표준 구조에 속한다. 덧붙여 \(\cos t \ne 0\)이면 \(\dfrac{\cos t}{1 - \sin t} = \dfrac{1 + \sin t}{\cos t}\)(분모·분자에 \(1 + \sin t\)를 곱함)이다. \(t = -\pi/2\)에서는 오른쪽 식이 정의되지 않으므로 왼쪽 식을 써야 한다.</p>
+        <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
       </div>
 
       <aside class="box backward">
-        <p class="box-title">3장과 비교: 위상동형사상에서 매끄러운 차트로</p>
-        <p><a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-14">예 3.2.14</a>(c)는 \(\sigma\)가 <em>위상동형사상</em>임을 보였고, <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-15">비예 3.2.15</a>는 \([0, 2\pi) \to S^1\)이 위상동형사상이 아님을 보였다.
-        이 절에서 새로워진 것은 차트들 <em>사이</em>의 관계다. 위상동형사상인 차트는 얼마든지 있지만(<a href="#i-11-3-9">비예 11.3.9</a>), 표준 구조에 속하는 것은 좌표변환이 매끄러운 것뿐이다.
-        각 차트 \(\alpha\)가 반열린 구간이 아니라 열린구간 \((-\pi, \pi)\)로 가는 것도 <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-15">비예 3.2.15</a>에서 본 이유 때문이다.</p>
+        <p class="box-title">Looking back: homeomorphism에서 smooth chart로</p>
+        <p><a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-14">Example 3.2.14</a>(c)는 \(\sigma\)가 <em>homeomorphism</em>임을 보였고, <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-15">Non-example 3.2.15</a>는 \([0, 2\pi) \to S^1\)이 homeomorphism이 아님을 보였다.
+        이 절에서 새로워진 것은 chart들 <em>사이</em>의 관계다. homeomorphism인 chart는 얼마든지 있지만(<a href="#i-11-3-9">Non-example 11.3.9</a>), 표준 구조에 속하는 것은 transition map이 smooth한 것뿐이다.
+        각 chart \(\alpha\)가 반열린 구간이 아니라 열린구간 \((-\pi, \pi)\)로 가는 것도 <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-15">Non-example 3.2.15</a>에서 본 이유 때문이다.</p>
       </aside>
     </section>
 
     <section id="sec-nonexamples">
-      <h2>비예와 흔한 오해</h2>
+      <h2>Non-examples and Common Misconceptions</h2>
 
       <div class="thm nonexample" id="i-11-3-8">
-        <p><span class="thm-head">비예 11.3.8</span> <span class="thm-name">(차트 하나로는 \(S^n\)을 덮을 수 없다)</span>.
-        \(n \ge 1\)이면 \(S^n\) 전체를 정의역으로 하는 차트는 없다. 더 일반적으로, 공집합이 아닌 컴팩트 위상 \(n\)-다양체 \(M\) (\(n \ge 1\))은 차트 하나로 덮을 수 없다.
-        \((M, \varphi)\)가 차트라 하자. \(\hat U = \varphi(M)\)은 컴팩트 공간의 연속상이므로 컴팩트하고(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">명제 3.6.5</a>(c)), 하이네-보렐 정리(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-7">정리 3.6.7</a>)에 의해 \(\R^n\)에서 닫혀 있고 유계다.
-        한편 \(\hat U\)는 차트의 치역이므로 열려 있다. \(\R^n\)은 연결이므로(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-10">예 3.7.10</a>(a), <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-9">명제 3.7.9</a>) 열려 있으면서 닫혀 있는 공집합이 아닌 부분집합은 \(\R^n\) 자신뿐이다.
-        그러면 \(\hat U = \R^n\)인데, \(\R^n\)은 유계가 아니므로 모순이다. \(S^n\)은 컴팩트하므로(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-8">예 3.6.8</a>(a)) 여기에 해당한다. 입체사영 두 개는 필요한 최소 개수다.</p>
+        <p><span class="thm-head">Non-example 11.3.8</span> <span class="thm-name">(chart 하나로는 \(S^n\)을 덮을 수 없다)</span>.
+        \(n \ge 1\)이면 \(S^n\) 전체를 정의역으로 하는 chart는 없다. 더 일반적으로, 공집합이 아닌 compact topological \(n\)-manifold \(M\) (\(n \ge 1\))은 chart 하나로 덮을 수 없다.
+        \((M, \varphi)\)가 chart라 하자. \(\hat U = \varphi(M)\)은 compact 공간의 continuous image이므로 compact하고(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-5">Proposition 3.6.5</a>(c)), Heine–Borel theorem(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-7">Theorem 3.6.7</a>)에 의해 \(\R^n\)에서 닫혀 있고 bounded다.
+        한편 \(\hat U\)는 chart의 치역이므로 열려 있다. \(\R^n\)은 연결이므로(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-10">Example 3.7.10</a>(a), <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-9">Proposition 3.7.9</a>) 열려 있으면서 닫혀 있는 공집합이 아닌 부분집합은 \(\R^n\) 자신뿐이다.
+        그러면 \(\hat U = \R^n\)인데, \(\R^n\)은 bounded가 아니므로 모순이다. \(S^n\)은 compact하므로(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-8">Example 3.6.8</a>(a)) 여기에 해당한다. stereographic projection 두 개는 필요한 최소 개수다.</p>
       </div>
 
       <div class="thm nonexample" id="i-11-3-9">
-        <p><span class="thm-head">비예 11.3.9</span> <span class="thm-name">(표준 구조에 속하지 않는 차트)</span>.
-        \(c\colon \R^n \to \R^n\), \(c(u) = \abs{u}^2 u\)라 하자. \(n = 1\)이면 \(c(u) = u^3\)이다. \(c\)는 매끄러운 전단사이고 역사상 \(c^{-1}(v) = v/\abs{v}^{2/3}\) (\(v \ne 0\)), \(c^{-1}(0) = 0\)은 연속이므로 위상동형사상이다.
-        따라서 \((S^n \setminus \{N\},\ c \circ \sigma)\)는 \(S^n\)의 차트다. 그러나 \(\sigma\)와의 좌표변환 \(\sigma \circ (c \circ \sigma)^{-1} = c^{-1}\)은 원점에서 미분가능하지 않다. \(e_1\) 방향의 차분몫이 \(\abs{c^{-1}(he_1)}/h = h^{1/3}/h \to \infty\) (\(h \to 0^+\))이기 때문이다.
-        그러므로 이 차트는 표준 구조에 속하지 않는다. <a href="11-2-smooth-structures.html#i-11-2-3">비예 11.2.3</a>의 \(x^3\) 차트를 구면에 옮긴 것이다.</p>
-        <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+        <p><span class="thm-head">Non-example 11.3.9</span> <span class="thm-name">(표준 구조에 속하지 않는 chart)</span>.
+        \(c\colon \R^n \to \R^n\), \(c(u) = \abs{u}^2 u\)라 하자. \(n = 1\)이면 \(c(u) = u^3\)이다. \(c\)는 smooth bijective이고 inverse map \(c^{-1}(v) = v/\abs{v}^{2/3}\) (\(v \ne 0\)), \(c^{-1}(0) = 0\)은 연속이므로 homeomorphism이다.
+        따라서 \((S^n \setminus \{N\},\ c \circ \sigma)\)는 \(S^n\)의 chart다. 그러나 \(\sigma\)와의 transition map \(\sigma \circ (c \circ \sigma)^{-1} = c^{-1}\)은 원점에서 미분가능하지 않다. \(e_1\) 방향의 difference quotient가 \(\abs{c^{-1}(he_1)}/h = h^{1/3}/h \to \infty\) (\(h \to 0^+\))이기 때문이다.
+        그러므로 이 chart는 표준 구조에 속하지 않는다. <a href="11-2-smooth-structures.html#i-11-2-3">Non-example 11.2.3</a>의 \(x^3\) chart를 sphere에 옮긴 것이다.</p>
+        <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
       </div>
 
       <aside class="box warning">
-        <p class="box-title">흔한 오해: “\(S^n \subseteq \R^{n+1}\)이니까 매끄러움은 저절로 정해진다”</p>
-        <p>이 절의 표준 구조는 차트 \(\sigma, \tilde\sigma\)만으로 정의했고, \(\R^{n+1}\)은 식을 쓰는 데만 썼다. \(\R^{n+1}\)의 매끄러움과 \(S^n\)의 매끄러운 구조가 “잘 맞는다”는 것,
-        즉 표준 구조가 \(S^n\)을 \(\R^{n+1}\)의 부분다양체로 본 구조와 같다는 것은 따로 증명해야 하는 정리다(<a href="../14-submanifolds/index.html">14장</a>, 아래 상자).</p>
+        <p class="box-title">Common misconception: “\(S^n \subseteq \R^{n+1}\)이니까 smoothness는 저절로 정해진다”</p>
+        <p>이 절의 표준 구조는 chart \(\sigma, \tilde\sigma\)만으로 정의했고, \(\R^{n+1}\)은 식을 쓰는 데만 썼다. \(\R^{n+1}\)의 smoothness와 \(S^n\)의 smooth structure가 “잘 맞는다”는 것,
+        즉 표준 구조가 \(S^n\)을 \(\R^{n+1}\)의 submanifold로 본 구조와 같다는 것은 따로 증명해야 하는 정리다(<a href="../14-submanifolds/index.html">Chapter 14</a>, 아래 상자).</p>
       </aside>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: 정칙값 정리로 본 \(S^n\)</p>
-        <p><a href="../14-submanifolds/index.html">14장</a>에서는 \(S^n = f^{-1}(1)\), \(f(x) = \abs{x}^2\)을 정칙값의 역상으로 보아 \(\R^{n+1}\)의 매장 부분다양체 구조를 준다. 그 구조가 이 절의 표준 구조와 같다는 것도 그곳에서 확인한다.
-        \(n = 2\)일 때 \(S^2\)가 정칙곡면이라는 사실(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-5">예 6.1.5</a>)과 이 절의 구조 사이의 관계는 <a href="index.html#toc-11-6">11.6절</a>에서 다룬다.</p>
+        <p class="box-title">Looking ahead: regular value theorem으로 본 \(S^n\)</p>
+        <p><a href="../14-submanifolds/index.html">Chapter 14</a>에서는 \(S^n = f^{-1}(1)\), \(f(x) = \abs{x}^2\)을 regular value의 preimage로 보아 \(\R^{n+1}\)의 embedding submanifold 구조를 준다. 그 구조가 이 절의 표준 구조와 같다는 것도 그곳에서 확인한다.
+        \(n = 2\)일 때 \(S^2\)가 regular surface라는 사실(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-5">Example 6.1.5</a>)과 이 절의 구조 사이의 관계는 <a href="index.html#toc-11-6">Section 11.6</a>에서 다룬다.</p>
       </aside>
 
       <aside class="box convention">
-        <p class="box-title">규약 비교: 입체사영의 방향과 반지름</p>
-        <p>이 study set은 북극 \(N = (0, \dots, 0, 1)\)에서 적도면 \(x^{n+1} = 0\)으로 사영한다. 일부 교재는 남극에서 사영하거나, 북극에서 남극의 접평면 \(x^{n+1} = -1\)로 사영한다.
-        뒤의 방식은 이 study set의 \(\sigma\)를 \(2\)배 한 것이다. 어느 경우든 좌표변환은 반전과 상수배의 합성이어서 같은 표준 구조를 준다. 반지름이 \(r\)인 구면 \(S^n(r)\)은 \(x \mapsto x/r\)로 \(S^n\)과 같은 차트를 쓴다.</p>
+        <p class="box-title">Conventions: stereographic projection의 방향과 반지름</p>
+        <p>이 study set은 북극 \(N = (0, \dots, 0, 1)\)에서 적도면 \(x^{n+1} = 0\)으로 projection한다. 일부 교재는 남극에서 projection하거나, 북극에서 남극의 tangent plane \(x^{n+1} = -1\)로 projection한다.
+        뒤의 방식은 이 study set의 \(\sigma\)를 \(2\)배 한 것이다. 어느 경우든 transition map은 inversion과 상수배의 합성이어서 같은 표준 구조를 준다. 반지름이 \(r\)인 sphere \(S^n(r)\)은 \(x \mapsto x/r\)로 \(S^n\)과 같은 chart를 쓴다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>두 입체사영의 좌표변환은 \(\R^n \setminus \{0\}\)의 반전 \(I(u) = u/\abs{u}^2\)이고, \(I\)는 자기 자신이 역인 미분동형사상이다(<a href="#i-11-3-1">명제 11.3.1</a>). 이 아틀라스가 \(S^n\)의 표준 매끄러운 구조를 정한다.</li>
-        <li>\(\det DI(u) = -\abs{u}^{-2n} \ne 0\)이다. 음의 부호는 두 사영이 방향을 반대로 준다는 뜻이다(<a href="../18-integration-stokes/index.html">18장</a>).</li>
-        <li>반구 차트 \(\varphi_i^\pm\)(한 좌표 버리기) \(2(n+1)\)개도 매끄러운 아틀라스이고, 입체사영과 같은 구조를 준다(<a href="#i-11-3-6">정리 11.3.6</a>).</li>
-        <li>\(S^1\)의 각 차트 \(\alpha\)는 표준 구조에 속한다. 반면 \(c \circ \sigma\), \(c(u) = \abs{u}^2u\)는 위상동형사상인 차트이지만 표준 구조에 속하지 않는다.</li>
-        <li>공집합이 아닌 컴팩트 다양체(차원 \(\ge 1\))는 차트 하나로 덮을 수 없다.</li>
+        <li>두 stereographic projection의 transition map은 \(\R^n \setminus \{0\}\)의 inversion \(I(u) = u/\abs{u}^2\)이고, \(I\)는 자기 자신이 역인 diffeomorphism이다(<a href="#i-11-3-1">Proposition 11.3.1</a>). 이 atlas가 \(S^n\)의 표준 smooth structure를 정한다.</li>
+        <li>\(\det DI(u) = -\abs{u}^{-2n} \ne 0\)이다. 음의 부호는 두 projection이 방향을 반대로 준다는 뜻이다(<a href="../18-integration-stokes/index.html">Chapter 18</a>).</li>
+        <li>hemisphere charts \(\varphi_i^\pm\)(한 좌표 버리기) \(2(n+1)\)개도 smooth atlas이고, stereographic projection과 같은 구조를 준다(<a href="#i-11-3-6">Theorem 11.3.6</a>).</li>
+        <li>\(S^1\)의 각 chart \(\alpha\)는 표준 구조에 속한다. 반면 \(c \circ \sigma\), \(c(u) = \abs{u}^2u\)는 homeomorphism인 chart이지만 표준 구조에 속하지 않는다.</li>
+        <li>공집합이 아닌 compact manifold(dimension \(\ge 1\))는 chart 하나로 덮을 수 없다.</li>
       </ul>
-      <p class="next">다음 절에서는 계산으로 확인하는 또 하나의 기준 예제 \(\RP^n\)의 좌표변환을 구하고, 열린부분다양체, 곱다양체(토러스 \(T^n\)), 그래프, 행렬 공간 \(\GL(n, \R)\)처럼 일반적인 구성으로 매끄러운 다양체를 만드는 방법을 모은다.</p>
+      <p class="next">다음 절에서는 계산으로 확인하는 또 하나의 running example \(\RP^n\)의 transition map을 구하고, open submanifold, product manifold(torus \(T^n\)), 그래프, 행렬 공간 \(\GL(n, \R)\)처럼 일반적인 구성으로 smooth manifold를 만드는 방법을 모은다.</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-11-3-1" data-level="1">
-        <p><span class="thm-head">연습 11.3.1</span> <span class="level">★</span>
-        <a href="#fig-11-3-1">그림 11.3.1</a>의 값을 확인하여라. 즉 \(S^1\)에서 \(x = (3/5, 4/5)\)와 \(z = (-4/5, -3/5)\)의 \(\sigma\), \(\tilde\sigma\) 값을 구하고 \(\sigma \cdot \tilde\sigma = 1\)임을 확인하여라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 11.3.1</span> <span class="level">★</span>
+        <a href="#fig-11-3-1">Figure 11.3.1</a>의 값을 확인하여라. 즉 \(S^1\)에서 \(x = (3/5, 4/5)\)와 \(z = (-4/5, -3/5)\)의 \(\sigma\), \(\tilde\sigma\) 값을 구하고 \(\sigma \cdot \tilde\sigma = 1\)임을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
           <p>\(n = 1\)이면 \(\sigma(x) = x^1/(1 - x^2)\), \(\tilde\sigma(x) = x^1/(1 + x^2)\)이다. \(x\): \(\sigma = (3/5)/(1/5) = 3\), \(\tilde\sigma = (3/5)/(9/5) = 1/3\). \(z\): \(\sigma = (-4/5)/(8/5) = -1/2\), \(\tilde\sigma = (-4/5)/(2/5) = -2\).
           곱은 각각 \(1\)이다. 일반적으로 \(\sigma\tilde\sigma = (x^1)^2/(1 - (x^2)^2) = (x^1)^2/(x^1)^2 = 1\)이다(\(x^1 \ne 0\)일 때).</p>
-          <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+          <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-11-3-2" data-level="1">
-        <p><span class="thm-head">연습 11.3.2</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 11.3.2</span> <span class="level">★</span>
         \(x = (2/3, 1/3, 2/3) \in S^2\)에 대하여 \(\sigma(x)\)와 \(\tilde\sigma(x)\)를 구하고, \(\tilde\sigma(x) = \sigma(x)/\abs{\sigma(x)}^2\)임을 확인하여라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <details class="solution"><summary>Solution</summary>
           <p>\(\abs{x}^2 = (4 + 1 + 4)/9 = 1\)이므로 \(x \in S^2\)이다. \(\sigma(x) = (2/3, 1/3)/(1 - 2/3) = (2, 1)\), \(\tilde\sigma(x) = (2/3, 1/3)/(1 + 2/3) = (2/5, 1/5)\)이다.
           \(\abs{\sigma(x)}^2 = 5\)이므로 \(\sigma(x)/\abs{\sigma(x)}^2 = (2/5, 1/5) = \tilde\sigma(x)\)이다.</p>
-          <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+          <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-11-3-3" data-level="1">
-        <p><span class="thm-head">연습 11.3.3</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 11.3.3</span> <span class="level">★</span>
         (a) \(S^1\)에서 \(\varphi_2^+ \circ (\varphi_1^+)^{-1}\)의 정의역과 식을 구하여라. (b) \(S^2\)에서 \(\varphi_2^+ \circ (\varphi_1^+)^{-1}\)의 정의역과 식을 구하여라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <details class="solution"><summary>Solution</summary>
           <p>(a) \(U_1^+ \cap U_2^+ = \{x^1 \gt 0, x^2 \gt 0\}\)이고 \(\varphi_1^+(x) = x^2\)이므로 정의역은 \((0, 1)\)이다. \((\varphi_1^+)^{-1}(w) = (\sqrt{1 - w^2}, w)\)이고 \(\varphi_2^+\)는 둘째 성분을 버리므로
-          \(\varphi_2^+ \circ (\varphi_1^+)^{-1}(w) = \sqrt{1 - w^2}\)이다. 이 사상은 \((0, 1)\)에서 \((0, 1)\) 위로 가는 미분동형사상이고 자기 자신이 역이다.</p>
+          \(\varphi_2^+ \circ (\varphi_1^+)^{-1}(w) = \sqrt{1 - w^2}\)이다. 이 map은 \((0, 1)\)에서 \((0, 1)\) 위로 가는 diffeomorphism이고 자기 자신이 역이다.</p>
           <p>(b) \((\varphi_1^+)^{-1}(w^1, w^2) = (\sqrt{1 - \abs{w}^2}, w^1, w^2)\)이고 \(U_2^+\)의 조건은 둘째 성분 \(w^1 \gt 0\)이다. 정의역은 \(\{w \in B^2 : w^1 \gt 0\}\)이고,
           둘째 성분을 버리면 \(\varphi_2^+ \circ (\varphi_1^+)^{-1}(w) = (\sqrt{1 - \abs{w}^2},\ w^2)\)이다.</p>
-          <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+          <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-11-3-4" data-level="1">
-        <p><span class="thm-head">연습 11.3.4</span> <span class="level">★</span>
-        참인지 거짓인지 판별하고 이유를 써라. (a) \(S^n \setminus \{N\}\)은 차트 하나로 덮인다. (b) \(\RP^n\) (\(n \ge 1\))은 차트 하나로 덮이지 않는다. (c) 원기둥 \(S^1 \times \R\)은 차트 하나로 덮이지 않는다.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 참. \(\sigma\colon S^n \setminus \{N\} \to \R^n\)이 차트다.
-          (b) 참. \(\RP^n\)은 공집합이 아닌 컴팩트 \(n\)-다양체이므로(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-14">명제 3.6.14</a>) <a href="#i-11-3-8">비예 11.3.8</a>이 적용된다.
-          (c) 거짓. <a href="#i-11-3-8">비예 11.3.8</a>은 컴팩트성을 쓰므로 원기둥에는 적용되지 않고, 실제로 차트 하나로 덮인다. \(\chi(v, t) = e^t v\)는 \(S^1 \times \R\)에서 \(\R^2 \setminus \{0\}\) 위로 가는 위상동형사상이고(역은 \(u \mapsto (u/\abs{u},\ \log\abs{u})\), <a href="11-1-topological-manifolds.html#ex-11-1-7">연습 11.1.7</a>의 풀이), \(\R^2 \setminus \{0\}\)은 \(\R^2\)의 열린집합이다. 따라서 \((S^1 \times \R, \chi)\)가 전체를 덮는 차트다. 이 문항은 <a href="#i-11-3-8">비예 11.3.8</a>에서 컴팩트성이 꼭 필요하다는 것을 확인하는 것이 목적이다.</p>
+        <p><span class="thm-head">Exercise 11.3.4</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. (a) \(S^n \setminus \{N\}\)은 chart 하나로 덮인다. (b) \(\RP^n\) (\(n \ge 1\))은 chart 하나로 덮이지 않는다. (c) cylinder \(S^1 \times \R\)은 chart 하나로 덮이지 않는다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. \(\sigma\colon S^n \setminus \{N\} \to \R^n\)이 chart다.
+          (b) 참. \(\RP^n\)은 공집합이 아닌 compact \(n\)-manifold이므로(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-14">Proposition 3.6.14</a>) <a href="#i-11-3-8">Non-example 11.3.8</a>이 적용된다.
+          (c) 거짓. <a href="#i-11-3-8">Non-example 11.3.8</a>은 compactness를 쓰므로 cylinder에는 적용되지 않고, 실제로 chart 하나로 덮인다. \(\chi(v, t) = e^t v\)는 \(S^1 \times \R\)에서 \(\R^2 \setminus \{0\}\) 위로 가는 homeomorphism이고(역은 \(u \mapsto (u/\abs{u},\ \log\abs{u})\), <a href="11-1-topological-manifolds.html#ex-11-1-7">Exercise 11.1.7</a>의 풀이), \(\R^2 \setminus \{0\}\)은 \(\R^2\)의 open set이다. 따라서 \((S^1 \times \R, \chi)\)가 전체를 덮는 chart다. 이 문항은 <a href="#i-11-3-8">Non-example 11.3.8</a>에서 compactness가 꼭 필요하다는 것을 확인하는 것이 목적이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-11-3-5" data-level="2">
-        <p><span class="thm-head">연습 11.3.5</span> <span class="level">★★</span>
-        \(\beta\colon S^1 \setminus \{(1, 0)\} \to (0, 2\pi)\)를 \(t \mapsto (\cos t, \sin t)\), \(t \in (0, 2\pi)\)의 역사상이라 하자. \(\beta\)가 차트이고 <a href="#i-11-3-7">예 11.3.7</a>의 \(\alpha\)와 매끄럽게 호환됨을 보여라.
-        또 \(\beta\)가 표준 구조에 속함을 보여라. \(\alpha\)와 호환된다는 것만으로 이 결론이 나오는가? (<a href="11-4-more-examples.html#i-11-4-12">예 11.4.12</a>에서 사용)</p>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 11.3.5</span> <span class="level">★★</span>
+        \(\beta\colon S^1 \setminus \{(1, 0)\} \to (0, 2\pi)\)를 \(t \mapsto (\cos t, \sin t)\), \(t \in (0, 2\pi)\)의 inverse map이라 하자. \(\beta\)가 chart이고 <a href="#i-11-3-7">Example 11.3.7</a>의 \(\alpha\)와 smoothly compatible임을 보여라.
+        또 \(\beta\)가 표준 구조에 속함을 보여라. \(\alpha\)와 compatible이라는 것만으로 이 결론이 나오는가? (<a href="11-4-more-examples.html#i-11-4-12">Example 11.4.12</a>에서 사용)</p>
+        <details class="solution"><summary>Solution</summary>
           <p>\(\beta\)는 \(\alpha\)를 회전시킨 것이다. \(x \in S^1 \setminus \{(1, 0)\}\)이면 \(-x \in S^1 \setminus \{(-1, 0)\}\)이고, \(x = (\cos t, \sin t)\) (\(t \in (0, 2\pi)\))이면 \(-x = (\cos(t - \pi), \sin(t - \pi))\), \(t - \pi \in (-\pi, \pi)\)이므로
-          \(\beta(x) = \alpha(-x) + \pi\)이다. 따라서 \(\beta\)는 위상동형사상의 합성으로 위상동형사상이다.
-          겹치는 곳은 \(S^1 \setminus \{(\pm 1, 0)\}\)이고 \(\beta\)에 의한 상은 \((0, \pi) \cup (\pi, 2\pi)\)이다. \(t \in (0, \pi)\)이면 \(\alpha(\beta^{-1}(t)) = t\)이고, \(t \in (\pi, 2\pi)\)이면 \(e(t) = e(t - 2\pi)\), \(t - 2\pi \in (-\pi, 0)\)이므로 \(\alpha(\beta^{-1}(t)) = t - 2\pi\)이다.
-          두 경우 모두 평행이동이므로 좌표변환과 그 역은 매끄럽다.</p>
-          <p><em>표준 구조에 속함.</em> \(\alpha\)와 호환된다는 것만으로는 결론이 나오지 않는다. \(\alpha\)의 정의역이 \(\beta\)의 정의역의 점 \((-1, 0)\)을 덮지 않기 때문이다(<a href="11-2-smooth-structures.html">11.2절</a>의 “호환은 추이적이지 않다” 상자).
-          그래서 매끄러운 아틀라스 \(\{\sigma, \tilde\sigma\}\)의 두 차트와의 호환을 직접 보인다. 대척사상을 \(a(x) = -x\)라 하면 앞 문단에서 \(\beta = \alpha \circ a + \pi\)이고,
+          \(\beta(x) = \alpha(-x) + \pi\)이다. 따라서 \(\beta\)는 homeomorphism의 합성으로 homeomorphism이다.
+          겹치는 곳은 \(S^1 \setminus \{(\pm 1, 0)\}\)이고 \(\beta\)에 의한 image는 \((0, \pi) \cup (\pi, 2\pi)\)이다. \(t \in (0, \pi)\)이면 \(\alpha(\beta^{-1}(t)) = t\)이고, \(t \in (\pi, 2\pi)\)이면 \(e(t) = e(t - 2\pi)\), \(t - 2\pi \in (-\pi, 0)\)이므로 \(\alpha(\beta^{-1}(t)) = t - 2\pi\)이다.
+          두 경우 모두 translation이므로 transition map과 그 역은 매끄럽다.</p>
+          <p><em>표준 구조에 속함.</em> \(\alpha\)와 compatible이라는 것만으로는 결론이 나오지 않는다. \(\alpha\)의 정의역이 \(\beta\)의 정의역의 점 \((-1, 0)\)을 덮지 않기 때문이다(<a href="11-2-smooth-structures.html">Section 11.2</a>의 “compatibility는 transitive relation이 아니다” 상자).
+          그래서 smooth atlas \(\{\sigma, \tilde\sigma\}\)의 두 chart와의 compatibility를 직접 보인다. antipodal map을 \(a(x) = -x\)라 하면 앞 문단에서 \(\beta = \alpha \circ a + \pi\)이고,
           (11.3.1)에서 \(-\sigma^{-1}(u) = \tilde\sigma^{-1}(-u)\), \(-\tilde\sigma^{-1}(v) = \sigma^{-1}(-v)\), \(\sigma(-y) = -\tilde\sigma(y)\), \(\tilde\sigma(-y) = -\sigma(y)\)이다. 따라서 겹치는 곳에서</p>
           <div class="equation" id="eq-11-3-12">
           \[ \begin{aligned} \beta \circ \sigma^{-1}(u) &= \alpha \circ \tilde\sigma^{-1}(-u) + \pi, \\
@@ -351,44 +351,44 @@
              \sigma \circ \beta^{-1}(t) &= -\tilde\sigma \circ \alpha^{-1}(t - \pi), \\
              \tilde\sigma \circ \beta^{-1}(t) &= -\sigma \circ \alpha^{-1}(t - \pi) \end{aligned} \tag{11.3.12} \]
           </div>
-          <p>이다(\(\beta^{-1}(t) = -\alpha^{-1}(t - \pi)\)). 오른쪽은 <a href="#i-11-3-7">예 11.3.7</a>에서 매끄러움을 보인 좌표변환 \(\alpha \circ \tilde\sigma^{-1}\), \(\alpha \circ \sigma^{-1}\), \(\tilde\sigma \circ \alpha^{-1}\), \(\sigma \circ \alpha^{-1}\)에
-          \(\pm\id\)와 평행이동을 합성한 것이므로 매끄럽다. 따라서 \(\beta\)는 \(\sigma\), \(\tilde\sigma\)와 모두 호환되고, <a href="11-2-smooth-structures.html#i-11-2-10">명제 11.2.10</a>(b)에 의해 표준 구조에 속한다.</p>
-          <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code></p>
+          <p>이다(\(\beta^{-1}(t) = -\alpha^{-1}(t - \pi)\)). 오른쪽은 <a href="#i-11-3-7">Example 11.3.7</a>에서 smoothness를 보인 transition map \(\alpha \circ \tilde\sigma^{-1}\), \(\alpha \circ \sigma^{-1}\), \(\tilde\sigma \circ \alpha^{-1}\), \(\sigma \circ \alpha^{-1}\)에
+          \(\pm\id\)와 translation을 합성한 것이므로 매끄럽다. 따라서 \(\beta\)는 \(\sigma\), \(\tilde\sigma\)와 모두 compatible이고, <a href="11-2-smooth-structures.html#i-11-2-10">Proposition 11.2.10</a>(b)에 의해 표준 구조에 속한다.</p>
+          <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-11-3-6" data-level="2">
-        <p><span class="thm-head">연습 11.3.6</span> <span class="level">★★</span>
-        \(n \ge 1\), \(u \ne 0\)일 때 \(\det DI(u) = -\abs{u}^{-2n}\)임을 보여라. (<a href="#i-11-3-3">예 11.3.3</a>에서 사용)</p>
-        <details class="hint"><summary>힌트</summary><p>\(R = I_n - 2\hat u\hat u^{\mathsf T}\)가 \(\hat u\)를 어디로 보내고, \(\hat u\)에 수직인 벡터를 어디로 보내는지 본다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 11.3.6</span> <span class="level">★★</span>
+        \(n \ge 1\), \(u \ne 0\)일 때 \(\det DI(u) = -\abs{u}^{-2n}\)임을 보여라. (<a href="#i-11-3-3">Example 11.3.3</a>에서 사용)</p>
+        <details class="hint"><summary>Hint</summary><p>\(R = I_n - 2\hat u\hat u^{\mathsf T}\)가 \(\hat u\)를 어디로 보내고, \(\hat u\)에 수직인 벡터를 어디로 보내는지 본다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>(11.3.5)에서 \(DI(u) = \abs{u}^{-2}R\), \(R = I_n - 2\hat u\hat u^{\mathsf T}\)이다. \(R\hat u = \hat u - 2\hat u(\hat u^{\mathsf T}\hat u) = -\hat u\)이고, \(\inner{w}{\hat u} = 0\)이면 \(Rw = w - 2\hat u\,\inner{\hat u}{w} = w\)이다.
-          \(\hat u\)와 \(\hat u^\perp\)의 정규직교기저를 합친 기저에서 \(R\)의 행렬은 \(\diag(-1, 1, \dots, 1)\)이므로 \(\det R = -1\)이다(행렬식은 기저에 무관, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-10">명제 1.6.10</a>).
+          \(\hat u\)와 \(\hat u^\perp\)의 orthonormal basis를 합친 basis에서 \(R\)의 행렬은 \(\diag(-1, 1, \dots, 1)\)이므로 \(\det R = -1\)이다(determinant는 basis에 무관, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-10">Proposition 1.6.10</a>).
           \(n \times n\) 행렬의 스칼라배는 \(\det(cA) = c^n\det A\)이므로 \(\det DI(u) = \abs{u}^{-2n} \cdot (-1)\)이다.</p>
-          <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code> (\(n = 1, 2, 3\))</p>
+          <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code> (\(n = 1, 2, 3\))</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-11-3-7" data-level="3">
-        <p><span class="thm-head">연습 11.3.7</span> <span class="level">★★★</span>
-        \(p \in S^n\)이고 \(A\)가 \(Ap = N\)인 \((n+1) \times (n+1)\) 직교행렬이라 하자. \(\sigma_p = \sigma \circ A\colon S^n \setminus \{p\} \to \R^n\)(“\(p\)에서의 입체사영”)이 표준 구조의 차트임을 보여라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(A\)는 \(S^n\)을 \(S^n\)으로 보내는 선형 위상동형사상이다. \(\sigma \circ A \circ \sigma^{-1}\)을 \(\R^{n+1}\)에서 매끄러운 사상들의 합성으로 본다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p><em>차트.</em> \(A\)는 직교행렬이므로 \(\abs{Ax} = \abs{x}\)이고, \(S^n\)에서 \(S^n\)으로 가는 전단사다(역은 \(A^{\mathsf T}\)). 성분이 일차식이므로 \(A\)와 \(A^{-1}\)은 연속이고, \(A(S^n \setminus \{p\}) = S^n \setminus \{N\}\)이다.
-          따라서 \(\sigma_p\)는 위상동형사상의 합성으로서 \(S^n \setminus \{p\}\)에서 \(\R^n\) 위로 가는 위상동형사상이다.</p>
-          <p><em>\(\sigma\)와의 호환.</em> 겹치는 곳에서 \(\sigma_p \circ \sigma^{-1} = \sigma \circ A \circ \sigma^{-1}\)이다. \(\sigma^{-1}\colon \R^n \to \R^{n+1}\)은 매끄럽고, \(A\)는 선형이며, \(\sigma\)는 열린집합 \(\{x^{n+1} \ne 1\}\)에서 매끄러운 사상의 제한이다.
-          정의역 \(\sigma(S^n \setminus \{N, A^{-1}N\})\)에서 \(A\sigma^{-1}(u) \ne N\)이므로 합성이 정의되고 매끄럽다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">명제 2.2.12</a>(b)). 역방향 \(\sigma \circ \sigma_p^{-1} = \sigma \circ A^{\mathsf T} \circ \sigma^{-1}\)도 같은 꼴이다.</p>
-          <p><em>\(\tilde\sigma\)와의 호환.</em> \(\tilde\sigma^{-1}\colon \R^n \to \R^{n+1}\)도 매끄럽고 \(\tilde\sigma\)는 \(\{x^{n+1} \ne -1\}\)에서 매끄러운 사상의 제한이므로, \(\sigma \circ A \circ \tilde\sigma^{-1}\)과 \(\tilde\sigma \circ A^{\mathsf T} \circ \sigma^{-1}\)은 같은 이유로 매끄럽다.
-          따라서 \(\sigma_p\)는 표준 구조에 속한다. (\(A\)는 언제나 존재한다: \(p\)를 첫 벡터로 하는 정규직교기저를 만들어(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-10">정리 1.5.10</a>) \(p \mapsto N\)이 되게 배치하면 된다.)</p>
-          <p class="verified">검증: <code>verify/v-11-3-spheres-stereographic.py</code> (회전 하나에 대한 기호 확인)</p>
+        <p><span class="thm-head">Exercise 11.3.7</span> <span class="level">★★★</span>
+        \(p \in S^n\)이고 \(A\)가 \(Ap = N\)인 \((n+1) \times (n+1)\) orthogonal matrix라 하자. \(\sigma_p = \sigma \circ A\colon S^n \setminus \{p\} \to \R^n\)(“\(p\)에서의 stereographic projection”)이 표준 구조의 chart임을 보여라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(A\)는 \(S^n\)을 \(S^n\)으로 보내는 linear homeomorphism이다. \(\sigma \circ A \circ \sigma^{-1}\)을 \(\R^{n+1}\)에서 smooth map들의 합성으로 본다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p><em>chart.</em> \(A\)는 orthogonal matrix이므로 \(\abs{Ax} = \abs{x}\)이고, \(S^n\)에서 \(S^n\)으로 가는 bijective다(역은 \(A^{\mathsf T}\)). 성분이 일차식이므로 \(A\)와 \(A^{-1}\)은 연속이고, \(A(S^n \setminus \{p\}) = S^n \setminus \{N\}\)이다.
+          따라서 \(\sigma_p\)는 homeomorphism의 합성으로서 \(S^n \setminus \{p\}\)에서 \(\R^n\) 위로 가는 homeomorphism이다.</p>
+          <p><em>\(\sigma\)와의 compatibility.</em> 겹치는 곳에서 \(\sigma_p \circ \sigma^{-1} = \sigma \circ A \circ \sigma^{-1}\)이다. \(\sigma^{-1}\colon \R^n \to \R^{n+1}\)은 매끄럽고, \(A\)는 linear이며, \(\sigma\)는 open set \(\{x^{n+1} \ne 1\}\)에서 smooth map의 제한이다.
+          정의역 \(\sigma(S^n \setminus \{N, A^{-1}N\})\)에서 \(A\sigma^{-1}(u) \ne N\)이므로 합성이 정의되고 매끄럽다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">Proposition 2.2.12</a>(b)). 역방향 \(\sigma \circ \sigma_p^{-1} = \sigma \circ A^{\mathsf T} \circ \sigma^{-1}\)도 같은 꼴이다.</p>
+          <p><em>\(\tilde\sigma\)와의 compatibility.</em> \(\tilde\sigma^{-1}\colon \R^n \to \R^{n+1}\)도 매끄럽고 \(\tilde\sigma\)는 \(\{x^{n+1} \ne -1\}\)에서 smooth map의 제한이므로, \(\sigma \circ A \circ \tilde\sigma^{-1}\)과 \(\tilde\sigma \circ A^{\mathsf T} \circ \sigma^{-1}\)은 같은 이유로 매끄럽다.
+          따라서 \(\sigma_p\)는 표준 구조에 속한다. (\(A\)는 언제나 존재한다: \(p\)를 첫 벡터로 하는 orthonormal basis를 만들어(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-10">Theorem 1.5.10</a>) \(p \mapsto N\)이 되게 배치하면 된다.)</p>
+          <p class="verified">Verification: <code>verify/v-11-3-spheres-stereographic.py</code> (회전 하나에 대한 기호 확인)</p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="11-2-smooth-structures.html">← 11.2 차트, 아틀라스, 매끄러운 구조</a>
-    <a rel="next" href="11-4-more-examples.html">11.4 여러 가지 예 →</a>
+    <a rel="prev" href="11-2-smooth-structures.html">← 11.2 Charts, Atlases, and Smooth Structures</a>
+    <a rel="next" href="11-4-more-examples.html">11.4 More Examples →</a>
   </nav>
 </body>
 </html>

@@ -572,6 +572,8 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 - 본문은 평서문 "~이다/~한다"로 쓴다. 독자에게 말을 거는 표현은 줄인다. "~해 보자"는 동기와 계산 안내에서만 허용한다.
 - **대학 수학 용어는 영어로 쓴다.** 예: dual space, kernel, image, basis, linear map, tangent space, curvature, regular surface, diffeomorphism, manifold, chart.
 - **고등학교 수학 수준의 말은 한국어로 둔다.** 목록은 `tools/terms_keep.txt`다. 예: 함수, 집합, 행렬, 벡터, 점, 직선, 평면, 원, 곡선, 길이, 넓이, 극한, 연속, 미분(하다), 적분, 접선, 속도.
+  - **차원**: "n차원"처럼 숫자·기호와 붙여 쓸 때는 한국어로 쓰고("\(n\)차원 manifold"), 형용사로는 "n-dimensional"도 된다. "2dimension"처럼 붙여 쓰지 않는다. 명사 "차원" 자체는 dimension이다("dimension이 n이다").
+  - **이름 붙은 정리·공식·방법은 고등학교에서 배운 것이라도 영어로 쓴다**: mean value theorem, intermediate value theorem, Rolle's theorem, extreme value theorem, Taylor's theorem, Cramer's rule, Gaussian elimination.
   - 같은 낱말이 두 뜻으로 쓰이면 뜻에 따른다. "미분한다"는 한국어지만, 사상으로서의 미분 dF_p는 differential이다. 직선의 "기울기"는 한국어지만, grad f는 gradient다.
 - **영어 표기의 정본은 `tools/terms.tsv`다**(한국어 → 영어). 표에 없는 용어는 Lee·do Carmo의 표준 영어를 쓰고 최종 보고에 적는다. 통합 담당이 표와 glossary.html에 추가한다.
 - 영어 용어는 소문자로 쓴다. 고유명사가 들어간 용어는 그 부분만 대문자로 쓴다: Gauss map, Lie bracket, Riemannian metric, Frenet frame, Theorema Egregium.
