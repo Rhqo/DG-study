@@ -16,7 +16,7 @@
 ### 한눈에 보기
 
 1. 결과물은 **정적 HTML**이다. 한 절이 한 파일이고, 수식은 MathJax 3으로 쓰며, 공용 CSS와 설정 파일만 사용한다 (§11).
-2. 본문은 한국어 "~이다"체로 쓴다. 용어가 처음 나올 때는 영어를 함께 적는다 (§8).
+2. 본문 문장은 한국어 "~이다"체로 쓰고, 대학 수학 용어와 라벨·제목은 영어로 쓴다. 용어를 처음 정의할 때 한국어 번역어를 괄호에 한 번 적는다 (§8).
 3. **아주 기초부터 차근차근** 쓴다. 순서는 동기 → 직관(그림) → 정의 → 예·비예 → 정리·증명 → 계산 → 요약 → 연습이다 (§2).
 4. 26장이 **한 권의 책처럼** 이어지게 쓴다. 큰 줄기, 이어받는 것·넘겨주는 것, 한 개념 한 정의, 필수 호환성 명제, 기준 예제의 여정이 그 장치다 (§3).
 5. 모든 정의와 정리에 가정을 빠짐없이 적는다. 이유 없는 "자명하다"는 쓰지 않는다 (§4).
@@ -47,17 +47,17 @@
 
 순서는 필요하면 조정해도 되지만 항목을 빠뜨리지는 않는다.
 
-1. **이 절의 목표**: 2–4개 항목. "이 절을 마치면 …을 할 수 있다" 형식으로 쓴다.
-2. **선수 지식**: 이전 절의 정의·정리 번호를 링크로 건다.
-3. **동기**: 이 개념이 왜 필요한지 쓴다. 첫 문단은 **앞 절이 끝난 지점에서** 출발한다(§3.2). 앞 절에서 해결하지 못한 질문이나 ℝ³·ℝⁿ의 익숙한 상황이 출발점이 된다.
+1. **이 절의 목표**(소제목 Goals): 2–4개 항목. "이 절을 마치면 …을 할 수 있다" 형식으로 쓴다.
+2. **선수 지식**(Prerequisites): 이전 절의 정의·정리 번호를 링크로 건다.
+3. **동기**(Motivation): 이 개념이 왜 필요한지 쓴다. 첫 문단은 **앞 절이 끝난 지점에서** 출발한다(§3.2). 앞 절에서 해결하지 못한 질문이나 ℝ³·ℝⁿ의 익숙한 상황이 출발점이 된다.
 4. **직관**: 그림을 1개 이상 넣는다. 정의보다 먼저 "그림으로 보면 무엇인지"를 보여준다.
-5. **정의**: 정확하게 진술한다. 바로 뒤에 가장 간단한 **예**와 **비예(non-example)**를 둔다. 비예가 부자연스러운 정의(예: 행렬식, 쌍대사상)에는 비예 대신 **흔한 오해**를 `box warning`으로 둔다.
+5. **정의**: 정확하게 진술한다. 바로 뒤에 가장 간단한 **예**와 **비예(non-example)**를 둔다. 비예가 부자연스러운 정의(예: 행렬식, 쌍대사상)에는 비예 대신 **흔한 오해**를 `box warning`(제목 Common misconception)으로 둔다.
 6. **정리**: 진술 → "이 정리가 말하는 것"(평이한 문장 1–2개) → 증명 아이디어(2–3문장) → 증명 순서로 쓴다.
 7. **좌표 표현**: 좌표 없는 정의와 좌표 공식을 모두 준다. 좌표 공식은 **좌표를 어떻게 골라도 같은 결과가 나오는지**(well-definedness) 확인한다.
 8. **계산 예제**: §7의 기준 예제로 계산한다. 어떤 계산 기법이 처음 나올 때는 중간 단계를 하나도 생략하지 않는다.
-9. **주의 / 흔한 오해 / 규약 비교**: 교재와 규약이 다를 때 넣는다.
-10. **요약**: 3–6개 항목으로 쓴다. 끝에 "다음 절에서는" 한두 문장으로 다음 절의 질문을 예고한다.
-11. **연습문제**: §14를 따른다.
+9. **주의 / 흔한 오해 / 규약 비교**(상자 제목 Warning / Common misconception / Conventions): 교재와 규약이 다를 때 넣는다.
+10. **요약**(Summary): 3–6개 항목으로 쓴다. 끝에 "다음 절에서는" 한두 문장으로 다음 절의 질문을 예고한다.
+11. **연습문제**(Exercises): §14를 따른다.
 
 ### 2.2 원칙
 
@@ -66,7 +66,7 @@
 - **같은 대상을 반복해서 쓴다.** 예제를 매번 새로 만들지 말고 §7 기준 예제를 다시 써서 독자가 비교할 수 있게 한다.
 - **정의의 각 조건이 왜 필요한지 보여준다.** 조건 하나를 빼면 무엇이 깨지는지 비예로 보인다.
 - **계산 생략 기준.** 어떤 계산 기법이 처음 나오는 곳에서는 모든 단계를 쓴다. 두 번째부터는 "(6.2.3)과 같은 방식으로"처럼 앞 계산을 참조하고 줄여도 된다.
-- **앞뒤를 연결한다.** Part I의 개념이 Part II·III에서 일반화될 때는 앞에서 "나중에 보게 될 일반화" 상자로 예고한다. 뒤에서는 "Part I의 …와 비교"로 되짚는다. 구체적인 규칙은 §3에 있다.
+- **앞뒤를 연결한다.** Part I의 개념이 Part II·III에서 일반화될 때는 앞에서 "Looking ahead" 상자(`box forward`)로 예고한다. 뒤에서는 "Looking back" 상자(`box backward`)에서 "Part I의 …와 비교"로 되짚는다. 구체적인 규칙은 §3에 있다.
 - **과하게 일반화하지 않는다.** Part I에서 벡터다발이나 접속의 일반론을 꺼내지 않는다. 그 자리에 필요한 만큼만 다룬다.
 - **분량 기준.** 한 절에는 핵심 개념 1개 안팎을 담고, 읽는 데 30–60분이 걸리게 한다. 정의 1–4개, 예 3개 이상, 그림 1개 이상, 연습 4–8개가 기준이다. 이보다 커지면 절을 나눈다.
   - Part 0의 복습 장은 기본 정의가 몰려 있어 정의가 5–7개여도 된다(01장 파일럿).
@@ -85,28 +85,29 @@ study set 전체를 꿰는 이야기 줄기다.
 - 모든 장은 적어도 하나의 줄기를 앞으로 진행시킨다.
 - 장 개요(`index.html`)에는 이 장이 어느 줄기의 어느 지점에 있는지 적는다.
 - 줄기와 무관한 장이 생기면 로드맵(§9)을 다시 검토할 신호이므로 최종 보고에 적는다.
+- 페이지(`p.threads`)에는 줄기의 영어 이름을 쓴다(§8.2). 예: `Threads: <strong>T3</strong> Intrinsic vs. extrinsic (start)`
 
-| 줄기 | 흐름 (장 번호) |
+| 줄기 (영어 이름) | 흐름 (장 번호) |
 |---|---|
-| T1. 곡률이란 무엇인가 | 곡선의 κ, τ (04–05) → 법곡률·주곡률·가우스 곡률 (08) → 빼어난 정리: K는 내재적이다 (09) → 곡률텐서·단면곡률 (24) → 가우스 방정식으로 Part I과 다시 만남 (25) |
-| T2. 미분과 접공간 | ℝⁿ의 전미분 DF(p) (02) → 접평면과 dφ_p (06) → 매끄러운 사상 (12) → derivation과 dF_p (13) → 몰입·침몰 (14) → 벡터장과 흐름 (15) → (선택) 분포와 프로베니우스 정리 (20) |
-| T3. 내재적 vs 외재적 | 부분공간 위상과 몫공간: 공간 안에 놓인 것과 스스로 주어진 것 (03) → 제1기본형식 (07) → 빼어난 정리 (09) → 둘러싼 공간 없는 추상 다양체 (11) → 리만 계량 (21) → 부분다양체의 기하 (25) |
-| T4. 평행이동과 측지선 | 곡면 위의 공변미분·측지선 (09) → 접속 (22) → 측지선·지수사상 (23) → 야코비 장 (26) |
-| T5. 적분과 위상 | 다중적분과 변수변환 공식 (02) → 컴팩트성·연결성 (03) → 호의 길이·넓이 (04, 07) → 가우스-보네 (10) → 단위분할 (12) → 미분형식·스토크스 (17–18) → 드람 코호몰로지 (19) → 가우스-보네 재방문 (26) |
-| T6. 쌍대성과 텐서 | 쌍대공간 (01) → 여접공간·1-형식 (16) → 미분형식 (17) → 음악적 동형 (21) → 곡률텐서 (24) |
+| T1. 곡률이란 무엇인가 (What is curvature?) | 곡선의 κ, τ (04–05) → 법곡률·주곡률·가우스 곡률 (08) → 빼어난 정리: K는 내재적이다 (09) → 곡률텐서·단면곡률 (24) → 가우스 방정식으로 Part I과 다시 만남 (25) |
+| T2. 미분과 접공간 (Differentials and tangent spaces) | ℝⁿ의 전미분 DF(p) (02) → 접평면과 dφ_p (06) → 매끄러운 사상 (12) → derivation과 dF_p (13) → 몰입·침몰 (14) → 벡터장과 흐름 (15) → (선택) 분포와 프로베니우스 정리 (20) |
+| T3. 내재적 vs 외재적 (Intrinsic vs. extrinsic) | 부분공간 위상과 몫공간: 공간 안에 놓인 것과 스스로 주어진 것 (03) → 제1기본형식 (07) → 빼어난 정리 (09) → 둘러싼 공간 없는 추상 다양체 (11) → 리만 계량 (21) → 부분다양체의 기하 (25) |
+| T4. 평행이동과 측지선 (Parallel transport and geodesics) | 곡면 위의 공변미분·측지선 (09) → 접속 (22) → 측지선·지수사상 (23) → 야코비 장 (26) |
+| T5. 적분과 위상 (Integration and topology) | 다중적분과 변수변환 공식 (02) → 컴팩트성·연결성 (03) → 호의 길이·넓이 (04, 07) → 가우스-보네 (10) → 단위분할 (12) → 미분형식·스토크스 (17–18) → 드람 코호몰로지 (19) → 가우스-보네 재방문 (26) |
+| T6. 쌍대성과 텐서 (Duality and tensors) | 쌍대공간 (01) → 여접공간·1-형식 (16) → 미분형식 (17) → 음악적 동형 (21) → 곡률텐서 (24) |
 
 ### 3.2 장과 절을 잇는 장치
 
 - **장 개요** `index.html`에는 부록 A-2 템플릿대로 다음을 반드시 쓴다.
-  - **이어받는 것**: 앞 장들에서 가져오는 질문과 결과. 번호로 링크한다.
-  - **이 장의 질문**: 이 장이 답하는 중심 질문 1–2개
-  - **넘겨주는 것**: 이 장이 남기는 질문, 그리고 뒤 장에서 쓰이는 결과와 그 장
-  - **줄기 위치**: §3.1의 어느 줄기, 어느 지점인지
+  - **이어받는 것**(소제목 Builds on): 앞 장들에서 가져오는 질문과 결과. 번호로 링크한다.
+  - **이 장의 질문**(Questions): 이 장이 답하는 중심 질문 1–2개
+  - **넘겨주는 것**(Leads to): 이 장이 남기는 질문, 그리고 뒤 장에서 쓰이는 결과와 그 장
+  - **줄기 위치**(`p.threads`, Threads): §3.1의 어느 줄기, 어느 지점인지
 - **절의 시작**: "동기"의 첫 문단은 앞 절(장의 첫 절이면 앞 장)이 끝난 지점에서 출발한다.
-  - 예: "6.3절에서 곡면 위의 함수가 매끄럽다는 것의 뜻을 정했다. 그렇다면 그런 함수의 '미분'은 무엇이어야 하는가?"
+  - 예: "Section 6.3에서 surface 위의 함수가 매끄럽다는 것의 뜻을 정했다. 그렇다면 그런 함수의 '미분'은 무엇이어야 하는가?"
 - **절의 끝**: 요약 다음에 "다음 절에서는"으로 다음 절의 질문을 한두 문장 예고한다(`<p class="next">`).
 - **앞으로 가리킬 때(예고)**
-  - **다른 장**의 개념은 `box forward` 안에서만 예고한다. 같은 장 안의 뒤 절은 일반 링크로 가리켜도 된다(예: "1.4절에서 다룬다").
+  - **다른 장**의 개념은 `box forward` 안에서만 예고한다. 같은 장 안의 뒤 절은 일반 링크로 가리켜도 된다(예: "Section 1.4에서 다룬다").
   - 예고한 개념은 **정의나 증명에 쓰지 않는다**.
   - 예고할 때는 해당 장을 링크한다.
 - **뒤로 가리킬 때(회고)**
@@ -115,14 +116,14 @@ study set 전체를 꿰는 이야기 줄기다.
   - 새 관점에서 다시 보는 것이 목적이면 `box backward`에 "무엇이 새로워졌는가"를 쓴다.
 - **같은 내용을 두 곳에 쓰지 않는다.** 복사하지 말고, 링크를 걸고 한 문장으로 요약한다.
 - **Part 0의 예외 (02장 ↔ 03장)**: 02장(미적분)이 03장(위상)보다 앞에 있지만, 02장의 증명은 컴팩트성에 관한 미적분학 수준의 사실을 쓴다. 그런 사실은 "미적분학에서 알려진 사실로 받아들인다"고 밝히고 증명이 있는 3.6절의 항목에 링크한다. 해당 사실은 유계 닫힌 집합 위 연속함수의 최대·최소(정리 3.6.10), 하이네-보렐(정리 3.6.7), 균등연속(따름정리 3.6.19), 중간값 정리(따름정리 3.7.6)다. 이 예외는 이 네 사실에만 적용하며, 02장은 이것들을 2.1절 「준비」 한 곳에 모아 둔다. 03장이 다루지 않는 미적분학의 사실(ℝⁿ의 완비성 등)도 2.1절 「준비」에 "받아들이는 사실"로 모아 두고 거기에 링크한다.
-- **한 문장짜리 지시문**: 뒤 장을 가리키기만 하는 한 문장("이 결과는 8장에서 다시 쓴다", "이 개념은 13장에서 다시 만난다")은 동기 문단이나 예·비고의 끝 어디에 써도 된다. 장 링크를 건다. 뒤 장의 개념을 **설명하거나 쓰려면** `box forward`로 옮긴다.
+- **한 문장짜리 지시문**: 뒤 장을 가리키기만 하는 한 문장("이 결과는 Chapter 8에서 다시 쓴다", "이 개념은 Chapter 13에서 다시 만난다")은 동기 문단이나 예·비고의 끝 어디에 써도 된다. 장 링크를 건다. 뒤 장의 개념을 **설명하거나 쓰려면** `box forward`로 옮긴다.
 
 ### 3.3 한 개념, 한 정의
 
 - 각 개념은 study set 전체에서 **한 곳에서만 정의**한다. 다른 곳에서는 그 정의를 링크한다.
-- 이미 정의된 개념을 다시 정의하지 않는다. 필요하면 "정의 6.2.1을 상기하자"처럼 **상기**만 한다. 상기할 때는 `<dfn>`을 쓰지 않고 원래 위치를 링크한다.
+- 이미 정의된 개념을 다시 정의하지 않는다. 필요하면 "Definition 6.2.1을 상기하자"처럼 **상기**만 한다. 상기할 때는 `<dfn>`을 쓰지 않고 원래 위치를 링크한다.
 - **일반화**(Part I의 개념을 Part II·III에서 넓힐 때)는 새 정의로 쓴다.
-  1. 무엇을 일반화하는지 표시한다. 예: `<dfn data-generalizes="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">접공간</dfn>`
+  1. 무엇을 일반화하는지 표시한다. 예: `<dfn data-generalizes="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">tangent space</dfn>(접공간)`
   2. 특수한 경우에 이전 정의와 **일치함을 명제로 증명한다**(호환성 명제, §3.4).
 - **동치인 두 정의**가 있을 때도 어느 쪽이 공식 정의인지 정한다. 다른 쪽은 명제로 둔다.
   - 예: 13장에서는 derivation 정의가 공식 정의이고, 곡선의 동치류 정의는 동치임을 보이는 명제로 둔다.
@@ -151,7 +152,7 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 
 기준 예제(§7)는 장을 거듭하며 **누적적으로** 발전한다.
 
-- 앞 장에서 계산한 값은 다시 계산하지 않고 인용해서 이어 간다. 예: "예 7.1.2에서 구한 E, F, G를 쓰면 …"
+- 앞 장에서 계산한 값은 다시 계산하지 않고 인용해서 이어 간다. 예: "Example 7.1.2에서 구한 E, F, G를 쓰면 …"
 - 아래 표는 계획이다. 각 장은 자기 칸의 내용을 반드시 다룬다.
 - 칸에 없는 내용을 추가했다면 최종 보고에 적는다(통합 담당이 표를 갱신).
 
@@ -175,8 +176,9 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 | 대상 | 정본 위치 | 검사 방법 |
 |---|---|---|
 | 기호·부호 규약 | §6 | 검토자 |
-| 용어 | §8 | 검토자, `concepts.html` |
-| 개념이 정의된 위치 | `concepts.html` (찾아보기, 자동 생성) | `build_index.py`: 같은 용어의 `<dfn>`이 두 번 나오면 오류 (`data-generalizes` 표시는 제외) |
+| 용어 | §8, `tools/terms.tsv`, `tools/terms_keep.txt` | 검토자, `concepts.html`. 변환 작업에서는 `term_guard.py` |
+| 라벨·제목 | §8.2, §9 | `check_site.py`: 영어 머리 단어·상태 라벨은 오류, 남은 한국어 라벨·제목·번호 참조는 경고 |
+| 개념이 정의된 위치 | `concepts.html` (Index, 자동 생성) | `build_index.py`: 같은 영어 용어(대소문자 무시)의 `<dfn>`이 두 번 나오면 오류 (`data-generalizes` 표시는 제외). 괄호 안 한국어 번역어가 서로 다르면 동음이의어로 보고 경고만 한다(예: trace = 대각합 / 자취) |
 | 기준 예제의 식과 값 | §7과 `tools/dgsym.py`의 `EXAMPLES` | verify 스크립트는 매개화를 `EXAMPLES`에서 가져온다. 식을 직접 다시 쓰지 않는다 |
 | 상호참조 | 각 페이지의 링크 | `check_site.py`: 깨진 링크, 번호 불일치 |
 | 역참조 ("쓰이는 곳") | `concepts.html` | `build_index.py`가 링크 그래프로 생성 |
@@ -218,7 +220,7 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
   - Part 0의 다중적분 복습: 적분가능성 판정, 푸비니 정리, 변수변환 공식, 그린 정리. 진술 또는 증명 스케치와 참고문헌으로 둔다(02장 2.6절).
   - ODE 흐름의 정의역이 열린집합이고 흐름이 매끄럽다는 것(ODE 항목에 포함한다).
 - 위 목록에 없는 증명을 생략했다면 최종 보고에 이유를 적는다.
-- 증명 스케치에는 반드시 "증명 스케치"라고 표시한다. 완전한 증명처럼 보이게 쓰지 않는다.
+- 증명 스케치에는 반드시 "Proof sketch."라고 표시한다(§11.3). 완전한 증명처럼 보이게 쓰지 않는다.
 
 ### 4.3 출처의 신뢰도 순서
 
@@ -561,109 +563,63 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 
 ---
 
-## 8. 한국어 문체와 용어
+## 8. 문체, 용어, 라벨
 
-### 8.1 문체
+**2026-10-04 사용자 결정**: 본문 문장은 한국어로 쓰고, **대학 수학 용어와 라벨·제목은 영어**로 쓴다.
+
+### 8.1 문체와 용어
 
 - 본문은 평서문 "~이다/~한다"로 쓴다. 독자에게 말을 거는 표현은 줄인다. "~해 보자"는 동기와 계산 안내에서만 허용한다.
-- 용어가 처음 **정의될 때**는 `<dfn>접공간</dfn>(tangent space)`처럼 쓴다. 이후에는 한국어만 쓴다.
+- **대학 수학 용어는 영어로 쓴다.** 예: dual space, kernel, image, basis, linear map, tangent space, curvature, regular surface, diffeomorphism, manifold, chart.
+- **고등학교 수학 수준의 말은 한국어로 둔다.** 목록은 `tools/terms_keep.txt`다. 예: 함수, 집합, 행렬, 벡터, 점, 직선, 평면, 원, 곡선, 길이, 넓이, 극한, 연속, 미분(하다), 적분, 접선, 속도.
+  - 같은 낱말이 두 뜻으로 쓰이면 뜻에 따른다. "미분한다"는 한국어지만, 사상으로서의 미분 dF_p는 differential이다. 직선의 "기울기"는 한국어지만, grad f는 gradient다.
+- **영어 표기의 정본은 `tools/terms.tsv`다**(한국어 → 영어). 표에 없는 용어는 Lee·do Carmo의 표준 영어를 쓰고 최종 보고에 적는다. 통합 담당이 표와 glossary.html에 추가한다.
+- 영어 용어는 소문자로 쓴다. 고유명사가 들어간 용어는 그 부분만 대문자로 쓴다: Gauss map, Lie bracket, Riemannian metric, Frenet frame, Theorema Egregium.
+- 한국어 문장 안에서는 영어 명사를 단수형으로 쓴다("두 tangent vector", "모든 chart"). "-s"를 붙이지 않는다. 고정된 이름은 예외다: Christoffel symbols, normal coordinates.
+- 한국어 수식어와 영어 용어를 한 용어 안에 섞지 않는다. "매끄러운 map"이 아니라 "smooth map"으로 쓴다. 문장 차원의 수식은 괜찮다("이 map은 매끄럽다").
+- **처음 정의할 때**: `<dfn>dual space</dfn>(쌍대공간)`처럼 영어를 `<dfn>`에 넣고 한국어 번역어를 괄호에 한 번 적는다. 그 뒤로는 영어만 쓴다.
+- **영어 용어 뒤 조사**는 영어 발음의 끝소리에 맞춘다.
+  - 예: kernel**은**(커널), image**는**(이미지), dual space**는**(스페이스), basis**는**(베이시스), manifold**는**(매니폴드), chart**는**(차트), map**은**(맵), diffeomorphism**은**(-즘), curvature**는**(커버처), torsion**은**(토션), atlas**는**(아틀라스), Lie bracket**은**(브래킷), Gauss map**은**(맵)
+  - 숫자는 한국어로 읽는다: Theorem 6.2.4**는**(사), Chapter 3**은**(삼), Section 1.3**에서**.
 - **기호 뒤 조사**는 기호를 읽는 소리(영어 알파벳 또는 그리스 문자 이름)의 받침에 맞춘다.
   - 예: \(M\)은(엠), \(S\)는(에스), \(p\)는(피), \(L\)은(엘), \(n\)은(엔), \(R\)은(알), \(\gamma\)는(감마), \(\theta\)는(세타), \(\nabla\)는(나블라)
-  - 첨자는 첨자 이름으로 읽는다(\(x^2\)는 "엑스 이", \(A^i_j\)는 "에이 아이 제이"). 거듭제곱은 "제곱"으로 읽는다(\((x^2)^2\)은 "…의 제곱").
-  - 헷갈리면 "곡선 \(\gamma\)는"처럼 명사를 앞에 둔다.
-- 조사는 수식에 붙여 쓴다. 예: `\(M\)의`
-- 용어는 대한수학회 수학용어를 우선한다. 정착된 번역어가 없으면 영어를 그대로 쓴다(예: derivation, pushforward).
-- 아래 표가 정본이다. 새 용어는 최종 보고에 적고, 통합 담당이 glossary.html에 추가한다.
+  - 첨자는 첨자 이름으로 읽는다(\(x^2\)는 "엑스 이", \(A^i_j\)는 "에이 아이 제이"). 거듭제곱은 "제곱"으로 읽는다.
+  - 헷갈리면 "curve \(\gamma\)는"처럼 명사를 앞에 둔다.
+- 조사는 수식과 영어 단어에 붙여 쓴다. 예: `\(M\)의`, `tangent space의`.
 
-### 8.2 용어표
+### 8.2 라벨과 제목 (영어)
 
-**곡선·곡면**
+| 대상 | 쓰는 말 |
+|---|---|
+| 번호 항목 (`.thm-head`) | Definition, Theorem, Proposition, Lemma, Corollary, Example, Non-example, Remark + `N.M.K` |
+| 연습·그림 | Exercise N.M.K, Figure N.M.K. |
+| 증명 | Proof. / Proof sketch. / Proof idea: |
+| 풀이 접기 (`summary`) | Hint, Solution |
+| 식 참조 | 단어 없이 "(N.M.K)". 문장 첫머리에서만 "Equation (N.M.K)" |
+| 장·절 참조 | Chapter N, Section N.M ("N장", "N.M절"이라 쓰지 않는다) |
+| 상자 제목 (`.box-title`) | Intuition, Warning, Common misconception, Conventions, Looking ahead, Looking back, History. 필요하면 뒤에 짧은 한국어 부제를 붙인다: "Intuition: 같은 대상, 다른 눈" |
+| 절 구조 제목 | Goals, Prerequisites, Motivation, Summary, Exercises. 그 밖의 소제목도 영어로 쓴다 |
+| 다음 절 예고 (`p.next`) | 본문 문장이므로 한국어로 쓴다: "다음 절에서는 …" |
+| 장 개요 | Questions, Builds on, Sections, Leads to, Threads |
+| 네비게이션 | breadcrumb: "Contents › 1. Linear Algebra Review › 1.3 Dual Spaces and Dual Bases". 개요 링크: "Chapter overview". pager: "← 1.2 Linear Maps" / "1.4 Change of Basis →" |
+| 상태 표시 | Planned, Draft, Reviewed, Final |
+| 메타 줄 | "References: [dC §2-5], …" |
+| 공용 페이지 | Contents (index), Notation and Conventions, Glossary, References, Index (concepts) |
+| 사이트 이름 | Differential Geometry Study (`<title>` 끝: "— DG Study") |
 
-| 한국어 | 영어 | 비고 |
-|---|---|---|
-| 매개곡선 | parametrized curve | |
-| 정칙곡선 / 정칙곡면 | regular curve / regular surface | |
-| 호의 길이 | arc length | |
-| 재매개화 | reparametrization | |
-| 곡률 | curvature | |
-| 비틀림률 | torsion (of a curve) | "열률"도 쓰임. 접속의 torsion은 "비틀림" |
-| 단위접벡터 / 주법선벡터 / 종법선벡터 | unit tangent / principal normal / binormal | |
-| 프레네 틀 | Frenet frame | |
-| 접촉평면 / 접촉원 | osculating plane / osculating circle | |
-| 매개화 | parametrization | |
-| 접평면 | tangent plane | |
-| 단위법벡터 | unit normal (vector) | |
-| 가우스 사상 | Gauss map | |
-| 제1기본형식 / 제2기본형식 | first / second fundamental form | |
-| 형태작용소 | shape operator | 바인가르텐 사상(Weingarten map) |
-| 법곡률 / 측지곡률 | normal curvature / geodesic curvature | |
-| 주곡률 / 주방향 | principal curvature / principal direction | |
-| 가우스 곡률 / 평균곡률 | Gaussian curvature / mean curvature | |
-| 배꼽점 | umbilical point | |
-| 점근방향 / 곡률선 | asymptotic direction / line of curvature | |
-| 등거리사상 / 등각사상 | isometry / conformal map | |
-| 빼어난 정리 | Theorema Egregium | |
-| 측지선 | geodesic | |
-| 평행이동 | parallel transport | |
-| 극소곡면 / 선직면 | minimal surface / ruled surface | |
-| 오일러 지표 | Euler characteristic | |
-| 원환면 / 토러스 | torus | 원환면은 ℝ³의 곡면(§7의 매개화), 토러스 Tⁿ은 곱공간 S¹ × ⋯ × S¹ |
+- **장·절 제목은 전부 영어**로 쓴다(Title Case). 장 제목의 정본은 §9의 표다. 절 제목은 장 개요의 toc가 정본이다.
+- 그림 캡션과 alt는 본문처럼 한국어 문장에 영어 용어를 쓴다. 캡션의 머리만 "Figure N.M.K."다.
+- 그림 **안**의 라벨은 지금처럼 수식 기호만 쓴다(§12.3).
 
-**다양체**
+### 8.3 용어표
 
-| 한국어 | 영어 | 비고 |
-|---|---|---|
-| 위상다양체 / 매끄러운 다양체 | topological / smooth manifold | |
-| 차트 / 아틀라스 | chart / atlas | 차트는 "좌표근방"이라고도 함 |
-| 매끄러운 구조 | smooth structure | |
-| 좌표변환 | transition map | |
-| 위상동형사상 / 미분동형사상 | homeomorphism / diffeomorphism | |
-| 범프 함수 / 단위분할 | bump function / partition of unity | |
-| 접벡터 / 접공간 / 접다발 | tangent vector / space / bundle | |
-| derivation | derivation | 번역하지 않음 |
-| 미분 | differential | dF_p |
-| 여접공간 / 여접다발 | cotangent space / bundle | |
-| 몰입 / 침몰 / 매장 | immersion / submersion / embedding | 첫 등장 시 영어 병기 필수 |
-| 부분다양체 | submanifold | 매장 부분다양체, 몰입 부분다양체 |
-| 정칙값 / 임계점 | regular value / critical point | |
-| 계수정리 | rank theorem | |
-| 계수 | rank / coefficient | 두 뜻이 같은 말이다. 헷갈릴 수 있는 곳에서는 "계수(rank)"처럼 영어를 붙인다 |
-| 중간값 정리 | intermediate value theorem | "사잇값 정리"라고 쓰지 않는다 |
-| 벡터장 / 적분곡선 / 흐름 | vector field / integral curve / flow | |
-| 리 괄호 / 리 미분 | Lie bracket / Lie derivative | |
-| 벡터다발 / 단면 / 틀 | vector bundle / section / frame | |
-| 텐서곱 / 축약 | tensor product / contraction | |
-| 미분형식 / 쐐기곱 / 외미분 | differential form / wedge product / exterior derivative | 쐐기곱을 "외적"이라 부르지 않음 (cross product와 혼동) |
-| 당김 | pullback | pushforward는 영어 그대로 |
-| 내부곱 | interior product | |
-| 방향 / 가향 | orientation / orientable | |
-| 경계를 갖는 다양체 | manifold with boundary | |
-| 닫힌 형식 / 완전 형식 | closed form / exact form | |
-| 드람 코호몰로지 | de Rham cohomology | |
-| 리 군 / 리 대수 | Lie group / Lie algebra | |
-| 분포 / 적분가능 | distribution / integrable | |
-
-**리만 기하**
-
-| 한국어 | 영어 | 비고 |
-|---|---|---|
-| 리만 계량 / 리만 다양체 | Riemannian metric / manifold | |
-| 준리만 계량 | pseudo-Riemannian metric | 1.5절에서 언급만 한다 |
-| 음악적 동형사상 | musical isomorphism | |
-| 기울기 / 발산 / 라플라시안 | gradient / divergence / Laplacian | |
-| 체적형식 | volume form | |
-| 접속 / 레비치비타 접속 | connection / Levi-Civita connection | |
-| 공변미분 | covariant derivative | |
-| 크리스토펠 기호 | Christoffel symbols | |
-| 지수사상 / 정규좌표 | exponential map / normal coordinates | |
-| 단사반지름 / 완비 | injectivity radius / complete | |
-| 곡률텐서 / 단면곡률 | curvature tensor / sectional curvature | |
-| 리치 곡률 / 스칼라 곡률 | Ricci / scalar curvature | |
-| 상수곡률 | constant curvature | |
-| 야코비 장 / 공액점 | Jacobi field / conjugate point | |
-| 홀로노미 | holonomy | |
-
----
+- 정본은 `tools/terms.tsv`(한국어 → 영어, 비고)와 `tools/terms_keep.txt`(한국어로 두는 말)다.
+- 독자용 판은 glossary.html이다(영어 → 한국어, 처음 나오는 곳).
+- 혼동하기 쉬운 것
+  - torus는 곱공간 T² = S¹ × S¹이고, torus of revolution은 ℝ³의 곡면 T_{R,r}이다(§7).
+  - "상"(image)과 "핵"(kernel)은 다른 낱말 속의 같은 글자(이상, 대상, 상수, 핵심)와 혼동하지 않는다.
+  - rank와 coefficient는 둘 다 예전에 "계수"라 불렀다. 이제 영어로 구분된다.
+- 새 용어는 최종 보고에 적는다. 통합 담당이 terms.tsv와 glossary.html에 추가한다.
 
 ## 9. 로드맵
 
@@ -671,34 +627,34 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 
 **장 제목과 폴더 (정본)**: 모든 페이지의 제목, 링크, breadcrumb는 아래 이름을 그대로 쓴다.
 
-| Part | 장 | 제목 | 폴더 |
+| Part | 장 | 제목 (English) | 폴더 |
 |---|---|---|---|
-| 0. 준비 | 01 | 선형대수 복습 | `01-linear-algebra` |
-| | 02 | ℝⁿ의 미적분 | `02-calculus-rn` |
-| | 03 | 위상공간 기초 | `03-topology-basics` |
-| I. 곡선과 곡면 | 04 | 곡선의 기초 | `04-curves` |
-| | 05 | 공간곡선과 프레네 틀 | `05-space-curves` |
-| | 06 | 정칙곡면 | `06-regular-surfaces` |
-| | 07 | 제1기본형식 | `07-first-fundamental-form` |
-| | 08 | 가우스 사상과 제2기본형식 | `08-gauss-map` |
-| | 09 | 곡면의 내재기하 | `09-intrinsic-geometry` |
-| | 10 | 가우스-보네 정리 | `10-gauss-bonnet` |
-| II. 매끄러운 다양체 | 11 | 매끄러운 다양체 | `11-smooth-manifolds` |
-| | 12 | 매끄러운 사상과 단위분할 | `12-smooth-maps` |
-| | 13 | 접공간 | `13-tangent-spaces` |
-| | 14 | 몰입, 침몰, 부분다양체 | `14-submanifolds` |
-| | 15 | 벡터장과 흐름 | `15-vector-fields-flows` |
-| | 16 | 여벡터와 텐서 | `16-covectors-tensors` |
-| | 17 | 미분형식 | `17-differential-forms` |
-| | 18 | 방향, 적분, 스토크스 정리 | `18-integration-stokes` |
-| | 19 | 드람 코호몰로지 입문 | `19-de-rham` |
-| | 20 | 리 군과 프로베니우스 정리 (선택) | `20-lie-groups-frobenius` |
-| III. 리만 기하 | 21 | 리만 계량 | `21-riemannian-metrics` |
-| | 22 | 접속과 레비치비타 접속 | `22-connections` |
-| | 23 | 측지선과 거리 | `23-geodesics` |
-| | 24 | 곡률 | `24-curvature` |
-| | 25 | 리만 부분다양체 | `25-submanifold-geometry` |
-| | 26 | 가우스-보네 재방문과 야코비 장 (선택) | `26-gauss-bonnet-jacobi` |
+| 0. Preliminaries | 01 | Linear Algebra Review | `01-linear-algebra` |
+| | 02 | Calculus on ℝⁿ | `02-calculus-rn` |
+| | 03 | Basic Topology | `03-topology-basics` |
+| I. Curves and Surfaces | 04 | Curves | `04-curves` |
+| | 05 | Space Curves and the Frenet Frame | `05-space-curves` |
+| | 06 | Regular Surfaces | `06-regular-surfaces` |
+| | 07 | The First Fundamental Form | `07-first-fundamental-form` |
+| | 08 | The Gauss Map and the Second Fundamental Form | `08-gauss-map` |
+| | 09 | Intrinsic Geometry of Surfaces | `09-intrinsic-geometry` |
+| | 10 | The Gauss–Bonnet Theorem | `10-gauss-bonnet` |
+| II. Smooth Manifolds | 11 | Smooth Manifolds | `11-smooth-manifolds` |
+| | 12 | Smooth Maps and Partitions of Unity | `12-smooth-maps` |
+| | 13 | Tangent Spaces | `13-tangent-spaces` |
+| | 14 | Immersions, Submersions, and Submanifolds | `14-submanifolds` |
+| | 15 | Vector Fields and Flows | `15-vector-fields-flows` |
+| | 16 | Covectors and Tensors | `16-covectors-tensors` |
+| | 17 | Differential Forms | `17-differential-forms` |
+| | 18 | Orientation, Integration, and Stokes's Theorem | `18-integration-stokes` |
+| | 19 | Introduction to de Rham Cohomology | `19-de-rham` |
+| | 20 | Lie Groups and the Frobenius Theorem (optional) | `20-lie-groups-frobenius` |
+| III. Riemannian Geometry | 21 | Riemannian Metrics | `21-riemannian-metrics` |
+| | 22 | Connections and the Levi-Civita Connection | `22-connections` |
+| | 23 | Geodesics and Distance | `23-geodesics` |
+| | 24 | Curvature | `24-curvature` |
+| | 25 | Riemannian Submanifolds | `25-submanifold-geometry` |
+| | 26 | Gauss–Bonnet Revisited and Jacobi Fields (optional) | `26-gauss-bonnet-jacobi` |
 
 **Part 0. 준비**
 
@@ -763,9 +719,9 @@ DG-study/
 ├── PLAN.md                    ← 통합 담당용 진행 계획과 진행 기록
 ├── index.html                 ← 전체 목차(독자 진입점)
 ├── notation.html              ← 기호표 (§6의 독자용 판)
-├── glossary.html              ← 한-영 용어집 (§8)
+├── glossary.html              ← Glossary: 영-한 용어집 (§8)
 ├── references.html            ← 참고문헌 (§5, 항목 id = 약어)
-├── concepts.html              ← 찾아보기: 개념 → 정의 위치·일반화·쓰이는 곳 (자동 생성, §3.6)
+├── concepts.html              ← Index: 영어 용어 → 정의 위치·일반화·쓰이는 곳 (자동 생성, §3.6)
 ├── assets/
 │   ├── style.css              ← 유일한 스타일시트
 │   └── mathjax-config.js      ← 유일한 MathJax 설정 (부록 C)
@@ -777,6 +733,9 @@ DG-study/
 │   ├── check_site.py          ← HTML 구조·링크 검사
 │   ├── build_index.py         ← concepts.html 생성, 중복 정의 검사
 │   ├── check_math.mjs         ← 수식(TeX) 오류 검사
+│   ├── term_guard.py          ← 용어·라벨 변환 전후 비교 (id·수식·구조·링크 대상, 남은 한국어)
+│   ├── terms.tsv              ← 용어표 정본: 한국어 → 영어 (§8.3)
+│   ├── terms_keep.txt         ← 한국어로 두는 말 (§8.1)
 │   ├── package.json
 │   ├── check_all.sh           ← 전체 검사
 │   └── tests/                 ← 도구 자체의 테스트와 fixture (사이트 검사 대상 아님)
@@ -821,14 +780,14 @@ DG-study/
 - `<html lang="ko">`, `<meta charset="utf-8">`, viewport
 - `<title>`, dg 메타데이터(§11.6)
 - style.css → mathjax-config.js → MathJax CDN 순서의 로드
-- 상단 breadcrumb (전체 목차 › 장 › 절)
-- pager: 장의 첫 절의 이전 링크는 자기 장 개요로, 장의 마지막 절의 다음 링크는 다음 장 개요로 간다. 독자가 장을 넘어갈 때 개요의 "이어받는 것 / 이 장의 질문"을 먼저 보게 하기 위해서다.
-- `<main>` 안에 목표 → 선수지식 → 본문 → 요약 → 연습문제
+- 상단 breadcrumb (Contents › 장 › 절, §8.2)
+- pager: 장의 첫 절의 이전 링크는 자기 장 개요로, 장의 마지막 절의 다음 링크는 다음 장 개요로 간다. 독자가 장을 넘어갈 때 개요의 "Builds on / Questions"를 먼저 보게 하기 위해서다.
+- `<main>` 안에 Goals → Prerequisites → 본문 → Summary → Exercises
 - 하단 이전/다음 절 링크
 
 ### 11.3 구성요소 (클래스 계약)
 
-style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래 클래스만 쓴다. `check_site.py`는 목록에 없는 클래스를 **오류**로 처리한다. 모든 구성요소가 쓰인 올바른 예는 `tools/tests/fixtures/site/`에 있으니, 페이지를 쓰기 전에 참고한다.
+style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래 클래스만 쓴다. `check_site.py`는 목록에 없는 클래스를 **오류**로 처리한다. 모든 구성요소가 쓰인 올바른 예는 `tools/tests/fixtures/site/`에 있으니, 페이지를 쓰기 전에 참고한다. 라벨·제목은 영어, 본문 문장은 한국어다(§8.2).
 
 **HTML 작성 규칙**
 - `<p>`, `<li>`를 포함한 모든 비어 있지 않은 태그는 명시적으로 닫는다.
@@ -838,28 +797,29 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 - **정의·정리류**
   ```html
   <div class="thm definition" id="i-6-2-1">
-    <p><span class="thm-head">정의 6.2.1</span> <span class="thm-name">(접평면, tangent plane)</span>. 본문…</p>
+    <p><span class="thm-head">Definition 6.2.1</span> <span class="thm-name">(tangent plane)</span>. 본문…</p>
   </div>
   ```
   - 두 번째 클래스 목록: `definition`, `theorem`, `proposition`, `lemma`, `corollary`, `example`, `nonexample`, `remark`
   - 호환성 명제(§3.4)에는 세 번째 클래스 `compat`을 붙인다.
-  - 제목 단어: 정의, 정리, 명제, 보조정리, 따름정리, 예, 비예, 비고
+  - 제목 단어: Definition, Theorem, Proposition, Lemma, Corollary, Example, Non-example, Remark. `thm-head`에는 "단어 번호"만 쓴다(예: `Non-example 6.2.3`).
+  - `thm-name`은 괄호 안의 영어 이름이다. 용어처럼 소문자로 쓰고 고유명사만 대문자로 쓴다(예: `(first fundamental form)`, `(Theorema Egregium)`).
 - **증명**
   ```html
   <div class="proof">
-    <p class="proof-idea">증명 아이디어: …</p>          <!-- 선택 -->
-    <p><span class="proof-head">증명.</span> …</p>
+    <p class="proof-idea">Proof idea: …</p>          <!-- 선택 -->
+    <p><span class="proof-head">Proof.</span> …</p>
   </div>
   ```
   - 끝 표시 ∎는 CSS가 붙이므로 직접 쓰지 않는다.
-  - 스케치는 `<span class="proof-head">증명 스케치.</span>`로 쓴다.
-- **상자**: `<aside class="box 종류">`로 쓰고, 첫 줄은 `<p class="box-title">…</p>`다.
-  - `intuition`: 직관
-  - `warning`: 주의 / 흔한 오해
-  - `convention`: 규약 비교
-  - `forward`: 나중에 보게 될 일반화
-  - `backward`: 앞에서 본 것과 비교
-  - `history`: 역사 (선택)
+  - 스케치는 `<span class="proof-head">Proof sketch.</span>`로 쓴다.
+- **상자**: `<aside class="box 종류">`로 쓰고, 첫 줄은 `<p class="box-title">…</p>`다. 제목은 아래 영어로 쓰고, 필요하면 짧은 한국어 부제를 붙인다(예: `Intuition: 같은 대상, 다른 눈`).
+  - `intuition`: Intuition (직관)
+  - `warning`: Warning / Common misconception (주의 / 흔한 오해)
+  - `convention`: Conventions (규약 비교)
+  - `forward`: Looking ahead (나중에 보게 될 일반화)
+  - `backward`: Looking back (앞에서 본 것과 비교)
+  - `history`: History (역사, 선택)
 - **번호 붙은 식**
   ```html
   <div class="equation" id="eq-6-2-1">\[ … \tag{6.2.1} \]</div>
@@ -867,38 +827,39 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 - **그림**
   ```html
   <figure class="dg-figure" id="fig-6-2-1">
-    <img src="figures/fig-6-2-1-tangent-plane.svg" alt="(한국어로 그림 내용 요약)">
-    <figcaption><span class="fig-head">그림 6.2.1.</span> 설명…</figcaption>
+    <img src="figures/fig-6-2-1-tangent-plane.svg" alt="(그림 내용 요약: 한국어 문장, 용어는 영어)">
+    <figcaption><span class="fig-head">Figure 6.2.1.</span> 설명…</figcaption>
   </figure>
   ```
-- **용어 정의**: `<dfn>접평면</dfn>(tangent plane)`
+- **용어 정의**: `<dfn>tangent plane</dfn>(접평면)`. `<dfn>`에는 영어 용어를, 바로 뒤 괄호에는 한국어 번역어를 한 번 적는다(§8.1). `build_index.py`는 `<dfn>`의 글자를 용어로, 괄호 안의 한글을 번역어로 읽는다.
   - 일반화하는 정의에는 `data-generalizes="(이전 정의의 상대경로#id)"`를 붙인다(§3.3).
   - `<dfn>`은 정의 항목(`div.thm.definition`) 안이나 정의하는 문장 안에서만 쓴다. `build_index.py`가 가장 가까운 id를 정의 위치로 기록한다.
 - **다음 절 예고**: 요약 section 끝의 `<p class="next">다음 절에서는 …</p>`
 - **인용**: `<a class="cite" href="../../references.html#dC">[dC §2-4]</a>`
-- **이 study set의 규약 도입**: 번호 붙은 비고로 쓰고 제목에 "규약"을 넣는다. 예: `<div class="thm remark" id="i-1-4-9">`와 `(인덱스 위치 규약)`. 번호가 있어야 뒤에서 링크할 수 있다. 교재와 다른 점을 알리는 것은 따로 `box convention`으로 쓴다.
+- **이 study set의 규약 도입**: 번호 붙은 비고(Remark)로 쓰고 제목에 "convention"을 넣는다. 예: `<div class="thm remark" id="i-1-4-9">`와 `(index position convention)`. 번호가 있어야 뒤에서 링크할 수 있다. 교재와 다른 점을 알리는 것은 따로 `box convention`(Conventions)으로 쓴다.
 - **확인 필요**: `<span class="todo">[확인 필요: …]</span>`
-- **검증 표시**: `<p class="verified">검증: <code>verify/v-7-1-first-form.py</code></p>` (계산 예제 끝, 선택)
+- **검증 표시**: `<p class="verified">Verification: <code>verify/v-7-1-first-form.py</code></p>` (계산 예제 끝, 선택)
 - **연습문제**
   ```html
   <div class="exercise" id="ex-6-2-1" data-level="1">
-    <p><span class="thm-head">연습 6.2.1</span> <span class="level">★</span> 문제…</p>
-    <details class="hint"><summary>힌트</summary><p>…</p></details>
-    <details class="solution"><summary>풀이</summary><p>…</p></details>
+    <p><span class="thm-head">Exercise 6.2.1</span> <span class="level">★</span> 문제…</p>
+    <details class="hint"><summary>Hint</summary><p>…</p></details>
+    <details class="solution"><summary>Solution</summary><p>…</p></details>
   </div>
   ```
-- **절 구조**: `<section class="goals">`, `<section class="prereq">`, `<section class="summary">`, `<section class="exercises">`
+- **절 구조**: `<section class="goals">`(소제목 Goals), `<section class="prereq">`(Prerequisites), `<section class="summary">`(Summary), `<section class="exercises">`(Exercises). 동기 소제목은 Motivation이고, 그 밖의 소제목도 영어로 쓴다(§8.2).
 - **장 개요의 절 목록**: `<ol class="toc">`. 각 항목에 상태 표시를 단다.
-  - 상태 표시의 형식: `<span class="status 상태">라벨</span>`. 상태별 라벨은 `planned` 계획, `draft` 초안, `reviewed` 검토 완료, `final` 확정이다.
+  - 상태 표시의 형식: `<span class="status 상태">라벨</span>`. 상태별 라벨은 `planned` Planned, `draft` Draft, `reviewed` Reviewed, `final` Final이다.
   - **아직 쓰지 않은 절**은 링크를 걸지 않는다. 예정 파일 이름은 `data-file`에 적는다.
     ```html
     <li id="toc-7-1" data-file="7-1-first-fundamental-form.html">
-      <span class="toc-title">7.1 제1기본형식</span> <span class="status planned">계획</span>
-      <p class="toc-note">내용: 정의와 좌표 표현, 길이·각·넓이 · 기준 예제: 구면·원기둥의 E, F, G</p>
+      <span class="toc-title">7.1 The First Fundamental Form</span> <span class="status planned">Planned</span>
+      <p class="toc-note">Topics: 정의와 coordinate representation, 길이·각·넓이 · Running examples: sphere·cylinder의 E, F, G</p>
     </li>
     ```
   - 절을 쓰면 `toc-title`을 `<a class="toc-title" href="7-1-first-fundamental-form.html">`로 바꾸고 상태를 올린다.
-- **장 개요의 연결 섹션**: `<section class="inherits">`(이어받는 것), `<section class="questions">`(이 장의 질문), `<section class="handoff">`(넘겨주는 것), `<p class="threads">`(줄기 위치). 부록 A-2를 따른다.
+  - `toc-note`의 머리는 "Topics:", "Running examples:"로 쓰고, 조각은 " · "로 나눈다.
+- **장 개요의 연결 섹션**: `<section class="inherits">`(소제목 Builds on), `<section class="questions">`(Questions), `<section class="handoff">`(Leads to), `<p class="threads">`("Threads: …", 줄기 위치). 절 목록의 소제목은 Sections다. 남긴 질문은 "Open question: …"으로 쓴다. 부록 A-2를 따른다.
 
 ### 11.4 수식
 
@@ -922,13 +883,15 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 ### 11.5 번호, id, 상호참조
 
 - **번호는 절 단위로 매긴다.**
-  - 정의·정리·예 등은 한 카운터를 공유한다: 정의 6.2.1, 예 6.2.2, 정리 6.2.3 …
-  - 식 `(N.M.K)`, 그림 `그림 N.M.K`, 연습 `연습 N.M.K`는 각각 따로 센다.
+  - 정의·정리·예 등은 한 카운터를 공유한다: Definition 6.2.1, Example 6.2.2, Theorem 6.2.3 …
+  - 식 `(N.M.K)`, 그림 `Figure N.M.K`, 연습 `Exercise N.M.K`는 각각 따로 센다.
 - **id 규칙**: 항목 `i-N-M-K`, 식 `eq-N-M-K`, 그림 `fig-N-M-K`, 연습 `ex-N-M-K`, 절 안의 소제목 `sec-slug`.
 - **참조는 항상 링크로 건다.**
-  - 같은 파일: `<a href="#i-6-2-3">정리 6.2.3</a>`
-  - 같은 장의 다른 절: `<a href="6-1-definition.html#i-6-1-4">정의 6.1.4</a>`
+  - 같은 파일: `<a href="#i-6-2-3">Theorem 6.2.3</a>`
+  - 같은 장의 다른 절: `<a href="6-1-definition.html#i-6-1-4">Definition 6.1.4</a>`
   - 다른 장: `<a href="../05-space-curves/5-3-frenet.html#eq-5-3-2">(5.3.2)</a>`
+  - 식은 단어 없이 `(N.M.K)`로 참조한다. 문장 첫머리에서만 `Equation <a href="#eq-6-2-1">(6.2.1)</a>`처럼 쓴다. 장·절은 "Chapter N", "Section N.M"으로 쓴다("N장", "N.M절"이라 쓰지 않는다, §8.2).
+  - `check_site.py`는 링크 없는 `Theorem N.M.K`·`Figure N.M.K`·`Exercise N.M.K`와 수식 밖의 `(N.M.K)`, 남은 한국어 참조(`정리 N.M.K`, `식 (N.M.K)`, `N장`, `N.M절`)를 경고한다.
 - 번호를 바꿨다면 저장소 전체에서 옛 번호를 grep해 참조를 모두 고친다. check_site.py가 깨진 링크와 번호 불일치를 잡는다.
 - 아직 없는 절을 참조해야 하면 §9 로드맵을 기준으로 링크를 걸고 `[확인 필요: 참조 대상 미작성]`을 붙인다.
 
@@ -974,7 +937,7 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
   - 예: 프레네 틀은 매개화에서 계산한 값으로 그리고, 접촉원의 반지름은 1/κ로 그린다.
   - 눈대중으로 그리지 않는다.
 - 그림에는 **본문과 같은 기호, 같은 매개변수 값**을 쓴다. 그 값은 캡션에 적는다. 예: "a = 1, b = 0.3인 나선"
-- 추상 다양체, 차트, 사상 도식 같은 **개념도**는 캡션 끝에 "(개념도)"라고 표시한다. 정확한 수치 표현이 아님을 독자가 알 수 있게 하기 위해서다.
+- 추상 다양체, 차트, 사상 도식 같은 **개념도**는 캡션 끝에 "(schematic)"이라고 표시한다. 정확한 수치 표현이 아님을 독자가 알 수 있게 하기 위해서다.
 - **재생성할 수 있어야 한다.** 프로젝트 루트에서 `PYTHONPATH=tools python3 <스크립트>`를 한 번 실행하면 같은 파일이 나와야 한다. 난수를 쓰면 seed를 고정한다.
 - 스크립트 안에 **자기검사 assert**를 넣는다. 예: |**t**| = 1, ⟨**t**, **n**⟩ = 0, 그린 점이 곡면 위에 있는지
 
@@ -1043,9 +1006,9 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 
 ### 12.6 캡션
 
-- `그림 N.M.K.` 다음에 무엇을 보여주는지 1–3문장, 사용한 매개변수, (개념도 표시)를 적는다. 캡션 안의 수식은 MathJax로 쓴다.
+- `Figure N.M.K.` 다음에 무엇을 보여주는지 1–3문장, 사용한 매개변수, (개념도 표시)를 적는다. 문장은 한국어, 용어는 영어다(§8.2). 캡션 안의 수식은 MathJax로 쓴다.
 - 모든 그림은 본문에서 **한 번 이상 참조**한다.
-- `alt` 속성에 그림 내용을 한국어로 요약한다(스크린리더용).
+- `alt` 속성에 그림 내용을 한국어 문장(용어는 영어)으로 요약한다(스크린리더용).
 
 ### 12.7 인터랙티브 그림 (선택)
 
@@ -1065,7 +1028,7 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
   - 정확한 sympy 기호계산을 우선 쓴다. 불가능하면 numpy 수치 확인으로 대신하고 허용오차를 명시한다.
   - 검증은 증명을 대신하지 않는다. **증명과 계산의 오류를 잡는 용도**다.
 - **파일**: `chapters/NN-slug/verify/v-N-M-slug.py`
-  - 각 검사는 `tools/dgcheck.py`의 헬퍼로 쓴다. 예: `check("예 7.1.2: 구면 E,F,G", 조건)`, `sym_equal(이름, a, b)`, `close(이름, a, b, tol)`
+  - 각 검사는 `tools/dgcheck.py`의 헬퍼로 쓴다. 예: `check("Example 7.1.2: sphere E,F,G", 조건)`, `sym_equal(이름, a, b)`, `close(이름, a, b, tol)`
   - 각 검사는 PASS/FAIL을 출력하고, 스크립트 끝에서 `summary()`를 호출한다.
   - 하나라도 실패하면 종료코드 1로 끝낸다.
   - 검사 이름에 본문 항목 번호를 넣는다.
@@ -1090,8 +1053,8 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
   - 풀이도 본문과 같은 엄밀성 기준을 따른다.
   - 계산 풀이는 verify 스크립트로 확인한다.
 - 본문 증명에서 "연습문제로 남긴다"는 ★ 수준의 짧은 확인에만 쓰고, 해당 연습 번호에 링크를 건다.
-- **기준 예제를 연습문제에서 미리 계산했다면** "N장에서 사용"이라고 표시한다. 뒤 장은 그 값을 가정하지 않고 §3.5의 자기 칸에서 본문으로 다시 계산한다. 이때 "연습 1.5.2에서 미리 해 보았다"처럼 링크를 건다.
-- **이후 절에서 쓰는 결과는 연습문제로 두지 않는다.** 본문에서 증명한다. 부득이하게 연습문제로 둔다면 "정리 x.y.z에서 사용"이라고 표시하고 풀이를 완전하게 쓴다.
+- **기준 예제를 연습문제에서 미리 계산했다면** "Chapter N에서 사용"이라고 표시한다. 뒤 장은 그 값을 가정하지 않고 §3.5의 자기 칸에서 본문으로 다시 계산한다. 이때 "Exercise 1.5.2에서 미리 해 보았다"처럼 링크를 건다.
+- **이후 절에서 쓰는 결과는 연습문제로 두지 않는다.** 본문에서 증명한다. 부득이하게 연습문제로 둔다면 "Theorem x.y.z에서 사용"이라고 표시하고 풀이를 완전하게 쓴다.
 
 ---
 
@@ -1107,8 +1070,8 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 
 1. 이 문서 전체를 읽는다.
 2. 다음 파일을 읽는다.
-   - 담당 장의 `index.html` (없으면 §9 로드맵). 특히 "이어받는 것"
-   - **앞 장의 `index.html`**, 특히 "넘겨주는 것"
+   - 담당 장의 `index.html` (없으면 §9 로드맵). 특히 "Builds on"
+   - **앞 장의 `index.html`**, 특히 "Leads to"
    - 선행 절: 적어도 바로 앞 절 전체와, 선수 지식으로 링크할 절 전부
    - `concepts.html`: 쓰려는 개념이 이미 정의되어 있는지 확인한다(§3.3)
    - `notation.html`, `glossary.html`
@@ -1163,7 +1126,7 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
      - 절 사이의 흐름이 이어지는가(앞 절이 끝난 지점에서 다음 절이 시작하는가)
      - 빠진 논리 단계나 중복 서술은 없는가
      - 기호와 용어가 절마다 달라지지 않는가
-     - 장 `index.html`의 "이어받는 것 / 넘겨주는 것"이 실제 내용과 맞는가
+     - 장 `index.html`의 "Builds on / Leads to"가 실제 내용과 맞는가
   3. **Part 통합 검토**: Part의 모든 장이 끝나면 한다.
      - §3.1 줄기가 실제로 이어지는가
      - §3.4 호환성 명제가 모두 증명되었는가
@@ -1191,15 +1154,16 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 - [ ] 부호가 나오는 곳마다 법벡터와 방향을 명시했다
 
 **교육**
-- [ ] 목표, 선수지식, 동기, 직관 그림, 요약이 있다
+- [ ] Goals, Prerequisites, Motivation, 직관 그림, Summary가 있다
 - [ ] 정의마다 예와 비예가 있다
 - [ ] 기준 예제를 썼고 값이 §7과 일치한다
 - [ ] 처음 나오는 계산은 단계를 생략하지 않았다
 
 **규약**
 - [ ] 모든 기호가 §6 및 notation.html과 일치하고, 새 기호는 보고했다
-- [ ] 교재와 다른 규약에 "규약 비교" 상자를 넣었다
-- [ ] 용어가 §8 표와 일치하고, 첫 정의에 `<dfn>`과 영어 병기를 했다
+- [ ] 교재와 다른 규약에 "Conventions" 상자(`box convention`)를 넣었다
+- [ ] 대학 수학 용어를 `tools/terms.tsv`의 영어로 썼고(고등학교 수준의 말은 `terms_keep.txt`대로 한국어), 첫 정의는 `<dfn>English</dfn>(한국어)` 형식이다(§8.1)
+- [ ] 라벨·제목(머리 단어, 상자 제목, 소제목, breadcrumb, pager, 상태 표시)이 §8.2의 영어이고, `check_site.py`에 남은 한국어 라벨·참조 경고가 없다
 
 **출처**
 - [ ] 대응 교재를 명시했고, 번호는 확인한 것만 적었다
@@ -1209,7 +1173,7 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 - [ ] 부록 A의 골격, 메타데이터, 네비게이션을 갖췄다
 - [ ] 번호·id 규칙을 지켰고 모든 참조 링크가 동작한다
 - [ ] 수식 구분자는 `\(` `\[`만 썼고, `<`는 `\lt`로 썼으며, 금지 매크로가 없다
-- [ ] `check_all.sh`를 통과했다
+- [ ] `check_all.sh`를 통과했다. 기존 페이지를 변환했다면 `python3 tools/term_guard.py <파일>`도 오류 없이 통과했다
 
 **그림**
 - [ ] 스크립트로 재생성되고, assert가 있고, 색 규칙을 지켰고, 그림 안에 한글이 없다
@@ -1258,70 +1222,70 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>7.1 제1기본형식 — 미분기하 스터디</title>
+  <title>7.1 The First Fundamental Form — DG Study</title>
   <meta name="dg-id" content="7.1">
   <meta name="dg-status" content="draft">
   <meta name="dg-prereq" content="6.2, 6.3">
   <meta name="dg-refs" content="dC §2-5; Pr Ch. 6">
-  <meta name="dg-updated" content="2026-09-30">
+  <meta name="dg-updated" content="2026-10-04">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">7. 제1기본형식</a> ›
-    <span>7.1 제1기본형식</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">7. The First Fundamental Form</a> ›
+    <span>7.1 The First Fundamental Form</span>
   </nav>
 
   <main>
     <header>
-      <h1>7.1 제1기본형식</h1>
-      <p class="meta">대응 교재:
+      <h1>7.1 The First Fundamental Form</h1>
+      <p class="meta">References:
         <a class="cite" href="../../references.html#dC">[dC §2-5]</a>,
         <a class="cite" href="../../references.html#Pr">[Pr Ch. 6]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
         <li>…</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">정의 6.2.1 (접평면)</a></li>
+        <li><a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">Definition 6.2.1 (tangent plane)</a></li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p>6장에서 정칙곡면과 그 접평면을 정의했다. 이제 곡면 <em>위에서</em> 길이와 각을 재고 싶다. …</p>
+      <h2>Motivation</h2>
+      <p>Chapter 6에서 regular surface와 그 tangent plane을 정의했다. 이제 surface <em>위에서</em> 길이와 각을 재고 싶다. …</p>
       <!-- 첫 문단은 앞 절(장의 첫 절이면 앞 장)이 끝난 지점에서 출발한다 (§3.2) -->
     </section>
 
-    <!-- 본문: 직관 → 정의 → 예·비예 → 정리·증명 → 좌표 표현 → 계산 예제 -->
+    <!-- 본문: 직관 → 정의 → 예·비예 → 정리·증명 → 좌표 표현 → 계산 예제. 소제목도 영어로 쓴다 (§8.2) -->
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
         <li>…</li>
       </ul>
-      <p class="next">다음 절에서는 제1기본형식을 보존하는 사상, 즉 등거리사상을 다룬다. …</p>
+      <p class="next">다음 절에서는 first fundamental form을 보존하는 map, 즉 isometry를 다룬다. …</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
       <!-- div.exercise … -->
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="../06-regular-surfaces/6-5-regular-values.html">← 6.5 정칙값의 역상</a>
-    <a rel="next" href="7-2-isometries.html">7.2 등거리사상 →</a>
+    <a rel="prev" href="../06-regular-surfaces/6-5-regular-values.html">← 6.5 Inverse Images of Regular Values</a>
+    <a rel="next" href="7-2-isometries.html">7.2 Isometries →</a>
   </nav>
 </body>
 </html>
@@ -1334,47 +1298,47 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 ```html
   <main>
     <header>
-      <h1>7. 제1기본형식</h1>
-      <p class="threads">줄기: <strong>T3</strong> 내재적 vs 외재적 (시작) ·
-        <strong>T5</strong> 적분과 위상 (넓이)</p>
+      <h1>7. The First Fundamental Form</h1>
+      <p class="threads">Threads: <strong>T3</strong> Intrinsic vs. extrinsic (start) ·
+        <strong>T5</strong> Integration and topology (area)</p>
     </header>
 
     <section class="questions">
-      <h2>이 장의 질문</h2>
+      <h2>Questions</h2>
       <ul>
-        <li>곡면 위에서 길이, 각, 넓이를 어떻게 재는가?</li>
-        <li>곡면을 늘이지 않고 구부릴 때 변하지 않는 양은 무엇인가?</li>
+        <li>surface 위에서 길이, 각, 넓이를 어떻게 재는가?</li>
+        <li>surface를 늘이지 않고 구부릴 때 변하지 않는 양은 무엇인가?</li>
       </ul>
     </section>
 
     <section class="inherits">
-      <h2>이어받는 것</h2>
+      <h2>Builds on</h2>
       <ul>
-        <li><a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">접평면</a>과
-            <a href="../06-regular-surfaces/6-4-differential-of-a-map.html">사상의 미분</a> (6장)</li>
-        <li><a href="../04-curves/4-2-arc-length.html">호의 길이</a> (4장): 곡면 위 곡선의 길이로 확장한다</li>
+        <li><a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">tangent plane</a>과
+            <a href="../06-regular-surfaces/6-4-differential-of-a-map.html">differential of a map</a> (Chapter 6)</li>
+        <li><a href="../04-curves/4-2-arc-length.html">arc length</a> (Chapter 4): surface 위 곡선의 길이로 확장한다</li>
       </ul>
     </section>
 
-    <h2>절 목록</h2>
+    <h2>Sections</h2>
     <ol class="toc">
       <li id="toc-7-1" data-file="7-1-first-fundamental-form.html">
-        <a class="toc-title" href="7-1-first-fundamental-form.html">7.1 제1기본형식</a> <span class="status draft">초안</span>
-        <p class="toc-note">내용: 정의와 좌표 표현 · 기준 예제: 구면·원환면·원기둥의 E, F, G</p>
+        <a class="toc-title" href="7-1-first-fundamental-form.html">7.1 The First Fundamental Form</a> <span class="status draft">Draft</span>
+        <p class="toc-note">Topics: 정의와 coordinate representation · Running examples: sphere·torus of revolution·cylinder의 E, F, G</p>
       </li>
       <li id="toc-7-2" data-file="7-2-isometries.html">
-        <span class="toc-title">7.2 등거리사상</span> <span class="status planned">계획</span>
+        <span class="toc-title">7.2 Isometries</span> <span class="status planned">Planned</span>
         <p class="toc-note">…</p>
       </li>
     </ol>
 
     <section class="handoff">
-      <h2>넘겨주는 것</h2>
+      <h2>Leads to</h2>
       <ul>
-        <li>E, F, G → 8장(곡률 공식), 9장(크리스토펠 기호, 빼어난 정리), 16·21장(리만 계량과의 호환성)</li>
-        <li>등거리사상 → 9장(빼어난 정리의 진술), 21장</li>
-        <li>넓이요소 dA → 10장(가우스-보네), 18장(체적형식의 적분)</li>
-        <li>남긴 질문: 제1기본형식만으로 곡면의 "휘어짐"을 알 수 있는가? → 9장</li>
+        <li>E, F, G → Chapter 8 (curvature 공식), Chapter 9 (Christoffel symbols, Theorema Egregium), Chapter 16·21 (Riemannian metric과의 compatibility)</li>
+        <li>isometry → Chapter 9 (Theorema Egregium의 진술), Chapter 21</li>
+        <li>area element dA → Chapter 10 (Gauss–Bonnet theorem), Chapter 18 (volume form의 적분)</li>
+        <li>Open question: first fundamental form만으로 surface의 "휘어짐"을 알 수 있는가? → Chapter 9</li>
       </ul>
     </section>
   </main>
@@ -1384,27 +1348,27 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 
 ## 부록 B. 모범 예시 (문체와 설명 밀도의 기준)
 
-아래는 `7-1-first-fundamental-form.html` 본문의 일부다. **설명의 촘촘함, 계산 단계, 구성요소 사용법**의 기준으로 삼는다.
+아래는 `7-1-first-fundamental-form.html` 본문의 일부다. **설명의 촘촘함, 계산 단계, 구성요소 사용법**의 기준으로 삼는다. 라벨·용어는 영어, 문장은 한국어다(§8).
 
 ```html
 <section id="sec-definition">
-  <h2>정의</h2>
-  <p>곡면 위에서 길이와 각을 재려면 각 접평면 위에 내적이 있어야 한다.
-  가장 자연스러운 방법은 \(\R^3\)의 내적을 접평면 \(T_pS\)로 제한하는 것이다.</p>
+  <h2>Definition</h2>
+  <p>surface 위에서 길이와 각을 재려면 각 tangent plane 위에 inner product가 있어야 한다.
+  가장 자연스러운 방법은 \(\R^3\)의 inner product를 tangent plane \(T_pS\)의 벡터에만 적용하는 것이다.</p>
 
   <div class="thm definition" id="i-7-1-1">
-    <p><span class="thm-head">정의 7.1.1</span>
-    <span class="thm-name">(제1기본형식, first fundamental form)</span>.
-    \(S\)가 정칙곡면이고 \(p \in S\)일 때, 이차형식
+    <p><span class="thm-head">Definition 7.1.1</span>
+    <span class="thm-name">(first fundamental form)</span>.
+    \(S\)가 regular surface이고 \(p \in S\)일 때, quadratic form
     \[ \mathrm{I}_p\colon T_pS \to \R, \qquad \mathrm{I}_p(w) = \inner{w}{w} = \abs{w}^2 \]
-    을 \(p\)에서 \(S\)의 <dfn>제1기본형식</dfn>(first fundamental form)이라 한다.</p>
+    을 \(p\)에서 \(S\)의 <dfn>first fundamental form</dfn>(제1기본형식)이라 한다.</p>
   </div>
 
-  <p>정의에는 매개화가 전혀 쓰이지 않았다. 따라서 \(\mathrm{I}_p\)는 곡면 자체에 속한 대상이다.
-  계산할 때는 매개화 \(\mathbf{x}\colon U \to S\)로 좌표 표현을 얻는다.
+  <p>정의에는 parametrization이 전혀 쓰이지 않았다. 따라서 \(\mathrm{I}_p\)는 surface 자체에 속한 대상이다.
+  계산할 때는 parametrization \(\mathbf{x}\colon U \to S\)로 coordinate representation을 얻는다.
   \(w \in T_pS\)는 \(w = a\,\mathbf{x}_u + b\,\mathbf{x}_v\) 꼴로 유일하게 쓸 수 있다
-  (<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">명제 6.2.4</a>).
-  내적의 쌍선형성과 대칭성에 의해</p>
+  (<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">Proposition 6.2.4</a>).
+  inner product는 bilinear이고 symmetric이므로</p>
   <div class="equation" id="eq-7-1-1">
   \[ \mathrm{I}_p(w) = E\,a^2 + 2F\,ab + G\,b^2, \qquad
      E = \inner{\mathbf{x}_u}{\mathbf{x}_u},\quad F = \inner{\mathbf{x}_u}{\mathbf{x}_v},\quad G = \inner{\mathbf{x}_v}{\mathbf{x}_v}. \tag{7.1.1} \]
@@ -1413,11 +1377,11 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 </section>
 
 <div class="thm example" id="i-7-1-2">
-  <p><span class="thm-head">예 7.1.2</span> <span class="thm-name">(구면)</span>.
-  반지름 \(r\)인 구면의 기준 매개화
+  <p><span class="thm-head">Example 7.1.2</span> <span class="thm-name">(sphere)</span>.
+  반지름 \(r\)인 sphere의 standard parametrization
   \[ \mathbf{x}(\theta,\varphi) = (r\sin\theta\cos\varphi,\ r\sin\theta\sin\varphi,\ r\cos\theta),
      \qquad 0 \lt \theta \lt \pi,\quad 0 \lt \varphi \lt 2\pi \]
-  를 쓰자. 편미분은
+  를 쓰자. partial derivative는
   \[ \begin{aligned}
      \mathbf{x}_\theta &= (r\cos\theta\cos\varphi,\ r\cos\theta\sin\varphi,\ -r\sin\theta),\\
      \mathbf{x}_\varphi &= (-r\sin\theta\sin\varphi,\ r\sin\theta\cos\varphi,\ 0)
@@ -1428,26 +1392,26 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
      F &= -r^2\sin\theta\cos\theta\sin\varphi\cos\varphi + r^2\sin\theta\cos\theta\sin\varphi\cos\varphi + 0 = 0,\\
      G &= r^2\sin^2\theta\,(\sin^2\varphi + \cos^2\varphi) = r^2\sin^2\theta.
   \end{aligned} \]
-  \(E = r^2\)는 경선(\(\varphi\) 고정)을 따라 \(\theta\)가 \(d\theta\)만큼 변할 때
+  \(E = r^2\)는 meridian(\(\varphi\) 고정)을 따라 \(\theta\)가 \(d\theta\)만큼 변할 때
   길이가 \(r\,d\theta\)만큼 변한다는 뜻이다.
-  \(G = r^2\sin^2\theta\)는 위도원의 반지름이 \(r\sin\theta\)라는 사실을 반영한다
-  (<a href="#fig-7-1-1">그림 7.1.1</a>).</p>
-  <p class="verified">검증: <code>verify/v-7-1-first-form.py</code></p>
+  \(G = r^2\sin^2\theta\)는 circle of latitude의 반지름이 \(r\sin\theta\)라는 사실을 반영한다
+  (<a href="#fig-7-1-1">Figure 7.1.1</a>).</p>
+  <p class="verified">Verification: <code>verify/v-7-1-first-form.py</code></p>
 </div>
 
 <aside class="box warning">
-  <p class="box-title">주의</p>
-  <p>\(F = 0\)은 좌표곡선들이 서로 직교한다는 뜻이다. 이것은 <em>매개화</em>의 성질이지
-  곡면의 성질이 아니다. 같은 구면이라도 다른 매개화를 쓰면 \(F \neq 0\)일 수 있다
-  (<a href="#ex-7-1-3">연습 7.1.3</a>).</p>
+  <p class="box-title">Warning</p>
+  <p>\(F = 0\)은 두 coordinate curve가 서로 orthogonal이라는 뜻이다. 이것은 <em>parametrization</em>의 성질이지
+  surface의 성질이 아니다. 같은 sphere라도 다른 parametrization을 쓰면 \(F \neq 0\)일 수 있다
+  (<a href="#ex-7-1-3">Exercise 7.1.3</a>).</p>
 </aside>
 
 <aside class="box convention">
-  <p class="box-title">규약 비교</p>
-  <p>do Carmo는 제2기본형식의 계수를 \(e, f, g\)로 쓴다
+  <p class="box-title">Conventions</p>
+  <p>do Carmo는 second fundamental form의 coefficient를 \(e, f, g\)로 쓴다
   <a class="cite" href="../../references.html#dC">[dC §3-3]</a>.
-  이 study set은 \(g\)를 리만 계량 전용으로 남겨 두려고 \(L, M, N\)을 쓴다.
-  즉 \(e = L,\ f = M,\ g = N\)이다. (8장에서 쓰는 형식의 예)</p>
+  이 study set은 \(g\)를 Riemannian metric 전용으로 남겨 두려고 \(L, M, N\)을 쓴다.
+  즉 \(e = L,\ f = M,\ g = N\)이다. (Chapter 8에서 쓰는 형식의 예)</p>
 </aside>
 ```
 
@@ -1553,6 +1517,9 @@ window.MathJax = {
    - `$` 구분자 사용, 원문 기준 수식 안의 `<`
    - 인라인 style, 페이지 `<style>`, 허용되지 않은 `<script>`
    - `todo`와 `REVIEW` 개수 보고
+   - 라벨(§8.2): `thm-head`·연습·그림 머리는 영어 단어와 번호(`Definition 6.2.1`, `Exercise 6.2.1`, `Figure 6.2.1.`), toc 상태 라벨은 Planned·Draft·Reviewed·Final이어야 한다(오류)
+   - 남은 한국어(경고): 머리·상자 제목·summary·소제목·breadcrumb·pager·상태·`p.meta`·`p.threads`·`p.toc-note`·`p.verified`가 한국어 라벨 단어(정의, 증명, 힌트, 직관, 이 절의 목표, 전체 목차, 대응 교재, 초안 …)로 시작함, 제목(h1–h3, toc-title, breadcrumb, pager, `<title>`)에 한글이 있음, 본문의 한국어 번호 참조(`정리 N.M.K`, `식 (N.M.K)`, `N장`, `N.M절`)
+   - 링크 없는 상호참조(경고): `Theorem N.M.K` 같은 영어 라벨 + 번호, 수식 밖의 `(N.M.K)`
    - 연결 장치
      - 절 페이지마다 `p.next`가 있는지
      - 장 `index.html`에 `inherits`, `questions`, `handoff`, `threads`가 있는지
@@ -1561,9 +1528,10 @@ window.MathJax = {
      - `<dfn>`: 용어, 정의 위치(가장 가까운 id), `data-generalizes`
      - 번호 항목(`div.thm`): 번호, 제목, 위치
      - 링크 그래프
-   - `concepts.html`의 내용: 가나다순 찾아보기(용어 → 정의 위치, 일반화 사슬, **쓰이는 곳** = 역참조)
+   - 용어는 `<dfn>`의 영어, 번역어는 바로 뒤 괄호 안의 한국어다. 옛 형식 `<dfn>한국어</dfn>(English)`도 읽으며, 이때는 한글이 없는 쪽을 영어 용어로 본다.
+   - `concepts.html`의 내용(영어): 영어 용어의 A–Z 묶음(글자가 아닌 것은 "#"), 대소문자 무시 알파벳순. 항목마다 용어, (한국어), 정의 위치, Generalizes / Generalized by, **Used in** = 역참조. 끝에 Compatibility propositions 목록
    - 오류로 처리하는 것
-     - `data-generalizes` 없이 같은 용어의 `<dfn>`이 두 번 나옴
+     - `data-generalizes` 없이 같은 영어 용어(대소문자 무시)의 `<dfn>`이 두 번 나옴. 한국어 번역어가 모두 다르면 동음이의어로 보고 경고만 한다
      - `data-generalizes`가 가리키는 대상이 없음
      - §3.4 표에 있는 장에 `compat` 항목이 없음
 8. **`tools/check_math.mjs`** + `tools/package.json`(의존성 `mathjax-full@3.2.2`)
@@ -1587,6 +1555,9 @@ window.MathJax = {
     - "이어받는 것 / 이 장의 질문 / 넘겨주는 것 / 줄기"는 §3.1–3.5에서 초안을 채운다.
     - 각 장 담당 agent가 이 초안을 다듬는다.
 12. (선택) 장 의존 그래프 `assets/roadmap.svg`(graphviz). §3.1 줄기별로 색을 구분한다.
+13. **`tools/term_guard.py`** (2026-10-04 추가, 영어 용어 전환용): `python3 tools/term_guard.py [--rev HEAD] [--quiet] 파일…`. 각 파일을 `git show REV:파일`과 비교한다(`--against 옛파일`로 git 없이도 비교).
+    - 오류: 요소 id 집합이 바뀜, 수식 `\(…\)`·`\[…\]`의 다중집합이 바뀜(공백 차이는 무시, `	ext{…}`·`\mbox{…}` 안의 한글만 바뀐 것은 NOTE), `div.thm`·`figure.dg-figure`·`div.exercise`·`div.equation`·`img` 개수가 바뀜, `href`·`src`·`data-generalizes`·`data-file` 대상이 바뀜(링크 글자는 바뀌어도 된다)
+    - 경고: check_site와 같은 남은 한국어 라벨, `terms.tsv`의 한국어 용어가 본문·`<title>`·`alt`에 남음(`</dfn>` 바로 뒤 괄호, `terms_keep.txt`의 낱말, code/pre 제외. 한 글자 용어 상·핵·공·틀은 조사가 붙은 독립된 낱말만)
 
 ---
 

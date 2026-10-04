@@ -8,13 +8,16 @@
     --check-only   concepts.html을 쓰지 않고 검사만 한다
     --output PATH  출력 경로 (기본: ROOT/concepts.html)
 
-수집: 절 페이지의 <dfn>(용어, 영어, 정의 위치, data-generalizes), div.thm 항목, 내부 링크 그래프.
+수집: 절 페이지의 <dfn>(용어, 정의 위치, data-generalizes), div.thm 항목, 내부 링크 그래프.
+  - 용어는 영어다(§8.1): <dfn>dual space</dfn>(쌍대공간). 괄호 안에 한글이 있으면 한국어 번역어로 본다.
+  - 옛 형식 <dfn>쌍대공간</dfn>(dual space)도 읽는다. 한글이 없는 쪽을 영어 용어로 본다.
 오류:
-  - 같은 용어의 <dfn>이 data-generalizes 없이 두 번 이상 나옴
+  - 같은 용어(영어, 대소문자 무시)의 <dfn>이 data-generalizes 없이 두 번 이상 나옴
   - data-generalizes가 가리키는 파일·id가 없음
   - §3.4 표의 장(11 12 13 14 16 18 21 22 23 24 25 26) 중 장 개요 dg-status가
     draft|reviewed|final인데 div.thm.compat 항목이 없음
 오류가 있어도 concepts.html은 쓴다(링크가 깨지지 않게). 종료코드는 1.
+concepts.html은 영어로 쓴다: 영어 용어의 A–Z 묶음(글자가 아닌 것은 "#"), 대소문자 무시 알파벳순.
 """
 
 import argparse
@@ -23,35 +26,38 @@ import html
 import os
 import re
 import sys
+import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from check_site import Node, Text, parse_page, repo_root, site_pages  # noqa: E402
 
 COMPAT_CHAPTERS = (11, 12, 13, 14, 16, 18, 21, 22, 23, 24, 25, 26)
-CHOSEONG = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"
-# 찾아보기 묶음: 된소리는 예사소리 묶음에 넣는다
-GROUP_OF = {"ㄲ": "ㄱ", "ㄸ": "ㄷ", "ㅃ": "ㅂ", "ㅆ": "ㅅ", "ㅉ": "ㅈ"}
-GROUP_ORDER = list("ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ") + ["A–Z", "기호", "기타"]
+GROUP_ORDER = [chr(c) for c in range(ord("A"), ord("Z") + 1)] + ["#"]
+ROOT_NAMES = {"index": "Contents", "notation": "Notation and Conventions", "glossary": "Glossary",
+              "references": "References", "concepts": "Index"}
+HANGUL_RE = re.compile(r"[가-힣ㄱ-ㅎㅏ-ㅣ]")
 
 
 def norm_term(s):
     return re.sub(r"\s+", " ", s).strip()
 
 
+def _fold(s):
+    """대소문자·발음 구별 기호를 무시한 비교 키 (Möbius → mobius)."""
+    s = unicodedata.normalize("NFKD", s)
+    return "".join(c for c in s if not unicodedata.combining(c)).casefold()
+
+
 def group_of(term):
-    t = term.lstrip()
-    if t.startswith("\\(") or t.startswith("\\["):
-        return "기호"
-    if not t:
-        return "기타"
-    ch = t[0]
-    code = ord(ch)
-    if 0xAC00 <= code <= 0xD7A3:
-        cho = CHOSEONG[(code - 0xAC00) // 588]
-        return GROUP_OF.get(cho, cho)
-    if ch.isascii() and ch.isalpha():
-        return "A–Z"
-    return "기타"
+    """A–Z 중 하나, 글자로 시작하지 않으면 '#'. 수식(\\( …)으로 시작하는 용어도 '#'."""
+    t = _fold(term.lstrip())
+    if t and "a" <= t[0] <= "z":
+        return t[0].upper()
+    return "#"
+
+
+def sort_key(term):
+    return (_fold(term), term)
 
 
 def location_map(page):
@@ -66,8 +72,8 @@ def location_map(page):
     return loc
 
 
-def english_after(dfn):
-    """</dfn> 바로 뒤 텍스트가 '(…)'로 시작하면 괄호 안을 영어 용어로 본다."""
+def paren_after(dfn):
+    """</dfn> 바로 뒤 텍스트가 '(…)'로 시작하면 괄호 안의 문자열."""
     parent = dfn.parent
     kids = parent.children
     idx = next(i for i, c in enumerate(kids) if c is dfn)
@@ -76,6 +82,20 @@ def english_after(dfn):
         if m:
             return norm_term(m.group(1))
     return None
+
+
+def split_term(dfn_text, paren):
+    """(영어 용어, 한국어 번역어 또는 None).
+
+    새 형식: <dfn>dual space</dfn>(쌍대공간) → ('dual space', '쌍대공간')
+    옛 형식: <dfn>쌍대공간</dfn>(dual space) → ('dual space', '쌍대공간')
+    괄호가 없거나 둘 다 한글이 있거나 없으면 <dfn> 쪽을 용어로 본다.
+    """
+    d_ko = bool(HANGUL_RE.search(dfn_text))
+    p_ko = bool(paren and HANGUL_RE.search(paren))
+    if paren and d_ko and not p_ko:
+        return paren, dfn_text
+    return dfn_text, (paren if p_ko else None)
 
 
 class Index:
@@ -112,8 +132,9 @@ class Index:
                         "compat": n.has_class("compat"),
                         "chapter": page.info.get("n"), "page": page}
                 if n.tag == "dfn" and page.kind == "section":
+                    term, korean = split_term(norm_term(n.text()), paren_after(n))
                     self.terms.append({
-                        "term": norm_term(n.text()), "english": english_after(n),
+                        "term": term, "korean": korean,
                         "rel": page.rel, "line": n.line, "loc": loc[id(n)],
                         "generalizes": n.get("data-generalizes"), "page": page})
                 if n.tag == "a" and n.get("href"):
@@ -138,11 +159,21 @@ class Index:
         # 1) 중복 정의
         by_term = {}
         for t in self.terms:
-            by_term.setdefault(t["term"], []).append(t)
-        for term, defs in by_term.items():
+            by_term.setdefault(_fold(t["term"]), []).append(t)
+        for defs in by_term.values():
             plain = [d for d in defs if not d["generalizes"]]
             if len(plain) > 1:
+                term = plain[0]["term"]
                 where = ", ".join(f"{d['rel']}:{d['line']}" for d in plain)
+                kos = [re.sub(r"\s+", "", d["korean"]) if d["korean"] else None for d in plain]
+                if None not in kos and len(set(kos)) == len(kos):
+                    # 같은 영어, 다른 한국어 번역어: 동음이의어(예: trace = 대각합 / 자취)로 본다
+                    for d in plain[1:]:
+                        self.warnings.append((d["rel"], d["line"],
+                                              f"term '{term}' is defined more than once with different Korean "
+                                              f"translations ({', '.join(x['korean'] for x in plain)}; {where}): "
+                                              f"treated as homonyms — make sure they are different concepts (§3.3)"))
+                    continue
                 for d in plain[1:]:
                     self.errors.append((d["rel"], d["line"],
                                         f"term '{term}' is defined more than once without data-generalizes "
@@ -184,7 +215,7 @@ class Index:
             if not has:
                 self.errors.append((info["rel"], 1,
                                     f"chapter {ch} is '{info['status']}' but has no div.thm.compat item "
-                                    f"(필수 호환성 명제, §3.4)"))
+                                    f"(required compatibility proposition, §3.4)"))
 
     # ------------------------------------------------------------ 출력
 
@@ -194,7 +225,14 @@ class Index:
         dg = page.meta.get("dg-id", rel) if page else rel
         if it:
             return it["head"]
-        base = f"{dg}절" if page is not None and page.kind == "section" else dg
+        if page is not None and page.kind == "section":
+            base = f"Section {dg}"
+        elif page is not None and page.kind == "chapter":
+            base = f"Chapter {dg} overview"
+        elif page is not None and page.kind == "root":
+            base = ROOT_NAMES.get(page.info.get("stem"), dg)
+        else:
+            base = dg
         node = page.ids.get(loc) if (page is not None and loc) else None
         if node is not None:
             heading = node if node.tag in ("h1", "h2", "h3", "h4") else (node.find("h2") or node.find("h3"))
@@ -227,7 +265,7 @@ class Index:
                 generalized_by.setdefault(tgt, []).append(t)
 
         groups = {}
-        for t in sorted(self.terms, key=lambda t: (t["term"], t["rel"], t["line"])):
+        for t in sorted(self.terms, key=lambda t: (sort_key(t["term"]), t["rel"], t["line"])):
             groups.setdefault(group_of(t["term"]), []).append(t)
 
         out = []
@@ -237,7 +275,7 @@ class Index:
         w("<head>")
         w('  <meta charset="utf-8">')
         w('  <meta name="viewport" content="width=device-width, initial-scale=1">')
-        w("  <title>찾아보기 — 미분기하 스터디</title>")
+        w("  <title>Index — DG Study</title>")
         w('  <meta name="dg-id" content="concepts">')
         w(f'  <meta name="dg-updated" content="{today}">')
         w('  <link rel="stylesheet" href="assets/style.css">')
@@ -246,41 +284,45 @@ class Index:
         w("</head>")
         w("<body>")
         w('  <nav class="breadcrumb">')
-        w('    <a href="index.html">전체 목차</a> ›')
-        w("    <span>찾아보기</span>")
+        w('    <a href="index.html">Contents</a> ›')
+        w("    <span>Index</span>")
         w("  </nav>")
         w("")
         w("  <main>")
         w("    <header>")
-        w("      <h1>찾아보기</h1>")
-        w('      <p class="meta">용어가 정의된 곳, 일반화 관계, 쓰이는 곳을 모은다. '
-          "이 페이지는 <code>tools/build_index.py</code>가 자동으로 만들므로 직접 고치지 않는다.</p>")
+        w("      <h1>Index</h1>")
+        w('      <p class="meta">Where each term is defined, what it generalizes, and where it is used. '
+          "This page is generated by <code>tools/build_index.py</code>; do not edit it by hand.</p>")
         w("    </header>")
         w("")
         w('    <section id="sec-terms">')
-        w("      <h2>용어</h2>")
+        w("      <h2>Terms</h2>")
         if not self.terms:
-            w("      <p>아직 정의된 용어가 없다.</p>")
+            w("      <p>No terms have been defined yet.</p>")
+        else:
+            letters = [g for g in GROUP_ORDER if g in groups]
+            w('      <p class="meta">' + " · ".join(
+                f'<a href="#sec-letter-{self._gid(g)}">{e(g)}</a>' for g in letters) + "</p>")
         k = 0
-        for gi, g in enumerate(GROUP_ORDER, 1):
+        for g in GROUP_ORDER:
             if g not in groups:
                 continue
-            w(f'      <h3 id="sec-group-{gi}">{e(g)}</h3>')
+            w(f'      <h3 id="sec-letter-{self._gid(g)}">{e(g)}</h3>')
             w("      <ul>")
             for t in groups[g]:
                 k += 1
                 parts = [f"<strong>{e(t['term'])}</strong>"]
-                if t["english"]:
-                    parts.append(f" ({e(t['english'])})")
-                parts.append(" — 정의: " + self._link(t["rel"], t["loc"]))
+                if t["korean"]:
+                    parts.append(f" ({e(t['korean'])})")
+                parts.append(" — " + self._link(t["rel"], t["loc"]))
                 tgt = t.get("gen_target")
                 if tgt:
                     gen_terms = terms_at.get(tgt, [])
                     label = ", ".join(e(x["term"]) for x in gen_terms) or e(self.item_label(*tgt))
-                    parts.append(f" · 일반화하는 개념: {label} ({self._link(*tgt)})")
+                    parts.append(f" · Generalizes: {label} ({self._link(*tgt)})")
                 ups = generalized_by.get((t["rel"], t["loc"]), [])
                 if ups:
-                    parts.append(" · 더 일반적인 개념: " + ", ".join(
+                    parts.append(" · Generalized by: " + ", ".join(
                         f"{e(u['term'])} ({self._link(u['rel'], u['loc'])})" for u in ups))
                 uses = back.get((t["rel"], t["loc"]), [])
                 seen, links = set(), []
@@ -291,18 +333,19 @@ class Index:
                     seen.add(key)
                     links.append(self._link(u["src_rel"], u["src_loc"]))
                 if links:
-                    parts.append(" · 쓰이는 곳: " + ", ".join(links))
+                    parts.append(" · Used in: " + ", ".join(links))
                 w(f'        <li id="term-{k}">' + "".join(parts) + "</li>")
             w("      </ul>")
         w("    </section>")
         w("")
         w('    <section id="sec-compat">')
-        w("      <h2>호환성 명제</h2>")
-        w("      <p>Part I의 개념과 Part II·III의 일반화가 일치함을 보이는 명제들이다(GUIDELINES.md §3.4).</p>")
+        w("      <h2>Compatibility propositions</h2>")
+        w("      <p>Propositions showing that a Part I concept agrees with its generalization "
+          "in Part II or III (GUIDELINES.md §3.4).</p>")
         compat = sorted((it for it in self.items.values() if it["compat"]),
                         key=lambda it: (it["chapter"] or 0, it["rel"], it["line"]))
         if not compat:
-            w("      <p>아직 작성된 호환성 명제가 없다.</p>")
+            w("      <p>No compatibility propositions yet.</p>")
         else:
             w("      <ul>")
             for it in compat:
@@ -314,6 +357,10 @@ class Index:
         w("</body>")
         w("</html>")
         return "\n".join(out) + "\n"
+
+    @staticmethod
+    def _gid(g):
+        return "other" if g == "#" else g.lower()
 
     def _link(self, rel, loc):
         return f'<a href="{html.escape(self.href(rel, loc), quote=True)}">{html.escape(self.item_label(rel, loc))}</a>'
@@ -338,7 +385,7 @@ def main(argv=None):
         print(f"WARN {rel}:{line}: {msg}")
     ncompat = sum(1 for it in idx.items.values() if it["compat"])
     print(f"build_index: {len(idx.pages)} pages, {len(idx.terms)} terms, {len(idx.items)} items, "
-          f"{ncompat} compat, {len(idx.errors)} errors"
+          f"{ncompat} compat, {len(idx.errors)} errors, {len(idx.warnings)} warnings"
           + ("" if args.check_only else " — wrote concepts.html"))
     return 1 if idx.errors else 0
 

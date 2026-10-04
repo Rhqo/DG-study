@@ -10,10 +10,13 @@ GUIDELINES.md §11(HTML 작성 규칙)의 페이지 계약을 검사한다. 표�
     --no-warn    WARN 줄을 출력하지 않는다 (개수는 요약에 나온다)
     파일 ...     이 파일들만 검사한다 (링크 대상은 루트 기준으로 확인)
 
+라벨은 영어다(§8.2): thm-head·연습·그림 머리(Definition 6.2.1, Exercise 6.2.1, Figure 6.2.1.)와
+toc 상태 라벨(Planned, Draft, Reviewed, Final)이 다르면 오류, 남은 한국어 라벨·제목·번호 참조는 WARN.
+
 출력: `ERROR 경로:줄: 메시지` / `WARN 경로:줄: 메시지`, 마지막에 요약.
 오류가 하나라도 있으면 종료코드 1.
 
-build_index.py가 이 파일의 파서(parse_page, site_pages 등)를 가져다 쓴다.
+build_index.py와 term_guard.py가 이 파일의 파서(parse_page, site_pages, korean_label_issues 등)를 가져다 쓴다.
 """
 
 import argparse
@@ -29,11 +32,14 @@ from urllib.parse import unquote
 MATHJAX_CDN = "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"
 ROOT_PAGES = ("index", "notation", "glossary", "references", "concepts")
 STATUSES = ("planned", "draft", "reviewed", "final")
-STATUS_LABEL = {"planned": "계획", "draft": "초안", "reviewed": "검토 완료", "final": "확정"}
+# 라벨은 영어로 쓴다 (GUIDELINES.md §8.2)
+STATUS_LABEL = {"planned": "Planned", "draft": "Draft", "reviewed": "Reviewed", "final": "Final"}
 THM_WORD = {
-    "definition": "정의", "theorem": "정리", "proposition": "명제", "lemma": "보조정리",
-    "corollary": "따름정리", "example": "예", "nonexample": "비예", "remark": "비고",
+    "definition": "Definition", "theorem": "Theorem", "proposition": "Proposition", "lemma": "Lemma",
+    "corollary": "Corollary", "example": "Example", "nonexample": "Non-example", "remark": "Remark",
 }
+EXERCISE_WORD = "Exercise"
+FIGURE_WORD = "Figure"
 REQUIRED_META = {
     "section": ("dg-id", "dg-status", "dg-prereq", "dg-refs", "dg-updated"),
     "chapter": ("dg-id", "dg-status", "dg-updated"),
@@ -63,9 +69,48 @@ SKIP_DIRS = {"tools", "refs", "assets", "node_modules", ".git"}
 SECTION_RE = re.compile(r"^(\d+)-(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*\.html$")
 CHAPTER_DIR_RE = re.compile(r"^(\d{2})-[a-z0-9]+(?:-[a-z0-9]+)*$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+# 링크 없는 상호참조 (§11.5). 번호 항목·연습·그림의 영어 라벨 + N.M.K, 그리고 수식 밖의 "(N.M.K)".
+# 식 번호는 장·절이 두 자리 이하이므로 "(2026.10.04)" 같은 날짜는 잡지 않는다.
+_EQ_NUM = r"\(\d{1,2}\.\d{1,2}\.\d{1,3}\)"
 UNLINKED_REF_RE = re.compile(
-    r"(?<![가-힣])(?:(?:정의|정리|명제|보조정리|따름정리|예|비예|비고|연습|그림)\s*\d+\.\d+\.\d+"
-    r"|식\s*\(\d+\.\d+\.\d+\))")
+    r"(?<![A-Za-z-])(?:(?:Definition|Theorem|Proposition|Lemma|Corollary|Example|Non-example|Remark"
+    r"|Exercise|Figure)\s+\d+\.\d+\.\d+"
+    r"|(?:Equation\s+)?" + _EQ_NUM + r")")
+
+# 남은 한국어 라벨 (§8.2). (한국어, 영어) — 긴 것부터 맞춘다.
+KOREAN_LABELS = [
+    ("나중에 보게 될 일반화", "Looking ahead"), ("앞에서 본 것과 비교", "Looking back"),
+    ("증명 아이디어", "Proof idea"), ("증명 스케치", "Proof sketch"), ("이 절의 목표", "Goals"),
+    ("이 장의 질문", "Questions"), ("이어받는 것", "Builds on"), ("넘겨주는 것", "Leads to"),
+    ("호환성 명제", "Compatibility proposition"), ("흔한 오해", "Common misconception"),
+    ("규약 비교", "Conventions"), ("선수 지식", "Prerequisites"), ("선수지식", "Prerequisites"),
+    ("연습문제", "Exercises"), ("보조정리", "Lemma"), ("따름정리", "Corollary"), ("절 목록", "Sections"),
+    ("전체 목차", "Contents"), ("대응 교재", "References"), ("참고문헌", "References"),
+    ("검토 완료", "Reviewed"), ("기준 예제", "Running examples"), ("장 개요", "Chapter overview"),
+    ("남긴 질문", "Open question"), ("찾아보기", "Index"), ("용어집", "Glossary"),
+    ("기호표", "Notation and Conventions"),
+    ("정의", "Definition"), ("정리", "Theorem"), ("명제", "Proposition"), ("비예", "Non-example"),
+    ("비고", "Remark"), ("연습", "Exercise"), ("그림", "Figure"), ("증명", "Proof"), ("힌트", "Hint"),
+    ("풀이", "Solution"), ("직관", "Intuition"), ("주의", "Warning"), ("역사", "History"),
+    ("목표", "Goals"), ("동기", "Motivation"), ("요약", "Summary"), ("줄기", "Threads"),
+    ("목차", "Contents"), ("계획", "Planned"), ("초안", "Draft"), ("확정", "Final"),
+    ("검증", "Verification"), ("내용", "Topics"), ("예", "Example"), ("식", "Equation"),
+]
+_KLABEL_RE = re.compile(
+    r"(" + "|".join(re.escape(k) for k, _ in sorted(KOREAN_LABELS, key=lambda x: -len(x[0]))) + r")(?![가-힣])")
+KOREAN_LABEL_EN = dict(KOREAN_LABELS)
+_KITEM = {"정의": "Definition", "정리": "Theorem", "명제": "Proposition", "보조정리": "Lemma",
+          "따름정리": "Corollary", "예": "Example", "비예": "Non-example", "비고": "Remark",
+          "연습": "Exercise", "그림": "Figure"}
+# 본문 어디서든(링크 안 포함) 남은 한국어 번호 참조: "정리 7.1.1", "식 (7.1.2)", "7장", "6.3절"
+KOREAN_REF_RE = re.compile(
+    r"(?<![가-힣])(?P<item>" + "|".join(sorted(_KITEM, key=len, reverse=True)) + r")\s*(?P<inum>\d+\.\d+\.\d+)"
+    r"|(?<![가-힣])식\s*(?P<eq>\(\d+\.\d+\.\d+\))"
+    # 절대·절단·절편·절반, 장점·장면·장치·장소 같은 낱말은 제외한다
+    r"|(?<![\d.])(?P<sec>\d{1,2}\.\d{1,2})\s?절(?![대댓단편반])"
+    r"|(?<![\d.])(?P<chap>\d{1,2})\s?장(?![점면치소])")
+HANGUL_RE = re.compile(r"[가-힣]")
+_NUM_PREFIX_RE = re.compile(r"^\s*(?:Part\s+[0IVX]+\.\s*)?(?:\d+(?:\.\d+)*\.?\s+)?")
 
 
 # ---------------------------------------------------------------- DOM
@@ -355,6 +400,133 @@ def line_of(text, pos):
     return text.count("\n", 0, pos) + 1
 
 
+_MATH_TOK_RE = re.compile(r"\\[()\[\]]")
+
+
+def _blank(s):
+    return re.sub(r"[^\n]", " ", s)
+
+
+def masked_texts(dom):
+    """문서 순서의 (Text, 수식을 공백으로 지운 문자열).
+
+    MathJax 3은 수식 구분자가 HTML 태그를 건너가지 못하므로(br, wbr, 주석 제외) 텍스트 노드마다
+    따로 본다. 닫히지 않은 구분자는 MathJax처럼 보통 글자로 둔다.
+    code/pre/script/style/textarea/noscript 안의 텍스트는 내지 않는다."""
+    for t in dom.iter_text():
+        if _text_inside(t, NO_MATH_TAGS):
+            continue
+        data, out, pos, closer, start = t.data, [], 0, None, 0
+        for m in _MATH_TOK_RE.finditer(data):
+            if not _unescaped(data, m.start()):
+                continue
+            tok = m.group(0)
+            if closer is None and tok in ("\\(", "\\["):
+                closer, start = ("\\)" if tok == "\\(" else "\\]"), m.start()
+            elif closer is not None and tok == closer:
+                out.append(data[pos:start])
+                out.append(_blank(data[start:m.end()]))
+                pos, closer = m.end(), None
+        out.append(data[pos:])
+        yield t, "".join(out)
+
+
+def _label_start(text):
+    """text가 한국어 라벨 단어로 시작하면 그 단어, 아니면 None."""
+    m = _KLABEL_RE.match(text.strip())
+    return m.group(1) if m else None
+
+
+def korean_label_issues(dom):
+    """남은 한국어 라벨·제목 (§8.2). (줄, 메시지) 목록.
+
+    - 머리(.thm-head, .fig-head, .proof-head, p.proof-idea, .box-title, summary, span.status)와
+      h1–h3, breadcrumb·pager 항목, p.meta·p.threads·p.toc-note·p.verified의 각 '·' 조각이
+      한국어 라벨 단어로 시작하는 경우
+    - 제목(h1–h3, .toc-title, breadcrumb·pager 항목, <title>)에 한글이 남은 경우
+    - 본문 어디서든 한국어 번호 참조("정리 7.1.1", "식 (7.1.2)", "7장", "6.3절")
+    """
+    out = []
+
+    def label(node, where, text=None):
+        text = node.text() if text is None else text
+        w = _label_start(text)
+        if w:
+            out.append((node.line, f"Korean label '{w}' in {where}: use '{KOREAN_LABEL_EN[w]}' (§8.2)"))
+            return True
+        return False
+
+    def title(node, where, text):
+        if HANGUL_RE.search(text):
+            short = text if len(text) <= 40 else text[:39] + "…"
+            out.append((node.line, f"Korean text in {where} '{short}': titles are English (§8.2, §9)"))
+
+    head_classes = (("thm-head", ".thm-head"), ("fig-head", ".fig-head"), ("proof-head", ".proof-head"),
+                    ("proof-idea", "p.proof-idea"), ("box-title", ".box-title"), ("status", "span.status"))
+    seg_classes = (("meta", "p.meta"), ("threads", "p.threads"), ("toc-note", "p.toc-note"),
+                   ("verified", "p.verified"))
+    for n in dom.iter():
+        if n.tag == "title":
+            title(n, "<title>", n.text())
+            continue
+        if n.tag == "summary":
+            label(n, "<summary>")
+            continue
+        if n.tag in ("h1", "h2", "h3"):
+            text = _NUM_PREFIX_RE.sub("", n.text(), count=1)
+            if not label(n, f"<{n.tag}>", text):
+                title(n, f"<{n.tag}>", text)
+            continue
+        if n.tag == "nav" and (n.has_class("breadcrumb") or n.has_class("pager")):
+            where = "breadcrumb" if n.has_class("breadcrumb") else "pager"
+            for c in n.children:
+                if isinstance(c, Node) and c.tag in ("a", "span"):
+                    text = _NUM_PREFIX_RE.sub("", c.text().strip("←→ "), count=1)
+                    if not label(c, where, text):
+                        title(c, where, text)
+            continue
+        if n.has_class("toc-title"):
+            title(n, ".toc-title", _NUM_PREFIX_RE.sub("", n.text(), count=1))
+        for cls, where in head_classes:
+            if n.has_class(cls):
+                label(n, where)
+                break
+        if n.tag == "p":
+            for cls, where in seg_classes:
+                if n.has_class(cls):
+                    for seg in n.text().split("·"):
+                        seg = _NUM_PREFIX_RE.sub("", seg, count=1)
+                        if label(n, where, seg):
+                            break
+                    break
+    # 본문의 한국어 번호 참조. 머리(.thm-head, .fig-head)는 위에서 이미 보고했다.
+    for t, data in masked_texts(dom):
+        if not KOREAN_REF_RE.search(data):
+            continue
+        if any(a.tag in ("head", "title") or {"thm-head", "fig-head"} & set(a.classes) for a in _text_ancestors(t)):
+            continue
+        for m in KOREAN_REF_RE.finditer(data):
+            if m.group("item"):
+                eng = f"{_KITEM[m.group('item')]} {m.group('inum')}"
+            elif m.group("eq"):
+                eng = m.group("eq")
+            elif m.group("sec"):
+                eng = f"Section {m.group('sec')}"
+            else:
+                eng = f"Chapter {m.group('chap')}"
+            out.append((t.line + data.count("\n", 0, m.start()),
+                        f"Korean reference '{m.group(0)}': write '{eng}' (§8.2)"))
+    # '식 <a …>(N.M.K)</a>': 낱말과 번호가 다른 노드에 있다
+    for a in dom.iter():
+        if a.tag != "a" or a.parent is None or not re.fullmatch(r"\(\d+\.\d+\.\d+\)", a.text()):
+            continue
+        kids = a.parent.children
+        i = next(j for j, c in enumerate(kids) if c is a)
+        if i and isinstance(kids[i - 1], Text) and re.search(r"(?<![가-힣])식\s*$", kids[i - 1].data):
+            out.append((a.line, f"Korean reference '식 {a.text()}': write '{a.text()}' (§8.2)"))
+    return out
+
+
 # ---------------------------------------------------------------- 보고
 
 class Reporter:
@@ -413,6 +585,7 @@ class SiteChecker:
         self.check_forbidden(page)
         self.check_links(page)
         self.check_math_text(page)
+        self.check_korean_labels(page)
         self.count_markers(page)
         if page.kind == "root":
             self.check_root(page)
@@ -598,7 +771,12 @@ class SiteChecker:
                 rep.error(rel, t.line, "\\tag{…} outside div.equation (§11.3)")
         # 4) 페이지 안의 매크로 정의 금지
         for m in re.finditer(r"\\(newcommand|renewcommand|def|let)\b", text):
-            rep.error(rel, line_of(text, m.start()), f"\\{m.group(1)} in a page is not allowed; request a macro for 부록 C (§11.4)")
+            rep.error(rel, line_of(text, m.start()), f"\\{m.group(1)} in a page is not allowed; request a macro for Appendix C (§11.4)")
+
+    def check_korean_labels(self, page):
+        """라벨·제목은 영어로 쓴다 (§8.2). 남은 한국어 라벨은 WARN으로 알린다."""
+        for line, msg in korean_label_issues(page.dom):
+            self.rep.warn(page.rel, line, msg)
 
     def count_markers(self, page):
         todo = sum(1 for n in page.dom.iter() if n.tag == "span" and n.has_class("todo"))
@@ -622,7 +800,7 @@ class SiteChecker:
             if nav is None:
                 rep.error(rel, 1, "missing <nav class=\"breadcrumb\">")
             elif not any(a.get("href") == "index.html" for a in nav.find_all("a")):
-                rep.error(rel, nav.line, "breadcrumb must link to index.html (전체 목차)")
+                rep.error(rel, nav.line, "breadcrumb must link to index.html (Contents)")
         self.check_main(page)
 
     def check_main(self, page):
@@ -646,7 +824,7 @@ class SiteChecker:
         if nav is None:
             rep.error(rel, 1, "missing <nav class=\"breadcrumb\">")
         elif not any(a.get("href") == "../../index.html" for a in nav.find_all("a")):
-            rep.error(rel, nav.line, "breadcrumb must link to ../../index.html (전체 목차)")
+            rep.error(rel, nav.line, "breadcrumb must link to ../../index.html (Contents)")
         main = self.check_main(page)
         if main is None:
             return
@@ -656,18 +834,18 @@ class SiteChecker:
         elif not h1.text().startswith(f"{n}. "):
             rep.error(rel, h1.line, f"<h1> must start with '{n}. ' (got '{h1.text()}')")
         if main.find("p", "threads") is None:
-            rep.error(rel, main.line, "missing <p class=\"threads\"> (줄기 위치, §3.2)")
-        for cls, label in (("questions", "이 장의 질문"), ("inherits", "이어받는 것"), ("handoff", "넘겨주는 것")):
+            rep.error(rel, main.line, "missing <p class=\"threads\"> (Threads, §3.2)")
+        for cls, label in (("questions", "Questions"), ("inherits", "Builds on"), ("handoff", "Leads to")):
             if main.find("section", cls) is None:
                 rep.error(rel, main.line, f"missing <section class=\"{cls}\"> ({label}, §3.2)")
         toc = main.find("ol", "toc")
         if toc is None:
-            rep.error(rel, main.line, "missing <ol class=\"toc\"> (절 목록)")
+            rep.error(rel, main.line, "missing <ol class=\"toc\"> (Sections)")
         else:
             self.check_toc(page, toc, n)
         pager = _find_nav(page, "pager")
         if pager is None:
-            rep.error(rel, 1, "missing <nav class=\"pager\"> (이전/다음 장)")
+            rep.error(rel, 1, "missing <nav class=\"pager\"> (previous/next chapter)")
         elif not pager.find_all("a"):
             rep.warn(rel, pager.line, "pager has no links")
 
@@ -710,7 +888,7 @@ class SiteChecker:
                 if dfile and title.get("href") != dfile:
                     rep.error(rel, title.line, f"toc link href '{title.get('href')}' must equal data-file '{dfile}'")
                 if st == "planned":
-                    rep.warn(rel, li.line, f"{dfile} is linked but still marked 계획 (planned)")
+                    rep.warn(rel, li.line, f"{dfile} is linked but still marked Planned")
                 if exists and st:
                     sec = parse_page(self.root, os.path.join(page.dir, dfile))
                     sst = sec.meta.get("dg-status")
@@ -720,7 +898,7 @@ class SiteChecker:
                 if exists:
                     rep.warn(rel, li.line, f"{dfile} exists but its toc entry is not linked")
                 if st and st != "planned":
-                    rep.error(rel, li.line, "an unlinked toc entry must have status planned (계획)")
+                    rep.error(rel, li.line, "an unlinked toc entry must have status planned (Planned)")
         cst = page.meta.get("dg-status")
         if cst in ("draft", "reviewed", "final") and any_planned:
             rep.warn(rel, 1, f"chapter dg-status is '{cst}' but some sections are still planned (§11.6)")
@@ -743,7 +921,7 @@ class SiteChecker:
                 if not re.match(r"^\d+(\.\d+)?$", tok.strip()):
                     rep.error(rel, 1, f"dg-prereq entry '{tok.strip()}' must look like N.M or N")
         if page.meta.get("dg-refs", "x").strip() == "":
-            rep.warn(rel, 1, "dg-refs is empty (대응 교재를 적는다)")
+            rep.warn(rel, 1, "dg-refs is empty (list the References)")
 
         nav = _find_nav(page, "breadcrumb")
         if nav is None:
@@ -751,11 +929,11 @@ class SiteChecker:
         else:
             hrefs = {a.get("href") for a in nav.find_all("a")}
             if "../../index.html" not in hrefs:
-                rep.error(rel, nav.line, "breadcrumb must link to ../../index.html (전체 목차)")
+                rep.error(rel, nav.line, "breadcrumb must link to ../../index.html (Contents)")
             if "index.html" not in hrefs:
-                rep.error(rel, nav.line, "breadcrumb must link to index.html (장 개요)")
+                rep.error(rel, nav.line, "breadcrumb must link to index.html (Chapter overview)")
         if _find_nav(page, "pager") is None:
-            rep.error(rel, 1, "missing <nav class=\"pager\"> (이전/다음 절)")
+            rep.error(rel, 1, "missing <nav class=\"pager\"> (previous/next section)")
         main = self.check_main(page)
         if main is None:
             return
@@ -764,8 +942,8 @@ class SiteChecker:
             rep.error(rel, main.line, "missing <header><h1>…</h1></header> in <main>")
         elif not h1.text().startswith(f"{n}.{m} "):
             rep.error(rel, h1.line, f"<h1> must start with '{n}.{m} ' (got '{h1.text()}')")
-        for cls, label in (("goals", "이 절의 목표"), ("prereq", "선수 지식"),
-                           ("summary", "요약"), ("exercises", "연습문제")):
+        for cls, label in (("goals", "Goals"), ("prereq", "Prerequisites"),
+                           ("summary", "Summary"), ("exercises", "Exercises")):
             if main.find("section", cls) is None:
                 rep.error(rel, main.line, f"missing <section class=\"{cls}\"> ({label})")
         summ = main.find("section", "summary")
@@ -775,18 +953,19 @@ class SiteChecker:
         self.check_unlinked_refs(page)
 
     def check_unlinked_refs(self, page):
-        """본문의 '정리 N.M.K', '식 (N.M.K)' 같은 상호참조는 링크여야 한다 (§11.5). WARN만 낸다."""
+        """본문의 'Theorem N.M.K', 'Figure N.M.K', 식 번호 '(N.M.K)' 같은 상호참조는 링크여야 한다
+        (§11.5). 수식 \\( \\) / \\[ \\] 안(\\tag 등)은 보지 않는다. WARN만 낸다."""
         rep, rel = self.rep, page.rel
         skip_tags = {"a", "code", "pre", "title", "head", "script", "style"}
         skip_classes = {"thm-head", "fig-head"}
-        for t in page.dom.iter_text():
-            if not UNLINKED_REF_RE.search(t.data):
+        for t, data in masked_texts(page.dom):
+            if not UNLINKED_REF_RE.search(data):
                 continue
             anc = list(_text_ancestors(t))
             if any(a.tag in skip_tags or skip_classes & set(a.classes) for a in anc):
                 continue
-            for m in UNLINKED_REF_RE.finditer(t.data):
-                rep.warn(rel, t.line + t.data.count("\n", 0, m.start()),
+            for m in UNLINKED_REF_RE.finditer(data):
+                rep.warn(rel, t.line + data.count("\n", 0, m.start()),
                          f"unlinked cross-reference '{m.group(0)}': wrap it in <a href=\"…\"> (§11.5)")
 
     def check_numbering(self, page, n, m):
@@ -815,7 +994,7 @@ class SiteChecker:
                     if head.text() != want_head:
                         rep.error(rel, head.line, f"thm-head must read '{want_head}' (got '{head.text()}')")
                 if node.has_class("compat") and "proposition" not in node.classes:
-                    rep.warn(rel, node.line, "compat is meant for propositions (호환성 명제, §3.4)")
+                    rep.warn(rel, node.line, "compat is meant for propositions (compatibility propositions, §3.4)")
             elif node.has_class("equation"):
                 k_eq += 1
                 want = f"eq-{n}-{m}-{k_eq}"
@@ -835,14 +1014,14 @@ class SiteChecker:
                 if node.id != want:
                     rep.error(rel, node.line, f"figure {k_fig} must have id '{want}' (got '{node.id}')")
                 figures.append(node)
-                self.check_figure(page, node, f"그림 {n}.{m}.{k_fig}.", want)
+                self.check_figure(page, node, f"{FIGURE_WORD} {n}.{m}.{k_fig}.", want)
             elif node.has_class("exercise"):
                 k_ex += 1
                 want = f"ex-{n}-{m}-{k_ex}"
                 if node.id != want:
                     rep.error(rel, node.line, f"exercise {k_ex} must have id '{want}' (got '{node.id}')")
                 head = node.find(cls="thm-head")
-                want_head = f"연습 {n}.{m}.{k_ex}"
+                want_head = f"{EXERCISE_WORD} {n}.{m}.{k_ex}"
                 if head is None or head.text() != want_head:
                     rep.error(rel, node.line, f"exercise head must read '{want_head}' "
                                               f"(got '{head.text() if head else None}')")
@@ -856,7 +1035,7 @@ class SiteChecker:
                     elif stars.text().count("★") != int(lvl):
                         rep.warn(rel, stars.line, f"level shows {stars.text().count('★')} stars but data-level is {lvl}")
                 if not any(d.tag == "details" and d.has_class("solution") for d in node.iter()):
-                    rep.error(rel, node.line, "exercise needs <details class=\"solution\"> (완전한 풀이, §14)")
+                    rep.error(rel, node.line, "exercise needs <details class=\"solution\"> (a complete Solution, §14)")
             # 번호 접두사를 다른 요소에 쓰지 않았는가
             i = node.id or ""
             if re.match(r"^(i|eq|fig|ex)-\d", i):
@@ -876,7 +1055,7 @@ class SiteChecker:
         cap = fig.find("figcaption")
         head = cap.find(cls="fig-head") if cap else None
         if head is None:
-            rep.error(rel, fig.line, "figure needs <figcaption><span class=\"fig-head\">그림 N.M.K.</span> …")
+            rep.error(rel, fig.line, f"figure needs <figcaption><span class=\"fig-head\">{FIGURE_WORD} N.M.K.</span> …")
         elif head.text() != want_head:
             rep.error(rel, head.line, f"fig-head must read '{want_head}' (got '{head.text()}')")
         imgs = fig.find_all("img")
@@ -885,7 +1064,7 @@ class SiteChecker:
             rep.error(rel, fig.line, "figure needs an <img> (static figure is always required)")
         for img in imgs:
             if not (img.get("alt") or "").strip():
-                rep.error(rel, img.line, "img needs a non-empty alt (한국어 요약, §12.6)")
+                rep.error(rel, img.line, "img needs a non-empty alt (a Korean summary, §12.6)")
             src = img.get("src") or ""
             res = self.resolve(page, src) if src else None
             if res is None:

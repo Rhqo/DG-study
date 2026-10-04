@@ -344,3 +344,20 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
       - §3.5 표: 나선·원환면·안장면·원기둥·회전면·그래프의 08 칸
     - 21장 작성자에게: Hess를 정의할 때 08장 8.2의 "헤세 행렬"에 data-generalizes를 붙인다.
 
+## 9. 영어 용어 전환 (2026-10-04, 사용자 지시)
+
+사용자가 "용어는 영어로 다 바꿔 달라"(예: 쌍대공간, 핵, 상)고 지시했다.
+- **결정**(AskUserQuestion 답)
+  - 범위: 대학 수학 용어 전부. 고등학교 수준의 말은 한국어로 둔다.
+  - 처음 정의할 때만 괄호로 한국어를 병기한다.
+  - 라벨까지 영어로 쓴다(Definition, Theorem, Proof 등). 장·절 제목도 전부 영어다.
+- **정본**: GUIDELINES.md §8(새로 씀), §9 장 제목(영어), tools/terms.tsv(404개), tools/terms_keep.txt
+- **진행 순서**
+  1. 도구 agent(opus): check_site·build_index 영어 라벨, style.css, fixture, 템플릿·모범 예시, 새 도구 tools/term_guard.py — 진행 중
+  2. 장 변환 agent(sonnet), 동시 4명씩
+     - 묶음 1: 01, 02, 03, 04
+     - 묶음 2: 05, 06, 07, 08
+     - 묶음 3: 11, 12, 계획 상태 장 개요(09, 10, 13–26), 공용 페이지(index, notation, glossary 뒤집기, references)
+  3. 각 agent는 `python3 tools/term_guard.py <파일>`로 수식·id·링크 대상이 그대로인지 확인한다. 그다음 `check_all --chapter N`을 통과시킨다.
+  4. 통합 담당이 전체 check_all을 돌리고 스크린샷을 확인한 뒤 commit한다. push는 사용자 확인 후에 한다(push = 공개 사이트 갱신).
+
