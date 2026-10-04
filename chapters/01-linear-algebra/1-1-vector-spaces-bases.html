@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>1.1 벡터공간과 기저 — 미분기하 스터디</title>
+  <title>1.1 Vector Spaces and Bases — DG Study</title>
   <meta name="dg-id" content="1.1">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="">
@@ -15,86 +15,86 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">1. 선형대수 복습</a> ›
-    <span>1.1 벡터공간과 기저</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">1. Linear Algebra Review</a> ›
+    <span>1.1 Vector Spaces and Bases</span>
   </nav>
 
   <main>
     <header>
-      <h1>1.1 벡터공간과 기저</h1>
-      <p class="meta">대응 교재:
-        <a class="cite" href="../../references.html#Ax">[Ax 1–2장]</a>,
-        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 부록 B]</a></p>
+      <h1>1.1 Vector Spaces and Bases</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Ax">[Ax Ch. 1–2]</a>,
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM App. B]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>벡터공간과 부분공간의 공리를 확인하고, 주어진 집합이 벡터공간(부분공간)인지 판별할 수 있다.</li>
-        <li>생성, 일차독립, 기저의 뜻을 설명하고, 기저가 “모든 벡터를 꼭 한 가지 방식으로 표현하게 해 주는 목록”임을 증명할 수 있다.</li>
-        <li>기저를 어떻게 고르든 그 길이가 같다는 사실(차원의 정의)을 교환 보조정리로 증명하는 흐름을 따라갈 수 있다.</li>
-        <li>기저에 대한 성분을 계산하고, 성분을 위첨자 \(v^i\)로 적는 규약을 안다.</li>
+        <li>vector space와 subspace의 공리를 확인하고, 주어진 집합이 vector space(subspace)인지 판별할 수 있다.</li>
+        <li>span, linearly independent, basis의 뜻을 설명하고, basis가 “모든 벡터를 꼭 한 가지 방식으로 표현하게 해 주는 목록”임을 증명할 수 있다.</li>
+        <li>basis를 어떻게 고르든 그 길이가 같다는 사실(dimension의 정의)을 exchange lemma로 증명하는 과정을 따라갈 수 있다.</li>
+        <li>basis에 대한 성분을 계산하고, 성분을 위첨자 \(v^i\)로 적는 규약을 안다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li>이 절은 study set 전체의 출발점이다. 학부 선형대수에서 행렬의 곱을 계산하고 연립일차방정식을 가우스 소거법으로 풀어 보았다고 가정한다(<a href="index.html">1장 개요</a>의 “이어받는 것”).</li>
+        <li>이 절은 study set 전체의 출발점이다. 학부 linear algebra에서 행렬의 곱을 계산하고 연립일차방정식을 가우스 소거법으로 풀어 보았다고 가정한다(<a href="index.html">Chapter 1 overview</a>의 “Builds on”).</li>
         <li>증명을 읽는 데 익숙하지 않아도 된다. 이 절의 증명은 한 단계씩 근거를 붙여 쓴다.</li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
+      <h2>Motivation</h2>
       <p>미분기하의 기본 발상은 “휘어진 대상을 한 점 근처에서 곧은 대상으로 근사한다”는 것이다.
-      곡선의 한 점에서는 속도벡터가, 곡면의 한 점에서는 접평면이, 일반적인 다양체의 한 점에서는 접공간이
-      그 곧은 대상이다. 이것들은 모두 <em>벡터공간</em>이다. 그래서 이 study set 전체가 선형대수 위에 서 있다.</p>
-      <p>그런데 이 벡터공간들에는 \(\R^n\)처럼 처음부터 좌표가 붙어 있지 않다. 예를 들어 구면의 한 점에서
-      접평면은 \(\R^3\) 안의 평면이지만, 그 평면 위에 “가로축”이나 “세로축”으로 삼을 만한 특별한 방향은 없다.
+      곡선의 한 점에서는 속도벡터가, surface의 한 점에서는 tangent plane이, 일반적인 manifold의 한 점에서는 tangent space가
+      그 곧은 대상이다. 이것들은 모두 <em>vector space</em>이다. 그래서 이 study set 전체가 linear algebra 위에 서 있다.</p>
+      <p>그런데 이 vector space들에는 \(\R^n\)처럼 처음부터 좌표가 붙어 있지 않다. 예를 들어 sphere의 한 점에서
+      tangent plane은 \(\R^3\) 안의 평면이지만, 그 평면 위에 “가로축”이나 “세로축”으로 삼을 만한 특별한 방향은 없다.
       계산을 하려면 좌표를 스스로 골라야 하고, 고르는 방법은 여러 가지다. 그러면 두 가지 질문이 생긴다.</p>
       <ul>
         <li>좌표를 고른다는 것은 정확히 무엇을 고르는 것인가?</li>
         <li>좌표를 다르게 고르면 무엇이 바뀌고 무엇이 바뀌지 않는가?</li>
       </ul>
-      <p>이 절은 첫 번째 질문에 답한다. 벡터공간을 공리로 정의하고, 좌표를 주는 목록인 <em>기저</em>를 정의한 뒤,
-      기저를 어떻게 고르든 그 길이(<em>차원</em>)가 같음을 증명한다. 두 번째 질문은 <a href="1-4-change-of-basis.html">1.4절</a>에서 다룬다.</p>
+      <p>이 절은 첫 번째 질문에 답한다. vector space를 공리로 정의하고, 좌표를 주는 목록인 <em>basis</em>를 정의한 뒤,
+      basis를 어떻게 고르든 그 길이(<em>dimension</em>)가 같음을 증명한다. 두 번째 질문은 <a href="1-4-change-of-basis.html">Section 1.4</a>에서 다룬다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 비스듬한 격자</p>
+        <p class="box-title">Intuition: 비스듬한 격자</p>
         <p>평면에서 두 벡터 \(b_1, b_2\)를 고르면 비스듬한 격자가 하나 생긴다. 평면의 모든 점은
-        “\(b_1\) 방향으로 몇 칸, \(b_2\) 방향으로 몇 칸”으로 읽을 수 있다(<a href="#fig-1-1-1">그림 1.1.1</a>(a)).
+        “\(b_1\) 방향으로 몇 칸, \(b_2\) 방향으로 몇 칸”으로 읽을 수 있다(<a href="#fig-1-1-1">Figure 1.1.1</a>(a)).
         이렇게 읽으려면 두 가지가 필요하다. 첫째, 모든 점에 닿아야 한다. (b)의 두 벡터는 한 직선 위에만 머물러
         이 조건을 어긴다. 둘째, 읽는 방법이 하나뿐이어야 한다. (c)의 세 벡터로는 같은 점에 가는 길이 두 가지다.
-        첫째 조건을 <em>생성</em>, 둘째 조건을 <em>일차독립</em>이라 부르고, 둘을 모두 만족하는 목록을 <em>기저</em>라 부른다.</p>
+        첫째 조건을 <em>span</em>, 둘째 조건을 <em>linearly independent</em>라 부르고, 둘을 모두 만족하는 목록을 <em>basis</em>라 부른다.</p>
       </aside>
 
       <figure class="dg-figure" id="fig-1-1-1">
-        <img src="figures/fig-1-1-1-bases.svg" alt="세 개의 평면 그림. (a) 두 벡터 b1=(2,1), b2=(-1,1)이 만드는 비스듬한 점선 격자와, b1과 b2를 두 변으로 하는 평행사변형의 대각선 v=(1,2). (b) 한 직선 위에 놓인 b1과 -b1, 그리고 그 직선 밖의 v. (c) 원점에서 v에 이르는 두 경로: b1 다음 b2(파랑), -b2 다음 w 세 번(주황).">
-        <figcaption><span class="fig-head">그림 1.1.1.</span>
-        (a) 기저 \(b_1 = (2,1)\), \(b_2 = (-1,1)\)이 만드는 격자. \(v = (1,2) = b_1 + b_2\)이므로 \(v\)의 성분은 \((1,1)\)이다.
-        (b) 목록 \((b_1, -b_1)\)은 직선 \(\Span(b_1, -b_1)\)만 생성하고 \(v\)에 닿지 못한다.
+        <img src="figures/fig-1-1-1-bases.svg" alt="세 개의 평면 그림. (a) 두 벡터 b1=(2,1), b2=(-1,1)이 만드는 비스듬한 점선 격자와, b1과 b2를 두 변으로 하는 평행사변형의 대각선 v=(1,2). (b) 한 직선 위에 놓인 b1과 -b1, 그리고 그 직선 밖의 v. (c) 원점에서 v에 이르는 두 가지 길: b1 다음 b2(파랑), -b2 다음 w 세 번(주황).">
+        <figcaption><span class="fig-head">Figure 1.1.1.</span>
+        (a) basis \(b_1 = (2,1)\), \(b_2 = (-1,1)\)이 만드는 격자. \(v = (1,2) = b_1 + b_2\)이므로 \(v\)의 성분은 \((1,1)\)이다.
+        (b) 목록 \((b_1, -b_1)\)은 직선 \(\Span(b_1, -b_1)\)만 span하고 \(v\)에 닿지 못한다.
         (c) 목록 \((b_1, b_2, w)\), \(w = (0,1)\)에서는 \(v = b_1 + b_2 = -b_2 + 3w\)로 표현이 두 가지다.
-        값은 <a href="#i-1-1-15">예 1.1.15</a>, <a href="#i-1-1-16">비예 1.1.16</a>과 같다.</figcaption>
+        값은 <a href="#i-1-1-15">Example 1.1.15</a>, <a href="#i-1-1-16">Non-example 1.1.16</a>과 같다.</figcaption>
       </figure>
     </section>
 
     <section id="sec-vector-spaces">
-      <h2>벡터공간</h2>
+      <h2>Vector Spaces</h2>
       <p>\(\R^2\)나 \(\R^3\)의 화살표에서 우리가 실제로 쓰는 것은 두 연산뿐이다. 두 벡터를 더하고, 벡터에 수를 곱한다.
       이 두 연산이 만족하는 성질만 뽑아내면 다음 정의가 된다.</p>
 
       <div class="thm definition" id="i-1-1-1">
-        <p><span class="thm-head">정의 1.1.1</span> <span class="thm-name">(벡터공간, vector space)</span>.
+        <p><span class="thm-head">Definition 1.1.1</span> <span class="thm-name">(vector space)</span>.
         집합 \(V\)에 덧셈 \(V \times V \to V\), \((v, w) \mapsto v + w\)와
         스칼라곱 \(\R \times V \to V\), \((a, v) \mapsto av\)가 주어져 있다고 하자.
         모든 \(u, v, w \in V\)와 모든 \(a, b \in \R\)에 대하여 다음 여덟 조건이 성립하면
-        \(V\)를 <dfn>벡터공간</dfn>(vector space)이라 하고, \(V\)의 원소를 <dfn>벡터</dfn>(vector)라 한다.</p>
+        \(V\)를 <dfn>vector space</dfn>(벡터공간)이라 하고, \(V\)의 원소를 <dfn>vector</dfn>(벡터)라 한다.</p>
         <ol>
           <li>(덧셈의 교환법칙) \(v + w = w + v\)</li>
           <li>(덧셈의 결합법칙) \((u + v) + w = u + (v + w)\)</li>
-          <li>(영벡터) 모든 \(v \in V\)에 대하여 \(v + 0 = v\)인 원소 \(0 \in V\)가 있다.</li>
+          <li>(zero vector) 모든 \(v \in V\)에 대하여 \(v + 0 = v\)인 원소 \(0 \in V\)가 있다.</li>
           <li>(덧셈의 역원) 각 \(v \in V\)에 대하여 \(v + w = 0\)인 \(w \in V\)가 있다.</li>
           <li>(스칼라곱의 결합법칙) \((ab)v = a(bv)\)</li>
           <li>(스칼라곱의 항등원) \(1v = v\)</li>
@@ -103,10 +103,10 @@
         </ol>
       </div>
 
-      <p>이 study set의 벡터공간은 모두 실수 위의 벡터공간이다. 정의에서 곧바로 따라 나오는 사실 몇 가지를
+      <p>이 study set의 vector space는 모두 실수 위의 vector space이다. 정의에서 곧바로 따라 나오는 사실 몇 가지를
       근거와 함께 확인해 두자. 뒤에서 자주 쓴다.</p>
       <ul>
-        <li><strong>영벡터는 하나뿐이다.</strong> \(0\)과 \(0'\)이 둘 다 조건 3을 만족하면
+        <li><strong>zero vector는 하나뿐이다.</strong> \(0\)과 \(0'\)이 둘 다 조건 3을 만족하면
         \(0 = 0 + 0' = 0' + 0 = 0'\)이다(첫 등호는 \(0'\)에 대한 조건 3, 둘째는 조건 1, 셋째는 \(0\)에 대한 조건 3).</li>
         <li><strong>\(0v = 0\)이다.</strong> 조건 8에서 \(0v = (0 + 0)v = 0v + 0v\)이다. 양변에 \(0v\)의 역원을 더하면 \(0 = 0v\)이다.</li>
         <li><strong>역원은 하나뿐이고 \((-1)v\)와 같다.</strong> 조건 6과 8에서 \(v + (-1)v = 1v + (-1)v = (1 + (-1))v = 0v = 0\)이다.
@@ -114,50 +114,50 @@
       </ul>
 
       <div class="thm example" id="i-1-1-2">
-        <p><span class="thm-head">예 1.1.2</span> <span class="thm-name">(\(\R^n\))</span>.
+        <p><span class="thm-head">Example 1.1.2</span> <span class="thm-name">(\(\R^n\))</span>.
         \(\R^n\)은 실수 \(n\)개의 순서쌍 \(x = (x^1, \dots, x^n)\) 전체의 집합이다. 덧셈과 스칼라곱을 성분별로
         \[ \begin{aligned} (x^1, \dots, x^n) + (y^1, \dots, y^n) &= (x^1 + y^1, \dots, x^n + y^n), \\ a(x^1, \dots, x^n) &= (ax^1, \dots, ax^n) \end{aligned} \]
-        로 정하면 \(\R^n\)은 벡터공간이다. 영벡터는 \((0, \dots, 0)\)이고 \(x\)의 역원은 \((-x^1, \dots, -x^n)\)이다.
+        로 정하면 \(\R^n\)은 vector space이다. zero vector는 \((0, \dots, 0)\)이고 \(x\)의 역원은 \((-x^1, \dots, -x^n)\)이다.
         여덟 조건은 모두 성분별로 실수의 같은 성질이 된다. 예를 들어 조건 7은 각 \(i\)에 대하여
         \(a(x^i + y^i) = ax^i + ay^i\)라는 실수의 분배법칙이다.
         행렬을 곱할 때는 \(x\)를 성분이 위에서 아래로 놓인 열벡터로 본다.</p>
       </div>
 
       <div class="thm example" id="i-1-1-3">
-        <p><span class="thm-head">예 1.1.3</span> <span class="thm-name">(행렬, 다항식, 함수)</span>.
-        다음은 모두 벡터공간이다. 덧셈과 스칼라곱은 “같은 자리끼리” 또는 “같은 점에서” 한다.</p>
+        <p><span class="thm-head">Example 1.1.3</span> <span class="thm-name">(matrices, polynomials, functions)</span>.
+        다음은 모두 vector space이다. 덧셈과 스칼라곱은 “같은 자리끼리” 또는 “같은 점에서” 한다.</p>
         <ul>
           <li>(a) 실수 성분을 갖는 \(m \times n\) 행렬 전체. 덧셈과 스칼라곱은 성분별로 한다.</li>
-          <li>(b) 차수가 \(d\) 이하인 실계수 다항식 \(c_0 + c_1 t + \dots + c_d t^d\) 전체 \(P_d\).
+          <li>(b) 차수가 \(d\) 이하인 coefficient가 실수인 다항식 \(c_0 + c_1 t + \dots + c_d t^d\) 전체 \(P_d\).
           두 다항식의 합과 다항식의 스칼라배는 다시 차수가 \(d\) 이하이다.</li>
-          <li>(c) 열린구간 \(I\) 위의 매끄러운(\(C^\infty\)) 실함수 전체 \(C^\infty(I)\).
+          <li>(c) 열린구간 \(I\) 위의 smooth(\(C^\infty\)) 실함수 전체 \(C^\infty(I)\).
           덧셈과 스칼라곱은 \((f + h)(t) = f(t) + h(t)\), \((af)(t) = af(t)\)로 정한다.
-          매끄러운 함수의 합과 스칼라배는 다시 매끄럽다(미적분학).</li>
+          smooth function의 합과 스칼라배는 다시 매끄럽다(미적분학).</li>
         </ul>
         <p>(b)와 (c)에서 벡터는 함수다. “벡터는 화살표”라는 그림은 \(\R^n\)에서만 맞는 그림이고,
-        벡터공간의 정의 자체는 화살표를 전혀 언급하지 않는다.</p>
+        vector space의 정의 자체는 화살표를 전혀 언급하지 않는다.</p>
       </div>
 
       <div class="thm nonexample" id="i-1-1-4">
-        <p><span class="thm-head">비예 1.1.4</span>.
+        <p><span class="thm-head">Non-example 1.1.4</span>.
         (a) \(\R^2\)의 제1사분면 \(Q = \{(x^1, x^2) : x^1 \ge 0,\ x^2 \ge 0\}\)에 \(\R^2\)의 연산을 그대로 주면
-        벡터공간이 아니다. \((1, 1) \in Q\)이지만 \((-1)(1,1) = (-1,-1) \notin Q\)이므로 스칼라곱이 \(Q\) 안에 머물지 않는다.
+        vector space가 아니다. \((1, 1) \in Q\)이지만 \((-1)(1,1) = (-1,-1) \notin Q\)이므로 스칼라곱이 \(Q\) 안에 머물지 않는다.
         같은 이유로 \((1,1)\)의 역원도 \(Q\)에 없다.</p>
-        <p>(b) 단위구면 \(S^2 = \{x \in \R^3 : (x^1)^2 + (x^2)^2 + (x^3)^2 = 1\}\)은 \(\R^3\)의 연산으로 벡터공간이 되지 않는다.
+        <p>(b) unit sphere \(S^2 = \{x \in \R^3 : (x^1)^2 + (x^2)^2 + (x^3)^2 = 1\}\)은 \(\R^3\)의 연산으로 vector space가 되지 않는다.
         \(e_1 = (1,0,0)\)과 \(e_2 = (0,1,0)\)은 \(S^2\)에 있지만 \(e_1 + e_2 = (1,1,0)\)의 성분 제곱의 합은 \(2\)이다.
-        원점 \(0\)도 \(S^2\)에 없다. 구면처럼 휘어진 대상은 벡터공간이 아니다. 그래서 미분기하에서는 휘어진 대상
-        대신 각 점의 접평면이라는 벡터공간을 가지고 계산한다.</p>
+        원점 \(0\)도 \(S^2\)에 없다. sphere처럼 휘어진 대상은 vector space가 아니다. 그래서 미분기하에서는 휘어진 대상
+        대신 각 점의 tangent plane이라는 vector space를 가지고 계산한다.</p>
       </div>
     </section>
 
     <section id="sec-subspaces">
-      <h2>부분공간</h2>
-      <p>벡터공간 안에 들어 있는 작은 벡터공간을 부분공간이라 한다. 공리 여덟 개를 모두 다시 확인할 필요는 없다.
+      <h2>Subspaces</h2>
+      <p>vector space 안에 들어 있는 작은 vector space를 subspace라 한다. 공리 여덟 개를 모두 다시 확인할 필요는 없다.
       다음 세 조건만 보면 된다.</p>
 
       <div class="thm definition" id="i-1-1-5">
-        <p><span class="thm-head">정의 1.1.5</span> <span class="thm-name">(부분공간, subspace)</span>.
-        \(V\)가 벡터공간이고 \(W \subseteq V\)라 하자. 다음 세 조건이 성립하면 \(W\)를 \(V\)의 <dfn>부분공간</dfn>(subspace)이라 한다.</p>
+        <p><span class="thm-head">Definition 1.1.5</span> <span class="thm-name">(subspace)</span>.
+        \(V\)가 vector space이고 \(W \subseteq V\)라 하자. 다음 세 조건이 성립하면 \(W\)를 \(V\)의 <dfn>subspace</dfn>(부분공간)이라 한다.</p>
         <ol>
           <li>\(0 \in W\).</li>
           <li>\(v, w \in W\)이면 \(v + w \in W\) (덧셈에 닫혀 있다).</li>
@@ -165,181 +165,181 @@
         </ol>
       </div>
 
-      <p>부분공간 \(W\)는 \(V\)의 연산을 제한한 것으로 그 자체가 벡터공간이다. 조건 2와 3 덕분에 두 연산의 결과가
-      \(W\) 안에 머문다. <a href="#i-1-1-1">정의 1.1.1</a>의 조건 1, 2, 5–8은 \(V\)에서 성립하므로 \(W\)에서도 성립한다.
-      조건 3(영벡터)은 부분공간의 조건 1이 보장한다. 조건 4(역원)는 \(w \in W\)이면 \(-w = (-1)w \in W\)이기 때문에 성립한다.</p>
+      <p>subspace \(W\)는 \(V\)의 연산을 제한한 것으로 그 자체가 vector space이다. 조건 2와 3 덕분에 두 연산의 결과가
+      \(W\) 안에 머문다. <a href="#i-1-1-1">Definition 1.1.1</a>의 조건 1, 2, 5–8은 \(V\)에서 성립하므로 \(W\)에서도 성립한다.
+      조건 3(zero vector)은 subspace의 조건 1이 보장한다. 조건 4(역원)는 \(w \in W\)이면 \(-w = (-1)w \in W\)이기 때문에 성립한다.</p>
 
       <div class="thm example" id="i-1-1-6">
-        <p><span class="thm-head">예 1.1.6</span>.
-        (a) \(\{0\}\)과 \(V\) 자신은 언제나 \(V\)의 부분공간이다.</p>
-        <p>(b) \(W = \{(x^1, x^2, x^3) \in \R^3 : x^1 + x^2 + x^3 = 0\}\)은 \(\R^3\)의 부분공간이다.
+        <p><span class="thm-head">Example 1.1.6</span>.
+        (a) \(\{0\}\)과 \(V\) 자신은 언제나 \(V\)의 subspace이다.</p>
+        <p>(b) \(W = \{(x^1, x^2, x^3) \in \R^3 : x^1 + x^2 + x^3 = 0\}\)은 \(\R^3\)의 subspace이다.
         세 조건을 확인하자. \(0 + 0 + 0 = 0\)이므로 \(0 \in W\)이다. \(x, y \in W\)이면
         \((x^1 + y^1) + (x^2 + y^2) + (x^3 + y^3) = (x^1 + x^2 + x^3) + (y^1 + y^2 + y^3) = 0 + 0 = 0\)이므로 \(x + y \in W\)이다.
         \(ax^1 + ax^2 + ax^3 = a(x^1 + x^2 + x^3) = 0\)이므로 \(ax \in W\)이다.</p>
-        <p>(c) 고정된 \(a \in \R^n\)에 대하여 원점을 지나는 직선 \(\{ta : t \in \R\}\)은 부분공간이다.</p>
-        <p>(d) 다항식을 \(\R\) 위의 함수로 보면 \(P_d\)는 \(C^\infty(\R)\)의 부분공간이다.</p>
+        <p>(c) 고정된 \(a \in \R^n\)에 대하여 원점을 지나는 직선 \(\{ta : t \in \R\}\)은 subspace이다.</p>
+        <p>(d) 다항식을 \(\R\) 위의 함수로 보면 \(P_d\)는 \(C^\infty(\R)\)의 subspace이다.</p>
       </div>
 
       <div class="thm nonexample" id="i-1-1-7">
-        <p><span class="thm-head">비예 1.1.7</span>.
+        <p><span class="thm-head">Non-example 1.1.7</span>.
         세 조건은 각각 따로 필요하다.</p>
         <ul>
           <li>(a) 평면 \(\{x \in \R^3 : x^3 = 1\}\)은 조건 1을 어긴다. \(0\)의 셋째 성분이 \(1\)이 아니기 때문이다. 조건 2와 3도 어긴다.</li>
           <li>(b) \(\R^2\)에서 두 좌표축의 합집합 \(\{x : x^1 = 0\} \cup \{x : x^2 = 0\}\)은 조건 1과 3을 만족하지만 조건 2를 어긴다.
           \(e_1\)과 \(e_2\)는 이 집합에 있지만 \(e_1 + e_2 = (1,1)\)은 없다.</li>
-          <li>(c) <a href="#i-1-1-4">비예 1.1.4</a>의 제1사분면 \(Q\)는 조건 1과 2를 만족하지만 조건 3을 어긴다.</li>
+          <li>(c) <a href="#i-1-1-4">Non-example 1.1.4</a>의 제1사분면 \(Q\)는 조건 1과 2를 만족하지만 조건 3을 어긴다.</li>
         </ul>
       </div>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: 접평면과 접공간</p>
-        <p><a href="../06-regular-surfaces/index.html">6장</a>(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">정의 6.2.1</a>, <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">명제 6.2.4</a>)에서 곡면 \(S\)의 점 \(p\)에서의 접평면 \(T_pS\)를 \(\R^3\)의
-        2차원 부분공간으로 정의한다. 교과서 그림은 흔히 이 평면을 점 \(p\)에 붙여 그리는데, 그렇게 붙여 그린 평면은
-        대개 원점을 지나지 않고, 그럴 때는 <a href="#i-1-1-7">비예 1.1.7</a>(a)처럼 부분공간이 아니다. 벡터공간으로서의 \(T_pS\)는 원점을 지나는 평면이고,
-        그림은 그것을 \(p\)만큼 평행이동해서 보여 준 것이다.
-        <a href="../13-tangent-spaces/index.html">13장</a>에서는 둘러싼 \(\R^3\) 없이 다양체의 접공간 \(T_pM\)을 정의하는데,
-        그것도 벡터공간이다.</p>
+        <p class="box-title">Looking ahead: tangent plane과 tangent space</p>
+        <p><a href="../06-regular-surfaces/index.html">Chapter 6</a>(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">Definition 6.2.1</a>, <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">Proposition 6.2.4</a>)에서 surface \(S\)의 점 \(p\)에서의 tangent plane \(T_pS\)를 \(\R^3\)의
+        2-dimensional subspace로 정의한다. 교과서 그림은 흔히 이 평면을 점 \(p\)에 붙여 그리는데, 그렇게 붙여 그린 평면은
+        대개 원점을 지나지 않고, 그럴 때는 <a href="#i-1-1-7">Non-example 1.1.7</a>(a)처럼 subspace가 아니다. vector space로서의 \(T_pS\)는 원점을 지나는 평면이고,
+        그림은 그것을 \(p\)만큼 옮겨서 보여 준 것이다.
+        <a href="../13-tangent-spaces/index.html">Chapter 13</a>에서는 둘러싼 \(\R^3\) 없이 manifold의 tangent space \(T_pM\)을 정의하는데,
+        그것도 vector space이다.</p>
       </aside>
     </section>
 
     <section id="sec-span-independence">
-      <h2>생성과 일차독립</h2>
+      <h2>Span and Linear Independence</h2>
       <p>이 장에서 <em>목록</em>(list)은 벡터를 유한개 순서대로 늘어놓은 것 \((v_1, \dots, v_k)\)이다.
       같은 벡터가 두 번 나와도 되고, 순서가 다르면 다른 목록이다. 벡터가 하나도 없는 빈 목록 \(()\)도 허용한다.</p>
 
       <div class="thm definition" id="i-1-1-8">
-        <p><span class="thm-head">정의 1.1.8</span> <span class="thm-name">(일차결합과 생성, linear combination and span)</span>.
-        \((v_1, \dots, v_k)\)가 벡터공간 \(V\)의 목록이라 하자.</p>
+        <p><span class="thm-head">Definition 1.1.8</span> <span class="thm-name">(linear combination and span)</span>.
+        \((v_1, \dots, v_k)\)가 vector space \(V\)의 목록이라 하자.</p>
         <ul>
-          <li>실수 \(a^1, \dots, a^k\)로 만든 벡터 \(a^1 v_1 + \dots + a^k v_k\)를 \(v_1, \dots, v_k\)의 <dfn>일차결합</dfn>(linear combination)이라 한다.</li>
-          <li>일차결합 전체의 집합을 \(\Span(v_1, \dots, v_k)\)로 쓰고 \(v_1, \dots, v_k\)가 <dfn>생성하는 부분공간</dfn>(span)이라 한다.
-          빈 목록이 생성하는 부분공간은 \(\{0\}\)으로 정한다.</li>
-          <li>\(\Span(v_1, \dots, v_k) = V\)이면 목록 \((v_1, \dots, v_k)\)가 \(V\)를 <em>생성한다</em>고 한다.</li>
-          <li>유한개의 벡터로 이루어진 목록이 \(V\)를 생성하면 \(V\)를 <dfn>유한차원</dfn>(finite-dimensional) 벡터공간이라 한다.</li>
+          <li>실수 \(a^1, \dots, a^k\)로 만든 벡터 \(a^1 v_1 + \dots + a^k v_k\)를 \(v_1, \dots, v_k\)의 <dfn>linear combination</dfn>(일차결합)이라 한다.</li>
+          <li>linear combination 전체의 집합을 \(\Span(v_1, \dots, v_k)\)로 쓰고 \(v_1, \dots, v_k\)의 <dfn>span</dfn>(생성하는 부분공간)이라 한다.
+          빈 목록의 span은 \(\{0\}\)으로 정한다.</li>
+          <li>\(\Span(v_1, \dots, v_k) = V\)이면 목록 \((v_1, \dots, v_k)\)가 \(V\)를 <em>span한다</em>고 한다.</li>
+          <li>유한개의 벡터로 이루어진 목록이 \(V\)를 span하면 \(V\)를 <dfn>finite-dimensional</dfn>(유한차원) vector space라 한다.</li>
         </ul>
       </div>
 
       <aside class="box warning">
-        <p class="box-title">위첨자는 거듭제곱이 아니다</p>
-        <p>\(a^2\)는 \(a\)의 제곱이 아니라 두 번째 계수다. 제곱을 뜻할 때는 괄호를 쳐서 \((a^2)^2\)로 쓴다.
-        이 study set은 계수와 성분에는 위첨자를, 벡터 목록의 번호에는 아래첨자를 붙인다. 이렇게 나누어 쓰는 이유는
-        <a href="1-4-change-of-basis.html">1.4절</a>에서 드러난다. 기저를 바꾸면 두 종류의 첨자가 서로 반대로 변한다.
-        다만 다항식의 \(t^k\)처럼 문맥상 거듭제곱이 분명한 경우는 그대로 쓰고, 그때 계수는 \(c_k\)처럼 적는다.
-        또 합 기호 \(\sum\)는 13장 전까지 생략하지 않는다.</p>
+        <p class="box-title">Warning: 위첨자는 거듭제곱이 아니다</p>
+        <p>\(a^2\)는 \(a\)의 제곱이 아니라 두 번째 coefficient다. 제곱을 뜻할 때는 괄호를 쳐서 \((a^2)^2\)로 쓴다.
+        이 study set은 coefficient와 성분에는 위첨자를, 벡터 목록의 번호에는 아래첨자를 붙인다. 이렇게 나누어 쓰는 이유는
+        <a href="1-4-change-of-basis.html">Section 1.4</a>에서 드러난다. basis를 바꾸면 두 종류의 첨자가 서로 반대로 변한다.
+        다만 다항식의 \(t^k\)처럼 문맥상 거듭제곱이 분명한 경우는 그대로 쓰고, 그때 coefficient는 \(c_k\)처럼 적는다.
+        또 합 기호 \(\sum\)는 Chapter 13 전까지 생략하지 않는다.</p>
       </aside>
 
-      <p>\(\Span(v_1, \dots, v_k)\)는 \(V\)의 부분공간이다. 모든 계수가 \(0\)인 일차결합이 \(0\)이므로 조건 1이 성립한다.
-      두 일차결합의 합 \(\sum_i a^i v_i + \sum_i b^i v_i = \sum_i (a^i + b^i) v_i\)와
-      스칼라배 \(c \sum_i a^i v_i = \sum_i (ca^i) v_i\)도 일차결합이므로 조건 2, 3이 성립한다.
-      또 \(v_1, \dots, v_k\)를 모두 포함하는 부분공간은 조건 2, 3에 의해 그 일차결합도 모두 포함한다.
-      따라서 \(\Span(v_1, \dots, v_k)\)는 \(v_1, \dots, v_k\)를 포함하는 가장 작은 부분공간이다.</p>
+      <p>\(\Span(v_1, \dots, v_k)\)는 \(V\)의 subspace이다. 모든 coefficient가 \(0\)인 linear combination이 \(0\)이므로 조건 1이 성립한다.
+      두 linear combination의 합 \(\sum_i a^i v_i + \sum_i b^i v_i = \sum_i (a^i + b^i) v_i\)와
+      스칼라배 \(c \sum_i a^i v_i = \sum_i (ca^i) v_i\)도 linear combination이므로 조건 2, 3이 성립한다.
+      또 \(v_1, \dots, v_k\)를 모두 포함하는 subspace는 조건 2, 3에 의해 그 linear combination도 모두 포함한다.
+      따라서 \(\Span(v_1, \dots, v_k)\)는 \(v_1, \dots, v_k\)를 포함하는 가장 작은 subspace이다.</p>
 
       <div class="thm definition" id="i-1-1-9">
-        <p><span class="thm-head">정의 1.1.9</span> <span class="thm-name">(일차독립, linear independence)</span>.
-        벡터공간 \(V\)의 목록 \((v_1, \dots, v_k)\)가 다음 조건을 만족하면 <dfn>일차독립</dfn>(linearly independent)이라 한다.
+        <p><span class="thm-head">Definition 1.1.9</span> <span class="thm-name">(linearly independent, linear independence)</span>.
+        vector space \(V\)의 목록 \((v_1, \dots, v_k)\)가 다음 조건을 만족하면 <dfn>linearly independent</dfn>(일차독립)이라 한다.
         \[ a^1 v_1 + \dots + a^k v_k = 0 \quad\text{이면}\quad a^1 = \dots = a^k = 0 \text{이다.} \]
-        일차독립이 아닌 목록, 즉 모두 \(0\)은 아닌 계수로 \(a^1 v_1 + \dots + a^k v_k = 0\)을 만들 수 있는 목록을
-        <dfn>일차종속</dfn>(linearly dependent)이라 한다. 빈 목록은 일차독립으로 본다.</p>
+        linearly independent가 아닌 목록, 즉 모두 \(0\)은 아닌 coefficient로 \(a^1 v_1 + \dots + a^k v_k = 0\)을 만들 수 있는 목록을
+        <dfn>linearly dependent</dfn>(일차종속)이라 한다. 빈 목록은 linearly independent로 본다.</p>
       </div>
 
-      <p>일차독립이 말하는 것은 “\(0\)을 만드는 일차결합은 모든 계수가 \(0\)인 것 하나뿐이다”라는 것이다.
+      <p>linear independence가 말하는 것은 “\(0\)을 만드는 linear combination은 모든 coefficient가 \(0\)인 것 하나뿐이다”라는 것이다.
       다음 예에서 판정하는 방법을 익혀 두자. 판정은 결국 연립일차방정식을 푸는 일이다.</p>
 
       <div class="thm example" id="i-1-1-10">
-        <p><span class="thm-head">예 1.1.10</span>.
+        <p><span class="thm-head">Example 1.1.10</span>.
         (a) \(\R^2\)에서 \(b_1 = (2,1)\), \(b_2 = (-1,1)\)이라 하자. \(a^1 b_1 + a^2 b_2 = 0\)이라 가정하면 성분별로</p>
         <div class="equation" id="eq-1-1-1">
         \[ 2a^1 - a^2 = 0, \qquad a^1 + a^2 = 0 \tag{1.1.1} \]
         </div>
         <p>이다. 두 식을 더하면 \(3a^1 = 0\)이므로 \(a^1 = 0\)이고, 둘째 식에서 \(a^2 = -a^1 = 0\)이다.
-        따라서 \((b_1, b_2)\)는 일차독립이다.</p>
-        <p>(b) \((b_1, -b_1)\)은 일차종속이다. \(1 \cdot b_1 + 1 \cdot (-b_1) = 0\)이고 계수 \(1, 1\)은 \(0\)이 아니다.</p>
-        <p>(c) \(w = (0,1)\)이라 하면 \((b_1, b_2, w)\)는 일차종속이다.
+        따라서 \((b_1, b_2)\)는 linearly independent이다.</p>
+        <p>(b) \((b_1, -b_1)\)은 linearly dependent이다. \(1 \cdot b_1 + 1 \cdot (-b_1) = 0\)이고 coefficient \(1, 1\)은 \(0\)이 아니다.</p>
+        <p>(c) \(w = (0,1)\)이라 하면 \((b_1, b_2, w)\)는 linearly dependent이다.
         \(b_1 + 2b_2 - 3w = (2 - 2 - 0,\ 1 + 2 - 3) = (0, 0)\)이기 때문이다.</p>
-        <p>(d) \(0\)을 포함하는 목록은 언제나 일차종속이다. \(0\)의 계수를 \(1\), 나머지 계수를 \(0\)으로 두면 된다.</p>
-        <p>(e) \(P_2\)에서 \((1, t, t^2)\)은 일차독립이다. \(c_0 + c_1 t + c_2 t^2\)이 영다항식, 즉 모든 \(t\)에서 \(0\)인 함수라 하자.
+        <p>(d) \(0\)을 포함하는 목록은 언제나 linearly dependent이다. \(0\)의 coefficient를 \(1\), 나머지 coefficient를 \(0\)으로 두면 된다.</p>
+        <p>(e) \(P_2\)에서 \((1, t, t^2)\)은 linearly independent이다. \(c_0 + c_1 t + c_2 t^2\)이 영다항식, 즉 모든 \(t\)에서 \(0\)인 함수라 하자.
         \(t = 0\)을 넣으면 \(c_0 = 0\)이다. \(t = 1\)과 \(t = -1\)을 넣으면 \(c_1 + c_2 = 0\), \(-c_1 + c_2 = 0\)이므로 \(c_1 = c_2 = 0\)이다.</p>
       </div>
 
-      <p>일차종속인 목록에는 “군더더기” 벡터가 있다. 다음 보조정리가 그것을 정확히 말한다.
-      뒤의 두 증명(교환 보조정리, <a href="#i-1-1-18">정리 1.1.18</a>)이 모두 이 보조정리 하나에 기댄다.</p>
+      <p>linearly dependent인 목록에는 “군더더기” 벡터가 있다. 다음 보조정리가 그것을 정확히 말한다.
+      뒤의 두 증명(exchange lemma, <a href="#i-1-1-18">Theorem 1.1.18</a>)이 모두 이 보조정리 하나에 기댄다.</p>
 
       <div class="thm lemma" id="i-1-1-11">
-        <p><span class="thm-head">보조정리 1.1.11</span> <span class="thm-name">(일차종속 보조정리)</span>.
-        벡터공간 \(V\)의 목록 \((v_1, \dots, v_k)\)가 일차종속이면, 어떤 \(j \in \{1, \dots, k\}\)가 있어서</p>
+        <p><span class="thm-head">Lemma 1.1.11</span> <span class="thm-name">(linear dependence lemma)</span>.
+        vector space \(V\)의 목록 \((v_1, \dots, v_k)\)가 linearly dependent이면, 어떤 \(j \in \{1, \dots, k\}\)가 있어서</p>
         <ul>
           <li>(a) \(v_j \in \Span(v_1, \dots, v_{j-1})\)이고,</li>
-          <li>(b) 목록에서 \(v_j\)를 빼도 생성하는 부분공간이 변하지 않는다.</li>
+          <li>(b) 목록에서 \(v_j\)를 빼도 span이 변하지 않는다.</li>
         </ul>
         <p>(\(j = 1\)이면 (a)는 \(v_1 \in \Span() = \{0\}\), 즉 \(v_1 = 0\)이라는 뜻이다.)</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(0\)을 만드는 일차결합에서 \(0\)이 아닌 계수 가운데 마지막 것을 골라, 그 벡터에 대해 식을 푼다.</p>
-        <p><span class="proof-head">증명.</span>
-        일차종속이므로 모두 \(0\)은 아닌 \(a^1, \dots, a^k\)가 있어서 \(a^1 v_1 + \dots + a^k v_k = 0\)이다.
+        <p class="proof-idea">Proof idea: \(0\)을 만드는 linear combination에서 \(0\)이 아닌 coefficient 가운데 마지막 것을 골라, 그 벡터에 대해 식을 푼다.</p>
+        <p><span class="proof-head">Proof.</span>
+        linearly dependent이므로 모두 \(0\)은 아닌 \(a^1, \dots, a^k\)가 있어서 \(a^1 v_1 + \dots + a^k v_k = 0\)이다.
         \(a^i \neq 0\)인 \(i\) 가운데 가장 큰 것을 \(j\)라 하자. 그러면 \(a^{j+1} = \dots = a^k = 0\)이므로
         \(a^1 v_1 + \dots + a^j v_j = 0\)이고, \(a^j \neq 0\)이므로 \(v_j\)에 대해 풀 수 있다.
         \[ v_j = -\frac{a^1}{a^j} v_1 - \dots - \frac{a^{j-1}}{a^j} v_{j-1}. \]
         이것이 (a)다(\(j = 1\)이면 우변은 빈 합 \(0\)이다).
-        (b)를 보이자. \(v_j\)를 뺀 목록의 일차결합은 \(v_j\)의 계수를 \(0\)으로 둔 원래 목록의 일차결합이므로,
-        빼기 전의 부분공간에 들어 있다. 거꾸로, 원래 목록의 일차결합 \(c^1 v_1 + \dots + c^k v_k\)에서
-        \(v_j\)를 위 식으로 바꾸어 넣으면 \(v_j\)를 뺀 나머지 벡터들의 일차결합이 된다.
-        따라서 두 부분공간은 같다.</p>
+        (b)를 보이자. \(v_j\)를 뺀 목록의 linear combination은 \(v_j\)의 coefficient를 \(0\)으로 둔 원래 목록의 linear combination이므로,
+        빼기 전의 subspace에 들어 있다. 거꾸로, 원래 목록의 linear combination \(c^1 v_1 + \dots + c^k v_k\)에서
+        \(v_j\)를 위 식으로 바꾸어 넣으면 \(v_j\)를 뺀 나머지 벡터들의 linear combination이 된다.
+        따라서 두 subspace는 같다.</p>
       </div>
     </section>
 
     <section id="sec-basis">
-      <h2>기저와 성분</h2>
+      <h2>Bases and Components</h2>
 
       <div class="thm definition" id="i-1-1-12">
-        <p><span class="thm-head">정의 1.1.12</span> <span class="thm-name">(기저, basis)</span>.
-        벡터공간 \(V\)의 목록 \((b_1, \dots, b_n)\)이 일차독립이고 \(V\)를 생성하면 \(V\)의 <dfn>기저</dfn>(basis)라 한다.</p>
+        <p><span class="thm-head">Definition 1.1.12</span> <span class="thm-name">(basis)</span>.
+        vector space \(V\)의 목록 \((b_1, \dots, b_n)\)이 linearly independent이고 \(V\)를 span하면 \(V\)의 <dfn>basis</dfn>(기저)라 한다.</p>
       </div>
 
-      <p>기저는 <em>순서가 있는</em> 목록이다. \((b_1, b_2)\)와 \((b_2, b_1)\)은 다른 기저다. 순서는 성분을 읽을 때,
-      그리고 <a href="1-6-determinant-orientation.html">1.6절</a>의 방향을 정할 때 중요하다.
-      가장 기본적인 예는 \(\R^n\)의 <dfn>표준기저</dfn>(standard basis) \((e_1, \dots, e_n)\)이다. 여기서 \(e_i\)는 \(i\)번째 성분만 \(1\)이고
-      나머지 성분은 \(0\)인 벡터다. 모든 \(x \in \R^n\)은 \(x = x^1 e_1 + \dots + x^n e_n\)이므로 이 목록은 \(\R^n\)을 생성한다.
-      또 \(a^1 e_1 + \dots + a^n e_n = (a^1, \dots, a^n)\)이 \(0\)이면 모든 \(a^i\)가 \(0\)이므로 일차독립이다.</p>
+      <p>basis는 <em>순서가 있는</em> 목록이다. \((b_1, b_2)\)와 \((b_2, b_1)\)은 다른 basis다. 순서는 성분을 읽을 때,
+      그리고 <a href="1-6-determinant-orientation.html">Section 1.6</a>의 orientation을 정할 때 중요하다.
+      가장 기본적인 예는 \(\R^n\)의 <dfn>standard basis</dfn>(표준기저) \((e_1, \dots, e_n)\)이다. 여기서 \(e_i\)는 \(i\)번째 성분만 \(1\)이고
+      나머지 성분은 \(0\)인 벡터다. 모든 \(x \in \R^n\)은 \(x = x^1 e_1 + \dots + x^n e_n\)이므로 이 목록은 \(\R^n\)을 span한다.
+      또 \(a^1 e_1 + \dots + a^n e_n = (a^1, \dots, a^n)\)이 \(0\)이면 모든 \(a^i\)가 \(0\)이므로 linearly independent이다.</p>
 
-      <p>기저의 두 조건이 무엇을 보장하는지 다음 정리가 말해 준다.</p>
+      <p>basis의 두 조건이 무엇을 보장하는지 다음 정리가 말해 준다.</p>
 
       <div class="thm theorem" id="i-1-1-13">
-        <p><span class="thm-head">정리 1.1.13</span> <span class="thm-name">(기저의 특징)</span>.
-        벡터공간 \(V\)의 목록 \((b_1, \dots, b_n)\)이 \(V\)의 기저일 필요충분조건은, 모든 \(v \in V\)를</p>
+        <p><span class="thm-head">Theorem 1.1.13</span> <span class="thm-name">(characterization of bases)</span>.
+        vector space \(V\)의 목록 \((b_1, \dots, b_n)\)이 \(V\)의 basis일 필요충분조건은, 모든 \(v \in V\)를</p>
         <div class="equation" id="eq-1-1-2">
         \[ v = v^1 b_1 + \dots + v^n b_n = \sum_{i=1}^{n} v^i b_i \qquad (v^i \in \R) \tag{1.1.2} \]
         </div>
         <p>꼴로 쓰는 방법이 꼭 하나씩 있는 것이다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 기저를 하나 고르면 모든 벡터에 수의 목록 \((v^1, \dots, v^n)\)이 하나씩 붙는다.
-      즉 기저를 고르는 것이 곧 좌표를 고르는 것이다. “생성”은 표현이 <em>있다</em>는 것을, “일차독립”은 표현이 <em>하나뿐</em>이라는 것을 보장한다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> basis를 하나 고르면 모든 벡터에 수의 목록 \((v^1, \dots, v^n)\)이 하나씩 붙는다.
+      즉 basis를 고르는 것이 곧 좌표를 고르는 것이다. “span”은 표현이 <em>있다</em>는 것을, “linearly independent”는 표현이 <em>하나뿐</em>이라는 것을 보장한다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 같은 벡터의 두 표현을 빼면 \(0\)의 표현이 된다. \(0\)의 표현이 하나뿐인 것이 일차독립이다.</p>
-        <p><span class="proof-head">증명.</span>
-        (\(\Rightarrow\)) \((b_1, \dots, b_n)\)이 기저라 하자. 이 목록이 \(V\)를 생성하므로 모든 \(v\)는 <a href="#eq-1-1-2">(1.1.2)</a> 꼴로 쓸 수 있다.
+        <p class="proof-idea">Proof idea: 같은 벡터의 두 표현을 빼면 \(0\)의 표현이 된다. \(0\)의 표현이 하나뿐인 것이 linearly independent이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (\(\Rightarrow\)) \((b_1, \dots, b_n)\)이 basis라 하자. 이 목록이 \(V\)를 span하므로 모든 \(v\)는 <a href="#eq-1-1-2">(1.1.2)</a> 꼴로 쓸 수 있다.
         두 가지로 쓸 수 있다고 하자: \(v = \sum_i v^i b_i = \sum_i w^i b_i\). 빼면 \(\sum_i (v^i - w^i) b_i = 0\)이고,
-        일차독립이므로 모든 \(i\)에 대하여 \(v^i - w^i = 0\)이다. 따라서 두 표현은 같다.</p>
-        <p>(\(\Leftarrow\)) 모든 \(v\)가 <a href="#eq-1-1-2">(1.1.2)</a> 꼴로 꼭 한 가지 방식으로 표현된다고 하자. 표현이 있으므로 목록은 \(V\)를 생성한다.
-        일차독립임을 보이자. \(\sum_i a^i b_i = 0\)이라 하자. 한편 \(\sum_i 0 \cdot b_i = 0\)도 \(0\)의 표현이다.
+        linearly independent이므로 모든 \(i\)에 대하여 \(v^i - w^i = 0\)이다. 따라서 두 표현은 같다.</p>
+        <p>(\(\Leftarrow\)) 모든 \(v\)가 <a href="#eq-1-1-2">(1.1.2)</a> 꼴로 꼭 한 가지 방식으로 표현된다고 하자. 표현이 있으므로 목록은 \(V\)를 span한다.
+        linearly independent임을 보이자. \(\sum_i a^i b_i = 0\)이라 하자. 한편 \(\sum_i 0 \cdot b_i = 0\)도 \(0\)의 표현이다.
         \(0\)의 표현은 하나뿐이므로 모든 \(i\)에 대하여 \(a^i = 0\)이다.</p>
       </div>
 
       <div class="thm definition" id="i-1-1-14">
-        <p><span class="thm-head">정의 1.1.14</span> <span class="thm-name">(성분, components)</span>.
-        \(\mathcal{B} = (b_1, \dots, b_n)\)이 \(V\)의 기저이고 \(v \in V\)일 때, 식 <a href="#eq-1-1-2">(1.1.2)</a>의 수 \(v^1, \dots, v^n\)을
-        기저 \(\mathcal{B}\)에 대한 \(v\)의 <dfn>성분</dfn>(components) 또는 좌표라 한다. 성분을 세로로 늘어놓은 열벡터를
+        <p><span class="thm-head">Definition 1.1.14</span> <span class="thm-name">(components)</span>.
+        \(\mathcal{B} = (b_1, \dots, b_n)\)이 \(V\)의 basis이고 \(v \in V\)일 때, <a href="#eq-1-1-2">(1.1.2)</a>의 수 \(v^1, \dots, v^n\)을
+        basis \(\mathcal{B}\)에 대한 \(v\)의 <dfn>components</dfn>(components) 또는 좌표라 한다. 성분을 세로로 늘어놓은 열벡터를
         \[ [v]_{\mathcal{B}} = \begin{pmatrix} v^1 \\ \vdots \\ v^n \end{pmatrix} \]
         로 쓴다.</p>
       </div>
 
-      <p>성분은 벡터 자체가 아니라 <em>벡터와 기저의 쌍</em>에 속한 것이다. 같은 벡터라도 기저가 바뀌면 성분이 바뀐다.
+      <p>성분은 벡터 자체가 아니라 <em>벡터와 basis의 쌍</em>에 속한 것이다. 같은 벡터라도 basis가 바뀌면 성분이 바뀐다.
       다음 예가 이 장 전체에서 되풀이해 쓰는 기준 예제다.</p>
 
       <div class="thm example" id="i-1-1-15">
-        <p><span class="thm-head">예 1.1.15</span> <span class="thm-name">(이 장의 기준 기저 \(\mathcal{B}\))</span>.
-        \(\R^2\)의 목록 \(\mathcal{B} = (b_1, b_2)\), \(b_1 = (2,1)\), \(b_2 = (-1,1)\)이 기저임을 보이고 성분을 구하자.
-        <a href="#i-1-1-13">정리 1.1.13</a>에 따라, 임의의 \(x = (x^1, x^2)\)에 대하여 \(x = v^1 b_1 + v^2 b_2\)를 만족하는 \((v^1, v^2)\)가
+        <p><span class="thm-head">Example 1.1.15</span> <span class="thm-name">(running basis \(\mathcal{B}\))</span>.
+        \(\R^2\)의 목록 \(\mathcal{B} = (b_1, b_2)\), \(b_1 = (2,1)\), \(b_2 = (-1,1)\)이 basis임을 보이고 성분을 구하자.
+        <a href="#i-1-1-13">Theorem 1.1.13</a>에 따라, 임의의 \(x = (x^1, x^2)\)에 대하여 \(x = v^1 b_1 + v^2 b_2\)를 만족하는 \((v^1, v^2)\)가
         꼭 하나 있음을 보이면 된다. 성분별로 쓰면</p>
         <div class="equation" id="eq-1-1-3">
         \[ 2v^1 - v^2 = x^1, \qquad v^1 + v^2 = x^2 \tag{1.1.3} \]
@@ -349,54 +349,54 @@
         \[ v^1 = \frac{x^1 + x^2}{3}, \qquad v^2 = \frac{-x^1 + 2x^2}{3} \tag{1.1.4} \]
         </div>
         <p>이어야 한다. 거꾸로 이 값을 넣으면 \(2v^1 - v^2 = \tfrac13(2x^1 + 2x^2 + x^1 - 2x^2) = x^1\), \(v^1 + v^2 = \tfrac13(3x^2) = x^2\)이므로
-        실제로 해다. 따라서 <a href="#eq-1-1-4">(1.1.4)</a>가 유일한 해이고, \(\mathcal{B}\)는 기저이다. 예를 들어 \(v = (1, 2)\)이면 \(v^1 = (1+2)/3 = 1\), \(v^2 = (-1+4)/3 = 1\)이므로
+        실제로 해이다. 따라서 <a href="#eq-1-1-4">(1.1.4)</a>가 유일한 해이고, \(\mathcal{B}\)는 basis이다. 예를 들어 \(v = (1, 2)\)이면 \(v^1 = (1+2)/3 = 1\), \(v^2 = (-1+4)/3 = 1\)이므로
         \(v = b_1 + b_2\), 즉 \([v]_{\mathcal{B}} = (1, 1)^{\mathsf{T}}\)이다.
         \(u = (3, 0)\)이면 \(u^1 = 1\), \(u^2 = -1\)이므로 \(u = b_1 - b_2\)이다.
-        같은 벡터 \(v = (1,2)\)의 성분이 표준기저 \(\mathcal{E} = (e_1, e_2)\)에서는 \((1, 2)\)이고 \(\mathcal{B}\)에서는 \((1, 1)\)이다
-        (<a href="#fig-1-1-1">그림 1.1.1</a>(a)). 여기서 \({}^{\mathsf{T}}\)는 행을 열로 세운다는 뜻이다(전치).</p>
-        <p class="verified">검증: <code>verify/v-1-1-vector-spaces-bases.py</code></p>
+        같은 벡터 \(v = (1,2)\)의 성분이 standard basis \(\mathcal{E} = (e_1, e_2)\)에서는 \((1, 2)\)이고 \(\mathcal{B}\)에서는 \((1, 1)\)이다
+        (<a href="#fig-1-1-1">Figure 1.1.1</a>(a)). 여기서 \({}^{\mathsf{T}}\)는 행을 열로 세운다는 뜻이다(transpose).</p>
+        <p class="verified">Verification: <code>verify/v-1-1-vector-spaces-bases.py</code></p>
       </div>
 
       <div class="thm nonexample" id="i-1-1-16">
-        <p><span class="thm-head">비예 1.1.16</span>.
-        (a) 목록 \((b_1, -b_1)\)은 \(\R^2\)를 생성하지 않는다. 일차결합 \(a^1 b_1 + a^2(-b_1) = (a^1 - a^2) b_1\)은 모두 직선
+        <p><span class="thm-head">Non-example 1.1.16</span>.
+        (a) 목록 \((b_1, -b_1)\)은 \(\R^2\)를 span하지 않는다. linear combination \(a^1 b_1 + a^2(-b_1) = (a^1 - a^2) b_1\)은 모두 직선
         \(\{tb_1 : t \in \R\}\) 위에 있다. \(v = (1,2)\)는 이 직선에 없다. \((1, 2) = t(2, 1)\)이면 \(2t = 1\)과 \(t = 2\)가 동시에 성립해야 하기 때문이다.
-        (<a href="#fig-1-1-1">그림 1.1.1</a>(b))</p>
-        <p>(b) 목록 \((b_1, b_2, w)\), \(w = (0,1)\)은 \(\R^2\)를 생성하지만(\(b_1, b_2\)만으로 이미 생성한다) 일차종속이다
-        (<a href="#i-1-1-10">예 1.1.10</a>(c)). 그래서 표현이 하나로 정해지지 않는다. \(v = (1,2)\)는
-        \(v = 1 \cdot b_1 + 1 \cdot b_2 + 0 \cdot w\)이기도 하고 \(v = 0 \cdot b_1 - 1 \cdot b_2 + 3w\)이기도 하다(<a href="#fig-1-1-1">그림 1.1.1</a>(c)).
-        두 표현의 차이 \((1, 2, -3)\)은 <a href="#i-1-1-10">예 1.1.10</a>(c)의 관계식 \(b_1 + 2b_2 - 3w = 0\)의 계수다.</p>
+        (<a href="#fig-1-1-1">Figure 1.1.1</a>(b))</p>
+        <p>(b) 목록 \((b_1, b_2, w)\), \(w = (0,1)\)은 \(\R^2\)를 span하지만(\(b_1, b_2\)만으로 이미 span한다) linearly dependent이다
+        (<a href="#i-1-1-10">Example 1.1.10</a>(c)). 그래서 표현이 하나로 정해지지 않는다. \(v = (1,2)\)는
+        \(v = 1 \cdot b_1 + 1 \cdot b_2 + 0 \cdot w\)이기도 하고 \(v = 0 \cdot b_1 - 1 \cdot b_2 + 3w\)이기도 하다(<a href="#fig-1-1-1">Figure 1.1.1</a>(c)).
+        두 표현의 차이 \((1, 2, -3)\)은 <a href="#i-1-1-10">Example 1.1.10</a>(c)의 관계식 \(b_1 + 2b_2 - 3w = 0\)의 coefficient다.</p>
       </div>
     </section>
 
     <section id="sec-dimension">
-      <h2>차원</h2>
-      <p>\(\R^2\)에는 기저가 무수히 많지만, 지금까지 본 것은 모두 벡터가 두 개였다. 이것은 우연인가?
-      \(\R^3\) 안의 어떤 평면에 벡터 세 개짜리 기저가 있을 수는 없는가? 다음 보조정리가 “그럴 수 없다”고 답한다.
+      <h2>Dimension</h2>
+      <p>\(\R^2\)에는 basis가 무수히 많지만, 지금까지 본 것은 모두 벡터가 두 개였다. 이것은 우연인가?
+      \(\R^3\) 안의 어떤 평면에 벡터 세 개짜리 basis가 있을 수는 없는가? 다음 보조정리가 “그럴 수 없다”고 답한다.
       이 절에서 가장 중요한 증명이므로 한 단계씩 따라가자.</p>
 
       <div class="thm lemma" id="i-1-1-17">
-        <p><span class="thm-head">보조정리 1.1.17</span> <span class="thm-name">(교환 보조정리, exchange lemma)</span>.
-        벡터공간 \(V\)에서 목록 \((u_1, \dots, u_m)\)이 일차독립이고 목록 \((w_1, \dots, w_k)\)가 \(V\)를 생성하면 \(m \le k\)이다.</p>
+        <p><span class="thm-head">Lemma 1.1.17</span> <span class="thm-name">(exchange lemma)</span>.
+        vector space \(V\)에서 목록 \((u_1, \dots, u_m)\)이 linearly independent이고 목록 \((w_1, \dots, w_k)\)가 \(V\)를 span하면 \(m \le k\)이다.</p>
       </div>
-      <p><strong>이 보조정리가 말하는 것.</strong> 일차독립인 목록은 생성하는 목록보다 길 수 없다.</p>
+      <p><strong>이 보조정리가 말하는 것.</strong> linearly independent인 목록은 span하는 목록보다 길 수 없다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 생성하는 목록에 \(u\)를 하나 끼워 넣을 때마다 \(w\)를 하나 빼도 여전히 생성한다. \(u\)를 \(m\)번 끼워 넣는 동안 매번 뺄 \(w\)가 남아 있어야 하므로 \(w\)가 \(m\)개 이상 있어야 한다.</p>
-        <p><span class="proof-head">증명.</span>
+        <p class="proof-idea">Proof idea: span하는 목록에 \(u\)를 하나 끼워 넣을 때마다 \(w\)를 하나 빼도 여전히 span한다. \(u\)를 \(m\)번 끼워 넣는 동안 매번 뺄 \(w\)가 남아 있어야 하므로 \(w\)가 \(m\)개 이상 있어야 한다.</p>
+        <p><span class="proof-head">Proof.</span>
         다음 과정을 \(s = 1, 2, \dots, m\)의 순서로 진행한다. 과정을 시작하기 직전(\(s = 1\)일 때)의 목록은 \((w_1, \dots, w_k)\)이다.
         단계 \(s\)를 시작할 때 목록은 다음 성질을 가진다고 하자.</p>
         <ul>
-          <li>(i) \(V\)를 생성하고, (ii) 길이가 \(k\)이며, (iii) 앞쪽에 \(u_1, \dots, u_{s-1}\)이, 뒤쪽에 \(w\) 가운데 \(k - (s-1)\)개가 놓여 있다.</li>
+          <li>(i) \(V\)를 span하고, (ii) 길이가 \(k\)이며, (iii) 앞쪽에 \(u_1, \dots, u_{s-1}\)이, 뒤쪽에 \(w\) 가운데 \(k - (s-1)\)개가 놓여 있다.</li>
         </ul>
         <p>\(s = 1\)이면 (i)–(iii)은 가정 그대로다. 단계 \(s\)에서는 다음을 한다.</p>
         <ol>
-          <li>\(u_s\)를 \(u_{s-1}\) 바로 뒤(\(s = 1\)이면 맨 앞)에 끼워 넣는다. 원래 목록이 \(V\)를 생성하므로 \(u_s\)는 원래 목록의 일차결합이다.
-          그 일차결합을 \(u_s\)에서 빼면 \(u_s\)의 계수가 \(1\)인 관계식이 생기므로, 새 목록은 일차종속이다.</li>
-          <li><a href="#i-1-1-11">보조정리 1.1.11</a>에 따라 새 목록의 어떤 벡터가 그 앞의 벡터들의 일차결합이다. 그 벡터는 \(u_1, \dots, u_s\) 가운데 하나일 수 없다.
-          만약 \(u_i \in \Span(u_1, \dots, u_{i-1})\)이면, 그 일차결합을 \(u_i\)에서 뺀 식은 \(u_i\)의 계수가 \(1\)인 관계식이 되어
-          \((u_1, \dots, u_m)\)이 일차독립이라는 가정에 어긋나기 때문이다. 따라서 그 벡터는 어떤 \(w\)이다.
+          <li>\(u_s\)를 \(u_{s-1}\) 바로 뒤(\(s = 1\)이면 맨 앞)에 끼워 넣는다. 원래 목록이 \(V\)를 span하므로 \(u_s\)는 원래 목록의 linear combination이다.
+          그 linear combination을 \(u_s\)에서 빼면 \(u_s\)의 coefficient가 \(1\)인 관계식이 생기므로, 새 목록은 linearly dependent이다.</li>
+          <li><a href="#i-1-1-11">Lemma 1.1.11</a>에 따라 새 목록의 어떤 벡터가 그 앞의 벡터들의 linear combination이다. 그 벡터는 \(u_1, \dots, u_s\) 가운데 하나일 수 없다.
+          만약 \(u_i \in \Span(u_1, \dots, u_{i-1})\)이면, 그 linear combination을 \(u_i\)에서 뺀 식은 \(u_i\)의 coefficient가 \(1\)인 관계식이 되어
+          \((u_1, \dots, u_m)\)이 linearly independent라는 가정에 어긋나기 때문이다. 따라서 그 벡터는 어떤 \(w\)이다.
           특히 <strong>이 시점에 목록에 \(w\)가 적어도 하나 남아 있어야 한다.</strong></li>
-          <li>그 \(w\)를 뺀다. <a href="#i-1-1-11">보조정리 1.1.11</a>(b)에 따라 목록은 여전히 \(V\)를 생성한다. 길이는 \(k\)로 돌아오고,
+          <li>그 \(w\)를 뺀다. <a href="#i-1-1-11">Lemma 1.1.11</a>(b)에 따라 목록은 여전히 \(V\)를 span한다. 길이는 \(k\)로 돌아오고,
           앞쪽에 \(u_1, \dots, u_s\), 뒤쪽에 \(w\)가 \(k - s\)개 놓인다. 즉 단계 \(s + 1\)의 시작 조건 (i)–(iii)이 성립한다.</li>
         </ol>
         <p>단계 \(s\)의 2번에서 \(w\)가 하나 이상 남아 있어야 하므로, 단계 \(s\)를 시작할 때의 \(w\)의 개수 \(k - (s - 1)\)은 \(1\) 이상이다.
@@ -404,214 +404,214 @@
       </div>
 
       <div class="thm theorem" id="i-1-1-18">
-        <p><span class="thm-head">정리 1.1.18</span> <span class="thm-name">(기저의 존재와 길이)</span>.
-        \(V\)가 유한차원 벡터공간이라 하자.</p>
+        <p><span class="thm-head">Theorem 1.1.18</span> <span class="thm-name">(existence and length of bases)</span>.
+        \(V\)가 finite-dimensional vector space라 하자.</p>
         <ul>
-          <li>(a) \(V\)를 생성하는 목록에서 벡터 몇 개를 빼서 기저를 만들 수 있다. 특히 \(V\)에는 기저가 있다.</li>
-          <li>(b) \(V\)의 일차독립인 목록에 벡터 몇 개를 덧붙여 기저를 만들 수 있다.</li>
-          <li>(c) \(V\)의 두 기저는 길이가 같다.</li>
+          <li>(a) \(V\)를 span하는 목록에서 벡터 몇 개를 빼서 basis를 만들 수 있다. 특히 \(V\)에는 basis가 있다.</li>
+          <li>(b) \(V\)의 linearly independent인 목록에 벡터 몇 개를 덧붙여 basis를 만들 수 있다.</li>
+          <li>(c) \(V\)의 두 basis는 길이가 같다.</li>
         </ul>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 생성하는 목록은 줄여서, 일차독립인 목록은 늘려서 기저로 만들 수 있다.
-      어느 쪽으로 만들든 기저의 길이는 같으므로, 그 길이를 공간의 크기를 재는 수(차원)로 쓸 수 있다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> span하는 목록은 줄여서, linearly independent인 목록은 늘려서 basis로 만들 수 있다.
+      어느 쪽으로 만들든 basis의 길이는 같으므로, 그 길이를 공간의 크기를 재는 수(dimension)로 쓸 수 있다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: (a)는 <a href="#i-1-1-11">보조정리 1.1.11</a>로 군더더기를 하나씩 뺀다. (b)는 생성하는 목록을 뒤에 붙인 다음 (a)를 한다. (c)는 교환 보조정리를 양쪽으로 쓴다.</p>
-        <p><span class="proof-head">증명.</span>
-        (a) \((v_1, \dots, v_k)\)가 \(V\)를 생성한다고 하자. 이 목록이 일차독립이면 이미 기저다. 일차종속이면 <a href="#i-1-1-11">보조정리 1.1.11</a>에 따라
-        생성하는 부분공간을 바꾸지 않고 벡터 하나를 뺄 수 있다. 남은 목록은 여전히 \(V\)를 생성한다. 이것을 되풀이한다.
-        한 번 뺄 때마다 길이가 \(1\)씩 줄어드므로 이 과정은 많아야 \(k\)번 만에 끝나고, 끝났을 때의 목록은 일차독립이면서 \(V\)를 생성한다.
-        (최악의 경우 빈 목록이 남는데, 그것은 \(V = \{0\}\)일 때이고 빈 목록은 \(\{0\}\)의 기저다.)
-        \(V\)는 유한차원이므로 생성하는 유한 목록이 있고, 거기에 이 과정을 적용하면 기저를 얻는다.</p>
-        <p>(b) \((u_1, \dots, u_m)\)이 일차독립이라 하자. \(V\)를 생성하는 목록 \((w_1, \dots, w_k)\)를 하나 골라
-        \((u_1, \dots, u_m, w_1, \dots, w_k)\)를 만든다. 이 목록은 \(V\)를 생성한다. 여기에 (a)의 과정을 적용한다.
-        이때 빠지는 벡터는 언제나 \(w\)이다. <a href="#i-1-1-11">보조정리 1.1.11</a>이 찾아 주는 벡터가 어떤 \(u_i\)라면
-        \(u_i \in \Span(u_1, \dots, u_{i-1})\)이 되어, 교환 보조정리의 증명 2번과 같은 이유로 \((u_1, \dots, u_m)\)의 일차독립에 어긋나기 때문이다.
-        따라서 결과로 얻는 기저는 \(u_1, \dots, u_m\)을 모두 포함한다.</p>
-        <p>(c) \((b_1, \dots, b_n)\)과 \((b'_1, \dots, b'_{n'})\)이 기저라 하자. 앞의 것은 일차독립이고 뒤의 것은 \(V\)를 생성하므로
-        교환 보조정리에서 \(n \le n'\)이다. 역할을 바꾸면 \(n' \le n\)이다. 따라서 \(n = n'\)이다.</p>
+        <p class="proof-idea">Proof idea: (a)는 <a href="#i-1-1-11">Lemma 1.1.11</a>로 군더더기를 하나씩 뺀다. (b)는 span하는 목록을 뒤에 붙인 다음 (a)를 한다. (c)는 exchange lemma를 양쪽으로 쓴다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) \((v_1, \dots, v_k)\)가 \(V\)를 span한다고 하자. 이 목록이 linearly independent이면 이미 basis다. linearly dependent이면 <a href="#i-1-1-11">Lemma 1.1.11</a>에 따라
+        span을 바꾸지 않고 벡터 하나를 뺄 수 있다. 남은 목록은 여전히 \(V\)를 span한다. 이것을 되풀이한다.
+        한 번 뺄 때마다 길이가 \(1\)씩 줄어드므로 이 과정은 많아야 \(k\)번 만에 끝나고, 끝났을 때의 목록은 linearly independent이면서 \(V\)를 span한다.
+        (최악의 경우 빈 목록이 남는데, 그것은 \(V = \{0\}\)일 때이고 빈 목록은 \(\{0\}\)의 basis다.)
+        \(V\)는 finite-dimensional이므로 span하는 유한 목록이 있고, 거기에 이 과정을 적용하면 basis를 얻는다.</p>
+        <p>(b) \((u_1, \dots, u_m)\)이 linearly independent라 하자. \(V\)를 span하는 목록 \((w_1, \dots, w_k)\)를 하나 골라
+        \((u_1, \dots, u_m, w_1, \dots, w_k)\)를 만든다. 이 목록은 \(V\)를 span한다. 여기에 (a)의 과정을 적용한다.
+        이때 빠지는 벡터는 언제나 \(w\)이다. <a href="#i-1-1-11">Lemma 1.1.11</a>이 찾아 주는 벡터가 어떤 \(u_i\)라면
+        \(u_i \in \Span(u_1, \dots, u_{i-1})\)이 되어, exchange lemma의 증명 2번과 같은 이유로 \((u_1, \dots, u_m)\)의 linear independence에 어긋나기 때문이다.
+        따라서 결과로 얻는 basis는 \(u_1, \dots, u_m\)을 모두 포함한다.</p>
+        <p>(c) \((b_1, \dots, b_n)\)과 \((b'_1, \dots, b'_{n'})\)이 basis라 하자. 앞의 것은 linearly independent이고 뒤의 것은 \(V\)를 span하므로
+        exchange lemma에서 \(n \le n'\)이다. 역할을 바꾸면 \(n' \le n\)이다. 따라서 \(n = n'\)이다.</p>
       </div>
 
       <div class="thm definition" id="i-1-1-19">
-        <p><span class="thm-head">정의 1.1.19</span> <span class="thm-name">(차원, dimension)</span>.
-        유한차원 벡터공간 \(V\)의 기저의 길이를 \(V\)의 <dfn>차원</dfn>(dimension)이라 하고 \(\dim V\)로 쓴다.
-        <a href="#i-1-1-18">정리 1.1.18</a>(c) 덕분에 이 수는 기저를 어떻게 고르든 같다. \(\dim\{0\} = 0\)이다.</p>
+        <p><span class="thm-head">Definition 1.1.19</span> <span class="thm-name">(dimension)</span>.
+        finite-dimensional vector space \(V\)의 basis의 길이를 \(V\)의 <dfn>dimension</dfn>(차원)이라 하고 \(\dim V\)로 쓴다.
+        <a href="#i-1-1-18">Theorem 1.1.18</a>(c) 덕분에 이 수는 basis를 어떻게 고르든 같다. \(\dim\{0\} = 0\)이다.</p>
       </div>
 
       <div class="thm example" id="i-1-1-20">
-        <p><span class="thm-head">예 1.1.20</span>.
-        (a) 표준기저의 길이가 \(n\)이므로 \(\dim \R^n = n\)이다.
-        (b) \((1, t, \dots, t^d)\)는 \(P_d\)를 생성하고 일차독립이다. 일차독립인 이유는 다음과 같다.
+        <p><span class="thm-head">Example 1.1.20</span>.
+        (a) standard basis의 길이가 \(n\)이므로 \(\dim \R^n = n\)이다.
+        (b) \((1, t, \dots, t^d)\)는 \(P_d\)를 span하고 linearly independent이다. linearly independent인 이유는 다음과 같다.
         \(c_0 + c_1 t + \dots + c_d t^d\)이 모든 \(t\)에서 \(0\)이면, 이 식을 \(t\)로 \(k\)번 미분한 뒤 \(t = 0\)을 넣어 \(k!\,c_k = 0\)을 얻는다(\(k = 0, \dots, d\)).
         따라서 \(\dim P_d = d + 1\)이다.
-        (c) 한 성분만 \(1\)이고 나머지는 \(0\)인 행렬 \(mn\)개가 \(m \times n\) 행렬 공간의 기저이므로 그 차원은 \(mn\)이다.
-        (d) \(C^\infty(\R)\)은 유한차원이 아니다(<a href="#ex-1-1-6">연습 1.1.6</a>).</p>
+        (c) 한 성분만 \(1\)이고 나머지는 \(0\)인 행렬 \(mn\)개가 \(m \times n\) 행렬 공간의 basis이므로 그 dimension은 \(mn\)이다.
+        (d) \(C^\infty(\R)\)은 finite-dimensional이 아니다(<a href="#ex-1-1-6">Exercise 1.1.6</a>).</p>
       </div>
 
       <div class="thm corollary" id="i-1-1-21">
-        <p><span class="thm-head">따름정리 1.1.21</span>.
+        <p><span class="thm-head">Corollary 1.1.21</span>.
         \(\dim V = n\)이라 하자.</p>
         <ul>
-          <li>(a) 길이가 \(n\)인 일차독립 목록은 기저다.</li>
-          <li>(b) 길이가 \(n\)이면서 \(V\)를 생성하는 목록은 기저다.</li>
-          <li>(c) \(W\)가 \(V\)의 부분공간이면 \(W\)는 유한차원이고 \(\dim W \le n\)이다. 또 \(\dim W = n\)일 필요충분조건은 \(W = V\)이다.</li>
+          <li>(a) 길이가 \(n\)인 linearly independent 목록은 basis다.</li>
+          <li>(b) 길이가 \(n\)이면서 \(V\)를 span하는 목록은 basis다.</li>
+          <li>(c) \(W\)가 \(V\)의 subspace이면 \(W\)는 finite-dimensional이고 \(\dim W \le n\)이다. 또 \(\dim W = n\)일 필요충분조건은 \(W = V\)이다.</li>
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        (a) <a href="#i-1-1-18">정리 1.1.18</a>(b)로 기저까지 덧붙인다. 그 기저의 길이는 <a href="#i-1-1-18">정리 1.1.18</a>(c)에 의해 \(n\)이어야 하므로 덧붙인 벡터가 없다. 즉 처음 목록이 기저다.
-        (b) <a href="#i-1-1-18">정리 1.1.18</a>(a)로 기저까지 뺀다. 결과의 길이가 \(n\)이어야 하므로 뺀 벡터가 없다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) <a href="#i-1-1-18">Theorem 1.1.18</a>(b)로 basis까지 덧붙인다. 그 basis의 길이는 <a href="#i-1-1-18">Theorem 1.1.18</a>(c)에 의해 \(n\)이어야 하므로 덧붙인 벡터가 없다. 즉 처음 목록이 basis다.
+        (b) <a href="#i-1-1-18">Theorem 1.1.18</a>(a)로 basis까지 뺀다. 결과의 길이가 \(n\)이어야 하므로 뺀 벡터가 없다.</p>
         <p>(c) \(W = \{0\}\)이면 분명하다. 아니면 다음과 같이 \(W\)의 벡터를 하나씩 고른다. \(0\)이 아닌 \(w_1 \in W\)를 고른다.
         \(w_1, \dots, w_s\)를 골랐는데 \(\Span(w_1, \dots, w_s) \neq W\)이면 그 밖의 \(w_{s+1} \in W\)를 고른다.
-        이렇게 만든 목록은 늘 일차독립이다. \((w_1, \dots, w_s)\)가 일차독립이고 \((w_1, \dots, w_{s+1})\)이 일차종속이라면
-        <a href="#i-1-1-11">보조정리 1.1.11</a>의 벡터 \(w_j\)는 \(j \le s\)일 수 없고(앞 목록의 일차독립), \(j = s+1\)일 수도 없다(\(w_{s+1}\)을 고른 방법)는 모순이 생긴다.
-        일차독립인 목록은 \(V\)에서도 일차독립이고, \(V\)의 기저가 \(V\)를 생성하므로 교환 보조정리에 의해 길이가 \(n\) 이하이다.
-        따라서 이 과정은 많아야 \(n\)번 만에 \(\Span(w_1, \dots, w_s) = W\)로 끝난다. 그러면 \((w_1, \dots, w_s)\)는 \(W\)의 기저이고
-        \(\dim W = s \le n\)이다. \(\dim W = n\)이면 \(W\)의 기저는 \(V\)에서 길이 \(n\)인 일차독립 목록이므로 (a)에 의해 \(V\)의 기저이고,
+        이렇게 만든 목록은 늘 linearly independent이다. \((w_1, \dots, w_s)\)가 linearly independent이고 \((w_1, \dots, w_{s+1})\)이 linearly dependent라면
+        <a href="#i-1-1-11">Lemma 1.1.11</a>의 벡터 \(w_j\)는 \(j \le s\)일 수 없고(앞 목록의 linear independence), \(j = s+1\)일 수도 없다(\(w_{s+1}\)을 고른 방법)는 모순이 생긴다.
+        linearly independent인 목록은 \(V\)에서도 linearly independent이고, \(V\)의 basis가 \(V\)를 span하므로 exchange lemma에 의해 길이가 \(n\) 이하이다.
+        따라서 이 과정은 많아야 \(n\)번 만에 \(\Span(w_1, \dots, w_s) = W\)로 끝난다. 그러면 \((w_1, \dots, w_s)\)는 \(W\)의 basis이고
+        \(\dim W = s \le n\)이다. \(\dim W = n\)이면 \(W\)의 basis는 \(V\)에서 길이 \(n\)인 linearly independent 목록이므로 (a)에 의해 \(V\)의 basis이고,
         따라서 \(W = V\)이다. 역은 분명하다.</p>
       </div>
 
       <div class="thm example" id="i-1-1-22">
-        <p><span class="thm-head">예 1.1.22</span> <span class="thm-name">(평면의 차원)</span>.
-        <a href="#i-1-1-6">예 1.1.6</a>(b)의 평면 \(W = \{x \in \R^3 : x^1 + x^2 + x^3 = 0\}\)의 차원을 구하자.
-        \(c_1 = (1, -1, 0)\)과 \(c_2 = (0, 1, -1)\)은 \(W\)에 있고 일차독립이다(\(a^1 c_1 + a^2 c_2 = (a^1,\ a^2 - a^1,\ -a^2) = 0\)이면 \(a^1 = a^2 = 0\)).
-        \(W\)의 기저는 \(W\)를 생성하므로 교환 보조정리에 의해 길이가 \(2\) 이상이다. 한편 \(e_1 \notin W\)이므로 \(W \neq \R^3\)이고,
-        <a href="#i-1-1-21">따름정리 1.1.21</a>(c)에 의해 \(\dim W \lt 3\)이다. 따라서 \(\dim W = 2\)이고, <a href="#i-1-1-21">따름정리 1.1.21</a>(a)에 의해 \((c_1, c_2)\)는 \(W\)의 기저다.
+        <p><span class="thm-head">Example 1.1.22</span> <span class="thm-name">(dimension of a plane)</span>.
+        <a href="#i-1-1-6">Example 1.1.6</a>(b)의 평면 \(W = \{x \in \R^3 : x^1 + x^2 + x^3 = 0\}\)의 dimension을 구하자.
+        \(c_1 = (1, -1, 0)\)과 \(c_2 = (0, 1, -1)\)은 \(W\)에 있고 linearly independent이다(\(a^1 c_1 + a^2 c_2 = (a^1,\ a^2 - a^1,\ -a^2) = 0\)이면 \(a^1 = a^2 = 0\)).
+        \(W\)의 basis는 \(W\)를 span하므로 exchange lemma에 의해 길이가 \(2\) 이상이다. 한편 \(e_1 \notin W\)이므로 \(W \neq \R^3\)이고,
+        <a href="#i-1-1-21">Corollary 1.1.21</a>(c)에 의해 \(\dim W \lt 3\)이다. 따라서 \(\dim W = 2\)이고, <a href="#i-1-1-21">Corollary 1.1.21</a>(a)에 의해 \((c_1, c_2)\)는 \(W\)의 basis다.
         실제로 \(x \in W\)이면 \(x^3 = -x^1 - x^2\)이므로 \(x = x^1 c_1 + (x^1 + x^2) c_2\)이다.</p>
-        <p class="verified">검증: <code>verify/v-1-1-vector-spaces-bases.py</code></p>
+        <p class="verified">Verification: <code>verify/v-1-1-vector-spaces-bases.py</code></p>
       </div>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: 다양체의 차원</p>
-        <p><a href="../11-smooth-manifolds/index.html">11장</a>에서 \(n\)차원 다양체를 “국소적으로 \(\R^n\)과 같은 공간”으로 정의한다.
-        <a href="../13-tangent-spaces/index.html">13장</a>에서는 \(n\)차원 다양체의 모든 접공간이 \(n\)차원 벡터공간임을 보이는데,
-        그 증명의 마지막 단계가 “이 \(n\)개의 벡터가 기저다”를 보이는 일이다. 한편 다양체 위의 매끄러운 함수 전체
-        \(C^\infty(M)\)(<a href="../12-smooth-maps/index.html">12장</a>)은 <a href="#i-1-1-20">예 1.1.20</a>(d)처럼 무한차원 벡터공간이다.</p>
+        <p class="box-title">Looking ahead: manifold의 dimension</p>
+        <p><a href="../11-smooth-manifolds/index.html">Chapter 11</a>에서 \(n\)-dimensional manifold를 “국소적으로 \(\R^n\)과 같은 공간”으로 정의한다.
+        <a href="../13-tangent-spaces/index.html">Chapter 13</a>에서는 \(n\)-dimensional manifold의 모든 tangent space가 \(n\)-dimensional vector space임을 보이는데,
+        그 증명의 마지막 단계가 “이 \(n\)개의 벡터가 basis다”를 보이는 일이다. 한편 manifold 위의 smooth function 전체
+        \(C^\infty(M)\)(<a href="../12-smooth-maps/index.html">Chapter 12</a>)은 <a href="#i-1-1-20">Example 1.1.20</a>(d)처럼 infinite-dimensional vector space이다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>벡터공간은 여덟 공리를 만족하는 덧셈과 스칼라곱을 가진 집합이다. \(\R^n\) 말고도 행렬, 다항식, 함수의 공간이 있다. 구면은 벡터공간이 아니다.</li>
-        <li>부분공간은 \(0\)을 포함하고 덧셈과 스칼라곱에 닫힌 부분집합이다.</li>
-        <li>기저는 일차독립이면서 생성하는 목록이다. 기저를 고르면 모든 벡터가 성분 \(v^i\)로 꼭 한 가지 방식으로 표현된다(<a href="#i-1-1-13">정리 1.1.13</a>).</li>
-        <li>교환 보조정리 때문에 모든 기저의 길이가 같고, 이 길이가 차원이다(<a href="#i-1-1-18">정리 1.1.18</a>).</li>
-        <li>성분과 계수에는 위첨자, 벡터 목록의 번호에는 아래첨자를 쓴다. 이 장의 기준 기저는 \(\mathcal{B} = ((2,1), (-1,1))\)이다(<a href="#i-1-1-15">예 1.1.15</a>).</li>
+        <li>vector space는 여덟 공리를 만족하는 덧셈과 스칼라곱을 가진 집합이다. \(\R^n\) 말고도 행렬, 다항식, 함수의 공간이 있다. sphere는 vector space가 아니다.</li>
+        <li>subspace는 \(0\)을 포함하고 덧셈과 스칼라곱에 닫힌 부분집합이다.</li>
+        <li>basis는 linearly independent이면서 span하는 목록이다. basis를 고르면 모든 벡터가 성분 \(v^i\)로 꼭 한 가지 방식으로 표현된다(<a href="#i-1-1-13">Theorem 1.1.13</a>).</li>
+        <li>exchange lemma 때문에 모든 basis의 길이가 같고, 이 길이가 dimension이다(<a href="#i-1-1-18">Theorem 1.1.18</a>).</li>
+        <li>성분과 coefficient에는 위첨자, 벡터 목록의 번호에는 아래첨자를 쓴다. 이 장의 기준 basis는 \(\mathcal{B} = ((2,1), (-1,1))\)이다(<a href="#i-1-1-15">Example 1.1.15</a>).</li>
       </ul>
-      <p class="next">다음 절에서는 덧셈과 스칼라곱을 보존하는 사상, 즉 선형사상을 다룬다. 기저를 고르면 선형사상은 행렬이 되고, 사상의 합성은 행렬의 곱이 된다.</p>
+      <p class="next">다음 절에서는 덧셈과 스칼라곱을 보존하는 map, 즉 linear map을 다룬다. basis를 고르면 linear map은 행렬이 되고, map의 합성은 행렬의 곱이 된다.</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-1-1-1" data-level="1">
-        <p><span class="thm-head">연습 1.1.1</span> <span class="level">★</span>
-        다음 집합이 \(\R^3\)의 부분공간인지 판별하여라.
+        <p><span class="thm-head">Exercise 1.1.1</span> <span class="level">★</span>
+        다음 집합이 \(\R^3\)의 subspace인지 판별하여라.
         (a) \(\{x : x^1 = 2x^2\}\) (b) \(\{x : x^1 x^2 = 0\}\) (c) \(\{x : x^1 + x^2 + x^3 = 1\}\) (d) \(\{(t, 2t, 3t) : t \in \R\}\)</p>
-        <details class="hint"><summary>힌트</summary><p><a href="#i-1-1-5">정의 1.1.5</a>의 세 조건을 차례로 확인한다. 아니라고 답할 때는 어기는 조건과 구체적인 반례를 댄다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 부분공간이다. \(0 = 2 \cdot 0\)이다. \(x^1 = 2x^2\), \(y^1 = 2y^2\)이면 \(x^1 + y^1 = 2(x^2 + y^2)\)이고 \(ax^1 = 2(ax^2)\)이다.</p>
-          <p>(b) 부분공간이 아니다. \(e_1 = (1,0,0)\)과 \(e_2 = (0,1,0)\)은 조건 \(x^1x^2 = 0\)을 만족하지만 \(e_1 + e_2 = (1,1,0)\)은 \(1 \cdot 1 \neq 0\)이다. 덧셈에 닫혀 있지 않다.</p>
-          <p>(c) 부분공간이 아니다. \(0 + 0 + 0 \neq 1\)이므로 \(0\)을 포함하지 않는다.</p>
-          <p>(d) 부분공간이다. 이 집합은 \(\Span((1,2,3))\)이고, 생성하는 부분공간은 언제나 부분공간이다.</p>
+        <details class="hint"><summary>Hint</summary><p><a href="#i-1-1-5">Definition 1.1.5</a>의 세 조건을 차례로 확인한다. 아니라고 답할 때는 어기는 조건과 구체적인 반례를 댄다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) subspace이다. \(0 = 2 \cdot 0\)이다. \(x^1 = 2x^2\), \(y^1 = 2y^2\)이면 \(x^1 + y^1 = 2(x^2 + y^2)\)이고 \(ax^1 = 2(ax^2)\)이다.</p>
+          <p>(b) subspace가 아니다. \(e_1 = (1,0,0)\)과 \(e_2 = (0,1,0)\)은 조건 \(x^1x^2 = 0\)을 만족하지만 \(e_1 + e_2 = (1,1,0)\)은 \(1 \cdot 1 \neq 0\)이다. 덧셈에 닫혀 있지 않다.</p>
+          <p>(c) subspace가 아니다. \(0 + 0 + 0 \neq 1\)이므로 \(0\)을 포함하지 않는다.</p>
+          <p>(d) subspace이다. 이 집합은 \(\Span((1,2,3))\)이고, span은 언제나 subspace이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-1-2" data-level="1">
-        <p><span class="thm-head">연습 1.1.2</span> <span class="level">★</span>
-        \(\R^3\)의 목록 \(((1,1,0), (0,1,1), (1,0,1))\)이 기저임을 보이고, 이 기저에 대한 \((2, 3, 1)\)의 성분을 구하여라.</p>
-        <details class="hint"><summary>힌트</summary><p><a href="#i-1-1-15">예 1.1.15</a>처럼 임의의 \(x\)에 대한 연립방정식을 세우고, 해가 꼭 하나임을 보인다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 1.1.2</span> <span class="level">★</span>
+        \(\R^3\)의 목록 \(((1,1,0), (0,1,1), (1,0,1))\)이 basis임을 보이고, 이 basis에 대한 \((2, 3, 1)\)의 성분을 구하여라.</p>
+        <details class="hint"><summary>Hint</summary><p><a href="#i-1-1-15">Example 1.1.15</a>처럼 임의의 \(x\)에 대한 연립방정식을 세우고, 해가 꼭 하나임을 보인다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>\(x = a(1,1,0) + b(0,1,1) + c(1,0,1)\)을 성분별로 쓰면 \(a + c = x^1\), \(a + b = x^2\), \(b + c = x^3\)이다.
           세 식을 모두 더하면 \(2(a + b + c) = x^1 + x^2 + x^3\)이다. \(s = (x^1 + x^2 + x^3)/2\)로 두면
           \(a = s - (b + c) = s - x^3\), \(b = s - (a + c) = s - x^1\), \(c = s - (a + b) = s - x^2\)이다.
-          이 값은 거꾸로 세 식을 만족한다(예: \(a + c = 2s - x^3 - x^2 = x^1\)). 해가 꼭 하나이므로 <a href="#i-1-1-13">정리 1.1.13</a>에 의해 기저다.
+          이 값은 거꾸로 세 식을 만족한다(예: \(a + c = 2s - x^3 - x^2 = x^1\)). 해가 꼭 하나이므로 <a href="#i-1-1-13">Theorem 1.1.13</a>에 의해 basis다.
           \(x = (2,3,1)\)이면 \(s = 3\)이므로 성분은 \((a, b, c) = (2, 1, 0)\)이다. 확인: \(2(1,1,0) + (0,1,1) = (2,3,1)\).</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-1-3" data-level="1">
-        <p><span class="thm-head">연습 1.1.3</span> <span class="level">★</span>
-        \((1,\ t - 1,\ (t-1)^2)\)이 \(P_2\)의 기저임을 보이고, 이 기저에 대한 \(t^2\)의 성분을 구하여라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(t = (t - 1) + 1\)로 쓴다. \(\dim P_2 = 3\)이므로 <a href="#i-1-1-21">따름정리 1.1.21</a>(b)를 쓸 수 있다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 1.1.3</span> <span class="level">★</span>
+        \((1,\ t - 1,\ (t-1)^2)\)이 \(P_2\)의 basis임을 보이고, 이 basis에 대한 \(t^2\)의 성분을 구하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(t = (t - 1) + 1\)로 쓴다. \(\dim P_2 = 3\)이므로 <a href="#i-1-1-21">Corollary 1.1.21</a>(b)를 쓸 수 있다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>\(t = (t-1) + 1\)이므로 \(t^2 = ((t-1) + 1)^2 = (t-1)^2 + 2(t-1) + 1\)이다. 따라서 임의의 \(p = c_0 + c_1 t + c_2 t^2\)은
           \[ p = (c_0 + c_1 + c_2) \cdot 1 + (c_1 + 2c_2)(t - 1) + c_2 (t - 1)^2 \]
-          로 쓸 수 있다. 즉 이 목록은 \(P_2\)를 생성한다. 길이가 \(3 = \dim P_2\)(<a href="#i-1-1-20">예 1.1.20</a>(b))이므로 <a href="#i-1-1-21">따름정리 1.1.21</a>(b)에 의해 기저다.
+          로 쓸 수 있다. 즉 이 목록은 \(P_2\)를 span한다. 길이가 \(3 = \dim P_2\)(<a href="#i-1-1-20">Example 1.1.20</a>(b))이므로 <a href="#i-1-1-21">Corollary 1.1.21</a>(b)에 의해 basis다.
           \(t^2\)의 성분은 \((1, 2, 1)\)이다. (성분이 \(p(1),\ p'(1),\ p''(1)/2\)와 같다는 점에 주목하자. \(t = 1\)에서의 테일러 전개다.)</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-1-4" data-level="1">
-        <p><span class="thm-head">연습 1.1.4</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 1.1.4</span> <span class="level">★</span>
         참인지 거짓인지 판별하고 이유를 대어라.
-        (a) \(\R^3\)의 벡터 네 개로 이루어진 목록은 언제나 일차종속이다.
-        (b) 일차독립인 목록에서 벡터 몇 개를 빼도 일차독립이다.
-        (c) \(V\)를 생성하는 목록에 벡터를 덧붙여도 \(V\)를 생성한다.
-        (d) 두 부분공간의 합집합은 부분공간이다.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 참. 표준기저 \((e_1, e_2, e_3)\)이 \(\R^3\)을 생성하므로 교환 보조정리에 의해 일차독립인 목록의 길이는 \(3\) 이하다.</p>
-          <p>(b) 참. 남은 벡터들 사이의 관계식은, 뺀 벡터들의 계수를 \(0\)으로 두면 원래 목록의 관계식이 된다. 원래 목록이 일차독립이므로 모든 계수가 \(0\)이다.</p>
-          <p>(c) 참. 원래 목록의 일차결합은 덧붙인 벡터의 계수를 \(0\)으로 둔 새 목록의 일차결합이다.</p>
-          <p>(d) 거짓. <a href="#i-1-1-7">비예 1.1.7</a>(b)의 두 좌표축이 반례다.</p>
+        (a) \(\R^3\)의 벡터 네 개로 이루어진 목록은 언제나 linearly dependent이다.
+        (b) linearly independent인 목록에서 벡터 몇 개를 빼도 linearly independent이다.
+        (c) \(V\)를 span하는 목록에 벡터를 덧붙여도 \(V\)를 span한다.
+        (d) 두 subspace의 합집합은 subspace이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. standard basis \((e_1, e_2, e_3)\)이 \(\R^3\)을 span하므로 exchange lemma에 의해 linearly independent인 목록의 길이는 \(3\) 이하다.</p>
+          <p>(b) 참. 남은 벡터들 사이의 관계식은, 뺀 벡터들의 coefficient를 \(0\)으로 두면 원래 목록의 관계식이 된다. 원래 목록이 linearly independent이므로 모든 coefficient가 \(0\)이다.</p>
+          <p>(c) 참. 원래 목록의 linear combination은 덧붙인 벡터의 coefficient를 \(0\)으로 둔 새 목록의 linear combination이다.</p>
+          <p>(d) 거짓. <a href="#i-1-1-7">Non-example 1.1.7</a>(b)의 두 좌표축이 반례다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-1-5" data-level="2">
-        <p><span class="thm-head">연습 1.1.5</span> <span class="level">★★</span>
+        <p><span class="thm-head">Exercise 1.1.5</span> <span class="level">★★</span>
         \(r \gt 0\), \(0 \lt \theta \lt \pi\), \(\varphi \in \R\)이라 하고
         \[ u = (r\cos\theta\cos\varphi,\ r\cos\theta\sin\varphi,\ -r\sin\theta), \qquad w = (-r\sin\theta\sin\varphi,\ r\sin\theta\cos\varphi,\ 0) \]
-        로 두자. \((u, w)\)가 일차독립임을 보여라. \(\theta = 0\)이면 어떻게 되는가? (<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-16">예 2.1.16</a>, <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-7">예 6.1.7</a>에서 사용)</p>
-        <details class="hint"><summary>힌트</summary><p>셋째 성분부터 본다. \(\sin\theta \gt 0\)이다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        로 두자. \((u, w)\)가 linearly independent임을 보여라. \(\theta = 0\)이면 어떻게 되는가? (<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-16">Example 2.1.16</a>, <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-7">Example 6.1.7</a>에서 사용)</p>
+        <details class="hint"><summary>Hint</summary><p>셋째 성분부터 본다. \(\sin\theta \gt 0\)이다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>\(au + cw = 0\)이라 하자. 셋째 성분은 \(-ar\sin\theta = 0\)이다. \(r \gt 0\)이고 \(0 \lt \theta \lt \pi\)에서 \(\sin\theta \gt 0\)이므로 \(a = 0\)이다.
           그러면 \(cw = 0\)이고, 첫째와 둘째 성분에서 \(cr\sin\theta\sin\varphi = 0\), \(cr\sin\theta\cos\varphi = 0\), 즉 \(c\sin\varphi = c\cos\varphi = 0\)이다.
-          따라서 \(c = c(\sin^2\varphi + \cos^2\varphi) = (c\sin\varphi)\sin\varphi + (c\cos\varphi)\cos\varphi = 0\)이다. 그러므로 \((u, w)\)는 일차독립이다.</p>
-          <p>\(\theta = 0\)이면 \(w = 0\)이므로 \((u, w)\)는 일차종속이다(<a href="#i-1-1-10">예 1.1.10</a>(d)).</p>
-          <p>(이 두 벡터는 <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-7">예 6.1.7</a>에서 반지름 \(r\)인 구면의 기준 매개화를 \(\theta\)와 \(\varphi\)로 편미분한 벡터로 다시 나온다.
-          \(\theta = 0, \pi\)를 매개화의 정의역에서 빼는 이유가 여기서 이미 보인다.)</p>
-          <p class="verified">검증: <code>verify/v-1-1-vector-spaces-bases.py</code></p>
+          따라서 \(c = c(\sin^2\varphi + \cos^2\varphi) = (c\sin\varphi)\sin\varphi + (c\cos\varphi)\cos\varphi = 0\)이다. 그러므로 \((u, w)\)는 linearly independent이다.</p>
+          <p>\(\theta = 0\)이면 \(w = 0\)이므로 \((u, w)\)는 linearly dependent이다(<a href="#i-1-1-10">Example 1.1.10</a>(d)).</p>
+          <p>(이 두 벡터는 <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-7">Example 6.1.7</a>에서 반지름 \(r\)인 sphere의 standard parametrization의 \(\theta\)와 \(\varphi\)에 대한 partial derivative로 다시 나온다.
+          \(\theta = 0, \pi\)를 parametrization의 정의역에서 빼는 이유가 여기서 이미 보인다.)</p>
+          <p class="verified">Verification: <code>verify/v-1-1-vector-spaces-bases.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-1-6" data-level="2">
-        <p><span class="thm-head">연습 1.1.6</span> <span class="level">★★</span>
-        \(C^\infty(\R)\)이 유한차원이 아님을 보여라.</p>
-        <details class="hint"><summary>힌트</summary><p>모든 \(m\)에 대해 \((1, t, \dots, t^m)\)이 일차독립이다(<a href="#i-1-1-20">예 1.1.20</a>(b)). 교환 보조정리를 쓴다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(C^\infty(\R)\)이 유한차원이라 가정하자. 그러면 길이 \(N\)인 목록이 \(C^\infty(\R)\)을 생성한다.
-          한편 <a href="#i-1-1-20">예 1.1.20</a>(b)의 논증(미분한 뒤 \(t = 0\) 대입)에 의해 \((1, t, \dots, t^N)\)은 \(C^\infty(\R)\)에서 일차독립이고 길이가 \(N + 1\)이다.
-          교환 보조정리에 의해 \(N + 1 \le N\)이어야 하므로 모순이다.</p>
+        <p><span class="thm-head">Exercise 1.1.6</span> <span class="level">★★</span>
+        \(C^\infty(\R)\)이 finite-dimensional이 아님을 보여라.</p>
+        <details class="hint"><summary>Hint</summary><p>모든 \(m\)에 대해 \((1, t, \dots, t^m)\)이 linearly independent이다(<a href="#i-1-1-20">Example 1.1.20</a>(b)). exchange lemma를 쓴다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(C^\infty(\R)\)이 finite-dimensional이라 가정하자. 그러면 길이 \(N\)인 목록이 \(C^\infty(\R)\)을 span한다.
+          한편 <a href="#i-1-1-20">Example 1.1.20</a>(b)의 논증(미분한 뒤 \(t = 0\) 대입)에 의해 \((1, t, \dots, t^N)\)은 \(C^\infty(\R)\)에서 linearly independent이고 길이가 \(N + 1\)이다.
+          exchange lemma에 의해 \(N + 1 \le N\)이어야 하므로 모순이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-1-7" data-level="3">
-        <p><span class="thm-head">연습 1.1.7</span> <span class="level">★★★</span>
-        \(U\)와 \(W\)가 유한차원 벡터공간 \(V\)의 부분공간일 때 \(U \cap W\)와 \(U + W = \{u + w : u \in U,\ w \in W\}\)는 부분공간이고
+        <p><span class="thm-head">Exercise 1.1.7</span> <span class="level">★★★</span>
+        \(U\)와 \(W\)가 finite-dimensional vector space \(V\)의 subspace일 때 \(U \cap W\)와 \(U + W = \{u + w : u \in U,\ w \in W\}\)는 subspace이고
         \[ \dim(U + W) = \dim U + \dim W - \dim(U \cap W) \]
         임을 보여라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(U \cap W\)의 기저를 \(U\)의 기저와 \(W\)의 기저로 각각 확장한다(<a href="#i-1-1-18">정리 1.1.18</a>(b)). 두 확장을 합친 목록이 \(U + W\)의 기저임을 보인다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(U \cap W\)가 부분공간인 것은 세 조건이 \(U\)와 \(W\) 양쪽에서 성립하기 때문이다. \(U + W\)는 \(0 = 0 + 0\)을 포함하고,
-          \((u + w) + (u' + w') = (u + u') + (w + w')\), \(a(u + w) = au + aw\)이므로 부분공간이다. <a href="#i-1-1-21">따름정리 1.1.21</a>(c)에 의해 모두 유한차원이다.</p>
-          <p>\((x_1, \dots, x_k)\)를 \(U \cap W\)의 기저라 하자. <a href="#i-1-1-18">정리 1.1.18</a>(b)로 이것을 \(U\)의 기저 \((x_1, \dots, x_k, u_1, \dots, u_p)\)와
-          \(W\)의 기저 \((x_1, \dots, x_k, w_1, \dots, w_q)\)로 확장한다. 목록 \(\mathcal{L} = (x_1, \dots, x_k, u_1, \dots, u_p, w_1, \dots, w_q)\)가
-          \(U + W\)의 기저임을 보이면 \(\dim(U + W) = k + p + q = (k + p) + (k + q) - k\)가 되어 증명이 끝난다.</p>
-          <p><em>생성.</em> \(u \in U\)는 \(x\)와 \(u_i\)의 일차결합이고 \(w \in W\)는 \(x\)와 \(w_i\)의 일차결합이므로 \(u + w\)는 \(\mathcal{L}\)의 일차결합이다.</p>
-          <p><em>일차독립.</em> \(\sum_i a^i x_i + \sum_i b^i u_i + \sum_i c^i w_i = 0\)이라 하자. 그러면
+        <details class="hint"><summary>Hint</summary><p>\(U \cap W\)의 basis를 \(U\)의 basis와 \(W\)의 basis로 각각 확장한다(<a href="#i-1-1-18">Theorem 1.1.18</a>(b)). 두 확장을 합친 목록이 \(U + W\)의 basis임을 보인다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(U \cap W\)가 subspace인 것은 세 조건이 \(U\)와 \(W\) 양쪽에서 성립하기 때문이다. \(U + W\)는 \(0 = 0 + 0\)을 포함하고,
+          \((u + w) + (u' + w') = (u + u') + (w + w')\), \(a(u + w) = au + aw\)이므로 subspace이다. <a href="#i-1-1-21">Corollary 1.1.21</a>(c)에 의해 모두 finite-dimensional이다.</p>
+          <p>\((x_1, \dots, x_k)\)를 \(U \cap W\)의 basis라 하자. <a href="#i-1-1-18">Theorem 1.1.18</a>(b)로 이것을 \(U\)의 basis \((x_1, \dots, x_k, u_1, \dots, u_p)\)와
+          \(W\)의 basis \((x_1, \dots, x_k, w_1, \dots, w_q)\)로 확장한다. 목록 \(\mathcal{L} = (x_1, \dots, x_k, u_1, \dots, u_p, w_1, \dots, w_q)\)가
+          \(U + W\)의 basis임을 보이면 \(\dim(U + W) = k + p + q = (k + p) + (k + q) - k\)가 되어 증명이 끝난다.</p>
+          <p><em>span.</em> \(u \in U\)는 \(x\)와 \(u_i\)의 linear combination이고 \(w \in W\)는 \(x\)와 \(w_i\)의 linear combination이므로 \(u + w\)는 \(\mathcal{L}\)의 linear combination이다.</p>
+          <p><em>linearly independent.</em> \(\sum_i a^i x_i + \sum_i b^i u_i + \sum_i c^i w_i = 0\)이라 하자. 그러면
           \(\sum_i c^i w_i = -\sum_i a^i x_i - \sum_i b^i u_i\)이다. 좌변은 \(W\)에, 우변은 \(U\)에 있으므로 이 벡터는 \(U \cap W\)에 있고,
           따라서 \(\sum_i c^i w_i = \sum_i d^i x_i\)인 \(d^i\)가 있다. 이 식을 \(\sum_i d^i x_i - \sum_i c^i w_i = 0\)으로 옮기면,
-          \((x_1, \dots, x_k, w_1, \dots, w_q)\)가 일차독립이므로 모든 \(c^i\)(와 \(d^i\))가 \(0\)이다. 그러면 \(\sum_i a^i x_i + \sum_i b^i u_i = 0\)이고,
-          \(U\)의 기저가 일차독립이므로 모든 \(a^i\)와 \(b^i\)가 \(0\)이다.</p>
-          <p class="verified">검증: <code>verify/v-1-1-vector-spaces-bases.py</code> (구체적인 부분공간에서 수치 확인)</p>
+          \((x_1, \dots, x_k, w_1, \dots, w_q)\)가 linearly independent이므로 모든 \(c^i\)(와 \(d^i\))가 \(0\)이다. 그러면 \(\sum_i a^i x_i + \sum_i b^i u_i = 0\)이고,
+          \(U\)의 basis가 linearly independent이므로 모든 \(a^i\)와 \(b^i\)가 \(0\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-1-1-vector-spaces-bases.py</code> (구체적인 subspace에서 수치 확인)</p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="index.html">← 1. 선형대수 복습 (장 개요)</a>
-    <a rel="next" href="1-2-linear-maps.html">1.2 선형사상과 행렬 →</a>
+    <a rel="prev" href="index.html">← 1. Linear Algebra Review (Chapter overview)</a>
+    <a rel="next" href="1-2-linear-maps.html">1.2 Linear Maps and Matrices →</a>
   </nav>
 </body>
 </html>

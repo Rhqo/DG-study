@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>3.7 연결성 — 미분기하 스터디</title>
+  <title>3.7 Connectedness — DG Study</title>
   <meta name="dg-id" content="3.7">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="3.2, 3.3, 3.6">
@@ -15,431 +15,431 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">3. 위상공간 기초</a> ›
-    <span>3.7 연결성</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">3. Basic Topology</a> ›
+    <span>3.7 Connectedness</span>
   </nav>
 
   <main>
     <header>
-      <h1>3.7 연결성</h1>
-      <p class="meta">대응 교재:
-        <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM 4장]</a>,
-        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 부록 A]</a>,
-        <a class="cite" href="../../references.html#dC">[dC 5장 부록 B, D]</a></p>
+      <h1>3.7 Connectedness</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM Ch. 4]</a>,
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM App. A]</a>,
+        <a class="cite" href="../../references.html#dC">[dC Ch. 5 App. B, D]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>연결성을 “열려 있으면서 닫힌 부분집합이 \(\varnothing\)과 전체뿐”으로 정의하고, \(\R\)의 연결 부분집합이 구간임을 증명할 수 있다.</li>
-        <li>경로연결성을 정의하고, 경로연결이면 연결이지만 역은 거짓임(위상수학자의 사인 곡선)을 설명할 수 있다.</li>
-        <li>연결성분을 정의하고, 국소적으로 경로연결인 공간(예: \(\R^n\)의 열린집합)에서는 연결과 경로연결이 같음을 증명할 수 있다.</li>
-        <li>연결성을 위상적 성질로 써서 \(\R \not\cong \R^n\) (\(n \ge 2\))을 보이고, 국소상수함수가 연결공간에서 상수임을 증명할 수 있다.</li>
+        <li>connectedness를 “열려 있으면서 닫힌 부분집합이 \(\varnothing\)과 전체뿐”으로 정의하고, \(\R\)의 connected 부분집합이 구간임을 증명할 수 있다.</li>
+        <li>path-connectedness를 정의하고, path-connected이면 connected이지만 역은 거짓임(topologist's sine curve)를 설명할 수 있다.</li>
+        <li>connected component를 정의하고, locally path-connected인 공간(예: \(\R^n\)의 open set)에서는 connected와 path-connected가 같음을 증명할 수 있다.</li>
+        <li>connectedness를 topological property로 써서 \(\R \not\cong \R^n\) (\(n \ge 2\))을 보이고, locally constant function이 connected space에서 상수임을 증명할 수 있다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="3-1-topological-spaces.html#i-3-1-15">정의 3.1.15 (닫힌집합, 폐포)</a>, <a href="3-1-topological-spaces.html#i-3-1-17">명제 3.1.17</a></li>
-        <li><a href="3-2-continuity-homeomorphism.html#i-3-2-1">정의 3.2.1 (연속)</a>, 위상적 성질(<a href="3-2-continuity-homeomorphism.html">3.2절</a>)</li>
-        <li><a href="3-3-subspaces-products.html#i-3-3-4">명제 3.3.4</a>, <a href="3-3-subspaces-products.html#i-3-3-6">보조정리 3.3.6 (붙이기 보조정리)</a></li>
-        <li><a href="3-4-quotient-spaces.html#i-3-4-14">명제 3.4.14</a>, <a href="3-6-compactness.html#i-3-6-13">예 3.6.13</a> (\(\RP^n\), \(T^2\)의 모형)</li>
+        <li><a href="3-1-topological-spaces.html#i-3-1-15">Definition 3.1.15 (closed set, closure)</a>, <a href="3-1-topological-spaces.html#i-3-1-17">Proposition 3.1.17</a></li>
+        <li><a href="3-2-continuity-homeomorphism.html#i-3-2-1">Definition 3.2.1 (연속)</a>, topological property(<a href="3-2-continuity-homeomorphism.html">Section 3.2</a>)</li>
+        <li><a href="3-3-subspaces-products.html#i-3-3-4">Proposition 3.3.4</a>, <a href="3-3-subspaces-products.html#i-3-3-6">Lemma 3.3.6 (gluing lemma)</a></li>
+        <li><a href="3-4-quotient-spaces.html#i-3-4-14">Proposition 3.4.14</a>, <a href="3-6-compactness.html#i-3-6-13">Example 3.6.13</a> (\(\RP^n\), \(T^2\)의 모형)</li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p><a href="3-6-compactness.html">3.6절</a>에서 컴팩트성으로 \([0, 1] \not\cong (0, 1)\)을 보였다. 그러나 \(\R\)과 \(\R^2\)는 둘 다 컴팩트하지 않으므로 컴팩트성으로는 구별되지 않는다.
-      둘은 정말 다른가? 직관은 분명하다. \(\R\)에서 한 점을 빼면 두 조각으로 갈라지지만, \(\R^2\)에서 한 점을 빼도 한 조각으로 남는다. 이 “조각의 개수”를 위상의 언어로 옮긴 것이 연결성이다.</p>
-      <p>연결성은 앞으로 여러 곳에서 가정으로 쓰인다. <a href="../10-gauss-bonnet/index.html">10장</a>의 곡면 분류는 연결 컴팩트 곡면에 대한 것이고, <a href="../19-de-rham/index.html">19장</a>의 \(H^0_{\mathrm{dR}}(M)\)은
-      \(M\)의 연결성분의 개수를 센다. 또 “도함수가 \(0\)이면 상수”는 연결된 정의역에서만 참이다(\(\R \setminus \{0\}\) 위의 부호함수를 생각하자. <a href="#i-3-7-18">따름정리 3.7.18</a>). 이 절은 이런 논증의 뼈대를 준비한다.</p>
+      <h2>Motivation</h2>
+      <p><a href="3-6-compactness.html">Section 3.6</a>에서 compactness로 \([0, 1] \not\cong (0, 1)\)을 보였다. 그러나 \(\R\)과 \(\R^2\)는 둘 다 compact하지 않으므로 compactness로는 구별되지 않는다.
+      둘은 정말 다른가? 직관은 분명하다. \(\R\)에서 한 점을 빼면 두 조각으로 갈라지지만, \(\R^2\)에서 한 점을 빼도 한 조각으로 남는다. 이 “조각의 개수”를 topology의 언어로 옮긴 것이 connectedness이다.</p>
+      <p>connectedness는 앞으로 여러 곳에서 가정으로 쓰인다. <a href="../10-gauss-bonnet/index.html">Chapter 10</a>의 surface 분류는 connected compact surface에 대한 것이고, <a href="../19-de-rham/index.html">Chapter 19</a>의 \(H^0_{\mathrm{dR}}(M)\)은
+      \(M\)의 connected component의 개수를 센다. 또 “도함수가 \(0\)이면 상수”는 connected인 정의역에서만 참이다(\(\R \setminus \{0\}\) 위의 부호함수를 생각하자. <a href="#i-3-7-18">Corollary 3.7.18</a>). 이 절은 이런 논증의 뼈대를 준비한다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 한 조각과 이어진 길</p>
-        <p>두 원판을 떨어뜨려 놓은 집합 \(A\)는 두 조각으로 나뉜다(<a href="#fig-3-7-1">그림 3.7.1</a>(a)). 각 원판은 \(A\) 안에서 열려 있으면서(다른 원판에 가까운 점이 없다) 닫혀 있다.
-        “연결”은 이런 식으로 쪼갤 수 없다는 뜻이다. 한편 고리 모양 영역의 두 점은 영역 안의 길로 이을 수 있다((b)). “경로연결”은 이런 길이 언제나 있다는 뜻이다.
-        보통의 공간에서는 두 개념이 같지만, 극한에서 심하게 진동하는 공간에서는 다를 수 있다(<a href="#fig-3-7-2">그림 3.7.2</a>).</p>
+        <p class="box-title">Intuition: 한 조각과 이어진 길</p>
+        <p>두 원판을 떨어뜨려 놓은 집합 \(A\)는 두 조각으로 나뉜다(<a href="#fig-3-7-1">Figure 3.7.1</a>(a)). 각 원판은 \(A\) 안에서 열려 있으면서(다른 원판에 가까운 점이 없다) 닫혀 있다.
+        “connected”는 이런 식으로 쪼갤 수 없다는 뜻이다. 한편 고리 모양 영역의 두 점은 영역 안의 길로 이을 수 있다((b)). “path-connected”는 이런 길이 언제나 있다는 뜻이다.
+        보통의 공간에서는 두 개념이 같지만, 극한에서 심하게 진동하는 공간에서는 다를 수 있다(<a href="#fig-3-7-2">Figure 3.7.2</a>).</p>
       </aside>
 
       <figure class="dg-figure" id="fig-3-7-1">
-        <img src="figures/fig-3-7-1-connectedness.svg" alt="(a) 서로 떨어진 두 원판 D₁(파랑 테두리)과 D₂(주황 테두리), 그리고 둘 사이의 세로 점선 x¹ = 0.05. (b) 점선 경계의 고리 모양 영역 안에서 오른쪽 위의 점 p에서 출발해 위를 돌아 왼쪽 아래의 점 q에 이르는 주황 경로 γ.">
-        <figcaption><span class="fig-head">그림 3.7.1.</span>
-        (a) \(A = D_1 \cup D_2\), 중심이 \((-0.7, 0)\), \((0.8, 0.1)\)이고 반지름이 \(0.55\), \(0.45\)인 닫힌 원판. \(D_1 = A \cap \{x^1 \lt 0.05\}\), \(D_2 = A \cap \{x^1 \gt 0.05\}\)이므로 \(A\)는 연결이 아니다(<a href="#i-3-7-3">비예 3.7.3</a>).
-        (b) 고리 \(\{1/2 \lt \abs{x} \lt 1\}\) 안의 경로 \(\gamma(t) = \rho(t)(\cos\theta(t), \sin\theta(t))\), \(\rho(t) = 0.75 + 0.1\sin 3\pi t\), \(\theta(t) = \pi/6 + 7\pi t/6\).</figcaption>
+        <img src="figures/fig-3-7-1-connectedness.svg" alt="(a) 서로 떨어진 두 원판 D₁(파랑 테두리)과 D₂(주황 테두리), 그리고 둘 사이의 세로 점선 x¹ = 0.05. (b) 점선 경계의 고리 모양 영역 안에서 오른쪽 위의 점 p에서 출발해 위를 돌아 왼쪽 아래의 점 q에 이르는 주황 path γ.">
+        <figcaption><span class="fig-head">Figure 3.7.1.</span>
+        (a) \(A = D_1 \cup D_2\), 중심이 \((-0.7, 0)\), \((0.8, 0.1)\)이고 반지름이 \(0.55\), \(0.45\)인 닫힌 원판. \(D_1 = A \cap \{x^1 \lt 0.05\}\), \(D_2 = A \cap \{x^1 \gt 0.05\}\)이므로 \(A\)는 connected가 아니다(<a href="#i-3-7-3">Non-example 3.7.3</a>).
+        (b) 고리 \(\{1/2 \lt \abs{x} \lt 1\}\) 안의 path \(\gamma(t) = \rho(t)(\cos\theta(t), \sin\theta(t))\), \(\rho(t) = 0.75 + 0.1\sin 3\pi t\), \(\theta(t) = \pi/6 + 7\pi t/6\).</figcaption>
       </figure>
     </section>
 
     <section id="sec-connected">
-      <h2>연결공간</h2>
+      <h2>Connected Spaces</h2>
 
       <div class="thm definition" id="i-3-7-1">
-        <p><span class="thm-head">정의 3.7.1</span> <span class="thm-name">(연결, connected)</span>.
-        위상공간 \(X\)를 공집합이 아닌 서로소인 두 열린집합의 합집합 \(X = U \cup V\)로 쓸 수 있으면, 이 쌍 \((U, V)\)를 \(X\)의 <dfn>분리</dfn>(separation)라 한다.
-        분리가 없으면 \(X\)를 <dfn>연결</dfn>(connected) 공간이라 한다. 부분집합 \(A \subseteq X\)가 부분공간으로서 연결이면 \(A\)를 연결 부분집합이라 한다.</p>
+        <p><span class="thm-head">Definition 3.7.1</span> <span class="thm-name">(connected)</span>.
+        topological space \(X\)를 공집합이 아닌 서로소인 두 open set의 합집합 \(X = U \cup V\)로 쓸 수 있으면, 이 쌍 \((U, V)\)를 \(X\)의 <dfn>separation</dfn>(분리)라 한다.
+        separation이 없으면 \(X\)를 <dfn>connected</dfn>(연결) 공간이라 한다. 부분집합 \(A \subseteq X\)가 subspace로서 connected이면 \(A\)를 connected 부분집합이라 한다.</p>
       </div>
 
-      <p>분리 \((U, V)\)에서 \(V = X \setminus U\)이므로 \(U\)는 열려 있으면서 닫혀 있다. 따라서 <strong>\(X\)가 연결일 필요충분조건은 열려 있으면서 닫힌 부분집합이 \(\varnothing\)과 \(X\)뿐인 것</strong>이다.
-      (공집합은 연결로 본다.)</p>
+      <p>separation \((U, V)\)에서 \(V = X \setminus U\)이므로 \(U\)는 열려 있으면서 닫혀 있다. 따라서 <strong>\(X\)가 connected일 필요충분조건은 열려 있으면서 닫힌 부분집합이 \(\varnothing\)과 \(X\)뿐인 것</strong>이다.
+      (공집합은 connected로 본다.)</p>
 
       <div class="thm example" id="i-3-7-2">
-        <p><span class="thm-head">예 3.7.2</span>.
-        (a) 한 점 공간은 연결이다. (b) 밀착위상을 준 공간은 연결이다. 열린집합이 \(\varnothing\)과 \(X\)뿐이기 때문이다.
-        (c) \(\R\)의 구간은 연결이다(<a href="#i-3-7-4">정리 3.7.4</a>). 특히 \(\R\) 자신이 연결이다.</p>
+        <p><span class="thm-head">Example 3.7.2</span>.
+        (a) 한 점 공간은 connected이다. (b) trivial topology를 준 공간은 connected이다. open set이 \(\varnothing\)과 \(X\)뿐이기 때문이다.
+        (c) \(\R\)의 구간은 connected이다(<a href="#i-3-7-4">Theorem 3.7.4</a>). 특히 \(\R\) 자신이 connected이다.</p>
       </div>
 
       <div class="thm nonexample" id="i-3-7-3">
-        <p><span class="thm-head">비예 3.7.3</span>.
-        (a) \(\R \setminus \{0\} = (-\infty, 0) \cup (0, \infty)\)는 연결이 아니다. 두 반직선은 공집합이 아니고 서로소이며 열려 있다.</p>
-        <p>(b) \(\Q\)는 연결이 아니다. \(U = \Q \cap (-\infty, \sqrt2)\), \(V = \Q \cap (\sqrt2, \infty)\)는 \(\Q\)에서 열려 있고 서로소이며 합집합이 \(\Q\)다(\(\sqrt2 \notin \Q\)).</p>
-        <p>(c) <a href="#fig-3-7-1">그림 3.7.1</a>(a)의 \(A = D_1 \cup D_2\)는 연결이 아니다. \(D_1 = A \cap \{x^1 \lt 0.05\}\)와 \(D_2 = A \cap \{x^1 \gt 0.05\}\)가 \(A\)의 분리다.</p>
-        <p>(d) 원소가 둘 이상인 이산공간은 연결이 아니다. 한 점 집합이 열려 있으면서 닫혀 있다.</p>
+        <p><span class="thm-head">Non-example 3.7.3</span>.
+        (a) \(\R \setminus \{0\} = (-\infty, 0) \cup (0, \infty)\)는 connected가 아니다. 두 반직선은 공집합이 아니고 서로소이며 열려 있다.</p>
+        <p>(b) \(\Q\)는 connected가 아니다. \(U = \Q \cap (-\infty, \sqrt2)\), \(V = \Q \cap (\sqrt2, \infty)\)는 \(\Q\)에서 열려 있고 서로소이며 합집합이 \(\Q\)다(\(\sqrt2 \notin \Q\)).</p>
+        <p>(c) <a href="#fig-3-7-1">Figure 3.7.1</a>(a)의 \(A = D_1 \cup D_2\)는 connected가 아니다. \(D_1 = A \cap \{x^1 \lt 0.05\}\)와 \(D_2 = A \cap \{x^1 \gt 0.05\}\)가 \(A\)의 separation이다.</p>
+        <p>(d) 원소가 둘 이상인 이산공간은 connected가 아니다. 한 점 집합이 열려 있으면서 닫혀 있다.</p>
       </div>
 
       <p>\(\R\)의 부분집합 \(I\)가 “\(x, y \in I\)이고 \(x \lt z \lt y\)이면 \(z \in I\)”를 만족하면 <em>구간</em>이라 한다. 열린구간, 닫힌구간, 반직선, \(\R\), 한 점, \(\varnothing\)이 모두 구간이다.</p>
 
       <div class="thm theorem" id="i-3-7-4">
-        <p><span class="thm-head">정리 3.7.4</span> <span class="thm-name">(\(\R\)의 연결 부분집합)</span>.
-        \(A \subseteq \R\)가 연결일 필요충분조건은 \(A\)가 구간인 것이다.</p>
+        <p><span class="thm-head">Theorem 3.7.4</span> <span class="thm-name">(connected subsets of \(\R\))</span>.
+        \(A \subseteq \R\)가 connected일 필요충분조건은 \(A\)가 구간인 것이다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> \(\R\)에서 “한 조각”인 집합은 정확히 구간이다. 중간값 정리와 “경로연결이면 연결”은 모두 이 정리에서 나온다.</p>
+      <p><strong>이 theorem이 말하는 것.</strong> \(\R\)에서 “한 조각”인 집합은 정확히 구간이다. intermediate value theorem과 “path-connected이면 connected”는 모두 이 theorem에서 나온다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 구간을 두 열린 조각으로 나눌 수 있다면 한 조각에서 다른 조각으로 넘어가는 “경계점” \(c = \sup\)를 잡는다. \(c\)가 어느 조각에 속하든 그 조각이 열려 있다는 사실과 모순이다. 이 증명에 실수의 완비성이 쓰인다.</p>
-        <p><span class="proof-head">증명.</span>
+        <p class="proof-idea">Proof idea: 구간을 두 열린 조각으로 나눌 수 있다면 한 조각에서 다른 조각으로 넘어가는 “boundary point” \(c = \sup\)를 잡는다. \(c\)가 어느 조각에 속하든 그 조각이 열려 있다는 사실과 모순이다. 이 증명에 실수의 completeness가 쓰인다.</p>
+        <p><span class="proof-head">Proof.</span>
         (\(\Rightarrow\)) \(A\)가 구간이 아니면 \(x, y \in A\), \(x \lt z \lt y\), \(z \notin A\)인 \(x, y, z\)가 있다. 그러면 \(A \cap (-\infty, z)\)와 \(A \cap (z, \infty)\)는 \(A\)에서 열려 있고, 각각 \(x\), \(y\)를 포함하며,
-        서로소이고, 합집합이 \(A\)다. 따라서 \(A\)는 연결이 아니다.</p>
-        <p>(\(\Leftarrow\)) \(A\)가 구간이고 \((U, V)\)가 \(A\)의 분리라고 가정하자. \(a \in U\), \(b \in V\)를 고르고, 필요하면 \(U\)와 \(V\)의 이름을 바꾸어 \(a \lt b\)라 하자. \(A\)가 구간이므로 \([a, b] \subseteq A\)이다.
+        서로소이고, 합집합이 \(A\)다. 따라서 \(A\)는 connected가 아니다.</p>
+        <p>(\(\Leftarrow\)) \(A\)가 구간이고 \((U, V)\)가 \(A\)의 separation이라고 가정하자. \(a \in U\), \(b \in V\)를 고르고, 필요하면 \(U\)와 \(V\)의 이름을 바꾸어 \(a \lt b\)라 하자. \(A\)가 구간이므로 \([a, b] \subseteq A\)이다.
         \(c = \sup(U \cap [a, b])\)로 두면 \(a \le c \le b\)이므로 \(c \in A\)이고, \(c \in U\)이거나 \(c \in V\)이다.</p>
         <ul>
           <li>\(c \in U\)인 경우: \(b \in V\)이므로 \(c \lt b\)이다. \(U\)가 \(A\)에서 열려 있으므로 \((c - \varepsilon, c + \varepsilon) \cap A \subseteq U\)인 \(\varepsilon \gt 0\)이 있다. \(\varepsilon \lt b - c\)로 잡으면
-          \(c + \varepsilon/2 \in [a, b] \subseteq A\)이므로 \(c + \varepsilon/2 \in U \cap [a, b]\)이다. 이것은 \(c\)가 상한이라는 데 모순이다.</li>
+          \(c + \varepsilon/2 \in [a, b] \subseteq A\)이므로 \(c + \varepsilon/2 \in U \cap [a, b]\)이다. 이것은 \(c\)가 supremum이라는 데 모순이다.</li>
           <li>\(c \in V\)인 경우: \(a \in U\)이므로 \(c \gt a\)이다. \(V\)가 열려 있으므로 \((c - \varepsilon, c + \varepsilon) \cap A \subseteq V\)인 \(\varepsilon\)이 있고, \(\varepsilon \lt c - a\)로 잡으면
-          \((c - \varepsilon, c] \subseteq V\)이므로 \(U \cap [a, b]\)는 \((c - \varepsilon, c]\)와 만나지 않는다. 그러면 \(c - \varepsilon\)이 \(U \cap [a, b]\)의 상계가 되어 \(c\)가 최소 상계라는 데 모순이다.</li>
+          \((c - \varepsilon, c] \subseteq V\)이므로 \(U \cap [a, b]\)는 \((c - \varepsilon, c]\)와 만나지 않는다. 그러면 \(c - \varepsilon\)이 \(U \cap [a, b]\)의 upper bound가 되어 \(c\)가 least upper bound라는 데 모순이다.</li>
         </ul>
-        <p>어느 쪽이든 모순이므로 \(A\)는 연결이다.</p>
+        <p>어느 쪽이든 모순이므로 \(A\)는 connected이다.</p>
       </div>
 
       <div class="thm proposition" id="i-3-7-5">
-        <p><span class="thm-head">명제 3.7.5</span> <span class="thm-name">(연속상)</span>.
-        \(X\)가 연결이고 \(f\colon X \to Y\)가 연속이면 \(f(X)\)는 연결이다. 특히 연결성은 위상적 성질이다.</p>
+        <p><span class="thm-head">Proposition 3.7.5</span> <span class="thm-name">(continuous image)</span>.
+        \(X\)가 connected이고 \(f\colon X \to Y\)가 연속이면 \(f(X)\)는 connected이다. 특히 connectedness는 topological property이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        \((U, V)\)가 \(f(X)\)의 분리라면 \(f^{-1}(U)\), \(f^{-1}(V)\)는 \(X\)에서 열려 있고(<a href="3-3-subspaces-products.html#i-3-3-5">정리 3.3.5</a>(c)로 \(f\)를 \(f(X)\)로 가는 사상으로 본다), 공집합이 아니며, 서로소이고, 합집합이 \(X\)이다.
-        이것은 \(X\)의 분리이므로 모순이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \((U, V)\)가 \(f(X)\)의 separation이라면 \(f^{-1}(U)\), \(f^{-1}(V)\)는 \(X\)에서 열려 있고(<a href="3-3-subspaces-products.html#i-3-3-5">Theorem 3.3.5</a>(c)로 \(f\)를 \(f(X)\)로 가는 map으로 본다), 공집합이 아니며, 서로소이고, 합집합이 \(X\)이다.
+        이것은 \(X\)의 separation이므로 모순이다.</p>
       </div>
 
       <div class="thm corollary" id="i-3-7-6">
-        <p><span class="thm-head">따름정리 3.7.6</span> <span class="thm-name">(중간값 정리)</span>.
-        \(X\)가 연결이고 \(f\colon X \to \R\)가 연속이며 \(a, b \in X\), \(f(a) \lt c \lt f(b)\)이면 \(f(x) = c\)인 \(x \in X\)가 있다.</p>
+        <p><span class="thm-head">Corollary 3.7.6</span> <span class="thm-name">(intermediate value theorem)</span>.
+        \(X\)가 connected이고 \(f\colon X \to \R\)가 연속이며 \(a, b \in X\), \(f(a) \lt c \lt f(b)\)이면 \(f(x) = c\)인 \(x \in X\)가 있다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        <a href="#i-3-7-5">명제 3.7.5</a>에 의해 \(f(X)\)는 \(\R\)의 연결 부분집합이므로 구간이고(<a href="#i-3-7-4">정리 3.7.4</a>), \(f(a), f(b)\)를 포함하므로 그 사이의 \(c\)도 포함한다.</p>
+        <p><span class="proof-head">Proof.</span>
+        <a href="#i-3-7-5">Proposition 3.7.5</a>에 의해 \(f(X)\)는 \(\R\)의 connected 부분집합이므로 구간이고(<a href="#i-3-7-4">Theorem 3.7.4</a>), \(f(a), f(b)\)를 포함하므로 그 사이의 \(c\)도 포함한다.</p>
       </div>
-      <p>\(X\)가 \(\R\)의 구간이면(<a href="#i-3-7-4">정리 3.7.4</a>에 의해 연결) 이것이 미적분학의 중간값 정리다. <a href="../02-calculus-rn/index.html">2장</a>은 이 사실을 증명 없이 받아들였고
-      (<a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절 준비</a>의 (v)), <a href="../04-curves/index.html">4장</a>은 이 따름정리를 인용한다.</p>
+      <p>\(X\)가 \(\R\)의 구간이면(<a href="#i-3-7-4">Theorem 3.7.4</a>에 의해 connected) 이것이 미적분학의 intermediate value theorem이다. <a href="../02-calculus-rn/index.html">Chapter 2</a>는 이 사실을 증명 없이 받아들였고
+      (<a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">Section 2.1 준비</a>의 (v)), <a href="../04-curves/index.html">Chapter 4</a>는 이 corollary를 인용한다.</p>
 
-      <p>연결 집합을 합치거나 폐포를 취해도 연결성이 유지된다. 다음 명제의 (a)가 이후 증명의 핵심 도구다.</p>
+      <p>connected 집합을 합치거나 closure를 취해도 connectedness가 유지된다. 다음 proposition의 (a)가 이후 증명의 핵심 도구다.</p>
 
       <div class="thm proposition" id="i-3-7-7">
-        <p><span class="thm-head">명제 3.7.7</span>.
-        \(X\)가 위상공간이라 하자.</p>
+        <p><span class="thm-head">Proposition 3.7.7</span>.
+        \(X\)가 topological space라 하자.</p>
         <ul>
-          <li>(a) \((U, V)\)가 \(X\)의 분리이고 \(A \subseteq X\)가 연결이면 \(A \subseteq U\)이거나 \(A \subseteq V\)이다.</li>
-          <li>(b) 연결 부분집합들 \(A_\alpha\)가 모두 한 점 \(p\)를 공유하면 \(\bigcup_\alpha A_\alpha\)는 연결이다.</li>
-          <li>(c) \(A\)가 연결이고 \(A \subseteq B \subseteq \overline{A}\)이면 \(B\)는 연결이다. 특히 \(\overline{A}\)는 연결이다.</li>
+          <li>(a) \((U, V)\)가 \(X\)의 separation이고 \(A \subseteq X\)가 connected이면 \(A \subseteq U\)이거나 \(A \subseteq V\)이다.</li>
+          <li>(b) connected 부분집합들 \(A_\alpha\)가 모두 한 점 \(p\)를 공유하면 \(\bigcup_\alpha A_\alpha\)는 connected이다.</li>
+          <li>(c) \(A\)가 connected이고 \(A \subseteq B \subseteq \overline{A}\)이면 \(B\)는 connected이다. 특히 \(\overline{A}\)는 connected이다.</li>
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        (a) \(A \cap U\)와 \(A \cap V\)는 \(A\)에서 열려 있고 서로소이며 합집합이 \(A\)다. \(A\)가 연결이므로 둘 중 하나는 공집합이다.</p>
-        <p>(b) \(B = \bigcup_\alpha A_\alpha\)의 분리 \((U, V)\)가 있다고 하자. \(p \in U\)라 하면, (a)를 부분공간 \(B\)에 적용해 각 \(A_\alpha\)는 \(U\)나 \(V\)에 들어가는데, \(p \in A_\alpha \cap U\)이므로 \(A_\alpha \subseteq U\)이다.
+        <p><span class="proof-head">Proof.</span>
+        (a) \(A \cap U\)와 \(A \cap V\)는 \(A\)에서 열려 있고 서로소이며 합집합이 \(A\)다. \(A\)가 connected이므로 둘 중 하나는 공집합이다.</p>
+        <p>(b) \(B = \bigcup_\alpha A_\alpha\)의 separation \((U, V)\)가 있다고 하자. \(p \in U\)라 하면, (a)를 subspace \(B\)에 적용해 각 \(A_\alpha\)는 \(U\)나 \(V\)에 들어가는데, \(p \in A_\alpha \cap U\)이므로 \(A_\alpha \subseteq U\)이다.
         따라서 \(B \subseteq U\)이고 \(V = \varnothing\)이 되어 모순이다.</p>
-        <p>(c) \((U, V)\)가 \(B\)의 분리라 하자. (a)에 의해 \(A \subseteq U\)라 해도 된다. \(V\)는 \(B\)에서 열려 있고 공집합이 아니므로 어떤 점 \(q \in V\)를 포함하며, \(V = W \cap B\)인 \(X\)의 열린집합 \(W\)가 있다.
-        \(q \in \overline{A}\)이므로 <a href="3-1-topological-spaces.html#i-3-1-17">명제 3.1.17</a>에 의해 \(W\)는 \(A\)의 점을 포함하고, 그 점은 \(W \cap B = V\)에 있다. 그런데 \(A \subseteq U\)이고 \(U \cap V = \varnothing\)이므로 모순이다.</p>
+        <p>(c) \((U, V)\)가 \(B\)의 separation이라 하자. (a)에 의해 \(A \subseteq U\)라 해도 된다. \(V\)는 \(B\)에서 열려 있고 공집합이 아니므로 어떤 점 \(q \in V\)를 포함하며, \(V = W \cap B\)인 \(X\)의 open set \(W\)가 있다.
+        \(q \in \overline{A}\)이므로 <a href="3-1-topological-spaces.html#i-3-1-17">Proposition 3.1.17</a>에 의해 \(W\)는 \(A\)의 점을 포함하고, 그 점은 \(W \cap B = V\)에 있다. 그런데 \(A \subseteq U\)이고 \(U \cap V = \varnothing\)이므로 모순이다.</p>
       </div>
     </section>
 
     <section id="sec-path-connected">
-      <h2>경로연결</h2>
+      <h2>Path-Connectedness</h2>
 
       <div class="thm definition" id="i-3-7-8">
-        <p><span class="thm-head">정의 3.7.8</span> <span class="thm-name">(경로와 경로연결, path and path-connected)</span>.
-        위상공간 \(X\)의 두 점 \(p, q\)에 대하여 연속사상 \(\gamma\colon [0, 1] \to X\)가 \(\gamma(0) = p\), \(\gamma(1) = q\)를 만족하면 \(\gamma\)를 \(p\)에서 \(q\)로 가는 <dfn>경로</dfn>(path)라 한다.
-        \(X\)의 모든 두 점 사이에 경로가 있으면 \(X\)를 <dfn>경로연결</dfn>(path-connected) 공간이라 한다.</p>
+        <p><span class="thm-head">Definition 3.7.8</span> <span class="thm-name">(path and path-connected)</span>.
+        topological space \(X\)의 두 점 \(p, q\)에 대하여 continuous map \(\gamma\colon [0, 1] \to X\)가 \(\gamma(0) = p\), \(\gamma(1) = q\)를 만족하면 \(\gamma\)를 \(p\)에서 \(q\)로 가는 <dfn>path</dfn>(경로)라 한다.
+        \(X\)의 모든 두 점 사이에 path가 있으면 \(X\)를 <dfn>path-connected</dfn>(경로연결) 공간이라 한다.</p>
       </div>
 
-      <p>경로는 연속이기만 하면 되고 매끄러울 필요가 없다.
-      경로로 이어진다는 관계는 동치관계다. \(p\)에서 \(p\)로는 상수 경로가 있고, \(\gamma\)를 거꾸로 따라간 \(\bar\gamma(t) = \gamma(1 - t)\)는 \(q\)에서 \(p\)로 가는 경로이며,
+      <p>path는 연속이기만 하면 되고 매끄러울 필요가 없다.
+      path로 이어진다는 관계는 equivalence relation이다. \(p\)에서 \(p\)로는 상수 path가 있고, \(\gamma\)를 거꾸로 따라간 \(\bar\gamma(t) = \gamma(1 - t)\)는 \(q\)에서 \(p\)로 가는 path이며,
       \(\gamma\)(\(p\)에서 \(q\)로)와 \(\eta\)(\(q\)에서 \(r\)로)를 이어 붙인</p>
       <div class="equation" id="eq-3-7-1">
       \[ (\gamma \cdot \eta)(t) = \begin{cases} \gamma(2t) & 0 \le t \le \tfrac12, \\ \eta(2t - 1) & \tfrac12 \le t \le 1 \end{cases} \tag{3.7.1} \]
       </div>
-      <p>는 \(p\)에서 \(r\)로 가는 경로다. 두 식은 \(t = 1/2\)에서 모두 \(q\)이고, 닫힌 두 조각 \([0, \tfrac12]\), \([\tfrac12, 1]\)에서 각각 연속이므로 붙이기 보조정리(<a href="3-3-subspaces-products.html#i-3-3-6">보조정리 3.3.6</a>)에 의해 연속이다.</p>
+      <p>는 \(p\)에서 \(r\)로 가는 path다. 두 식은 \(t = 1/2\)에서 모두 \(q\)이고, 닫힌 두 조각 \([0, \tfrac12]\), \([\tfrac12, 1]\)에서 각각 연속이므로 gluing lemma(<a href="3-3-subspaces-products.html#i-3-3-6">Lemma 3.3.6</a>)에 의해 연속이다.</p>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: 경로와 곡선</p>
-        <p><a href="../04-curves/index.html">4장</a>의 곡선 \(\gamma\colon I \to \R^3\)은 열린구간 \(I\)에서 정의된 매끄러운 사상이다. 이 절의 경로는 닫힌구간 \([0, 1]\)에서 정의되고 연속이기만 하면 되므로 다른 개념이다.
+        <p class="box-title">Looking ahead: path와 곡선</p>
+        <p><a href="../04-curves/index.html">Chapter 4</a>의 곡선 \(\gamma\colon I \to \R^3\)은 열린구간 \(I\)에서 정의된 smooth map이다. 이 절의 path는 닫힌구간 \([0, 1]\)에서 정의되고 연속이기만 하면 되므로 다른 개념이다.
         두 이름을 섞어 쓰지 않는다.</p>
       </aside>
 
       <div class="thm proposition" id="i-3-7-9">
-        <p><span class="thm-head">명제 3.7.9</span>.
-        경로연결 공간은 연결이다. 경로연결 공간의 연속상은 경로연결이다.</p>
+        <p><span class="thm-head">Proposition 3.7.9</span>.
+        path-connected 공간은 connected이다. path-connected 공간의 continuous image는 path-connected이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        \(X\)가 경로연결이고 공집합이 아니라 하자. 한 점 \(p\)를 고정하고 각 \(q\)에 대해 \(p\)에서 \(q\)로 가는 경로 \(\gamma_q\)를 고른다. \(\gamma_q([0, 1])\)은 연결인 \([0, 1]\)(<a href="#i-3-7-4">정리 3.7.4</a>)의 연속상이므로 연결이고(<a href="#i-3-7-5">명제 3.7.5</a>),
-        모두 \(p\)를 포함하며, 합집합이 \(X\)다. <a href="#i-3-7-7">명제 3.7.7</a>(b)에 의해 \(X\)는 연결이다.
-        \(f\colon X \to Y\)가 연속이면 \(f(x)\)와 \(f(x')\)은 경로 \(f \circ \gamma\)로 이어진다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(X\)가 path-connected이고 공집합이 아니라 하자. 한 점 \(p\)를 고정하고 각 \(q\)에 대해 \(p\)에서 \(q\)로 가는 path \(\gamma_q\)를 고른다. \(\gamma_q([0, 1])\)은 connected인 \([0, 1]\)(<a href="#i-3-7-4">Theorem 3.7.4</a>)의 continuous image이므로 connected이고(<a href="#i-3-7-5">Proposition 3.7.5</a>),
+        모두 \(p\)를 포함하며, 합집합이 \(X\)다. <a href="#i-3-7-7">Proposition 3.7.7</a>(b)에 의해 \(X\)는 connected이다.
+        \(f\colon X \to Y\)가 연속이면 \(f(x)\)와 \(f(x')\)은 path \(f \circ \gamma\)로 이어진다.</p>
       </div>
 
       <div class="thm example" id="i-3-7-10">
-        <p><span class="thm-head">예 3.7.10</span> <span class="thm-name">(경로연결 공간)</span>.
-        (a) \(\R^n\)의 볼록집합 \(C\)(두 점을 잇는 선분을 포함하는 집합)는 경로연결이다. \(p, q \in C\)이면</p>
+        <p><span class="thm-head">Example 3.7.10</span> <span class="thm-name">(path-connected space)</span>.
+        (a) \(\R^n\)의 convex set \(C\)(두 점을 잇는 선분을 포함하는 집합)는 path-connected이다. \(p, q \in C\)이면</p>
         <div class="equation" id="eq-3-7-2">
         \[ \gamma(t) = (1 - t)\,p + t\,q, \qquad 0 \le t \le 1 \tag{3.7.2} \]
         </div>
-        <p>이 \(C\) 안의 경로다. 열린공, 닫힌공, \(\R^n\), 상자 \([0, 1]^2\)가 여기에 속한다.</p>
-        <p>(b) \(n \ge 2\)이면 \(\R^n \setminus \{0\}\)은 경로연결이다. \(p, q \ne 0\)을 잇는 선분 (3.7.2)가 원점을 지나지 않으면 그것을 쓴다. 지나면 \(p\)와 \(q\)는 원점을 지나는 한 직선 위에 있다.
+        <p>이 \(C\) 안의 path다. open ball, closed ball, \(\R^n\), box \([0, 1]^2\)가 여기에 속한다.</p>
+        <p>(b) \(n \ge 2\)이면 \(\R^n \setminus \{0\}\)은 path-connected이다. \(p, q \ne 0\)을 잇는 선분 (3.7.2)가 원점을 지나지 않으면 그것을 쓴다. 지나면 \(p\)와 \(q\)는 원점을 지나는 한 직선 위에 있다.
         \(n \ge 2\)이므로 그 직선 밖의 점 \(r\)을 고를 수 있고, 두 선분 \([p, r]\), \([r, q]\)는 원점을 지나지 않는다(원점을 지나면 \(r\)이 그 직선 위에 있게 된다). 두 선분을 (3.7.1)로 이어 붙인다.</p>
-        <p>(c) \(n \ge 1\)이면 \(S^n\)은 경로연결이다. \(\rho(x) = x/\abs{x}\)는 \(\R^{n+1} \setminus \{0\}\)에서 \(S^n\) 위로 가는 연속 전사이고, (b)에 의해 정의역이 경로연결이다(\(n + 1 \ge 2\)). <a href="#i-3-7-9">명제 3.7.9</a>를 쓴다.</p>
-        <p>(d) \(n \ge 1\)이면 \(\RP^n\)은 경로연결이다. \(S^n\)의 연속상이다(<a href="3-4-quotient-spaces.html#i-3-4-14">명제 3.4.14</a>). 토러스 \(T^2\)와 원환면 \(T_{R,r}\)는 경로연결인 \([0, 1]^2\)의 연속상이다(<a href="3-6-compactness.html#i-3-6-13">예 3.6.13</a>).</p>
-        <p>(e) 반면 \(\GL(n, \R)\)은 연결이 아니다. \(\det\colon \GL(n, \R) \to \R\)는 연속이고, \(\det I = 1 \gt 0\), \(\det\diag(-1, 1, \dots, 1) = -1 \lt 0\)이다.
-        \(\GL(n, \R)\)이 연결이라면 중간값 정리에 의해 \(\det A = 0\)인 \(A \in \GL(n, \R)\)가 있어야 하는데, 이것은 불가능하다. 즉 \(\{\det \gt 0\}\)과 \(\{\det \lt 0\}\)이 분리다.</p>
-        <p class="verified">검증: <code>verify/v-3-7-connectedness.py</code></p>
+        <p>(c) \(n \ge 1\)이면 \(S^n\)은 path-connected이다. \(\rho(x) = x/\abs{x}\)는 \(\R^{n+1} \setminus \{0\}\)에서 \(S^n\) 위로 가는 연속 surjective이고, (b)에 의해 정의역이 path-connected이다(\(n + 1 \ge 2\)). <a href="#i-3-7-9">Proposition 3.7.9</a>를 쓴다.</p>
+        <p>(d) \(n \ge 1\)이면 \(\RP^n\)은 path-connected이다. \(S^n\)의 continuous image이다(<a href="3-4-quotient-spaces.html#i-3-4-14">Proposition 3.4.14</a>). torus \(T^2\)와 torus of revolution \(T_{R,r}\)는 path-connected인 \([0, 1]^2\)의 continuous image이다(<a href="3-6-compactness.html#i-3-6-13">Example 3.6.13</a>).</p>
+        <p>(e) 반면 \(\GL(n, \R)\)은 connected가 아니다. \(\det\colon \GL(n, \R) \to \R\)는 연속이고, \(\det I = 1 \gt 0\), \(\det\diag(-1, 1, \dots, 1) = -1 \lt 0\)이다.
+        \(\GL(n, \R)\)이 connected라면 intermediate value theorem에 의해 \(\det A = 0\)인 \(A \in \GL(n, \R)\)가 있어야 하는데, 이것은 불가능하다. 즉 \(\{\det \gt 0\}\)과 \(\{\det \lt 0\}\)이 separation이다.</p>
+        <p class="verified">Verification: <code>verify/v-3-7-connectedness.py</code></p>
       </div>
 
       <div class="thm nonexample" id="i-3-7-11">
-        <p><span class="thm-head">비예 3.7.11</span> <span class="thm-name">(위상수학자의 사인 곡선: 연결이지만 경로연결이 아닌 공간)</span>.
-        \(A = \{(x, \sin(1/x)) : 0 \lt x \le 1\}\)과 \(T = A \cup (\{0\} \times [-1, 1]) \subseteq \R^2\)라 하자(<a href="#fig-3-7-2">그림 3.7.2</a>).</p>
+        <p><span class="thm-head">Non-example 3.7.11</span> <span class="thm-name">(topologist's sine curve: connected but not path-connected)</span>.
+        \(A = \{(x, \sin(1/x)) : 0 \lt x \le 1\}\)과 \(T = A \cup (\{0\} \times [-1, 1]) \subseteq \R^2\)라 하자(<a href="#fig-3-7-2">Figure 3.7.2</a>).</p>
         <ul>
-          <li><em>\(T\)는 연결이다.</em> \(A\)는 연결인 \((0, 1]\)의 연속상 \(x \mapsto (x, \sin(1/x))\)이므로 연결이다. \(T = \overline{A}\)임을 보이면 <a href="#i-3-7-7">명제 3.7.7</a>(c)에 의해 \(T\)는 연결이다.
+          <li><em>\(T\)는 connected이다.</em> \(A\)는 connected인 \((0, 1]\)의 continuous image \(x \mapsto (x, \sin(1/x))\)이므로 connected이다. \(T = \overline{A}\)임을 보이면 <a href="#i-3-7-7">Proposition 3.7.7</a>(c)에 의해 \(T\)는 connected이다.
           \(\abs{y_0} \le 1\)이면 \(x_k = 1/(\arcsin y_0 + 2\pi k)\)가 \(0\)으로 가고 \(\sin(1/x_k) = y_0\)이므로 \((x_k, y_0) \to (0, y_0)\)이다. 따라서 \(\{0\} \times [-1, 1] \subseteq \overline{A}\)이다.
-          거꾸로 \((x_0, y_0) \in \overline{A}\)이면 \(A\)의 점 \((x_k, \sin(1/x_k)) \to (x_0, y_0)\)이 있다(<a href="3-2-continuity-homeomorphism.html#i-3-2-17">명제 3.2.17</a>(c)). \(x_0 \in [0, 1]\)이고, \(x_0 \gt 0\)이면 \(\sin(1/x)\)의 연속성에서 \(y_0 = \sin(1/x_0)\)이며,
+          거꾸로 \((x_0, y_0) \in \overline{A}\)이면 \(A\)의 점 \((x_k, \sin(1/x_k)) \to (x_0, y_0)\)이 있다(<a href="3-2-continuity-homeomorphism.html#i-3-2-17">Proposition 3.2.17</a>(c)). \(x_0 \in [0, 1]\)이고, \(x_0 \gt 0\)이면 \(\sin(1/x)\)의 연속성에서 \(y_0 = \sin(1/x_0)\)이며,
           \(x_0 = 0\)이면 \(\abs{y_0} \le 1\)이다. 따라서 \(\overline{A} \subseteq T\)이다.</li>
-          <li><em>\(T\)는 경로연결이 아니다.</em> \((0, 0)\)에서 \((1, \sin 1)\)로 가는 경로 \(\gamma = (\gamma^1, \gamma^2)\)가 있다고 하자. \(F = \gamma^{-1}(\{0\} \times [-1, 1])\)은 닫힌집합의 역상이므로 \([0, 1]\)의 닫힌집합이고 \(0\)을 포함한다.
+          <li><em>\(T\)는 path-connected가 아니다.</em> \((0, 0)\)에서 \((1, \sin 1)\)로 가는 path \(\gamma = (\gamma^1, \gamma^2)\)가 있다고 하자. \(F = \gamma^{-1}(\{0\} \times [-1, 1])\)은 closed set의 preimage이므로 \([0, 1]\)의 closed set이고 \(0\)을 포함한다.
           \(t_0 = \max F\)로 두면 \(t_0 \lt 1\)이고, \(t \gt t_0\)이면 \(\gamma(t) \in A\), 즉 \(\gamma^1(t) \gt 0\)이다. \(\gamma^2\)는 \(t_0\)에서 연속이므로 \([t_0, t_0 + \delta]\)에서 \(\abs{\gamma^2(t) - \gamma^2(t_0)} \lt 1/2\)인 \(\delta\) (\(0 \lt \delta \le 1 - t_0\))가 있다.
-          한편 \(\gamma^1([t_0, t_0 + \delta])\)는 연결이므로 구간이고, \(\gamma^1(t_0) = 0\)과 \(\gamma^1(t_0 + \delta) \gt 0\)을 포함한다. 따라서 이 구간은 충분히 큰 \(k\)에 대한 \(1/(\pi/2 + 2\pi k)\)와 \(1/(3\pi/2 + 2\pi k)\)를 모두 포함하고,
+          한편 \(\gamma^1([t_0, t_0 + \delta])\)는 connected이므로 구간이고, \(\gamma^1(t_0) = 0\)과 \(\gamma^1(t_0 + \delta) \gt 0\)을 포함한다. 따라서 이 구간은 충분히 큰 \(k\)에 대한 \(1/(\pi/2 + 2\pi k)\)와 \(1/(3\pi/2 + 2\pi k)\)를 모두 포함하고,
           그 값을 갖는 \(t\)는 \((t_0, t_0 + \delta]\)에 있고(\(\gamma^1(t_0) = 0\)이므로) 거기서 \(\gamma(t) \in A\)이므로 \(\gamma^2(t) = 1\)과 \(\gamma^2(t) = -1\)이 모두 나타난다. \(1\)과 \(-1\)이 둘 다 \(\gamma^2(t_0)\)에서 \(1/2\)보다 가까울 수는 없으므로 모순이다.</li>
         </ul>
-        <p class="verified">검증: <code>verify/v-3-7-connectedness.py</code></p>
+        <p class="verified">Verification: <code>verify/v-3-7-connectedness.py</code></p>
       </div>
 
       <figure class="dg-figure" id="fig-3-7-2">
         <img src="figures/fig-3-7-2-sine-curve.svg" alt="오른쪽 점 (1, sin 1)에서 왼쪽으로 갈수록 점점 빠르게 위아래로 진동하는 검은 곡선 y = sin(1/x)와, x = 0 위의 주황 세로 선분 {0} × [-1, 1]. 곡선이 위쪽 1에 닿는 점들 x_k는 파랑, 아래쪽 -1에 닿는 점들 x'_k는 초록 점으로 표시되어 있다.">
-        <figcaption><span class="fig-head">그림 3.7.2.</span>
-        위상수학자의 사인 곡선 \(T\). 그래프 \(y = \sin(1/x)\) (\(0 \lt x \le 1\))는 \(x \to 0\)에서 한없이 빠르게 진동하고, 그 폐포에 세로 선분 \(\{0\} \times [-1, 1]\)(주황)이 더해진다.
+        <figcaption><span class="fig-head">Figure 3.7.2.</span>
+        topologist's sine curve \(T\). 그래프 \(y = \sin(1/x)\) (\(0 \lt x \le 1\))는 \(x \to 0\)에서 한없이 빠르게 진동하고, 그 closure에 세로 선분 \(\{0\} \times [-1, 1]\)(주황)이 더해진다.
         파랑 점은 \(x_k = 1/(\pi/2 + 2\pi k)\), 초록 점은 \(x'_k = 1/(3\pi/2 + 2\pi k)\) (\(k = 1, 2, 3\))이다. 곡선은 \(1/x\)를 \([1, 400]\)에서 균등하게 나눈 점으로 그렸다.</figcaption>
       </figure>
 
       <aside class="box convention">
-        <p class="box-title">규약 비교: 용어</p>
-        <p>do Carmo는 경로를 arc, 경로연결을 arcwise connected라 부른다 <a class="cite" href="../../references.html#dC">[dC 5장 부록 B]</a>. 일부 교재에서 arc는 “단사인 경로”를 뜻하므로,
-        이 study set은 연속사상 \([0,1] \to X\)를 늘 “경로(path)”라 부른다.</p>
+        <p class="box-title">Conventions: 용어</p>
+        <p>do Carmo는 path를 arc, path-connected를 arcwise connected라 부른다 <a class="cite" href="../../references.html#dC">[dC Ch. 5 App. B]</a>. 일부 교재에서 arc는 “injective인 path”를 뜻하므로,
+        이 study set은 continuous map \([0,1] \to X\)를 늘 “path”라 부른다.</p>
       </aside>
     </section>
 
     <section id="sec-components">
-      <h2>연결성분과 국소 경로연결</h2>
+      <h2>Connected Components and Local Path-Connectedness</h2>
 
       <div class="thm definition" id="i-3-7-12">
-        <p><span class="thm-head">정의 3.7.12</span> <span class="thm-name">(연결성분, connected component)</span>.
-        위상공간 \(X\)의 점 \(p\)를 포함하는 모든 연결 부분집합의 합집합을 \(p\)의 <dfn>연결성분</dfn>(connected component)이라 한다.
-        마찬가지로 \(p\)와 경로로 이어지는 점 전체를 \(p\)의 <dfn>경로성분</dfn>(path component)이라 한다.</p>
+        <p><span class="thm-head">Definition 3.7.12</span> <span class="thm-name">(connected component)</span>.
+        topological space \(X\)의 점 \(p\)를 포함하는 모든 connected 부분집합의 합집합을 \(p\)의 <dfn>connected component</dfn>(연결성분)이라 한다.
+        마찬가지로 \(p\)와 path로 이어지는 점 전체를 \(p\)의 <dfn>path component</dfn>(경로성분)이라 한다.</p>
       </div>
 
       <div class="thm proposition" id="i-3-7-13">
-        <p><span class="thm-head">명제 3.7.13</span> <span class="thm-name">(연결성분의 성질)</span>.</p>
+        <p><span class="thm-head">Proposition 3.7.13</span> <span class="thm-name">(properties of connected components)</span>.</p>
         <ul>
-          <li>(a) 각 연결성분은 연결이고, \(X\)의 연결 부분집합은 하나의 연결성분에 들어간다. 즉 연결성분은 극대 연결 부분집합이다.</li>
-          <li>(b) 서로 다른 두 연결성분은 서로소이고, 연결성분들의 합집합은 \(X\)다.</li>
-          <li>(c) 각 연결성분은 닫혀 있다.</li>
+          <li>(a) 각 connected component는 connected이고, \(X\)의 connected 부분집합은 하나의 connected component에 들어간다. 즉 connected component는 극대 connected 부분집합이다.</li>
+          <li>(b) 서로 다른 두 connected component는 서로소이고, connected component들의 합집합은 \(X\)다.</li>
+          <li>(c) 각 connected component는 닫혀 있다.</li>
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        (a) \(p\)의 연결성분 \(C_p\)는 \(p\)를 공유하는 연결집합들의 합집합이므로 <a href="#i-3-7-7">명제 3.7.7</a>(b)에 의해 연결이다. \(p\)를 포함하는 연결집합은 정의상 \(C_p\)에 들어간다.
-        (b) \(q \in C_p \cap C_{p'}\)이면 \(C_p \cup C_{p'}\)은 \(q\)를 공유하는 두 연결집합의 합집합이므로 연결이고 \(p\)를 포함하므로 \(C_p\)에 들어간다. 즉 \(C_{p'} \subseteq C_p\)이고, 대칭적으로 \(C_p \subseteq C_{p'}\)이다.
-        \(p \in C_p\)(한 점은 연결)이므로 합집합은 \(X\)다.
-        (c) <a href="#i-3-7-7">명제 3.7.7</a>(c)에 의해 \(\overline{C_p}\)는 연결이고 \(p\)를 포함하므로 \(\overline{C_p} \subseteq C_p\)이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) \(p\)의 connected component \(C_p\)는 \(p\)를 공유하는 connected set들의 합집합이므로 <a href="#i-3-7-7">Proposition 3.7.7</a>(b)에 의해 connected이다. \(p\)를 포함하는 connected set은 정의상 \(C_p\)에 들어간다.
+        (b) \(q \in C_p \cap C_{p'}\)이면 \(C_p \cup C_{p'}\)은 \(q\)를 공유하는 두 connected set의 합집합이므로 connected이고 \(p\)를 포함하므로 \(C_p\)에 들어간다. 즉 \(C_{p'} \subseteq C_p\)이고, symmetry로 \(C_p \subseteq C_{p'}\)이다.
+        \(p \in C_p\)(한 점은 connected)이므로 합집합은 \(X\)다.
+        (c) <a href="#i-3-7-7">Proposition 3.7.7</a>(c)에 의해 \(\overline{C_p}\)는 connected이고 \(p\)를 포함하므로 \(\overline{C_p} \subseteq C_p\)이다.</p>
       </div>
 
-      <p>연결성분은 닫혀 있지만 열려 있지 않을 수 있다. \(\Q\)의 연결성분은 한 점 집합들이고(연결 부분집합이 구간이면서 유리수로만 이루어져야 하므로), 이것은 \(\Q\)에서 열려 있지 않다.
+      <p>connected component는 닫혀 있지만 열려 있지 않을 수 있다. \(\Q\)의 connected component는 한 점 집합들이고(connected 부분집합이 구간이면서 유리수로만 이루어져야 하므로), 이것은 \(\Q\)에서 열려 있지 않다.
       다음 조건이 있으면 이런 일이 일어나지 않는다.</p>
 
       <div class="thm definition" id="i-3-7-14">
-        <p><span class="thm-head">정의 3.7.14</span> <span class="thm-name">(국소 경로연결, locally path-connected)</span>.
-        위상공간 \(X\)의 모든 점 \(p\)와 \(p\)의 모든 근방 \(U\)에 대하여, \(U\) 안에 경로연결인 \(p\)의 근방이 있으면 \(X\)를 <dfn>국소 경로연결</dfn>(locally path-connected) 공간이라 한다.</p>
+        <p><span class="thm-head">Definition 3.7.14</span> <span class="thm-name">(locally path-connected)</span>.
+        topological space \(X\)의 모든 점 \(p\)와 \(p\)의 모든 neighborhood \(U\)에 대하여, \(U\) 안에 path-connected인 \(p\)의 neighborhood가 있으면 \(X\)를 <dfn>locally path-connected</dfn>(국소 경로연결) 공간이라 한다.</p>
       </div>
 
-      <p>\(\R^n\)의 열린집합 \(W\)는 국소 경로연결이다. \(p\)의 근방 \(U \subseteq W\) 안에 공 \(B_\varepsilon(p)\)가 있고, 공은 볼록하므로 경로연결이다(<a href="#i-3-7-10">예 3.7.10</a>(a)).
-      같은 이유로 \(S^n\)이나 \(\RP^n\)처럼 “모든 점이 \(\R^n\)과 위상동형인 근방을 갖는” 공간도 국소 경로연결이다(그 근방 안의 공의 상을 쓴다).
-      반면 위상수학자의 사인 곡선 \(T\)는 \((0, 0)\) 근처에서 국소 경로연결이 아니다(<a href="#i-3-7-11">비예 3.7.11</a>의 논증을 작은 공 안에서 되풀이하면 보인다).</p>
+      <p>\(\R^n\)의 open set \(W\)는 locally path-connected이다. \(p\)의 neighborhood \(U \subseteq W\) 안에 ball \(B_\varepsilon(p)\)가 있고, ball은 convex하므로 path-connected이다(<a href="#i-3-7-10">Example 3.7.10</a>(a)).
+      같은 이유로 \(S^n\)이나 \(\RP^n\)처럼 “모든 점이 \(\R^n\)과 homeomorphic인 neighborhood를 갖는” 공간도 locally path-connected이다(그 neighborhood 안의 ball의 image를 쓴다).
+      반면 topologist's sine curve \(T\)는 \((0, 0)\) 근처에서 locally path-connected가 아니다(<a href="#i-3-7-11">Non-example 3.7.11</a>의 논증을 작은 ball 안에서 되풀이하면 보인다).</p>
 
       <div class="thm theorem" id="i-3-7-15">
-        <p><span class="thm-head">정리 3.7.15</span>.
-        \(X\)가 국소 경로연결이라 하자. 그러면 경로성분들은 열려 있으면서 닫혀 있고, 연결성분과 경로성분은 같다. 특히 \(X\)가 연결일 필요충분조건은 \(X\)가 경로연결인 것이다.</p>
+        <p><span class="thm-head">Theorem 3.7.15</span>.
+        \(X\)가 locally path-connected라 하자. 그러면 path component들은 열려 있으면서 닫혀 있고, connected component와 path component는 같다. 특히 \(X\)가 connected일 필요충분조건은 \(X\)가 path-connected인 것이다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> \(\R^n\)의 열린집합이나 앞으로 다룰 다양체에서는 “연결”을 확인할 때 경로로 이어 보면 된다.</p>
+      <p><strong>이 theorem이 말하는 것.</strong> \(\R^n\)의 open set이나 앞으로 다룰 manifold에서는 “connected”를 확인할 때 path로 이어 보면 된다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 한 점 근처의 경로연결 근방은 통째로 그 점의 경로성분에 속한다. 그래서 경로성분은 열려 있고, 그 여집합(다른 경로성분들의 합집합)도 열려 있다.</p>
-        <p><span class="proof-head">증명.</span>
-        \(P\)가 경로성분이고 \(q \in P\)라 하자. \(X\)를 근방으로 보고 <a href="#i-3-7-14">정의 3.7.14</a>를 쓰면 경로연결인 \(q\)의 근방 \(W\)가 있다. \(W\)의 각 점은 \(q\)와 경로로 이어지고, \(q\)는 \(P\)의 기준점과 이어지므로,
-        경로를 이어 붙이면(식 <a href="#eq-3-7-1">(3.7.1)</a>) \(W \subseteq P\)이다. 따라서 \(P\)는 열려 있다. \(X \setminus P\)는 다른 경로성분들의 합집합이므로 역시 열려 있고, 따라서 \(P\)는 닫혀 있다.</p>
-        <p>\(p\)의 경로성분 \(P\)와 연결성분 \(C\)를 비교하자. \(P\)는 경로연결이므로 연결이고(<a href="#i-3-7-9">명제 3.7.9</a>) \(p\)를 포함하므로 \(P \subseteq C\)이다. \(P\)는 \(X\)에서 열려 있으면서 닫혀 있으므로
-        \(C\)에서도 열려 있으면서 닫혀 있고(<a href="3-3-subspaces-products.html#i-3-3-4">명제 3.3.4</a>), 공집합이 아니다. \(C\)가 연결이므로 \(P = C\)이다. \(X\)가 연결이면 \(X\) 자신이 하나의 연결성분이므로 하나의 경로성분이다.</p>
+        <p class="proof-idea">Proof idea: 한 점 근처의 path-connected neighborhood는 통째로 그 점의 path component에 속한다. 그래서 path component는 열려 있고, 그 여집합(다른 path component들의 합집합)도 열려 있다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(P\)가 path component이고 \(q \in P\)라 하자. \(X\)를 neighborhood로 보고 <a href="#i-3-7-14">Definition 3.7.14</a>를 쓰면 path-connected인 \(q\)의 neighborhood \(W\)가 있다. \(W\)의 각 점은 \(q\)와 path로 이어지고, \(q\)는 \(P\)의 기준점과 이어지므로,
+        path를 이어 붙이면(<a href="#eq-3-7-1">(3.7.1)</a>) \(W \subseteq P\)이다. 따라서 \(P\)는 열려 있다. \(X \setminus P\)는 다른 path component들의 합집합이므로 역시 열려 있고, 따라서 \(P\)는 닫혀 있다.</p>
+        <p>\(p\)의 path component \(P\)와 connected component \(C\)를 비교하자. \(P\)는 path-connected이므로 connected이고(<a href="#i-3-7-9">Proposition 3.7.9</a>) \(p\)를 포함하므로 \(P \subseteq C\)이다. \(P\)는 \(X\)에서 열려 있으면서 닫혀 있으므로
+        \(C\)에서도 열려 있으면서 닫혀 있고(<a href="3-3-subspaces-products.html#i-3-3-4">Proposition 3.3.4</a>), 공집합이 아니다. \(C\)가 connected이므로 \(P = C\)이다. \(X\)가 connected이면 \(X\) 자신이 하나의 connected component이므로 하나의 path component이다.</p>
       </div>
 
-      <p>연결성은 “국소적으로 참인 것이 전역적으로 참”이 되게 해 준다. 다음 명제가 그 전형이다.</p>
+      <p>connectedness는 “locally 참인 것이 globally 참”이 되게 해 준다. 다음 proposition이 그 전형이다.</p>
 
       <div class="thm proposition" id="i-3-7-16">
-        <p><span class="thm-head">명제 3.7.16</span> <span class="thm-name">(국소상수함수)</span>.
-        \(X\)가 연결이고 \(f\colon X \to Y\)가 <em>국소상수</em>, 즉 모든 점이 \(f\)가 상수인 근방을 가진다고 하자(\(Y\)는 임의의 집합). 그러면 \(f\)는 상수다.</p>
+        <p><span class="thm-head">Proposition 3.7.16</span> <span class="thm-name">(locally constant function)</span>.
+        \(X\)가 connected이고 \(f\colon X \to Y\)가 <em>locally constant</em>, 즉 모든 점이 \(f\)가 상수인 neighborhood를 가진다고 하자(\(Y\)는 임의의 집합). 그러면 \(f\)는 상수다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        \(X \ne \varnothing\)이라 하고 \(p \in X\), \(c = f(p)\)로 두자. \(E = f^{-1}(c)\)는 \(p\)를 포함한다. \(x \in E\)이면 \(f\)가 상수인 근방이 \(E\)에 들어가므로 \(E\)는 열려 있다.
-        \(x \notin E\)이면 \(f\)가 상수 \(f(x) \ne c\)인 근방이 \(X \setminus E\)에 들어가므로 \(X \setminus E\)도 열려 있다. \(X\)가 연결이므로 \(E = X\)이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(X \ne \varnothing\)이라 하고 \(p \in X\), \(c = f(p)\)로 두자. \(E = f^{-1}(c)\)는 \(p\)를 포함한다. \(x \in E\)이면 \(f\)가 상수인 neighborhood가 \(E\)에 들어가므로 \(E\)는 열려 있다.
+        \(x \notin E\)이면 \(f\)가 상수 \(f(x) \ne c\)인 neighborhood가 \(X \setminus E\)에 들어가므로 \(X \setminus E\)도 열려 있다. \(X\)가 connected이므로 \(E = X\)이다.</p>
       </div>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: \(H^0\)과 연결성분</p>
-        <p><a href="../19-de-rham/index.html">19장</a>에서 \(df = 0\)인 매끄러운 함수 \(f\)는 국소상수임을 보이고, <a href="#i-3-7-16">명제 3.7.16</a>과 <a href="#i-3-7-15">정리 3.7.15</a>로 \(H^0_{\mathrm{dR}}(M)\)의 차원이 \(M\)의 연결성분의 개수임을 증명한다.
-        <a href="../11-smooth-manifolds/index.html">11장</a>에서는 다양체가 국소 경로연결이므로 연결성분이 열려 있고, 제2가산 조건 때문에 연결성분이 가산개임을 본다.</p>
+        <p class="box-title">Looking ahead: \(H^0\)과 connected component</p>
+        <p><a href="../19-de-rham/index.html">Chapter 19</a>에서 \(df = 0\)인 smooth function \(f\)는 locally constant임을 보이고, <a href="#i-3-7-16">Proposition 3.7.16</a>과 <a href="#i-3-7-15">Theorem 3.7.15</a>로 \(H^0_{\mathrm{dR}}(M)\)의 dimension이 \(M\)의 connected component의 개수임을 증명한다.
+        <a href="../11-smooth-manifolds/index.html">Chapter 11</a>에서는 manifold가 locally path-connected이므로 connected component가 열려 있고, second countable 조건 때문에 connected component가 countable개임을 본다.</p>
       </aside>
 
       <div class="thm example" id="i-3-7-17">
-        <p><span class="thm-head">예 3.7.17</span> <span class="thm-name">(\(\R \not\cong \R^n\), \(n \ge 2\))</span>.
-        위상동형사상 \(h\colon \R \to \R^n\)이 있다고 하자. \(h\)를 \(\R \setminus \{0\}\)으로 제한하면 \(\R \setminus \{0\}\)에서 \(\R^n \setminus \{h(0)\}\)로 가는 위상동형사상이다
-        (제한과 역사상의 제한이 모두 연속, <a href="3-3-subspaces-products.html#i-3-3-5">정리 3.3.5</a>). 그런데 \(\R^n \setminus \{h(0)\}\)은 평행이동하면 \(\R^n \setminus \{0\}\)이므로 경로연결이고(<a href="#i-3-7-10">예 3.7.10</a>(b)) 따라서 연결이며,
-        \(\R \setminus \{0\}\)은 연결이 아니다(<a href="#i-3-7-3">비예 3.7.3</a>(a)). 연결성은 위상적 성질이므로(<a href="#i-3-7-5">명제 3.7.5</a>) 모순이다.
-        같은 방법으로 \(S^1 \not\cong [0, 1]\)이다. \([0, 1]\)에서 \(1/2\)을 빼면 연결이 아니지만, \(S^1\)에서 어느 한 점 \(p\)를 빼도, \(p\)를 북극으로 보내는 회전(위상동형사상)과 입체사영(<a href="3-2-continuity-homeomorphism.html#i-3-2-14">예 3.2.14</a>(c))을 합성하면 \(S^1 \setminus \{p\} \cong \R\)이므로 연결이다.</p>
+        <p><span class="thm-head">Example 3.7.17</span> <span class="thm-name">(\(\R \not\cong \R^n\), \(n \ge 2\))</span>.
+        homeomorphism \(h\colon \R \to \R^n\)이 있다고 하자. \(h\)를 \(\R \setminus \{0\}\)으로 제한하면 \(\R \setminus \{0\}\)에서 \(\R^n \setminus \{h(0)\}\)로 가는 homeomorphism이다
+        (restriction과 inverse map의 restriction이 모두 연속, <a href="3-3-subspaces-products.html#i-3-3-5">Theorem 3.3.5</a>). 그런데 \(\R^n \setminus \{h(0)\}\)은 이동으로 \(\R^n \setminus \{0\}\)과 homeomorphic이므로 path-connected이고(<a href="#i-3-7-10">Example 3.7.10</a>(b)) 따라서 connected이며,
+        \(\R \setminus \{0\}\)은 connected가 아니다(<a href="#i-3-7-3">Non-example 3.7.3</a>(a)). connectedness는 topological property이므로(<a href="#i-3-7-5">Proposition 3.7.5</a>) 모순이다.
+        같은 방법으로 \(S^1 \not\cong [0, 1]\)이다. \([0, 1]\)에서 \(1/2\)을 빼면 connected가 아니지만, \(S^1\)에서 어느 한 점 \(p\)를 빼도, \(p\)를 북극으로 보내는 회전(homeomorphism)과 stereographic projection(<a href="3-2-continuity-homeomorphism.html#i-3-2-14">Example 3.2.14</a>(c))을 합성하면 \(S^1 \setminus \{p\} \cong \R\)이므로 connected이다.</p>
       </div>
 
       <aside class="box warning">
-        <p class="box-title">주의: \(\R^2 \not\cong \R^3\)은 이 방법으로 증명되지 않는다</p>
-        <p>\(\R^2\)와 \(\R^3\)에서 한 점을 빼면 둘 다 연결로 남는다. \(\R^m \not\cong \R^n\) (\(m \ne n\))은 참이지만(“영역의 불변성”), 증명에는 호몰로지 같은 대수적 위상수학의 도구가 필요하다.
-        이 study set은 이 사실을 증명하지 않는다. 대신 매끄러운 다양체에서는 차원이 미분(접공간의 차원)으로 정해지므로, <a href="../13-tangent-spaces/index.html">13장</a>에서 선형대수만으로 차원이 잘 정의됨을 보게 된다.</p>
+        <p class="box-title">Warning: \(\R^2 \not\cong \R^3\)은 이 방법으로 증명되지 않는다</p>
+        <p>\(\R^2\)와 \(\R^3\)에서 한 점을 빼면 둘 다 connected로 남는다. \(\R^m \not\cong \R^n\) (\(m \ne n\))은 참이지만(“영역의 불변성”), 증명에는 homology 같은 algebraic topology의 도구가 필요하다.
+        이 study set은 이 사실을 증명하지 않는다. 대신 smooth manifold에서는 dimension이 미분(tangent space의 dimension)으로 정해지므로, <a href="../13-tangent-spaces/index.html">Chapter 13</a>에서 linear algebra만으로 dimension이 잘 정의됨을 보게 된다.</p>
       </aside>
 
-      <p>마지막으로 <a href="#sec-motivation">동기</a>에서 말한 “도함수가 \(0\)이면 상수”를 연결성으로 정확히 진술하고 증명한다.</p>
+      <p>마지막으로 <a href="#sec-motivation">동기</a>에서 말한 “도함수가 \(0\)이면 상수”를 connectedness로 정확히 진술하고 증명한다.</p>
 
       <div class="thm corollary" id="i-3-7-18">
-        <p><span class="thm-head">따름정리 3.7.18</span> <span class="thm-name">(연결인 열린집합에서 \(DF = 0\)이면 상수)</span>.
-        \(U \subseteq \R^n\)이 연결인 열린집합이고 \(F\colon U \to \R^m\)이 \(U\)에서 미분가능하며 모든 \(x \in U\)에서 \(DF(x) = 0\)이면 \(F\)는 \(U\)에서 상수다.</p>
+        <p><span class="thm-head">Corollary 3.7.18</span> <span class="thm-name">(\(DF = 0\) on a connected open set implies constant)</span>.
+        \(U \subseteq \R^n\)이 connected인 open set이고 \(F\colon U \to \R^m\)이 \(U\)에서 미분가능하며 모든 \(x \in U\)에서 \(DF(x) = 0\)이면 \(F\)는 \(U\)에서 상수다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 미분은 “각 공 위에서 상수”라는 국소적 정보만 준다. 그것을 \(U\) 전체로 잇는 것은 연결성이다.</p>
-        <p><span class="proof-head">증명.</span>
-        \(p \in U\)라 하자. \(U\)가 열린집합이므로 \(B_r(p) \subseteq U\)인 \(r \gt 0\)이 있고, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-10">따름정리 2.2.10</a>에 의해 \(F\)는 \(B_r(p)\)에서 상수다.
-        \(B_r(p)\)는 \(\R^n\)의 열린집합이고(<a href="3-1-topological-spaces.html#i-3-1-6">보조정리 3.1.6</a>) \(U\)에 포함되므로 부분공간 \(U\)에서도 열려 있다. 즉 \(B_r(p)\)는 \(U\)에서 \(p\)의 근방이다.
-        따라서 \(F\)는 국소상수이고, \(U\)가 연결이므로 <a href="#i-3-7-16">명제 3.7.16</a>에 의해 상수다.</p>
+        <p class="proof-idea">Proof idea: 미분은 “각 ball 위에서 상수”라는 local 정보만 준다. 그것을 \(U\) 전체로 잇는 것은 connectedness이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(p \in U\)라 하자. \(U\)가 open set이므로 \(B_r(p) \subseteq U\)인 \(r \gt 0\)이 있고, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-10">Corollary 2.2.10</a>에 의해 \(F\)는 \(B_r(p)\)에서 상수다.
+        \(B_r(p)\)는 \(\R^n\)의 open set이고(<a href="3-1-topological-spaces.html#i-3-1-6">Lemma 3.1.6</a>) \(U\)에 포함되므로 subspace \(U\)에서도 열려 있다. 즉 \(B_r(p)\)는 \(U\)에서 \(p\)의 neighborhood이다.
+        따라서 \(F\)는 locally constant이고, \(U\)가 connected이므로 <a href="#i-3-7-16">Proposition 3.7.16</a>에 의해 상수다.</p>
       </div>
-      <p>연결이라는 가정은 뺄 수 없다. \(\R \setminus \{0\}\)에서 \(x \gt 0\)이면 \(1\), \(x \lt 0\)이면 \(-1\)인 함수는 도함수가 \(0\)이지만 상수가 아니다.
-      또 <a href="#i-3-7-15">정리 3.7.15</a>에 의해 연결인 열린집합은 경로연결이므로, 이 따름정리의 가정은 “\(U\)의 두 점이 \(U\) 안의 경로로 이어진다”로 확인해도 된다.</p>
+      <p>connected라는 가정은 뺄 수 없다. \(\R \setminus \{0\}\)에서 \(x \gt 0\)이면 \(1\), \(x \lt 0\)이면 \(-1\)인 함수는 도함수가 \(0\)이지만 상수가 아니다.
+      또 <a href="#i-3-7-15">Theorem 3.7.15</a>에 의해 connected인 open set은 path-connected이므로, 이 corollary의 가정은 “\(U\)의 두 점이 \(U\) 안의 path로 이어진다”로 확인해도 된다.</p>
 
       <aside class="box backward">
-        <p class="box-title">2장과 비교: 공에서 연결 열린집합으로</p>
-        <p><a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-10">따름정리 2.2.10</a>은 “\(DF = 0\)이면 상수”를 공 위에서만 증명했고, 공이라는 가정을 그냥 빼면 서로 떨어진 두 공의 합집합에서 결론이 거짓임을 보았다.
-        그때 남긴 질문 “어떤 열린집합에서 국소상수이면 상수인가?”의 답이 연결성이다. 새로워진 것은 역할의 분담이다. 미분(평균값 부등식)은 각 공 위에서의 정보만 주고, 그 정보를 전체로 잇는 것은 위상(연결성)이다.
-        <a href="../19-de-rham/index.html">19장</a>에서 \(df = 0\)인 함수가 연결성분마다 상수라는 사실로 \(H^0_{\mathrm{dR}}\)을 계산할 때 같은 분담이 다시 나온다.</p>
+        <p class="box-title">Looking back (Chapter 2): ball에서 connected open set으로</p>
+        <p><a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-10">Corollary 2.2.10</a>은 “\(DF = 0\)이면 상수”를 ball 위에서만 증명했고, ball이라는 가정을 그냥 빼면 서로 떨어진 두 ball의 합집합에서 결론이 거짓임을 보았다.
+        그때 남긴 질문 “어떤 open set에서 locally constant이면 상수인가?”의 답이 connectedness이다. 새로워진 것은 역할의 분담이다. 미분(mean value inequality)는 각 ball 위에서의 정보만 주고, 그 정보를 전체로 잇는 것은 topology(connectedness)이다.
+        <a href="../19-de-rham/index.html">Chapter 19</a>에서 \(df = 0\)인 함수가 connected component마다 상수라는 사실로 \(H^0_{\mathrm{dR}}\)을 계산할 때 같은 분담이 다시 나온다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>연결공간에는 열려 있으면서 닫힌 부분집합이 \(\varnothing\)과 전체뿐이다. \(\R\)의 연결 부분집합은 정확히 구간이다(<a href="#i-3-7-4">정리 3.7.4</a>).</li>
-        <li>연결성은 연속상으로 보존되고(중간값 정리), 한 점을 공유하는 합집합과 폐포로도 보존된다.</li>
-        <li>경로연결이면 연결이다. 볼록집합, \(\R^n \setminus \{0\}\) (\(n \ge 2\)), \(S^n\), \(\RP^n\), \(T^2\)는 경로연결이고, \(\GL(n, \R)\)은 연결이 아니다. 위상수학자의 사인 곡선은 연결이지만 경로연결이 아니다.</li>
-        <li>연결성분은 극대 연결 부분집합이다. 국소 경로연결 공간(예: \(\R^n\)의 열린집합)에서는 연결성분이 열려 있고 경로성분과 같다(<a href="#i-3-7-15">정리 3.7.15</a>).</li>
-        <li>연결공간 위의 국소상수함수는 상수다. 특히 연결인 열린집합 \(U \subseteq \R^n\)에서 \(DF = 0\)이면 \(F\)는 상수다(<a href="#i-3-7-18">따름정리 3.7.18</a>). 연결성으로 \(\R \not\cong \R^n\) (\(n \ge 2\))을 보인다.</li>
+        <li>connected space에는 열려 있으면서 닫힌 부분집합이 \(\varnothing\)과 전체뿐이다. \(\R\)의 connected 부분집합은 정확히 구간이다(<a href="#i-3-7-4">Theorem 3.7.4</a>).</li>
+        <li>connectedness는 continuous image로 보존되고(intermediate value theorem), 한 점을 공유하는 합집합과 closure로도 보존된다.</li>
+        <li>path-connected이면 connected이다. convex set, \(\R^n \setminus \{0\}\) (\(n \ge 2\)), \(S^n\), \(\RP^n\), \(T^2\)는 path-connected이고, \(\GL(n, \R)\)은 connected가 아니다. topologist's sine curve는 connected이지만 path-connected가 아니다.</li>
+        <li>connected component는 극대 connected 부분집합이다. locally path-connected 공간(예: \(\R^n\)의 open set)에서는 connected component가 열려 있고 path component와 같다(<a href="#i-3-7-15">Theorem 3.7.15</a>).</li>
+        <li>connected space 위의 locally constant function은 상수다. 특히 connected인 open set \(U \subseteq \R^n\)에서 \(DF = 0\)이면 \(F\)는 상수다(<a href="#i-3-7-18">Corollary 3.7.18</a>). connectedness로 \(\R \not\cong \R^n\) (\(n \ge 2\))을 보인다.</li>
       </ul>
-      <p class="next">다음 장에서는 이 장의 도구를 들고 곡선의 기하로 들어간다. 매개곡선의 속도와 호의 길이를 정의하고, 곡선이 얼마나 휘었는지를 재는 곡률을 도입한다. 이 장의 부분공간 위상과 위상동형사상, 컴팩트성과 연결성은 <a href="../06-regular-surfaces/index.html">6장</a>의 정칙곡면에서 본격적으로 쓰인다.</p>
+      <p class="next">다음 장에서는 이 장의 도구를 들고 곡선의 기하로 들어간다. parametrized curve의 속도와 arc length를 정의하고, 곡선이 얼마나 휘었는지를 재는 curvature를 도입한다. 이 장의 subspace topology와 homeomorphism, compactness와 connectedness는 <a href="../06-regular-surfaces/index.html">Chapter 6</a>의 regular surface에서 본격적으로 쓰인다.</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-3-7-1" data-level="1">
-        <p><span class="thm-head">연습 3.7.1</span> <span class="level">★</span>
-        다음 집합이 연결인지 판별하여라. (a) \([0, 1] \cup [2, 3]\) (b) \(S^1\) (c) 쌍곡선 \(\{xy = 1\}\) (d) 두 좌표축의 합집합 \(\{xy = 0\}\) (e) \(\R^2 \setminus \{(x, 0) : x \in \R\}\)</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 아니다. 구간이 아니다(<a href="#i-3-7-4">정리 3.7.4</a>). (b) 연결(<a href="#i-3-7-10">예 3.7.10</a>(c)).
-          (c) 아니다. \(\{x \gt 0\}\)과 \(\{x \lt 0\}\)으로 자른 두 가지가 분리다(곡선 위에서 \(x \ne 0\)).
-          (d) 연결. 두 축은 각각 연결(직선)이고 원점을 공유한다(<a href="#i-3-7-7">명제 3.7.7</a>(b)).
-          (e) 아니다. 윗반평면 \(\{y \gt 0\}\)과 아랫반평면 \(\{y \lt 0\}\)이 분리다.</p>
+        <p><span class="thm-head">Exercise 3.7.1</span> <span class="level">★</span>
+        다음 집합이 connected인지 판별하여라. (a) \([0, 1] \cup [2, 3]\) (b) \(S^1\) (c) 쌍곡선 \(\{xy = 1\}\) (d) 두 좌표축의 합집합 \(\{xy = 0\}\) (e) \(\R^2 \setminus \{(x, 0) : x \in \R\}\)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 아니다. 구간이 아니다(<a href="#i-3-7-4">Theorem 3.7.4</a>). (b) connected(<a href="#i-3-7-10">Example 3.7.10</a>(c)).
+          (c) 아니다. \(\{x \gt 0\}\)과 \(\{x \lt 0\}\)으로 자른 두 가지가 separation이다(곡선 위에서 \(x \ne 0\)).
+          (d) connected. 두 축은 각각 connected(직선)이고 원점을 공유한다(<a href="#i-3-7-7">Proposition 3.7.7</a>(b)).
+          (e) 아니다. 윗반평면 \(\{y \gt 0\}\)과 아랫반평면 \(\{y \lt 0\}\)이 separation이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-7-2" data-level="1">
-        <p><span class="thm-head">연습 3.7.2</span> <span class="level">★</span>
-        \(x^3 - 3x + 1 = 0\)이 \((0, 1)\)과 \((1, 2)\)에서 각각 해를 가짐을 중간값 정리로 보여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(p(x) = x^3 - 3x + 1\)은 연속이다. \(p(0) = 1 \gt 0\), \(p(1) = -1 \lt 0\), \(p(2) = 3 \gt 0\)이다. \([0, 1]\)과 \([1, 2]\)는 연결이므로 <a href="#i-3-7-6">따름정리 3.7.6</a>에 의해
+        <p><span class="thm-head">Exercise 3.7.2</span> <span class="level">★</span>
+        \(x^3 - 3x + 1 = 0\)이 \((0, 1)\)과 \((1, 2)\)에서 각각 해를 가짐을 intermediate value theorem으로 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(p(x) = x^3 - 3x + 1\)은 연속이다. \(p(0) = 1 \gt 0\), \(p(1) = -1 \lt 0\), \(p(2) = 3 \gt 0\)이다. \([0, 1]\)과 \([1, 2]\)는 connected이므로 <a href="#i-3-7-6">Corollary 3.7.6</a>에 의해
           \(p(x_1) = 0\)인 \(x_1 \in (0, 1)\)과 \(p(x_2) = 0\)인 \(x_2 \in (1, 2)\)가 있다(끝점에서는 \(0\)이 아니므로 열린구간 안).</p>
-          <p class="verified">검증: <code>verify/v-3-7-connectedness.py</code></p>
+          <p class="verified">Verification: <code>verify/v-3-7-connectedness.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-7-3" data-level="1">
-        <p><span class="thm-head">연습 3.7.3</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 3.7.3</span> <span class="level">★</span>
         \([0, 1) \not\cong (0, 1)\)임을 한 점을 빼는 방법으로 보여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>위상동형사상 \(h\colon [0, 1) \to (0, 1)\)이 있다고 하자. \([0, 1) \setminus \{0\} = (0, 1)\)은 연결이다. 그러면 \((0, 1) \setminus \{h(0)\}\)도 연결이어야 한다(<a href="#i-3-7-17">예 3.7.17</a>과 같은 논증).
-          그러나 \((0, 1)\)에서 어느 점 \(c\)를 빼도 \((0, c) \cup (c, 1)\)은 구간이 아니므로 연결이 아니다. 모순이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>homeomorphism \(h\colon [0, 1) \to (0, 1)\)이 있다고 하자. \([0, 1) \setminus \{0\} = (0, 1)\)은 connected이다. 그러면 \((0, 1) \setminus \{h(0)\}\)도 connected이어야 한다(<a href="#i-3-7-17">Example 3.7.17</a>과 같은 논증).
+          그러나 \((0, 1)\)에서 어느 점 \(c\)를 빼도 \((0, c) \cup (c, 1)\)은 구간이 아니므로 connected가 아니다. 모순이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-7-4" data-level="1">
-        <p><span class="thm-head">연습 3.7.4</span> <span class="level">★</span>
-        다음 공간의 연결성분을 구하여라. (a) 쌍곡선 \(\{xy = 1\}\) (b) \(\GL(1, \R) = \R \setminus \{0\}\) (c) \(\Z \subseteq \R\)</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 두 가지 \(\{xy = 1, x \gt 0\}\), \(\{xy = 1, x \lt 0\}\). 각각 연결인 \((0, \infty)\)(또는 \((-\infty, 0)\))의 연속상 \(x \mapsto (x, 1/x)\)이고, 둘은 서로소인 열린집합이므로 더 큰 연결집합은 없다(<a href="#i-3-7-7">명제 3.7.7</a>(a)).
+        <p><span class="thm-head">Exercise 3.7.4</span> <span class="level">★</span>
+        다음 공간의 connected component를 구하여라. (a) 쌍곡선 \(\{xy = 1\}\) (b) \(\GL(1, \R) = \R \setminus \{0\}\) (c) \(\Z \subseteq \R\)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 두 가지 \(\{xy = 1, x \gt 0\}\), \(\{xy = 1, x \lt 0\}\). 각각 connected인 \((0, \infty)\)(또는 \((-\infty, 0)\))의 continuous image \(x \mapsto (x, 1/x)\)이고, 둘은 서로소인 open set이므로 더 큰 connected set은 없다(<a href="#i-3-7-7">Proposition 3.7.7</a>(a)).
           (b) \((-\infty, 0)\)과 \((0, \infty)\). (c) 한 점 집합들. \(\Z\)는 이산공간이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-7-5" data-level="2">
-        <p><span class="thm-head">연습 3.7.5</span> <span class="level">★★</span>
+        <p><span class="thm-head">Exercise 3.7.5</span> <span class="level">★★</span>
         \(f\colon S^1 \to \R\)이 연속이면 \(f(x) = f(-x)\)인 \(x \in S^1\)이 있음을 보여라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(g(x) = f(x) - f(-x)\)는 \(g(-x) = -g(x)\)를 만족한다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        <details class="hint"><summary>Hint</summary><p>\(g(x) = f(x) - f(-x)\)는 \(g(-x) = -g(x)\)를 만족한다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>\(g(x) = f(x) - f(-x)\)는 연속이다(\(x \mapsto -x\)가 연속). 한 점 \(x_0\)을 고르자. \(g(x_0) = 0\)이면 끝이다. 아니면 \(g(-x_0) = -g(x_0)\)는 \(g(x_0)\)와 부호가 반대다.
-          \(S^1\)은 연결이므로(<a href="#i-3-7-10">예 3.7.10</a>(c)) 중간값 정리에 의해 \(g(x) = 0\), 즉 \(f(x) = f(-x)\)인 \(x\)가 있다. (예: 적도 위의 온도가 연속이면 대척점에서 온도가 같은 두 점이 있다.)</p>
+          \(S^1\)은 connected이므로(<a href="#i-3-7-10">Example 3.7.10</a>(c)) intermediate value theorem에 의해 \(g(x) = 0\), 즉 \(f(x) = f(-x)\)인 \(x\)가 있다. (예: 적도 위의 온도가 연속이면 대척점에서 온도가 같은 두 점이 있다.)</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-7-6" data-level="2">
-        <p><span class="thm-head">연습 3.7.6</span> <span class="level">★★</span>
-        \(X\)와 \(Y\)가 연결이면 \(X \times Y\)도 연결임을 보여라.</p>
-        <details class="hint"><summary>힌트</summary><p>한 점 \((x_0, y_0)\)을 고정하고, 각 \((x, y)\)에 대해 \(X \times \{y_0\} \cup \{x\} \times Y\)를 본다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(X, Y\)가 공집합이 아니라 하자(아니면 곱이 공집합). \(x \mapsto (x, y_0)\)과 \(y \mapsto (x, y)\)는 연속이므로(<a href="3-3-subspaces-products.html#i-3-3-15">정리 3.3.15</a>(b)) \(X \times \{y_0\}\)과 \(\{x\} \times Y\)는 연결이고,
-          점 \((x, y_0)\)을 공유하므로 \(L_{x} = (X \times \{y_0\}) \cup (\{x\} \times Y)\)는 연결이다(<a href="#i-3-7-7">명제 3.7.7</a>(b)). 모든 \(L_x\)는 \((x_0, y_0)\)을 포함하고 합집합이 \(X \times Y\)이므로 다시 <a href="#i-3-7-7">명제 3.7.7</a>(b)에 의해 \(X \times Y\)는 연결이다.</p>
+        <p><span class="thm-head">Exercise 3.7.6</span> <span class="level">★★</span>
+        \(X\)와 \(Y\)가 connected이면 \(X \times Y\)도 connected임을 보여라.</p>
+        <details class="hint"><summary>Hint</summary><p>한 점 \((x_0, y_0)\)을 고정하고, 각 \((x, y)\)에 대해 \(X \times \{y_0\} \cup \{x\} \times Y\)를 본다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(X, Y\)가 공집합이 아니라 하자(아니면 곱이 공집합). \(x \mapsto (x, y_0)\)과 \(y \mapsto (x, y)\)는 연속이므로(<a href="3-3-subspaces-products.html#i-3-3-15">Theorem 3.3.15</a>(b)) \(X \times \{y_0\}\)과 \(\{x\} \times Y\)는 connected이고,
+          점 \((x, y_0)\)을 공유하므로 \(L_{x} = (X \times \{y_0\}) \cup (\{x\} \times Y)\)는 connected이다(<a href="#i-3-7-7">Proposition 3.7.7</a>(b)). 모든 \(L_x\)는 \((x_0, y_0)\)을 포함하고 합집합이 \(X \times Y\)이므로 다시 <a href="#i-3-7-7">Proposition 3.7.7</a>(b)에 의해 \(X \times Y\)는 connected이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-7-7" data-level="3">
-        <p><span class="thm-head">연습 3.7.7</span> <span class="level">★★★</span>
-        \(\R^2 \setminus \Q^2\) (적어도 한 좌표가 무리수인 점 전체)가 경로연결임을 보여라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(a\)가 무리수이면 세로선 \(\{x = a\}\) 전체가 이 집합에 들어 있고, \(b\)가 무리수이면 가로선 \(\{y = b\}\) 전체가 들어 있다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(Z = \R^2 \setminus \Q^2\)라 하자. 무리수 \(a\)에 대한 세로선 \(V_a = \{a\} \times \R\)과 무리수 \(b\)에 대한 가로선 \(H_b = \R \times \{b\}\)는 \(Z\)에 들어 있고 각각 경로연결이다(선분).
-          \(V_a \cap H_b = \{(a, b)\}\)이므로 모든 \(V_a\)와 모든 \(H_b\)는 서로 경로로 이어진다: \(V_a\)의 점에서 \((a, b)\)를 거쳐 \(H_b\)의 점으로 간다. 두 세로선 \(V_a, V_{a'}\)도 \(H_{\sqrt2}\)를 거쳐 이어지고, 두 가로선도 같다.
-          \(Z\)의 모든 점 \((x, y)\)는 \(x\)가 무리수이면 \(V_x\)에, \(y\)가 무리수이면 \(H_y\)에 있다. 따라서 \(Z\)의 두 점은 각자의 선을 따라 \(V\)나 \(H\) 하나로 가고, 그 선들 사이를 위와 같이 이어 붙여(식 <a href="#eq-3-7-1">(3.7.1)</a>) 경로로 연결된다.
-          (\(\Q^2\)는 가산이지만 조밀하다. 그래도 평면에서 빼면 연결이 유지된다.)</p>
+        <p><span class="thm-head">Exercise 3.7.7</span> <span class="level">★★★</span>
+        \(\R^2 \setminus \Q^2\) (적어도 한 좌표가 무리수인 점 전체)가 path-connected임을 보여라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(a\)가 무리수이면 세로선 \(\{x = a\}\) 전체가 이 집합에 들어 있고, \(b\)가 무리수이면 가로선 \(\{y = b\}\) 전체가 들어 있다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(Z = \R^2 \setminus \Q^2\)라 하자. 무리수 \(a\)에 대한 세로선 \(V_a = \{a\} \times \R\)과 무리수 \(b\)에 대한 가로선 \(H_b = \R \times \{b\}\)는 \(Z\)에 들어 있고 각각 path-connected이다(선분).
+          \(V_a \cap H_b = \{(a, b)\}\)이므로 모든 \(V_a\)와 모든 \(H_b\)는 서로 path로 이어진다: \(V_a\)의 점에서 \((a, b)\)를 거쳐 \(H_b\)의 점으로 간다. 두 세로선 \(V_a, V_{a'}\)도 \(H_{\sqrt2}\)를 거쳐 이어지고, 두 가로선도 같다.
+          \(Z\)의 모든 점 \((x, y)\)는 \(x\)가 무리수이면 \(V_x\)에, \(y\)가 무리수이면 \(H_y\)에 있다. 따라서 \(Z\)의 두 점은 각자의 선을 따라 \(V\)나 \(H\) 하나로 가고, 그 선들 사이를 위와 같이 이어 붙여(<a href="#eq-3-7-1">(3.7.1)</a>) path로 이어진다.
+          (\(\Q^2\)는 countable이지만 dense하다. 그래도 평면에서 빼면 connected가 유지된다.)</p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="3-6-compactness.html">← 3.6 컴팩트성</a>
-    <a rel="next" href="../04-curves/index.html">4. 곡선의 기초 →</a>
+    <a rel="prev" href="3-6-compactness.html">← 3.6 Compactness</a>
+    <a rel="next" href="../04-curves/index.html">4. Curves →</a>
   </nav>
 </body>
 </html>

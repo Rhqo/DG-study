@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>2.1 전미분: 선형근사로서의 미분 — 미분기하 스터디</title>
+  <title>2.1 The Total Derivative: Differentiation as Linear Approximation — DG Study</title>
   <meta name="dg-id" content="2.1">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="1.1, 1.2">
@@ -15,254 +15,254 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">2. ℝⁿ의 미적분</a> ›
-    <span>2.1 전미분: 선형근사로서의 미분</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">2. Calculus on ℝⁿ</a> ›
+    <span>2.1 The Total Derivative: Differentiation as Linear Approximation</span>
   </nav>
 
   <main>
     <header>
-      <h1>2.1 전미분: 선형근사로서의 미분</h1>
-      <p class="meta">대응 교재:
-        <a class="cite" href="../../references.html#Sp-CoM">[Sp-CoM 2장]</a>,
-        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 부록 C]</a>,
-        <a class="cite" href="../../references.html#dC">[dC 2장 부록]</a></p>
+      <h1>2.1 The Total Derivative: Differentiation as Linear Approximation</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Sp-CoM">[Sp-CoM Ch. 2]</a>,
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM App. C]</a>,
+        <a class="cite" href="../../references.html#dC">[dC Ch. 2 Appendix]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>사상 \(F\colon U \to \R^m\)이 한 점에서 미분가능하다는 것을 “선형사상으로 근사된다”는 말로 정확히 진술하고, 전미분 \(DF(p)\)가 하나로 정해짐을 보일 수 있다.</li>
-        <li>편미분, 방향미분, 야코비 행렬을 정의하고, 전미분의 행렬이 야코비 행렬임을 증명할 수 있다.</li>
-        <li>편미분이 존재해도 미분가능하지 않은 예를 들 수 있고, 편미분이 연속이면 미분가능하다는 판정법을 쓸 수 있다.</li>
-        <li>이 장의 기준 사상인 극좌표 사상, 그리고 원·나선·구면의 기준 매개화의 전미분을 계산할 수 있다.</li>
+        <li>map \(F\colon U \to \R^m\)이 한 점에서 미분가능하다는 것을 “linear map으로 근사된다”는 말로 정확히 진술하고, total derivative \(DF(p)\)가 하나로 정해짐을 보일 수 있다.</li>
+        <li>partial derivative, directional derivative, Jacobian matrix를 정의하고, total derivative의 행렬이 Jacobian matrix임을 증명할 수 있다.</li>
+        <li>partial derivative가 존재해도 미분가능하지 않은 예를 들 수 있고, partial derivative가 연속이면 미분가능하다는 판정법을 쓸 수 있다.</li>
+        <li>이 장의 기준 map인 polar coordinate map, 그리고 원·helix·sphere의 standard parametrization의 total derivative를 계산할 수 있다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-2">예 1.1.2 (\(\R^n\))</a>와 표준기저 \(e_1, \dots, e_n\) (<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#sec-basis">1.1절</a>)</li>
-        <li><a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-1">정의 1.2.1 (선형사상)</a>, <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-13">정의 1.2.13 (선형사상의 행렬)</a>, <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-14">명제 1.2.14</a></li>
-        <li>\(\R^n\)의 유클리드 내적 \(\inner{x}{y} = \sum_i x^i y^i\)과 노름 \(\abs{x} = \sqrt{\inner{x}{x}}\) (<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-4">정의 1.5.4</a>),
-          <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-5">정리 1.5.5 (코시-슈바르츠 부등식)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6 (삼각부등식, 거리)</a>,
-          <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">명제 1.5.7 (선형사상은 유계이다)</a></li>
+        <li><a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-2">Example 1.1.2 (\(\R^n\))</a>와 standard basis \(e_1, \dots, e_n\) (<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#sec-basis">Section 1.1</a>)</li>
+        <li><a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-1">Definition 1.2.1 (linear map)</a>, <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-13">Definition 1.2.13 (matrix of a linear map)</a>, <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-14">Proposition 1.2.14</a></li>
+        <li>\(\R^n\)의 Euclidean inner product \(\inner{x}{y} = \sum_i x^i y^i\)과 norm \(\abs{x} = \sqrt{\inner{x}{x}}\) (<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-4">Definition 1.5.4</a>),
+          <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-5">Theorem 1.5.5 (Cauchy–Schwarz inequality)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">Corollary 1.5.6 (triangle inequality, distance)</a>,
+          <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">Proposition 1.5.7 (linear maps are bounded)</a></li>
         <li>1변수 미적분: 도함수, 평균값 정리</li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p>1장에서 벡터공간 사이의 선형사상을 정의하고, 기저를 고르면 선형사상이 행렬이 됨을 보았다(<a href="../01-linear-algebra/1-2-linear-maps.html">1.2절</a>).
-      1장의 끝에서 예고했듯이 이 장의 첫 주제는 휘어진 사상을 한 점 근처에서 선형사상으로 근사하는 것이다. 미분이 바로 그 선형사상이다. 1변수 미적분에서 \(f\)가 \(a\)에서 미분가능하면</p>
+      <h2>Motivation</h2>
+      <p>Chapter 1에서 vector space 사이의 linear map을 정의하고, basis를 고르면 linear map이 행렬이 됨을 보았다(<a href="../01-linear-algebra/1-2-linear-maps.html">Section 1.2</a>).
+      Chapter 1의 끝에서 예고했듯이 이 장의 첫 주제는 휘어진 map을 한 점 근처에서 linear map으로 근사하는 것이다. 미분이 바로 그 linear map이다. 1변수 미적분에서 \(f\)가 \(a\)에서 미분가능하면</p>
       <div class="equation" id="eq-2-1-1">
       \[ f(a + h) = f(a) + f'(a)\,h + (\text{나머지}), \qquad \frac{\text{나머지}}{h} \to 0 \quad (h \to 0) \tag{2.1.1} \]
       </div>
-      <p>이다. 즉 \(a\) 근처에서 \(f\)는 “상수 \(f(a)\) 더하기 선형사상 \(h \mapsto f'(a)\,h\)”로 근사되고, 그 오차는 \(h\)보다 빠르게 작아진다.
+      <p>이다. 즉 \(a\) 근처에서 \(f\)는 “상수 \(f(a)\) 더하기 linear map \(h \mapsto f'(a)\,h\)”로 근사되고, 그 오차는 \(h\)보다 빠르게 작아진다.
       그래프로 보면 곡선을 한 점에서 접선으로 바꾸는 것이다.</p>
-      <p>미분기하가 하는 일도 이것이다. 곡선은 한 점에서 접선으로, 곡면은 한 점에서 접평면으로 근사하고, 그 곧은 대상에서 선형대수로 계산한다.
-      그러려면 변수가 여럿이고 값도 여럿인 사상 \(F\colon \R^n \to \R^m\)에 대해 식 <a href="#eq-2-1-1">(2.1.1)</a>과 같은 근사를 말할 수 있어야 한다.
-      이때 \(f'(a)\)라는 <em>수</em> 자리에 들어갈 것은 \(\R^n\)에서 \(\R^m\)으로 가는 <em>선형사상</em>이다. 이 절에서는 이 선형사상, 즉 전미분을 정의하고
-      그것을 편미분으로 계산하는 방법을 정리한다.</p>
+      <p>미분기하가 하는 일도 이것이다. 곡선은 한 점에서 접선으로, surface는 한 점에서 tangent plane으로 근사하고, 그 곧은 대상에서 linear algebra로 계산한다.
+      그러려면 변수가 여럿이고 값도 여럿인 map \(F\colon \R^n \to \R^m\)에 대해 <a href="#eq-2-1-1">(2.1.1)</a>과 같은 근사를 말할 수 있어야 한다.
+      이때 \(f'(a)\)라는 <em>수</em> 자리에 들어갈 것은 \(\R^n\)에서 \(\R^m\)으로 가는 <em>linear map</em>이다. 이 절에서는 이 linear map, 즉 total derivative를 정의하고
+      그것을 partial derivative로 계산하는 방법을 정리한다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 가까이서 보면 격자가 곧다</p>
-        <p>극좌표 사상 \(P(r, \theta) = (r\cos\theta,\ r\sin\theta)\)는 \((r, \theta)\) 평면의 곧은 격자를 원호와 반직선으로 이루어진 휜 격자로 보낸다
-        (<a href="#fig-2-1-1">그림 2.1.1</a>의 검은 격자). 그런데 점 \(p\) 근처만 보면 휜 격자는 주황색 평행사변형 격자와 거의 겹친다.
-        주황색 격자는 <em>선형사상</em> \(DP(p)\)로 격자를 옮긴 뒤 \(P(p)\)만큼 평행이동한 것이다. \(p\)에서 멀어질수록 두 격자의 차이가 커지지만,
-        그 차이는 \(p\)까지의 거리보다 빨리 작아진다. 이것이 “\(P\)는 \(p\)에서 미분가능하고 전미분이 \(DP(p)\)다”라는 말의 뜻이다.</p>
+        <p class="box-title">Intuition: 가까이서 보면 격자가 곧다</p>
+        <p>polar coordinate map \(P(r, \theta) = (r\cos\theta,\ r\sin\theta)\)는 \((r, \theta)\) 평면의 곧은 격자를 원호와 반직선으로 이루어진 휜 격자로 보낸다
+        (<a href="#fig-2-1-1">Figure 2.1.1</a>의 검은 격자). 그런데 점 \(p\) 근처만 보면 휜 격자는 주황색 평행사변형 격자와 거의 겹친다.
+        주황색 격자는 <em>linear map</em> \(DP(p)\)로 격자를 옮긴 뒤 \(P(p)\)만큼 평행이동한 것이다. \(p\)에서 멀어질수록 두 격자의 차이가 커지지만,
+        그 차이는 \(p\)까지의 거리보다 빨리 작아진다. 이것이 “\(P\)는 \(p\)에서 미분가능하고 total derivative가 \(DP(p)\)다”라는 말의 뜻이다.</p>
       </aside>
 
       <figure class="dg-figure" id="fig-2-1-1">
-        <img src="figures/fig-2-1-1-linear-approximation.svg" alt="두 평면 그림. 왼쪽은 r-theta 평면에서 점 p=(3/2, π/6)을 중심으로 한 정사각형과 5×5 좌표격자, 그리고 p에서 나가는 두 파란 화살표 (1/2)e1, (1/2)e2. 오른쪽은 xy 평면에서 그 격자의 극좌표 사상에 의한 상인 휜 격자(원호와 반직선)와, 아핀 근사 P(p)+DP(p)(q−p)에 의한 주황 점선 평행사변형 격자. 두 격자는 P(p) 근처에서 거의 겹치고 가장자리로 갈수록 벌어진다. 파란 화살표는 DP(p)(1/2)e1, DP(p)(1/2)e2.">
-        <figcaption><span class="fig-head">그림 2.1.1.</span>
-        극좌표 사상 \(P\)와 점 \(p = (3/2,\ \pi/6)\). 왼쪽 정사각형 \([1, 2] \times [\pi/6 - 1/2,\ \pi/6 + 1/2]\)의 격자가 \(P\)에 의해 휜 격자(검정)로 가고,
-        아핀 근사 \(q \mapsto P(p) + DP(p)(q - p)\)에 의해 평행사변형 격자(주황 점선)로 간다. 파란 화살표는 \(\tfrac12 e_1, \tfrac12 e_2\)와 그 상 \(DP(p)(\tfrac12 e_1), DP(p)(\tfrac12 e_2)\)이다.
-        \(DP(p)\)의 값은 <a href="#i-2-1-14">예 2.1.14</a>에서 계산한다.</figcaption>
+        <img src="figures/fig-2-1-1-linear-approximation.svg" alt="두 평면 그림. 왼쪽은 r-theta 평면에서 점 p=(3/2, π/6)을 중심으로 한 정사각형과 5×5 좌표격자, 그리고 p에서 나가는 두 파란 화살표 (1/2)e1, (1/2)e2. 오른쪽은 xy 평면에서 그 격자의 polar coordinate map에 의한 image인 휜 격자(원호와 반직선)와, affine 근사 P(p)+DP(p)(q−p)에 의한 주황 점선 평행사변형 격자. 두 격자는 P(p) 근처에서 거의 겹치고 가장자리로 갈수록 벌어진다. 파란 화살표는 DP(p)(1/2)e1, DP(p)(1/2)e2.">
+        <figcaption><span class="fig-head">Figure 2.1.1.</span>
+        polar coordinate map \(P\)와 점 \(p = (3/2,\ \pi/6)\). 왼쪽 정사각형 \([1, 2] \times [\pi/6 - 1/2,\ \pi/6 + 1/2]\)의 격자가 \(P\)에 의해 휜 격자(검정)로 가고,
+        affine 근사 \(q \mapsto P(p) + DP(p)(q - p)\)에 의해 평행사변형 격자(주황 점선)로 간다. 파란 화살표는 \(\tfrac12 e_1, \tfrac12 e_2\)와 그 image \(DP(p)(\tfrac12 e_1), DP(p)(\tfrac12 e_2)\)이다.
+        \(DP(p)\)의 값은 <a href="#i-2-1-14">Example 2.1.14</a>에서 계산한다.</figcaption>
       </figure>
     </section>
 
     <section id="sec-preliminaries">
-      <h2>준비: 거리, 공, 열린집합, 극한, 폐포, 컴팩트 집합, 완비성</h2>
-      <p>극한을 말하려면 “가깝다”는 말이 필요하다. 이 장은 위상을 다루는 <a href="../03-topology-basics/index.html">3장</a>보다 앞에 있으므로, 미적분학에서 쓰던 다음 약속을 그대로 쓴다.
-      이 개념들은 3장에서 거리공간과 위상공간의 언어로 정식으로 정의한다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-5">정의 3.1.5</a>,
-      <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-15">정의 3.1.15</a>,
-      <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-1">정의 3.2.1</a>, <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-3">명제 3.2.3</a>).
+      <h2>Preliminaries: distance, balls, open sets, limits, closure, compact sets, completeness</h2>
+      <p>극한을 말하려면 “가깝다”는 말이 필요하다. 이 장은 topology를 다루는 <a href="../03-topology-basics/index.html">Chapter 3</a>보다 앞에 있으므로, 미적분학에서 쓰던 다음 약속을 그대로 쓴다.
+      이 개념들은 Chapter 3에서 metric space와 topological space의 언어로 정식으로 정의한다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-5">Definition 3.1.5</a>,
+      <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-15">Definition 3.1.15</a>,
+      <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-1">Definition 3.2.1</a>, <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-3">Proposition 3.2.3</a>).
       여기서는 이 장에 필요한 만큼만 상기한다.</p>
       <ul>
-        <li><strong>거리.</strong> 두 점 \(x, y \in \R^n\) 사이의 거리는 유클리드 거리 \(\abs{x - y}\)이고, 삼각부등식 \(\abs{x - z} \le \abs{x - y} + \abs{y - z}\)이 성립한다
-        (<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6</a>).</li>
-        <li><strong>공.</strong> \(p \in \R^n\)과 \(r \gt 0\)에 대하여 \(B_r(p) = \{x \in \R^n : \abs{x - p} \lt r\}\)를 \(p\)를 중심으로 하는 반지름 \(r\)인 (열린) 공이라 한다.</li>
-        <li><strong>열린집합.</strong> \(U \subseteq \R^n\)의 모든 점 \(p\)에 대하여 \(B_r(p) \subseteq U\)인 \(r \gt 0\)이 있으면 \(U\)를 열린집합이라 한다.
-        공, \(\R^n\) 자신, 반평면 \(\{(r, \theta) : r \gt 0\}\)은 열린집합이고, 닫힌 반평면 \(\{(r, \theta) : r \ge 0\}\)은 열린집합이 아니다(\(r = 0\)인 점 둘레의 어떤 공도 \(r \lt 0\)인 점을 포함한다).
-        \(p\)를 포함하는 열린집합을 \(p\)의 근방이라 부른다.</li>
-        <li><strong>극한과 연속.</strong> \(F\colon U \to \R^m\)이고 \(p \in U\)일 때 \(\lim_{x \to p} F(x) = q\)는 “모든 \(\varepsilon \gt 0\)에 대하여 어떤 \(\delta \gt 0\)이 있어서,
+        <li><strong>Distance.</strong> 두 점 \(x, y \in \R^n\) 사이의 거리는 Euclidean distance \(\abs{x - y}\)이고, triangle inequality \(\abs{x - z} \le \abs{x - y} + \abs{y - z}\)이 성립한다
+        (<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">Corollary 1.5.6</a>).</li>
+        <li><strong>Ball.</strong> \(p \in \R^n\)과 \(r \gt 0\)에 대하여 \(B_r(p) = \{x \in \R^n : \abs{x - p} \lt r\}\)를 \(p\)를 중심으로 하는 반지름 \(r\)인 (open) ball이라 한다.</li>
+        <li><strong>Open set.</strong> \(U \subseteq \R^n\)의 모든 점 \(p\)에 대하여 \(B_r(p) \subseteq U\)인 \(r \gt 0\)이 있으면 \(U\)를 open set이라 한다.
+        ball, \(\R^n\) 자신, 반평면 \(\{(r, \theta) : r \gt 0\}\)은 open set이고, 닫힌 반평면 \(\{(r, \theta) : r \ge 0\}\)은 open set이 아니다(\(r = 0\)인 점 둘레의 어떤 ball도 \(r \lt 0\)인 점을 포함한다).
+        \(p\)를 포함하는 open set을 \(p\)의 neighborhood라 부른다.</li>
+        <li><strong>Limits and continuity.</strong> \(F\colon U \to \R^m\)이고 \(p \in U\)일 때 \(\lim_{x \to p} F(x) = q\)는 “모든 \(\varepsilon \gt 0\)에 대하여 어떤 \(\delta \gt 0\)이 있어서,
         \(x \in U\)이고 \(0 \lt \abs{x - p} \lt \delta\)이면 \(\abs{F(x) - q} \lt \varepsilon\)”이라는 뜻이다. \(\lim_{x \to p} F(x) = F(p)\)이면 \(F\)가 \(p\)에서 연속이라 한다.</li>
-        <li><strong>성분별 극한.</strong> \(v \in \R^m\)의 각 성분은 \(\abs{v^i} \le \abs{v} \le \abs{v^1} + \dots + \abs{v^m}\)을 만족한다(첫 부등식은 \(\abs{v}^2\)이 \((v^i)^2\)을 포함하는 합이기 때문이고, 둘째는 \(v = \sum_i v^i e_i\)에 삼각부등식을 쓴 것이다).
+        <li><strong>Componentwise limits.</strong> \(v \in \R^m\)의 각 성분은 \(\abs{v^i} \le \abs{v} \le \abs{v^1} + \dots + \abs{v^m}\)을 만족한다(첫 부등식은 \(\abs{v}^2\)이 \((v^i)^2\)을 포함하는 합이기 때문이고, 둘째는 \(v = \sum_i v^i e_i\)에 triangle inequality를 쓴 것이다).
         따라서 \(F = (F^1, \dots, F^m)\)이 \(q\)로 수렴할 필요충분조건은 각 성분 \(F^i\)가 \(q^i\)로 수렴하는 것이다.</li>
-        <li><strong>연속사상과 열린집합.</strong> \(U \subseteq \R^n\)이 열린집합이고 \(F\colon U \to \R^m\)이 연속이며 \(V \subseteq \R^m\)이 열린집합이면
-        \(F^{-1}(V) = \{x \in U : F(x) \in V\}\)는 열린집합이다. \(x \in F^{-1}(V)\)이면 \(B_\varepsilon(F(x)) \subseteq V\)인 \(\varepsilon \gt 0\)이 있고,
+        <li><strong>Continuous maps and open sets.</strong> \(U \subseteq \R^n\)이 open set이고 \(F\colon U \to \R^m\)이 연속이며 \(V \subseteq \R^m\)이 open set이면
+        \(F^{-1}(V) = \{x \in U : F(x) \in V\}\)는 open set이다. \(x \in F^{-1}(V)\)이면 \(B_\varepsilon(F(x)) \subseteq V\)인 \(\varepsilon \gt 0\)이 있고,
         \(x\)에서의 연속성에서 \(x' \in U\), \(\abs{x' - x} \lt \delta\)이면 \(\abs{F(x') - F(x)} \lt \varepsilon\)인 \(\delta \gt 0\)이 있다. \(\delta\)를 줄여 \(B_\delta(x) \subseteq U\)가 되게 하면
-        \(B_\delta(x) \subseteq F^{-1}(V)\)이기 때문이다. (3장은 이 성질을 연속의 정의로 삼는다.)</li>
-        <li><strong>닫힌집합과 유계집합.</strong> 여집합 \(\R^n \setminus A\)가 열린집합이면 \(A\)를 닫힌집합이라 한다. 닫힌 공 \(\{x : \abs{x - p} \le r\}\)과 닫힌 직사각형
-        \([a^1, b^1] \times \dots \times [a^n, b^n]\)은 닫힌집합이다. 여집합의 점 \(x\) 둘레에, 앞의 경우는 반지름 \(\abs{x - p} - r\)인 공이, 뒤의 경우는 구간 \([a^i, b^i]\)를 벗어난 좌표 \(x^i\)에서
-        그 구간까지의 거리를 반지름으로 하는 공이 여집합에 들어가기 때문이다. 유한개의 닫힌집합의 합집합도 닫힌집합이다(여집합의 점마다 각 여집합에서 잡은 반지름들 가운데 가장 작은 것을 쓴다).
-        닫힌집합 \(A\) 안의 수열이 수렴하면 그 극한도 \(A\)에 있다. 극한이 열린집합 \(\R^n \setminus A\)에 있다면 그 둘레의 어떤 공이 \(A\)와 만나지 않는데, 수열의 항은 결국 그 공에 들어가기 때문이다.
-        어떤 공 \(B_R(0)\)에 포함되는 집합을 유계라 한다.</li>
-        <li><strong>내부, 경계, 폐포.</strong> \(D \subseteq \R^n\)이고 \(p \in \R^n\)이라 하자. 어떤 공 \(B_r(p)\)가 \(D\)에 포함되면 \(p\)를 \(D\)의 <em>내점</em>이라 하고, 내점 전체를 \(D\)의 <em>내부</em>라 한다.
-        \(p\)를 중심으로 하는 모든 공이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함하면 \(p\)를 \(D\)의 <em>경계점</em>이라 하고, 경계점 전체를 \(\partial D\)로 쓴다.
-        \(\overline{D} = D \cup \partial D\)를 \(D\)의 <em>폐포</em>라 한다. 정의에서 곧바로 \(\R^n\)의 각 점은 \(D\)의 내점, \(\R^n \setminus D\)의 내점, \(D\)의 경계점 가운데 정확히 하나다.
-        앞의 둘이 모두 아니라는 것은 \(p\)를 중심으로 하는 모든 공이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함한다는 뜻이고, 앞의 둘이 동시에 성립하면 \(p\)가 \(D\)와 \(\R^n \setminus D\)에 함께 속하게 되기 때문이다.
-        따라서 \(\overline{D}\)의 여집합은 \(\R^n \setminus D\)의 내부이고, 이것은 열린집합이다. \(B_r(q) \subseteq \R^n \setminus D\)이고 \(x \in B_r(q)\)이면 삼각부등식에서 \(B_{r - \abs{x - q}}(x) \subseteq B_r(q)\)이므로 \(x\)도 내점이기 때문이다.
-        즉 \(\overline{D}\)는 닫힌집합이다. 또 \(D \subseteq B_R(0)\)이고 \(\abs{q} \gt R\)이면 공 \(B_{\abs{q} - R}(q)\)는 \(B_R(0)\)과 만나지 않으므로(그 점 \(y\)는 \(\abs{y} \ge \abs{q} - \abs{y - q} \gt R\)) \(q \notin \overline{D}\)이다. 즉 \(D\)가 유계이면 \(\overline{D}\)도 유계이다.
-        3장은 폐포를 위상공간에서 “\(D\)를 포함하는 모든 닫힌집합의 교집합”으로 정의한다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-15">정의 3.1.15</a>).
-        \(\R^n\)에서 그 정의가 여기의 \(D \cup \partial D\)와 같은 집합을 준다는 것은 <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-27">명제 3.1.27</a>에서 증명한다.</li>
-        <li><strong>컴팩트 집합에 관한 세 사실.</strong> 이 장에서는 미적분학의 관습대로 \(\R^n\)의 유계인 닫힌집합을 <em>컴팩트</em> 집합이라고도 부른다. 컴팩트 집합 \(K\)에 관한 다음 세 사실은
+        \(B_\delta(x) \subseteq F^{-1}(V)\)이기 때문이다. (Chapter 3은 이 성질을 연속의 정의로 삼는다.)</li>
+        <li><strong>Closed sets and bounded sets.</strong> 여집합 \(\R^n \setminus A\)가 open set이면 \(A\)를 closed set이라 한다. closed ball \(\{x : \abs{x - p} \le r\}\)과 닫힌 직사각형
+        \([a^1, b^1] \times \dots \times [a^n, b^n]\)은 closed set이다. 여집합의 점 \(x\) 둘레에, 앞의 경우는 반지름 \(\abs{x - p} - r\)인 ball이, 뒤의 경우는 구간 \([a^i, b^i]\)를 벗어난 좌표 \(x^i\)에서
+        그 구간까지의 거리를 반지름으로 하는 ball이 여집합에 들어가기 때문이다. 유한개의 closed set의 합집합도 closed set이다(여집합의 점마다 각 여집합에서 잡은 반지름들 가운데 가장 작은 것을 쓴다).
+        closed set \(A\) 안의 수열이 수렴하면 그 극한도 \(A\)에 있다. 극한이 open set \(\R^n \setminus A\)에 있다면 그 둘레의 어떤 ball이 \(A\)와 만나지 않는데, 수열의 항은 결국 그 ball에 들어가기 때문이다.
+        어떤 ball \(B_R(0)\)에 포함되는 집합을 bounded라 한다.</li>
+        <li><strong>Interior, boundary, closure.</strong> \(D \subseteq \R^n\)이고 \(p \in \R^n\)이라 하자. 어떤 ball \(B_r(p)\)가 \(D\)에 포함되면 \(p\)를 \(D\)의 <em>interior point</em>라 하고, interior point 전체를 \(D\)의 <em>interior</em>라 한다.
+        \(p\)를 중심으로 하는 모든 ball이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함하면 \(p\)를 \(D\)의 <em>boundary point</em>라 하고, boundary point 전체를 \(\partial D\)로 쓴다.
+        \(\overline{D} = D \cup \partial D\)를 \(D\)의 <em>closure</em>라 한다. 정의에서 곧바로 \(\R^n\)의 각 점은 \(D\)의 interior point, \(\R^n \setminus D\)의 interior point, \(D\)의 boundary point 가운데 정확히 하나다.
+        앞의 둘이 모두 아니라는 것은 \(p\)를 중심으로 하는 모든 ball이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함한다는 뜻이고, 앞의 둘이 동시에 성립하면 \(p\)가 \(D\)와 \(\R^n \setminus D\)에 함께 속하게 되기 때문이다.
+        따라서 \(\overline{D}\)의 여집합은 \(\R^n \setminus D\)의 interior이고, 이것은 open set이다. \(B_r(q) \subseteq \R^n \setminus D\)이고 \(x \in B_r(q)\)이면 triangle inequality에서 \(B_{r - \abs{x - q}}(x) \subseteq B_r(q)\)이므로 \(x\)도 interior point이기 때문이다.
+        즉 \(\overline{D}\)는 closed set이다. 또 \(D \subseteq B_R(0)\)이고 \(\abs{q} \gt R\)이면 ball \(B_{\abs{q} - R}(q)\)는 \(B_R(0)\)과 만나지 않으므로(그 점 \(y\)는 \(\abs{y} \ge \abs{q} - \abs{y - q} \gt R\)) \(q \notin \overline{D}\)이다. 즉 \(D\)가 bounded이면 \(\overline{D}\)도 bounded이다.
+        Chapter 3은 closure를 topological space에서 “\(D\)를 포함하는 모든 closed set의 교집합”으로 정의한다(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-15">Definition 3.1.15</a>).
+        \(\R^n\)에서 그 정의가 여기의 \(D \cup \partial D\)와 같은 집합을 준다는 것은 <a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-27">Proposition 3.1.27</a>에서 증명한다.</li>
+        <li><strong>Three facts about compact sets.</strong> 이 장에서는 미적분학의 관습대로 \(\R^n\)의 bounded closed set을 <em>compact</em> set이라고도 부른다. compact set \(K\)에 관한 다음 세 사실은
         <strong>미적분학에서 알려진 사실로 받아들인다</strong>.
-        (i) <em>하이네-보렐 정리.</em> 열린집합들이 \(K\)를 덮으면 그 가운데 유한개가 이미 \(K\)를 덮는다.
-        (ii) <em>최댓값·최솟값 정리.</em> \(K \neq \varnothing\)이면 \(K\) 위의 연속함수는 최댓값과 최솟값을 가진다. 특히 유계이다.
-        (iii) <em>균등연속성.</em> \(K\) 위의 연속사상 \(F\)는 균등연속이다. 즉 모든 \(\varepsilon \gt 0\)에 대하여 어떤 \(\delta \gt 0\)이 있어서, \(x, x' \in K\)이고 \(\abs{x - x'} \lt \delta\)이면 \(\abs{F(x) - F(x')} \lt \varepsilon\)이다.
-        3장은 컴팩트성을 열린덮개로 정의하고(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-1">정의 3.6.1</a>) 이 세 사실을 증명한다
-        (<a href="../03-topology-basics/3-6-compactness.html#i-3-6-7">하이네-보렐 정리 3.6.7</a>, <a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">최댓값·최솟값 정리 3.6.10</a>,
-        <a href="../03-topology-basics/3-6-compactness.html#i-3-6-19">따름정리 3.6.19</a>). 이 장의 증명이 3장의 결과를 쓰는 곳은 이 세 사실과 아래의 중간값 정리 (v)뿐이다.</li>
-        <li><strong>완비성.</strong> \(\R^n\)의 수열 \((x_k)\)가 “모든 \(\varepsilon \gt 0\)에 대하여 어떤 \(N\)이 있어서 \(k, m \ge N\)이면 \(\abs{x_k - x_m} \lt \varepsilon\)”을 만족하면 코시 수열이라 한다.
-        (iv) <em>\(\R^n\)의 완비성.</em> \(\R^n\)의 코시 수열은 수렴한다. 이것도 <strong>미적분학에서 알려진 사실로 받아들인다</strong>.
-        (각 성분 \((x_k^i)\)는 \(\abs{x_k^i - x_m^i} \le \abs{x_k - x_m}\)이므로 \(\R\)의 코시 수열이고, 실수의 완비성에 의해 수렴한다. 그러면 위의 성분별 극한에 의해 \((x_k)\)도 수렴한다.)
-        3장은 이 사실을 다루지 않는다. 이 장에서는 <a href="2-3-inverse-function-theorem.html#i-2-3-6">축소사상 원리</a>의 증명에 쓴다.</li>
-        <li><strong>중간값 정리.</strong> (v) 구간 \(I \subseteq \R\) 위의 연속함수 \(f\)가 \(a, b \in I\)에서 \(f(a) \lt c \lt f(b)\)이면 \(f(t) = c\)인 \(t \in I\)가 있다. 따라서 연속함수에 의한 구간의 상은 구간이다.
-        이것도 1변수 미적분학에서 <strong>알려진 사실로 받아들인다</strong>. 3장은 이것을 연결성으로 증명한다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>).</li>
+        (i) <em>Heine–Borel theorem.</em> open set들이 \(K\)를 덮으면 그 가운데 유한개가 이미 \(K\)를 덮는다.
+        (ii) <em>최댓값·최솟값 정리.</em> \(K \neq \varnothing\)이면 \(K\) 위의 연속함수는 최댓값과 최솟값을 가진다. 특히 bounded이다.
+        (iii) <em>Uniform continuity.</em> \(K\) 위의 continuous map \(F\)는 uniformly continuous이다. 즉 모든 \(\varepsilon \gt 0\)에 대하여 어떤 \(\delta \gt 0\)이 있어서, \(x, x' \in K\)이고 \(\abs{x - x'} \lt \delta\)이면 \(\abs{F(x) - F(x')} \lt \varepsilon\)이다.
+        Chapter 3은 compactness를 open cover로 정의하고(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-1">Definition 3.6.1</a>) 이 세 사실을 증명한다
+        (<a href="../03-topology-basics/3-6-compactness.html#i-3-6-7">Theorem 3.6.7</a>(Heine–Borel), <a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">Theorem 3.6.10</a>(최댓값·최솟값),
+        <a href="../03-topology-basics/3-6-compactness.html#i-3-6-19">Corollary 3.6.19</a>). 이 장의 증명이 Chapter 3의 결과를 쓰는 곳은 이 세 사실과 아래의 intermediate value theorem (v)뿐이다.</li>
+        <li><strong>Completeness.</strong> \(\R^n\)의 수열 \((x_k)\)가 “모든 \(\varepsilon \gt 0\)에 대하여 어떤 \(N\)이 있어서 \(k, m \ge N\)이면 \(\abs{x_k - x_m} \lt \varepsilon\)”을 만족하면 Cauchy sequence라 한다.
+        (iv) <em>\(\R^n\)의 completeness.</em> \(\R^n\)의 Cauchy sequence는 수렴한다. 이것도 <strong>미적분학에서 알려진 사실로 받아들인다</strong>.
+        (각 성분 \((x_k^i)\)는 \(\abs{x_k^i - x_m^i} \le \abs{x_k - x_m}\)이므로 \(\R\)의 Cauchy sequence이고, 실수의 completeness에 의해 수렴한다. 그러면 위의 성분별 극한에 의해 \((x_k)\)도 수렴한다.)
+        Chapter 3은 이 사실을 다루지 않는다. 이 장에서는 <a href="2-3-inverse-function-theorem.html#i-2-3-6">contraction mapping principle</a>의 증명에 쓴다.</li>
+        <li><strong>Intermediate value theorem.</strong> (v) 구간 \(I \subseteq \R\) 위의 연속함수 \(f\)가 \(a, b \in I\)에서 \(f(a) \lt c \lt f(b)\)이면 \(f(t) = c\)인 \(t \in I\)가 있다. 따라서 연속함수에 의한 구간의 image는 구간이다.
+        이것도 1변수 미적분학에서 <strong>알려진 사실로 받아들인다</strong>. Chapter 3은 이것을 connectedness로 증명한다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">Corollary 3.7.6</a>).</li>
       </ul>
-      <p>미분을 정의할 때 정의역을 <em>열린집합</em>으로 두는 이유는 간단하다. \(p \in U\)이고 \(U\)가 열린집합이면 \(\abs{h}\)가 충분히 작은 모든 \(h\)에 대하여 \(p + h \in U\)이다.
+      <p>미분을 정의할 때 정의역을 <em>open set</em>으로 두는 이유는 간단하다. \(p \in U\)이고 \(U\)가 open set이면 \(\abs{h}\)가 충분히 작은 모든 \(h\)에 대하여 \(p + h \in U\)이다.
       그래서 \(F(p + h)\)를 모든 방향의 작은 \(h\)에 대해 생각할 수 있다.</p>
     </section>
 
     <section id="sec-derivative">
-      <h2>전미분</h2>
-      <p>식 <a href="#eq-2-1-1">(2.1.1)</a>의 “나머지를 \(h\)로 나눈 것이 \(0\)으로 간다”를 벡터로 옮기면, 나눗셈 대신 길이의 비를 쓰게 된다.</p>
+      <h2>The total derivative</h2>
+      <p>Equation <a href="#eq-2-1-1">(2.1.1)</a>의 “나머지를 \(h\)로 나눈 것이 \(0\)으로 간다”를 벡터로 옮기면, 나눗셈 대신 길이의 비를 쓰게 된다.</p>
 
       <div class="thm definition" id="i-2-1-1">
-        <p><span class="thm-head">정의 2.1.1</span> <span class="thm-name">(미분가능성과 전미분, differentiability and total derivative)</span>.
-        \(U \subseteq \R^n\)이 열린집합이고 \(F\colon U \to \R^m\), \(p \in U\)라 하자. 선형사상 \(A\colon \R^n \to \R^m\)이 있어서</p>
+        <p><span class="thm-head">Definition 2.1.1</span> <span class="thm-name">(differentiability and total derivative)</span>.
+        \(U \subseteq \R^n\)이 open set이고 \(F\colon U \to \R^m\), \(p \in U\)라 하자. linear map \(A\colon \R^n \to \R^m\)이 있어서</p>
         <div class="equation" id="eq-2-1-2">
         \[ \lim_{h \to 0} \frac{\abs{F(p + h) - F(p) - Ah}}{\abs{h}} = 0 \tag{2.1.2} \]
         </div>
-        <p>이면 \(F\)가 \(p\)에서 <dfn>미분가능</dfn>(differentiable)하다고 하고, \(A\)를 \(p\)에서 \(F\)의 <dfn>전미분</dfn>(total derivative)이라 하여 \(DF(p)\)로 쓴다.
+        <p>이면 \(F\)가 \(p\)에서 <dfn>differentiable</dfn>(미분가능)하다고 하고, \(A\)를 \(p\)에서 \(F\)의 <dfn>total derivative</dfn>(전미분)이라 하여 \(DF(p)\)로 쓴다.
         \(F\)가 \(U\)의 모든 점에서 미분가능하면 \(U\)에서 미분가능하다고 한다.</p>
       </div>
 
-      <p>식 <a href="#eq-2-1-2">(2.1.2)</a>의 극한은 \(h \in \R^n\)에 대한 극한이고, \(h\)는 \(p + h \in U\)이고 \(h \neq 0\)인 벡터 위를 움직인다.
+      <p>Equation <a href="#eq-2-1-2">(2.1.2)</a>의 극한은 \(h \in \R^n\)에 대한 극한이고, \(h\)는 \(p + h \in U\)이고 \(h \neq 0\)인 벡터 위를 움직인다.
       흔히 나머지 \(R(h) = F(p + h) - F(p) - DF(p)h\)를 두고</p>
       <div class="equation" id="eq-2-1-3">
       \[ F(p + h) = F(p) + DF(p)\,h + R(h), \qquad \frac{\abs{R(h)}}{\abs{h}} \to 0 \quad (h \to 0) \tag{2.1.3} \]
       </div>
-      <p>로 쓴다. 식 <a href="#eq-2-1-1">(2.1.1)</a>과 똑같은 모양이다. 정의에 “\(A\)가 있어서”라고 썼으므로, 먼저 그런 \(A\)가 하나뿐인지 확인해야 \(DF(p)\)라는 이름을 붙일 수 있다.</p>
+      <p>로 쓴다. <a href="#eq-2-1-1">(2.1.1)</a>과 똑같은 모양이다. 정의에 “\(A\)가 있어서”라고 썼으므로, 먼저 그런 \(A\)가 하나뿐인지 확인해야 \(DF(p)\)라는 이름을 붙일 수 있다.</p>
 
       <div class="thm proposition" id="i-2-1-2">
-        <p><span class="thm-head">명제 2.1.2</span> <span class="thm-name">(전미분의 유일성)</span>.
-        <a href="#i-2-1-1">정의 2.1.1</a>의 조건을 만족하는 선형사상 \(A\)는 많아야 하나다.</p>
+        <p><span class="thm-head">Proposition 2.1.2</span> <span class="thm-name">(uniqueness of the total derivative)</span>.
+        <a href="#i-2-1-1">Definition 2.1.1</a>의 조건을 만족하는 linear map \(A\)는 많아야 하나다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 두 선형사상 \(A, B\)가 모두 조건을 만족하면 \((A - B)h\)도 \(\abs{h}\)보다 빨리 작아진다. 선형사상은 늘이고 줄이는 비율이 방향마다 일정하므로 \(A - B = 0\)일 수밖에 없다.</p>
-        <p><span class="proof-head">증명.</span>
-        \(A\)와 \(B\)가 모두 <a href="#eq-2-1-2">(2.1.2)</a>를 만족한다고 하자. \(v \in \R^n\)이 \(0\)이 아닌 벡터라 하자. \(U\)가 열린집합이므로 \(\abs{t}\)가 충분히 작으면 \(p + tv \in U\)이다.
-        \(h = tv\) (\(t \neq 0\))라 두면 삼각부등식에 의해</p>
+        <p class="proof-idea">Proof idea: 두 linear map \(A, B\)가 모두 조건을 만족하면 \((A - B)h\)도 \(\abs{h}\)보다 빨리 작아진다. linear map은 늘이고 줄이는 비율이 방향마다 일정하므로 \(A - B = 0\)일 수밖에 없다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(A\)와 \(B\)가 모두 <a href="#eq-2-1-2">(2.1.2)</a>를 만족한다고 하자. \(v \in \R^n\)이 \(0\)이 아닌 벡터라 하자. \(U\)가 open set이므로 \(\abs{t}\)가 충분히 작으면 \(p + tv \in U\)이다.
+        \(h = tv\) (\(t \neq 0\))라 두면 triangle inequality에 의해</p>
         <p>\[ \frac{\abs{(A - B)h}}{\abs{h}} \le \frac{\abs{F(p + h) - F(p) - Bh}}{\abs{h}} + \frac{\abs{F(p + h) - F(p) - Ah}}{\abs{h}} \]</p>
-        <p>이고 \(t \to 0\)일 때 \(h \to 0\)이므로 우변은 \(0\)으로 간다. 그런데 선형성에 의해 좌변은 \(\abs{t(A - B)v}/\abs{tv} = \abs{(A - B)v}/\abs{v}\)로 \(t\)에 무관하다.
+        <p>이고 \(t \to 0\)일 때 \(h \to 0\)이므로 우변은 \(0\)으로 간다. 그런데 linearity에 의해 좌변은 \(\abs{t(A - B)v}/\abs{tv} = \abs{(A - B)v}/\abs{v}\)로 \(t\)에 무관하다.
         \(t\)에 무관한 수가 \(0\)으로 가므로 \((A - B)v = 0\)이다. \(v\)는 임의였으므로 \(A = B\)이다.</p>
       </div>
 
       <div class="thm example" id="i-2-1-3">
-        <p><span class="thm-head">예 2.1.3</span> <span class="thm-name">(아핀사상과 1변수 함수)</span>.
+        <p><span class="thm-head">Example 2.1.3</span> <span class="thm-name">(affine maps and one-variable functions)</span>.
         (a) \(m \times n\) 행렬 \(A\)와 \(b \in \R^m\)에 대하여 \(F(x) = Ax + b\)라 하자. 모든 \(p\)와 \(h\)에 대하여 \(F(p + h) - F(p) - Ah = 0\)이므로
-        <a href="#eq-2-1-2">(2.1.2)</a>의 분자는 늘 \(0\)이다. 따라서 \(F\)는 모든 점에서 미분가능하고 \(DF(p) = A\)이다. 특히 선형사상의 전미분은 어느 점에서나 그 자신이다.
-        상수사상(\(A = 0\))의 전미분은 \(0\)이다.</p>
-        <p>(b) \(n = m = 1\)이라 하자. \(\R\)에서 \(\R\)로 가는 선형사상은 어떤 수 \(c\)를 곱하는 사상 \(h \mapsto ch\)뿐이다(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-4">명제 1.2.4</a>에서 \(c\)는 \(1\)의 상이다).
+        <a href="#eq-2-1-2">(2.1.2)</a>의 분자는 늘 \(0\)이다. 따라서 \(F\)는 모든 점에서 미분가능하고 \(DF(p) = A\)이다. 특히 linear map의 total derivative는 어느 점에서나 그 자신이다.
+        constant map(\(A = 0\))의 total derivative는 \(0\)이다.</p>
+        <p>(b) \(n = m = 1\)이라 하자. \(\R\)에서 \(\R\)로 가는 linear map은 어떤 수 \(c\)를 곱하는 map \(h \mapsto ch\)뿐이다(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-4">Proposition 1.2.4</a>에서 \(c\)는 \(1\)의 image이다).
         이때 <a href="#eq-2-1-2">(2.1.2)</a>는 \(\abs{f(a + h) - f(a) - ch}/\abs{h} = \abs{(f(a + h) - f(a))/h - c} \to 0\), 즉 \(\lim_{h \to 0} (f(a + h) - f(a))/h = c\)라는 뜻이다.
-        따라서 \(f\)가 <a href="#i-2-1-1">정의 2.1.1</a>의 뜻으로 미분가능할 필요충분조건은 미적분학의 뜻으로 미분가능한 것이고, 그때 \(Df(a)\)는 \(f'(a)\)를 곱하는 사상이다.
+        따라서 \(f\)가 <a href="#i-2-1-1">Definition 2.1.1</a>의 뜻으로 미분가능할 필요충분조건은 미적분학의 뜻으로 미분가능한 것이고, 그때 \(Df(a)\)는 \(f'(a)\)를 곱하는 map이다.
         \(1 \times 1\) 행렬을 수와 같게 보면 \(Df(a) = f'(a)\)이다.</p>
       </div>
 
       <div class="thm example" id="i-2-1-4">
-        <p><span class="thm-head">예 2.1.4</span> <span class="thm-name">(노름의 제곱, 내적, 스칼라곱)</span>.
-        다음 세 사상은 모든 점에서 미분가능하다. 모두 “나머지가 증분의 제곱 정도”라는 같은 방식으로 확인한다.</p>
-        <p>(a) \(f\colon \R^n \to \R\), \(f(x) = \abs{x}^2 = \inner{x}{x}\). 내적의 쌍선형성과 대칭성에 의해
+        <p><span class="thm-head">Example 2.1.4</span> <span class="thm-name">(squared norm, inner product, scalar product)</span>.
+        다음 세 map은 모든 점에서 미분가능하다. 모두 “나머지가 증분의 제곱 정도”라는 같은 방식으로 확인한다.</p>
+        <p>(a) \(f\colon \R^n \to \R\), \(f(x) = \abs{x}^2 = \inner{x}{x}\). inner product의 bilinearity와 symmetry에 의해
         \[ f(p + h) = \inner{p + h}{p + h} = \inner{p}{p} + 2\inner{p}{h} + \inner{h}{h} \]
-        이다. \(h \mapsto 2\inner{p}{h}\)는 선형사상이고 나머지는 \(\abs{h}^2\)이므로 \(\abs{h}^2/\abs{h} = \abs{h} \to 0\)이다. 따라서 \(Df(p)h = 2\inner{p}{h}\)이다.</p>
+        이다. \(h \mapsto 2\inner{p}{h}\)는 linear map이고 나머지는 \(\abs{h}^2\)이므로 \(\abs{h}^2/\abs{h} = \abs{h} \to 0\)이다. 따라서 \(Df(p)h = 2\inner{p}{h}\)이다.</p>
         <p>(b) \(\beta\colon \R^m \times \R^m \to \R\), \(\beta(y, z) = \inner{y}{z}\). 여기서 \(\R^m \times \R^m\)을 \(\R^{2m}\)과 같게 보고 점을 \((y, z)\), 증분을 \((k, l)\)로 쓴다.
         \[ \beta(y + k, z + l) - \beta(y, z) = \inner{k}{z} + \inner{y}{l} + \inner{k}{l} \]
-        이다. \((k, l) \mapsto \inner{k}{z} + \inner{y}{l}\)은 선형이고, 나머지는 코시-슈바르츠 부등식과 \(\abs{k}, \abs{l} \le \abs{(k, l)}\)에 의해
+        이다. \((k, l) \mapsto \inner{k}{z} + \inner{y}{l}\)은 linear이고, 나머지는 Cauchy–Schwarz inequality와 \(\abs{k}, \abs{l} \le \abs{(k, l)}\)에 의해
         \(\abs{\inner{k}{l}} \le \abs{k}\abs{l} \le \abs{(k, l)}^2\)을 만족한다. 따라서 \(D\beta(y, z)(k, l) = \inner{k}{z} + \inner{y}{l}\)이다.</p>
         <p>(c) \(\mu\colon \R \times \R^m \to \R^m\), \(\mu(s, z) = sz\). 같은 계산으로 \(\mu(s + \sigma, z + l) - \mu(s, z) = \sigma z + sl + \sigma l\)이고
         \(\abs{\sigma l} = \abs{\sigma}\abs{l} \le \abs{(\sigma, l)}^2\)이므로 \(D\mu(s, z)(\sigma, l) = \sigma z + sl\)이다.</p>
-        <p>(b)와 (c)는 <a href="2-2-chain-rule.html#i-2-2-5">명제 2.2.5</a>에서 곱의 미분법을 증명할 때 쓴다.</p>
+        <p>(b)와 (c)는 <a href="2-2-chain-rule.html#i-2-2-5">Proposition 2.2.5</a>에서 곱의 미분법을 증명할 때 쓴다.</p>
       </div>
 
       <div class="thm nonexample" id="i-2-1-5">
-        <p><span class="thm-head">비예 2.1.5</span> <span class="thm-name">(노름 \(\abs{x}\))</span>.
+        <p><span class="thm-head">Non-example 2.1.5</span> <span class="thm-name">(norm \(\abs{x}\))</span>.
         \(g(x) = \abs{x}\)(\(\R^n \to \R\))는 \(0\)에서 미분가능하지 않다. 미분가능하다고 하고 \(A = Dg(0)\)라 하자. \(v \neq 0\)을 고정하고 \(h = tv\)로 두면
         \(t \to 0^+\)일 때와 \(t \to 0^-\)일 때 모두 \(\abs{g(tv) - g(0) - A(tv)}/\abs{tv} \to 0\)이어야 한다. \(t \gt 0\)이면 이 값은 \(\abs{\abs{v} - Av}/\abs{v}\)이고,
         \(t \lt 0\)이면 \(\abs{\abs{v} + Av}/\abs{v}\)이다. 둘 다 \(0\)이면 \(Av = \abs{v}\)와 \(Av = -\abs{v}\)가 함께 성립해야 하므로 \(\abs{v} = 0\)이 되어 모순이다.
-        그래프로 보면 원뿔의 꼭짓점에는 접평면이 없다. 반면 \(x \neq 0\)인 점에서는 \(g\)가 미분가능하다. 그곳에서 \(\partial_i g(x) = x^i/\abs{x}\)가 연속이기 때문이다(<a href="#i-2-1-13">정리 2.1.13</a>).</p>
+        그래프로 보면 원뿔의 vertex에는 tangent plane이 없다. 반면 \(x \neq 0\)인 점에서는 \(g\)가 미분가능하다. 그곳에서 \(\partial_i g(x) = x^i/\abs{x}\)가 연속이기 때문이다(<a href="#i-2-1-13">Theorem 2.1.13</a>).</p>
       </div>
 
-      <p>다음 보조정리는 여러 성분을 가진 사상을 한 성분씩 다뤄도 된다는 것을 말한다. 앞으로 증명을 \(m = 1\)인 경우로 줄일 때 자주 쓴다.</p>
+      <p>다음 보조정리는 여러 성분을 가진 map을 한 성분씩 다뤄도 된다는 것을 말한다. 앞으로 증명을 \(m = 1\)인 경우로 줄일 때 자주 쓴다.</p>
 
       <div class="thm lemma" id="i-2-1-6">
-        <p><span class="thm-head">보조정리 2.1.6</span> <span class="thm-name">(성분별 판정)</span>.
+        <p><span class="thm-head">Lemma 2.1.6</span> <span class="thm-name">(componentwise criterion)</span>.
         \(F = (F^1, \dots, F^m)\colon U \to \R^m\)이 \(p\)에서 미분가능할 필요충분조건은 모든 성분 \(F^i\colon U \to \R\)가 \(p\)에서 미분가능한 것이다.
         이때 \(DF(p)h\)의 \(i\)번째 성분은 \(DF^i(p)h\)이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        선형사상 \(A\colon \R^n \to \R^m\)의 \(i\)번째 성분 \(A^i h = (Ah)^i\)는 \(\R^n\)에서 \(\R\)로 가는 선형사상이고, 거꾸로 선형사상 \(A^1, \dots, A^m\)을 성분으로 모으면
-        선형사상 \(A\)가 된다. 벡터 \(v = F(p + h) - F(p) - Ah\)에 <a href="#sec-preliminaries">준비</a>의 부등식 \(\abs{v^i} \le \abs{v} \le \sum_i \abs{v^i}\)를 쓰면,
+        <p><span class="proof-head">Proof.</span>
+        linear map \(A\colon \R^n \to \R^m\)의 \(i\)번째 성분 \(A^i h = (Ah)^i\)는 \(\R^n\)에서 \(\R\)로 가는 linear map이고, 거꾸로 linear map \(A^1, \dots, A^m\)을 성분으로 모으면
+        linear map \(A\)가 된다. 벡터 \(v = F(p + h) - F(p) - Ah\)에 <a href="#sec-preliminaries">Preliminaries</a>의 부등식 \(\abs{v^i} \le \abs{v} \le \sum_i \abs{v^i}\)를 쓰면,
         \(\abs{v}/\abs{h} \to 0\)일 필요충분조건은 모든 \(i\)에 대하여 \(\abs{v^i}/\abs{h} = \abs{F^i(p + h) - F^i(p) - A^i h}/\abs{h} \to 0\)인 것이다.</p>
       </div>
 
-      <p>미분가능한 사상은 연속이다. 이것을 보이려면 선형사상이 벡터를 “일정한 배율 이상 늘이지 않는다”는 사실이 필요하다.
-      <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">명제 1.5.7</a>을 상기하자. 선형사상 \(A\colon \R^n \to \R^m\)의 표준기저에 대한 행렬의 성분이 \(A^i_j\)이면,
-      \(C = \big(\sum_{i,j} (A^i_j)^2\big)^{1/2}\)에 대하여 모든 \(v \in \R^n\)에서 \(\abs{Av} \le C\abs{v}\)이다. 증명은 각 성분에 코시-슈바르츠 부등식을 쓰는 것이었다.</p>
+      <p>미분가능한 map은 연속이다. 이것을 보이려면 linear map이 벡터를 “일정한 배율 이상 늘이지 않는다”는 사실이 필요하다.
+      <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">Proposition 1.5.7</a>을 상기하자. linear map \(A\colon \R^n \to \R^m\)의 standard basis에 대한 행렬의 성분이 \(A^i_j\)이면,
+      \(C = \big(\sum_{i,j} (A^i_j)^2\big)^{1/2}\)에 대하여 모든 \(v \in \R^n\)에서 \(\abs{Av} \le C\abs{v}\)이다. 증명은 각 성분에 Cauchy–Schwarz inequality를 쓰는 것이었다.</p>
 
       <div class="thm proposition" id="i-2-1-7">
-        <p><span class="thm-head">명제 2.1.7</span> <span class="thm-name">(미분가능하면 연속)</span>.
+        <p><span class="thm-head">Proposition 2.1.7</span> <span class="thm-name">(differentiable implies continuous)</span>.
         \(F\colon U \to \R^m\)이 \(p\)에서 미분가능하면 \(F\)는 \(p\)에서 연속이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
+        <p><span class="proof-head">Proof.</span>
         <a href="#eq-2-1-3">(2.1.3)</a>의 나머지 \(R(h)\)에 대하여 \(\abs{R(h)}/\abs{h} \to 0\)이므로, \(\abs{h}\)가 충분히 작으면 \(\abs{R(h)} \le \abs{h}\)이다.
-        그러면 삼각부등식과 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">명제 1.5.7</a>(상수 \(C\))에서
+        그러면 triangle inequality와 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">Proposition 1.5.7</a>(상수 \(C\))에서
         \(\abs{F(p + h) - F(p)} \le \abs{DF(p)h} + \abs{R(h)} \le (C + 1)\abs{h}\)이고, 이것은 \(h \to 0\)일 때 \(0\)으로 간다.</p>
       </div>
     </section>
 
     <section id="sec-partials">
-      <h2>편미분, 방향미분, 야코비 행렬</h2>
-      <p><a href="#i-2-1-1">정의 2.1.1</a>은 \(DF(p)\)가 무엇이어야 하는지 말해 주지만, 어떻게 구하는지는 말해 주지 않는다. 계산은 1변수 미분으로 한다.
+      <h2>Partial derivatives, directional derivatives, and the Jacobian matrix</h2>
+      <p><a href="#i-2-1-1">Definition 2.1.1</a>은 \(DF(p)\)가 무엇이어야 하는지 말해 주지만, 어떻게 구하는지는 말해 주지 않는다. 계산은 1변수 미분으로 한다.
       한 방향으로만 움직이면 변수가 하나가 되기 때문이다.</p>
 
       <div class="thm definition" id="i-2-1-8">
-        <p><span class="thm-head">정의 2.1.8</span> <span class="thm-name">(편미분, partial derivative)</span>.
+        <p><span class="thm-head">Definition 2.1.8</span> <span class="thm-name">(partial derivative)</span>.
         \(f\colon U \to \R\)이고 \(p \in U\), \(j \in \{1, \dots, n\}\)이라 하자. 극한
         \[ \pd{f}{x^j}(p) = \lim_{t \to 0} \frac{f(p + te_j) - f(p)}{t} \]
-        이 존재하면 이것을 \(p\)에서 \(f\)의 \(x^j\)에 대한 <dfn>편미분</dfn>(partial derivative)이라 하고 \(\partial_j f(p)\)로도 쓴다.
+        이 존재하면 이것을 \(p\)에서 \(f\)의 \(x^j\)에 대한 <dfn>partial derivative</dfn>(편미분)이라 하고 \(\partial_j f(p)\)로도 쓴다.
         \(F = (F^1, \dots, F^m)\)이면 성분마다 \(\pd{F^i}{x^j}(p)\)를 정의하고, 이것들을 모은 벡터를 \(\pd{F}{x^j}(p) = \partial_j F(p) \in \R^m\)으로 쓴다.</p>
       </div>
 
-      <p>편미분은 \(x^j\) 말고 나머지 좌표를 모두 고정하고 \(x^j\)만의 함수로 보아 미분한 것이다. 좌표축 방향이 아닌 방향으로도 같은 일을 할 수 있다.</p>
+      <p>partial derivative는 \(x^j\) 말고 나머지 좌표를 모두 고정하고 \(x^j\)만의 함수로 보아 미분한 것이다. 좌표축 방향이 아닌 방향으로도 같은 일을 할 수 있다.</p>
 
       <div class="thm definition" id="i-2-1-9">
-        <p><span class="thm-head">정의 2.1.9</span> <span class="thm-name">(방향미분, directional derivative)</span>.
+        <p><span class="thm-head">Definition 2.1.9</span> <span class="thm-name">(directional derivative)</span>.
         \(F\colon U \to \R^m\), \(p \in U\), \(v \in \R^n\)이라 하자. 극한
         \[ D_vF(p) = \lim_{t \to 0} \frac{F(p + tv) - F(p)}{t} = \left.\frac{d}{dt}\right|_{t = 0} F(p + tv) \]
-        이 존재하면 이것을 \(p\)에서 \(v\) 방향으로의 \(F\)의 <dfn>방향미분</dfn>(directional derivative)이라 한다.</p>
+        이 존재하면 이것을 \(p\)에서 \(v\) 방향으로의 \(F\)의 <dfn>directional derivative</dfn>(방향미분)이라 한다.</p>
       </div>
 
       <p>정의에서 곧바로 \(D_{e_j}F(p) = \partial_j F(p)\)이다. \(v\)가 단위벡터일 필요는 없다. \(v\)를 \(c\)배하면 \(t\) 대신 \(ct\)로 바꾸어 생각하면 되므로
       \(D_{cv}F(p) = c\,D_vF(p)\)이다(\(c \neq 0\)일 때 극한의 변수 바꾸기, \(c = 0\)이면 양변이 \(0\)).</p>
 
       <div class="thm definition" id="i-2-1-10">
-        <p><span class="thm-head">정의 2.1.10</span> <span class="thm-name">(야코비 행렬, Jacobian matrix)</span>.
-        \(F\colon U \to \R^m\)의 모든 편미분 \(\partial_j F^i(p)\)가 존재할 때, \(i\)행 \(j\)열 성분이 \(\partial_j F^i(p)\)인 \(m \times n\) 행렬</p>
+        <p><span class="thm-head">Definition 2.1.10</span> <span class="thm-name">(Jacobian matrix)</span>.
+        \(F\colon U \to \R^m\)의 모든 partial derivative \(\partial_j F^i(p)\)가 존재할 때, \(i\)행 \(j\)열 성분이 \(\partial_j F^i(p)\)인 \(m \times n\) 행렬</p>
         <div class="equation" id="eq-2-1-4">
         \[ \begin{pmatrix}
              \pd{F^1}{x^1}(p) & \cdots & \pd{F^1}{x^n}(p) \\
@@ -270,106 +270,106 @@
              \pd{F^m}{x^1}(p) & \cdots & \pd{F^m}{x^n}(p)
            \end{pmatrix} \tag{2.1.4} \]
         </div>
-        <p>를 \(p\)에서 \(F\)의 <dfn>야코비 행렬</dfn>(Jacobian matrix)이라 한다.</p>
+        <p>를 \(p\)에서 \(F\)의 <dfn>Jacobian matrix</dfn>(야코비 행렬)이라 한다.</p>
       </div>
 
       <p>행은 성분 \(F^i\)를, 열은 변수 \(x^j\)를 따라 늘어놓는다. 위 첨자 \(i\)가 행, 아래 첨자 \(j\)가 열이라는 점은
-      <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-13">정의 1.2.13</a>의 \(A^i_j\)와 같다. \(j\)번째 열은 벡터 \(\partial_j F(p)\)이다.
-      이제 전미분과 이 행렬을 연결하자.</p>
+      <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-13">Definition 1.2.13</a>의 \(A^i_j\)와 같다. \(j\)번째 열은 벡터 \(\partial_j F(p)\)이다.
+      이제 total derivative와 이 행렬을 연결하자.</p>
 
       <div class="thm theorem" id="i-2-1-11">
-        <p><span class="thm-head">정리 2.1.11</span> <span class="thm-name">(전미분의 행렬은 야코비 행렬이다)</span>.
+        <p><span class="thm-head">Theorem 2.1.11</span> <span class="thm-name">(matrix of the total derivative is the Jacobian matrix)</span>.
         \(F\colon U \to \R^m\)이 \(p\)에서 미분가능하다고 하자.</p>
         <ul>
-          <li>(a) 모든 \(v \in \R^n\)에 대하여 방향미분 \(D_vF(p)\)가 존재하고 \(D_vF(p) = DF(p)v\)이다.</li>
-          <li>(b) 모든 편미분 \(\partial_j F^i(p)\)가 존재하고, 표준기저에 대한 \(DF(p)\)의 행렬은 야코비 행렬 <a href="#eq-2-1-4">(2.1.4)</a>이다. 즉 성분으로
+          <li>(a) 모든 \(v \in \R^n\)에 대하여 directional derivative \(D_vF(p)\)가 존재하고 \(D_vF(p) = DF(p)v\)이다.</li>
+          <li>(b) 모든 partial derivative \(\partial_j F^i(p)\)가 존재하고, standard basis에 대한 \(DF(p)\)의 행렬은 Jacobian matrix <a href="#eq-2-1-4">(2.1.4)</a>이다. 즉 성분으로
           \[ \big(DF(p)v\big)^i = \sum_{j=1}^{n} \pd{F^i}{x^j}(p)\, v^j \qquad (i = 1, \dots, m) \]
           이다.</li>
         </ul>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 전미분이 존재한다는 것을 알기만 하면, 그것은 편미분으로 계산된다. 그래서 앞으로는 전미분 \(DF(p)\)와
-      그 행렬인 야코비 행렬을 같은 기호 \(DF(p)\)로 쓴다. 다만 이 정리는 <em>미분가능성을 가정</em>한다. 편미분이 있다고 해서 미분가능한 것은 아니다(<a href="#i-2-1-12">비예 2.1.12</a>).</p>
+      <p><strong>이 정리가 말하는 것.</strong> total derivative가 존재한다는 것을 알기만 하면, 그것은 partial derivative로 계산된다. 그래서 앞으로는 total derivative \(DF(p)\)와
+      그 행렬인 Jacobian matrix를 같은 기호 \(DF(p)\)로 쓴다. 다만 이 정리는 <em>미분가능성을 가정</em>한다. partial derivative가 있다고 해서 미분가능한 것은 아니다(<a href="#i-2-1-12">Non-example 2.1.12</a>).</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: <a href="#i-2-1-1">정의 2.1.1</a>의 \(h\)를 한 직선 \(h = tv\) 위로만 움직인다.</p>
-        <p><span class="proof-head">증명.</span>
-        (a) \(v = 0\)이면 양변이 \(0\)이다. \(v \neq 0\)이라 하자. \(t \neq 0\)이 충분히 작으면 \(p + tv \in U\)이고, \(DF(p)\)의 선형성에 의해
+        <p class="proof-idea">Proof idea: <a href="#i-2-1-1">Definition 2.1.1</a>의 \(h\)를 한 직선 \(h = tv\) 위로만 움직인다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) \(v = 0\)이면 양변이 \(0\)이다. \(v \neq 0\)이라 하자. \(t \neq 0\)이 충분히 작으면 \(p + tv \in U\)이고, \(DF(p)\)의 linearity에 의해
         \[ \begin{aligned} \Big\lvert \frac{F(p + tv) - F(p)}{t} - DF(p)v \Big\rvert &= \frac{\abs{F(p + tv) - F(p) - DF(p)(tv)}}{\abs{t}} \\
            &= \abs{v}\,\frac{\abs{F(p + tv) - F(p) - DF(p)(tv)}}{\abs{tv}} \end{aligned} \]
         이다. \(t \to 0\)이면 \(tv \to 0\)이므로 <a href="#eq-2-1-2">(2.1.2)</a>에 의해 우변은 \(0\)으로 간다. 따라서 \(D_vF(p)\)가 존재하고 \(DF(p)v\)와 같다.</p>
         <p>(b) (a)에서 \(v = e_j\)로 두면 \(\partial_j F(p) = D_{e_j}F(p) = DF(p)e_j\)가 존재한다. 이 벡터의 성분이 \(\partial_j F^1(p), \dots, \partial_j F^m(p)\)이다.
-        <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-13">정의 1.2.13</a>에 의해 표준기저에 대한 \(DF(p)\)의 행렬의 \(j\)번째 열은 \(DF(p)e_j\)의 성분이므로, 그 행렬은 \(i\)행 \(j\)열 성분이 \(\partial_j F^i(p)\)인 행렬,
+        <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-13">Definition 1.2.13</a>에 의해 standard basis에 대한 \(DF(p)\)의 행렬의 \(j\)번째 열은 \(DF(p)e_j\)의 성분이므로, 그 행렬은 \(i\)행 \(j\)열 성분이 \(\partial_j F^i(p)\)인 행렬,
         즉 <a href="#eq-2-1-4">(2.1.4)</a>이다. 성분 공식은 <a href="../01-linear-algebra/1-2-linear-maps.html#eq-1-2-2">(1.2.2)</a>이다.</p>
       </div>
 
-      <p>(a)에는 숨은 내용이 하나 더 있다. 미분가능하면 \(v \mapsto D_vF(p)\)가 <em>선형</em>이다. 방향미분이 모든 방향으로 존재해도 이 사상이 선형이 아니면 미분가능할 수 없다.</p>
+      <p>(a)에는 숨은 내용이 하나 더 있다. 미분가능하면 \(v \mapsto D_vF(p)\)가 <em>linear</em>이다. directional derivative가 모든 방향으로 존재해도 이 map이 linear가 아니면 미분가능할 수 없다.</p>
 
       <div class="thm nonexample" id="i-2-1-12">
-        <p><span class="thm-head">비예 2.1.12</span> <span class="thm-name">(편미분이나 방향미분이 있어도 미분가능하지 않은 함수)</span>.
+        <p><span class="thm-head">Non-example 2.1.12</span> <span class="thm-name">(function with partial or directional derivatives that is not differentiable)</span>.
         (a) \(f(x, y) = \dfrac{xy}{x^2 + y^2}\) (\((x, y) \neq 0\)), \(f(0, 0) = 0\)이라 하자. 두 좌표축 위에서 \(f(t, 0) = f(0, t) = 0\)이므로
         \(\partial_x f(0, 0) = \partial_y f(0, 0) = 0\)이다. 그러나 대각선 위에서는 \(t \neq 0\)일 때 \(f(t, t) = t^2/(2t^2) = 1/2\)이므로 \(f\)는 원점에서 연속이 아니다.
-        <a href="#i-2-1-7">명제 2.1.7</a>에 의해 \(f\)는 원점에서 미분가능하지 않다.</p>
+        <a href="#i-2-1-7">Proposition 2.1.7</a>에 의해 \(f\)는 원점에서 미분가능하지 않다.</p>
         <p>(b) \(g(x, y) = \dfrac{x^3}{x^2 + y^2}\) (\((x, y) \neq 0\)), \(g(0, 0) = 0\)이라 하자. \(v = (v^1, v^2) \neq 0\)이면
         \[ D_vg(0) = \lim_{t \to 0} \frac{1}{t}\cdot\frac{t^3 (v^1)^3}{t^2\big((v^1)^2 + (v^2)^2\big)} = \frac{(v^1)^3}{\abs{v}^2} \]
-        로 모든 방향미분이 존재한다(\(v = 0\)이면 \(0\)). 그러나 \(v \mapsto (v^1)^3/\abs{v}^2\)은 선형이 아니다. \(D_{e_1}g(0) + D_{e_2}g(0) = 1 + 0 = 1\)인데
-        \(D_{e_1 + e_2}g(0) = 1/2\)이다. <a href="#i-2-1-11">정리 2.1.11</a>(a)에 의해 \(g\)는 원점에서 미분가능하지 않다.
-        한편 \(\abs{g(x, y)} \le \abs{x}\)이므로 \(g\)는 원점에서 연속이다. 연속성과 방향미분의 존재를 합쳐도 미분가능성이 나오지 않는다.</p>
+        로 모든 directional derivative가 존재한다(\(v = 0\)이면 \(0\)). 그러나 \(v \mapsto (v^1)^3/\abs{v}^2\)은 linear가 아니다. \(D_{e_1}g(0) + D_{e_2}g(0) = 1 + 0 = 1\)인데
+        \(D_{e_1 + e_2}g(0) = 1/2\)이다. <a href="#i-2-1-11">Theorem 2.1.11</a>(a)에 의해 \(g\)는 원점에서 미분가능하지 않다.
+        한편 \(\abs{g(x, y)} \le \abs{x}\)이므로 \(g\)는 원점에서 연속이다. 연속성과 directional derivative의 존재를 합쳐도 미분가능성이 나오지 않는다.</p>
       </div>
 
-      <p>다행히 실제로 쓰는 사상에서는 미분가능성을 편미분으로 쉽게 판정할 수 있다. 편미분이 <em>연속</em>이기만 하면 된다.</p>
+      <p>다행히 실제로 쓰는 map에서는 미분가능성을 partial derivative로 쉽게 판정할 수 있다. partial derivative가 <em>연속</em>이기만 하면 된다.</p>
 
       <div class="thm theorem" id="i-2-1-13">
-        <p><span class="thm-head">정리 2.1.13</span> <span class="thm-name">(편미분이 연속이면 미분가능)</span>.
-        \(F\colon U \to \R^m\)과 \(p \in U\)에 대하여, 어떤 공 \(B_r(p) \subseteq U\)의 모든 점에서 모든 편미분 \(\partial_j F^i\)가 존재하고 이 함수들이 \(p\)에서 연속이면,
+        <p><span class="thm-head">Theorem 2.1.13</span> <span class="thm-name">(continuous partial derivatives imply differentiable)</span>.
+        \(F\colon U \to \R^m\)과 \(p \in U\)에 대하여, 어떤 ball \(B_r(p) \subseteq U\)의 모든 점에서 모든 partial derivative \(\partial_j F^i\)가 존재하고 이 함수들이 \(p\)에서 연속이면,
         \(F\)는 \(p\)에서 미분가능하다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(p\)에서 \(p + h\)까지 좌표축에 나란한 선분을 따라 한 좌표씩 움직인다. 각 선분에서는 1변수 평균값 정리를 쓰고, 편미분의 연속성으로 오차를 잡는다.</p>
-        <p><span class="proof-head">증명.</span>
-        <a href="#i-2-1-6">보조정리 2.1.6</a>에 의해 성분 하나, 즉 \(f = F^i\colon U \to \R\)에 대해 보이면 된다. \(\abs{h} \lt r\)인 \(h = (h^1, \dots, h^n)\)을 잡고
+        <p class="proof-idea">Proof idea: \(p\)에서 \(p + h\)까지 좌표축에 나란한 선분을 따라 한 좌표씩 움직인다. 각 선분에서는 1변수 평균값 정리를 쓰고, partial derivative의 연속성으로 오차를 잡는다.</p>
+        <p><span class="proof-head">Proof.</span>
+        <a href="#i-2-1-6">Lemma 2.1.6</a>에 의해 성분 하나, 즉 \(f = F^i\colon U \to \R\)에 대해 보이면 된다. \(\abs{h} \lt r\)인 \(h = (h^1, \dots, h^n)\)을 잡고
         \(q_0 = p\), \(q_j = p + h^1e_1 + \dots + h^je_j\) (\(j = 1, \dots, n\))로 두자. 그러면 \(q_n = p + h\)이고</p>
         <p>\[ f(p + h) - f(p) = \sum_{j=1}^{n} \big(f(q_j) - f(q_{j-1})\big) \]</p>
         <p>이다. \(q_{j-1}\)과 \(q_j\)를 잇는 선분 위의 점 \(q_{j-1} + s h^je_j\) (\(0 \le s \le 1\))은 \(p\)와의 거리가 \(\big(\sum_{k \le j} (h^k)^2\big)^{1/2} \le \abs{h} \lt r\) 이하이므로 \(B_r(p)\) 안에 있다.
-        \(h^j = 0\)이면 \(f(q_j) - f(q_{j-1}) = 0\)이다. \(h^j \neq 0\)이면 \(u(s) = f(q_{j-1} + s h^j e_j)\)는 편미분의 정의에 의해 \([0, 1]\)에서 미분가능하고
+        \(h^j = 0\)이면 \(f(q_j) - f(q_{j-1}) = 0\)이다. \(h^j \neq 0\)이면 \(u(s) = f(q_{j-1} + s h^j e_j)\)는 partial derivative의 정의에 의해 \([0, 1]\)에서 미분가능하고
         \(u'(s) = h^j\,\partial_j f(q_{j-1} + s h^j e_j)\)이다(차분몫에서 \(t = \tau h^j\)로 변수를 바꾸면 된다). 1변수 평균값 정리에 의해 어떤 \(s_j \in (0, 1)\)이 있어서
         \(f(q_j) - f(q_{j-1}) = u(1) - u(0) = h^j\,\partial_j f(\xi_j)\), \(\xi_j = q_{j-1} + s_j h^j e_j\)이다. 두 경우 모두 \(\abs{\xi_j - p} \le \abs{h}\)인 \(\xi_j\)에 대해 이 식이 성립한다.
         따라서 \(A h = \sum_j \partial_j f(p)\,h^j\)로 두면</p>
         <p>\[ \frac{\abs{f(p + h) - f(p) - Ah}}{\abs{h}} = \frac{\big\lvert \sum_j h^j\big(\partial_j f(\xi_j) - \partial_j f(p)\big) \big\rvert}{\abs{h}} \le \sum_{j=1}^{n} \abs{\partial_j f(\xi_j) - \partial_j f(p)} \]</p>
-        <p>이다(\(\abs{h^j} \le \abs{h}\)). \(h \to 0\)이면 \(\xi_j \to p\)이고 \(\partial_j f\)가 \(p\)에서 연속이므로 우변은 \(0\)으로 간다. \(A\)는 선형이므로 \(f\)는 \(p\)에서 미분가능하다.</p>
+        <p>이다(\(\abs{h^j} \le \abs{h}\)). \(h \to 0\)이면 \(\xi_j \to p\)이고 \(\partial_j f\)가 \(p\)에서 연속이므로 우변은 \(0\)으로 간다. \(A\)는 linear이므로 \(f\)는 \(p\)에서 미분가능하다.</p>
       </div>
 
       <aside class="box warning">
-        <p class="box-title">주의: 편미분의 존재와 미분가능성</p>
+        <p class="box-title">Warning: partial derivative의 존재와 미분가능성</p>
         <p>함축 관계를 정리하면 다음과 같다.</p>
         <p>\[ \begin{aligned}
-           &\text{편미분이 } p \text{ 근방에서 존재하고 } p \text{에서 연속} \\
+           &\text{partial derivatives exist near } p \text{ and are continuous at } p \text{ itself} \\
            &\quad\Rightarrow\ \text{미분가능} \\
-           &\quad\Rightarrow\ \text{연속이고, 모든 방향미분이 존재하며 } v \text{에 대해 선형} \\
-           &\quad\Rightarrow\ \text{모든 편미분이 존재}
+           &\quad\Rightarrow\ \text{continuous, all directional derivatives exist and are linear in } v \text{ } \\
+           &\quad\Rightarrow\ \text{all partial derivatives exist}
         \end{aligned} \]</p>
-        <p>어느 화살표도 거꾸로 성립하지 않는다. 첫째 화살표의 반례는 <a href="#ex-2-1-7">연습 2.1.7</a>, 둘째는 <a href="#ex-2-1-5">연습 2.1.5</a>(c), 셋째는 <a href="#i-2-1-12">비예 2.1.12</a>(a)이다.
-        이 study set에서 다루는 사상은 거의 모두 편미분이 연속이므로 첫째 조건으로 판정한다.</p>
+        <p>어느 화살표도 거꾸로 성립하지 않는다. 첫째 화살표의 반례는 <a href="#ex-2-1-7">Exercise 2.1.7</a>, 둘째는 <a href="#ex-2-1-5">Exercise 2.1.5</a>(c), 셋째는 <a href="#i-2-1-12">Non-example 2.1.12</a>(a)이다.
+        이 study set에서 다루는 map은 거의 모두 partial derivative가 연속이므로 첫째 조건으로 판정한다.</p>
       </aside>
     </section>
 
     <section id="sec-examples">
-      <h2>기준 사상과 기준 매개화의 전미분</h2>
-      <p>이제 이 장 전체에서 되풀이해 쓸 사상 하나를 계산하자. 극좌표는 평면의 점을 원점까지의 거리 \(r\)와 각 \(\theta\)로 나타낸다.
-      이 대응을 \((r, \theta)\)에서 \((x, y)\)로 가는 사상으로 보는 것이 극좌표 사상이다. 계산 기법이 처음 나오는 곳이므로 모든 단계를 쓴다.</p>
+      <h2>Total derivatives of the running map and parametrization</h2>
+      <p>이제 이 장 전체에서 되풀이해 쓸 map 하나를 계산하자. polar coordinates는 평면의 점을 원점까지의 거리 \(r\)와 각 \(\theta\)로 나타낸다.
+      이 대응을 \((r, \theta)\)에서 \((x, y)\)로 가는 map으로 보는 것이 polar coordinate map이다. 계산 기법이 처음 나오는 곳이므로 모든 단계를 쓴다.</p>
 
       <div class="thm example" id="i-2-1-14">
-        <p><span class="thm-head">예 2.1.14</span> <span class="thm-name">(극좌표 사상, 이 장의 기준 사상)</span>.
+        <p><span class="thm-head">Example 2.1.14</span> <span class="thm-name">(polar coordinate map, the running map of this chapter)</span>.
         \(P\colon \R^2 \to \R^2\), \(P(r, \theta) = (r\cos\theta,\ r\sin\theta)\)라 하자. 성분은 \(P^1(r, \theta) = r\cos\theta\), \(P^2(r, \theta) = r\sin\theta\)이다.
         \(\theta\)를 고정하고 \(r\)로 미분하면 \(\partial_r P^1 = \cos\theta\), \(\partial_r P^2 = \sin\theta\)이고, \(r\)을 고정하고 \(\theta\)로 미분하면
-        \(\partial_\theta P^1 = -r\sin\theta\), \(\partial_\theta P^2 = r\cos\theta\)이다. 네 편미분은 모두 \(\R^2\) 전체에서 연속이므로
-        <a href="#i-2-1-13">정리 2.1.13</a>에 의해 \(P\)는 모든 점에서 미분가능하고, <a href="#i-2-1-11">정리 2.1.11</a>에 의해</p>
+        \(\partial_\theta P^1 = -r\sin\theta\), \(\partial_\theta P^2 = r\cos\theta\)이다. 네 partial derivative는 모두 \(\R^2\) 전체에서 연속이므로
+        <a href="#i-2-1-13">Theorem 2.1.13</a>에 의해 \(P\)는 모든 점에서 미분가능하고, <a href="#i-2-1-11">Theorem 2.1.11</a>에 의해</p>
         <div class="equation" id="eq-2-1-5">
         \[ DP(r, \theta) = \begin{pmatrix} \cos\theta & -r\sin\theta \\ \sin\theta & r\cos\theta \end{pmatrix}, \qquad
            \det DP(r, \theta) = r\cos^2\theta + r\sin^2\theta = r \tag{2.1.5} \]
         </div>
         <p>이다. 첫째 열 \(\partial_r P = (\cos\theta, \sin\theta)\)는 반지름 방향의 단위벡터이고, 둘째 열 \(\partial_\theta P = (-r\sin\theta, r\cos\theta)\)는 반지름 \(r\)인 원의 접선 방향이며 길이가 \(r\)이다.
-        원점에서 멀수록 \(\theta\)를 조금 바꿀 때 점이 더 많이 움직인다는 뜻이다. 이 두 열은 1장에서 “극좌표 기저”라 부른 벡터 <a href="../01-linear-algebra/1-3-dual-spaces.html#eq-1-3-7">(1.3.7)</a>이다
-        (<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-9">예 1.3.9</a>). 그 예에서는 편미분을 미리 빌려 썼고, 이제 그 벡터들이 전미분의 열이라는 뜻이 분명해졌다.</p>
-        <p>그림 <a href="#fig-2-1-1">2.1.1</a>의 점 \(p = (3/2,\ \pi/6)\)에서는 \(\cos(\pi/6) = \sqrt3/2\), \(\sin(\pi/6) = 1/2\)이므로</p>
+        원점에서 멀수록 \(\theta\)를 조금 바꿀 때 점이 더 많이 움직인다는 뜻이다. 이 두 열은 Chapter 1에서 “polar coordinate basis”라 부른 벡터 <a href="../01-linear-algebra/1-3-dual-spaces.html#eq-1-3-7">(1.3.7)</a>이다
+        (<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-9">Example 1.3.9</a>). 그 예에서는 partial derivative를 미리 빌려 썼고, 이제 그 벡터들이 total derivative의 열이라는 뜻이 분명해졌다.</p>
+        <p><a href="#fig-2-1-1">Figure 2.1.1</a>의 점 \(p = (3/2,\ \pi/6)\)에서는 \(\cos(\pi/6) = \sqrt3/2\), \(\sin(\pi/6) = 1/2\)이므로</p>
         <p>\[ P(p) = \Big(\frac{3\sqrt3}{4},\ \frac34\Big), \qquad DP(p) = \begin{pmatrix} \sqrt3/2 & -3/4 \\ 1/2 & 3\sqrt3/4 \end{pmatrix}, \qquad \det DP(p) = \frac32 \]</p>
         <p>이다. 근사의 정도를 숫자로 보자. \(h = t(1, 1)\)이라 하면 나머지의 크기 \(\abs{P(p + h) - P(p) - DP(p)h}\)와 그것을 \(\abs{h}\)로 나눈 값은 다음과 같다(소수 넷째 자리까지).</p>
         <ul>
@@ -378,29 +378,29 @@
           <li>\(t = 0.001\): 나머지 \(0.00000125\), 비 \(0.0009\)</li>
         </ul>
         <p>\(t\)가 \(1/10\)이 될 때마다 나머지는 약 \(1/100\)이 되고 비는 약 \(1/10\)이 된다. 비가 \(0\)으로 가는 것이 <a href="#eq-2-1-2">(2.1.2)</a>이다.</p>
-        <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
+        <p class="verified">Verification: <code>verify/v-2-1-total-derivative.py</code></p>
       </div>
 
-      <p>\(n = 1\)인 사상, 즉 곡선에서는 전미분이 익숙한 도함수가 된다. \(I \subseteq \R\)이 열린구간이고 \(\gamma = (\gamma^1, \dots, \gamma^m)\colon I \to \R^m\)이라 하자.
-      <a href="#i-2-1-6">보조정리 2.1.6</a>과 <a href="#i-2-1-3">예 2.1.3</a>(b)에 의해 \(\gamma\)가 \(t\)에서 미분가능할 필요충분조건은 각 성분이 미분가능한 것이고,
+      <p>\(n = 1\)인 map, 즉 곡선에서는 total derivative가 익숙한 도함수가 된다. \(I \subseteq \R\)이 열린구간이고 \(\gamma = (\gamma^1, \dots, \gamma^m)\colon I \to \R^m\)이라 하자.
+      <a href="#i-2-1-6">Lemma 2.1.6</a>과 <a href="#i-2-1-3">Example 2.1.3</a>(b)에 의해 \(\gamma\)가 \(t\)에서 미분가능할 필요충분조건은 각 성분이 미분가능한 것이고,
       그때 \(D\gamma(t)\)는 \(m \times 1\) 행렬, 즉 열벡터 \(\big((\gamma^1)'(t), \dots, (\gamma^m)'(t)\big)\)이다. 이 벡터를 \(\gamma'(t)\)로 쓴다.
-      \(D\gamma(t)h = h\,\gamma'(t)\)이므로 전미분과 \(\gamma'(t)\)는 같은 정보를 담는다.</p>
+      \(D\gamma(t)h = h\,\gamma'(t)\)이므로 total derivative와 \(\gamma'(t)\)는 같은 정보를 담는다.</p>
 
       <div class="thm example" id="i-2-1-15">
-        <p><span class="thm-head">예 2.1.15</span> <span class="thm-name">(원과 나선)</span>.
-        반지름 \(r\)인 원의 기준 매개화 \(\gamma(t) = (r\cos t,\ r\sin t,\ 0)\)의 성분을 미분하면
-        \(\gamma'(t) = (-r\sin t,\ r\cos t,\ 0)\)이고 \(\abs{\gamma'(t)} = r\)이다. 나선 \(\gamma(t) = (a\cos t,\ a\sin t,\ bt)\) (\(a \gt 0\), \(b \neq 0\))에서는
+        <p><span class="thm-head">Example 2.1.15</span> <span class="thm-name">(circle and helix)</span>.
+        반지름 \(r\)인 원의 standard parametrization \(\gamma(t) = (r\cos t,\ r\sin t,\ 0)\)의 성분을 미분하면
+        \(\gamma'(t) = (-r\sin t,\ r\cos t,\ 0)\)이고 \(\abs{\gamma'(t)} = r\)이다. helix \(\gamma(t) = (a\cos t,\ a\sin t,\ bt)\) (\(a \gt 0\), \(b \neq 0\))에서는
         \(\gamma'(t) = (-a\sin t,\ a\cos t,\ b)\)이고 \(\abs{\gamma'(t)} = \sqrt{a^2 + b^2}\)이다. 두 곡선 모두 빠르기가 일정하다.
-        원의 매개화는 극좌표 사상에서 \(r\)을 고정한 것이므로 \(\gamma'(t)\)의 앞 두 성분은 <a href="#eq-2-1-5">(2.1.5)</a>의 둘째 열과 같다.
-        이 벡터들은 <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-8">예 4.1.8</a>에서 곡선의 속도벡터(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-7">정의 4.1.7</a>)로 다시 나온다.</p>
-        <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
+        원의 parametrization은 polar coordinate map에서 \(r\)을 고정한 것이므로 \(\gamma'(t)\)의 앞 두 성분은 <a href="#eq-2-1-5">(2.1.5)</a>의 둘째 열과 같다.
+        이 벡터들은 <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-8">Example 4.1.8</a>에서 곡선의 속도벡터(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-7">Definition 4.1.7</a>)로 다시 나온다.</p>
+        <p class="verified">Verification: <code>verify/v-2-1-total-derivative.py</code></p>
       </div>
 
       <div class="thm example" id="i-2-1-16">
-        <p><span class="thm-head">예 2.1.16</span> <span class="thm-name">(구면의 기준 매개화)</span>.
-        반지름 \(r\)인 구면의 기준 매개화
+        <p><span class="thm-head">Example 2.1.16</span> <span class="thm-name">(standard parametrization of the sphere)</span>.
+        반지름 \(r\)인 sphere의 standard parametrization
         \[ \mathbf{x}(\theta, \varphi) = (r\sin\theta\cos\varphi,\ r\sin\theta\sin\varphi,\ r\cos\theta), \qquad 0 \lt \theta \lt \pi,\quad 0 \lt \varphi \lt 2\pi \]
-        는 열린집합 \(U = (0, \pi) \times (0, 2\pi)\)에서 \(\R^3\)으로 가는 사상이다. 성분마다 \(\theta\)와 \(\varphi\)로 편미분하면</p>
+        는 open set \(U = (0, \pi) \times (0, 2\pi)\)에서 \(\R^3\)으로 가는 map이다. 성분마다 \(\theta\)와 \(\varphi\)로 partial derivative를 취하면</p>
         <div class="equation" id="eq-2-1-6">
         \[ D\mathbf{x}(\theta, \varphi) = \begin{pmatrix}
              r\cos\theta\cos\varphi & -r\sin\theta\sin\varphi \\
@@ -408,150 +408,150 @@
              -r\sin\theta & 0
            \end{pmatrix} \tag{2.1.6} \]
         </div>
-        <p>이다. 편미분이 모두 연속이므로 \(\mathbf{x}\)는 \(U\)에서 미분가능하다. 두 열은 \(\mathbf{x}_\theta = \partial_\theta\mathbf{x}\)와 \(\mathbf{x}_\varphi = \partial_\varphi\mathbf{x}\)이고,
-        \(0 \lt \theta \lt \pi\)이면 이 두 벡터는 일차독립이다. \(a\mathbf{x}_\theta + c\mathbf{x}_\varphi = 0\)이면 셋째 성분 \(-ar\sin\theta = 0\)에서 \(a = 0\)이고, \(\mathbf{x}_\varphi \neq 0\)(\(\abs{\mathbf{x}_\varphi} = r\sin\theta \gt 0\))이므로 \(c = 0\)이기 때문이다(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#ex-1-1-5">연습 1.1.5</a>에서 미리 해 보았다).
-        따라서 \(D\mathbf{x}(\theta, \varphi)\)의 계수(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-9">정의 1.2.9</a>)는 \(U\)의 모든 점에서 \(2\)이다.
-        \(\theta = 0\)이면 둘째 열이 \(0\)이 되어 계수가 \(1\)로 떨어진다. 이 사실은 <a href="2-5-rank-theorem.html">2.5절</a>의 계수정리와
-        <a href="../06-regular-surfaces/index.html">6장</a>의 정칙곡면의 정의(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">정의 6.1.1</a>)에서 중요해진다.</p>
-        <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
+        <p>이다. partial derivative가 모두 연속이므로 \(\mathbf{x}\)는 \(U\)에서 미분가능하다. 두 열은 \(\mathbf{x}_\theta = \partial_\theta\mathbf{x}\)와 \(\mathbf{x}_\varphi = \partial_\varphi\mathbf{x}\)이고,
+        \(0 \lt \theta \lt \pi\)이면 이 두 벡터는 linearly independent이다. \(a\mathbf{x}_\theta + c\mathbf{x}_\varphi = 0\)이면 셋째 성분 \(-ar\sin\theta = 0\)에서 \(a = 0\)이고, \(\mathbf{x}_\varphi \neq 0\)(\(\abs{\mathbf{x}_\varphi} = r\sin\theta \gt 0\))이므로 \(c = 0\)이기 때문이다(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#ex-1-1-5">Exercise 1.1.5</a>에서 미리 해 보았다).
+        따라서 \(D\mathbf{x}(\theta, \varphi)\)의 rank(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-9">Definition 1.2.9</a>)는 \(U\)의 모든 점에서 \(2\)이다.
+        \(\theta = 0\)이면 둘째 열이 \(0\)이 되어 rank가 \(1\)로 떨어진다. 이 사실은 <a href="2-5-rank-theorem.html">Section 2.5</a>의 rank theorem과
+        <a href="../06-regular-surfaces/index.html">Chapter 6</a>의 regular surface의 정의(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>)에서 중요해진다.</p>
+        <p class="verified">Verification: <code>verify/v-2-1-total-derivative.py</code></p>
       </div>
 
       <aside class="box convention">
-        <p class="box-title">규약 비교: 전미분의 기호와 “미분가능”의 뜻</p>
-        <p>do Carmo는 \(\R^n\) 사이 사상의 미분을 \(dF_p\)로 쓰고, 곡선 \(\alpha\)로 \(dF_p(w) = (F \circ \alpha)'(0)\)이라 정의한다
-        <a class="cite" href="../../references.html#dC">[dC 2장 부록, 정의 1과 명제 7]</a>. 또 do Carmo는 “미분가능”을 모든 계의 편미분이 연속이라는 뜻, 즉 이 study set의 “매끄러운”의 뜻으로 쓴다.
-        이 study set에서 “미분가능”은 <a href="#i-2-1-1">정의 2.1.1</a>의 뜻이고, 매끄러움은 <a href="2-2-chain-rule.html#i-2-2-11">정의 2.2.11</a>에서 따로 정의한다.
-        기호는 \(\R^n\) 사이의 사상에 \(DF(p)\)를, 다양체 사이의 사상에 \(dF_p\)(<a href="../13-tangent-spaces/index.html">13장</a>)를 쓴다.
-        곡선으로 계산하는 do Carmo의 정의가 <a href="#i-2-1-1">정의 2.1.1</a>과 같은 결과를 준다는 것은 <a href="2-2-chain-rule.html#i-2-2-2">따름정리 2.2.2</a>에서 보인다.</p>
+        <p class="box-title">Conventions: total derivative의 기호와 “미분가능”의 뜻</p>
+        <p>do Carmo는 \(\R^n\) 사이 map의 미분을 \(dF_p\)로 쓰고, 곡선 \(\alpha\)로 \(dF_p(w) = (F \circ \alpha)'(0)\)이라 정의한다
+        <a class="cite" href="../../references.html#dC">[dC Ch. 2 Appendix, Definition 1 and Proposition 7]</a>. 또 do Carmo는 “미분가능”을 모든 계의 partial derivative가 연속이라는 뜻, 즉 이 study set의 “smooth”의 뜻으로 쓴다.
+        이 study set에서 “미분가능”은 <a href="#i-2-1-1">Definition 2.1.1</a>의 뜻이고, 매끄러움은 <a href="2-2-chain-rule.html#i-2-2-11">Definition 2.2.11</a>에서 따로 정의한다.
+        기호는 \(\R^n\) 사이의 map에 \(DF(p)\)를, manifold 사이의 map에 \(dF_p\)(<a href="../13-tangent-spaces/index.html">Chapter 13</a>)를 쓴다.
+        곡선으로 계산하는 do Carmo의 정의가 <a href="#i-2-1-1">Definition 2.1.1</a>과 같은 결과를 준다는 것은 <a href="2-2-chain-rule.html#i-2-2-2">Corollary 2.2.2</a>에서 보인다.</p>
       </aside>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: 미분과 접공간 (줄기 T2)</p>
-        <p>전미분 \(DF(p)\)는 study set 전체를 꿰는 줄기 T2의 출발점이다. <a href="../06-regular-surfaces/index.html">6장</a>에서는 매개화 \(\mathbf{x}\)의 전미분의 상
-        \(D\mathbf{x}(q)(\R^2)\)로 곡면의 접평면을 만들고(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">명제 6.2.4</a>) 곡면 사이 사상의 미분 \(d\varphi_p\)를 정의한다(<a href="../06-regular-surfaces/6-4-differential-of-a-map.html#i-6-4-1">정의 6.4.1</a>). <a href="../13-tangent-spaces/index.html">13장</a>에서는 둘러싼 \(\R^N\) 없이
-        다양체 사이의 미분 \(dF_p\colon T_pM \to T_{F(p)}N\)을 정의하는데, 그 동기가 이 절의 방향미분이다. 또 함수 \(f\colon U \to \R\)의 전미분 \(Df(p)\)는
-        \(\R^n\)에서 \(\R\)로 가는 선형사상, 즉 쌍대공간 \((\R^n)^*\)의 원소(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-1">정의 1.3.1</a>)이다.
-        이것은 <a href="../16-covectors-tensors/index.html">16장</a>의 1-형식 \(df\)로 이어진다.</p>
+        <p class="box-title">Looking ahead: 미분과 tangent space (줄기 T2)</p>
+        <p>total derivative \(DF(p)\)는 study set 전체를 꿰는 줄기 T2의 출발점이다. <a href="../06-regular-surfaces/index.html">Chapter 6</a>에서는 parametrization \(\mathbf{x}\)의 total derivative의 image
+        \(D\mathbf{x}(q)(\R^2)\)로 surface의 tangent plane을 만들고(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">Proposition 6.2.4</a>) surface 사이 map의 미분 \(d\varphi_p\)를 정의한다(<a href="../06-regular-surfaces/6-4-differential-of-a-map.html#i-6-4-1">Definition 6.4.1</a>). <a href="../13-tangent-spaces/index.html">Chapter 13</a>에서는 둘러싼 \(\R^N\) 없이
+        manifold 사이의 미분 \(dF_p\colon T_pM \to T_{F(p)}N\)을 정의하는데, 그 동기가 이 절의 directional derivative이다. 또 함수 \(f\colon U \to \R\)의 total derivative \(Df(p)\)는
+        \(\R^n\)에서 \(\R\)로 가는 linear map, 즉 dual space \((\R^n)^*\)의 원소(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-1">Definition 1.3.1</a>)이다.
+        이것은 <a href="../16-covectors-tensors/index.html">Chapter 16</a>의 1-형식 \(df\)로 이어진다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>\(F\colon U \to \R^m\)이 \(p\)에서 미분가능하다는 것은 \(F(p + h) = F(p) + DF(p)h + R(h)\), \(\abs{R(h)}/\abs{h} \to 0\)인 선형사상 \(DF(p)\)가 있다는 것이다. 이 선형사상은 하나뿐이다(<a href="#i-2-1-2">명제 2.1.2</a>).</li>
-        <li>미분가능하면 연속이고, 모든 방향미분이 존재하며 \(D_vF(p) = DF(p)v\)이다. 표준기저에 대한 \(DF(p)\)의 행렬은 야코비 행렬 \(\big(\partial_j F^i(p)\big)\)이다(<a href="#i-2-1-11">정리 2.1.11</a>).</li>
-        <li>편미분이나 방향미분이 모두 있어도 미분가능하지 않을 수 있다(<a href="#i-2-1-12">비예 2.1.12</a>). 편미분이 연속이면 미분가능하다(<a href="#i-2-1-13">정리 2.1.13</a>).</li>
-        <li>기준 사상: 극좌표 사상 \(P(r, \theta) = (r\cos\theta, r\sin\theta)\)의 전미분은 <a href="#eq-2-1-5">(2.1.5)</a>이고 \(\det DP = r\)이다. 구면의 기준 매개화의 전미분 <a href="#eq-2-1-6">(2.1.6)</a>은 \(0 \lt \theta \lt \pi\)에서 계수가 \(2\)이다.</li>
+        <li>\(F\colon U \to \R^m\)이 \(p\)에서 미분가능하다는 것은 \(F(p + h) = F(p) + DF(p)h + R(h)\), \(\abs{R(h)}/\abs{h} \to 0\)인 linear map \(DF(p)\)가 있다는 것이다. 이 linear map은 하나뿐이다(<a href="#i-2-1-2">Proposition 2.1.2</a>).</li>
+        <li>미분가능하면 연속이고, 모든 directional derivative가 존재하며 \(D_vF(p) = DF(p)v\)이다. standard basis에 대한 \(DF(p)\)의 행렬은 Jacobian matrix \(\big(\partial_j F^i(p)\big)\)이다(<a href="#i-2-1-11">Theorem 2.1.11</a>).</li>
+        <li>partial derivative나 directional derivative가 모두 있어도 미분가능하지 않을 수 있다(<a href="#i-2-1-12">Non-example 2.1.12</a>). partial derivative가 연속이면 미분가능하다(<a href="#i-2-1-13">Theorem 2.1.13</a>).</li>
+        <li>기준 map: polar coordinate map \(P(r, \theta) = (r\cos\theta, r\sin\theta)\)의 total derivative는 <a href="#eq-2-1-5">(2.1.5)</a>이고 \(\det DP = r\)이다. sphere의 standard parametrization의 total derivative <a href="#eq-2-1-6">(2.1.6)</a>은 \(0 \lt \theta \lt \pi\)에서 rank가 \(2\)이다.</li>
       </ul>
-      <p class="next">다음 절에서는 미분가능한 두 사상을 합성하면 전미분이 어떻게 되는지(연쇄법칙)를 증명하고, 미분을 거듭하는 고계 미분, 매끄러운 사상, 테일러 정리를 다룬다.</p>
+      <p class="next">다음 절에서는 미분가능한 두 map을 합성하면 total derivative가 어떻게 되는지(chain rule)를 증명하고, 미분을 거듭하는 고계 미분, smooth map, Taylor's theorem을 다룬다.</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-2-1-1" data-level="1">
-        <p><span class="thm-head">연습 2.1.1</span> <span class="level">★</span>
-        \(F(x, y) = (x^2 - y^2,\ 2xy)\)의 야코비 행렬을 구하고, \(F\)가 모든 점에서 미분가능한 이유를 대어라. \((1, 1)\)에서 \(DF\)의 행렬과 행렬식을 구하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>편미분은 \(\partial_x(x^2 - y^2) = 2x\), \(\partial_y(x^2 - y^2) = -2y\), \(\partial_x(2xy) = 2y\), \(\partial_y(2xy) = 2x\)이다. 모두 다항식이라 연속이므로
-          <a href="#i-2-1-13">정리 2.1.13</a>에 의해 \(F\)는 모든 점에서 미분가능하고
+        <p><span class="thm-head">Exercise 2.1.1</span> <span class="level">★</span>
+        \(F(x, y) = (x^2 - y^2,\ 2xy)\)의 Jacobian matrix를 구하고, \(F\)가 모든 점에서 미분가능한 이유를 대어라. \((1, 1)\)에서 \(DF\)의 행렬과 determinant를 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>partial derivative는 \(\partial_x(x^2 - y^2) = 2x\), \(\partial_y(x^2 - y^2) = -2y\), \(\partial_x(2xy) = 2y\), \(\partial_y(2xy) = 2x\)이다. 모두 다항식이라 연속이므로
+          <a href="#i-2-1-13">Theorem 2.1.13</a>에 의해 \(F\)는 모든 점에서 미분가능하고
           \[ DF(x, y) = \begin{pmatrix} 2x & -2y \\ 2y & 2x \end{pmatrix}, \qquad \det DF(x, y) = 4x^2 + 4y^2 \]
           이다. \((1, 1)\)에서는 \(DF(1, 1) = \begin{pmatrix} 2 & -2 \\ 2 & 2 \end{pmatrix}\), \(\det DF(1, 1) = 8\)이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-2-1-2" data-level="1">
-        <p><span class="thm-head">연습 2.1.2</span> <span class="level">★</span>
-        반지름 \(r\)인 원기둥의 기준 매개화 \(\mathbf{x}(u, v) = (r\cos u,\ r\sin u,\ v)\)의 전미분을 구하고, 모든 점에서 계수가 \(2\)임을 보여라. (<a href="../06-regular-surfaces/index.html">6장</a>(<a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-7">예 6.5.7</a>: 원기둥이 정칙곡면임)에서 사용)</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>성분의 편미분은 모두 연속이므로 \(\mathbf{x}\)는 미분가능하고
+        <p><span class="thm-head">Exercise 2.1.2</span> <span class="level">★</span>
+        반지름 \(r\)인 cylinder의 standard parametrization \(\mathbf{x}(u, v) = (r\cos u,\ r\sin u,\ v)\)의 total derivative를 구하고, 모든 점에서 rank가 \(2\)임을 보여라. (<a href="../06-regular-surfaces/index.html">Chapter 6</a>(<a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-7">Example 6.5.7</a>: cylinder가 regular surface임)에서 사용)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>성분의 partial derivative는 모두 연속이므로 \(\mathbf{x}\)는 미분가능하고
           \[ D\mathbf{x}(u, v) = \begin{pmatrix} -r\sin u & 0 \\ r\cos u & 0 \\ 0 & 1 \end{pmatrix} \]
-          이다. 두 열 \(\mathbf{x}_u = (-r\sin u, r\cos u, 0)\), \(\mathbf{x}_v = (0, 0, 1)\)이 일차독립임을 보이자. \(a\mathbf{x}_u + b\mathbf{x}_v = 0\)이면 셋째 성분에서 \(b = 0\)이고,
-          앞 두 성분에서 \(ar\sin u = ar\cos u = 0\)이다. \(r \gt 0\)이고 \(\sin^2 u + \cos^2 u = 1\)이므로 \(a = a(\sin^2 u + \cos^2 u) = 0\)이다. 따라서 계수는 \(2\)이다.</p>
+          이다. 두 열 \(\mathbf{x}_u = (-r\sin u, r\cos u, 0)\), \(\mathbf{x}_v = (0, 0, 1)\)이 linearly independent임을 보이자. \(a\mathbf{x}_u + b\mathbf{x}_v = 0\)이면 셋째 성분에서 \(b = 0\)이고,
+          앞 두 성분에서 \(ar\sin u = ar\cos u = 0\)이다. \(r \gt 0\)이고 \(\sin^2 u + \cos^2 u = 1\)이므로 \(a = a(\sin^2 u + \cos^2 u) = 0\)이다. 따라서 rank는 \(2\)이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-2-1-3" data-level="1">
-        <p><span class="thm-head">연습 2.1.3</span> <span class="level">★</span>
-        \(A\)가 \(n \times n\) 행렬이고 \(f(x) = \inner{x}{Ax}\)일 때, <a href="#i-2-1-1">정의 2.1.1</a>만 써서 \(Df(p)h = \inner{h}{Ap} + \inner{p}{Ah}\)임을 보여라.</p>
-        <details class="hint"><summary>힌트</summary><p><a href="#i-2-1-4">예 2.1.4</a>(a)처럼 \(f(p + h)\)를 전개하고, 나머지를 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">명제 1.5.7</a>로 누른다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>내적의 쌍선형성과 \(A\)의 선형성에 의해
-          \(f(p + h) = \inner{p + h}{Ap + Ah} = \inner{p}{Ap} + \inner{h}{Ap} + \inner{p}{Ah} + \inner{h}{Ah}\)이다. \(h \mapsto \inner{h}{Ap} + \inner{p}{Ah}\)는 선형이다.
-          나머지는 코시-슈바르츠 부등식과 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">명제 1.5.7</a>에 의해 \(\abs{\inner{h}{Ah}} \le \abs{h}\abs{Ah} \le C\abs{h}^2\)이므로 \(\abs{h}\)로 나누면 \(0\)으로 간다.
-          따라서 \(Df(p)h = \inner{h}{Ap} + \inner{p}{Ah}\)이다. \(A\)가 대칭행렬이면 \(\inner{p}{Ah} = \sum_{i,j} p^i A^i_j h^j = \inner{Ap}{h}\)이므로 \(Df(p)h = 2\inner{Ap}{h}\)이다.
-          \(A = I\)이면 <a href="#i-2-1-4">예 2.1.4</a>(a)가 된다.</p>
+        <p><span class="thm-head">Exercise 2.1.3</span> <span class="level">★</span>
+        \(A\)가 \(n \times n\) 행렬이고 \(f(x) = \inner{x}{Ax}\)일 때, <a href="#i-2-1-1">Definition 2.1.1</a>만 써서 \(Df(p)h = \inner{h}{Ap} + \inner{p}{Ah}\)임을 보여라.</p>
+        <details class="hint"><summary>Hint</summary><p><a href="#i-2-1-4">Example 2.1.4</a>(a)처럼 \(f(p + h)\)를 전개하고, 나머지를 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">Proposition 1.5.7</a>으로 누른다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>inner product의 bilinearity와 \(A\)의 linearity에 의해
+          \(f(p + h) = \inner{p + h}{Ap + Ah} = \inner{p}{Ap} + \inner{h}{Ap} + \inner{p}{Ah} + \inner{h}{Ah}\)이다. \(h \mapsto \inner{h}{Ap} + \inner{p}{Ah}\)는 linear이다.
+          나머지는 Cauchy–Schwarz inequality와 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">Proposition 1.5.7</a>에 의해 \(\abs{\inner{h}{Ah}} \le \abs{h}\abs{Ah} \le C\abs{h}^2\)이므로 \(\abs{h}\)로 나누면 \(0\)으로 간다.
+          따라서 \(Df(p)h = \inner{h}{Ap} + \inner{p}{Ah}\)이다. \(A\)가 symmetric matrix이면 \(\inner{p}{Ah} = \sum_{i,j} p^i A^i_j h^j = \inner{Ap}{h}\)이므로 \(Df(p)h = 2\inner{Ap}{h}\)이다.
+          \(A = I\)이면 <a href="#i-2-1-4">Example 2.1.4</a>(a)가 된다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-2-1-4" data-level="1">
-        <p><span class="thm-head">연습 2.1.4</span> <span class="level">★</span>
-        \(f(x, y, z) = x^2 + y^2 + z^2\)이라 하자. 구면의 기준 매개화의 점 \(p = \mathbf{x}(\theta, \varphi)\)에서 방향 \(\mathbf{x}_\theta\)와 \(\mathbf{x}_\varphi\)로의 방향미분이 모두 \(0\)임을 보이고, 그 뜻을 말하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p><a href="#i-2-1-4">예 2.1.4</a>(a)와 <a href="#i-2-1-11">정리 2.1.11</a>(a)에 의해 \(D_vf(p) = Df(p)v = 2\inner{p}{v}\)이다. <a href="#eq-2-1-6">(2.1.6)</a>의 첫째 열로 계산하면
+        <p><span class="thm-head">Exercise 2.1.4</span> <span class="level">★</span>
+        \(f(x, y, z) = x^2 + y^2 + z^2\)이라 하자. sphere의 standard parametrization의 점 \(p = \mathbf{x}(\theta, \varphi)\)에서 방향 \(\mathbf{x}_\theta\)와 \(\mathbf{x}_\varphi\)로의 directional derivative가 모두 \(0\)임을 보이고, 그 뜻을 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-2-1-4">Example 2.1.4</a>(a)와 <a href="#i-2-1-11">Theorem 2.1.11</a>(a)에 의해 \(D_vf(p) = Df(p)v = 2\inner{p}{v}\)이다. <a href="#eq-2-1-6">(2.1.6)</a>의 첫째 열로 계산하면
           \[ \inner{\mathbf{x}}{\mathbf{x}_\theta} = r^2\sin\theta\cos\theta\cos^2\varphi + r^2\sin\theta\cos\theta\sin^2\varphi - r^2\cos\theta\sin\theta = 0 \]
           이고, 둘째 열로 계산하면 \(\inner{\mathbf{x}}{\mathbf{x}_\varphi} = -r^2\sin^2\theta\cos\varphi\sin\varphi + r^2\sin^2\theta\sin\varphi\cos\varphi + 0 = 0\)이다.
-          뜻: \(f\)는 원점까지 거리의 제곱이고 구면 위에서 \(f = r^2\)으로 일정하다. 구면을 따라 움직이는 방향으로는 \(f\)가 (1차 근사로) 변하지 않는다.
-          <a href="../06-regular-surfaces/index.html">6장</a>(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-8">예 6.2.8</a>)에서 이것을 “구면의 접평면은 위치벡터에 수직이다”로 다시 본다.</p>
-          <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
+          뜻: \(f\)는 원점까지 거리의 제곱이고 sphere 위에서 \(f = r^2\)으로 일정하다. sphere를 따라 움직이는 방향으로는 \(f\)가 (1차 근사로) 변하지 않는다.
+          <a href="../06-regular-surfaces/index.html">Chapter 6</a>(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-8">Example 6.2.8</a>)에서 이것을 “sphere의 tangent plane은 위치벡터에 수직이다”로 다시 본다.</p>
+          <p class="verified">Verification: <code>verify/v-2-1-total-derivative.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-2-1-5" data-level="1">
-        <p><span class="thm-head">연습 2.1.5</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 2.1.5</span> <span class="level">★</span>
         참인지 거짓인지 판별하고 이유를 대어라.
-        (a) \(F\)가 \(p\)에서 미분가능하면 \(p\)에서 모든 편미분이 존재한다.
-        (b) \(p\)에서 모든 편미분이 존재하면 \(F\)는 \(p\)에서 연속이다.
-        (c) \(f\)가 \(p\)에서 연속이고, 모든 방향미분이 존재하며, \(v \mapsto D_vf(p)\)가 선형이면 \(f\)는 \(p\)에서 미분가능하다.
-        (d) \(F\colon \R^n \to \R^m\)이 선형사상이면 모든 \(p\)에서 \(DF(p) = F\)이다.</p>
-        <details class="hint"><summary>힌트</summary><p>(c)는 \(f(x, y) = x^3y/(x^4 + y^2)\), \(f(0, 0) = 0\)을 곡선 \(y = x^2\) 위에서 보아라. 연속성에는 \(x^4 + y^2 \ge 2x^2\abs{y}\)를 쓴다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 참. <a href="#i-2-1-11">정리 2.1.11</a>(b).</p>
-          <p>(b) 거짓. <a href="#i-2-1-12">비예 2.1.12</a>(a).</p>
+        (a) \(F\)가 \(p\)에서 미분가능하면 \(p\)에서 모든 partial derivative가 존재한다.
+        (b) \(p\)에서 모든 partial derivative가 존재하면 \(F\)는 \(p\)에서 연속이다.
+        (c) \(f\)가 \(p\)에서 연속이고, 모든 directional derivative가 존재하며, \(v \mapsto D_vf(p)\)가 linear이면 \(f\)는 \(p\)에서 미분가능하다.
+        (d) \(F\colon \R^n \to \R^m\)이 linear map이면 모든 \(p\)에서 \(DF(p) = F\)이다.</p>
+        <details class="hint"><summary>Hint</summary><p>(c)는 \(f(x, y) = x^3y/(x^4 + y^2)\), \(f(0, 0) = 0\)을 곡선 \(y = x^2\) 위에서 보아라. 연속성에는 \(x^4 + y^2 \ge 2x^2\abs{y}\)를 쓴다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. <a href="#i-2-1-11">Theorem 2.1.11</a>(b).</p>
+          <p>(b) 거짓. <a href="#i-2-1-12">Non-example 2.1.12</a>(a).</p>
           <p>(c) 거짓. 힌트의 \(f\)를 보자. <em>연속:</em> \(x^4 + y^2 - 2x^2\abs{y} = (x^2 - \abs{y})^2 \ge 0\)이므로 \((x, y) \neq 0\)이면
           \(\abs{f(x, y)} = \abs{x}\cdot x^2\abs{y}/(x^4 + y^2) \le \abs{x}/2\)이고, 따라서 \(f\)는 원점에서 연속이다.
-          <em>방향미분:</em> \(v = (v^1, v^2)\)에 대하여 \(v^2 = 0\)이면 \(f(tv) = 0\)이므로 \(D_vf(0) = 0\)이다. \(v^2 \neq 0\)이면
-          \(f(tv)/t = t(v^1)^3v^2/\big(t^2(v^1)^4 + (v^2)^2\big) \to 0\)이므로 역시 \(D_vf(0) = 0\)이다. 따라서 \(v \mapsto D_vf(0)\)은 영사상으로 선형이다.
-          <em>미분불가능:</em> 미분가능하다면 <a href="#i-2-1-11">정리 2.1.11</a>(a)에 의해 \(Df(0) = 0\)이어야 하므로 \(\abs{f(h)}/\abs{h} \to 0\)이어야 한다.
+          <em>directional derivative:</em> \(v = (v^1, v^2)\)에 대하여 \(v^2 = 0\)이면 \(f(tv) = 0\)이므로 \(D_vf(0) = 0\)이다. \(v^2 \neq 0\)이면
+          \(f(tv)/t = t(v^1)^3v^2/\big(t^2(v^1)^4 + (v^2)^2\big) \to 0\)이므로 역시 \(D_vf(0) = 0\)이다. 따라서 \(v \mapsto D_vf(0)\)은 zero map으로 linear이다.
+          <em>미분불가능:</em> 미분가능하다면 <a href="#i-2-1-11">Theorem 2.1.11</a>(a)에 의해 \(Df(0) = 0\)이어야 하므로 \(\abs{f(h)}/\abs{h} \to 0\)이어야 한다.
           그러나 \(h = (t, t^2)\)이면 \(f(h) = t^5/(2t^4) = t/2\)이고 \(\abs{h} = \abs{t}\sqrt{1 + t^2}\)이므로 \(\abs{f(h)}/\abs{h} = 1/(2\sqrt{1 + t^2}) \to 1/2\)이다.</p>
-          <p>(d) 참. <a href="#i-2-1-3">예 2.1.3</a>(a)에서 \(b = 0\)인 경우다.</p>
-          <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
+          <p>(d) 참. <a href="#i-2-1-3">Example 2.1.3</a>(a)에서 \(b = 0\)인 경우다.</p>
+          <p class="verified">Verification: <code>verify/v-2-1-total-derivative.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-2-1-6" data-level="2">
-        <p><span class="thm-head">연습 2.1.6</span> <span class="level">★★</span>
-        \(g(x, y) = \sqrt{\abs{xy}}\)의 원점에서의 편미분이 모두 \(0\)임을 보이고, \(g\)가 원점에서 미분가능하지 않음을 보여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>좌표축 위에서 \(g(t, 0) = g(0, t) = 0\)이므로 \(\partial_x g(0) = \partial_y g(0) = 0\)이다. \(g\)가 원점에서 미분가능하다면 <a href="#i-2-1-11">정리 2.1.11</a>(b)에 의해
+        <p><span class="thm-head">Exercise 2.1.6</span> <span class="level">★★</span>
+        \(g(x, y) = \sqrt{\abs{xy}}\)의 원점에서의 partial derivative가 모두 \(0\)임을 보이고, \(g\)가 원점에서 미분가능하지 않음을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>좌표축 위에서 \(g(t, 0) = g(0, t) = 0\)이므로 \(\partial_x g(0) = \partial_y g(0) = 0\)이다. \(g\)가 원점에서 미분가능하다면 <a href="#i-2-1-11">Theorem 2.1.11</a>(b)에 의해
           \(Dg(0)\)의 행렬은 \((0\ \ 0)\), 즉 \(Dg(0) = 0\)이어야 한다. 그러면 \(\abs{g(h) - g(0) - 0}/\abs{h} = \sqrt{\abs{h^1h^2}}/\abs{h} \to 0\)이어야 한다.
           그런데 \(h = (t, t)\), \(t \neq 0\)이면 이 값은 \(\abs{t}/(\sqrt2\abs{t}) = 1/\sqrt2\)이다. 따라서 \(g\)는 원점에서 미분가능하지 않다.
-          (\(g\)는 연속이다. 연속이고 편미분이 있어도 미분가능하지 않은 또 하나의 예다.)</p>
+          (\(g\)는 연속이다. 연속이고 partial derivative가 있어도 미분가능하지 않은 또 하나의 예다.)</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-2-1-7" data-level="3">
-        <p><span class="thm-head">연습 2.1.7</span> <span class="level">★★★</span>
+        <p><span class="thm-head">Exercise 2.1.7</span> <span class="level">★★★</span>
         \(f\colon \R^2 \to \R\)을 \(x \neq 0\)이면 \(f(x) = \abs{x}^2\sin(1/\abs{x})\), \(f(0) = 0\)으로 정의하자.
-        (a) \(f\)가 \(\R^2\)의 모든 점에서 미분가능함을 보여라. (b) \(\partial_1 f\)가 원점에서 연속이 아님을 보여라. 이로써 <a href="#i-2-1-13">정리 2.1.13</a>의 역이 거짓임을 확인하여라.</p>
-        <details class="hint"><summary>힌트</summary><p>원점에서는 \(\abs{f(h)} \le \abs{h}^2\)를 쓴다. 원점 밖에서는 편미분을 계산해 <a href="#i-2-1-13">정리 2.1.13</a>을 쓴다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        (a) \(f\)가 \(\R^2\)의 모든 점에서 미분가능함을 보여라. (b) \(\partial_1 f\)가 원점에서 연속이 아님을 보여라. 이로써 <a href="#i-2-1-13">Theorem 2.1.13</a>의 역이 거짓임을 확인하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>원점에서는 \(\abs{f(h)} \le \abs{h}^2\)를 쓴다. 원점 밖에서는 partial derivative를 계산해 <a href="#i-2-1-13">Theorem 2.1.13</a>을 쓴다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>(a) 원점에서: \(\abs{f(h) - f(0) - 0 \cdot h}/\abs{h} = \abs{h}\,\abs{\sin(1/\abs{h})} \le \abs{h} \to 0\)이므로 \(f\)는 원점에서 미분가능하고 \(Df(0) = 0\)이다.
-          원점 밖에서: \(\rho(x) = \abs{x} = \sqrt{(x^1)^2 + (x^2)^2}\)는 \(x \neq 0\)에서 \(\partial_1\rho = x^1/\rho\)로 연속인 편미분을 가지므로(1변수 연쇄법칙)
+          원점 밖에서: \(\rho(x) = \abs{x} = \sqrt{(x^1)^2 + (x^2)^2}\)는 \(x \neq 0\)에서 \(\partial_1\rho = x^1/\rho\)로 연속인 partial derivative를 가지므로(1변수 chain rule)
           \[ \partial_1 f(x) = 2x^1\sin(1/\rho) + \rho^2\cos(1/\rho)\cdot\Big(-\frac{1}{\rho^2}\Big)\frac{x^1}{\rho} = 2x^1\sin(1/\rho) - \frac{x^1}{\rho}\cos(1/\rho) \]
-          이고 \(\partial_2 f\)도 같은 모양이다. 이것들은 원점 밖에서 연속이므로 <a href="#i-2-1-13">정리 2.1.13</a>에 의해 \(f\)는 원점 밖의 모든 점에서 미분가능하다.</p>
+          이고 \(\partial_2 f\)도 같은 모양이다. 이것들은 원점 밖에서 연속이므로 <a href="#i-2-1-13">Theorem 2.1.13</a>에 의해 \(f\)는 원점 밖의 모든 점에서 미분가능하다.</p>
           <p>(b) \(x = (t, 0)\), \(t \gt 0\)이면 \(\partial_1 f(t, 0) = 2t\sin(1/t) - \cos(1/t)\)이다. \(t_k = 1/(k\pi)\)로 두면 \(\partial_1 f(t_k, 0) = -\cos(k\pi) = (-1)^{k+1}\)로 \(1\)과 \(-1\)을 오간다.
-          따라서 \(t \to 0^+\)일 때 \(\partial_1 f(t, 0)\)은 수렴하지 않고, 특히 \(\partial_1 f(0) = 0\)으로 가지 않는다. \(f\)는 미분가능하지만 편미분이 연속이 아니므로,
-          “미분가능 \(\Rightarrow\) 편미분이 연속”은 거짓이다.</p>
-          <p class="verified">검증: <code>verify/v-2-1-total-derivative.py</code></p>
+          따라서 \(t \to 0^+\)일 때 \(\partial_1 f(t, 0)\)은 수렴하지 않고, 특히 \(\partial_1 f(0) = 0\)으로 가지 않는다. \(f\)는 미분가능하지만 partial derivative가 연속이 아니므로,
+          “미분가능 \(\Rightarrow\) partial derivative가 연속”은 거짓이다.</p>
+          <p class="verified">Verification: <code>verify/v-2-1-total-derivative.py</code></p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="index.html">← 2. ℝⁿ의 미적분 (장 개요)</a>
-    <a rel="next" href="2-2-chain-rule.html">2.2 연쇄법칙과 고계 미분 →</a>
+    <a rel="prev" href="index.html">← 2. Calculus on ℝⁿ (Chapter overview)</a>
+    <a rel="next" href="2-2-chain-rule.html">2.2 The Chain Rule and Higher Derivatives →</a>
   </nav>
 </body>
 </html>

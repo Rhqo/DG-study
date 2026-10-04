@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>3.1 열린집합과 위상공간 — 미분기하 스터디</title>
+  <title>3.1 Open Sets and Topological Spaces — DG Study</title>
   <meta name="dg-id" content="3.1">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="1.1, 1.5">
@@ -15,442 +15,442 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">3. 위상공간 기초</a> ›
-    <span>3.1 열린집합과 위상공간</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">3. Basic Topology</a> ›
+    <span>3.1 Open Sets and Topological Spaces</span>
   </nav>
 
   <main>
     <header>
-      <h1>3.1 열린집합과 위상공간</h1>
-      <p class="meta">대응 교재:
-        <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM 2장]</a>,
-        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 부록 A]</a>,
-        <a class="cite" href="../../references.html#dC">[dC 2장 부록 A]</a></p>
+      <h1>3.1 Open Sets and Topological Spaces</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM Ch. 2]</a>,
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM App. A]</a>,
+        <a class="cite" href="../../references.html#dC">[dC Ch. 2 App. A]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>거리공간의 열린공과 열린집합을 정의하고, 주어진 집합이 열린집합인지 공(ball)을 이용해 판정할 수 있다.</li>
-        <li>열린집합의 세 성질에서 위상의 공리를 뽑아내고, 위상공간의 예와 비예를 들 수 있다.</li>
-        <li>닫힌집합과 폐포를 정의하고, “모든 근방이 \(A\)와 만난다”는 판정법으로 폐포를 계산할 수 있다.</li>
-        <li>위상의 기저를 이해하고, 서로 다른 거리가 같은 위상을 줄 수 있음을 증명할 수 있다.</li>
+        <li>metric space의 open ball과 open set을 정의하고, 주어진 집합이 open set인지 ball을 이용해 판정할 수 있다.</li>
+        <li>open set의 세 성질에서 topology의 공리를 뽑아내고, topological space의 example과 non-example을 들 수 있다.</li>
+        <li>closed set과 closure를 정의하고, “모든 neighborhood가 \(A\)와 만난다”는 판정법으로 closure를 계산할 수 있다.</li>
+        <li>basis for a topology를 이해하고, 서로 다른 metric이 같은 topology를 줄 수 있음을 증명할 수 있다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-2">예 1.1.2 (\(\R^n\))</a>: \(\R^n\)의 점을 \(x = (x^1, \dots, x^n)\)으로 쓴다. 위첨자는 거듭제곱이 아니라 성분 번호다.</li>
-        <li><a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-4">정의 1.5.4 (노름)</a>: 유클리드 노름 \(\abs{x} = \sqrt{(x^1)^2 + \dots + (x^n)^2}\).
-          <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6 (삼각부등식, 유클리드 거리)</a>: \(\abs{x + y} \le \abs{x} + \abs{y}\)이고, 유클리드 거리 \(d(p, q) = \abs{q - p}\)는 세 성질(<a href="#i-3-1-1">정의 3.1.1</a>의 이름으로 양의 정부호성, 대칭성, 삼각부등식)을 만족한다.</li>
-        <li>집합의 기본 연산: 합집합 \(\bigcup\), 교집합 \(\bigcap\), 여집합 \(X \setminus A\), 드모르간 법칙
+        <li><a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-2">Example 1.1.2 (\(\R^n\))</a>: \(\R^n\)의 점을 \(x = (x^1, \dots, x^n)\)으로 쓴다. 위첨자는 거듭제곱이 아니라 성분 번호다.</li>
+        <li><a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-4">Definition 1.5.4 (norm)</a>: Euclidean norm \(\abs{x} = \sqrt{(x^1)^2 + \dots + (x^n)^2}\).
+          <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">Corollary 1.5.6 (triangle inequality, Euclidean distance)</a>: \(\abs{x + y} \le \abs{x} + \abs{y}\)이고, Euclidean distance \(d(p, q) = \abs{q - p}\)는 세 성질(<a href="#i-3-1-1">Definition 3.1.1</a>의 이름으로 positive definiteness, symmetry, triangle inequality)를 만족한다.</li>
+        <li>집합의 기본 연산: 합집합 \(\bigcup\), 교집합 \(\bigcap\), 여집합 \(X \setminus A\), De Morgan's laws
           \(X \setminus \bigcup_\alpha A_\alpha = \bigcap_\alpha (X \setminus A_\alpha)\), \(X \setminus \bigcap_\alpha A_\alpha = \bigcup_\alpha (X \setminus A_\alpha)\).
           여기서 \(\alpha\)는 임의의(무한할 수도 있는) 첨자 집합을 움직인다.</li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p><a href="../01-linear-algebra/index.html">1장</a>과 <a href="../02-calculus-rn/index.html">2장</a>에서는 \(\R^n\) 안에서 모든 것을 거리로 쟀다.
+      <h2>Motivation</h2>
+      <p><a href="../01-linear-algebra/index.html">Chapter 1</a>과 <a href="../02-calculus-rn/index.html">Chapter 2</a>에서는 \(\R^n\) 안에서 모든 것을 거리로 쟀다.
       두 점 사이의 거리 \(\abs{x - y}\)로 수열의 극한을 정하고, “\(x\)가 \(p\)에 가까우면 \(F(x)\)가 \(F(p)\)에 가깝다”로 연속을 정하고,
-      그 위에서 미분을 정의했다(<a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절</a>에서는 열린집합과 극한을 미적분학의 약속으로 상기만 했다). 그런데 이 study set이 다룰 대상에는 거리가 처음부터 붙어 있지 않거나, 붙어 있더라도 자연스럽지 않은 것이 많다.</p>
+      그 위에서 미분을 정의했다(<a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">Section 2.1</a>에서는 open set과 극한을 미적분학의 약속으로 상기만 했다). 그런데 이 study set이 다룰 대상에는 metric이 처음부터 붙어 있지 않거나, 붙어 있더라도 자연스럽지 않은 것이 많다.</p>
       <ul>
-        <li>구면 \(S^2\)은 \(\R^3\) 안에 놓여 있으므로 \(\R^3\)의 거리를 빌려 쓸 수 있다. 그러나 구면 위에 사는 존재에게는 대원을 따라 잰 거리가 더 자연스럽다. 두 거리는 값이 다르다.</li>
-        <li>실사영공간 \(\RP^2\)의 “점”은 \(\R^3\)에서 원점을 지나는 직선이다(<a href="3-4-quotient-spaces.html">3.4절</a>). 두 직선 사이의 거리를 무엇으로 정해야 하는가?</li>
-        <li><a href="../11-smooth-manifolds/index.html">11장</a>의 추상 다양체는 둘러싼 공간이 아예 없다.</li>
+        <li>sphere \(S^2\)은 \(\R^3\) 안에 놓여 있으므로 \(\R^3\)의 metric을 빌려 쓸 수 있다. 그러나 sphere 위에 사는 존재에게는 great circle을 따라 잰 거리가 더 자연스럽다. 두 거리는 값이 다르다.</li>
+        <li>real projective space \(\RP^2\)의 “점”은 \(\R^3\)에서 원점을 지나는 직선이다(<a href="3-4-quotient-spaces.html">Section 3.4</a>). 두 직선 사이의 거리를 무엇으로 정해야 하는가?</li>
+        <li><a href="../11-smooth-manifolds/index.html">Chapter 11</a>의 추상 manifold는 둘러싼 공간이 아예 없다.</li>
       </ul>
-      <p>다행히 연속과 극한에 실제로 필요한 것은 거리의 <em>값</em>이 아니다. 필요한 것은 “\(p\) 근처”라는 개념, 즉 어떤 집합이
-      “각 점을 조금씩 여유 있게 둘러싸고 있는가”라는 정보뿐이다. 이 정보를 담은 집합을 <em>열린집합</em>이라 한다. 이 절에서는
-      먼저 거리가 있는 공간에서 열린집합을 정의하고, 열린집합이 만족하는 세 성질을 뽑아낸다. 그 세 성질을 공리로 삼은 것이 <em>위상</em>이다.
-      이렇게 하면 이 장의 첫 질문 “가까움을 거리 없이 말할 수 있는가?”에 답할 수 있다.</p>
+      <p>다행히 연속과 극한에 실제로 필요한 것은 metric의 <em>값</em>이 아니다. 필요한 것은 “\(p\) 근처”라는 개념, 즉 어떤 집합이
+      “각 점을 조금씩 여유 있게 둘러싸고 있는가”라는 정보뿐이다. 이 정보를 담은 집합을 <em>open set</em>이라 한다. 이 절에서는
+      먼저 metric이 있는 공간에서 open set을 정의하고, open set이 만족하는 세 성질을 뽑아낸다. 그 세 성질을 공리로 삼은 것이 <em>topology</em>이다.
+      이렇게 하면 이 장의 첫 질문 “가까움을 metric 없이 말할 수 있는가?”에 답할 수 있다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 열린집합은 경계를 갖지 않는다</p>
+        <p class="box-title">Intuition: open set은 경계를 갖지 않는다</p>
         <p>평면의 영역 \(U\)가 <em>열려 있다</em>는 것은, \(U\)의 어느 점 \(p\)에서 보더라도 사방으로 조금은 움직여도 \(U\) 안에 머문다는 뜻이다.
-        즉 \(p\)를 중심으로 하는 작은 원판이 통째로 \(U\)에 들어간다(<a href="#fig-3-1-1">그림 3.1.1</a>(a)). 경계에 가까운 점일수록 원판을 작게 잡아야 하지만,
+        즉 \(p\)를 중심으로 하는 작은 원판이 통째로 \(U\)에 들어간다(<a href="#fig-3-1-1">Figure 3.1.1</a>(a)). 경계에 가까운 점일수록 원판을 작게 잡아야 하지만,
         \(U\)가 자기 경계를 포함하지 않으므로 언제나 잡을 수 있다. 반대로 닫힌 원판 \(D\)의 경계 위의 점 \(q\)에서는 아무리 작은 원판도 \(D\) 밖으로 삐져나간다
-        (<a href="#fig-3-1-1">그림 3.1.1</a>(b)). 그래서 \(D\)는 열린집합이 아니다.</p>
+        (<a href="#fig-3-1-1">Figure 3.1.1</a>(b)). 그래서 \(D\)는 open set이 아니다.</p>
       </aside>
 
       <figure class="dg-figure" id="fig-3-1-1">
         <img src="figures/fig-3-1-1-open-sets.svg" alt="두 개의 평면 그림. (a) 점선 경계를 가진 얼룩 모양 영역 U 안의 두 점 p, p'과, 각 점을 중심으로 U 안에 들어가는 파란 원. 경계에 가까운 p'의 원이 더 작다. (b) 실선 경계를 가진 원판 D. 안쪽 점 p의 파란 원은 D 안에 있고, 경계 위의 점 q를 중심으로 하는 두 주홍색 원은 모두 D 밖으로 나간다.">
-        <figcaption><span class="fig-head">그림 3.1.1.</span>
-        (a) 열린집합 \(U\)(경계는 \(U\)에 속하지 않아 점선으로 그렸다). 각 점마다 \(U\) 안에 들어가는 열린공이 있다. 반지름은 경계까지의 거리의 0.8배로 잡았다.
-        (b) 닫힌 원판 \(D = \{x \in \R^2 : \abs{x} \le 1\}\). 경계점 \(q = (1, 0)\)을 중심으로 하는 공 \(B_\varepsilon(q)\)는 \(\varepsilon = 0.36,\ 0.2\) 어느 쪽이든
-        \(D\) 밖의 점 \((1 + \varepsilon/2,\ 0)\)(주홍 점)을 포함한다. (a)의 \(U\)는 개념도이고, (b)의 원들은 실제 반지름으로 그렸다.</figcaption>
+        <figcaption><span class="fig-head">Figure 3.1.1.</span>
+        (a) open set \(U\)(경계는 \(U\)에 속하지 않아 점선으로 그렸다). 각 점마다 \(U\) 안에 들어가는 open ball이 있다. 반지름은 경계까지의 거리의 0.8배로 잡았다.
+        (b) 닫힌 원판 \(D = \{x \in \R^2 : \abs{x} \le 1\}\). boundary point \(q = (1, 0)\)을 중심으로 하는 ball \(B_\varepsilon(q)\)는 \(\varepsilon = 0.36,\ 0.2\) 어느 쪽이든
+        \(D\) 밖의 점 \((1 + \varepsilon/2,\ 0)\)(주홍 점)을 포함한다. (a)의 \(U\)는 schematic이고, (b)의 원들은 실제 반지름으로 그렸다.</figcaption>
       </figure>
     </section>
 
     <section id="sec-metric-spaces">
-      <h2>거리공간</h2>
+      <h2>Metric Spaces</h2>
       <p>\(\R^n\)의 거리 \(\abs{x - y}\)에서 우리가 실제로 쓰는 성질은 세 가지뿐이다. 거리는 음이 아니고 같은 점 사이에서만 \(0\)이다.
       \(x\)에서 \(y\)까지와 \(y\)에서 \(x\)까지의 거리가 같다. 돌아가는 길은 곧장 가는 길보다 짧지 않다. 이 세 성질만 뽑아내면 다음 정의가 된다.</p>
 
       <div class="thm definition" id="i-3-1-1">
-        <p><span class="thm-head">정의 3.1.1</span> <span class="thm-name">(거리공간, metric space)</span>.
+        <p><span class="thm-head">Definition 3.1.1</span> <span class="thm-name">(metric space)</span>.
         집합 \(X\)와 함수 \(d\colon X \times X \to \R\)가 모든 \(x, y, z \in X\)에 대하여 다음 세 조건을 만족하면
-        \(d\)를 \(X\) 위의 <dfn>거리</dfn>(metric)라 하고, 순서쌍 \((X, d)\)를 <dfn>거리공간</dfn>(metric space)이라 한다.</p>
+        \(d\)를 \(X\) 위의 <dfn>metric</dfn>(거리)라 하고, 순서쌍 \((X, d)\)를 <dfn>metric space</dfn>(거리공간)이라 한다.</p>
         <ol>
-          <li>(양의 정부호성) \(d(x, y) \ge 0\)이고, \(d(x, y) = 0\)일 필요충분조건은 \(x = y\)이다.</li>
-          <li>(대칭성) \(d(x, y) = d(y, x)\).</li>
-          <li>(삼각부등식) \(d(x, z) \le d(x, y) + d(y, z)\).</li>
+          <li>(positive definiteness) \(d(x, y) \ge 0\)이고, \(d(x, y) = 0\)일 필요충분조건은 \(x = y\)이다.</li>
+          <li>(symmetry) \(d(x, y) = d(y, x)\).</li>
+          <li>(triangle inequality) \(d(x, z) \le d(x, y) + d(y, z)\).</li>
         </ol>
-        <p>거리가 문맥에서 분명하면 \((X, d)\)를 그냥 \(X\)로 쓴다.</p>
+        <p>metric이 문맥에서 분명하면 \((X, d)\)를 그냥 \(X\)로 쓴다.</p>
       </div>
 
       <div class="thm example" id="i-3-1-2">
-        <p><span class="thm-head">예 3.1.2</span> <span class="thm-name">(\(\R^n\) 위의 세 거리)</span>.
-        \(x, y \in \R^n\)에 대하여 다음 셋은 모두 \(\R^n\) 위의 거리다.</p>
+        <p><span class="thm-head">Example 3.1.2</span> <span class="thm-name">(three metrics on \(\R^n\))</span>.
+        \(x, y \in \R^n\)에 대하여 다음 셋은 모두 \(\R^n\) 위의 metric이다.</p>
         <div class="equation" id="eq-3-1-1">
         \[ \begin{aligned} d(x, y) &= \abs{x - y} = \Big(\sum_{i=1}^{n} (x^i - y^i)^2\Big)^{1/2}, \\
            d_\infty(x, y) &= \max_{1 \le i \le n} \abs{x^i - y^i}, \\
            d_1(x, y) &= \sum_{i=1}^{n} \abs{x^i - y^i}. \end{aligned} \tag{3.1.1} \]
         </div>
-        <p>첫째가 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6</a>(b)의 유클리드 거리이고, \(\R^n\)에 거리를 따로 말하지 않으면 늘 이것을 쓴다. 조건 1과 2는 세 거리 모두 식에서 바로 보인다
+        <p>첫째가 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">Corollary 1.5.6</a>(b)의 Euclidean distance이고, \(\R^n\)에 metric을 따로 말하지 않으면 늘 이것을 쓴다. 조건 1과 2는 세 metric 모두 식에서 바로 보인다
         (예를 들어 \(d_\infty(x, y) = 0\)이면 모든 \(i\)에서 \(\abs{x^i - y^i} = 0\)이다). 조건 3을 확인하자.</p>
         <ul>
-          <li>\(d_1\): 각 \(i\)에서 실수의 삼각부등식 \(\abs{x^i - z^i} \le \abs{x^i - y^i} + \abs{y^i - z^i}\)이 성립한다. 이것을 \(i = 1, \dots, n\)에 대해 더하면 된다.</li>
+          <li>\(d_1\): 각 \(i\)에서 실수의 triangle inequality \(\abs{x^i - z^i} \le \abs{x^i - y^i} + \abs{y^i - z^i}\)이 성립한다. 이것을 \(i = 1, \dots, n\)에 대해 더하면 된다.</li>
           <li>\(d_\infty\): 각 \(i\)에서 \(\abs{x^i - z^i} \le \abs{x^i - y^i} + \abs{y^i - z^i} \le d_\infty(x, y) + d_\infty(y, z)\)이다.
           우변은 \(i\)에 무관하므로, 좌변의 최댓값 \(d_\infty(x, z)\)도 우변 이하다.</li>
-          <li>\(d\): <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6</a>(b)에서 이미 확인했다. 노름의 삼각부등식 \(\abs{a + b} \le \abs{a} + \abs{b}\)(코시-슈바르츠 부등식, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-5">정리 1.5.5</a>에서 나온다)에 \(a = x - y\), \(b = y - z\)를 넣은 것이다.</li>
+          <li>\(d\): <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">Corollary 1.5.6</a>(b)에서 이미 확인했다. norm의 triangle inequality \(\abs{a + b} \le \abs{a} + \abs{b}\)(Cauchy–Schwarz inequality, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-5">Theorem 1.5.5</a>에서 나온다)에 \(a = x - y\), \(b = y - z\)를 넣은 것이다.</li>
         </ul>
-        <p class="verified">검증: <code>verify/v-3-1-topological-spaces.py</code></p>
+        <p class="verified">Verification: <code>verify/v-3-1-topological-spaces.py</code></p>
       </div>
 
       <div class="thm nonexample" id="i-3-1-3">
-        <p><span class="thm-head">비예 3.1.3</span>.
-        \(\R\) 위의 함수 \(\rho(x, y) = (x - y)^2\)은 조건 1과 2를 만족하지만 거리가 아니다. 삼각부등식을 어긴다:
+        <p><span class="thm-head">Non-example 3.1.3</span>.
+        \(\R\) 위의 함수 \(\rho(x, y) = (x - y)^2\)은 조건 1과 2를 만족하지만 metric이 아니다. triangle inequality를 어긴다:
         \(\rho(0, 2) = 4\)이지만 \(\rho(0, 1) + \rho(1, 2) = 1 + 1 = 2\)이다. 제곱하면 긴 거리가 지나치게 커져서 “돌아가는 길이 더 짧은” 일이 생긴다.</p>
       </div>
 
       <div class="thm example" id="i-3-1-4">
-        <p><span class="thm-head">예 3.1.4</span> <span class="thm-name">(부분집합의 거리, 이산거리)</span>.
-        (a) \((X, d)\)가 거리공간이고 \(A \subseteq X\)이면, \(d\)를 \(A \times A\)로 제한한 함수는 \(A\) 위의 거리다. 세 조건은 \(X\)의 모든 점에서 성립하므로 \(A\)의 점에서도 성립한다.
-        예를 들어 단위구면 \(S^n = \{x \in \R^{n+1} : \abs{x} = 1\}\)은 \(\R^{n+1}\)의 유클리드 거리를 제한해 거리공간이 된다.
-        두 점 사이의 거리는 구면을 뚫고 지나가는 현(chord)의 길이다.</p>
-        <p>(b) 임의의 집합 \(X\)에서 \(x \ne y\)이면 \(d(x, y) = 1\), \(x = y\)이면 \(d(x, y) = 0\)으로 정하면 거리다. 이것을 <dfn>이산거리</dfn>(discrete metric)라 한다.
-        삼각부등식은 다음과 같이 확인한다. \(x = z\)이면 좌변이 \(0\)이다. \(x \ne z\)이면 \(y\)는 \(x\)와 \(z\) 가운데 적어도 하나와 다르므로 우변이 \(1\) 이상이다.</p>
+        <p><span class="thm-head">Example 3.1.4</span> <span class="thm-name">(metric on a subset, discrete metric)</span>.
+        (a) \((X, d)\)가 metric space이고 \(A \subseteq X\)이면, \(d\)를 \(A \times A\)로 제한한 함수는 \(A\) 위의 metric이다. 세 조건은 \(X\)의 모든 점에서 성립하므로 \(A\)의 점에서도 성립한다.
+        예를 들어 unit sphere \(S^n = \{x \in \R^{n+1} : \abs{x} = 1\}\)은 \(\R^{n+1}\)의 Euclidean distance를 제한해 metric space가 된다.
+        두 점 사이의 거리는 sphere를 뚫고 지나가는 현(chord)의 길이다.</p>
+        <p>(b) 임의의 집합 \(X\)에서 \(x \ne y\)이면 \(d(x, y) = 1\), \(x = y\)이면 \(d(x, y) = 0\)으로 정하면 metric이다. 이것을 <dfn>discrete metric</dfn>(이산거리)라 한다.
+        triangle inequality는 다음과 같이 확인한다. \(x = z\)이면 좌변이 \(0\)이다. \(x \ne z\)이면 \(y\)는 \(x\)와 \(z\) 가운데 적어도 하나와 다르므로 우변이 \(1\) 이상이다.</p>
       </div>
 
       <aside class="box warning">
-        <p class="box-title">용어 주의: 거리와 계량</p>
-        <p>영어 metric은 두 가지 뜻으로 쓰인다. 이 절의 metric은 두 점에 수를 대응시키는 함수 \(d\)이고, 이 study set은 이것을 <em>거리</em>라 부른다.
-        <a href="../21-riemannian-metrics/index.html">21장</a>의 Riemannian metric은 각 점의 접공간에 주어진 내적이고, 이것은 <em>계량</em>이라 부른다.
-        21장에서 계량으로부터 거리를 만든다. 둘은 다른 대상이다.</p>
+        <p class="box-title">Warning: metric과 Riemannian metric</p>
+        <p>영어 metric은 두 가지 뜻으로 쓰인다. 이 절의 metric은 두 점에 수를 대응시키는 함수 \(d\)이고, 이 study set에서 이것을 단순히 <em>metric</em>이라 부른다.
+        <a href="../21-riemannian-metrics/index.html">Chapter 21</a>의 Riemannian metric은 각 점의 tangent space에 주어진 inner product이고, 이것은 <em>Riemannian metric</em>이라 부른다.
+        Chapter 21에서 Riemannian metric으로부터 metric(distance function)을 만든다. 둘은 다른 대상이다.</p>
       </aside>
     </section>
 
     <section id="sec-open-sets">
-      <h2>거리공간의 열린집합</h2>
+      <h2>Open Sets in a Metric Space</h2>
 
       <div class="thm definition" id="i-3-1-5">
-        <p><span class="thm-head">정의 3.1.5</span> <span class="thm-name">(열린공과 열린집합, open ball and open set)</span>.
-        \((X, d)\)가 거리공간이라 하자. \(p \in X\)이고 \(r \gt 0\)일 때</p>
+        <p><span class="thm-head">Definition 3.1.5</span> <span class="thm-name">(open ball and open set)</span>.
+        \((X, d)\)가 metric space라 하자. \(p \in X\)이고 \(r \gt 0\)일 때</p>
         <div class="equation" id="eq-3-1-2">
         \[ B_r(p) = \{x \in X : d(x, p) \lt r\} \tag{3.1.2} \]
         </div>
-        <p>를 \(p\)를 중심으로 하는 반지름 \(r\)인 <dfn>열린공</dfn>(open ball)이라 한다. 부분집합 \(U \subseteq X\)가 다음 조건을 만족하면 \(U\)를
-        (거리 \(d\)에 대한) <dfn>열린집합</dfn>(open set)이라 한다.</p>
+        <p>를 \(p\)를 중심으로 하는 반지름 \(r\)인 <dfn>open ball</dfn>(열린공)이라 한다. 부분집합 \(U \subseteq X\)가 다음 조건을 만족하면 \(U\)를
+        (metric \(d\)에 대한) <dfn>open set</dfn>(열린집합)이라 한다.</p>
         <ul>
           <li>모든 \(p \in U\)에 대하여 어떤 \(r \gt 0\)이 존재하여 \(B_r(p) \subseteq U\)이다.</li>
         </ul>
       </div>
 
-      <p>한정사의 순서에 주의하자. 반지름 \(r\)은 점 \(p\)마다 따로 골라도 된다. <a href="#fig-3-1-1">그림 3.1.1</a>(a)에서 경계에 가까운 \(p'\)은 작은 공을 쓴다.
-      \(\R\)에서 열린공은 열린구간 \((p - r,\ p + r)\)이고, \(\R^2\)에서는 경계를 뺀 원판이다. 그런데 이름이 “열린공”이라고 해서 <a href="#i-3-1-5">정의 3.1.5</a>의 뜻으로 열려 있다는 것이
+      <p>quantifier의 순서에 주의하자. 반지름 \(r\)은 점 \(p\)마다 따로 골라도 된다. <a href="#fig-3-1-1">Figure 3.1.1</a>(a)에서 경계에 가까운 \(p'\)은 작은 ball을 쓴다.
+      \(\R\)에서 open ball은 열린구간 \((p - r,\ p + r)\)이고, \(\R^2\)에서는 경계를 뺀 원판이다. 그런데 이름이 “open ball”이라고 해서 <a href="#i-3-1-5">Definition 3.1.5</a>의 뜻으로 열려 있다는 것이
       저절로 보장되지는 않는다. 확인해 두자.</p>
 
       <div class="thm lemma" id="i-3-1-6">
-        <p><span class="thm-head">보조정리 3.1.6</span>.
-        거리공간의 열린공 \(B_r(p)\)는 열린집합이다. 구체적으로, \(q \in B_r(p)\)이고 \(s = r - d(p, q)\)이면 \(s \gt 0\)이고 \(B_s(q) \subseteq B_r(p)\)이다.</p>
+        <p><span class="thm-head">Lemma 3.1.6</span>.
+        metric space의 open ball \(B_r(p)\)는 open set이다. 구체적으로, \(q \in B_r(p)\)이고 \(s = r - d(p, q)\)이면 \(s \gt 0\)이고 \(B_s(q) \subseteq B_r(p)\)이다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(q\)에서 공의 가장자리까지 남은 거리 \(s\)만큼은 여유가 있다. 삼각부등식이 이것을 보장한다.</p>
-        <p><span class="proof-head">증명.</span>
-        \(q \in B_r(p)\)이므로 \(d(p, q) \lt r\)이고, 따라서 \(s = r - d(p, q) \gt 0\)이다. \(x \in B_s(q)\)라 하자. 삼각부등식(<a href="#i-3-1-1">정의 3.1.1</a>의 조건 3)과 대칭성에 의해
+        <p class="proof-idea">Proof idea: \(q\)에서 ball의 가장자리까지 남은 거리 \(s\)만큼은 여유가 있다. triangle inequality가 이것을 보장한다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(q \in B_r(p)\)이므로 \(d(p, q) \lt r\)이고, 따라서 \(s = r - d(p, q) \gt 0\)이다. \(x \in B_s(q)\)라 하자. triangle inequality(<a href="#i-3-1-1">Definition 3.1.1</a>의 조건 3)과 symmetry에 의해
         \[ d(p, x) \le d(p, q) + d(q, x) \lt d(p, q) + s = r \]
         이다. 따라서 \(x \in B_r(p)\)이다. \(x\)는 \(B_s(q)\)의 임의의 점이므로 \(B_s(q) \subseteq B_r(p)\)이다.</p>
       </div>
 
       <div class="thm example" id="i-3-1-7">
-        <p><span class="thm-head">예 3.1.7</span> <span class="thm-name">(열린집합)</span>.
-        (a) \(\R\)의 열린구간 \((a, b)\)는 열린공 \(B_{(b-a)/2}((a+b)/2)\)이므로 열린집합이다. 반직선 \((a, \infty)\)도 열린집합이다. \(p \gt a\)이면 \(B_{p - a}(p) = (a,\ 2p - a) \subseteq (a, \infty)\)이다.</p>
-        <p>(b) 오른쪽 반평면 \(H = \{(x^1, x^2) \in \R^2 : x^1 \gt 0\}\)은 열린집합이다. \(p = (p^1, p^2) \in H\)이면 \(r = p^1 \gt 0\)으로 잡는다.
+        <p><span class="thm-head">Example 3.1.7</span> <span class="thm-name">(open set)</span>.
+        (a) \(\R\)의 열린구간 \((a, b)\)는 open ball \(B_{(b-a)/2}((a+b)/2)\)이므로 open set이다. 반직선 \((a, \infty)\)도 open set이다. \(p \gt a\)이면 \(B_{p - a}(p) = (a,\ 2p - a) \subseteq (a, \infty)\)이다.</p>
+        <p>(b) 오른쪽 반평면 \(H = \{(x^1, x^2) \in \R^2 : x^1 \gt 0\}\)은 open set이다. \(p = (p^1, p^2) \in H\)이면 \(r = p^1 \gt 0\)으로 잡는다.
         \(x \in B_r(p)\)이면 \(\abs{x^1 - p^1} \le \abs{x - p} \lt p^1\)이므로 \(x^1 \gt p^1 - p^1 = 0\), 즉 \(x \in H\)이다.</p>
-        <p>(c) 이산거리(<a href="#i-3-1-4">예 3.1.4</a>(b))에서는 \(B_{1/2}(p) = \{p\}\)이다. 따라서 모든 부분집합 \(U\)가 열린집합이다. 각 \(p \in U\)에서 \(B_{1/2}(p) = \{p\} \subseteq U\)이기 때문이다.</p>
-        <p>(d) 공집합 \(\varnothing\)은 열린집합이다. 조건 “모든 \(p \in \varnothing\)에 대하여 …”를 확인할 점이 하나도 없으므로 조건이 (공허하게) 참이다.</p>
+        <p>(c) discrete metric(<a href="#i-3-1-4">Example 3.1.4</a>(b))에서는 \(B_{1/2}(p) = \{p\}\)이다. 따라서 모든 부분집합 \(U\)가 open set이다. 각 \(p \in U\)에서 \(B_{1/2}(p) = \{p\} \subseteq U\)이기 때문이다.</p>
+        <p>(d) 공집합 \(\varnothing\)은 open set이다. 조건 “모든 \(p \in \varnothing\)에 대하여 …”를 확인할 점이 하나도 없으므로 조건이 (공허하게) 참이다.</p>
       </div>
 
       <div class="thm nonexample" id="i-3-1-8">
-        <p><span class="thm-head">비예 3.1.8</span>.
-        (a) \([0, 1)\)은 \(\R\)의 열린집합이 아니다. \(0 \in [0, 1)\)이지만 어떤 \(r \gt 0\)에 대해서도 \(B_r(0) = (-r, r)\)은 음수 \(-r/2\)를 포함한다.</p>
-        <p>(b) 닫힌 원판 \(D = \{x \in \R^2 : \abs{x} \le 1\}\)은 열린집합이 아니다. \(q = (1, 0) \in D\)이고, 어떤 \(\varepsilon \gt 0\)에 대해서도 점 \((1 + \varepsilon/2,\ 0)\)은
-        \(B_\varepsilon(q)\)에 있지만 \(D\)에 없다(<a href="#fig-3-1-1">그림 3.1.1</a>(b)).</p>
-        <p>(c) 정수 전체 \(\Z\)는 \(\R\)의 열린집합이 아니다. \(0 \in \Z\)이지만 \(B_r(0)\)은 정수가 아닌 \(\min(r, 1)/2\)를 포함한다.</p>
+        <p><span class="thm-head">Non-example 3.1.8</span>.
+        (a) \([0, 1)\)은 \(\R\)의 open set이 아니다. \(0 \in [0, 1)\)이지만 어떤 \(r \gt 0\)에 대해서도 \(B_r(0) = (-r, r)\)은 음수 \(-r/2\)를 포함한다.</p>
+        <p>(b) 닫힌 원판 \(D = \{x \in \R^2 : \abs{x} \le 1\}\)은 open set이 아니다. \(q = (1, 0) \in D\)이고, 어떤 \(\varepsilon \gt 0\)에 대해서도 점 \((1 + \varepsilon/2,\ 0)\)은
+        \(B_\varepsilon(q)\)에 있지만 \(D\)에 없다(<a href="#fig-3-1-1">Figure 3.1.1</a>(b)).</p>
+        <p>(c) 정수 전체 \(\Z\)는 \(\R\)의 open set이 아니다. \(0 \in \Z\)이지만 \(B_r(0)\)은 정수가 아닌 \(\min(r, 1)/2\)를 포함한다.</p>
       </div>
 
-      <p>다음 정리는 열린집합들이 합집합과 교집합에 대해 어떻게 행동하는지를 말한다. 이 세 성질이 이 절의 핵심이다. 다음 소절에서 이것을 공리로 삼는다.</p>
+      <p>다음 theorem은 open set들이 합집합과 교집합에 대해 어떻게 행동하는지를 말한다. 이 세 성질이 이 절의 핵심이다. 다음 소절에서 이것을 공리로 삼는다.</p>
 
       <div class="thm theorem" id="i-3-1-9">
-        <p><span class="thm-head">정리 3.1.9</span> <span class="thm-name">(열린집합의 세 성질)</span>.
-        \((X, d)\)가 거리공간이라 하자.</p>
+        <p><span class="thm-head">Theorem 3.1.9</span> <span class="thm-name">(three properties of open sets)</span>.
+        \((X, d)\)가 metric space라 하자.</p>
         <ul>
-          <li>(a) \(\varnothing\)과 \(X\)는 열린집합이다.</li>
-          <li>(b) 열린집합들의 합집합 \(\bigcup_\alpha U_\alpha\)는 열린집합이다. 열린집합의 개수는 무한해도 된다.</li>
-          <li>(c) <em>유한개의</em> 열린집합의 교집합 \(U_1 \cap \dots \cap U_k\)는 열린집합이다.</li>
+          <li>(a) \(\varnothing\)과 \(X\)는 open set이다.</li>
+          <li>(b) open set들의 합집합 \(\bigcup_\alpha U_\alpha\)는 open set이다. open set의 개수는 무한해도 된다.</li>
+          <li>(c) <em>유한개의</em> open set의 교집합 \(U_1 \cap \dots \cap U_k\)는 open set이다.</li>
         </ul>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 열린집합은 아무리 많이 합쳐도 열린집합이지만, 교집합은 유한개까지만 안전하다. 이 비대칭이 위상의 공리에 그대로 들어간다(<a href="#i-3-1-10">비예 3.1.10</a>).</p>
+      <p><strong>이 theorem이 말하는 것.</strong> open set은 아무리 많이 합쳐도 open set이지만, 교집합은 유한개까지만 안전하다. 이 불균형이 topology의 공리에 그대로 들어간다(<a href="#i-3-1-10">Non-example 3.1.10</a>).</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: (b)는 한 집합 안에 들어간 공이 합집합 안에도 들어간다는 것이다. (c)는 반지름 \(k\)개 가운데 가장 작은 것을 고른다. 개수가 유한해야 가장 작은 반지름이 양수다.</p>
-        <p><span class="proof-head">증명.</span>
-        (a) \(\varnothing\)은 <a href="#i-3-1-7">예 3.1.7</a>(d)에서 보았다. \(X\)의 경우, 모든 \(p\)에서 \(B_1(p) \subseteq X\)이다(열린공은 정의상 \(X\)의 부분집합이다).</p>
-        <p>(b) \(p \in \bigcup_\alpha U_\alpha\)라 하자. 그러면 어떤 첨자 \(\beta\)에 대하여 \(p \in U_\beta\)이다. \(U_\beta\)가 열린집합이므로 \(B_r(p) \subseteq U_\beta\)인 \(r \gt 0\)이 있고,
+        <p class="proof-idea">Proof idea: (b)는 한 집합 안에 들어간 ball이 합집합 안에도 들어간다는 것이다. (c)는 반지름 \(k\)개 가운데 가장 작은 것을 고른다. 개수가 유한해야 가장 작은 반지름이 양수다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) \(\varnothing\)은 <a href="#i-3-1-7">Example 3.1.7</a>(d)에서 보았다. \(X\)의 경우, 모든 \(p\)에서 \(B_1(p) \subseteq X\)이다(open ball은 정의상 \(X\)의 부분집합이다).</p>
+        <p>(b) \(p \in \bigcup_\alpha U_\alpha\)라 하자. 그러면 어떤 첨자 \(\beta\)에 대하여 \(p \in U_\beta\)이다. \(U_\beta\)가 open set이므로 \(B_r(p) \subseteq U_\beta\)인 \(r \gt 0\)이 있고,
         \(U_\beta \subseteq \bigcup_\alpha U_\alpha\)이므로 \(B_r(p) \subseteq \bigcup_\alpha U_\alpha\)이다.</p>
-        <p>(c) \(p \in U_1 \cap \dots \cap U_k\)라 하자. 각 \(i\)에서 \(p \in U_i\)이고 \(U_i\)가 열린집합이므로 \(B_{r_i}(p) \subseteq U_i\)인 \(r_i \gt 0\)이 있다.
+        <p>(c) \(p \in U_1 \cap \dots \cap U_k\)라 하자. 각 \(i\)에서 \(p \in U_i\)이고 \(U_i\)가 open set이므로 \(B_{r_i}(p) \subseteq U_i\)인 \(r_i \gt 0\)이 있다.
         \(r = \min(r_1, \dots, r_k)\)로 두면 \(r \gt 0\)이다(양수 유한개의 최솟값). \(r \le r_i\)이므로 \(B_r(p) \subseteq B_{r_i}(p) \subseteq U_i\)가 모든 \(i\)에서 성립한다.
         따라서 \(B_r(p) \subseteq U_1 \cap \dots \cap U_k\)이다.</p>
       </div>
 
       <div class="thm nonexample" id="i-3-1-10">
-        <p><span class="thm-head">비예 3.1.10</span> <span class="thm-name">(무한 교집합)</span>.
-        <a href="#i-3-1-9">정리 3.1.9</a>(c)에서 “유한개”를 뺄 수 없다. \(\R\)에서 \(U_k = (-1/k,\ 1/k)\) (\(k = 1, 2, 3, \dots\))는 모두 열린집합이지만
-        \(\bigcap_{k=1}^{\infty} U_k = \{0\}\)이다. \(x \ne 0\)이면 \(1/k \lt \abs{x}\)인 \(k\)가 있어 \(x \notin U_k\)이기 때문이다. 그리고 \(\{0\}\)은 열린집합이 아니다.
-        증명에서 보면, 반지름 \(r_k = 1/k\)들의 “최솟값”이 없고 하한이 \(0\)이 된다.</p>
+        <p><span class="thm-head">Non-example 3.1.10</span> <span class="thm-name">(infinite intersection)</span>.
+        <a href="#i-3-1-9">Theorem 3.1.9</a>(c)에서 “유한개”를 뺄 수 없다. \(\R\)에서 \(U_k = (-1/k,\ 1/k)\) (\(k = 1, 2, 3, \dots\))는 모두 open set이지만
+        \(\bigcap_{k=1}^{\infty} U_k = \{0\}\)이다. \(x \ne 0\)이면 \(1/k \lt \abs{x}\)인 \(k\)가 있어 \(x \notin U_k\)이기 때문이다. 그리고 \(\{0\}\)은 open set이 아니다.
+        증명에서 보면, 반지름 \(r_k = 1/k\)들의 “최솟값”이 없고 infimum이 \(0\)이 된다.</p>
       </div>
     </section>
 
     <section id="sec-topology">
-      <h2>위상공간</h2>
-      <p><a href="#i-3-1-9">정리 3.1.9</a>의 세 성질에는 거리가 한 번도 나오지 않는다. 그래서 이 세 성질을 만족하는 부분집합들의 모임만 주어지면,
-      거리 없이도 “열린집합”을 말할 수 있다.</p>
+      <h2>Topological Spaces</h2>
+      <p><a href="#i-3-1-9">Theorem 3.1.9</a>의 세 성질에는 metric이 한 번도 나오지 않는다. 그래서 이 세 성질을 만족하는 부분집합들의 collection만 주어지면,
+      metric 없이도 “open set”을 말할 수 있다.</p>
 
       <div class="thm definition" id="i-3-1-11">
-        <p><span class="thm-head">정의 3.1.11</span> <span class="thm-name">(위상공간, topological space)</span>.
-        집합 \(X\)의 부분집합들의 모임 \(\mathcal{T}\)가 다음 세 조건을 만족하면 \(\mathcal{T}\)를 \(X\) 위의 <dfn>위상</dfn>(topology)이라 한다.</p>
+        <p><span class="thm-head">Definition 3.1.11</span> <span class="thm-name">(topological space)</span>.
+        집합 \(X\)의 부분집합들의 collection \(\mathcal{T}\)가 다음 세 조건을 만족하면 \(\mathcal{T}\)를 \(X\) 위의 <dfn>topology</dfn>(위상)이라 한다.</p>
         <ol>
           <li>\(\varnothing \in \mathcal{T}\)이고 \(X \in \mathcal{T}\)이다.</li>
           <li>\(\mathcal{T}\)의 원소들의 합집합은 (원소가 몇 개이든) \(\mathcal{T}\)에 속한다.</li>
           <li>\(\mathcal{T}\)의 원소 유한개의 교집합은 \(\mathcal{T}\)에 속한다.</li>
         </ol>
-        <p>순서쌍 \((X, \mathcal{T})\)를 <dfn>위상공간</dfn>(topological space)이라 하고, \(\mathcal{T}\)의 원소를 \(X\)의 <dfn data-generalizes="3-1-topological-spaces.html#i-3-1-5">열린집합</dfn>(open set)이라 한다.
-        점 \(p \in X\)를 포함하는 열린집합을 \(p\)의 <dfn>근방</dfn>(neighborhood)이라 한다. 위상이 문맥에서 분명하면 \((X, \mathcal{T})\)를 그냥 \(X\)로 쓴다.</p>
+        <p>순서쌍 \((X, \mathcal{T})\)를 <dfn>topological space</dfn>(위상공간)이라 하고, \(\mathcal{T}\)의 원소를 \(X\)의 <dfn data-generalizes="3-1-topological-spaces.html#i-3-1-5">open set</dfn>(열린집합)이라 한다.
+        점 \(p \in X\)를 포함하는 open set을 \(p\)의 <dfn>neighborhood</dfn>(근방)이라 한다. topology가 문맥에서 분명하면 \((X, \mathcal{T})\)를 그냥 \(X\)로 쓴다.</p>
       </div>
 
-      <p>조건 3은 “두 열린집합의 교집합은 열려 있다”만 확인하면 된다. \(U_1 \cap \dots \cap U_k = (U_1 \cap \dots \cap U_{k-1}) \cap U_k\)로 묶어 \(k\)에 대한 귀납법을 쓰면 되기 때문이다.
-      <a href="#i-3-1-5">정의 3.1.5</a>의 “열린집합”과 <a href="#i-3-1-11">정의 3.1.11</a>의 “열린집합”은 같은 낱말이다. <a href="#i-3-1-11">정의 3.1.11</a>이 <a href="#i-3-1-5">정의 3.1.5</a>를 일반화한 것이고, 거리공간에서는 다음 예 (a)에 의해 두 뜻이 일치하므로 혼란이 없다.</p>
+      <p>조건 3은 “두 open set의 교집합은 열려 있다”만 확인하면 된다. \(U_1 \cap \dots \cap U_k = (U_1 \cap \dots \cap U_{k-1}) \cap U_k\)로 묶어 \(k\)에 대한 귀납법을 쓰면 되기 때문이다.
+      <a href="#i-3-1-5">Definition 3.1.5</a>의 “open set”과 <a href="#i-3-1-11">Definition 3.1.11</a>의 “open set”은 같은 낱말이다. <a href="#i-3-1-11">Definition 3.1.11</a>이 <a href="#i-3-1-5">Definition 3.1.5</a>를 일반화한 것이고, metric space에서는 다음 예 (a)에 의해 두 뜻이 일치하므로 혼란이 없다.</p>
 
       <div class="thm example" id="i-3-1-12">
-        <p><span class="thm-head">예 3.1.12</span> <span class="thm-name">(위상의 예)</span>.
-        (a) 거리공간 \((X, d)\)에서 <a href="#i-3-1-5">정의 3.1.5</a>의 뜻으로 열린 집합 전체 \(\mathcal{T}_d\)는 <a href="#i-3-1-9">정리 3.1.9</a>에 의해 위상이다.
-        이것을 \(d\)가 주는 <dfn>거리 위상</dfn>(metric topology)이라 한다. \(\R^n\)에는 따로 말하지 않는 한 늘 유클리드 거리의 거리 위상을 주고, 이것을 \(\R^n\)의
-        <dfn>표준 위상</dfn>(standard topology)이라 한다.</p>
-        <p>(b) 임의의 집합 \(X\)에서 모든 부분집합의 모임은 위상이다. 이것을 <dfn>이산위상</dfn>(discrete topology)이라 한다. 이산거리의 거리 위상이 바로 이것이다(<a href="#i-3-1-7">예 3.1.7</a>(c)).</p>
-        <p>(c) \(\mathcal{T} = \{\varnothing, X\}\)도 위상이다. 이것을 <dfn>밀착위상</dfn>(trivial topology)이라 한다. 합집합과 교집합이 모두 \(\varnothing\)이나 \(X\)가 되므로 세 조건이 성립한다.</p>
-        <p>(d) \(X = \{a, b, c\}\)에서 \(\mathcal{T} = \{\varnothing, \{a\}, \{a, b\}, X\}\)는 위상이다. 이 모임은 포함관계로 한 줄로 늘어서 있으므로
+        <p><span class="thm-head">Example 3.1.12</span> <span class="thm-name">(examples of topologies)</span>.
+        (a) metric space \((X, d)\)에서 <a href="#i-3-1-5">Definition 3.1.5</a>의 뜻으로 open set 전체 \(\mathcal{T}_d\)는 <a href="#i-3-1-9">Theorem 3.1.9</a>에 의해 topology이다.
+        이것을 \(d\)가 주는 <dfn>metric topology</dfn>(거리 위상)이라 한다. \(\R^n\)에는 따로 말하지 않는 한 늘 Euclidean distance의 metric topology를 주고, 이것을 \(\R^n\)의
+        <dfn>standard topology</dfn>(표준 위상)이라 한다.</p>
+        <p>(b) 임의의 집합 \(X\)에서 모든 부분집합의 collection은 topology이다. 이것을 <dfn>discrete topology</dfn>(이산위상)이라 한다. discrete metric의 metric topology가 바로 이것이다(<a href="#i-3-1-7">Example 3.1.7</a>(c)).</p>
+        <p>(c) \(\mathcal{T} = \{\varnothing, X\}\)도 topology이다. 이것을 <dfn>trivial topology</dfn>(밀착위상)이라 한다. 합집합과 교집합이 모두 \(\varnothing\)이나 \(X\)가 되므로 세 조건이 성립한다.</p>
+        <p>(d) \(X = \{a, b, c\}\)에서 \(\mathcal{T} = \{\varnothing, \{a\}, \{a, b\}, X\}\)는 topology이다. 이 collection은 포함관계로 한 줄로 늘어서 있으므로
         두 원소의 합집합은 큰 쪽, 교집합은 작은 쪽이 되어 다시 \(\mathcal{T}\)에 속한다.</p>
       </div>
 
       <div class="thm nonexample" id="i-3-1-13">
-        <p><span class="thm-head">비예 3.1.13</span>.
-        (a) \(X = \{a, b, c\}\)에서 \(\{\varnothing, \{a\}, \{b\}, X\}\)는 위상이 아니다. \(\{a\} \cup \{b\} = \{a, b\}\)가 이 모임에 없어 조건 2를 어긴다.</p>
-        <p>(b) \(\R\)에서 \(\varnothing\), \(\R\), 그리고 유계인 열린구간 \((a, b)\) 전체의 모임은 위상이 아니다. 두 원소 \((0, 1)\)과 \((2, 3)\)의 합집합은 구간이 아니므로 조건 2를 어긴다.
+        <p><span class="thm-head">Non-example 3.1.13</span>.
+        (a) \(X = \{a, b, c\}\)에서 \(\{\varnothing, \{a\}, \{b\}, X\}\)는 topology가 아니다. \(\{a\} \cup \{b\} = \{a, b\}\)가 이 collection에 없어 조건 2를 어긴다.</p>
+        <p>(b) \(\R\)에서 \(\varnothing\), \(\R\), 그리고 bounded인 열린구간 \((a, b)\) 전체의 collection은 topology가 아니다. 두 원소 \((0, 1)\)과 \((2, 3)\)의 합집합은 구간이 아니므로 조건 2를 어긴다.
         (조건 3은 만족한다. 두 열린구간의 교집합은 공집합이거나 열린구간이다.)</p>
       </div>
 
-      <p>한 집합 위에도 위상은 여러 가지가 있다. \(\R\) 위의 표준 위상, 이산위상, 밀착위상은 서로 다르다. 그러면 모든 위상이 어떤 거리에서 오는가?
+      <p>한 집합 위에도 topology는 여러 가지가 있다. \(\R\) 위의 standard topology, discrete topology, trivial topology는 서로 다르다. 그러면 모든 topology가 어떤 metric에서 오는가?
       그렇지 않다.</p>
 
       <div class="thm proposition" id="i-3-1-14">
-        <p><span class="thm-head">명제 3.1.14</span>.
-        \(X\)에 서로 다른 두 점이 있으면, \(X\)의 밀착위상은 어떤 거리의 거리 위상도 아니다.</p>
+        <p><span class="thm-head">Proposition 3.1.14</span>.
+        \(X\)에 서로 다른 두 점이 있으면, \(X\)의 trivial topology는 어떤 metric의 metric topology도 아니다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        \(d\)가 \(X\) 위의 거리라 하고 \(x \ne y\)라 하자. \(r = d(x, y)\)로 두면 <a href="#i-3-1-1">정의 3.1.1</a>의 조건 1에서 \(r \gt 0\)이다. <a href="#i-3-1-6">보조정리 3.1.6</a>에 의해
-        \(B_r(x)\)는 \(d\)에 대한 열린집합이다. 그런데 \(x \in B_r(x)\)이므로 \(B_r(x) \ne \varnothing\)이고, \(d(y, x) = r\)은 \(r\)보다 작지 않으므로 \(y \notin B_r(x)\), 즉 \(B_r(x) \ne X\)이다.
-        따라서 \(\mathcal{T}_d\)에는 \(\varnothing\)도 \(X\)도 아닌 원소가 있어 밀착위상과 다르다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(d\)가 \(X\) 위의 metric이라 하고 \(x \ne y\)라 하자. \(r = d(x, y)\)로 두면 <a href="#i-3-1-1">Definition 3.1.1</a>의 조건 1에서 \(r \gt 0\)이다. <a href="#i-3-1-6">Lemma 3.1.6</a>에 의해
+        \(B_r(x)\)는 \(d\)에 대한 open set이다. 그런데 \(x \in B_r(x)\)이므로 \(B_r(x) \ne \varnothing\)이고, \(d(y, x) = r\)은 \(r\)보다 작지 않으므로 \(y \notin B_r(x)\), 즉 \(B_r(x) \ne X\)이다.
+        따라서 \(\mathcal{T}_d\)에는 \(\varnothing\)도 \(X\)도 아닌 원소가 있어 trivial topology와 다르다.</p>
       </div>
 
       <aside class="box convention">
-        <p class="box-title">규약 비교: 근방</p>
-        <p>이 study set은 Lee와 do Carmo처럼 “\(p\)의 근방”을 \(p\)를 포함하는 <em>열린집합</em>으로 쓴다
-        <a class="cite" href="../../references.html#dC">[dC 2장 부록 A]</a>, <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM 2장]</a>.
-        일부 교재는 \(p\)를 포함하는 열린집합을 <em>포함하는</em> 집합(열려 있지 않아도 됨)을 근방이라 부르고, 이 study set의 근방을 “열린 근방”이라 부른다.
-        다른 교재를 읽을 때 “근방”이 열린집합인지 확인하자.</p>
+        <p class="box-title">Conventions: neighborhood</p>
+        <p>이 study set은 Lee와 do Carmo처럼 “\(p\)의 neighborhood”를 \(p\)를 포함하는 <em>open set</em>으로 쓴다
+        <a class="cite" href="../../references.html#dC">[dC Ch. 2 App. A]</a>, <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM Ch. 2]</a>.
+        일부 교재는 \(p\)를 포함하는 open set을 <em>포함하는</em> 집합(열려 있지 않아도 됨)을 neighborhood라 부르고, 이 study set의 neighborhood를 “열린 neighborhood”라 부른다.
+        다른 교재를 읽을 때 “neighborhood”가 open set인지 확인하자.</p>
       </aside>
     </section>
 
     <section id="sec-closed-sets">
-      <h2>닫힌집합과 폐포</h2>
-      <p>열린집합이 “경계를 하나도 포함하지 않는 집합”이라면, 그 반대편에 “경계를 모두 포함하는 집합”이 있다.
-      위상공간에서는 경계를 따로 정의하지 않고 여집합으로 이것을 정의한다.</p>
+      <h2>Closed Sets and Closure</h2>
+      <p>open set이 “경계를 하나도 포함하지 않는 집합”이라면, 그 반대편에 “경계를 모두 포함하는 집합”이 있다.
+      topological space에서는 경계를 따로 정의하지 않고 여집합으로 이것을 정의한다.</p>
 
       <div class="thm definition" id="i-3-1-15">
-        <p><span class="thm-head">정의 3.1.15</span> <span class="thm-name">(닫힌집합과 폐포, closed set and closure)</span>.
-        \(X\)가 위상공간이라 하자. 부분집합 \(A \subseteq X\)의 여집합 \(X \setminus A\)가 열린집합이면 \(A\)를 <dfn>닫힌집합</dfn>(closed set)이라 한다.
-        \(A\)를 포함하는 모든 닫힌집합의 교집합을 \(A\)의 <dfn>폐포</dfn>(closure)라 하고 \(\overline{A}\)로 쓴다.</p>
+        <p><span class="thm-head">Definition 3.1.15</span> <span class="thm-name">(closed set and closure)</span>.
+        \(X\)가 topological space라 하자. 부분집합 \(A \subseteq X\)의 여집합 \(X \setminus A\)가 open set이면 \(A\)를 <dfn>closed set</dfn>(닫힌집합)이라 한다.
+        \(A\)를 포함하는 모든 closed set의 교집합을 \(A\)의 <dfn>closure</dfn>(폐포)라 하고 \(\overline{A}\)로 쓴다.</p>
       </div>
 
       <div class="thm proposition" id="i-3-1-16">
-        <p><span class="thm-head">명제 3.1.16</span> <span class="thm-name">(닫힌집합의 성질)</span>.
-        \(X\)가 위상공간이라 하자.</p>
+        <p><span class="thm-head">Proposition 3.1.16</span> <span class="thm-name">(properties of closed sets)</span>.
+        \(X\)가 topological space라 하자.</p>
         <ul>
-          <li>(a) \(\varnothing\)과 \(X\)는 닫힌집합이다.</li>
-          <li>(b) 닫힌집합들의 교집합은 (개수가 무한해도) 닫힌집합이다.</li>
-          <li>(c) 유한개의 닫힌집합의 합집합은 닫힌집합이다.</li>
-          <li>(d) \(\overline{A}\)는 \(A\)를 포함하는 가장 작은 닫힌집합이다. 특히 \(A\)가 닫힌집합일 필요충분조건은 \(A = \overline{A}\)이다.</li>
+          <li>(a) \(\varnothing\)과 \(X\)는 closed set이다.</li>
+          <li>(b) closed set들의 교집합은 (개수가 무한해도) closed set이다.</li>
+          <li>(c) 유한개의 closed set의 합집합은 closed set이다.</li>
+          <li>(d) \(\overline{A}\)는 \(A\)를 포함하는 가장 작은 closed set이다. 특히 \(A\)가 closed set일 필요충분조건은 \(A = \overline{A}\)이다.</li>
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        (a) \(X \setminus \varnothing = X\)와 \(X \setminus X = \varnothing\)은 열린집합이다(<a href="#i-3-1-11">정의 3.1.11</a>의 조건 1).
-        (b) 닫힌집합 \(A_\alpha\)들에 대해 드모르간 법칙으로 \(X \setminus \bigcap_\alpha A_\alpha = \bigcup_\alpha (X \setminus A_\alpha)\)이고, 이것은 열린집합들의 합집합이므로 열린집합이다(조건 2).
-        (c) 같은 방식으로 \(X \setminus (A_1 \cup \dots \cup A_k) = (X \setminus A_1) \cap \dots \cap (X \setminus A_k)\)는 열린집합 유한개의 교집합이다(조건 3).</p>
-        <p>(d) (b)에 의해 \(\overline{A}\)는 닫힌집합이고, 교집합에 참여한 모든 집합이 \(A\)를 포함하므로 \(A \subseteq \overline{A}\)이다. \(C\)가 \(A\)를 포함하는 닫힌집합이면
-        \(C\)는 교집합에 참여한 집합 가운데 하나이므로 \(\overline{A} \subseteq C\)이다. 따라서 \(\overline{A}\)는 \(A\)를 포함하는 가장 작은 닫힌집합이다.
-        \(A\)가 닫힌집합이면 \(A\) 자신이 그런 \(C\)이므로 \(\overline{A} \subseteq A \subseteq \overline{A}\)이다. 거꾸로 \(A = \overline{A}\)이면 \(A\)는 닫힌집합이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) \(X \setminus \varnothing = X\)와 \(X \setminus X = \varnothing\)은 open set이다(<a href="#i-3-1-11">Definition 3.1.11</a>의 조건 1).
+        (b) closed set \(A_\alpha\)들에 대해 De Morgan's laws로 \(X \setminus \bigcap_\alpha A_\alpha = \bigcup_\alpha (X \setminus A_\alpha)\)이고, 이것은 open set들의 합집합이므로 open set이다(조건 2).
+        (c) 같은 방식으로 \(X \setminus (A_1 \cup \dots \cup A_k) = (X \setminus A_1) \cap \dots \cap (X \setminus A_k)\)는 open set 유한개의 교집합이다(조건 3).</p>
+        <p>(d) (b)에 의해 \(\overline{A}\)는 closed set이고, 교집합에 참여한 모든 집합이 \(A\)를 포함하므로 \(A \subseteq \overline{A}\)이다. \(C\)가 \(A\)를 포함하는 closed set이면
+        \(C\)는 교집합에 참여한 집합 가운데 하나이므로 \(\overline{A} \subseteq C\)이다. 따라서 \(\overline{A}\)는 \(A\)를 포함하는 가장 작은 closed set이다.
+        \(A\)가 closed set이면 \(A\) 자신이 그런 \(C\)이므로 \(\overline{A} \subseteq A \subseteq \overline{A}\)이다. 거꾸로 \(A = \overline{A}\)이면 \(A\)는 closed set이다.</p>
       </div>
 
-      <p>폐포를 “닫힌집합들의 교집합”으로 계산하기는 어렵다. 실제 계산에는 다음 판정법을 쓴다.</p>
+      <p>closure를 “closed set들의 교집합”으로 계산하기는 어렵다. 실제 계산에는 다음 판정법을 쓴다.</p>
 
       <div class="thm proposition" id="i-3-1-17">
-        <p><span class="thm-head">명제 3.1.17</span> <span class="thm-name">(폐포의 점)</span>.
-        \(X\)가 위상공간이고 \(A \subseteq X\), \(p \in X\)라 하자. \(p \in \overline{A}\)일 필요충분조건은 \(p\)의 모든 근방이 \(A\)와 만나는 것이다.
-        \(X\)가 거리공간이면, 이 조건은 모든 \(\varepsilon \gt 0\)에 대하여 \(B_\varepsilon(p) \cap A \ne \varnothing\)인 것과 같다.</p>
+        <p><span class="thm-head">Proposition 3.1.17</span> <span class="thm-name">(points of the closure)</span>.
+        \(X\)가 topological space이고 \(A \subseteq X\), \(p \in X\)라 하자. \(p \in \overline{A}\)일 필요충분조건은 \(p\)의 모든 neighborhood가 \(A\)와 만나는 것이다.
+        \(X\)가 metric space이면, 이 조건은 모든 \(\varepsilon \gt 0\)에 대하여 \(B_\varepsilon(p) \cap A \ne \varnothing\)인 것과 같다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(A\)와 만나지 않는 근방 \(U\)가 있다는 것과, \(U\)의 여집합이라는 닫힌집합이 \(A\)를 품으면서 \(p\)를 빼 버린다는 것은 같은 말이다.</p>
-        <p><span class="proof-head">증명.</span>
-        두 조건의 부정이 동치임을 보인다. \(p\)의 근방 \(U\)가 \(U \cap A = \varnothing\)을 만족한다고 하자. 그러면 \(X \setminus U\)는 닫힌집합이고 \(A \subseteq X \setminus U\)이므로
-        <a href="#i-3-1-16">명제 3.1.16</a>(d)에 의해 \(\overline{A} \subseteq X \setminus U\)이다. \(p \in U\)이므로 \(p \notin \overline{A}\)이다.
-        거꾸로 \(p \notin \overline{A}\)라 하자. 그러면 \(U = X \setminus \overline{A}\)는 열린집합이고 \(p\)를 포함하므로 \(p\)의 근방이다. 또 \(A \subseteq \overline{A}\)이므로 \(U \cap A = \varnothing\)이다.</p>
-        <p>거리공간의 경우: 열린공 \(B_\varepsilon(p)\)는 \(p\)의 근방이다(<a href="#i-3-1-6">보조정리 3.1.6</a>). 거꾸로 \(p\)의 근방 \(U\)는 어떤 \(B_\varepsilon(p)\)를 포함한다(<a href="#i-3-1-5">정의 3.1.5</a>).
-        따라서 “모든 근방이 \(A\)와 만난다”와 “모든 \(B_\varepsilon(p)\)가 \(A\)와 만난다”는 같은 조건이다.</p>
+        <p class="proof-idea">Proof idea: \(A\)와 만나지 않는 neighborhood \(U\)가 있다는 것과, \(U\)의 여집합이라는 closed set이 \(A\)를 품으면서 \(p\)를 빼 버린다는 것은 같은 말이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        두 조건의 부정이 동치임을 보인다. \(p\)의 neighborhood \(U\)가 \(U \cap A = \varnothing\)을 만족한다고 하자. 그러면 \(X \setminus U\)는 closed set이고 \(A \subseteq X \setminus U\)이므로
+        <a href="#i-3-1-16">Proposition 3.1.16</a>(d)에 의해 \(\overline{A} \subseteq X \setminus U\)이다. \(p \in U\)이므로 \(p \notin \overline{A}\)이다.
+        거꾸로 \(p \notin \overline{A}\)라 하자. 그러면 \(U = X \setminus \overline{A}\)는 open set이고 \(p\)를 포함하므로 \(p\)의 neighborhood이다. 또 \(A \subseteq \overline{A}\)이므로 \(U \cap A = \varnothing\)이다.</p>
+        <p>metric space의 경우: open ball \(B_\varepsilon(p)\)는 \(p\)의 neighborhood이다(<a href="#i-3-1-6">Lemma 3.1.6</a>). 거꾸로 \(p\)의 neighborhood \(U\)는 어떤 \(B_\varepsilon(p)\)를 포함한다(<a href="#i-3-1-5">Definition 3.1.5</a>).
+        따라서 “모든 neighborhood가 \(A\)와 만난다”와 “모든 \(B_\varepsilon(p)\)가 \(A\)와 만난다”는 같은 조건이다.</p>
       </div>
 
       <div class="thm example" id="i-3-1-18">
-        <p><span class="thm-head">예 3.1.18</span>.
-        (a) 거리공간에서 \(K = \{x \in X : d(x, p) \le r\}\)은 닫힌집합이다. \(y \notin K\)이면 \(s = d(y, p) - r \gt 0\)이다. \(x \in B_s(y)\)이면
-        삼각부등식에서 \(d(x, p) \ge d(y, p) - d(y, x) \gt d(y, p) - s = r\)이므로 \(x \notin K\)이다. 즉 \(B_s(y) \subseteq X \setminus K\)이고, 여집합이 열린집합이다.</p>
-        <p>(b) 거리공간에서 한 점 \(\{p\}\)는 닫힌집합이다. \(y \ne p\)이면 \(B_{d(y,p)}(y)\)는 \(p\)를 포함하지 않으므로 \(X \setminus \{p\}\)가 열린집합이다.
-        <a href="#i-3-1-16">명제 3.1.16</a>(c)에 의해 유한집합도 닫힌집합이다.</p>
-        <p>(c) \(\R\)에서 \(\overline{(0, 1)} = [0, 1]\)이다. \([0, 1]\)은 여집합 \((-\infty, 0) \cup (1, \infty)\)가 열려 있으므로 닫힌집합이고 \((0, 1)\)을 포함한다. 따라서 \(\overline{(0,1)} \subseteq [0,1]\)이다.
-        한편 \(0\)의 모든 공 \(B_\varepsilon(0)\)은 \((0, 1)\)의 점 \(\min(\varepsilon, 1)/2\)를 포함하므로 <a href="#i-3-1-17">명제 3.1.17</a>에 의해 \(0 \in \overline{(0, 1)}\)이고, \(1\)도 같다.</p>
-        <p>(d) \(\R^n\)에서 열린공 \(B_1(0)\)의 폐포는 닫힌공 \(\{x : \abs{x} \le 1\}\)이다. (a)에 의해 닫힌공은 \(B_1(0)\)을 포함하는 닫힌집합이므로 폐포는 그 안에 있다.
+        <p><span class="thm-head">Example 3.1.18</span>.
+        (a) metric space에서 \(K = \{x \in X : d(x, p) \le r\}\)은 closed set이다. \(y \notin K\)이면 \(s = d(y, p) - r \gt 0\)이다. \(x \in B_s(y)\)이면
+        triangle inequality에서 \(d(x, p) \ge d(y, p) - d(y, x) \gt d(y, p) - s = r\)이므로 \(x \notin K\)이다. 즉 \(B_s(y) \subseteq X \setminus K\)이고, 여집합이 open set이다.</p>
+        <p>(b) metric space에서 한 점 \(\{p\}\)는 closed set이다. \(y \ne p\)이면 \(B_{d(y,p)}(y)\)는 \(p\)를 포함하지 않으므로 \(X \setminus \{p\}\)가 open set이다.
+        <a href="#i-3-1-16">Proposition 3.1.16</a>(c)에 의해 유한집합도 closed set이다.</p>
+        <p>(c) \(\R\)에서 \(\overline{(0, 1)} = [0, 1]\)이다. \([0, 1]\)은 여집합 \((-\infty, 0) \cup (1, \infty)\)가 열려 있으므로 closed set이고 \((0, 1)\)을 포함한다. 따라서 \(\overline{(0,1)} \subseteq [0,1]\)이다.
+        한편 \(0\)의 모든 ball \(B_\varepsilon(0)\)은 \((0, 1)\)의 점 \(\min(\varepsilon, 1)/2\)를 포함하므로 <a href="#i-3-1-17">Proposition 3.1.17</a>에 의해 \(0 \in \overline{(0, 1)}\)이고, \(1\)도 같다.</p>
+        <p>(d) \(\R^n\)에서 open ball \(B_1(0)\)의 closure는 closed ball \(\{x : \abs{x} \le 1\}\)이다. (a)에 의해 closed ball은 \(B_1(0)\)을 포함하는 closed set이므로 closure는 그 안에 있다.
         거꾸로 \(\abs{x} = 1\)이고 \(0 \lt \varepsilon \lt 1\)이면 점 \(y = (1 - \varepsilon/2)x\)는 \(\abs{y} = 1 - \varepsilon/2 \lt 1\)이고 \(\abs{x - y} = \varepsilon/2 \lt \varepsilon\)이므로
-        \(B_\varepsilon(x) \cap B_1(0) \ne \varnothing\)이다. \(\varepsilon \ge 1\)이면 더 큰 공이므로 역시 만난다. 따라서 \(x \in \overline{B_1(0)}\)이다.
-        같은 논증으로 \(\R^n\)에서 \(\overline{B_r(p)} = \{x : \abs{x - p} \le r\}\)이다. 그래서 \(\R^n\)에서는 닫힌공을 \(\overline{B}_r(p)\)로 쓴다.</p>
-        <p>(e) \(\R\)에서 유리수 전체 \(\Q\)의 폐포는 \(\R\)이다. 모든 열린구간에 유리수가 있기 때문이다(실수의 기본 성질).</p>
+        \(B_\varepsilon(x) \cap B_1(0) \ne \varnothing\)이다. \(\varepsilon \ge 1\)이면 더 큰 ball이므로 역시 만난다. 따라서 \(x \in \overline{B_1(0)}\)이다.
+        같은 논증으로 \(\R^n\)에서 \(\overline{B_r(p)} = \{x : \abs{x - p} \le r\}\)이다. 그래서 \(\R^n\)에서는 closed ball을 \(\overline{B}_r(p)\)로 쓴다.</p>
+        <p>(e) \(\R\)에서 유리수 전체 \(\Q\)의 closure는 \(\R\)이다. 모든 열린구간에 유리수가 있기 때문이다(실수의 기본 성질).</p>
       </div>
 
       <div class="thm nonexample" id="i-3-1-19">
-        <p><span class="thm-head">비예 3.1.19</span>.
-        (a) \([0, 1)\)은 \(\R\)의 닫힌집합도 아니다. 여집합 \((-\infty, 0) \cup [1, \infty)\)는 점 \(1\)에서 <a href="#i-3-1-8">비예 3.1.8</a>(a)와 같은 이유로 열린집합이 아니다.
-        \([0, 1)\)은 열린집합도 닫힌집합도 아니다.</p>
-        <p>(b) 일반적인 거리공간에서는 열린공의 폐포가 닫힌공 \(\{x : d(x, p) \le r\}\)보다 작을 수 있다. 원소가 둘 이상인 집합 \(X\)에 이산거리를 주면
-        \(B_1(p) = \{p\}\)이고 이것은 닫힌집합이므로(<a href="#i-3-1-18">예 3.1.18</a>(b)) \(\overline{B_1(p)} = \{p\}\)이다. 그러나 \(\{x : d(x, p) \le 1\} = X\)이다.
-        <a href="#i-3-1-18">예 3.1.18</a>(d)의 등식은 \(\R^n\)의 성질(두 점 사이를 선분으로 이을 수 있다)을 쓴 것이다.</p>
+        <p><span class="thm-head">Non-example 3.1.19</span>.
+        (a) \([0, 1)\)은 \(\R\)의 closed set도 아니다. 여집합 \((-\infty, 0) \cup [1, \infty)\)는 점 \(1\)에서 <a href="#i-3-1-8">Non-example 3.1.8</a>(a)와 같은 이유로 open set이 아니다.
+        \([0, 1)\)은 open set도 closed set도 아니다.</p>
+        <p>(b) 일반적인 metric space에서는 open ball의 closure가 closed ball \(\{x : d(x, p) \le r\}\)보다 작을 수 있다. 원소가 둘 이상인 집합 \(X\)에 discrete metric을 주면
+        \(B_1(p) = \{p\}\)이고 이것은 closed set이므로(<a href="#i-3-1-18">Example 3.1.18</a>(b)) \(\overline{B_1(p)} = \{p\}\)이다. 그러나 \(\{x : d(x, p) \le 1\} = X\)이다.
+        <a href="#i-3-1-18">Example 3.1.18</a>(d)의 등식은 \(\R^n\)의 성질(두 점 사이를 선분으로 이을 수 있다)을 쓴 것이다.</p>
       </div>
 
       <aside class="box warning">
-        <p class="box-title">주의: 열림과 닫힘은 반대말이 아니다</p>
-        <p>“닫힌집합”은 “열린집합이 아닌 집합”이 아니다. \([0, 1)\)은 열려 있지도 닫혀 있지도 않고, \(\varnothing\)과 \(X\)는 열려 있으면서 닫혀 있다.
-        이산위상에서는 모든 부분집합이 열려 있으면서 닫혀 있다. 반면 \(\R\)에서 열려 있으면서 닫힌 부분집합은 \(\varnothing\)과 \(\R\)뿐이다.
-        이 사실이 <a href="3-7-connectedness.html">3.7절</a>의 연결성의 출발점이다(<a href="3-7-connectedness.html#i-3-7-4">정리 3.7.4</a>).</p>
+        <p class="box-title">Warning: 열림과 닫힘은 반대말이 아니다</p>
+        <p>“closed set”은 “open set이 아닌 집합”이 아니다. \([0, 1)\)은 열려 있지도 닫혀 있지도 않고, \(\varnothing\)과 \(X\)는 열려 있으면서 닫혀 있다.
+        discrete topology에서는 모든 부분집합이 열려 있으면서 닫혀 있다. 반면 \(\R\)에서 열려 있으면서 닫힌 부분집합은 \(\varnothing\)과 \(\R\)뿐이다.
+        이 사실이 <a href="3-7-connectedness.html">Section 3.7</a>의 connectedness의 출발점이다(<a href="3-7-connectedness.html#i-3-7-4">Theorem 3.7.4</a>).</p>
       </aside>
     </section>
 
     <section id="sec-basis">
-      <h2>위상의 기저</h2>
-      <p>거리공간의 열린집합은 열린공들로 “조립”된다. \(U\)가 열린집합이면 각 \(p \in U\)에서 \(B_{r_p}(p) \subseteq U\)인 공을 하나씩 골라 모두 합하면
-      \(U = \bigcup_{p \in U} B_{r_p}(p)\)이다(각 공이 \(U\) 안에 있고, 모든 \(p\)가 자기 공에 들어 있다). 이처럼 모든 열린집합을 조립할 수 있는 벽돌들의 모임을 기저라 한다.</p>
+      <h2>Bases for a Topology</h2>
+      <p>metric space의 open set은 open ball들로 “조립”된다. \(U\)가 open set이면 각 \(p \in U\)에서 \(B_{r_p}(p) \subseteq U\)인 ball을 하나씩 골라 모두 합하면
+      \(U = \bigcup_{p \in U} B_{r_p}(p)\)이다(각 ball이 \(U\) 안에 있고, 모든 \(p\)가 자기 ball에 들어 있다). 이처럼 모든 open set을 조립할 수 있는 벽돌들의 collection을 basis라 한다.</p>
 
       <div class="thm definition" id="i-3-1-20">
-        <p><span class="thm-head">정의 3.1.20</span> <span class="thm-name">(위상의 기저, basis for a topology)</span>.
-        \((X, \mathcal{T})\)가 위상공간이라 하자. 열린집합들의 모임 \(\mathcal{B} \subseteq \mathcal{T}\)가 다음 조건을 만족하면 \(\mathcal{B}\)를 \(\mathcal{T}\)의 <dfn>위상의 기저</dfn>(basis for a topology)라 한다.</p>
+        <p><span class="thm-head">Definition 3.1.20</span> <span class="thm-name">(basis for a topology)</span>.
+        \((X, \mathcal{T})\)가 topological space라 하자. open set들의 collection \(\mathcal{B} \subseteq \mathcal{T}\)가 다음 조건을 만족하면 \(\mathcal{B}\)를 \(\mathcal{T}\)의 <dfn>basis for a topology</dfn>(위상의 기저)라 한다.</p>
         <ul>
-          <li>모든 열린집합은 \(\mathcal{B}\)의 원소들의 합집합이다. (원소를 하나도 고르지 않은 합집합은 \(\varnothing\)이다.)</li>
+          <li>모든 open set은 \(\mathcal{B}\)의 원소들의 합집합이다. (원소를 하나도 고르지 않은 합집합은 \(\varnothing\)이다.)</li>
         </ul>
       </div>
 
-      <p><a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-12">1장의 기저</a>(벡터공간의 기저)와 이름이 같지만 다른 개념이다. 벡터공간의 기저는 모든 벡터를 <em>일차결합</em>으로 꼭 한 가지 방식으로 표현하게 해 주고,
-      위상의 기저는 모든 열린집합을 <em>합집합</em>으로 표현하게 해 준다. 위상의 기저에서는 표현이 하나일 필요가 없다. 두 개념이 한 문장에 함께 나오면 “위상의 기저”라고 명시한다.</p>
+      <p><a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-12">Chapter 1의 basis</a>(vector space의 basis)와 이름이 같지만 다른 개념이다. vector space의 basis는 모든 벡터를 <em>linear combination</em>으로 꼭 한 가지 방식으로 표현하게 해 주고,
+      basis for a topology는 모든 open set을 <em>합집합</em>으로 표현하게 해 준다. basis for a topology에서는 표현이 하나일 필요가 없다. 두 개념이 한 문장에 함께 나오면 “basis for a topology”라고 명시한다.</p>
 
       <div class="thm proposition" id="i-3-1-21">
-        <p><span class="thm-head">명제 3.1.21</span> <span class="thm-name">(기저의 판정)</span>.
-        열린집합들의 모임 \(\mathcal{B}\)가 \((X, \mathcal{T})\)의 위상의 기저일 필요충분조건은 다음이다.</p>
+        <p><span class="thm-head">Proposition 3.1.21</span> <span class="thm-name">(criterion for a basis)</span>.
+        open set들의 collection \(\mathcal{B}\)가 \((X, \mathcal{T})\)의 basis for a topology일 필요충분조건은 다음이다.</p>
         <ul>
-          <li>모든 열린집합 \(U\)와 모든 \(p \in U\)에 대하여 \(p \in B \subseteq U\)인 \(B \in \mathcal{B}\)가 존재한다.</li>
+          <li>모든 open set \(U\)와 모든 \(p \in U\)에 대하여 \(p \in B \subseteq U\)인 \(B \in \mathcal{B}\)가 존재한다.</li>
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
+        <p><span class="proof-head">Proof.</span>
         (\(\Rightarrow\)) \(U = \bigcup_\alpha B_\alpha\) (\(B_\alpha \in \mathcal{B}\))이고 \(p \in U\)이면 \(p\)는 어떤 \(B_\beta\)에 들어 있고, \(B_\beta \subseteq U\)이다.
-        (\(\Leftarrow\)) 열린집합 \(U\)의 각 점 \(p\)에서 조건의 \(B_p \in \mathcal{B}\)를 고르면 \(U = \bigcup_{p \in U} B_p\)이다. 각 \(B_p \subseteq U\)이므로 우변은 \(U\)에 포함되고,
+        (\(\Leftarrow\)) open set \(U\)의 각 점 \(p\)에서 조건의 \(B_p \in \mathcal{B}\)를 고르면 \(U = \bigcup_{p \in U} B_p\)이다. 각 \(B_p \subseteq U\)이므로 우변은 \(U\)에 포함되고,
         각 \(p\)가 \(B_p\)에 들어 있으므로 \(U\)가 우변에 포함된다.</p>
       </div>
 
       <div class="thm example" id="i-3-1-22">
-        <p><span class="thm-head">예 3.1.22</span>.
-        (a) 거리공간에서 모든 열린공의 모임은 거리 위상의 기저다. 열린공은 열린집합이고(<a href="#i-3-1-6">보조정리 3.1.6</a>), <a href="#i-3-1-5">정의 3.1.5</a>가 바로 <a href="#i-3-1-21">명제 3.1.21</a>의 조건이다.
-        반지름이 \(1/k\) (\(k = 1, 2, \dots\)) 꼴인 열린공만 모아도 기저다. \(B_r(p) \subseteq U\)이면 \(1/k \lt r\)인 \(k\)를 골라 \(B_{1/k}(p) \subseteq B_r(p) \subseteq U\)로 쓰면 된다.</p>
-        <p>(b) 이산위상에서 한 점 집합 \(\{p\}\)들의 모임은 기저다. \(p \in U\)이면 \(p \in \{p\} \subseteq U\)이다.</p>
+        <p><span class="thm-head">Example 3.1.22</span>.
+        (a) metric space에서 모든 open ball의 collection은 metric topology의 basis다. open ball은 open set이고(<a href="#i-3-1-6">Lemma 3.1.6</a>), <a href="#i-3-1-5">Definition 3.1.5</a>가 바로 <a href="#i-3-1-21">Proposition 3.1.21</a>의 조건이다.
+        반지름이 \(1/k\) (\(k = 1, 2, \dots\)) 꼴인 open ball만 모아도 basis다. \(B_r(p) \subseteq U\)이면 \(1/k \lt r\)인 \(k\)를 골라 \(B_{1/k}(p) \subseteq B_r(p) \subseteq U\)로 쓰면 된다.</p>
+        <p>(b) discrete topology에서 한 점 집합 \(\{p\}\)들의 collection은 basis다. \(p \in U\)이면 \(p \in \{p\} \subseteq U\)이다.</p>
       </div>
 
       <div class="thm nonexample" id="i-3-1-23">
-        <p><span class="thm-head">비예 3.1.23</span>.
-        반직선 \((a, \infty)\) (\(a \in \R\))들의 모임은 \(\R\)의 표준 위상의 기저가 아니다. 모두 열린집합이지만(<a href="#i-3-1-7">예 3.1.7</a>(a)),
-        열린집합 \((0, 1)\)과 그 점 \(1/2\)에 대하여 \(1/2\)을 포함하는 반직선 \((a, \infty)\)는 모두 \(2\)를 포함하므로 \((0, 1)\)에 들어가지 않는다.</p>
+        <p><span class="thm-head">Non-example 3.1.23</span>.
+        반직선 \((a, \infty)\) (\(a \in \R\))들의 collection은 \(\R\)의 standard topology의 basis가 아니다. 모두 open set이지만(<a href="#i-3-1-7">Example 3.1.7</a>(a)),
+        open set \((0, 1)\)과 그 점 \(1/2\)에 대하여 \(1/2\)을 포함하는 반직선 \((a, \infty)\)는 모두 \(2\)를 포함하므로 \((0, 1)\)에 들어가지 않는다.</p>
       </div>
 
-      <p>지금까지는 위상이 먼저 있고 기저를 찾았다. 거꾸로, 벽돌들의 모임에서 출발해 위상을 <em>만들</em> 수도 있다.
-      <a href="3-3-subspaces-products.html">3.3절</a>에서 이 방법으로 곱위상을 정의한다.</p>
+      <p>지금까지는 topology가 먼저 있고 basis를 찾았다. 거꾸로, 벽돌들의 collection에서 출발해 topology를 <em>만들</em> 수도 있다.
+      <a href="3-3-subspaces-products.html">Section 3.3</a>에서 이 방법으로 product topology를 정의한다.</p>
 
       <div class="thm proposition" id="i-3-1-24">
-        <p><span class="thm-head">명제 3.1.24</span> <span class="thm-name">(기저로부터 만든 위상)</span>.
-        \(X\)가 집합이고 \(\mathcal{B}\)가 \(X\)의 부분집합들의 모임으로서 다음 두 조건을 만족한다고 하자.</p>
+        <p><span class="thm-head">Proposition 3.1.24</span> <span class="thm-name">(topology generated by a basis)</span>.
+        \(X\)가 집합이고 \(\mathcal{B}\)가 \(X\)의 부분집합들의 collection으로서 다음 두 조건을 만족한다고 하자.</p>
         <ul>
           <li>(i) \(X\)의 모든 점은 \(\mathcal{B}\)의 어떤 원소에 들어 있다.</li>
           <li>(ii) \(B_1, B_2 \in \mathcal{B}\)이고 \(p \in B_1 \cap B_2\)이면 \(p \in B_3 \subseteq B_1 \cap B_2\)인 \(B_3 \in \mathcal{B}\)가 있다.</li>
         </ul>
-        <p>그러면 \(\mathcal{B}\)의 원소들의 합집합 전체 \(\mathcal{T}_{\mathcal{B}}\)는 \(X\) 위의 위상이고, \(\mathcal{B}\)는 \(\mathcal{T}_{\mathcal{B}}\)의 위상의 기저다.
-        \(\mathcal{T}_{\mathcal{B}}\)를 \(\mathcal{B}\)가 <em>생성하는 위상</em>이라 한다.</p>
+        <p>그러면 \(\mathcal{B}\)의 원소들의 합집합 전체 \(\mathcal{T}_{\mathcal{B}}\)는 \(X\) 위의 topology이고, \(\mathcal{B}\)는 \(\mathcal{T}_{\mathcal{B}}\)의 basis for a topology다.
+        \(\mathcal{T}_{\mathcal{B}}\)를 \(\mathcal{B}\)가 <em>만드는 topology</em>라 한다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 합집합의 합집합은 합집합이므로 조건 2는 저절로 성립한다. 교집합에 대한 조건 3을 위해 (ii)가 필요하다.</p>
-        <p><span class="proof-head">증명.</span>
-        <a href="#i-3-1-11">정의 3.1.11</a>의 세 조건을 확인한다. <em>조건 1.</em> 원소를 하나도 고르지 않은 합집합이 \(\varnothing\)이다. (i)에 의해 \(\mathcal{B}\)의 모든 원소의 합집합이 \(X\)이다.
+        <p class="proof-idea">Proof idea: 합집합의 합집합은 합집합이므로 조건 2는 저절로 성립한다. 교집합에 대한 조건 3을 위해 (ii)가 필요하다.</p>
+        <p><span class="proof-head">Proof.</span>
+        <a href="#i-3-1-11">Definition 3.1.11</a>의 세 조건을 확인한다. <em>조건 1.</em> 원소를 하나도 고르지 않은 합집합이 \(\varnothing\)이다. (i)에 의해 \(\mathcal{B}\)의 모든 원소의 합집합이 \(X\)이다.
         <em>조건 2.</em> \(\mathcal{T}_{\mathcal{B}}\)의 원소들은 각각 \(\mathcal{B}\)의 원소들의 합집합이므로, 그것들의 합집합도 \(\mathcal{B}\)의 원소들의 합집합이다.
         <em>조건 3.</em> 두 원소의 경우만 보이면 된다. \(U = \bigcup_\alpha B_\alpha\), \(V = \bigcup_\beta B'_\beta\)이고 \(p \in U \cap V\)라 하자. 어떤 \(\alpha, \beta\)에서 \(p \in B_\alpha \cap B'_\beta\)이고,
         (ii)에 의해 \(p \in B_p \subseteq B_\alpha \cap B'_\beta \subseteq U \cap V\)인 \(B_p \in \mathcal{B}\)가 있다. 따라서 \(U \cap V = \bigcup_{p \in U \cap V} B_p\)는 \(\mathcal{T}_{\mathcal{B}}\)에 속한다.
-        마지막으로 \(\mathcal{B}\)의 원소는 (자기 자신 하나의 합집합으로) \(\mathcal{T}_{\mathcal{B}}\)에 속하고, \(\mathcal{T}_{\mathcal{B}}\)의 모든 원소가 \(\mathcal{B}\)의 원소의 합집합이므로 \(\mathcal{B}\)는 기저다.</p>
+        마지막으로 \(\mathcal{B}\)의 원소는 (자기 자신 하나의 합집합으로) \(\mathcal{T}_{\mathcal{B}}\)에 속하고, \(\mathcal{T}_{\mathcal{B}}\)의 모든 원소가 \(\mathcal{B}\)의 원소의 합집합이므로 \(\mathcal{B}\)는 basis다.</p>
       </div>
 
-      <p>이 절의 마지막 질문은 다음이다. 같은 집합 위의 서로 다른 두 거리가 같은 열린집합을 줄 수 있는가? 다음 명제가 그 조건을 말한다.
-      \(d'\)에 대한 열린공은 \(B'_s(p)\)로 쓴다.</p>
+      <p>이 절의 마지막 질문은 다음이다. 같은 집합 위의 서로 다른 두 metric이 같은 open set을 줄 수 있는가? 다음 proposition이 그 조건을 말한다.
+      \(d'\)에 대한 open ball은 \(B'_s(p)\)로 쓴다.</p>
 
       <div class="thm proposition" id="i-3-1-25">
-        <p><span class="thm-head">명제 3.1.25</span> <span class="thm-name">(같은 위상을 주는 두 거리)</span>.
-        \(d\)와 \(d'\)이 집합 \(X\) 위의 거리라 하자.</p>
+        <p><span class="thm-head">Proposition 3.1.25</span> <span class="thm-name">(two metrics giving the same topology)</span>.
+        \(d\)와 \(d'\)이 집합 \(X\) 위의 metric이라 하자.</p>
         <ul>
-          <li>(a) 모든 \(p \in X\)와 \(r \gt 0\)에 대하여 \(B'_s(p) \subseteq B_r(p)\)인 \(s \gt 0\)이 있으면, \(d\)에 대한 열린집합은 모두 \(d'\)에 대한 열린집합이다.</li>
-          <li>(b) 특히 양의 상수 \(c, C\)가 있어서 모든 \(x, y\)에서 \(c\,d(x, y) \le d'(x, y) \le C\,d(x, y)\)이면 두 거리는 같은 위상을 준다: \(\mathcal{T}_d = \mathcal{T}_{d'}\).</li>
+          <li>(a) 모든 \(p \in X\)와 \(r \gt 0\)에 대하여 \(B'_s(p) \subseteq B_r(p)\)인 \(s \gt 0\)이 있으면, \(d\)에 대한 open set은 모두 \(d'\)에 대한 open set이다.</li>
+          <li>(b) 특히 양의 상수 \(c, C\)가 있어서 모든 \(x, y\)에서 \(c\,d(x, y) \le d'(x, y) \le C\,d(x, y)\)이면 두 metric은 같은 topology를 준다: \(\mathcal{T}_d = \mathcal{T}_{d'}\).</li>
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        (a) \(U\)가 \(d\)에 대한 열린집합이고 \(p \in U\)라 하자. \(B_r(p) \subseteq U\)인 \(r \gt 0\)이 있고, 가정에서 \(B'_s(p) \subseteq B_r(p) \subseteq U\)인 \(s \gt 0\)이 있다.
-        따라서 \(U\)는 \(d'\)에 대한 열린집합이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) \(U\)가 \(d\)에 대한 open set이고 \(p \in U\)라 하자. \(B_r(p) \subseteq U\)인 \(r \gt 0\)이 있고, 가정에서 \(B'_s(p) \subseteq B_r(p) \subseteq U\)인 \(s \gt 0\)이 있다.
+        따라서 \(U\)는 \(d'\)에 대한 open set이다.</p>
         <p>(b) \(r \gt 0\)이 주어졌다고 하자. \(d'(x, p) \lt cr\)이면 \(d(x, p) \le d'(x, p)/c \lt r\)이므로 \(B'_{cr}(p) \subseteq B_r(p)\)이다. (a)에 의해 \(\mathcal{T}_d \subseteq \mathcal{T}_{d'}\)이다.
         또 \(d(x, p) \lt r/C\)이면 \(d'(x, p) \le C\,d(x, p) \lt r\)이므로 \(B_{r/C}(p) \subseteq B'_r(p)\)이고, 역할을 바꾼 (a)에 의해 \(\mathcal{T}_{d'} \subseteq \mathcal{T}_d\)이다.</p>
       </div>
 
       <div class="thm example" id="i-3-1-26">
-        <p><span class="thm-head">예 3.1.26</span> <span class="thm-name">(\(\R^n\)의 세 거리는 같은 위상을 준다)</span>.
-        <a href="#i-3-1-2">예 3.1.2</a>의 세 거리 사이에 다음 부등식이 성립함을 보이자. \(a = x - y\)로 두면 \(a^i = x^i - y^i\)이다.</p>
+        <p><span class="thm-head">Example 3.1.26</span> <span class="thm-name">(the three metrics on \(\R^n\) give the same topology)</span>.
+        <a href="#i-3-1-2">Example 3.1.2</a>의 세 metric 사이에 다음 부등식이 성립함을 보이자. \(a = x - y\)로 두면 \(a^i = x^i - y^i\)이다.</p>
         <div class="equation" id="eq-3-1-3">
         \[ d_\infty(x, y) \le d(x, y) \le d_1(x, y) \le n\, d_\infty(x, y). \tag{3.1.3} \]
         </div>
@@ -459,182 +459,182 @@
           <li>둘째 부등식: \(d_1(x, y)^2 = \big(\sum_i \abs{a^i}\big)^2 = \sum_i (a^i)^2 + \sum_{i \ne j} \abs{a^i}\abs{a^j} \ge \sum_i (a^i)^2 = d(x, y)^2\)이다. 버린 항들이 모두 음이 아니기 때문이다.</li>
           <li>셋째 부등식: 각 \(\abs{a^i} \le d_\infty(x, y)\)이므로 \(n\)개를 더하면 \(d_1(x,y) \le n\,d_\infty(x, y)\)이다.</li>
         </ul>
-        <p>따라서 \(d_\infty \le d \le n\,d_\infty\)이고 \(d \le d_1 \le n\,d_\infty \le n\,d\)이다. <a href="#i-3-1-25">명제 3.1.25</a>(b)에 의해 세 거리는 모두 표준 위상을 준다.
-        <a href="#fig-3-1-2">그림 3.1.2</a>는 \(n = 2\)일 때 원점을 중심으로 하는 세 공이 서로의 안에 들어가는 모습이다.
-        \(d_\infty\)의 공 \(B^\infty_r(p) = (p^1 - r, p^1 + r) \times \dots \times (p^n - r, p^n + r)\)은 정육면체이므로,
-        특히 \(U \subseteq \R^n\)이 열린집합일 필요충분조건은 \(U\)의 각 점을 중심으로 하는 작은 열린 정육면체가 \(U\) 안에 들어가는 것이다.</p>
-        <p class="verified">검증: <code>verify/v-3-1-topological-spaces.py</code></p>
+        <p>따라서 \(d_\infty \le d \le n\,d_\infty\)이고 \(d \le d_1 \le n\,d_\infty \le n\,d\)이다. <a href="#i-3-1-25">Proposition 3.1.25</a>(b)에 의해 세 metric은 모두 standard topology를 준다.
+        <a href="#fig-3-1-2">Figure 3.1.2</a>는 \(n = 2\)일 때 원점을 중심으로 하는 세 ball이 서로의 안에 들어가는 모습이다.
+        \(d_\infty\)의 ball \(B^\infty_r(p) = (p^1 - r, p^1 + r) \times \dots \times (p^n - r, p^n + r)\)은 정육면체이므로,
+        특히 \(U \subseteq \R^n\)이 open set일 필요충분조건은 \(U\)의 각 점을 중심으로 하는 작은 열린 정육면체가 \(U\) 안에 들어가는 것이다.</p>
+        <p class="verified">Verification: <code>verify/v-3-1-topological-spaces.py</code></p>
       </div>
 
       <figure class="dg-figure" id="fig-3-1-2">
-        <img src="figures/fig-3-1-2-metric-balls.svg" alt="원점을 중심으로 하는 네 개의 겹친 도형. 바깥에서부터 한 변이 2인 검은 점선 정사각형, 반지름 1인 파란 점선 원, 꼭짓점이 축 위의 1에 있는 초록 점선 마름모, 한 변이 1인 주황 점선 정사각형.">
-        <figcaption><span class="fig-head">그림 3.1.2.</span>
-        \(\R^2\)에서 원점을 중심으로 하는 공들: \(d_\infty\)의 공 \(B^\infty_1\)(정사각형) \(\supseteq\) 유클리드 공 \(B_1\)(원판) \(\supseteq\) \(d_1\)의 공 \(B^1_1\)(마름모)
+        <img src="figures/fig-3-1-2-metric-balls.svg" alt="원점을 중심으로 하는 네 개의 겹친 도형. 바깥에서부터 한 변이 2인 검은 점선 정사각형, 반지름 1인 파란 점선 원, 모서리가 축 위의 1에 있는 초록 점선 마름모, 한 변이 1인 주황 점선 정사각형.">
+        <figcaption><span class="fig-head">Figure 3.1.2.</span>
+        \(\R^2\)에서 원점을 중심으로 하는 ball들: \(d_\infty\)의 ball \(B^\infty_1\)(정사각형) \(\supseteq\) Euclidean ball \(B_1\)(원판) \(\supseteq\) \(d_1\)의 ball \(B^1_1\)(마름모)
         \(\supseteq\) \(B^\infty_{1/2}\)(작은 정사각형). 포함관계는 부등식 <a href="#eq-3-1-3">(3.1.3)</a> \(d_\infty \le d \le d_1 \le 2\,d_\infty\)에서 나온다.
-        경계는 공에 속하지 않으므로 점선으로 그렸다.</figcaption>
+        경계는 ball에 속하지 않으므로 점선으로 그렸다.</figcaption>
       </figure>
 
       <aside class="box intuition">
-        <p class="box-title">위상은 크기를 잊고 가까움만 기억한다</p>
-        <p>세 거리 \(d, d_\infty, d_1\)은 같은 두 점에 서로 다른 값을 준다. 예를 들어 \((0,0)\)과 \((1,1)\) 사이의 거리는 차례로 \(\sqrt2,\ 1,\ 2\)이다.
-        그러나 “어떤 집합이 각 점을 여유 있게 둘러싸는가”라는 판정은 세 거리에서 똑같다. 위상은 거리에서 이 판정만 남기고 나머지 정보를 버린 것이다.
-        그래서 연속처럼 위상만으로 정의되는 개념은 세 거리 가운데 무엇을 쓰든 같은 답을 준다.</p>
+        <p class="box-title">Intuition: topology는 크기를 잊고 가까움만 기억한다</p>
+        <p>세 metric \(d, d_\infty, d_1\)은 같은 두 점에 서로 다른 값을 준다. 예를 들어 \((0,0)\)과 \((1,1)\) 사이의 거리는 차례로 \(\sqrt2,\ 1,\ 2\)이다.
+        그러나 “어떤 집합이 각 점을 여유 있게 둘러싸는가”라는 판정은 세 metric에서 똑같다. topology는 metric에서 이 판정만 남기고 나머지 정보를 버린 것이다.
+        그래서 연속처럼 topology만으로 정의되는 개념은 세 metric 가운데 무엇을 쓰든 같은 답을 준다.</p>
       </aside>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: 리만 거리와 다양체의 위상</p>
-        <p><a href="../21-riemannian-metrics/index.html">21장</a>에서 리만 다양체 위에 곡선의 길이로 거리 \(d_g\)를 정의한다. 그때 증명하는 핵심 사실은
-        \(d_g\)의 거리 위상이 다양체에 원래 주어진 위상과 같다는 것이다. 그 증명은 <a href="#i-3-1-25">명제 3.1.25</a>(a)처럼 좌표근방 안에서 두 종류의 공을 서로의 안에 넣는 방식으로 진행된다.</p>
+        <p class="box-title">Looking ahead: Riemannian metric과 manifold의 topology</p>
+        <p><a href="../21-riemannian-metrics/index.html">Chapter 21</a>에서 Riemannian manifold 위에 곡선의 길이로 거리 \(d_g\)를 정의한다. 그때 증명하는 핵심 사실은
+        \(d_g\)의 metric topology가 manifold에 원래 주어진 topology와 같다는 것이다. 그 증명은 <a href="#i-3-1-25">Proposition 3.1.25</a>(a)처럼 coordinate neighborhood 안에서 두 종류의 ball을 서로의 안에 넣는 방식으로 진행된다.</p>
       </aside>
     </section>
 
     <section id="sec-boundary-points">
-      <h2>경계점으로 본 폐포</h2>
-      <p>미적분학에서는 폐포를 “집합에 경계점을 더한 것”으로 배운다. <a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절 준비</a>도 \(\R^n\)에서 이것을 약속으로 삼았다.
-      <a href="#i-3-1-15">정의 3.1.15</a>의 폐포(닫힌집합들의 교집합)가 그 약속과 같은 집합임을 확인해 두자.</p>
+      <h2>Closure in Terms of Boundary Points</h2>
+      <p>미적분학에서는 closure를 “집합에 boundary point를 더한 것”으로 배운다. <a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">Section 2.1 준비</a>도 \(\R^n\)에서 이것을 약속으로 삼았다.
+      <a href="#i-3-1-15">Definition 3.1.15</a>의 closure(closed set들의 교집합)가 그 약속과 같은 집합임을 확인해 두자.</p>
 
       <div class="thm proposition" id="i-3-1-27">
-        <p><span class="thm-head">명제 3.1.27</span> <span class="thm-name">(폐포는 집합에 경계점을 더한 것이다)</span>.
-        \(X\)가 위상공간이고 \(A \subseteq X\)라 하자. \(p\)의 모든 근방이 \(A\)와 \(X \setminus A\)를 함께 만나는 점 \(p \in X\) 전체를 \(\partial A\)로 쓰면</p>
+        <p><span class="thm-head">Proposition 3.1.27</span> <span class="thm-name">(the closure is the set together with its boundary points)</span>.
+        \(X\)가 topological space이고 \(A \subseteq X\)라 하자. \(p\)의 모든 neighborhood가 \(A\)와 \(X \setminus A\)를 함께 만나는 점 \(p \in X\) 전체를 \(\partial A\)로 쓰면</p>
         <div class="equation" id="eq-3-1-4">
         \[ \overline{A} = A \cup \partial A \tag{3.1.4} \]
         </div>
-        <p>이다. \(X\)가 거리공간이면 \(\partial A\)의 조건에서 “모든 근방” 대신 “모든 열린공 \(B_\varepsilon(p)\)”라 해도 같은 집합이다.</p>
+        <p>이다. \(X\)가 metric space이면 \(\partial A\)의 조건에서 “모든 neighborhood” 대신 “모든 open ball \(B_\varepsilon(p)\)”라 해도 같은 집합이다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: <a href="#i-3-1-17">명제 3.1.17</a>의 판정법 “모든 근방이 \(A\)와 만난다”를 쓴다. \(A\) 밖의 점에서는 “모든 근방이 \(X \setminus A\)와 만난다”는 조건이 저절로 성립한다. 그 점 자신이 \(X \setminus A\)에 있기 때문이다.</p>
-        <p><span class="proof-head">증명.</span>
-        (\(\supseteq\)) <a href="#i-3-1-16">명제 3.1.16</a>(d)에 의해 \(A \subseteq \overline{A}\)이다. \(p \in \partial A\)이면 \(p\)의 모든 근방이 \(A\)와 만나므로 <a href="#i-3-1-17">명제 3.1.17</a>에 의해 \(p \in \overline{A}\)이다.</p>
-        <p>(\(\subseteq\)) \(p \in \overline{A}\)라 하자. \(p \in A\)이면 \(p \in A \cup \partial A\)이다. \(p \notin A\)이면, \(p\)의 근방 \(U\)는 <a href="#i-3-1-17">명제 3.1.17</a>에 의해 \(A\)와 만나고,
-        \(p \in U \cap (X \setminus A)\)이므로 \(X \setminus A\)와도 만난다. \(U\)는 \(p\)의 임의의 근방이므로 \(p \in \partial A\)이다.</p>
-        <p>거리공간의 경우: 열린공 \(B_\varepsilon(p)\)는 \(p\)의 근방이고(<a href="#i-3-1-6">보조정리 3.1.6</a>), \(p\)의 모든 근방 \(U\)는 어떤 열린공 \(B_\varepsilon(p)\)를 포함한다(<a href="#i-3-1-5">정의 3.1.5</a>).
-        앞의 사실에서 “모든 근방이 \(A\)와 \(X \setminus A\)를 함께 만나면 모든 \(B_\varepsilon(p)\)도 그렇다”가 나온다. 뒤의 사실에서, 모든 열린공이 두 집합과 만나면 \(U \supseteq B_\varepsilon(p)\)도 두 집합과 만난다.</p>
+        <p class="proof-idea">Proof idea: <a href="#i-3-1-17">Proposition 3.1.17</a>의 판정법 “모든 neighborhood가 \(A\)와 만난다”를 쓴다. \(A\) 밖의 점에서는 “모든 neighborhood가 \(X \setminus A\)와 만난다”는 조건이 저절로 성립한다. 그 점 자신이 \(X \setminus A\)에 있기 때문이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (\(\supseteq\)) <a href="#i-3-1-16">Proposition 3.1.16</a>(d)에 의해 \(A \subseteq \overline{A}\)이다. \(p \in \partial A\)이면 \(p\)의 모든 neighborhood가 \(A\)와 만나므로 <a href="#i-3-1-17">Proposition 3.1.17</a>에 의해 \(p \in \overline{A}\)이다.</p>
+        <p>(\(\subseteq\)) \(p \in \overline{A}\)라 하자. \(p \in A\)이면 \(p \in A \cup \partial A\)이다. \(p \notin A\)이면, \(p\)의 neighborhood \(U\)는 <a href="#i-3-1-17">Proposition 3.1.17</a>에 의해 \(A\)와 만나고,
+        \(p \in U \cap (X \setminus A)\)이므로 \(X \setminus A\)와도 만난다. \(U\)는 \(p\)의 임의의 neighborhood이므로 \(p \in \partial A\)이다.</p>
+        <p>metric space의 경우: open ball \(B_\varepsilon(p)\)는 \(p\)의 neighborhood이고(<a href="#i-3-1-6">Lemma 3.1.6</a>), \(p\)의 모든 neighborhood \(U\)는 어떤 open ball \(B_\varepsilon(p)\)를 포함한다(<a href="#i-3-1-5">Definition 3.1.5</a>).
+        앞의 사실에서 “모든 neighborhood가 \(A\)와 \(X \setminus A\)를 함께 만나면 모든 \(B_\varepsilon(p)\)도 그렇다”가 나온다. 뒤의 사실에서, 모든 open ball이 두 집합과 만나면 \(U \supseteq B_\varepsilon(p)\)도 두 집합과 만난다.</p>
       </div>
 
-      <p>예를 들어 \(\R\)에서 \(\partial(0, 1) = \{0, 1\}\)이므로 \(\overline{(0, 1)} = [0, 1]\)이고(<a href="#i-3-1-18">예 3.1.18</a>(c)와 같다), 모든 열린구간이 유리수와 무리수를 함께 포함하므로
-      \(\partial\Q = \R\)이고 \(\overline{\Q} = \R\)이다(<a href="#i-3-1-18">예 3.1.18</a>(e)와 같다).</p>
+      <p>예를 들어 \(\R\)에서 \(\partial(0, 1) = \{0, 1\}\)이므로 \(\overline{(0, 1)} = [0, 1]\)이고(<a href="#i-3-1-18">Example 3.1.18</a>(c)와 같다), 모든 열린구간이 유리수와 무리수를 함께 포함하므로
+      \(\partial\Q = \R\)이고 \(\overline{\Q} = \R\)이다(<a href="#i-3-1-18">Example 3.1.18</a>(e)와 같다).</p>
 
       <aside class="box backward">
-        <p class="box-title">2장과 비교: 경계점과 폐포의 약속</p>
-        <p><a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절 준비</a>는 \(D \subseteq \R^n\)에 대해 경계점 전체 \(\partial D\)(\(p\)를 중심으로 하는 모든 공이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함하는 점 \(p\) 전체)와
-        폐포 \(\overline{D} = D \cup \partial D\)를 미적분학의 약속으로 두었고, <a href="../02-calculus-rn/2-6-change-of-variables.html">2.6절</a>의 적분 영역(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6</a>)과
-        변수변환 공식(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">정리 2.6.9</a>)이 그 약속을 썼다. <a href="#i-3-1-27">명제 3.1.27</a>을 거리공간 \(\R^n\)에 쓰면 그 약속의 \(\partial D\)가 이 명제의 \(\partial D\)와 같고,
-        따라서 \(D \cup \partial D\)가 <a href="#i-3-1-15">정의 3.1.15</a>의 폐포와 같은 집합이다. 새로워진 것은 두 가지다. 경계점을 거리 없이 근방만으로 말할 수 있게 되었고,
-        2.1절 준비에서 따로 확인한 “\(\overline{D}\)는 닫힌집합이다”가 이제 <a href="#i-3-1-16">명제 3.1.16</a>(d)에서 바로 나온다.</p>
+        <p class="box-title">Looking back (Chapter 2): boundary point와 closure의 약속</p>
+        <p><a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">Section 2.1 준비</a>는 \(D \subseteq \R^n\)에 대해 boundary point 전체 \(\partial D\)(\(p\)를 중심으로 하는 모든 ball이 \(D\)의 점과 \(D\) 밖의 점을 함께 포함하는 점 \(p\) 전체)와
+        closure \(\overline{D} = D \cup \partial D\)를 미적분학의 약속으로 두었고, <a href="../02-calculus-rn/2-6-change-of-variables.html">Section 2.6</a>의 domain of integration(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">Definition 2.6.6</a>)과
+        change of variables formula(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">Theorem 2.6.9</a>)이 그 약속을 썼다. <a href="#i-3-1-27">Proposition 3.1.27</a>을 metric space \(\R^n\)에 쓰면 그 약속의 \(\partial D\)가 이 proposition의 \(\partial D\)와 같고,
+        따라서 \(D \cup \partial D\)가 <a href="#i-3-1-15">Definition 3.1.15</a>의 closure와 같은 집합이다. 새로워진 것은 두 가지다. boundary point를 metric 없이 neighborhood만으로 말할 수 있게 되었고,
+        Section 2.1 준비에서 따로 확인한 “\(\overline{D}\)는 closed set이다”가 이제 <a href="#i-3-1-16">Proposition 3.1.16</a>(d)에서 바로 나온다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>거리공간에서 \(U\)가 열린집합이라는 것은 \(U\)의 각 점을 중심으로 하는 어떤 열린공이 \(U\)에 들어간다는 뜻이다. 열린공 자신은 열린집합이다(<a href="#i-3-1-6">보조정리 3.1.6</a>).</li>
-        <li>열린집합들은 임의의 합집합과 유한 교집합에 닫혀 있다(<a href="#i-3-1-9">정리 3.1.9</a>). 이 세 성질을 공리로 삼은 것이 위상이고, 위상이 주어진 집합이 위상공간이다.</li>
-        <li>닫힌집합은 여집합이 열린 집합이다. \(p \in \overline{A}\)일 필요충분조건은 \(p\)의 모든 근방이 \(A\)와 만나는 것이다(<a href="#i-3-1-17">명제 3.1.17</a>). 따라서 폐포는 \(A\)에 경계점(모든 근방이 \(A\)와 \(X \setminus A\)를 함께 만나는 점)을 더한 것이다(<a href="#i-3-1-27">명제 3.1.27</a>).</li>
-        <li>위상의 기저는 모든 열린집합을 합집합으로 조립하는 벽돌들이다. 거리공간에서는 열린공들이 기저다.</li>
-        <li>\(\R^n\)의 거리 \(d, d_\infty, d_1\)은 값이 다르지만 같은 위상(표준 위상)을 준다(<a href="#i-3-1-26">예 3.1.26</a>).</li>
+        <li>metric space에서 \(U\)가 open set이라는 것은 \(U\)의 각 점을 중심으로 하는 어떤 open ball이 \(U\)에 들어간다는 뜻이다. open ball 자신은 open set이다(<a href="#i-3-1-6">Lemma 3.1.6</a>).</li>
+        <li>open set들은 임의의 합집합과 유한 교집합에 닫혀 있다(<a href="#i-3-1-9">Theorem 3.1.9</a>). 이 세 성질을 공리로 삼은 것이 topology이고, topology가 주어진 집합이 topological space이다.</li>
+        <li>closed set은 여집합이 open set이다. \(p \in \overline{A}\)일 필요충분조건은 \(p\)의 모든 neighborhood가 \(A\)와 만나는 것이다(<a href="#i-3-1-17">Proposition 3.1.17</a>). 따라서 closure는 \(A\)에 boundary point(모든 neighborhood가 \(A\)와 \(X \setminus A\)를 함께 만나는 점)를 더한 것이다(<a href="#i-3-1-27">Proposition 3.1.27</a>).</li>
+        <li>basis for a topology는 모든 open set을 합집합으로 조립하는 벽돌들이다. metric space에서는 open ball들이 basis다.</li>
+        <li>\(\R^n\)의 metric \(d, d_\infty, d_1\)은 값이 다르지만 같은 topology(standard topology)를 준다(<a href="#i-3-1-26">Example 3.1.26</a>).</li>
       </ul>
-      <p class="next">다음 절에서는 위상만으로 연속을 정의한다. 연속사상은 열린집합의 역상이 열린집합인 사상이고, 거리공간에서는 이것이 익숙한 \(\varepsilon\)-\(\delta\) 연속과 같다. 연속인 역사상을 갖는 전단사, 즉 위상동형사상은 “위상적으로 같은 공간”을 판정하는 도구다.</p>
+      <p class="next">다음 절에서는 topology만으로 연속을 정의한다. continuous map은 open set의 preimage가 open set인 map이고, metric space에서는 이것이 익숙한 \(\varepsilon\)-\(\delta\) 연속과 같다. 연속인 inverse map을 갖는 bijective, 즉 homeomorphism은 “topological하게 같은 공간”을 판정하는 도구다.</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-3-1-1" data-level="1">
-        <p><span class="thm-head">연습 3.1.1</span> <span class="level">★</span>
-        다음 \(\R\)의 부분집합이 열린집합인지, 닫힌집합인지 판별하여라.
+        <p><span class="thm-head">Exercise 3.1.1</span> <span class="level">★</span>
+        다음 \(\R\)의 부분집합이 open set인지, closed set인지 판별하여라.
         (a) \((0, 1]\) (b) \(\Z\) (c) \(\{1/k : k = 1, 2, 3, \dots\}\) (d) \([0, \infty)\)</p>
-        <details class="hint"><summary>힌트</summary><p>열린지는 <a href="#i-3-1-5">정의 3.1.5</a>로, 닫혔는지는 여집합이 열렸는지로 판정한다. (c)는 \(0\)이 폐포에 들어가는지 <a href="#i-3-1-17">명제 3.1.17</a>로 본다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        <details class="hint"><summary>Hint</summary><p>열린지는 <a href="#i-3-1-5">Definition 3.1.5</a>로, 닫혔는지는 여집합이 열렸는지로 판정한다. (c)는 \(0\)이 closure에 들어가는지 <a href="#i-3-1-17">Proposition 3.1.17</a>로 본다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>(a) 둘 다 아니다. \(1 \in (0, 1]\)이지만 모든 \(B_r(1)\)이 \(1 + r/2\)를 포함하므로 열리지 않았다. 여집합 \((-\infty, 0] \cup (1, \infty)\)는 \(0\)을 포함하지만 모든 \(B_r(0)\)이 \((0, 1]\)의 점 \(\min(r, 1)/2\)를 포함하므로 열리지 않았다.</p>
-          <p>(b) 닫혀 있고 열려 있지 않다. 열리지 않은 것은 <a href="#i-3-1-8">비예 3.1.8</a>(c)다. 여집합 \(\bigcup_{k \in \Z} (k, k + 1)\)은 열린구간들의 합집합이므로 열려 있다(<a href="#i-3-1-9">정리 3.1.9</a>(b)).</p>
-          <p>(c) 둘 다 아니다. \(1\)을 중심으로 하는 공은 집합에 없는 \(1 + r/2\)를 포함하므로 열리지 않았다. 또 \(0\)은 집합에 없지만, 모든 \(\varepsilon \gt 0\)에 대해 \(1/k \lt \varepsilon\)인 \(k\)가 있어 \(B_\varepsilon(0)\)이 집합과 만나므로 \(0\)은 폐포에 속한다. 따라서 집합이 자기 폐포와 달라 닫혀 있지 않다(<a href="#i-3-1-16">명제 3.1.16</a>(d)).</p>
-          <p>(d) 닫혀 있고 열려 있지 않다. 여집합 \((-\infty, 0)\)은 열린 반직선이다(<a href="#i-3-1-7">예 3.1.7</a>(a)와 같은 논증). \(0\)에서의 공은 음수를 포함하므로 열리지 않았다.</p>
+          <p>(b) 닫혀 있고 열려 있지 않다. 열리지 않은 것은 <a href="#i-3-1-8">Non-example 3.1.8</a>(c)다. 여집합 \(\bigcup_{k \in \Z} (k, k + 1)\)은 열린구간들의 합집합이므로 열려 있다(<a href="#i-3-1-9">Theorem 3.1.9</a>(b)).</p>
+          <p>(c) 둘 다 아니다. \(1\)을 중심으로 하는 ball은 집합에 없는 \(1 + r/2\)를 포함하므로 열리지 않았다. 또 \(0\)은 집합에 없지만, 모든 \(\varepsilon \gt 0\)에 대해 \(1/k \lt \varepsilon\)인 \(k\)가 있어 \(B_\varepsilon(0)\)이 집합과 만나므로 \(0\)은 closure에 속한다. 따라서 집합이 자기 closure와 달라 닫혀 있지 않다(<a href="#i-3-1-16">Proposition 3.1.16</a>(d)).</p>
+          <p>(d) 닫혀 있고 열려 있지 않다. 여집합 \((-\infty, 0)\)은 열린 반직선이다(<a href="#i-3-1-7">Example 3.1.7</a>(a)와 같은 논증). \(0\)에서의 ball은 음수를 포함하므로 열리지 않았다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-1-2" data-level="1">
-        <p><span class="thm-head">연습 3.1.2</span> <span class="level">★</span>
-        \(X = \{a, b, c\}\)의 다음 부분집합 모임이 위상인지 판별하여라.
+        <p><span class="thm-head">Exercise 3.1.2</span> <span class="level">★</span>
+        \(X = \{a, b, c\}\)의 다음 부분집합 collection이 topology인지 판별하여라.
         (a) \(\{\varnothing, \{a\}, \{b\}, \{a, b\}, \{b, c\}, X\}\) (b) \(\{\varnothing, \{a, b\}, \{b, c\}, X\}\) (c) \(\{\varnothing, \{b\}, X\}\)</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 위상이다. \(\varnothing\)과 \(X\)가 있다. \(\varnothing\)이나 \(X\)가 끼는 합집합·교집합은 다른 원소 자신이거나 \(\varnothing\), \(X\)이므로, 나머지 네 원소 \(\{a\}, \{b\}, \{a, b\}, \{b, c\}\)의 여섯 쌍만 보면 된다.
-          합집합은 \(\{a\} \cup \{b\} = \{a, b\}\), \(\{a\} \cup \{a, b\} = \{a, b\}\), \(\{a\} \cup \{b, c\} = X\), \(\{b\} \cup \{a, b\} = \{a, b\}\), \(\{b\} \cup \{b, c\} = \{b, c\}\), \(\{a, b\} \cup \{b, c\} = X\)이고 모두 모임 안에 있다.
-          교집합은 \(\{a\} \cap \{b\} = \varnothing\), \(\{a\} \cap \{a, b\} = \{a\}\), \(\{a\} \cap \{b, c\} = \varnothing\), \(\{b\} \cap \{a, b\} = \{b\}\), \(\{b\} \cap \{b, c\} = \{b\}\), \(\{a, b\} \cap \{b, c\} = \{b\}\)이고 역시 모임 안에 있다.
-          유한 모임이므로 임의의 합집합과 교집합은 두 개씩 되풀이해 얻으므로 이것으로 충분하다.</p>
-          <p>(b) 위상이 아니다. \(\{a, b\} \cap \{b, c\} = \{b\}\)가 모임에 없어 조건 3을 어긴다.</p>
-          <p>(c) 위상이다. 모든 합집합과 교집합이 \(\varnothing, \{b\}, X\) 가운데 하나다.</p>
-          <p class="verified">검증: <code>verify/v-3-1-topological-spaces.py</code> (세 조건을 모든 부분모임에 대해 기계적으로 확인)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) topology이다. \(\varnothing\)과 \(X\)가 있다. \(\varnothing\)이나 \(X\)가 끼는 합집합·교집합은 다른 원소 자신이거나 \(\varnothing\), \(X\)이므로, 나머지 네 원소 \(\{a\}, \{b\}, \{a, b\}, \{b, c\}\)의 여섯 쌍만 보면 된다.
+          합집합은 \(\{a\} \cup \{b\} = \{a, b\}\), \(\{a\} \cup \{a, b\} = \{a, b\}\), \(\{a\} \cup \{b, c\} = X\), \(\{b\} \cup \{a, b\} = \{a, b\}\), \(\{b\} \cup \{b, c\} = \{b, c\}\), \(\{a, b\} \cup \{b, c\} = X\)이고 모두 collection 안에 있다.
+          교집합은 \(\{a\} \cap \{b\} = \varnothing\), \(\{a\} \cap \{a, b\} = \{a\}\), \(\{a\} \cap \{b, c\} = \varnothing\), \(\{b\} \cap \{a, b\} = \{b\}\), \(\{b\} \cap \{b, c\} = \{b\}\), \(\{a, b\} \cap \{b, c\} = \{b\}\)이고 역시 collection 안에 있다.
+          유한 collection이므로 임의의 합집합과 교집합은 두 개씩 되풀이해 얻으므로 이것으로 충분하다.</p>
+          <p>(b) topology가 아니다. \(\{a, b\} \cap \{b, c\} = \{b\}\)가 collection에 없어 조건 3을 어긴다.</p>
+          <p>(c) topology이다. 모든 합집합과 교집합이 \(\varnothing, \{b\}, X\) 가운데 하나다.</p>
+          <p class="verified">Verification: <code>verify/v-3-1-topological-spaces.py</code> (세 조건을 모든 subcollection에 대해 기계적으로 확인)</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-1-3" data-level="1">
-        <p><span class="thm-head">연습 3.1.3</span> <span class="level">★</span>
-        \(\R\) 위에서 \(\rho(x, y) = \abs{x^3 - y^3}\)이 거리임을 보이고, 열린공 \(B^\rho_1(0)\)과 \(B^\rho_1(2)\)를 구간으로 나타내어라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(t \mapsto t^3\)은 \(\R\)에서 \(\R\)로 가는 순증가 전단사다. \(\rho(x, y)\)는 \(x^3\)과 \(y^3\) 사이의 유클리드 거리다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(\rho(x, y) = \abs{x^3 - y^3} \ge 0\)이고 대칭이다. \(\rho(x, y) = 0\)이면 \(x^3 = y^3\)이고, \(t \mapsto t^3\)이 단사이므로 \(x = y\)이다.
-          삼각부등식은 실수의 삼각부등식 \(\abs{x^3 - z^3} \le \abs{x^3 - y^3} + \abs{y^3 - z^3}\)이다.</p>
+        <p><span class="thm-head">Exercise 3.1.3</span> <span class="level">★</span>
+        \(\R\) 위에서 \(\rho(x, y) = \abs{x^3 - y^3}\)이 metric임을 보이고, open ball \(B^\rho_1(0)\)과 \(B^\rho_1(2)\)를 구간으로 나타내어라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(t \mapsto t^3\)은 \(\R\)에서 \(\R\)로 가는 순증가 bijective다. \(\rho(x, y)\)는 \(x^3\)과 \(y^3\) 사이의 Euclidean distance다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\rho(x, y) = \abs{x^3 - y^3} \ge 0\)이고 symmetric이다. \(\rho(x, y) = 0\)이면 \(x^3 = y^3\)이고, \(t \mapsto t^3\)이 injective이므로 \(x = y\)이다.
+          triangle inequality는 실수의 triangle inequality \(\abs{x^3 - z^3} \le \abs{x^3 - y^3} + \abs{y^3 - z^3}\)이다.</p>
           <p>\(B^\rho_1(0) = \{x : \abs{x^3} \lt 1\} = (-1, 1)\)이고, \(B^\rho_1(2) = \{x : 7 \lt x^3 \lt 9\} = (7^{1/3},\ 9^{1/3}) \approx (1.913,\ 2.080)\)이다.
           중심 \(2\)가 구간의 가운데에 있지 않다는 점에 주목하자.</p>
-          <p class="verified">검증: <code>verify/v-3-1-topological-spaces.py</code></p>
+          <p class="verified">Verification: <code>verify/v-3-1-topological-spaces.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-1-4" data-level="1">
-        <p><span class="thm-head">연습 3.1.4</span> <span class="level">★</span>
-        \(\R\)에서 다음 집합의 폐포를 구하여라. (a) \((0, 1) \cup (1, 2)\) (b) \(\Q \cap [0, 1]\) (c) \(\{1/k : k = 1, 2, 3, \dots\}\)</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) \([0, 2]\). \([0, 2]\)는 닫혀 있고 집합을 포함하므로 폐포는 그 안에 있다. \(0, 1, 2\)의 모든 공은 \((0,1) \cup (1,2)\)와 만나므로(예: \(B_\varepsilon(1)\)은 \(1 - \min(\varepsilon,1)/2\)를 포함) 이 세 점도 폐포에 있다.</p>
+        <p><span class="thm-head">Exercise 3.1.4</span> <span class="level">★</span>
+        \(\R\)에서 다음 집합의 closure를 구하여라. (a) \((0, 1) \cup (1, 2)\) (b) \(\Q \cap [0, 1]\) (c) \(\{1/k : k = 1, 2, 3, \dots\}\)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \([0, 2]\). \([0, 2]\)는 닫혀 있고 집합을 포함하므로 closure는 그 안에 있다. \(0, 1, 2\)의 모든 ball은 \((0,1) \cup (1,2)\)와 만나므로(예: \(B_\varepsilon(1)\)은 \(1 - \min(\varepsilon,1)/2\)를 포함) 이 세 점도 closure에 있다.</p>
           <p>(b) \([0, 1]\). \([0, 1]\)은 닫혀 있고 집합을 포함한다. \(x \in [0, 1]\)이고 \(\varepsilon \gt 0\)이면 구간 \((x - \varepsilon, x + \varepsilon) \cap [0, 1]\)은 길이가 양수인 구간을 포함하므로 유리수를 포함한다.</p>
           <p>(c) \(\{0\} \cup \{1/k : k \ge 1\}\). 이 집합 \(K\)는 닫혀 있다. \(y \notin K\)라 하자. \(y \lt 0\)이거나 \(y \gt 1\)이면 \(y\)를 포함하고 \(K\)와 만나지 않는 열린 반직선이 있다.
           \(0 \lt y \lt 1\)이면 \(1/(k+1) \lt y \lt 1/k\)인 \(k\)가 있고, 열린구간 \((1/(k+1), 1/k)\)가 \(y\)를 포함하면서 \(K\)와 만나지 않는다. 따라서 \(\R \setminus K\)는 열려 있다.
-          또 <a href="#ex-3-1-1">연습 3.1.1</a>(c)에서 \(0\)은 폐포에 속한다. 따라서 폐포는 \(K\)다.</p>
+          또 <a href="#ex-3-1-1">Exercise 3.1.1</a>(c)에서 \(0\)은 closure에 속한다. 따라서 closure는 \(K\)다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-1-5" data-level="2">
-        <p><span class="thm-head">연습 3.1.5</span> <span class="level">★★</span>
-        (a) 이산거리를 준 집합 \(X\)에서 모든 부분집합은 열려 있으면서 닫혀 있음을 보여라.
-        (b) 원소가 둘 이상인 집합 \(X\)에 밀착위상을 주면 한 점 집합 \(\{p\}\)가 닫힌집합이 아님을 보여라. 이것이 <a href="#i-3-1-14">명제 3.1.14</a>의 또 다른 증명이 되는 이유를 설명하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) <a href="#i-3-1-7">예 3.1.7</a>(c)에 의해 모든 부분집합이 열려 있다. \(A \subseteq X\)이면 \(X \setminus A\)도 부분집합이므로 열려 있고, 따라서 \(A\)는 닫혀 있다.</p>
-          <p>(b) \(X \setminus \{p\}\)는 \(p\)가 아닌 점을 포함하므로 \(\varnothing\)이 아니고, \(p\)를 포함하지 않으므로 \(X\)도 아니다. 밀착위상의 열린집합은 \(\varnothing\)과 \(X\)뿐이므로 \(X \setminus \{p\}\)는 열려 있지 않다.
-          한편 <a href="#i-3-1-18">예 3.1.18</a>(b)에 의해 거리 위상에서는 한 점 집합이 언제나 닫혀 있다. 따라서 밀착위상은 어떤 거리의 거리 위상도 될 수 없다.</p>
+        <p><span class="thm-head">Exercise 3.1.5</span> <span class="level">★★</span>
+        (a) discrete metric을 준 집합 \(X\)에서 모든 부분집합은 열려 있으면서 닫혀 있음을 보여라.
+        (b) 원소가 둘 이상인 집합 \(X\)에 trivial topology를 주면 한 점 집합 \(\{p\}\)가 closed set이 아님을 보여라. 이것이 <a href="#i-3-1-14">Proposition 3.1.14</a>의 또 다른 증명이 되는 이유를 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) <a href="#i-3-1-7">Example 3.1.7</a>(c)에 의해 모든 부분집합이 열려 있다. \(A \subseteq X\)이면 \(X \setminus A\)도 부분집합이므로 열려 있고, 따라서 \(A\)는 닫혀 있다.</p>
+          <p>(b) \(X \setminus \{p\}\)는 \(p\)가 아닌 점을 포함하므로 \(\varnothing\)이 아니고, \(p\)를 포함하지 않으므로 \(X\)도 아니다. trivial topology의 open set은 \(\varnothing\)과 \(X\)뿐이므로 \(X \setminus \{p\}\)는 열려 있지 않다.
+          한편 <a href="#i-3-1-18">Example 3.1.18</a>(b)에 의해 metric topology에서는 한 점 집합이 언제나 닫혀 있다. 따라서 trivial topology는 어떤 metric의 metric topology도 될 수 없다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-1-6" data-level="2">
-        <p><span class="thm-head">연습 3.1.6</span> <span class="level">★★</span>
-        \(\R\)에서 닫힌집합들의 합집합이 닫혀 있지 않은 예를 들어라. 이것이 <a href="#i-3-1-16">명제 3.1.16</a>(c)의 “유한개”가 필요한 이유임을 <a href="#i-3-1-10">비예 3.1.10</a>과 연결해 설명하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(A_k = [1/k,\ 1]\) (\(k = 1, 2, \dots\))는 닫힌집합이다(여집합이 두 열린 반직선의 합집합). 그런데 \(\bigcup_k A_k = (0, 1]\)은 닫혀 있지 않다(<a href="#ex-3-1-1">연습 3.1.1</a>(a)).
-          드모르간 법칙으로 여집합을 보면 \(\R \setminus \bigcup_k A_k = \bigcap_k (\R \setminus A_k)\)이다. 즉 닫힌집합의 무한 합집합에 대한 주장은 열린집합의 무한 교집합에 대한 주장과 같고,
-          후자는 <a href="#i-3-1-10">비예 3.1.10</a>에서 보았듯 거짓일 수 있다.</p>
+        <p><span class="thm-head">Exercise 3.1.6</span> <span class="level">★★</span>
+        \(\R\)에서 closed set들의 합집합이 닫혀 있지 않은 예를 들어라. 이것이 <a href="#i-3-1-16">Proposition 3.1.16</a>(c)의 “유한개”가 필요한 이유임을 <a href="#i-3-1-10">Non-example 3.1.10</a>과 연결해 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(A_k = [1/k,\ 1]\) (\(k = 1, 2, \dots\))는 closed set이다(여집합이 두 열린 반직선의 합집합). 그런데 \(\bigcup_k A_k = (0, 1]\)은 닫혀 있지 않다(<a href="#ex-3-1-1">Exercise 3.1.1</a>(a)).
+          De Morgan's laws로 여집합을 보면 \(\R \setminus \bigcup_k A_k = \bigcap_k (\R \setminus A_k)\)이다. 즉 closed set의 무한 합집합에 대한 주장은 open set의 무한 교집합에 대한 주장과 같고,
+          후자는 <a href="#i-3-1-10">Non-example 3.1.10</a>에서 보았듯 거짓일 수 있다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-3-1-7" data-level="2">
-        <p><span class="thm-head">연습 3.1.7</span> <span class="level">★★</span>
-        단위구면 \(S^2 \subseteq \R^3\) 위에서 현의 길이 \(d(x, y) = \abs{x - y}\)(<a href="#i-3-1-4">예 3.1.4</a>(a))와 두 점이 원점에서 이루는 각
-        \(d_{\mathrm{arc}}(x, y) = \arccos\inner{x}{y} \in [0, \pi]\)를 비교하자. \(d_{\mathrm{arc}}\)가 거리라는 사실(대원을 따라 잰 거리)은 받아들인다.
-        \(\tfrac{2}{\pi}\,d_{\mathrm{arc}} \le d \le d_{\mathrm{arc}}\)임을 보이고, 두 거리가 \(S^2\) 위에 같은 위상을 준다고 결론지어라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(\theta = d_{\mathrm{arc}}(x, y)\)로 두면 \(\abs{x - y}^2 = 2 - 2\cos\theta = 4\sin^2(\theta/2)\)이다. \([0, \pi/2]\)에서 \(\tfrac{2}{\pi}t \le \sin t \le t\)이다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 3.1.7</span> <span class="level">★★</span>
+        unit sphere \(S^2 \subseteq \R^3\) 위에서 현의 길이 \(d(x, y) = \abs{x - y}\)(<a href="#i-3-1-4">Example 3.1.4</a>(a))와 두 점이 원점에서 이루는 각
+        \(d_{\mathrm{arc}}(x, y) = \arccos\inner{x}{y} \in [0, \pi]\)를 비교하자. \(d_{\mathrm{arc}}\)가 metric이라는 사실(great circle을 따라 잰 metric)은 받아들인다.
+        \(\tfrac{2}{\pi}\,d_{\mathrm{arc}} \le d \le d_{\mathrm{arc}}\)임을 보이고, 두 metric이 \(S^2\) 위에 같은 topology를 준다고 결론지어라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(\theta = d_{\mathrm{arc}}(x, y)\)로 두면 \(\abs{x - y}^2 = 2 - 2\cos\theta = 4\sin^2(\theta/2)\)이다. \([0, \pi/2]\)에서 \(\tfrac{2}{\pi}t \le \sin t \le t\)이다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>\(\abs{x} = \abs{y} = 1\)이므로 \(\abs{x - y}^2 = \inner{x-y}{x-y} = \abs{x}^2 - 2\inner{x}{y} + \abs{y}^2 = 2 - 2\cos\theta = 4\sin^2(\theta/2)\)이다.
           \(\theta/2 \in [0, \pi/2]\)에서 \(\sin(\theta/2) \ge 0\)이므로 \(d(x, y) = 2\sin(\theta/2)\)이다.</p>
-          <p>\(t \in [0, \pi/2]\)에서 \(\sin t \le t\)이다(\(t - \sin t\)는 \(0\)에서 \(0\)이고 도함수 \(1 - \cos t \ge 0\)). 또 \(\sin\)은 \([0, \pi/2]\)에서 위로 볼록(\(\sin'' = -\sin \le 0\))이므로 그래프가 두 끝점 \((0,0)\), \((\pi/2, 1)\)을 잇는 선분 \(y = \tfrac{2}{\pi}t\) 위에 있다: \(\sin t \ge \tfrac{2}{\pi}t\).
+          <p>\(t \in [0, \pi/2]\)에서 \(\sin t \le t\)이다(\(t - \sin t\)는 \(0\)에서 \(0\)이고 도함수 \(1 - \cos t \ge 0\)). 또 \(\sin\)은 \([0, \pi/2]\)에서 위로 convex(\(\sin'' = -\sin \le 0\))이므로 그래프가 두 끝점 \((0,0)\), \((\pi/2, 1)\)을 잇는 선분 \(y = \tfrac{2}{\pi}t\) 위에 있다: \(\sin t \ge \tfrac{2}{\pi}t\).
           \(t = \theta/2\)를 넣고 2를 곱하면 \(\tfrac{2}{\pi}\theta \le 2\sin(\theta/2) \le \theta\), 즉 \(\tfrac{2}{\pi}d_{\mathrm{arc}} \le d \le d_{\mathrm{arc}}\)이다.
-          <a href="#i-3-1-25">명제 3.1.25</a>(b)에서 \(c = 2/\pi\), \(C = 1\)로 두면 두 거리는 같은 위상을 준다.</p>
-          <p>(내적 \(\inner{x}{y}\)는 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-2">예 1.5.2</a>(a)의 유클리드 내적이고, \(\theta = \arccos\inner{x}{y}\)는 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6</a>(c)의 두 벡터 사이의 각이다.)</p>
-          <p class="verified">검증: <code>verify/v-3-1-topological-spaces.py</code></p>
+          <a href="#i-3-1-25">Proposition 3.1.25</a>(b)에서 \(c = 2/\pi\), \(C = 1\)로 두면 두 metric은 같은 topology를 준다.</p>
+          <p>(inner product \(\inner{x}{y}\)는 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-2">Example 1.5.2</a>(a)의 Euclidean inner product이고, \(\theta = \arccos\inner{x}{y}\)는 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">Corollary 1.5.6</a>(c)의 두 벡터 사이의 각이다.)</p>
+          <p class="verified">Verification: <code>verify/v-3-1-topological-spaces.py</code></p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="index.html">← 3. 위상공간 기초 (장 개요)</a>
-    <a rel="next" href="3-2-continuity-homeomorphism.html">3.2 연속사상과 위상동형사상 →</a>
+    <a rel="prev" href="index.html">← 3. Basic Topology (Chapter overview)</a>
+    <a rel="next" href="3-2-continuity-homeomorphism.html">3.2 Continuous Maps and Homeomorphisms →</a>
   </nav>
 </body>
 </html>

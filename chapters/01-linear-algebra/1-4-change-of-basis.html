@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>1.4 기저변환과 성분변환 — 미분기하 스터디</title>
+  <title>1.4 Change of Basis and Transformation of Components — DG Study</title>
   <meta name="dg-id" content="1.4">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="1.1, 1.2, 1.3">
@@ -15,387 +15,387 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">1. 선형대수 복습</a> ›
-    <span>1.4 기저변환과 성분변환</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">1. Linear Algebra Review</a> ›
+    <span>1.4 Change of Basis and Transformation of Components</span>
   </nav>
 
   <main>
     <header>
-      <h1>1.4 기저변환과 성분변환</h1>
-      <p class="meta">대응 교재:
-        <a class="cite" href="../../references.html#Ax">[Ax 3장]</a>,
-        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 11장]</a>,
-        <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM 부록 B]</a></p>
+      <h1>1.4 Change of Basis and Transformation of Components</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Ax">[Ax Ch. 3]</a>,
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM Ch. 11]</a>,
+        <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM App. B]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>기저변환 행렬 \(B\)를 쓰고, 기저를 바꿀 때 벡터의 성분은 \(B^{-1}\)로, 여벡터의 성분은 \(B\)로 변한다는 것을 증명할 수 있다.</li>
-        <li>반변과 공변이라는 말의 뜻을 알고, 위·아래 첨자 규약(<a href="#i-1-4-9">비고 1.4.9</a>)으로 식이 맞는지 점검할 수 있다.</li>
-        <li>\(\omega(v) = \sum_i \omega_i v^i\)가 기저에 무관한 이유를 성분의 변환으로 설명할 수 있다.</li>
-        <li>선형사상의 행렬이 \(C^{-1}AB\)로 변함을 보이고, 대각합처럼 기저에 무관한 양을 찾을 수 있다.</li>
+        <li>change-of-basis matrix \(B\)를 쓰고, basis를 바꿀 때 벡터의 성분은 \(B^{-1}\)로, covector의 성분은 \(B\)로 변한다는 것을 증명할 수 있다.</li>
+        <li>contravariant와 covariant라는 말의 뜻을 알고, 위·아래 첨자 규약(<a href="#i-1-4-9">Remark 1.4.9</a>)으로 식이 맞는지 점검할 수 있다.</li>
+        <li>\(\omega(v) = \sum_i \omega_i v^i\)가 basis에 무관한 이유를 성분의 변환으로 설명할 수 있다.</li>
+        <li>linear map의 행렬이 \(C^{-1}AB\)로 변함을 보이고, trace처럼 basis에 무관한 양을 찾을 수 있다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="1-1-vector-spaces-bases.html#i-1-1-13">정리 1.1.13</a>, <a href="1-1-vector-spaces-bases.html#i-1-1-14">정의 1.1.14 (성분)</a>, <a href="1-1-vector-spaces-bases.html#i-1-1-15">예 1.1.15 (기준 기저)</a></li>
-        <li><a href="1-2-linear-maps.html#i-1-2-13">정의 1.2.13 (선형사상의 행렬)</a>, <a href="1-2-linear-maps.html#i-1-2-14">명제 1.2.14</a>, <a href="1-2-linear-maps.html#i-1-2-16">정리 1.2.16 (합성과 행렬곱)</a></li>
-        <li><a href="1-3-dual-spaces.html#i-1-3-4">정의 1.3.4 (쌍대기저)</a>, <a href="1-3-dual-spaces.html#i-1-3-5">정리 1.3.5</a>, <a href="1-3-dual-spaces.html#eq-1-3-4">식 (1.3.4)</a>, <a href="1-3-dual-spaces.html#i-1-3-9">예 1.3.9 (극좌표 기저)</a></li>
+        <li><a href="1-1-vector-spaces-bases.html#i-1-1-13">Theorem 1.1.13</a>, <a href="1-1-vector-spaces-bases.html#i-1-1-14">Definition 1.1.14 (components)</a>, <a href="1-1-vector-spaces-bases.html#i-1-1-15">Example 1.1.15 (running basis)</a></li>
+        <li><a href="1-2-linear-maps.html#i-1-2-13">Definition 1.2.13 (matrix of a linear map)</a>, <a href="1-2-linear-maps.html#i-1-2-14">Proposition 1.2.14</a>, <a href="1-2-linear-maps.html#i-1-2-16">Theorem 1.2.16 (composition and matrix multiplication)</a></li>
+        <li><a href="1-3-dual-spaces.html#i-1-3-4">Definition 1.3.4 (dual basis)</a>, <a href="1-3-dual-spaces.html#i-1-3-5">Theorem 1.3.5</a>, <a href="1-3-dual-spaces.html#eq-1-3-4">Equation (1.3.4)</a>, <a href="1-3-dual-spaces.html#i-1-3-9">Example 1.3.9 (polar coordinates basis)</a></li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p><a href="1-3-dual-spaces.html">1.3절</a>에서 기저 \(\mathcal{B} = (b_i)\)를 하나 고르면 벡터는 성분 \(v^i = \beta^i(v)\)를, 여벡터는 성분 \(\omega_i = \omega(b_i)\)를 갖게 되었다.
-      두 성분 모두 기저에 의존한다. 그러면 기저를 다른 것으로 바꿀 때 성분은 어떻게 바뀌는가? 이것이 <a href="1-1-vector-spaces-bases.html">1.1절</a>의 두 번째 질문,
+      <h2>Motivation</h2>
+      <p><a href="1-3-dual-spaces.html">Section 1.3</a>에서 basis \(\mathcal{B} = (b_i)\)를 하나 고르면 벡터는 성분 \(v^i = \beta^i(v)\)를, covector는 성분 \(\omega_i = \omega(b_i)\)를 갖게 되었다.
+      두 성분 모두 basis에 의존한다. 그러면 basis를 다른 것으로 바꿀 때 성분은 어떻게 바뀌는가? 이것이 <a href="1-1-vector-spaces-bases.html">Section 1.1</a>의 두 번째 질문,
       “좌표를 다르게 고르면 무엇이 바뀌고 무엇이 바뀌지 않는가”이다.</p>
-      <p>단위를 바꾸는 상황을 떠올리면 답의 모양을 짐작할 수 있다. 길이가 \(3\,\mathrm{m}\)인 변위를 \(1\,\mathrm{m}\)짜리 기저벡터로 재면 성분이 \(3\)이고,
-      \(1\,\mathrm{cm}\)짜리 기저벡터(길이가 \(1/100\))로 재면 성분이 \(300\)이다. <em>기저벡터가 작아지면 벡터의 성분은 커진다.</em> 반대로 “\(1\,\mathrm{m}\)당 온도가 \(2\)도 오른다”는
-      기울기는 \(1\,\mathrm{m}\) 기저벡터에서 값이 \(2\)이고 \(1\,\mathrm{cm}\) 기저벡터에서 값이 \(0.02\)이다. <em>기저벡터가 작아지면 여벡터의 성분도 작아진다.</em>
-      그리고 둘을 곱한 온도 변화 \(3 \times 2 = 300 \times 0.02 = 6\)은 단위와 상관없이 같다. 이 절은 이 관찰을 일반적인 기저변환에서 정확한 정리로 만든다.</p>
+      <p>단위를 바꾸는 상황을 떠올리면 답의 모양을 짐작할 수 있다. 길이가 \(3\,\mathrm{m}\)인 변위를 \(1\,\mathrm{m}\)짜리 basis vector로 재면 성분이 \(3\)이고,
+      \(1\,\mathrm{cm}\)짜리 basis vector(길이가 \(1/100\))로 재면 성분이 \(300\)이다. <em>basis vector가 작아지면 벡터의 성분은 커진다.</em> 반대로 “\(1\,\mathrm{m}\)당 온도가 \(2\)도 오른다”는
+      기울기는 \(1\,\mathrm{m}\) basis vector에서 값이 \(2\)이고 \(1\,\mathrm{cm}\) basis vector에서 값이 \(0.02\)이다. <em>basis vector가 작아지면 covector의 성분도 작아진다.</em>
+      그리고 둘을 곱한 온도 변화 \(3 \times 2 = 300 \times 0.02 = 6\)은 단위와 상관없이 같다. 이 절은 이 관찰을 일반적인 change of basis에서 정확한 정리로 만든다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 같은 대상, 다른 눈금</p>
-        <p><a href="#fig-1-4-1">그림 1.4.1</a>의 세 패널에는 모두 같은 벡터 \(v\)와 같은 여벡터 \(\omega\)(등위선)가 그려져 있다. 바뀌는 것은 격자, 즉 기저뿐이다.
-        (b)에서 첫 기저벡터를 두 배로 늘이면 \(v\)의 첫 성분은 절반이 되고 \(\omega\)의 첫 성분(늘인 기저벡터가 건너는 등위선의 수)은 두 배가 된다.
-        벡터의 성분은 기저와 <em>반대로</em>, 여벡터의 성분은 기저와 <em>함께</em> 변한다. 그리고 세 패널 모두에서 \(\sum_i \omega_i v^i = 3\)이다.</p>
+        <p class="box-title">Intuition: 같은 대상, 다른 눈금</p>
+        <p><a href="#fig-1-4-1">Figure 1.4.1</a>의 세 패널에는 모두 같은 벡터 \(v\)와 같은 covector \(\omega\)(등위선)가 그려져 있다. 바뀌는 것은 격자, 즉 basis뿐이다.
+        (b)에서 첫 basis vector를 두 배로 늘이면 \(v\)의 첫 성분은 절반이 되고 \(\omega\)의 첫 성분(늘인 basis vector가 건너는 등위선의 수)은 두 배가 된다.
+        벡터의 성분은 basis와 <em>반대로</em>, covector의 성분은 basis와 <em>함께</em> 변한다. 그리고 세 패널 모두에서 \(\sum_i \omega_i v^i = 3\)이다.</p>
       </aside>
 
       <figure class="dg-figure" id="fig-1-4-1">
-        <img src="figures/fig-1-4-1-change-of-basis.svg" alt="세 평면 그림. 모든 패널에 같은 검정 벡터 v=(1,2)와 기울기 -1인 자주색 평행선(여벡터 x1+x2의 등위선)이 있다. (a) 표준기저 e1, e2와 정사각 격자. (b) 가로로 두 배 늘인 기저 2e1, e2와 직사각 격자. (c) 기준 기저 b1=(2,1), b2=(-1,1)과 비스듬한 격자. 각 패널 아래에 v의 성분과 여벡터의 성분이 적혀 있다.">
-        <figcaption><span class="fig-head">그림 1.4.1.</span>
-        같은 벡터 \(v = (1,2)\)와 같은 여벡터 \(\omega(x) = x^1 + x^2\)를 세 기저로 읽는다.
-        (a) 표준기저: \([v] = (1, 2)\), \((\omega_1, \omega_2) = (1, 1)\).
+        <img src="figures/fig-1-4-1-change-of-basis.svg" alt="세 평면 그림. 모든 패널에 같은 검정 벡터 v=(1,2)와 기울기 -1인 자주색 평행선(covector x1+x2의 등위선)이 있다. (a) standard basis e1, e2와 정사각 격자. (b) 가로로 두 배 늘인 basis 2e1, e2와 직사각 격자. (c) 기준 basis b1=(2,1), b2=(-1,1)과 비스듬한 격자. 각 패널 아래에 v의 성분과 covector의 성분이 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 1.4.1.</span>
+        같은 벡터 \(v = (1,2)\)와 같은 covector \(\omega(x) = x^1 + x^2\)를 세 basis로 읽는다.
+        (a) standard basis: \([v] = (1, 2)\), \((\omega_1, \omega_2) = (1, 1)\).
         (b) \(\tilde b_1 = 2e_1\), \(\tilde b_2 = e_2\): \([v] = (\tfrac12, 2)\), \((\omega_1, \omega_2) = (2, 1)\).
-        (c) 기준 기저 \(\mathcal{B}\): \([v] = (1,1)\), \((\omega_1, \omega_2) = (3, 0)\).
-        어느 경우에도 \(\sum_i \omega_i v^i = 3 = \omega(v)\)이다(<a href="#i-1-4-10">예 1.4.10</a>).</figcaption>
+        (c) 기준 basis \(\mathcal{B}\): \([v] = (1,1)\), \((\omega_1, \omega_2) = (3, 0)\).
+        어느 경우에도 \(\sum_i \omega_i v^i = 3 = \omega(v)\)이다(<a href="#i-1-4-10">Example 1.4.10</a>).</figcaption>
       </figure>
     </section>
 
     <section id="sec-transition">
-      <h2>기저변환 행렬</h2>
-      <p>이 절에서 \(V\)는 \(n\)차원 벡터공간이고, \(\mathcal{B} = (b_1, \dots, b_n)\)을 “옛 기저”, \(\tilde{\mathcal{B}} = (\tilde b_1, \dots, \tilde b_n)\)을 “새 기저”라 부른다.
-      새 기저에 대한 것에는 모두 물결표를 붙인다: 성분 \(\tilde v^j\), \(\tilde\omega_j\), 쌍대기저 \(\tilde\beta^j\).</p>
+      <h2>Change-of-Basis Matrices</h2>
+      <p>이 절에서 \(V\)는 \(n\)-dimensional vector space이고, \(\mathcal{B} = (b_1, \dots, b_n)\)을 “옛 basis”, \(\tilde{\mathcal{B}} = (\tilde b_1, \dots, \tilde b_n)\)을 “새 basis”라 부른다.
+      새 basis에 대한 것에는 모두 물결표를 붙인다: 성분 \(\tilde v^j\), \(\tilde\omega_j\), dual basis \(\tilde\beta^j\).</p>
 
       <div class="thm definition" id="i-1-4-1">
-        <p><span class="thm-head">정의 1.4.1</span> <span class="thm-name">(기저변환 행렬, change-of-basis matrix)</span>.
-        새 기저벡터를 옛 기저로 전개한 식을</p>
+        <p><span class="thm-head">Definition 1.4.1</span> <span class="thm-name">(change-of-basis matrix)</span>.
+        새 basis vector를 옛 basis로 전개한 식을</p>
         <div class="equation" id="eq-1-4-1">
         \[ \tilde b_j = \sum_{i=1}^{n} B^i_j\, b_i \qquad (j = 1, \dots, n) \tag{1.4.1} \]
         </div>
-        <p>이라 할 때, \(i\)행 \(j\)열의 성분이 \(B^i_j\)인 \(n \times n\) 행렬 \(B\)를 \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 <dfn>기저변환 행렬</dfn>(change-of-basis matrix)이라 한다.
+        <p>이라 할 때, \(i\)행 \(j\)열의 성분이 \(B^i_j\)인 \(n \times n\) 행렬 \(B\)를 \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 <dfn>change-of-basis matrix</dfn>(기저변환 행렬)이라 한다.
         \(B\)의 \(j\)번째 열은 \(\tilde b_j\)의 옛 성분 \([\tilde b_j]_{\mathcal{B}}\)이다.</p>
       </div>
 
-      <p><a href="#eq-1-4-1">(1.4.1)</a>을 <a href="1-2-linear-maps.html#i-1-2-13">정의 1.2.13</a>과 비교하면 \(B\)는 항등사상의 행렬이다: \(B = [\id_V]^{\mathcal{B}}_{\tilde{\mathcal{B}}}\). 항등사상은 동형사상이므로
-      따름정리 <a href="1-2-linear-maps.html#i-1-2-17">1.2.17</a>에 의해 <strong>\(B\)는 가역</strong>이다. 벡터는 그대로 두고 이름표(기저)만 바꾸는 것이므로 항등사상이 나오는 것이 자연스럽다.</p>
+      <p><a href="#eq-1-4-1">(1.4.1)</a>을 <a href="1-2-linear-maps.html#i-1-2-13">Definition 1.2.13</a>과 비교하면 \(B\)는 identity map의 행렬이다: \(B = [\id_V]^{\mathcal{B}}_{\tilde{\mathcal{B}}}\). identity map은 isomorphism이므로
+      Corollary <a href="1-2-linear-maps.html#i-1-2-17">1.2.17</a>에 의해 <strong>\(B\)는 invertible</strong>이다. 벡터는 그대로 두고 이름표(basis)만 바꾸는 것이므로 identity map이 나오는 것이 자연스럽다.</p>
 
       <div class="thm example" id="i-1-4-2">
-        <p><span class="thm-head">예 1.4.2</span>.
-        (a) \(\R^n\)에서 옛 기저가 표준기저 \(\mathcal{E}\)이면 \(\tilde b_j\)의 성분은 \(\tilde b_j\) 자신이므로, \(B\)는 열이 \(\tilde b_1, \dots, \tilde b_n\)인 행렬이다.
-        기준 기저 \(\mathcal{B}\)로 바꾸는 경우 \(b_1 = 2e_1 + e_2\), \(b_2 = -e_1 + e_2\)이므로
+        <p><span class="thm-head">Example 1.4.2</span>.
+        (a) \(\R^n\)에서 옛 basis가 standard basis \(\mathcal{E}\)이면 \(\tilde b_j\)의 성분은 \(\tilde b_j\) 자신이므로, \(B\)는 열이 \(\tilde b_1, \dots, \tilde b_n\)인 행렬이다.
+        기준 basis \(\mathcal{B}\)로 바꾸는 경우 \(b_1 = 2e_1 + e_2\), \(b_2 = -e_1 + e_2\)이므로
         \(B = \begin{pmatrix} 2 & -1 \\ 1 & 1 \end{pmatrix}\)이고, 이것은 <a href="1-2-linear-maps.html#eq-1-2-5">(1.2.5)</a>의 \(B\)와 같다.</p>
-        <p>(b) (늘이기) \(\tilde b_1 = 2e_1\), \(\tilde b_2 = e_2\)이면 \(B = \begin{pmatrix} 2 & 0 \\ 0 & 1 \end{pmatrix}\)이다(<a href="#fig-1-4-1">그림 1.4.1</a>(b)).</p>
+        <p>(b) (늘이기) \(\tilde b_1 = 2e_1\), \(\tilde b_2 = e_2\)이면 \(B = \begin{pmatrix} 2 & 0 \\ 0 & 1 \end{pmatrix}\)이다(<a href="#fig-1-4-1">Figure 1.4.1</a>(b)).</p>
         <p>(c) (순서 바꾸기) \(\tilde b_1 = b_2\), \(\tilde b_2 = b_1\)이면 \(B = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}\)이다.</p>
       </div>
 
       <div class="thm nonexample" id="i-1-4-3">
-        <p><span class="thm-head">비예 1.4.3</span>.
-        (a) 새 기저벡터를 <em>행</em>으로 늘어놓은 \(\begin{pmatrix} 2 & 1 \\ -1 & 1 \end{pmatrix}\)은 \(\mathcal{E}\)에서 \(\mathcal{B}\)로의 기저변환 행렬이 아니다. 그 전치행렬이다.
+        <p><span class="thm-head">Non-example 1.4.3</span>.
+        (a) 새 basis vector를 <em>행</em>으로 늘어놓은 \(\begin{pmatrix} 2 & 1 \\ -1 & 1 \end{pmatrix}\)은 \(\mathcal{E}\)에서 \(\mathcal{B}\)로의 change-of-basis matrix가 아니다. 그 transpose이다.
         이 행렬로 성분을 바꾸면 틀린 답이 나온다.
-        (b) \((b_1, 2b_1)\)처럼 기저가 아닌 목록으로는 기저변환 행렬을 만들 수 없다. 옛 기저를 \(\mathcal{E}\)로 두고 형식적으로 <a href="#eq-1-4-1">(1.4.1)</a>을 써서 만든 \(\begin{pmatrix} 2 & 4 \\ 1 & 2 \end{pmatrix}\)은 가역이 아니고,
-        이 목록에 대한 “성분”은 정의되지 않는다(<a href="1-1-vector-spaces-bases.html#i-1-1-16">비예 1.1.16</a>).</p>
+        (b) \((b_1, 2b_1)\)처럼 basis가 아닌 목록으로는 change-of-basis matrix를 만들 수 없다. 옛 basis를 \(\mathcal{E}\)로 두고 형식적으로 <a href="#eq-1-4-1">(1.4.1)</a>을 써서 만든 \(\begin{pmatrix} 2 & 4 \\ 1 & 2 \end{pmatrix}\)은 invertible하지 않고,
+        이 목록에 대한 “성분”은 정의되지 않는다(<a href="1-1-vector-spaces-bases.html#i-1-1-16">Non-example 1.1.16</a>).</p>
       </div>
 
-      <p>기저를 두 번 바꾸거나 되돌리는 경우는 <a href="1-2-linear-maps.html#i-1-2-16">정리 1.2.16</a>에서 바로 나온다. <a href="1-6-determinant-orientation.html">1.6절</a>에서 방향을 정의할 때 이 명제를 쓴다.</p>
+      <p>basis를 두 번 바꾸거나 되돌리는 경우는 <a href="1-2-linear-maps.html#i-1-2-16">Theorem 1.2.16</a>에서 바로 나온다. <a href="1-6-determinant-orientation.html">Section 1.6</a>에서 orientation을 정의할 때 이 명제를 쓴다.</p>
 
       <div class="thm proposition" id="i-1-4-4">
-        <p><span class="thm-head">명제 1.4.4</span> <span class="thm-name">(기저변환의 합성)</span>.
-        \(\mathcal{B}, \tilde{\mathcal{B}}, \hat{\mathcal{B}}\)이 \(V\)의 기저이고, \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 기저변환 행렬이 \(B\), \(\tilde{\mathcal{B}}\)에서 \(\hat{\mathcal{B}}\)로의 기저변환 행렬이 \(C\)라 하자.</p>
+        <p><span class="thm-head">Proposition 1.4.4</span> <span class="thm-name">(composition of changes of basis)</span>.
+        \(\mathcal{B}, \tilde{\mathcal{B}}, \hat{\mathcal{B}}\)이 \(V\)의 basis이고, \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 change-of-basis matrix가 \(B\), \(\tilde{\mathcal{B}}\)에서 \(\hat{\mathcal{B}}\)로의 change-of-basis matrix가 \(C\)라 하자.</p>
         <ul>
-          <li>(a) \(\mathcal{B}\)에서 \(\mathcal{B}\) 자신으로의 기저변환 행렬은 \(I\)이다.</li>
-          <li>(b) \(\mathcal{B}\)에서 \(\hat{\mathcal{B}}\)로의 기저변환 행렬은 \(BC\)이다.</li>
-          <li>(c) \(\tilde{\mathcal{B}}\)에서 \(\mathcal{B}\)로의 기저변환 행렬은 \(B^{-1}\)이다.</li>
+          <li>(a) \(\mathcal{B}\)에서 \(\mathcal{B}\) 자신으로의 change-of-basis matrix는 \(I\)이다.</li>
+          <li>(b) \(\mathcal{B}\)에서 \(\hat{\mathcal{B}}\)로의 change-of-basis matrix는 \(BC\)이다.</li>
+          <li>(c) \(\tilde{\mathcal{B}}\)에서 \(\mathcal{B}\)로의 change-of-basis matrix는 \(B^{-1}\)이다.</li>
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        기저변환 행렬은 항등사상의 행렬이다: \(B = [\id]^{\mathcal{B}}_{\tilde{\mathcal{B}}}\), \(C = [\id]^{\tilde{\mathcal{B}}}_{\hat{\mathcal{B}}}\).
-        (a)는 <a href="1-2-linear-maps.html#i-1-2-17">따름정리 1.2.17</a>의 증명 첫 줄이다. (b) \(\id = \id \circ \id\)에 <a href="1-2-linear-maps.html#i-1-2-16">정리 1.2.16</a>을 쓰면
+        <p><span class="proof-head">Proof.</span>
+        change-of-basis matrix는 identity map의 행렬이다: \(B = [\id]^{\mathcal{B}}_{\tilde{\mathcal{B}}}\), \(C = [\id]^{\tilde{\mathcal{B}}}_{\hat{\mathcal{B}}}\).
+        (a)는 <a href="1-2-linear-maps.html#i-1-2-17">Corollary 1.2.17</a>의 증명 첫 줄이다. (b) \(\id = \id \circ \id\)에 <a href="1-2-linear-maps.html#i-1-2-16">Theorem 1.2.16</a>을 쓰면
         \([\id]^{\mathcal{B}}_{\hat{\mathcal{B}}} = [\id]^{\mathcal{B}}_{\tilde{\mathcal{B}}}\,[\id]^{\tilde{\mathcal{B}}}_{\hat{\mathcal{B}}} = BC\)이다.
         (c) \(\tilde{\mathcal{B}}\)에서 \(\mathcal{B}\)로의 행렬을 \(B'\)이라 하면, (b)를 \(\mathcal{B} \to \tilde{\mathcal{B}} \to \mathcal{B}\)와 \(\tilde{\mathcal{B}} \to \mathcal{B} \to \tilde{\mathcal{B}}\)에 쓰고 (a)를 쓰면 \(BB' = I\), \(B'B = I\)이다. 따라서 \(B' = B^{-1}\)이다.</p>
       </div>
     </section>
 
     <section id="sec-transformation-laws">
-      <h2>벡터 성분과 여벡터 성분의 변환</h2>
+      <h2>Transformation of Vector and Covector Components</h2>
 
       <div class="thm theorem" id="i-1-4-5">
-        <p><span class="thm-head">정리 1.4.5</span> <span class="thm-name">(벡터 성분의 변환)</span>.
-        \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 기저변환 행렬이 \(B\)이면, 모든 \(v \in V\)에 대하여</p>
+        <p><span class="thm-head">Theorem 1.4.5</span> <span class="thm-name">(transformation of vector components)</span>.
+        \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 change-of-basis matrix가 \(B\)이면, 모든 \(v \in V\)에 대하여</p>
         <div class="equation" id="eq-1-4-2">
         \[ v^i = \sum_{j=1}^{n} B^i_j\, \tilde v^j, \qquad \tilde v^j = \sum_{i=1}^{n} (B^{-1})^j_i\, v^i \tag{1.4.2} \]
         </div>
         <p>이다. 행렬로 쓰면 \([v]_{\mathcal{B}} = B\,[v]_{\tilde{\mathcal{B}}}\), \([v]_{\tilde{\mathcal{B}}} = B^{-1}[v]_{\mathcal{B}}\)이다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 기저벡터는 \(B\)로 새것이 되는데(식 <a href="#eq-1-4-1">(1.4.1)</a>), 벡터의 성분은 \(B^{-1}\)로 새것이 된다. 방향이 거꾸로다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> basis vector는 \(B\)로 새것이 되는데(<a href="#eq-1-4-1">(1.4.1)</a>), 벡터의 성분은 \(B^{-1}\)로 새것이 된다. 방향이 거꾸로다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 같은 벡터를 새 기저로 쓴 식에 <a href="#eq-1-4-1">(1.4.1)</a>을 넣어 옛 기저로 다시 쓰고, 성분이 하나뿐이라는 사실(<a href="1-1-vector-spaces-bases.html#i-1-1-13">정리 1.1.13</a>)을 쓴다.</p>
-        <p><span class="proof-head">증명.</span>
+        <p class="proof-idea">Proof idea: 같은 벡터를 새 basis로 쓴 식에 <a href="#eq-1-4-1">(1.4.1)</a>을 넣어 옛 basis로 다시 쓰고, 성분이 하나뿐이라는 사실(<a href="1-1-vector-spaces-bases.html#i-1-1-13">Theorem 1.1.13</a>)을 쓴다.</p>
+        <p><span class="proof-head">Proof.</span>
         이 계산이 처음 나오므로 모든 단계를 쓴다. \(v = \sum_j \tilde v^j \tilde b_j\)에 <a href="#eq-1-4-1">(1.4.1)</a>을 넣으면
         \[ v = \sum_{j=1}^{n} \tilde v^j \tilde b_j = \sum_{j=1}^{n} \tilde v^j \Big(\sum_{i=1}^{n} B^i_j\, b_i\Big) = \sum_{i=1}^{n} \Big(\sum_{j=1}^{n} B^i_j\, \tilde v^j\Big) b_i \]
-        이다. 마지막 등호는 유한합의 순서를 바꾸고 \(b_i\)로 묶은 것이다. 한편 \(v = \sum_i v^i b_i\)이다. <a href="1-1-vector-spaces-bases.html#i-1-1-13">정리 1.1.13</a>에 의해 \(\mathcal{B}\)-성분은 하나뿐이므로
+        이다. 마지막 등호는 유한합의 순서를 바꾸고 \(b_i\)로 묶은 것이다. 한편 \(v = \sum_i v^i b_i\)이다. <a href="1-1-vector-spaces-bases.html#i-1-1-13">Theorem 1.1.13</a>에 의해 \(\mathcal{B}\)-성분은 하나뿐이므로
         \(v^i = \sum_j B^i_j \tilde v^j\)이다. 이것이 <a href="#eq-1-4-2">(1.4.2)</a>의 첫 식이고, 행렬로 쓰면 \([v]_{\mathcal{B}} = B[v]_{\tilde{\mathcal{B}}}\)이다. 양변에 \(B^{-1}\)을 곱하면 둘째 식이다.
-        (같은 결과를 <a href="1-2-linear-maps.html#i-1-2-14">명제 1.2.14</a>를 \(T = \id\)에 써서 한 줄로 얻을 수도 있다: \([v]_{\mathcal{B}} = [\id]^{\mathcal{B}}_{\tilde{\mathcal{B}}}[v]_{\tilde{\mathcal{B}}}\).)</p>
+        (같은 결과를 <a href="1-2-linear-maps.html#i-1-2-14">Proposition 1.2.14</a>를 \(T = \id\)에 써서 한 줄로 얻을 수도 있다: \([v]_{\mathcal{B}} = [\id]^{\mathcal{B}}_{\tilde{\mathcal{B}}}[v]_{\tilde{\mathcal{B}}}\).)</p>
       </div>
 
       <div class="thm theorem" id="i-1-4-6">
-        <p><span class="thm-head">정리 1.4.6</span> <span class="thm-name">(여벡터 성분과 쌍대기저의 변환)</span>.
-        \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 기저변환 행렬이 \(B\)이고 \((\beta^i)\), \((\tilde\beta^j)\)가 각각의 쌍대기저라 하자. 모든 \(\omega \in V^*\)에 대하여</p>
+        <p><span class="thm-head">Theorem 1.4.6</span> <span class="thm-name">(transformation of covector components and the dual basis)</span>.
+        \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 change-of-basis matrix가 \(B\)이고 \((\beta^i)\), \((\tilde\beta^j)\)가 각각의 dual basis라 하자. 모든 \(\omega \in V^*\)에 대하여</p>
         <div class="equation" id="eq-1-4-3">
         \[ \tilde\omega_j = \sum_{i=1}^{n} \omega_i\, B^i_j, \qquad \tilde\beta^j = \sum_{i=1}^{n} (B^{-1})^j_i\, \beta^i \tag{1.4.3} \]
         </div>
-        <p>이다. 여벡터의 성분을 행벡터로 쓰면 \((\tilde\omega_1, \dots, \tilde\omega_n) = (\omega_1, \dots, \omega_n)\,B\)이다.</p>
+        <p>이다. covector의 성분을 행벡터로 쓰면 \((\tilde\omega_1, \dots, \tilde\omega_n) = (\omega_1, \dots, \omega_n)\,B\)이다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 여벡터의 성분은 기저벡터와 <em>같은</em> 행렬 \(B\)로 변하고(식 <a href="#eq-1-4-1">(1.4.1)</a>과 비교), 쌍대기저는 벡터의 성분과 같은 \(B^{-1}\)로 변한다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> covector의 성분은 basis vector와 <em>같은</em> 행렬 \(B\)로 변하고(<a href="#eq-1-4-1">(1.4.1)</a>과 비교), dual basis는 벡터의 성분과 같은 \(B^{-1}\)로 변한다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 여벡터의 성분은 기저벡터에서의 값이므로, 기저벡터가 변하는 대로 따라 변한다.</p>
-        <p><span class="proof-head">증명.</span>
-        정리 <a href="1-3-dual-spaces.html#i-1-3-5">1.3.5</a>에 의해 \(\tilde\omega_j = \omega(\tilde b_j)\)이다. <a href="#eq-1-4-1">(1.4.1)</a>과 \(\omega\)의 선형성에서
+        <p class="proof-idea">Proof idea: covector의 성분은 basis vector에서의 값이므로, basis vector가 변하는 대로 따라 변한다.</p>
+        <p><span class="proof-head">Proof.</span>
+        Theorem <a href="1-3-dual-spaces.html#i-1-3-5">1.3.5</a>에 의해 \(\tilde\omega_j = \omega(\tilde b_j)\)이다. <a href="#eq-1-4-1">(1.4.1)</a>과 \(\omega\)의 linearity에서
         \[ \tilde\omega_j = \omega\Big(\sum_{i} B^i_j\, b_i\Big) = \sum_{i} B^i_j\, \omega(b_i) = \sum_{i} \omega_i\, B^i_j \]
-        이다. 쌍대기저에 대해서는 \(\eta^j = \sum_i (B^{-1})^j_i \beta^i\)로 두고 \(\eta^j(\tilde b_k)\)를 계산한다. \(\beta^i(\tilde b_k) = \beta^i\big(\sum_l B^l_k b_l\big) = \sum_l B^l_k \delta^i_l = B^i_k\)이므로
+        이다. dual basis에 대해서는 \(\eta^j = \sum_i (B^{-1})^j_i \beta^i\)로 두고 \(\eta^j(\tilde b_k)\)를 계산한다. \(\beta^i(\tilde b_k) = \beta^i\big(\sum_l B^l_k b_l\big) = \sum_l B^l_k \delta^i_l = B^i_k\)이므로
         \[ \eta^j(\tilde b_k) = \sum_{i} (B^{-1})^j_i\, B^i_k = (B^{-1}B)^j_k = \delta^j_k \]
-        이다. 즉 \((\eta^j)\)는 \(\tilde{\mathcal{B}}\)에 대해 <a href="1-3-dual-spaces.html#eq-1-3-2">(1.3.2)</a>를 만족하고, 그런 여벡터는 하나뿐이므로(<a href="1-3-dual-spaces.html#i-1-3-4">정의 1.3.4</a>) \(\eta^j = \tilde\beta^j\)이다.</p>
+        이다. 즉 \((\eta^j)\)는 \(\tilde{\mathcal{B}}\)에 대해 <a href="1-3-dual-spaces.html#eq-1-3-2">(1.3.2)</a>를 만족하고, 그런 covector는 하나뿐이므로(<a href="1-3-dual-spaces.html#i-1-3-4">Definition 1.3.4</a>) \(\eta^j = \tilde\beta^j\)이다.</p>
       </div>
 
       <div class="thm definition" id="i-1-4-7">
-        <p><span class="thm-head">정의 1.4.7</span> <span class="thm-name">(반변과 공변, contravariant and covariant)</span>.
-        기저를 \(B\)로 바꿀 때 <a href="#eq-1-4-2">(1.4.2)</a>처럼 \(B^{-1}\)로 변하는 성분을 <dfn>반변</dfn>(contravariant) 성분, <a href="#eq-1-4-3">(1.4.3)</a>의 첫 식처럼 기저벡터와 같은 \(B\)로 변하는 성분을
-        <dfn>공변</dfn>(covariant) 성분이라 한다. 벡터의 성분은 반변 성분이고 여벡터의 성분은 공변 성분이다.</p>
+        <p><span class="thm-head">Definition 1.4.7</span> <span class="thm-name">(contravariant and covariant)</span>.
+        basis를 \(B\)로 바꿀 때 <a href="#eq-1-4-2">(1.4.2)</a>처럼 \(B^{-1}\)로 변하는 성분을 <dfn>contravariant</dfn>(반변) 성분, <a href="#eq-1-4-3">(1.4.3)</a>의 첫 식처럼 basis vector와 같은 \(B\)로 변하는 성분을
+        <dfn>covariant</dfn>(공변) 성분이라 한다. 벡터의 성분은 contravariant 성분이고 covector의 성분은 covariant 성분이다.</p>
       </div>
 
-      <p>“반변”은 기저와 반대로 변한다는 뜻이고, “공변”은 기저와 함께 변한다는 뜻이다. 예를 들어 <a href="#fig-1-4-1">그림 1.4.1</a>(b)에서 \(B = \diag(2, 1)\)이므로
-      \(\tilde v^1 = \tfrac12 v^1\)(반변), \(\tilde\omega_1 = 2\omega_1\)(공변)이다. 한편 “이 성분이 벡터의 것인가 여벡터의 것인가”를 따지는 비예로, 벡터 두 개의 성분을 곱해 더한
-      \(\sum_i v^i w^i\)를 보자. 이것은 반변 성분끼리의 짝이어서 기저에 따라 값이 달라진다(<a href="#ex-1-4-3">연습 1.4.3</a>(b)). 반변과 공변이 짝을 이룰 때에만 변환이 서로 상쇄된다.</p>
+      <p>“contravariant”는 basis와 반대로 변한다는 뜻이고, “covariant”는 basis와 함께 변한다는 뜻이다. 예를 들어 <a href="#fig-1-4-1">Figure 1.4.1</a>(b)에서 \(B = \diag(2, 1)\)이므로
+      \(\tilde v^1 = \tfrac12 v^1\)(contravariant), \(\tilde\omega_1 = 2\omega_1\)(covariant)이다. 한편 “이 성분이 벡터의 것인가 covector의 것인가”를 따지는 non-example로, 벡터 두 개의 성분을 곱해 더한
+      \(\sum_i v^i w^i\)를 보자. 이것은 contravariant 성분끼리의 짝이어서 basis에 따라 값이 달라진다(<a href="#ex-1-4-3">Exercise 1.4.3</a>(b)). contravariant와 covariant가 짝을 이룰 때에만 변환이 서로 상쇄된다.</p>
 
       <div class="thm proposition" id="i-1-4-8">
-        <p><span class="thm-head">명제 1.4.8</span> <span class="thm-name">(\(\sum_i \omega_i v^i\)는 기저에 무관하다)</span>.
-        모든 \(\omega \in V^*\), \(v \in V\)와 두 기저 \(\mathcal{B}, \tilde{\mathcal{B}}\)에 대하여 \(\sum_j \tilde\omega_j \tilde v^j = \sum_i \omega_i v^i\)이다.</p>
+        <p><span class="thm-head">Proposition 1.4.8</span> <span class="thm-name">(\(\sum_i \omega_i v^i\) is independent of the basis)</span>.
+        모든 \(\omega \in V^*\), \(v \in V\)와 두 basis \(\mathcal{B}, \tilde{\mathcal{B}}\)에 대하여 \(\sum_j \tilde\omega_j \tilde v^j = \sum_i \omega_i v^i\)이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        두 값이 모두 \(\omega(v)\)라는 것은 식 <a href="1-3-dual-spaces.html#eq-1-3-4">(1.3.4)</a>에서 이미 안다. 여기서는 그것을 변환 법칙만으로 확인해 두자. 뒤에서 텐서의 성분을 다룰 때 같은 계산이 되풀이된다.
+        <p><span class="proof-head">Proof.</span>
+        두 값이 모두 \(\omega(v)\)라는 것은 <a href="1-3-dual-spaces.html#eq-1-3-4">(1.3.4)</a>에서 이미 안다. 여기서는 그것을 변환 법칙만으로 확인해 두자. 뒤에서 텐서의 성분을 다룰 때 같은 계산이 되풀이된다.
         <a href="#eq-1-4-3">(1.4.3)</a>과 <a href="#eq-1-4-2">(1.4.2)</a>에서
         \[ \begin{aligned}
            \sum_j \tilde\omega_j \tilde v^j &= \sum_j \Big(\sum_i \omega_i B^i_j\Big)\Big(\sum_k (B^{-1})^j_k v^k\Big) \\
            &= \sum_{i,k} \omega_i \Big(\sum_j B^i_j (B^{-1})^j_k\Big) v^k \\
            &= \sum_{i,k} \omega_i\, \delta^i_k\, v^k = \sum_i \omega_i v^i
         \end{aligned} \]
-        이다. 셋째 등호는 \(BB^{-1} = I\)이다. 공변 성분의 \(B\)와 반변 성분의 \(B^{-1}\)이 만나 사라졌다.</p>
+        이다. 셋째 등호는 \(BB^{-1} = I\)이다. covariant 성분의 \(B\)와 contravariant 성분의 \(B^{-1}\)이 만나 사라졌다.</p>
       </div>
 
       <div class="thm remark" id="i-1-4-9">
-        <p><span class="thm-head">비고 1.4.9</span> <span class="thm-name">(인덱스 위치 규약)</span>.
+        <p><span class="thm-head">Remark 1.4.9</span> <span class="thm-name">(index placement convention)</span>.
         이 study set 전체에서 첨자의 위치를 다음과 같이 쓴다. 이 규약은 여기서 도입하고 끝까지 유지한다.</p>
         <ul>
-          <li>(a) 기저벡터는 아래첨자 \(b_i\), 벡터의 성분은 위첨자 \(v^i\). 성분은 반변이다.</li>
-          <li>(b) 쌍대기저는 위첨자 \(\beta^i\), 여벡터의 성분은 아래첨자 \(\omega_i\). 성분은 공변이다.</li>
-          <li>(c) 선형사상과 기저변환의 행렬 성분은 \(A^i_j\)로 쓴다. 위첨자는 행(도착 쪽), 아래첨자는 열(출발 쪽)이다. 크로네커 델타도 \(\delta^i_j\)이다.</li>
+          <li>(a) basis vector는 아래첨자 \(b_i\), 벡터의 성분은 위첨자 \(v^i\). 성분은 contravariant이다.</li>
+          <li>(b) dual basis는 위첨자 \(\beta^i\), covector의 성분은 아래첨자 \(\omega_i\). 성분은 covariant이다.</li>
+          <li>(c) linear map과 change of basis의 행렬 성분은 \(A^i_j\)로 쓴다. 위첨자는 행(도착 쪽), 아래첨자는 열(출발 쪽)이다. Kronecker delta도 \(\delta^i_j\)이다.</li>
           <li>(d) <strong>균형 규칙.</strong> 합은 같은 문자가 한 번은 위, 한 번은 아래에 나올 때만 한다. 합하고 남은 첨자(자유 첨자)는 등식의 양변에서 위치가 같아야 한다.
           예를 들어 \(\tilde v^j = \sum_i (B^{-1})^j_i v^i\)에서 \(i\)는 위·아래 짝으로 더해지고, 자유 첨자 \(j\)는 양변에서 모두 위에 있다.</li>
-          <li>(e) 합 기호 \(\sum\)는 <a href="../13-tangent-spaces/index.html">13장</a>에서 아인슈타인 합 규약을 도입하기 전까지 생략하지 않는다.</li>
-          <li>(f) 뒤의 장에서 좌표함수는 위첨자 \(x^i\), 좌표벡터는 아래첨자 \(\partial_i\), 좌표 1-형식은 위첨자 \(dx^i\)로 쓴다. (a), (b)와 같은 규칙이다.</li>
+          <li>(e) 합 기호 \(\sum\)는 <a href="../13-tangent-spaces/index.html">Chapter 13</a>에서 아인슈타인 합 규약을 도입하기 전까지 생략하지 않는다.</li>
+          <li>(f) 뒤의 장에서 coordinate functions는 위첨자 \(x^i\), 좌표벡터는 아래첨자 \(\partial_i\), 좌표 1-형식은 위첨자 \(dx^i\)로 쓴다. (a), (b)와 같은 규칙이다.</li>
         </ul>
-        <p>균형 규칙이 성립하도록 쓰면, <a href="#i-1-4-8">명제 1.4.8</a>의 계산처럼 짝을 이룬 첨자에서 \(B\)와 \(B^{-1}\)이 상쇄되어 결과가 기저에 무관하다. 그래서 첨자의 위치만 보고도 식이 틀렸는지 상당 부분 점검할 수 있다(<a href="#ex-1-4-4">연습 1.4.4</a>).
+        <p>균형 규칙이 성립하도록 쓰면, <a href="#i-1-4-8">Proposition 1.4.8</a>의 계산처럼 짝을 이룬 첨자에서 \(B\)와 \(B^{-1}\)이 상쇄되어 결과가 basis에 무관하다. 그래서 첨자의 위치만 보고도 식이 틀렸는지 상당 부분 점검할 수 있다(<a href="#ex-1-4-4">Exercise 1.4.4</a>).
         위첨자는 거듭제곱이 아니다. 제곱은 \((x^2)^2\)처럼 괄호로 쓴다.</p>
       </div>
     </section>
 
     <section id="sec-examples">
-      <h2>계산 예</h2>
+      <h2>Worked Examples</h2>
 
       <div class="thm example" id="i-1-4-10">
-        <p><span class="thm-head">예 1.4.10</span> <span class="thm-name">(표준기저에서 기준 기저로)</span>.
-        옛 기저를 \(\mathcal{E} = (e_1, e_2)\), 새 기저를 기준 기저 \(\mathcal{B} = (b_1, b_2)\)로 두자. <a href="#i-1-4-2">예 1.4.2</a>(a)에서
-        \(B = \begin{pmatrix} 2 & -1 \\ 1 & 1 \end{pmatrix}\)이고 <a href="1-2-linear-maps.html#i-1-2-18">예 1.2.18</a>에서 \(B^{-1} = \tfrac13\begin{pmatrix} 1 & 1 \\ -1 & 2 \end{pmatrix}\)이다.
-        (정리를 쓸 때 옛 기저 자리에 \(\mathcal{E}\), 새 기저 자리에 \(\mathcal{B}\)를 넣는다. 새 성분에는 물결표 대신 “\(\mathcal{B}\)-성분”이라는 말을 쓴다.)</p>
+        <p><span class="thm-head">Example 1.4.10</span> <span class="thm-name">(from the standard basis to the running basis)</span>.
+        옛 basis를 \(\mathcal{E} = (e_1, e_2)\), 새 basis를 기준 basis \(\mathcal{B} = (b_1, b_2)\)로 두자. <a href="#i-1-4-2">Example 1.4.2</a>(a)에서
+        \(B = \begin{pmatrix} 2 & -1 \\ 1 & 1 \end{pmatrix}\)이고 <a href="1-2-linear-maps.html#i-1-2-18">Example 1.2.18</a>에서 \(B^{-1} = \tfrac13\begin{pmatrix} 1 & 1 \\ -1 & 2 \end{pmatrix}\)이다.
+        (정리를 쓸 때 옛 basis 자리에 \(\mathcal{E}\), 새 basis 자리에 \(\mathcal{B}\)를 넣는다. 새 성분에는 물결표 대신 “\(\mathcal{B}\)-성분”이라는 말을 쓴다.)</p>
         <p><em>벡터.</em> \(v = (1, 2)\)의 옛 성분은 \((1, 2)\)이다. <a href="#eq-1-4-2">(1.4.2)</a>에서 새 성분은
         \[ [v]_{\mathcal{B}} = B^{-1}\begin{pmatrix} 1 \\ 2 \end{pmatrix} = \frac13\begin{pmatrix} 1 \cdot 1 + 1 \cdot 2 \\ (-1) \cdot 1 + 2 \cdot 2 \end{pmatrix} = \begin{pmatrix} 1 \\ 1 \end{pmatrix} \]
-        이다. 예 <a href="1-1-vector-spaces-bases.html#i-1-1-15">1.1.15</a>에서 직접 풀어 얻은 것과 같다.</p>
-        <p><em>여벡터.</em> \(\omega(x) = x^1 + x^2\)의 옛 성분은 \((\omega_1, \omega_2) = (\omega(e_1), \omega(e_2)) = (1, 1)\)이다. <a href="#eq-1-4-3">(1.4.3)</a>에서 새 성분은
+        이다. Example <a href="1-1-vector-spaces-bases.html#i-1-1-15">1.1.15</a>에서 직접 풀어 얻은 것과 같다.</p>
+        <p><em>covector.</em> \(\omega(x) = x^1 + x^2\)의 옛 성분은 \((\omega_1, \omega_2) = (\omega(e_1), \omega(e_2)) = (1, 1)\)이다. <a href="#eq-1-4-3">(1.4.3)</a>에서 새 성분은
         \[ (1,\ 1)\begin{pmatrix} 2 & -1 \\ 1 & 1 \end{pmatrix} = (1 \cdot 2 + 1 \cdot 1,\ \ 1 \cdot (-1) + 1 \cdot 1) = (3,\ 0) \]
         이다. 직접 계산해도 \(\omega(b_1) = 2 + 1 = 3\), \(\omega(b_2) = -1 + 1 = 0\)이다. 즉 \(\omega = 3\beta^1\)이고, 그래서 \(\omega\)의 등위선이 \(\beta^1\)의 등위선과 평행하다
-        (<a href="1-3-dual-spaces.html#fig-1-3-1">그림 1.3.1</a>).</p>
-        <p><em>불변량.</em> 옛 성분으로 \(1 \cdot 1 + 1 \cdot 2 = 3\), 새 성분으로 \(3 \cdot 1 + 0 \cdot 1 = 3\)이다. 둘 다 \(\omega(v) = 1 + 2 = 3\)이다(<a href="#i-1-4-8">명제 1.4.8</a>, <a href="#fig-1-4-1">그림 1.4.1</a>(a), (c)).</p>
-        <p><em>쌍대기저.</em> <a href="#eq-1-4-3">(1.4.3)</a>의 둘째 식에서 \(\beta^1 = \tfrac13(e^1 + e^2)\), \(\beta^2 = \tfrac13(-e^1 + 2e^2)\)로 \(B^{-1}\)의 행이고, 예 <a href="1-3-dual-spaces.html#i-1-3-6">1.3.6</a>과 같다.</p>
-        <p class="verified">검증: <code>verify/v-1-4-change-of-basis.py</code></p>
+        (<a href="1-3-dual-spaces.html#fig-1-3-1">Figure 1.3.1</a>).</p>
+        <p><em>불변량.</em> 옛 성분으로 \(1 \cdot 1 + 1 \cdot 2 = 3\), 새 성분으로 \(3 \cdot 1 + 0 \cdot 1 = 3\)이다. 둘 다 \(\omega(v) = 1 + 2 = 3\)이다(<a href="#i-1-4-8">Proposition 1.4.8</a>, <a href="#fig-1-4-1">Figure 1.4.1</a>(a), (c)).</p>
+        <p><em>dual basis.</em> <a href="#eq-1-4-3">(1.4.3)</a>의 둘째 식에서 \(\beta^1 = \tfrac13(e^1 + e^2)\), \(\beta^2 = \tfrac13(-e^1 + 2e^2)\)로 \(B^{-1}\)의 행이고, Example <a href="1-3-dual-spaces.html#i-1-3-6">1.3.6</a>과 같다.</p>
+        <p class="verified">Verification: <code>verify/v-1-4-change-of-basis.py</code></p>
       </div>
 
       <div class="thm example" id="i-1-4-11">
-        <p><span class="thm-head">예 1.4.11</span> <span class="thm-name">(극좌표 기저)</span>.
-        점 \(p = (r\cos\theta, r\sin\theta)\)(\(r \gt 0\))에서 옛 기저 \(\mathcal{E}\)를 예 <a href="1-3-dual-spaces.html#i-1-3-9">1.3.9</a>의 극좌표 기저
-        \(\tilde b_1 = (\cos\theta, \sin\theta)\), \(\tilde b_2 = (-r\sin\theta, r\cos\theta)\)로 바꾸자. 기저변환 행렬 \(B\)와 \(B^{-1}\)은 <a href="1-3-dual-spaces.html#eq-1-3-8">(1.3.8)</a>이다.</p>
+        <p><span class="thm-head">Example 1.4.11</span> <span class="thm-name">(polar coordinates basis)</span>.
+        점 \(p = (r\cos\theta, r\sin\theta)\)(\(r \gt 0\))에서 옛 basis \(\mathcal{E}\)를 Example <a href="1-3-dual-spaces.html#i-1-3-9">1.3.9</a>의 polar coordinates basis
+        \(\tilde b_1 = (\cos\theta, \sin\theta)\), \(\tilde b_2 = (-r\sin\theta, r\cos\theta)\)로 바꾸자. change-of-basis matrix \(B\)와 \(B^{-1}\)은 <a href="1-3-dual-spaces.html#eq-1-3-8">(1.3.8)</a>이다.</p>
         <p><em>벡터.</em> <a href="#eq-1-4-2">(1.4.2)</a>에서 \(v = (v^1, v^2)\)의 새 성분은
         \[ \tilde v^1 = \cos\theta\, v^1 + \sin\theta\, v^2, \qquad \tilde v^2 = \frac{-\sin\theta\, v^1 + \cos\theta\, v^2}{r} \]
         이다. \(\tilde v^1\)은 \(v\)의 “바깥쪽으로 가는 빠르기”, \(\tilde v^2\)는 “각이 늘어나는 빠르기”다. 예를 들어 \(r = 2\), \(\theta = \pi/2\)(점 \(p = (0, 2)\))에서
         \(v = e_1\)이면 \(\tilde v = (0, -\tfrac12)\)이다. 원의 꼭대기에서 오른쪽으로 움직이면 반지름은 그대로이고 각은 줄어든다. 확인: \(-\tfrac12\tilde b_2 = -\tfrac12(-2, 0) = (1, 0)\).</p>
-        <p><em>여벡터.</em> 둘째 좌표를 읽는 여벡터 \(e^2\)의 옛 성분은 \((0, 1)\)이고, <a href="#eq-1-4-3">(1.4.3)</a>에서 새 성분은
+        <p><em>covector.</em> 둘째 좌표를 읽는 covector \(e^2\)의 옛 성분은 \((0, 1)\)이고, <a href="#eq-1-4-3">(1.4.3)</a>에서 새 성분은
         \[ (0,\ 1)\,B = (\sin\theta,\ \ r\cos\theta) \]
-        이다. 이 두 수는 \(y = r\sin\theta\)를 \(r\)과 \(\theta\)로 편미분한 값 \(\partial y/\partial r\), \(\partial y/\partial\theta\)와 같다. 같은 방법으로 \(e^1\)의 새 성분은
+        이다. 이 두 수는 \(y = r\sin\theta\)의 \(r\)과 \(\theta\)에 대한 partial derivative \(\partial y/\partial r\), \(\partial y/\partial\theta\)와 같다. 같은 방법으로 \(e^1\)의 새 성분은
         \((\cos\theta, -r\sin\theta) = (\partial x/\partial r, \partial x/\partial\theta)\)이다(\(x = r\cos\theta\)).</p>
-        <p class="verified">검증: <code>verify/v-1-4-change-of-basis.py</code></p>
+        <p class="verified">Verification: <code>verify/v-1-4-change-of-basis.py</code></p>
       </div>
 
       <aside class="box warning">
-        <p class="box-title">주의: 기저변환은 벡터를 움직이지 않는다</p>
-        <p>기저변환 행렬 \(B\)는 항등사상의 행렬이다. 벡터 \(v\)는 그대로 있고, \(v\)를 부르는 수(성분)만 바뀐다. 이것을 <em>수동적</em> 변환이라 부르기도 한다.
-        반면 행렬 \(B\)를 선형사상 \(x \mapsto Bx\)로 보고 \(v\)에 적용하면 \(v\)가 다른 벡터 \(Bv\)로 움직인다(<em>능동적</em> 변환, <a href="1-2-linear-maps.html#fig-1-2-1">그림 1.2.1</a>(a)).
-        같은 행렬이 두 역할을 하므로 헷갈리기 쉽다. \(B\)를 쓸지 \(B^{-1}\)을 쓸지 헷갈릴 때는 (i) <a href="#i-1-4-9">비고 1.4.9</a>의 균형 규칙, (ii) <a href="#fig-1-4-1">그림 1.4.1</a>(b)의 늘이기 예(기저벡터가 길어지면 성분은 작아진다)로 확인한다.</p>
+        <p class="box-title">Warning: change of basis는 벡터를 움직이지 않는다</p>
+        <p>change-of-basis matrix \(B\)는 identity map의 행렬이다. 벡터 \(v\)는 그대로 있고, \(v\)를 부르는 수(성분)만 바뀐다. 이것을 <em>수동적</em> 변환이라 부르기도 한다.
+        반면 행렬 \(B\)를 linear map \(x \mapsto Bx\)로 보고 \(v\)에 적용하면 \(v\)가 다른 벡터 \(Bv\)로 움직인다(<em>능동적</em> 변환, <a href="1-2-linear-maps.html#fig-1-2-1">Figure 1.2.1</a>(a)).
+        같은 행렬이 두 역할을 하므로 헷갈리기 쉽다. \(B\)를 쓸지 \(B^{-1}\)을 쓸지 헷갈릴 때는 (i) <a href="#i-1-4-9">Remark 1.4.9</a>의 균형 규칙, (ii) <a href="#fig-1-4-1">Figure 1.4.1</a>(b)의 늘이기 예(basis vector가 길어지면 성분은 작아진다)로 확인한다.</p>
       </aside>
 
       <aside class="box convention">
-        <p class="box-title">규약 비교: 기저변환 행렬의 방향</p>
-        <p>“기저변환 행렬”이 가리키는 행렬은 교재마다 다르다. 이 study set은 새 기저를 옛 기저로 나타낸 <a href="#eq-1-4-1">(1.4.1)</a>의 \(B\)를 쓴다. 이 행렬의 열은 새 기저벡터(의 옛 성분)이다.
-        일부 교재는 옛 기저를 새 기저로 나타낸 행렬, 즉 여기의 \(B^{-1}\)을 기저변환 행렬이라 부르고, 또 일부는 “성분을 옛것에서 새것으로 바꾸는 행렬”이라는 뜻으로 같은 이름을 쓴다
-        (<a href="#i-1-4-5">정리 1.4.5</a>에 의해 이것도 \(B^{-1}\)이다).
-        방향 판정(<a href="1-6-determinant-orientation.html">1.6절</a>)처럼 행렬식의 부호만 쓰는 경우에는 \(\det B^{-1} = 1/\det B\)이므로 어느 쪽이든 결과가 같다. 성분을 계산할 때는 반드시 어느 쪽인지 확인하자.</p>
+        <p class="box-title">Conventions: change-of-basis matrix의 방향</p>
+        <p>“change-of-basis matrix”가 가리키는 행렬은 교재마다 다르다. 이 study set은 새 basis를 옛 basis로 나타낸 <a href="#eq-1-4-1">(1.4.1)</a>의 \(B\)를 쓴다. 이 행렬의 열은 새 basis vector(의 옛 성분)이다.
+        일부 교재는 옛 basis를 새 basis로 나타낸 행렬, 즉 여기의 \(B^{-1}\)을 change-of-basis matrix라 부르고, 또 일부는 “성분을 옛것에서 새것으로 바꾸는 행렬”이라는 뜻으로 같은 이름을 쓴다
+        (<a href="#i-1-4-5">Theorem 1.4.5</a>에 의해 이것도 \(B^{-1}\)이다).
+        orientation 판정(<a href="1-6-determinant-orientation.html">Section 1.6</a>)처럼 determinant의 부호만 쓰는 경우에는 \(\det B^{-1} = 1/\det B\)이므로 어느 쪽이든 결과가 같다. 성분을 계산할 때는 반드시 어느 쪽인지 확인하자.</p>
       </aside>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 일반화: 좌표변환과 야코비 행렬</p>
-        <p><a href="../13-tangent-spaces/index.html">13장</a>에서 다양체의 두 좌표 \((x^i)\)와 \((\tilde x^j)\) 사이의 좌표벡터는 \(\tilde\partial_j = \sum_i \pd{x^i}{\tilde x^j}\,\partial_i\)로 변한다.
-        즉 기저변환 행렬이 야코비 행렬 \(B^i_j = \partial x^i/\partial\tilde x^j\)이고, 접벡터의 성분은 <a href="#i-1-4-5">정리 1.4.5</a>에 따라 \(\tilde v^j = \sum_i \pd{\tilde x^j}{x^i}\, v^i\)로 변한다.
-        <a href="../16-covectors-tensors/index.html">16장</a>에서는 <a href="#i-1-4-6">정리 1.4.6</a>이 \(d\tilde x^j = \sum_i \pd{\tilde x^j}{x^i}\,dx^i\)와 \(\tilde\omega_j = \sum_i \omega_i \pd{x^i}{\tilde x^j}\)가 된다.
-        <a href="#i-1-4-11">예 1.4.11</a>이 극좌표에서 이것을 미리 보여 준다. 또 \((k,l)\)형 텐서의 성분은 위첨자마다 \(B^{-1}\)을, 아래첨자마다 \(B\)를 하나씩 받는다.</p>
+        <p class="box-title">Looking ahead: transition map과 Jacobian matrix</p>
+        <p><a href="../13-tangent-spaces/index.html">Chapter 13</a>에서 manifold의 두 좌표 \((x^i)\)와 \((\tilde x^j)\) 사이의 좌표벡터는 \(\tilde\partial_j = \sum_i \pd{x^i}{\tilde x^j}\,\partial_i\)로 변한다.
+        즉 change-of-basis matrix가 Jacobian matrix \(B^i_j = \partial x^i/\partial\tilde x^j\)이고, tangent vector의 성분은 <a href="#i-1-4-5">Theorem 1.4.5</a>에 따라 \(\tilde v^j = \sum_i \pd{\tilde x^j}{x^i}\, v^i\)로 변한다.
+        <a href="../16-covectors-tensors/index.html">Chapter 16</a>에서는 <a href="#i-1-4-6">Theorem 1.4.6</a>이 \(d\tilde x^j = \sum_i \pd{\tilde x^j}{x^i}\,dx^i\)와 \(\tilde\omega_j = \sum_i \omega_i \pd{x^i}{\tilde x^j}\)가 된다.
+        <a href="#i-1-4-11">Example 1.4.11</a>이 polar coordinates에서 이것을 미리 보여 준다. 또 \((k,l)\)형 텐서의 성분은 위첨자마다 \(B^{-1}\)을, 아래첨자마다 \(B\)를 하나씩 받는다.</p>
       </aside>
     </section>
 
     <section id="sec-linear-maps">
-      <h2>선형사상의 행렬은 어떻게 변하는가</h2>
+      <h2>How the Matrix of a Linear Map Changes</h2>
 
       <div class="thm theorem" id="i-1-4-12">
-        <p><span class="thm-head">정리 1.4.12</span> <span class="thm-name">(행렬의 변환)</span>.
-        \(T\colon V \to W\)가 선형사상이고, \(V\)의 기저를 \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로(행렬 \(B\)), \(W\)의 기저를 \(\mathcal{C}\)에서 \(\tilde{\mathcal{C}}\)로(행렬 \(C\)) 바꾸면</p>
+        <p><span class="thm-head">Theorem 1.4.12</span> <span class="thm-name">(transformation of a matrix)</span>.
+        \(T\colon V \to W\)가 linear map이고, \(V\)의 basis를 \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로(행렬 \(B\)), \(W\)의 basis를 \(\mathcal{C}\)에서 \(\tilde{\mathcal{C}}\)로(행렬 \(C\)) 바꾸면</p>
         <div class="equation" id="eq-1-4-4">
         \[ [T]^{\tilde{\mathcal{C}}}_{\tilde{\mathcal{B}}} = C^{-1}\,[T]^{\mathcal{C}}_{\mathcal{B}}\,B, \qquad \tilde A^i_j = \sum_{k,l} (C^{-1})^i_k\, A^k_l\, B^l_j \tag{1.4.4} \]
         </div>
         <p>이다. 특히 \(T \in \End(V)\)이고 \(\mathcal{C} = \mathcal{B}\), \(\tilde{\mathcal{C}} = \tilde{\mathcal{B}}\)이면 \([T]_{\tilde{\mathcal{B}}} = B^{-1}[T]_{\mathcal{B}}B\)이다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 행렬 성분 \(A^i_j\)의 위첨자(도착 쪽)는 반변 성분처럼 \(C^{-1}\)을, 아래첨자(출발 쪽)는 공변 성분처럼 \(B\)를 받는다. 균형 규칙과도 맞는다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> 행렬 성분 \(A^i_j\)의 위첨자(도착 쪽)는 contravariant 성분처럼 \(C^{-1}\)을, 아래첨자(출발 쪽)는 covariant 성분처럼 \(B\)를 받는다. 균형 규칙과도 맞는다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(T\)를 \(\id_W \circ T \circ \id_V\)로 쓰고, 세 사상에 서로 다른 기저를 붙여 <a href="1-2-linear-maps.html#i-1-2-16">정리 1.2.16</a>을 쓴다. 양 끝의 항등사상의 행렬이 기저변환 행렬이다.</p>
-        <p><span class="proof-head">증명.</span>
-        \(T = \id_W \circ T \circ \id_V\)에 <a href="1-2-linear-maps.html#i-1-2-16">정리 1.2.16</a>을 기저 \(\tilde{\mathcal{B}} \to \mathcal{B} \to \mathcal{C} \to \tilde{\mathcal{C}}\)의 순서로 쓰면
+        <p class="proof-idea">Proof idea: \(T\)를 \(\id_W \circ T \circ \id_V\)로 쓰고, 세 map에 서로 다른 basis를 붙여 <a href="1-2-linear-maps.html#i-1-2-16">Theorem 1.2.16</a>을 쓴다. 양 끝의 identity map의 행렬이 change-of-basis matrix이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(T = \id_W \circ T \circ \id_V\)에 <a href="1-2-linear-maps.html#i-1-2-16">Theorem 1.2.16</a>을 basis \(\tilde{\mathcal{B}} \to \mathcal{B} \to \mathcal{C} \to \tilde{\mathcal{C}}\)의 순서로 쓰면
         \[ [T]^{\tilde{\mathcal{C}}}_{\tilde{\mathcal{B}}} = [\id_W]^{\tilde{\mathcal{C}}}_{\mathcal{C}}\,[T]^{\mathcal{C}}_{\mathcal{B}}\,[\id_V]^{\mathcal{B}}_{\tilde{\mathcal{B}}} \]
-        이다. \([\id_V]^{\mathcal{B}}_{\tilde{\mathcal{B}}} = B\)이고, <a href="#i-1-4-4">명제 1.4.4</a>(c)에 의해 \([\id_W]^{\tilde{\mathcal{C}}}_{\mathcal{C}} = C^{-1}\)이다. 성분식은 행렬곱을 풀어 쓴 것이다.</p>
+        이다. \([\id_V]^{\mathcal{B}}_{\tilde{\mathcal{B}}} = B\)이고, <a href="#i-1-4-4">Proposition 1.4.4</a>(c)에 의해 \([\id_W]^{\tilde{\mathcal{C}}}_{\mathcal{C}} = C^{-1}\)이다. 성분식은 행렬곱을 풀어 쓴 것이다.</p>
       </div>
 
       <div class="thm corollary" id="i-1-4-13">
-        <p><span class="thm-head">따름정리 1.4.13</span> <span class="thm-name">(대각합은 기저에 무관하다)</span>.
-        \(T \in \End(V)\)이면 \(\tr [T]_{\mathcal{B}}\)는 기저 \(\mathcal{B}\)를 어떻게 골라도 같다.</p>
+        <p><span class="thm-head">Corollary 1.4.13</span> <span class="thm-name">(the trace is independent of the basis)</span>.
+        \(T \in \End(V)\)이면 \(\tr [T]_{\mathcal{B}}\)는 basis \(\mathcal{B}\)를 어떻게 골라도 같다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
+        <p><span class="proof-head">Proof.</span>
         먼저 \(n \times n\) 행렬 \(X, Y\)에 대해 \(\tr(XY) = \tr(YX)\)이다:
         \(\tr(XY) = \sum_i (XY)^i_i = \sum_i \sum_k X^i_k Y^k_i = \sum_k \sum_i Y^k_i X^i_k = \sum_k (YX)^k_k = \tr(YX)\)이다.
-        <a href="#i-1-4-12">정리 1.4.12</a>에서 \([T]_{\tilde{\mathcal{B}}} = B^{-1}AB\)(\(A = [T]_{\mathcal{B}}\))이므로
+        <a href="#i-1-4-12">Theorem 1.4.12</a>에서 \([T]_{\tilde{\mathcal{B}}} = B^{-1}AB\)(\(A = [T]_{\mathcal{B}}\))이므로
         \(\tr(B^{-1}(AB)) = \tr((AB)B^{-1}) = \tr A\)이다.</p>
       </div>
 
-      <p>따라서 \(T \in \End(V)\)의 <dfn>대각합</dfn>(trace)을 아무 기저에서의 행렬의 대각합 \(\tr T = \tr[T]_{\mathcal{B}}\)로 정의할 수 있다. 행렬식도 같은 방식으로 선형사상의 양이 된다
-      (<a href="1-6-determinant-orientation.html">1.6절</a>). 반면 행렬 성분의 총합처럼 기저에 따라 달라지는 양은 선형사상의 성질이 아니다(<a href="#ex-1-4-3">연습 1.4.3</a>(e)).</p>
+      <p>따라서 \(T \in \End(V)\)의 <dfn>trace</dfn>(대각합)을 아무 basis에서의 행렬의 trace \(\tr T = \tr[T]_{\mathcal{B}}\)로 정의할 수 있다. determinant도 같은 방식으로 linear map의 양이 된다
+      (<a href="1-6-determinant-orientation.html">Section 1.6</a>). 반면 행렬 성분의 총합처럼 basis에 따라 달라지는 양은 linear map의 성질이 아니다(<a href="#ex-1-4-3">Exercise 1.4.3</a>(e)).</p>
 
       <div class="thm example" id="i-1-4-14">
-        <p><span class="thm-head">예 1.4.14</span> <span class="thm-name">(좋은 기저를 고르면 행렬이 단순해진다)</span>.
-        <a href="1-2-linear-maps.html#i-1-2-7">예 1.2.7</a>의 \(P\)는 표준기저에서 \(A = \tfrac12\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}\)이다. 새 기저 \(\tilde b_1 = (1, 1)\), \(\tilde b_2 = (1, -1)\)로 바꾸자.
+        <p><span class="thm-head">Example 1.4.14</span> <span class="thm-name">(a good basis simplifies the matrix)</span>.
+        <a href="1-2-linear-maps.html#i-1-2-7">Example 1.2.7</a>의 \(P\)는 standard basis에서 \(A = \tfrac12\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}\)이다. 새 basis \(\tilde b_1 = (1, 1)\), \(\tilde b_2 = (1, -1)\)로 바꾸자.
         \(B = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}\)이고 \(B^2 = 2I\)이므로 \(B^{-1} = \tfrac12 B\)이다. 차례로 계산하면
         \[ AB = \frac12\begin{pmatrix} 1 + 1 & 1 - 1 \\ 1 + 1 & 1 - 1 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 1 & 0 \end{pmatrix}, \qquad
            B^{-1}(AB) = \frac12\begin{pmatrix} 1 + 1 & 0 \\ 1 - 1 & 0 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix} \]
-        이다. 새 기저에서 \(P\)는 “첫 성분은 그대로, 둘째 성분은 \(0\)으로”라는 사상이다. \(\tilde b_1\)은 \(\im P\)를, \(\tilde b_2\)는 \(\ker P\)를 생성하기 때문이다
-        (<a href="1-2-linear-maps.html#fig-1-2-1">그림 1.2.1</a>(b)). 대각합은 두 기저에서 모두 \(1\)이다.</p>
-        <p class="verified">검증: <code>verify/v-1-4-change-of-basis.py</code></p>
+        이다. 새 basis에서 \(P\)는 “첫 성분은 그대로, 둘째 성분은 \(0\)으로”라는 map이다. \(\tilde b_1\)은 \(\im P\)를, \(\tilde b_2\)는 \(\ker P\)를 span하기 때문이다
+        (<a href="1-2-linear-maps.html#fig-1-2-1">Figure 1.2.1</a>(b)). trace는 두 basis에서 모두 \(1\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-1-4-change-of-basis.py</code></p>
       </div>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: 곡률은 기저에 무관하다</p>
-        <p><a href="../08-gauss-map/index.html">8장</a>에서 곡면의 평균곡률을 형태작용소 \(W_p \in \End(T_pS)\)의 대각합으로 \(H = \tfrac12\tr W_p\), 가우스 곡률을 행렬식으로 \(K = \det W_p\)로 정의한다.
-        \(W_p\)의 행렬은 매개화(즉 \(T_pS\)의 기저)에 따라 달라지지만, <a href="#i-1-4-13">따름정리 1.4.13</a>과 <a href="1-6-determinant-orientation.html">1.6절</a>의 결과 덕분에 \(H\)와 \(K\)는 곡면과 점만으로 정해진다.</p>
+        <p class="box-title">Looking ahead: curvature는 basis에 무관하다</p>
+        <p><a href="../08-gauss-map/index.html">Chapter 8</a>에서 surface의 mean curvature를 shape operator \(W_p \in \End(T_pS)\)의 trace로 \(H = \tfrac12\tr W_p\), Gaussian curvature를 determinant로 \(K = \det W_p\)로 정의한다.
+        \(W_p\)의 행렬은 parametrization(즉 \(T_pS\)의 basis)에 따라 달라지지만, <a href="#i-1-4-13">Corollary 1.4.13</a>과 <a href="1-6-determinant-orientation.html">Section 1.6</a>의 결과 덕분에 \(H\)와 \(K\)는 surface와 점만으로 정해진다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>새 기저를 옛 기저로 쓴 \(\tilde b_j = \sum_i B^i_j b_i\)의 행렬 \(B\)가 기저변환 행렬이고, 가역이다. 합성은 곱 \(BC\), 되돌리기는 \(B^{-1}\)이다(<a href="#i-1-4-4">명제 1.4.4</a>).</li>
-        <li>벡터의 성분은 \(\tilde v^j = \sum_i (B^{-1})^j_i v^i\)로 반대로(반변), 여벡터의 성분은 \(\tilde\omega_j = \sum_i \omega_i B^i_j\)로 함께(공변) 변한다(<a href="#i-1-4-5">정리 1.4.5</a>, <a href="#i-1-4-6">1.4.6</a>).</li>
-        <li>반변과 공변이 짝을 이루면 변환이 상쇄되어 \(\sum_i \omega_i v^i\)는 기저에 무관하다(<a href="#i-1-4-8">명제 1.4.8</a>).</li>
-        <li>위·아래 첨자의 균형 규칙이 이 상쇄를 눈에 보이게 해 준다(<a href="#i-1-4-9">비고 1.4.9</a>). 이 규약을 study set 끝까지 쓴다.</li>
-        <li>선형사상의 행렬은 \(C^{-1}AB\)로 변하고, 대각합은 기저에 무관하다(<a href="#i-1-4-12">정리 1.4.12</a>, <a href="#i-1-4-13">따름정리 1.4.13</a>).</li>
+        <li>새 basis를 옛 basis로 쓴 \(\tilde b_j = \sum_i B^i_j b_i\)의 행렬 \(B\)가 change-of-basis matrix이고, invertible이다. 합성은 곱 \(BC\), 되돌리기는 \(B^{-1}\)이다(<a href="#i-1-4-4">Proposition 1.4.4</a>).</li>
+        <li>벡터의 성분은 \(\tilde v^j = \sum_i (B^{-1})^j_i v^i\)로 반대로(contravariant), covector의 성분은 \(\tilde\omega_j = \sum_i \omega_i B^i_j\)로 함께(covariant) 변한다(<a href="#i-1-4-5">Theorem 1.4.5</a>, <a href="#i-1-4-6">1.4.6</a>).</li>
+        <li>contravariant와 covariant가 짝을 이루면 변환이 상쇄되어 \(\sum_i \omega_i v^i\)는 basis에 무관하다(<a href="#i-1-4-8">Proposition 1.4.8</a>).</li>
+        <li>위·아래 첨자의 균형 규칙이 이 상쇄를 눈에 보이게 해 준다(<a href="#i-1-4-9">Remark 1.4.9</a>). 이 규약을 study set 끝까지 쓴다.</li>
+        <li>linear map의 행렬은 \(C^{-1}AB\)로 변하고, trace는 basis에 무관하다(<a href="#i-1-4-12">Theorem 1.4.12</a>, <a href="#i-1-4-13">Corollary 1.4.13</a>).</li>
       </ul>
-      <p class="next">다음 절에서는 벡터의 길이와 각을 재는 도구, 내적을 다룬다. 두 벡터의 성분을 곱해 더한 \(\sum_i v^i w^i\)는 기저에 무관하지 않았다. 기저에 무관하게 길이와 각을 재려면 벡터공간에 무엇을 더해야 하는가?</p>
+      <p class="next">다음 절에서는 벡터의 길이와 각을 재는 도구, inner product를 다룬다. 두 벡터의 성분을 곱해 더한 \(\sum_i v^i w^i\)는 basis에 무관하지 않았다. basis에 무관하게 길이와 각을 재려면 vector space에 무엇을 더해야 하는가?</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-1-4-1" data-level="1">
-        <p><span class="thm-head">연습 1.4.1</span> <span class="level">★</span>
-        \(\R^2\)의 표준기저를 \(\tilde b_1 = (1, 1)\), \(\tilde b_2 = (1, -1)\)로 바꾼다. \(B\)와 \(B^{-1}\)을 구하고, \(v = (3, 1)\)의 새 성분과 \(\omega = 2e^1 - e^2\)의 새 성분을 구하여라.
-        두 기저에서 \(\sum_i \omega_i v^i\)가 같음을 확인하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(B = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}\), \(B^{-1} = \tfrac12\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}\)(<a href="#i-1-4-14">예 1.4.14</a>).
+        <p><span class="thm-head">Exercise 1.4.1</span> <span class="level">★</span>
+        \(\R^2\)의 standard basis를 \(\tilde b_1 = (1, 1)\), \(\tilde b_2 = (1, -1)\)로 바꾼다. \(B\)와 \(B^{-1}\)을 구하고, \(v = (3, 1)\)의 새 성분과 \(\omega = 2e^1 - e^2\)의 새 성분을 구하여라.
+        두 basis에서 \(\sum_i \omega_i v^i\)가 같음을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(B = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}\), \(B^{-1} = \tfrac12\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}\)(<a href="#i-1-4-14">Example 1.4.14</a>).
           \([v]_{\tilde{\mathcal{B}}} = B^{-1}(3,1)^{\mathsf{T}} = \tfrac12(4, 2)^{\mathsf{T}} = (2, 1)^{\mathsf{T}}\). 확인: \(2(1,1) + (1,-1) = (3, 1)\).
           \((\tilde\omega_1, \tilde\omega_2) = (2, -1)B = (2 - 1,\ 2 + 1) = (1, 3)\). 확인: \(\omega(\tilde b_1) = 2 - 1 = 1\), \(\omega(\tilde b_2) = 2 + 1 = 3\).
-          \(\sum \omega_i v^i\)는 옛 기저에서 \(2 \cdot 3 + (-1) \cdot 1 = 5\), 새 기저에서 \(1 \cdot 2 + 3 \cdot 1 = 5\)이다.</p>
+          \(\sum \omega_i v^i\)는 옛 basis에서 \(2 \cdot 3 + (-1) \cdot 1 = 5\), 새 basis에서 \(1 \cdot 2 + 3 \cdot 1 = 5\)이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-4-2" data-level="1">
-        <p><span class="thm-head">연습 1.4.2</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 1.4.2</span> <span class="level">★</span>
         \(\lambda_1, \dots, \lambda_n \neq 0\)이고 \(\tilde b_j = \lambda_j b_j\)라 하자. \(\tilde v^j\), \(\tilde\omega_j\), \(\tilde\beta^j\)를 \(v^j\), \(\omega_j\), \(\beta^j\)로 나타내어라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <details class="solution"><summary>Solution</summary>
           <p>\(B = \diag(\lambda_1, \dots, \lambda_n)\), \(B^{-1} = \diag(1/\lambda_1, \dots, 1/\lambda_n)\)이다. <a href="#eq-1-4-2">(1.4.2)</a>에서 \(\tilde v^j = v^j/\lambda_j\),
-          <a href="#eq-1-4-3">(1.4.3)</a>에서 \(\tilde\omega_j = \lambda_j\omega_j\), \(\tilde\beta^j = \beta^j/\lambda_j\)이다. (<a href="#fig-1-4-1">그림 1.4.1</a>(b)는 \(\lambda_1 = 2\), \(\lambda_2 = 1\)인 경우다.)</p>
+          <a href="#eq-1-4-3">(1.4.3)</a>에서 \(\tilde\omega_j = \lambda_j\omega_j\), \(\tilde\beta^j = \beta^j/\lambda_j\)이다. (<a href="#fig-1-4-1">Figure 1.4.1</a>(b)는 \(\lambda_1 = 2\), \(\lambda_2 = 1\)인 경우다.)</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-4-3" data-level="1">
-        <p><span class="thm-head">연습 1.4.3</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 1.4.3</span> <span class="level">★</span>
         참인지 거짓인지 판별하고 이유를 대어라.
-        (a) 기저를 바꾸면 벡터 \(v\) 자체가 바뀐다.
-        (b) 두 벡터의 성분으로 만든 \(\sum_i v^i w^i\)는 기저에 무관하다.
-        (c) \(\sum_i \omega_i v^i\)는 기저에 무관하다.
-        (d) \(T \in \End(V)\)의 행렬의 대각합은 기저에 무관하다.
-        (e) \(T \in \End(V)\)의 행렬의 모든 성분의 합은 기저에 무관하다.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 거짓. 기저변환 행렬은 항등사상의 행렬이고, 바뀌는 것은 성분뿐이다.</p>
-          <p>(b) 거짓. \(\R^2\)에서 \(v = w = e_1\)이면 표준기저에서 \(\sum_i v^i w^i = 1\)이다. 기저를 \((2e_1, e_2)\)로 바꾸면 성분이 \((\tfrac12, 0)\)이 되어 합이 \(\tfrac14\)이다.</p>
-          <p>(c) 참. <a href="#i-1-4-8">명제 1.4.8</a>. (d) 참. <a href="#i-1-4-13">따름정리 1.4.13</a>.</p>
-          <p>(e) 거짓. <a href="#i-1-4-14">예 1.4.14</a>의 \(P\)는 표준기저에서 성분의 합이 \(2\)이지만, 새 기저에서는 \(1\)이다.</p>
+        (a) basis를 바꾸면 벡터 \(v\) 자체가 바뀐다.
+        (b) 두 벡터의 성분으로 만든 \(\sum_i v^i w^i\)는 basis에 무관하다.
+        (c) \(\sum_i \omega_i v^i\)는 basis에 무관하다.
+        (d) \(T \in \End(V)\)의 행렬의 trace는 basis에 무관하다.
+        (e) \(T \in \End(V)\)의 행렬의 모든 성분의 합은 basis에 무관하다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 거짓. change-of-basis matrix는 identity map의 행렬이고, 바뀌는 것은 성분뿐이다.</p>
+          <p>(b) 거짓. \(\R^2\)에서 \(v = w = e_1\)이면 standard basis에서 \(\sum_i v^i w^i = 1\)이다. basis를 \((2e_1, e_2)\)로 바꾸면 성분이 \((\tfrac12, 0)\)이 되어 합이 \(\tfrac14\)이다.</p>
+          <p>(c) 참. <a href="#i-1-4-8">Proposition 1.4.8</a>. (d) 참. <a href="#i-1-4-13">Corollary 1.4.13</a>.</p>
+          <p>(e) 거짓. <a href="#i-1-4-14">Example 1.4.14</a>의 \(P\)는 standard basis에서 성분의 합이 \(2\)이지만, 새 basis에서는 \(1\)이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-4-4" data-level="1">
-        <p><span class="thm-head">연습 1.4.4</span> <span class="level">★</span>
-        <a href="#i-1-4-9">비고 1.4.9</a>의 균형 규칙에 맞는 식과 어긋나는 식을 가려라. 어긋나는 식은 무엇이 틀렸는지 말하여라.
+        <p><span class="thm-head">Exercise 1.4.4</span> <span class="level">★</span>
+        <a href="#i-1-4-9">Remark 1.4.9</a>의 균형 규칙에 맞는 식과 어긋나는 식을 가려라. 어긋나는 식은 무엇이 틀렸는지 말하여라.
         (a) \(\tilde v^j = \sum_i (B^{-1})^j_i v^i\) (b) \(\tilde\omega_j = \sum_i (B^{-1})^j_i\,\omega_i\) (c) \(\sum_i A^i_i\) (d) \(\sum_i v^i v^i\) (e) \(\tilde b_j = \sum_i B^i_j b_i\)</p>
-        <details class="solution"><summary>풀이</summary>
+        <details class="solution"><summary>Solution</summary>
           <p>(a) 맞다. \(i\)가 위·아래로 짝을 이루고, 자유 첨자 \(j\)는 양변에서 위에 있다.</p>
           <p>(b) 어긋난다. 합하는 \(i\)가 두 번 모두 아래에 있고, 자유 첨자 \(j\)가 좌변에서는 아래, 우변에서는 위에 있다. 올바른 식은 \(\tilde\omega_j = \sum_i \omega_i B^i_j\)이다.</p>
-          <p>(c) 맞다. 위·아래 짝으로 더하므로 기저에 무관한 수(대각합)다.</p>
-          <p>(d) 어긋난다. \(i\)가 두 번 모두 위에 있다. <a href="#ex-1-4-3">연습 1.4.3</a>(b)에서 보았듯 기저에 따라 값이 바뀐다.</p>
+          <p>(c) 맞다. 위·아래 짝으로 더하므로 basis에 무관한 수(trace)다.</p>
+          <p>(d) 어긋난다. \(i\)가 두 번 모두 위에 있다. <a href="#ex-1-4-3">Exercise 1.4.3</a>(b)에서 보았듯 basis에 따라 값이 바뀐다.</p>
           <p>(e) 맞다. <a href="#eq-1-4-1">(1.4.1)</a>이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-4-5" data-level="1">
-        <p><span class="thm-head">연습 1.4.5</span> <span class="level">★</span>
-        <a href="#i-1-4-11">예 1.4.11</a>에서 \(r = 2\), \(\theta = \pi/3\)일 때 \(v = e_1\)의 새 성분과 \(\omega = e^1\)의 새 성분을 구하고, 두 기저에서 \(\omega(v)\)가 같음을 확인하여라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 1.4.5</span> <span class="level">★</span>
+        <a href="#i-1-4-11">Example 1.4.11</a>에서 \(r = 2\), \(\theta = \pi/3\)일 때 \(v = e_1\)의 새 성분과 \(\omega = e^1\)의 새 성분을 구하고, 두 basis에서 \(\omega(v)\)가 같음을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
           <p>\(\cos\theta = \tfrac12\), \(\sin\theta = \tfrac{\sqrt3}{2}\)이다. \(\tilde v^1 = \cos\theta = \tfrac12\), \(\tilde v^2 = -\sin\theta/r = -\tfrac{\sqrt3}{4}\)이다.
           \((\tilde\omega_1, \tilde\omega_2) = (1, 0)B = (\cos\theta, -r\sin\theta) = (\tfrac12, -\sqrt3)\)이다.
           새 성분으로 \(\tfrac12 \cdot \tfrac12 + (-\sqrt3)(-\tfrac{\sqrt3}{4}) = \tfrac14 + \tfrac34 = 1\)이고, 옛 성분으로 \(e^1(e_1) = 1\)이다.</p>
@@ -403,46 +403,46 @@
       </div>
 
       <div class="exercise" id="ex-1-4-6" data-level="2">
-        <p><span class="thm-head">연습 1.4.6</span> <span class="level">★★</span>
-        기준 기저 \(\mathcal{B} = ((2,1), (-1,1))\)에서 기저 \(\tilde{\mathcal{B}} = ((1,1), (1,-1))\)로의 기저변환 행렬을 <a href="#i-1-4-4">명제 1.4.4</a>로 구하고, <a href="#eq-1-4-1">(1.4.1)</a>로 확인하여라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(\mathcal{B} \to \mathcal{E} \to \tilde{\mathcal{B}}\)로 나누어 생각한다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 1.4.6</span> <span class="level">★★</span>
+        기준 basis \(\mathcal{B} = ((2,1), (-1,1))\)에서 basis \(\tilde{\mathcal{B}} = ((1,1), (1,-1))\)로의 change-of-basis matrix를 <a href="#i-1-4-4">Proposition 1.4.4</a>로 구하고, <a href="#eq-1-4-1">(1.4.1)</a>로 확인하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(\mathcal{B} \to \mathcal{E} \to \tilde{\mathcal{B}}\)로 나누어 생각한다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>\(\mathcal{E}\)에서 \(\mathcal{B}\)로의 행렬은 \(B_1 = \begin{pmatrix} 2 & -1 \\ 1 & 1 \end{pmatrix}\), \(\mathcal{E}\)에서 \(\tilde{\mathcal{B}}\)로의 행렬은 \(B_2 = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}\)이다.
-          <a href="#i-1-4-4">명제 1.4.4</a>(c)에 의해 \(\mathcal{B}\)에서 \(\mathcal{E}\)로의 행렬은 \(B_1^{-1}\)이고, (b)에 의해 \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 행렬은
+          <a href="#i-1-4-4">Proposition 1.4.4</a>(c)에 의해 \(\mathcal{B}\)에서 \(\mathcal{E}\)로의 행렬은 \(B_1^{-1}\)이고, (b)에 의해 \(\mathcal{B}\)에서 \(\tilde{\mathcal{B}}\)로의 행렬은
           \[ B_1^{-1}B_2 = \frac13\begin{pmatrix} 1 & 1 \\ -1 & 2 \end{pmatrix}\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} = \frac13\begin{pmatrix} 2 & 0 \\ 1 & -3 \end{pmatrix} \]
           이다. 확인: \(\tfrac23 b_1 + \tfrac13 b_2 = (\tfrac43 - \tfrac13,\ \tfrac23 + \tfrac13) = (1, 1) = \tilde b_1\)이고 \(0 \cdot b_1 - b_2 = (1, -1) = \tilde b_2\)이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-4-7" data-level="2">
-        <p><span class="thm-head">연습 1.4.7</span> <span class="level">★★</span>
+        <p><span class="thm-head">Exercise 1.4.7</span> <span class="level">★★</span>
         \(\tr(XYZ) = \tr(YZX)\)(순환)임을 보여라. 그러나 \(\tr(XYZ) \neq \tr(YXZ)\)인 \(2 \times 2\) 행렬의 예를 들어라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p><a href="#i-1-4-13">따름정리 1.4.13</a>의 증명의 \(\tr(XY) = \tr(YX)\)를 \(X\)와 \(YZ\)에 쓰면 \(\tr(X(YZ)) = \tr((YZ)X)\)이다.
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-1-4-13">Corollary 1.4.13</a>의 증명의 \(\tr(XY) = \tr(YX)\)를 \(X\)와 \(YZ\)에 쓰면 \(\tr(X(YZ)) = \tr((YZ)X)\)이다.
           예: \(X = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}\), \(Y = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\), \(Z = \begin{pmatrix} 0 & 0 \\ 1 & 0 \end{pmatrix}\)이면
-          \(YZ = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}\)이므로 \(XYZ = X\)이고 대각합이 \(1\)이다. 한편 \(XZ = 0\)이므로 \(YXZ = 0\)이고 대각합이 \(0\)이다.</p>
+          \(YZ = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}\)이므로 \(XYZ = X\)이고 trace가 \(1\)이다. 한편 \(XZ = 0\)이므로 \(YXZ = 0\)이고 trace가 \(0\)이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-1-4-8" data-level="3">
-        <p><span class="thm-head">연습 1.4.8</span> <span class="level">★★★</span>
-        \(T \in \End(V)\)의 행렬이 모든 기저에서 같다면 \(T = c\,\id_V\)인 실수 \(c\)가 있음을 보여라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(A = [T]_{\mathcal{B}}\)가 모든 가역행렬 \(B\)와 교환한다(\(AB = BA\)). 특별한 \(B\)를 대입한다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>기저 \(\mathcal{B}\)를 하나 고정하고 \(A = [T]_{\mathcal{B}}\)라 하자. 가역행렬 \(B\)마다 <a href="#eq-1-4-1">(1.4.1)</a>로 새 기저를 만들 수 있고(열이 일차독립이므로), <a href="#i-1-4-12">정리 1.4.12</a>에서 \(B^{-1}AB = A\), 즉 \(AB = BA\)이다.</p>
+        <p><span class="thm-head">Exercise 1.4.8</span> <span class="level">★★★</span>
+        \(T \in \End(V)\)의 행렬이 모든 basis에서 같다면 \(T = c\,\id_V\)인 실수 \(c\)가 있음을 보여라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(A = [T]_{\mathcal{B}}\)가 모든 invertible matrix \(B\)와 교환한다(\(AB = BA\)). 특별한 \(B\)를 대입한다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>basis \(\mathcal{B}\)를 하나 고정하고 \(A = [T]_{\mathcal{B}}\)라 하자. invertible matrix \(B\)마다 <a href="#eq-1-4-1">(1.4.1)</a>로 새 basis를 만들 수 있고(열이 linearly independent이므로), <a href="#i-1-4-12">Theorem 1.4.12</a>에서 \(B^{-1}AB = A\), 즉 \(AB = BA\)이다.</p>
           <p><em>대각행렬이다.</em> \(k\)를 고정하고 \(B = \diag(1, \dots, 2, \dots, 1)\)(\(k\)번째만 \(2\))로 두면 \((AB)^i_k = 2A^i_k\), \((BA)^i_k = A^i_k\)(\(i \neq k\))이다.
           따라서 \(i \neq k\)이면 \(A^i_k = 0\)이다.</p>
-          <p><em>대각성분이 같다.</em> \(n \ge 2\)이고 \(k \neq 1\)이라 하자. \(E\)를 \((1, k)\) 성분만 \(1\)인 행렬이라 하면 \(E^2 = 0\)이므로 \(B = I + E\)는 가역이고 \(B^{-1} = I - E\)이다.
+          <p><em>대각성분이 같다.</em> \(n \ge 2\)이고 \(k \neq 1\)이라 하자. \(E\)를 \((1, k)\) 성분만 \(1\)인 행렬이라 하면 \(E^2 = 0\)이므로 \(B = I + E\)는 invertible이고 \(B^{-1} = I - E\)이다.
           \(AB = BA\)에서 \(AE = EA\)이다. \(A\)가 대각행렬이므로 \(AE\)는 \((1,k)\) 성분만 \(A^1_1\)이고, \(EA\)는 \((1,k)\) 성분만 \(A^k_k\)이다. 따라서 \(A^1_1 = A^k_k\)이다.</p>
-          <p>그러므로 \(A = cI\)(\(c = A^1_1\))이고, 행렬이 같은 두 선형사상은 같으므로(<a href="1-2-linear-maps.html#i-1-2-4">명제 1.2.4</a>) \(T = c\,\id_V\)이다.</p>
+          <p>그러므로 \(A = cI\)(\(c = A^1_1\))이고, 행렬이 같은 두 linear map은 같으므로(<a href="1-2-linear-maps.html#i-1-2-4">Proposition 1.2.4</a>) \(T = c\,\id_V\)이다.</p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="1-3-dual-spaces.html">← 1.3 쌍대공간과 쌍대기저</a>
-    <a rel="next" href="1-5-inner-products.html">1.5 내적과 그람 행렬 →</a>
+    <a rel="prev" href="1-3-dual-spaces.html">← 1.3 Dual Spaces and Dual Bases</a>
+    <a rel="next" href="1-5-inner-products.html">1.5 Inner Products and Gram Matrices →</a>
   </nav>
 </body>
 </html>

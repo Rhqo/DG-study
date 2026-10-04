@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>3. 위상공간 기초 — 미분기하 스터디</title>
+  <title>3. Basic Topology — DG Study</title>
   <meta name="dg-id" content="3">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-updated" content="2026-10-01">
@@ -12,103 +12,103 @@
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
 </head>
 <body>
-  <nav class="breadcrumb"><a href="../../index.html">전체 목차</a> › <span>3. 위상공간 기초</span></nav>
+  <nav class="breadcrumb"><a href="../../index.html">Contents</a> › <span>3. Basic Topology</span></nav>
 
   <main>
     <header>
-      <h1>3. 위상공간 기초</h1>
-      <p class="meta">Part 0. 준비 · 대응 교재: <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM 2–4장]</a>, <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM 부록 A]</a></p>
-      <p class="threads">줄기: <strong>T3</strong> 내재적 vs 외재적 (첫 지점: 부분공간 위상(공간 안에 놓인 것)과 몫공간(스스로 주어진 것), <a href="3-3-subspaces-products.html">3.3절</a>·<a href="3-4-quotient-spaces.html">3.4절</a>) · <strong>T5</strong> 적분과 위상 (컴팩트성·연결성, <a href="3-6-compactness.html">3.6절</a>·<a href="3-7-connectedness.html">3.7절</a>)</p>
+      <h1>3. Basic Topology</h1>
+      <p class="meta">Part 0. Preliminaries · References: <a class="cite" href="../../references.html#Lee-ITM">[Lee-ITM Ch. 2–4]</a>, <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM App. A]</a></p>
+      <p class="threads">Threads: <strong>T3</strong> Intrinsic vs. extrinsic (start: subspace topology(공간 안에 놓인 것)과 quotient space(스스로 주어진 것), <a href="3-3-subspaces-products.html">Section 3.3</a>·<a href="3-4-quotient-spaces.html">Section 3.4</a>) · <strong>T5</strong> Integration and topology (compactness·connectedness, <a href="3-6-compactness.html">Section 3.6</a>·<a href="3-7-connectedness.html">Section 3.7</a>)</p>
     </header>
 
     <section class="questions">
-      <h2>이 장의 질문</h2>
+      <h2>Questions</h2>
       <ul>
-        <li>‘가까움’과 ‘연속’을 거리 없이 말할 수 있는가?</li>
+        <li>‘가까움’과 ‘연속’을 metric 없이 말할 수 있는가?</li>
         <li>공간을 ‘이어 붙여’ 새 공간을 만들 수 있는가?</li>
       </ul>
     </section>
 
     <section class="inherits">
-      <h2>이어받는 것</h2>
+      <h2>Builds on</h2>
       <ul>
-        <li><a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-4">정의 1.5.4 (노름)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">따름정리 1.5.6 (삼각부등식, 유클리드 거리)</a> (1장) — 거리공간의 가장 기본적인 예. 거리의 공리에서 열린집합으로, 열린집합에서 위상으로 간다(3.1절)</li>
-        <li><a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-14">명제 1.2.14 (행렬 표현)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">명제 1.5.7 (선형사상은 유계)</a> (1장) — 선형사상 \(\R^n \to \R^m\)의 연속성(3.2절)</li>
-        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-6">정의 1.6.6 (행렬식)</a> (1장) — \(\det\)이 연속이므로 \(\GL(n, \R)\)은 열려 있고(3.2절) 연결이 아니다(3.7절)</li>
-        <li><a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-12">명제 1.2.12</a>, <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-11">정의 1.2.11 (동형사상, \(\cong\))</a> (1장) — 선형 동형사상의 역사상은 저절로 선형이지만 연속 전단사의 역사상은 그렇지 않다(3.2절의 비교 상자). 기호 \(\cong\)는 이 장에서 위상동형을 뜻한다</li>
-        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-12">명제 1.6.12 (방향은 정확히 두 개다)</a> (1장) — 기저들 위의 “같은 방향” 관계가 첫 동치관계의 예다. <a href="3-4-quotient-spaces.html#i-3-4-1">정의 3.4.1</a>에서 임의의 집합 위의 동치관계와 몫집합으로 일반화한다(3.4절)</li>
-        <li><a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절의 준비</a>(거리, 공, 열린집합, 극한, 컴팩트 집합) (2장) — 미적분학의 약속으로만 쓴 개념을 3.1–3.2절에서 정식으로 정의한다.
-          <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-2">예 2.3.2</a>(c)의 미분동형사상 \(B_1(0) \to \R^n\)은 <a href="3-2-continuity-homeomorphism.html#i-3-2-14">예 3.2.14</a>(b)에서, <a href="../02-calculus-rn/2-5-rank-theorem.html">2.5절</a>의 8자 곡선은 <a href="3-3-subspaces-products.html#i-3-3-11">비예 3.3.11</a>에서 위상의 언어로 다시 본다</li>
-        <li><a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절 준비</a>의 경계점과 폐포의 약속, 그것을 쓴 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">정의 2.6.6</a>과 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">정리 2.6.9</a> (2장) — 약속이 정의 3.1.15의 폐포와 같음을 <a href="3-1-topological-spaces.html#i-3-1-27">명제 3.1.27</a>에서 증명한다(3.1절)</li>
-        <li><a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-1">정의 2.3.1 (미분동형사상)</a>, <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-3">비예 2.3.3</a> (2장) — 위상동형사상과 미분동형사상의 차이(3.2절의 용어 주의)</li>
-        <li><a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-10">따름정리 2.2.10</a> (2장) — 공 위에서 \(DF = 0\)이면 상수. 연결인 열린집합으로 넓힌다(<a href="3-7-connectedness.html#i-3-7-18">따름정리 3.7.18</a>, 3.7절)</li>
+        <li><a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-4">Definition 1.5.4 (norm)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-6">Corollary 1.5.6 (triangle inequality, Euclidean distance)</a> (Chapter 1) — metric space의 가장 기본적인 예. metric의 공리에서 open set으로, open set에서 topology로 간다(Section 3.1)</li>
+        <li><a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-14">Proposition 1.2.14 (matrix representation)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-7">Proposition 1.5.7 (linear map은 bounded)</a> (Chapter 1) — linear map \(\R^n \to \R^m\)의 연속성(Section 3.2)</li>
+        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-6">Definition 1.6.6 (determinant)</a> (Chapter 1) — \(\det\)이 연속이므로 \(\GL(n, \R)\)은 열려 있고(Section 3.2) connected가 아니다(Section 3.7)</li>
+        <li><a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-12">Proposition 1.2.12</a>, <a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-11">Definition 1.2.11 (isomorphism, \(\cong\))</a> (Chapter 1) — linear isomorphism의 inverse map은 저절로 linear이지만 연속 bijective의 inverse map은 그렇지 않다(Section 3.2의 비교 box). 기호 \(\cong\)는 이 장에서 homeomorphic을 뜻한다</li>
+        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-12">Proposition 1.6.12 (exactly two orientations)</a> (Chapter 1) — basis들 위의 “같은 orientation” 관계가 첫 equivalence relation의 예다. <a href="3-4-quotient-spaces.html#i-3-4-1">Definition 3.4.1</a>에서 임의의 집합 위의 equivalence relation과 quotient set으로 일반화한다(Section 3.4)</li>
+        <li><a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">Section 2.1의 준비</a>(metric, ball, open set, 극한, compact 집합) (Chapter 2) — 미적분학의 약속으로만 쓴 개념을 Section 3.1–3.2에서 정식으로 정의한다.
+          <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-2">Example 2.3.2</a>(c)의 diffeomorphism \(B_1(0) \to \R^n\)은 <a href="3-2-continuity-homeomorphism.html#i-3-2-14">Example 3.2.14</a>(b)에서, <a href="../02-calculus-rn/2-5-rank-theorem.html">Section 2.5</a>의 figure-eight curve는 <a href="3-3-subspaces-products.html#i-3-3-11">Non-example 3.3.11</a>에서 topology의 언어로 다시 본다</li>
+        <li><a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">Section 2.1 준비</a>의 boundary point와 closure의 약속, 그것을 쓴 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-6">Definition 2.6.6</a>과 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">Theorem 2.6.9</a> (Chapter 2) — 약속이 Definition 3.1.15의 closure와 같음을 <a href="3-1-topological-spaces.html#i-3-1-27">Proposition 3.1.27</a>에서 증명한다(Section 3.1)</li>
+        <li><a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-1">Definition 2.3.1 (diffeomorphism)</a>, <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-3">Non-example 2.3.3</a> (Chapter 2) — homeomorphism과 diffeomorphism의 차이(Section 3.2의 Warning box)</li>
+        <li><a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-10">Corollary 2.2.10</a> (Chapter 2) — ball 위에서 \(DF = 0\)이면 상수. connected인 open set으로 넓힌다(<a href="3-7-connectedness.html#i-3-7-18">Corollary 3.7.18</a>, Section 3.7)</li>
       </ul>
     </section>
 
-    <h2>절 목록</h2>
+    <h2>Sections</h2>
     <ol class="toc">
       <li id="toc-3-1" data-file="3-1-topological-spaces.html">
-        <a class="toc-title" href="3-1-topological-spaces.html">3.1 열린집합과 위상공간</a> <span class="status reviewed">검토 완료</span>
-        <p class="toc-note">내용: 거리공간과 열린공, 열린집합의 세 성질, 위상공간과 근방, 닫힌집합과 폐포, 위상의 기저, 같은 위상을 주는 거리(\(d, d_\infty, d_1\))</p>
+        <a class="toc-title" href="3-1-topological-spaces.html">3.1 Open Sets and Topological Spaces</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: metric space와 open ball, open set의 세 성질, topological space와 neighborhood, closed set과 closure, basis for a topology, 같은 topology를 주는 metric(\(d, d_\infty, d_1\))</p>
       </li>
       <li id="toc-3-2" data-file="3-2-continuity-homeomorphism.html">
-        <a class="toc-title" href="3-2-continuity-homeomorphism.html">3.2 연속사상과 위상동형사상</a> <span class="status reviewed">검토 완료</span>
-        <p class="toc-note">내용: 열린집합으로 본 연속성과 \(\varepsilon\)-\(\delta\), 역상 판정(\(S^n\), \(\GL(n,\R)\)), 열린사상, 위상동형사상(\(B_1(0) \cong \R^n\), 입체사영), 비예 \([0, 2\pi) \to S^1\), 수열의 수렴</p>
+        <a class="toc-title" href="3-2-continuity-homeomorphism.html">3.2 Continuous Maps and Homeomorphisms</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: open set으로 본 연속성과 \(\varepsilon\)-\(\delta\), preimage 판정(\(S^n\), \(\GL(n,\R)\)), open map, homeomorphism(\(B_1(0) \cong \R^n\), stereographic projection), non-example \([0, 2\pi) \to S^1\), 수열의 수렴</p>
       </li>
       <li id="toc-3-3" data-file="3-3-subspaces-products.html">
-        <a class="toc-title" href="3-3-subspaces-products.html">3.3 부분공간과 곱공간</a> <span class="status reviewed">검토 완료</span>
-        <p class="toc-note">내용: 부분공간 위상과 특징적 성질, 붙이기 보조정리, 위상 매장(비예: 8자 곡선), 곱위상과 특징적 성질 · 기준 예제: 토러스 \(T^2 = S^1 \times S^1 \cong\) 원환면(위상동형)</p>
+        <a class="toc-title" href="3-3-subspaces-products.html">3.3 Subspaces and Product Spaces</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: subspace topology와 특징적 성질, gluing lemma, topological embedding(non-example: figure-eight curve), product topology와 특징적 성질 · Running examples: torus \(T^2 = S^1 \times S^1 \cong\) torus of revolution(homeomorphic)</p>
       </li>
       <li id="toc-3-4" data-file="3-4-quotient-spaces.html">
-        <a class="toc-title" href="3-4-quotient-spaces.html">3.4 몫공간</a> <span class="status reviewed">검토 완료</span>
-        <p class="toc-note">내용: 동치관계, 몫위상과 몫사상의 특징적 성질, \(\R/\Z \cong S^1\) · 기준 예제: 토러스(정사각형의 몫공간); \(\RP^n\)(몫위상, \(S^n/{\pm} \cong \RP^n\), \(U_i \cong \R^n\))</p>
+        <a class="toc-title" href="3-4-quotient-spaces.html">3.4 Quotient Spaces</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: equivalence relation, quotient topology와 quotient map의 특징적 성질, \(\R/\Z \cong S^1\) · Running examples: torus(정사각형의 quotient space); \(\RP^n\)(quotient topology, \(S^n/{\pm} \cong \RP^n\), \(U_i \cong \R^n\))</p>
       </li>
       <li id="toc-3-5" data-file="3-5-hausdorff-second-countable.html">
-        <a class="toc-title" href="3-5-hausdorff-second-countable.html">3.5 하우스도르프 조건과 제2가산 조건</a> <span class="status reviewed">검토 완료</span>
-        <p class="toc-note">내용: 두 조건의 뜻과 필요성, 극한의 유일성, 비예: 원점이 두 개인 직선, \(\R \times \R_{\text{이산}}\) · 기준 예제: \(\RP^n\)(하우스도르프, 제2가산)</p>
+        <a class="toc-title" href="3-5-hausdorff-second-countable.html">3.5 The Hausdorff and Second Countable Conditions</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 두 조건의 뜻과 필요성, 극한의 유일성, non-example: 원점이 두 개인 직선, \(\R \times \R_{\text{discrete}}\) · Running examples: \(\RP^n\)(Hausdorff, second countable)</p>
       </li>
       <li id="toc-3-6" data-file="3-6-compactness.html">
-        <a class="toc-title" href="3-6-compactness.html">3.6 컴팩트성</a> <span class="status reviewed">검토 완료</span>
-        <p class="toc-note">내용: 열린덮개, 곱의 컴팩트성(튜브 보조정리), 하이네-보렐 정리, 최댓값·최솟값, 닫힌사상 보조정리, 린델뢰프 성질, 부분수열, 르베그 수와 균등연속 · 기준 예제: 토러스(\([0,1]^2/{\sim} \cong T^2\)); \(\RP^n\)(컴팩트)</p>
+        <a class="toc-title" href="3-6-compactness.html">3.6 Compactness</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: open cover, 곱의 compactness(tube lemma), Heine–Borel theorem, 최댓값·최솟값, closed map lemma, Lindelöf property, subsequence, Lebesgue number와 uniformly continuous · Running examples: torus(\([0,1]^2/{\sim} \cong T^2\)); \(\RP^n\)(compact)</p>
       </li>
       <li id="toc-3-7" data-file="3-7-connectedness.html">
-        <a class="toc-title" href="3-7-connectedness.html">3.7 연결성</a> <span class="status reviewed">검토 완료</span>
-        <p class="toc-note">내용: 연결과 \(\R\)의 구간, 중간값 정리, 경로연결(비예: 위상수학자의 사인 곡선), 연결성분, 국소 경로연결, 국소상수함수, \(\R \not\cong \R^n\) · 기준 예제: \(\RP^n\), \(T^2\)(연결)</p>
+        <a class="toc-title" href="3-7-connectedness.html">3.7 Connectedness</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: connected와 \(\R\)의 구간, intermediate value theorem, path-connected(non-example: topologist's sine curve), connected component, locally path-connected, locally constant function, \(\R \not\cong \R^n\) · Running examples: \(\RP^n\), \(T^2\)(connected)</p>
       </li>
     </ol>
 
     <section class="handoff">
-      <h2>넘겨주는 것</h2>
+      <h2>Leads to</h2>
       <ul>
-        <li><a href="3-3-subspaces-products.html#i-3-3-1">부분공간 위상</a>, <a href="3-2-continuity-homeomorphism.html#i-3-2-12">위상동형사상</a>, <a href="3-3-subspaces-products.html#i-3-3-8">위상 매장</a>
-          → <a href="../06-regular-surfaces/index.html">6장</a>(정칙곡면의 정의 <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">정의 6.1.1</a>: 매개화는 \(V \cap S\) 위로의 위상동형사상. 이 조건이 없으면 생기는 일: <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-3">비예 6.1.3</a>(c)), <a href="../14-submanifolds/index.html">14장</a>(매끄러운 매장 = 몰입 + 위상 매장, 8자 곡선 <a href="3-3-subspaces-products.html#i-3-3-11">비예 3.3.11</a>)</li>
-        <li>토러스와 원환면: <a href="3-3-subspaces-products.html#i-3-3-17">예 3.3.17</a>(\(T^2 \cong\) 원환면 \(T_{R,r}\)), <a href="3-4-quotient-spaces.html#i-3-4-10">예 3.4.10</a>과 <a href="3-6-compactness.html#i-3-6-13">예 3.6.13</a>(\([0,1]^2/{\sim} \cong T^2\))
-          → <a href="../06-regular-surfaces/index.html">6장</a>(정칙곡면으로서의 원환면: <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-8">예 6.5.8</a>), <a href="../11-smooth-manifolds/index.html">11장</a>(곱다양체 \(T^2 = S^1 \times S^1\)), <a href="../19-de-rham/index.html">19장</a></li>
-        <li>\(\RP^n\): <a href="3-4-quotient-spaces.html#i-3-4-11">정의 3.4.11</a>, <a href="3-4-quotient-spaces.html#i-3-4-14">명제 3.4.14</a>(\(S^n/{\pm} \cong \RP^n\)), <a href="3-4-quotient-spaces.html#i-3-4-15">명제 3.4.15</a>(\(\varphi_i\colon U_i \to \R^n\)이 위상동형사상),
-          <a href="3-5-hausdorff-second-countable.html#i-3-5-7">명제 3.5.7</a>·<a href="3-5-hausdorff-second-countable.html#i-3-5-11">명제 3.5.11</a>(하우스도르프, 제2가산), <a href="3-6-compactness.html#i-3-6-14">명제 3.6.14</a>(컴팩트), <a href="3-7-connectedness.html#i-3-7-10">예 3.7.10</a>(연결)
-          → <a href="../11-smooth-manifolds/index.html">11장</a>(위상다양체임은 이미 증명됨; 남은 일은 좌표변환 \(\varphi_j \circ \varphi_i^{-1}\)의 매끄러움), <a href="../18-integration-stokes/index.html">18장</a>(방향 불가능성)</li>
-        <li><a href="3-5-hausdorff-second-countable.html#i-3-5-1">하우스도르프 조건</a>과 <a href="3-5-hausdorff-second-countable.html#i-3-5-8">제2가산 조건</a>, 비예(<a href="3-5-hausdorff-second-countable.html#i-3-5-6">원점이 두 개인 직선</a>, <a href="3-5-hausdorff-second-countable.html#i-3-5-12">\(\R \times \R_{\text{이산}}\)</a>)
-          → <a href="../11-smooth-manifolds/index.html">11장</a>(위상다양체의 정의)</li>
-        <li><a href="3-2-continuity-homeomorphism.html#i-3-2-14">예 3.2.14</a>(c)(입체사영은 위상동형사상), <a href="3-3-subspaces-products.html#i-3-3-12">곱위상</a>, <a href="3-4-quotient-spaces.html#i-3-4-7">몫사상의 특징적 성질</a> → <a href="../11-smooth-manifolds/index.html">11장</a>(\(S^n\)의 차트, 곱다양체, 몫으로 만든 다양체)</li>
-        <li>2장이 미리 인용한 사실의 증명: 하이네-보렐 정리(<a href="3-6-compactness.html#i-3-6-7">정리 3.6.7</a>), 최댓값·최솟값 정리(<a href="3-6-compactness.html#i-3-6-10">정리 3.6.10</a>), 균등연속성(<a href="3-6-compactness.html#i-3-6-19">따름정리 3.6.19</a>),
-          중간값 정리(<a href="3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>), 폐포 = 집합 \(\cup\) 경계점(<a href="3-1-topological-spaces.html#i-3-1-27">명제 3.1.27</a>)
-          → <a href="../02-calculus-rn/index.html">2장</a>(<a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">2.1절 준비</a>의 (i)–(iii), (v)와 폐포의 약속. 3.6절의 비교 상자에 대응을 적었다)</li>
-        <li>최댓값·최솟값 정리(<a href="3-6-compactness.html#i-3-6-10">정리 3.6.10</a>)와 중간값 정리(<a href="3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>) → <a href="../04-curves/index.html">4장</a>(꺾은선 근사의 오차 상한, 접촉원의 접촉 차수 추정, 1변수 역함수 정리, 접선각 함수의 유일성)</li>
-        <li>컴팩트성: <a href="3-6-compactness.html#i-3-6-7">하이네-보렐 정리</a>, <a href="3-6-compactness.html#i-3-6-10">최댓값 정리</a>, <a href="3-6-compactness.html#i-3-6-12">닫힌사상 보조정리</a>
-          → <a href="../08-gauss-map/index.html">8장</a>(컴팩트 곡면의 타원점), <a href="../10-gauss-bonnet/index.html">10장</a>(전역 가우스-보네의 가정), <a href="../23-geodesics/index.html">23장</a>(호프-리노프 정리)</li>
-        <li><a href="3-6-compactness.html#i-3-6-17">르베그 수 보조정리</a>와 <a href="3-6-compactness.html#i-3-6-19">균등연속성</a> → <a href="../05-space-curves/index.html">5장</a>(접선회전정리의 증명)</li>
-        <li><a href="3-6-compactness.html#i-3-6-15">린델뢰프 성질</a> → <a href="../12-smooth-maps/index.html">12장</a>(단위분할의 존재)</li>
-        <li>연결성: <a href="3-7-connectedness.html#i-3-7-15">정리 3.7.15</a>(국소 경로연결이면 연결 \(\iff\) 경로연결), <a href="3-7-connectedness.html#i-3-7-16">명제 3.7.16</a>(국소상수함수), <a href="3-7-connectedness.html#i-3-7-18">따름정리 3.7.18</a>(연결인 열린집합에서 \(DF = 0\)이면 상수) → <a href="../19-de-rham/index.html">19장</a>(\(H^0\)과 연결성분), <a href="../10-gauss-bonnet/index.html">10장</a>(연결 컴팩트 곡면)</li>
-        <li><a href="3-1-topological-spaces.html#i-3-1-1">거리공간</a>과 <a href="3-1-topological-spaces.html#i-3-1-12">거리 위상</a>, <a href="3-1-topological-spaces.html#i-3-1-25">명제 3.1.25</a>(같은 위상을 주는 거리) → <a href="../21-riemannian-metrics/index.html">21장</a>(리만 거리가 다양체의 위상을 준다)</li>
-        <li>남긴 질문: \(m \ne n\)이면 \(\R^m \not\cong \R^n\)인가? 이 장은 \(\R \not\cong \R^n\)만 증명한다(<a href="3-7-connectedness.html#i-3-7-17">예 3.7.17</a>). 매끄러운 경우는 <a href="../13-tangent-spaces/index.html">13장</a>에서 접공간의 차원으로 답한다.</li>
-        <li>예고만 하고 정의하지 않은 개념: 차트와 좌표변환(11장), 단위분할(12장), 매끄러운 매장·몰입(14장), 리만 거리(21장)</li>
+        <li><a href="3-3-subspaces-products.html#i-3-3-1">subspace topology</a>, <a href="3-2-continuity-homeomorphism.html#i-3-2-12">homeomorphism</a>, <a href="3-3-subspaces-products.html#i-3-3-8">topological embedding</a>
+          → <a href="../06-regular-surfaces/index.html">Chapter 6</a>(regular surface의 정의 <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>: parametrization은 \(V \cap S\) 위로의 homeomorphism. 이 조건이 없으면 생기는 일: <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-3">Non-example 6.1.3</a>(c)), <a href="../14-submanifolds/index.html">Chapter 14</a>(smooth embedding = immersion + topological embedding, figure-eight curve <a href="3-3-subspaces-products.html#i-3-3-11">Non-example 3.3.11</a>)</li>
+        <li>torus와 torus of revolution: <a href="3-3-subspaces-products.html#i-3-3-17">Example 3.3.17</a>(\(T^2 \cong\) torus of revolution \(T_{R,r}\)), <a href="3-4-quotient-spaces.html#i-3-4-10">Example 3.4.10</a>과 <a href="3-6-compactness.html#i-3-6-13">Example 3.6.13</a>(\([0,1]^2/{\sim} \cong T^2\))
+          → <a href="../06-regular-surfaces/index.html">Chapter 6</a>(regular surface로서의 torus of revolution: <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-8">Example 6.5.8</a>), <a href="../11-smooth-manifolds/index.html">Chapter 11</a>(product manifold \(T^2 = S^1 \times S^1\)), <a href="../19-de-rham/index.html">Chapter 19</a></li>
+        <li>\(\RP^n\): <a href="3-4-quotient-spaces.html#i-3-4-11">Definition 3.4.11</a>, <a href="3-4-quotient-spaces.html#i-3-4-14">Proposition 3.4.14</a>(\(S^n/{\pm} \cong \RP^n\)), <a href="3-4-quotient-spaces.html#i-3-4-15">Proposition 3.4.15</a>(\(\varphi_i\colon U_i \to \R^n\)이 homeomorphism),
+          <a href="3-5-hausdorff-second-countable.html#i-3-5-7">Proposition 3.5.7</a>·<a href="3-5-hausdorff-second-countable.html#i-3-5-11">Proposition 3.5.11</a>(Hausdorff, second countable), <a href="3-6-compactness.html#i-3-6-14">Proposition 3.6.14</a>(compact), <a href="3-7-connectedness.html#i-3-7-10">Example 3.7.10</a>(connected)
+          → <a href="../11-smooth-manifolds/index.html">Chapter 11</a>(topological manifold임은 이미 증명됨; 남은 일은 transition map \(\varphi_j \circ \varphi_i^{-1}\)의 매끄러움), <a href="../18-integration-stokes/index.html">Chapter 18</a>(nonorientability)</li>
+        <li><a href="3-5-hausdorff-second-countable.html#i-3-5-1">Hausdorff 조건</a>과 <a href="3-5-hausdorff-second-countable.html#i-3-5-8">second countable 조건</a>, non-example(<a href="3-5-hausdorff-second-countable.html#i-3-5-6">원점이 두 개인 직선</a>, <a href="3-5-hausdorff-second-countable.html#i-3-5-12">\(\R \times \R_{\text{discrete}}\)</a>)
+          → <a href="../11-smooth-manifolds/index.html">Chapter 11</a>(topological manifold의 정의)</li>
+        <li><a href="3-2-continuity-homeomorphism.html#i-3-2-14">Example 3.2.14</a>(c)(stereographic projection은 homeomorphism), <a href="3-3-subspaces-products.html#i-3-3-12">product topology</a>, <a href="3-4-quotient-spaces.html#i-3-4-7">quotient map의 특징적 성질</a> → <a href="../11-smooth-manifolds/index.html">Chapter 11</a>(\(S^n\)의 chart, product manifold, quotient로 만든 manifold)</li>
+        <li>Chapter 2가 미리 인용한 사실의 증명: Heine–Borel theorem(<a href="3-6-compactness.html#i-3-6-7">Theorem 3.6.7</a>), extreme value theorem(<a href="3-6-compactness.html#i-3-6-10">Theorem 3.6.10</a>), uniform continuity(<a href="3-6-compactness.html#i-3-6-19">Corollary 3.6.19</a>),
+          intermediate value theorem(<a href="3-7-connectedness.html#i-3-7-6">Corollary 3.7.6</a>), closure = 집합 \(\cup\) boundary point(<a href="3-1-topological-spaces.html#i-3-1-27">Proposition 3.1.27</a>)
+          → <a href="../02-calculus-rn/index.html">Chapter 2</a>(<a href="../02-calculus-rn/2-1-total-derivative.html#sec-preliminaries">Section 2.1 준비</a>의 (i)–(iii), (v)와 closure의 약속. Section 3.6의 비교 box에 대응을 적었다)</li>
+        <li>extreme value theorem(<a href="3-6-compactness.html#i-3-6-10">Theorem 3.6.10</a>)와 intermediate value theorem(<a href="3-7-connectedness.html#i-3-7-6">Corollary 3.7.6</a>) → <a href="../04-curves/index.html">Chapter 4</a>(꺾은선 근사의 오차 upper bound, osculating circle의 접촉 차수 추정, 1변수 inverse function theorem, tangent angle 함수의 유일성)</li>
+        <li>compactness: <a href="3-6-compactness.html#i-3-6-7">Heine–Borel theorem</a>, <a href="3-6-compactness.html#i-3-6-10">extreme value theorem</a>, <a href="3-6-compactness.html#i-3-6-12">closed map lemma</a>
+          → <a href="../08-gauss-map/index.html">Chapter 8</a>(compact surface의 elliptic point), <a href="../10-gauss-bonnet/index.html">Chapter 10</a>(global Gauss–Bonnet theorem의 가정), <a href="../23-geodesics/index.html">Chapter 23</a>(Hopf–Rinow theorem)</li>
+        <li><a href="3-6-compactness.html#i-3-6-17">Lebesgue number lemma</a>와 <a href="3-6-compactness.html#i-3-6-19">uniform continuity</a> → <a href="../05-space-curves/index.html">Chapter 5</a>(rotation index theorem (Umlaufsatz)의 증명)</li>
+        <li><a href="3-6-compactness.html#i-3-6-15">Lindelöf property</a> → <a href="../12-smooth-maps/index.html">Chapter 12</a>(partition of unity의 존재)</li>
+        <li>connectedness: <a href="3-7-connectedness.html#i-3-7-15">Theorem 3.7.15</a>(locally path-connected이면 connected \(\iff\) path-connected), <a href="3-7-connectedness.html#i-3-7-16">Proposition 3.7.16</a>(locally constant function), <a href="3-7-connectedness.html#i-3-7-18">Corollary 3.7.18</a>(connected인 open set에서 \(DF = 0\)이면 상수) → <a href="../19-de-rham/index.html">Chapter 19</a>(\(H^0\)과 connected component), <a href="../10-gauss-bonnet/index.html">Chapter 10</a>(connected compact surface)</li>
+        <li><a href="3-1-topological-spaces.html#i-3-1-1">metric space</a>와 <a href="3-1-topological-spaces.html#i-3-1-12">metric topology</a>, <a href="3-1-topological-spaces.html#i-3-1-25">Proposition 3.1.25</a>(같은 topology를 주는 metric) → <a href="../21-riemannian-metrics/index.html">Chapter 21</a>(Riemannian distance가 manifold의 topology를 준다)</li>
+        <li>Open question: \(m \ne n\)이면 \(\R^m \not\cong \R^n\)인가? 이 장은 \(\R \not\cong \R^n\)만 증명한다(<a href="3-7-connectedness.html#i-3-7-17">Example 3.7.17</a>). smooth 경우는 <a href="../13-tangent-spaces/index.html">Chapter 13</a>에서 tangent space의 dimension으로 답한다.</li>
+        <li>예고만 하고 정의하지 않은 개념: chart와 transition map(Chapter 11), partition of unity(Chapter 12), smooth embedding·immersion(Chapter 14), Riemannian metric(Chapter 21)</li>
       </ul>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="../02-calculus-rn/index.html">← 2. ℝⁿ의 미적분</a>
-    <a rel="next" href="../04-curves/index.html">4. 곡선의 기초 →</a>
+    <a rel="prev" href="../02-calculus-rn/index.html">← 2. Calculus on ℝⁿ</a>
+    <a rel="next" href="../04-curves/index.html">4. Curves →</a>
   </nav>
 </body>
 </html>
