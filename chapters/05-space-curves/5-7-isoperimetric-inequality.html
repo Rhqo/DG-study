@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>5.7 등주부등식 (선택) — 미분기하 스터디</title>
+  <title>5.7 The Isoperimetric Inequality (optional) — DG Study</title>
   <meta name="dg-id" content="5.7">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="5.6, 2.6, 4.2, 4.4">
@@ -15,294 +15,294 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">5. 공간곡선과 프레네 틀</a> ›
-    <span>5.7 등주부등식 (선택)</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">5. Space Curves and the Frenet Frame</a> ›
+    <span>5.7 The Isoperimetric Inequality (optional)</span>
   </nav>
 
   <main>
     <header>
-      <h1>5.7 등주부등식 (선택)</h1>
-      <p class="meta">대응 교재:
-        <a class="cite" href="../../references.html#dC">[dC §1-7 정리 1]</a></p>
+      <h1>5.7 The Isoperimetric Inequality (optional)</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#dC">[dC §1-7 Theorem 1]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>닫힌 평면곡선의 부호 있는 넓이 \(A(\gamma) = \frac12\int(xy' - yx')\,dt\)를 정의하고, 단순 닫힌 곡선이면 그것이 둘러싼 영역의 넓이임을 설명할 수 있다.</li>
-        <li>평균이 \(0\)인 주기함수에 대한 비르팅거 부등식 \(\int f'^2 \ge \int f^2\)을 증명할 수 있다.</li>
-        <li>등주부등식 \(L^2 \ge 4\pi\abs{A}\)를 증명하고, 등호가 원을 한 번 도는 곡선에서만 성립함을 보일 수 있다.</li>
+        <li>closed plane curve의 signed area \(A(\gamma) = \frac12\int(xy' - yx')\,dt\)를 정의하고, simple closed curve이면 그것이 둘러싼 영역의 넓이임을 설명할 수 있다.</li>
+        <li>평균이 \(0\)인 주기함수에 대한 Wirtinger's inequality \(\int f'^2 \ge \int f^2\)을 증명할 수 있다.</li>
+        <li>isoperimetric inequality \(L^2 \ge 4\pi\abs{A}\)를 증명하고, 등호가 원을 한 번 도는 곡선에서만 성립함을 보일 수 있다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="5-6-rotation-index.html#i-5-6-1">정의 5.6.1 (닫힌 곡선)</a>, <a href="5-6-rotation-index.html#i-5-6-4">명제 5.6.4 (재매개화와 호의 길이 매개화)</a></li>
-        <li>곡선의 길이(<a href="../04-curves/4-2-arc-length.html#i-4-2-7">정의 4.2.7</a>)와 재매개화 불변성(<a href="../04-curves/4-3-reparametrization.html#i-4-3-6">정리 4.3.6</a>)</li>
-        <li>그린 정리(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">정리 2.6.13</a>. 조르당 곡선 정리와 “양의 방향”이 여기서 받아들여져 있다)</li>
-        <li>중간값 정리(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>), 1변수 미적분의 로피탈의 정리와 부분적분</li>
+        <li><a href="5-6-rotation-index.html#i-5-6-1">Definition 5.6.1 (closed curve)</a>, <a href="5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4 (properties of the rotation index)</a></li>
+        <li>곡선의 길이(<a href="../04-curves/4-2-arc-length.html#i-4-2-7">Definition 4.2.7</a>)와 reparametrization 불변성(<a href="../04-curves/4-3-reparametrization.html#i-4-3-6">Theorem 4.3.6</a>)</li>
+        <li>Green's theorem(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">Theorem 2.6.13</a>. Jordan curve theorem과 “positively oriented”가 여기서 받아들여져 있다)</li>
+        <li>intermediate value theorem(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">Corollary 3.7.6</a>), 1변수 미적분의 L'Hôpital's rule과 부분적분</li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p><a href="5-6-rotation-index.html">5.6절</a>의 접선회전정리는 단순 닫힌 곡선의 전역적인 성질이었다. 또 하나의 고전적인 전역 정리가 있다. 길이가 \(L\)인 끈으로 평면에서 울타리를 두르면 가장 넓은 땅을 둘러싸는 모양은 무엇인가?
-      답은 원이고, 넓이는 \(L^2/4\pi\)이다. 이것이 등주부등식이다. 그리스 시대부터 알려진 답이지만, 최댓값이 존재한다는 것까지 포함한 엄밀한 증명은 19세기에야 나왔다.</p>
-      <p>이 절은 넓이를 곡선의 적분 \(\frac12\int(xy' - yx')\,dt\)로 나타내고, 푸리에 급수 없이 증명할 수 있는 비르팅거 부등식 하나로 등주부등식을 얻는다. 필수 흐름 밖의 선택 절이며, 뒤의 장에서 이 절의 결과를 쓰지 않는다.</p>
+      <h2>Motivation</h2>
+      <p><a href="5-6-rotation-index.html">Section 5.6</a>의 rotation index theorem은 simple closed curve의 전역적인 성질이었다. 또 하나의 고전적인 전역 정리가 있다. 길이가 \(L\)인 끈으로 평면에서 울타리를 두르면 가장 넓은 땅을 둘러싸는 모양은 무엇인가?
+      답은 원이고, 넓이는 \(L^2/4\pi\)이다. 이것이 isoperimetric inequality이다. 그리스 시대부터 알려진 답이지만, 최댓값이 존재한다는 것까지 포함한 엄밀한 증명은 19세기에야 나왔다.</p>
+      <p>이 절은 넓이를 곡선의 적분 \(\frac12\int(xy' - yx')\,dt\)로 나타내고, Fourier 급수 없이 증명할 수 있는 Wirtinger's inequality 하나로 isoperimetric inequality를 얻는다. 필수 줄기 밖의 선택 절이며, 뒤의 장에서 이 절의 결과를 쓰지 않는다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 같은 끈, 다른 땅</p>
-        <p><a href="#fig-5-7-1">그림 5.7.1</a>의 세 곡선은 모두 길이가 \(2\pi\)이다. 원(a)은 넓이 \(\pi\)를 둘러싸고, 원을 한쪽으로 누른 타원(b)과 옆구리가 들어간 곡선(c)은 그보다 작다.
-        비 \(4\pi A/L^2\)는 확대·축소해도 변하지 않는 “둥근 정도”이고, 등주부등식은 이 비가 늘 \(1\) 이하이며 원에서만 \(1\)이라는 것이다.</p>
+        <p class="box-title">Intuition: 같은 끈, 다른 땅</p>
+        <p><a href="#fig-5-7-1">Figure 5.7.1</a>의 세 곡선은 모두 길이가 \(2\pi\)이다. 원(a)은 넓이 \(\pi\)를 둘러싸고, 원을 한쪽으로 누른 타원(b)과 옆구리가 들어간 곡선(c)은 그보다 작다.
+        비 \(4\pi A/L^2\)는 확대·축소해도 변하지 않는 “둥근 정도”이고, isoperimetric inequality는 이 비가 늘 \(1\) 이하이며 원에서만 \(1\)이라는 것이다.</p>
       </aside>
 
       <figure class="dg-figure" id="fig-5-7-1">
-        <img src="figures/fig-5-7-1-same-length.svg" alt="같은 축척으로 그린 세 닫힌 곡선과 하늘색으로 칠한 내부. (a) 단위원, 아래에 A=3.142, 4πA/L²=1.000. (b) 가로로 긴 타원, A=2.643, 4πA/L²=0.841. (c) 위쪽 가운데가 오목한 콩 모양 곡선, A=2.753, 4πA/L²=0.876.">
-        <figcaption><span class="fig-head">그림 5.7.1.</span>
-        길이가 모두 \(L = 2\pi\)가 되도록 줄인 (a) 단위원, (b) 타원 \((2\cos t, \sin t)\), (c) 곡선 \(\rho(t)(\cos t, \sin t)\), \(\rho = 1 + \tfrac14\cos 2t + \tfrac{3}{25}\sin 3t\)(<a href="5-6-rotation-index.html#fig-5-6-2">그림 5.6.2</a>의 곡선).
-        아래의 \(A\)는 <a href="#eq-5-7-1">(5.7.1)</a>의 수치 적분이다. 원만 \(4\pi A/L^2 = 1\)이다(<a href="#i-5-7-7">정리 5.7.7</a>).</figcaption>
+        <img src="figures/fig-5-7-1-same-length.svg" alt="같은 축척으로 그린 세 closed curve와 하늘색으로 칠한 영역. (a) 단위원, 아래에 A=3.142, 4πA/L²=1.000. (b) 가로로 긴 타원, A=2.643, 4πA/L²=0.841. (c) 위쪽 가운데가 오목한 콩 모양 곡선, A=2.753, 4πA/L²=0.876.">
+        <figcaption><span class="fig-head">Figure 5.7.1.</span>
+        길이가 모두 \(L = 2\pi\)가 되도록 줄인 (a) 단위원, (b) 타원 \((2\cos t, \sin t)\), (c) 곡선 \(\rho(t)(\cos t, \sin t)\), \(\rho = 1 + \tfrac14\cos 2t + \tfrac{3}{25}\sin 3t\)(<a href="5-6-rotation-index.html#fig-5-6-2">Figure 5.6.2</a>의 곡선).
+        아래의 \(A\)는 <a href="#eq-5-7-1">(5.7.1)</a>의 수치 적분이다. 원만 \(4\pi A/L^2 = 1\)이다(<a href="#i-5-7-7">Theorem 5.7.7</a>).</figcaption>
       </figure>
     </section>
 
     <section id="sec-area">
-      <h2>곡선이 둘러싸는 넓이</h2>
+      <h2>Area Enclosed by a Curve</h2>
 
       <div class="thm definition" id="i-5-7-1">
-        <p><span class="thm-head">정의 5.7.1</span> <span class="thm-name">(부호 있는 넓이, signed area)</span>.
-        \(\gamma(t) = (x(t), y(t))\)가 주기 \(T\)인 닫힌 곡선일 때</p>
+        <p><span class="thm-head">Definition 5.7.1</span> <span class="thm-name">(signed area)</span>.
+        \(\gamma(t) = (x(t), y(t))\)가 주기 \(T\)인 closed curve일 때</p>
         <div class="equation" id="eq-5-7-1">
         \[ A(\gamma) = \frac12\int_0^T \big(x(t)\,y'(t) - y(t)\,x'(t)\big)\,dt \tag{5.7.1} \]
         </div>
-        <p>를 \(\gamma\)가 둘러싸는 <dfn>부호 있는 넓이</dfn>(signed area)라 한다.</p>
+        <p>를 \(\gamma\)가 둘러싸는 <dfn>signed area</dfn>(부호 있는 넓이)라 한다.</p>
       </div>
 
-      <p>피적분함수 \(\tfrac12(xy' - yx')\)는 원점, \(\gamma(t)\), \(\gamma(t) + \gamma'(t)\,dt\)가 만드는 가는 삼각형의 부호 있는 넓이(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-6">정의 1.6.6</a>의 \(2 \times 2\) 행렬식의 절반)다.
+      <p>피적분함수 \(\tfrac12(xy' - yx')\)는 원점, \(\gamma(t)\), \(\gamma(t) + \gamma'(t)\,dt\)가 만드는 가는 삼각형의 signed area(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-6">Definition 1.6.6</a>의 \(2 \times 2\) determinant의 절반)다.
       곡선이 원점 둘레를 반시계 방향으로 돌면 이 삼각형들이 부채꼴처럼 모여 넓이를 채운다.</p>
 
       <div class="thm proposition" id="i-5-7-2">
-        <p><span class="thm-head">명제 5.7.2</span> <span class="thm-name">(부호 있는 넓이의 성질)</span>.
-        \(\gamma\)가 주기 \(T\)인 닫힌 곡선이라 하자.</p>
+        <p><span class="thm-head">Proposition 5.7.2</span> <span class="thm-name">(properties of signed area)</span>.
+        \(\gamma\)가 주기 \(T\)인 closed curve라 하자.</p>
         <ul>
           <li>(a) \(A(\gamma) = \int_0^T x\,y'\,dt = -\int_0^T y\,x'\,dt\)이다.</li>
-          <li>(b) <a href="5-6-rotation-index.html#i-5-6-4">명제 5.6.4</a>(b)의 재매개화 \(\gamma \circ h\)에서, \(h\)가 방향을 보존하면 \(A(\gamma \circ h) = A(\gamma)\), 뒤집으면 \(A(\gamma \circ h) = -A(\gamma)\)이다.</li>
-          <li>(c) 평면의 강체운동 \(\psi\)에 대해 \(A(\psi \circ \gamma) = A(\gamma)\)이고, 반사 \((x, y) \mapsto (x, -y)\)를 합성하면 \(A\)의 부호가 바뀌며, \(\lambda \gt 0\)배 확대에 대해 \(A(\lambda\gamma) = \lambda^2A(\gamma)\)이다.</li>
+          <li>(b) <a href="5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4</a>(b)의 reparametrization \(\gamma \circ h\)에서, \(h\)가 orientation-preserving이면 \(A(\gamma \circ h) = A(\gamma)\), orientation-reversing이면 \(A(\gamma \circ h) = -A(\gamma)\)이다.</li>
+          <li>(c) rigid motion of the plane \(\psi\)에 대해 \(A(\psi \circ \gamma) = A(\gamma)\)이고, 반사 \((x, y) \mapsto (x, -y)\)를 합성하면 \(A\)의 부호가 바뀌며, \(\lambda \gt 0\)배 확대에 대해 \(A(\lambda\gamma) = \lambda^2A(\gamma)\)이다.</li>
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
+        <p><span class="proof-head">Proof.</span>
         (a) \((xy)' = x'y + xy'\)이고 \(xy\)는 주기 \(T\)를 가지므로 \(\int_0^T (x'y + xy')\,dt = x(T)y(T) - x(0)y(0) = 0\)이다. 곧 \(\int xy' = -\int yx'\)이고, \(A\)는 두 값의 평균이다.</p>
         <p>(b) \(\beta = \gamma \circ h\)이면 \(\beta' = h'\,\gamma'(h)\)이므로 \(x_\beta y_\beta' - y_\beta x_\beta' = h'\,(xy' - yx')(h(u))\)이다. 치환 \(t = h(u)\)로 \(\int_0^{\tilde T}\) 가 \(h' \gt 0\)이면 \(\int_{h(0)}^{h(0) + T}\), \(h' \lt 0\)이면
         \(\int_{h(0)}^{h(0) - T} = -\int_{h(0) - T}^{h(0)}\)이 되고, 피적분함수가 주기 \(T\)를 가지므로 각각 \(2A(\gamma)\), \(-2A(\gamma)\)이다.</p>
-        <p>(c) 평행이동 \(\gamma + c\)에서는 \((x + c^1)y' - (y + c^2)x' = (xy' - yx') + c^1y' - c^2x'\)이고 \(\int_0^T y' = \int_0^T x' = 0\)(주기성)이므로 \(A\)가 같다. 회전 \(R_\alpha\)에서는 \(xy' - yx' = \det(\gamma, \gamma')\)이고
-        \(\det(R_\alpha\gamma, R_\alpha\gamma') = \det R_\alpha\,\det(\gamma, \gamma') = \det(\gamma, \gamma')\)이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">정리 1.6.8</a>(a)). 반사의 행렬 \(\diag(1, -1)\)은 행렬식이 \(-1\)이므로 부호가 바뀌고, \(\lambda\)배는 \(\det(\lambda\gamma, \lambda\gamma') = \lambda^2\det(\gamma, \gamma')\)이다.</p>
+        <p>(c) translation \(\gamma + c\)에서는 \((x + c^1)y' - (y + c^2)x' = (xy' - yx') + c^1y' - c^2x'\)이고 \(\int_0^T y' = \int_0^T x' = 0\)(주기성)이므로 \(A\)가 같다. 회전 \(R_\alpha\)에서는 \(xy' - yx' = \det(\gamma, \gamma')\)이고
+        \(\det(R_\alpha\gamma, R_\alpha\gamma') = \det R_\alpha\,\det(\gamma, \gamma') = \det(\gamma, \gamma')\)이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8</a>(a)). 반사의 행렬 \(\diag(1, -1)\)은 determinant가 \(-1\)이므로 부호가 바뀌고, \(\lambda\)배는 \(\det(\lambda\gamma, \lambda\gamma') = \lambda^2\det(\gamma, \gamma')\)이다.</p>
       </div>
 
       <div class="thm example" id="i-5-7-3">
-        <p><span class="thm-head">예 5.7.3</span>.
+        <p><span class="thm-head">Example 5.7.3</span>.
         (a) 반시계 방향 원 \((r\cos t, r\sin t)\)은 \(xy' - yx' = r^2\cos^2 t + r^2\sin^2 t = r^2\)이므로 \(A = \frac12 r^2 \cdot 2\pi = \pi r^2\)이고, 시계 방향이면 \(-\pi r^2\)이다.</p>
         <p>(b) 타원 \((a\cos t, b\sin t)\)은 \(xy' - yx' = ab\cos^2 t + ab\sin^2 t = ab\)이므로 \(A = \pi ab\)이다.</p>
-        <p>(c) 극좌표 곡선 \(\rho(t)(\cos t, \sin t)\)은 \(xy' - yx' = \rho^2\)이므로(<a href="#ex-5-7-5">연습 5.7.5</a>) \(A = \frac12\int_0^{2\pi}\rho^2\,dt\)이다. 리마송 \(\rho = 1 + 2\cos t\)이면 \(\frac12\int_0^{2\pi}(1 + 4\cos t + 4\cos^2 t)\,dt = \frac12(2\pi + 4\pi) = 3\pi\)이다.
-        리마송은 단순하지 않고 안쪽 고리 안의 점들은 두 번 감기므로, \(3\pi\)는 “둘러싸인 땅의 넓이”가 아니라 안쪽 고리를 두 번 센 넓이다.</p>
-        <p>(d) 8자 곡선 \((\sin t, \sin t\cos t)\)은 두 고리를 반대 방향으로 돌아서 \(A = 0\)이다. 실제로 \(xy' - yx' = \sin t\,(\cos^2 t - \sin^2 t) - \sin t\cos t\cdot\cos t = -\sin^3 t\)이고 \(\int_0^{2\pi}\sin^3 t\,dt = 0\)이다.</p>
-        <p class="verified">검증: <code>verify/v-5-7-isoperimetric-inequality.py</code></p>
+        <p>(c) polar coordinates 곡선 \(\rho(t)(\cos t, \sin t)\)은 \(xy' - yx' = \rho^2\)이므로(<a href="#ex-5-7-5">Exercise 5.7.5</a>) \(A = \frac12\int_0^{2\pi}\rho^2\,dt\)이다. limaçon \(\rho = 1 + 2\cos t\)이면 \(\frac12\int_0^{2\pi}(1 + 4\cos t + 4\cos^2 t)\,dt = \frac12(2\pi + 4\pi) = 3\pi\)이다.
+        limaçon은 단순하지 않고 안쪽 고리 안의 점들은 두 번 감기므로, \(3\pi\)는 “둘러싸인 땅의 넓이”가 아니라 안쪽 고리를 두 번 센 넓이다.</p>
+        <p>(d) figure-eight curve \((\sin t, \sin t\cos t)\)은 두 고리를 반대 방향으로 돌아서 \(A = 0\)이다. 실제로 \(xy' - yx' = \sin t\,(\cos^2 t - \sin^2 t) - \sin t\cos t\cdot\cos t = -\sin^3 t\)이고 \(\int_0^{2\pi}\sin^3 t\,dt = 0\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-5-7-isoperimetric-inequality.py</code></p>
       </div>
 
-      <p>(c)와 (d)가 보여 주듯 단순하지 않은 곡선에서 \(A(\gamma)\)는 넓이가 아니다. 단순 닫힌 곡선이면 그린 정리가 \(A(\gamma)\)를 진짜 넓이와 잇는다.</p>
+      <p>(c)와 (d)가 보여 주듯 단순하지 않은 곡선에서 \(A(\gamma)\)는 넓이가 아니다. simple closed curve이면 Green's theorem이 \(A(\gamma)\)를 진짜 넓이와 잇는다.</p>
 
       <div class="thm proposition" id="i-5-7-4">
-        <p><span class="thm-head">명제 5.7.4</span> <span class="thm-name">(단순 닫힌 곡선이 둘러싼 넓이)</span>.
-        \(\gamma\)가 주기 \(T\)인 단순 닫힌 곡선이고, 자취가 둘러싼 유계 영역을 \(\Omega\), \(D = \Omega \cup \gamma(\R)\)이라 하자. \(\gamma\)가 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">정리 2.6.13</a>의 뜻으로 양의 방향이면(\(\Omega\)를 왼쪽에 두고 돌면)
+        <p><span class="thm-head">Proposition 5.7.4</span> <span class="thm-name">(area enclosed by a simple closed curve)</span>.
+        \(\gamma\)가 주기 \(T\)인 simple closed curve이고, trace가 둘러싼 bounded 영역을 \(\Omega\), \(D = \Omega \cup \gamma(\R)\)이라 하자. \(\gamma\)가 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">Theorem 2.6.13</a>의 뜻으로 positively oriented이면(\(\Omega\)를 왼쪽에 두고 돌면)
         \(A(\gamma) = \vol(D)\)이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">정리 2.6.13</a>을 \([0, T]\)에서 \(P = -y/2\), \(Q = x/2\)로 쓰면 \(\partial_xQ - \partial_yP = 1\)이므로 \(\vol(D) = \int_D 1 = \frac12\int_0^T (x\,y' - y\,x')\,dt = A(\gamma)\)이다(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">정리 2.6.13</a> 뒤의 설명과 같다).</p>
+        <p><span class="proof-head">Proof.</span>
+        <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">Theorem 2.6.13</a>을 \([0, T]\)에서 \(P = -y/2\), \(Q = x/2\)로 쓰면 \(\partial_xQ - \partial_yP = 1\)이므로 \(\vol(D) = \int_D 1 = \frac12\int_0^T (x\,y' - y\,x')\,dt = A(\gamma)\)이다(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">Theorem 2.6.13</a> 뒤의 설명과 같다).</p>
       </div>
 
-      <p>do Carmo와 같이, 단순 닫힌 곡선은 두 방향 가운데 하나가 양의 방향이라는 것을 받아들인다 <a class="cite" href="../../references.html#dC">[dC §1-7]</a>. 이것은 그린 정리와 함께 받아들인 조르당 곡선 정리 수준의 사실이다.
-      그러면 <a href="#i-5-7-2">명제 5.7.2</a>(b)에서 어느 방향이든 \(\abs{A(\gamma)} = \vol(D)\)이다.</p>
+      <p>do Carmo와 같이, simple closed curve는 두 방향 가운데 하나가 positively oriented이라는 것을 받아들인다 <a class="cite" href="../../references.html#dC">[dC §1-7]</a>. 이것은 Green's theorem과 함께 받아들인 Jordan curve theorem 수준의 사실이다.
+      그러면 <a href="#i-5-7-2">Proposition 5.7.2</a>(b)에서 어느 방향이든 \(\abs{A(\gamma)} = \vol(D)\)이다.</p>
     </section>
 
     <section id="sec-wirtinger">
-      <h2>비르팅거 부등식</h2>
-      <p>등주부등식의 증명의 핵심은 함수와 그 도함수의 크기를 비교하는 부등식이다. 먼저 양 끝이 \(0\)인 경우를 보인다.</p>
+      <h2>Wirtinger's Inequality</h2>
+      <p>isoperimetric inequality의 증명의 핵심은 함수와 그 도함수의 크기를 비교하는 부등식이다. 먼저 양 끝이 \(0\)인 경우를 보인다.</p>
 
       <div class="thm lemma" id="i-5-7-5">
-        <p><span class="thm-head">보조정리 5.7.5</span> <span class="thm-name">(양 끝이 \(0\)인 함수)</span>.
+        <p><span class="thm-head">Lemma 5.7.5</span> <span class="thm-name">(functions with value \(0\) at both endpoints)</span>.
         \(g\)가 \([\alpha, \alpha + \pi]\)를 포함하는 열린구간에서 매끄럽고 \(g(\alpha) = g(\alpha + \pi) = 0\)이면</p>
         \[ \int_\alpha^{\alpha + \pi} g'(t)^2\,dt \ \ge\ \int_\alpha^{\alpha + \pi} g(t)^2\,dt \]
         <p>이고, 등호는 어떤 상수 \(c\)에 대해 \(g(t) = c\sin(t - \alpha)\)일 때만 성립한다.</p>
       </div>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(g = h\sin t\)로 쓰면 \(g'^2 - g^2\)이 \(h'^2\sin^2 t\)와 완전미분 \((h^2\sin t\cos t)'\)의 합이 된다. 완전미분의 적분은 양 끝에서 \(0\)이 된다.</p>
-        <p><span class="proof-head">증명.</span>
+        <p class="proof-idea">Proof idea: \(g = h\sin t\)로 쓰면 \(g'^2 - g^2\)이 \(h'^2\sin^2 t\)와 도함수 꼴의 항 \((h^2\sin t\cos t)'\)의 합이 된다. 도함수 꼴의 항의 적분은 양 끝에서 \(0\)이 된다.</p>
+        <p><span class="proof-head">Proof.</span>
         \(t\)를 \(t - \alpha\)로 바꾸면 \(\alpha = 0\)이라 해도 된다. \((0, \pi)\)에서 \(\sin t \gt 0\)이므로 \(h = g/\sin t\)는 \((0, \pi)\)에서 매끄럽고 \(g = h\sin t\)이다. \(g' = h'\sin t + h\cos t\)이므로</p>
         \[ g'^2 - g^2 = h'^2\sin^2 t + 2hh'\sin t\cos t + h^2(\cos^2 t - \sin^2 t) = h'^2\sin^2 t + \big(h^2\sin t\cos t\big)' \]
         <p>이다(마지막 항을 곱의 미분법으로 전개하면 가운데 두 항이 된다). \(0 \lt \delta \lt \pi/2\)에서 \([\delta, \pi - \delta]\)로 적분하면</p>
         \[ \int_\delta^{\pi - \delta}(g'^2 - g^2)\,dt = \int_\delta^{\pi - \delta}h'^2\sin^2 t\,dt + \Big[g(t)\,\frac{g(t)}{\sin t}\cos t\Big]_\delta^{\pi - \delta} \]
-        <p>이다(\(h^2\sin t\cos t = g\cdot(g/\sin t)\cos t\)). 로피탈의 정리에서 \(t \to 0^+\)이면 \(g(t)/\sin t \to g'(0)\), \(t \to \pi^-\)이면 \(g(t)/\sin t \to -g'(\pi)\)이고, \(g(t) \to 0\)이므로 경계항은 \(\delta \to 0\)에서 \(0\)으로 간다.
+        <p>이다(\(h^2\sin t\cos t = g\cdot(g/\sin t)\cos t\)). L'Hôpital's rule에서 \(t \to 0^+\)이면 \(g(t)/\sin t \to g'(0)\), \(t \to \pi^-\)이면 \(g(t)/\sin t \to -g'(\pi)\)이고, \(g(t) \to 0\)이므로 boundary term은 \(\delta \to 0\)에서 \(0\)으로 간다.
         왼쪽은 \(\int_0^\pi(g'^2 - g^2)\)으로 간다. 따라서 \(I(\delta) = \int_\delta^{\pi - \delta}h'^2\sin^2 t\,dt\)는 \(\delta \to 0\)에서 \(\int_0^\pi(g'^2 - g^2)\)으로 수렴한다. \(I(\delta) \ge 0\)이므로 극한도 \(0\) 이상이다.
         등호이면, \(I(\delta)\)는 \(\delta\)가 줄면 늘어나고 극한이 \(0\)이므로 모든 \(\delta\)에서 \(I(\delta) = 0\)이다. 연속이고 \(0\) 이상인 피적분함수의 적분이 \(0\)이므로 \((0, \pi)\)에서 \(h' = 0\), 곧 \(h\)는 상수 \(c\)이고
         \(g = c\sin t\)이다(양 끝에서는 연속성으로). 거꾸로 \(g = c\sin t\)이면 \(\int_0^\pi c^2(\cos^2 t - \sin^2 t)\,dt = c^2\int_0^\pi\cos 2t\,dt = 0\)이다.</p>
       </div>
 
       <div class="thm lemma" id="i-5-7-6">
-        <p><span class="thm-head">보조정리 5.7.6</span> <span class="thm-name">(비르팅거 부등식, Wirtinger's inequality)</span>.
+        <p><span class="thm-head">Lemma 5.7.6</span> <span class="thm-name">(Wirtinger's inequality)</span>.
         \(f\colon \R \to \R\)가 매끄럽고 주기 \(2\pi\)를 가지며 \(\int_0^{2\pi} f\,dt = 0\)이면</p>
         \[ \int_0^{2\pi} f'(t)^2\,dt \ \ge\ \int_0^{2\pi} f(t)^2\,dt \]
         <p>이고, 등호는 상수 \(a, b\)에 대해 \(f(t) = a\cos t + b\sin t\)일 때만 성립한다.</p>
       </div>
       <p><strong>이 보조정리가 말하는 것.</strong> 평균이 \(0\)인 주기함수는 적어도 \(\cos t\), \(\sin t\)만큼은 흔들려야 하므로, 도함수가 함수 자신보다 (제곱 적분의 뜻에서) 작을 수 없다. 평균 조건은 빠질 수 없다. 상수함수 \(f = 1\)은 \(\int f'^2 = 0 \lt 2\pi = \int f^2\)이다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(f\)를 \(\pi\)만큼 옮기면 부호가 바뀌는 부분 \(u\)와 그대로인 부분 \(v\)로 나눈다. 두 부분은 적분에서 서로 간섭하지 않고, 각각 길이 \(\pi\)의 구간 양 끝에서 \(0\)이 되므로 <a href="#i-5-7-5">보조정리 5.7.5</a>를 쓸 수 있다.</p>
-        <p><span class="proof-head">증명.</span>
+        <p class="proof-idea">Proof idea: \(f\)를 \(\pi\)만큼 옮기면 부호가 바뀌는 부분 \(u\)와 그대로인 부분 \(v\)로 나눈다. 두 부분은 적분에서 서로 간섭하지 않고, 각각 길이 \(\pi\)의 구간 양 끝에서 \(0\)이 되므로 <a href="#i-5-7-5">Lemma 5.7.5</a>를 쓸 수 있다.</p>
+        <p><span class="proof-head">Proof.</span>
         \(u(t) = \frac12(f(t) - f(t + \pi))\), \(v(t) = \frac12(f(t) + f(t + \pi))\)로 두면 \(f = u + v\), \(u(t + \pi) = -u(t)\), \(v(t + \pi) = v(t)\)이고, 미분하면 \(u'(t + \pi) = -u'(t)\), \(v'(t + \pi) = v'(t)\)이다.</p>
         <p><em>간섭하지 않음.</em> \(w = u'v'\)이면 \(w(t + \pi) = -w(t)\)이므로 \(\int_0^{2\pi} w = \int_0^\pi w(t)\,dt + \int_0^\pi w(t + \pi)\,dt = 0\)이다. 같은 방식으로 \(\int_0^{2\pi} uv = 0\)이다. 따라서
         \(\int_0^{2\pi} f'^2 = \int_0^{2\pi} u'^2 + \int_0^{2\pi} v'^2\), \(\int_0^{2\pi} f^2 = \int_0^{2\pi} u^2 + \int_0^{2\pi} v^2\)이다.</p>
-        <p><em>\(u\)의 부분.</em> \(u(\pi) = -u(0)\)이므로 중간값 정리(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>)에서 \(u(t_0) = 0\)인 \(t_0 \in [0, \pi]\)가 있고, \(u(t_0 + \pi) = -u(t_0) = 0\)이다.
-        <a href="#i-5-7-5">보조정리 5.7.5</a>에서 \(\int_{t_0}^{t_0 + \pi} u'^2 \ge \int_{t_0}^{t_0 + \pi} u^2\)이다. \(u^2\)과 \(u'^2\)은 주기 \(\pi\)를 가지므로 \([0, 2\pi]\)에서의 적분은 길이 \(\pi\)인 어느 구간에서의 적분의 두 배다.
+        <p><em>\(u\)의 부분.</em> \(u(\pi) = -u(0)\)이므로 intermediate value theorem(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">Corollary 3.7.6</a>)에서 \(u(t_0) = 0\)인 \(t_0 \in [0, \pi]\)가 있고, \(u(t_0 + \pi) = -u(t_0) = 0\)이다.
+        <a href="#i-5-7-5">Lemma 5.7.5</a>에서 \(\int_{t_0}^{t_0 + \pi} u'^2 \ge \int_{t_0}^{t_0 + \pi} u^2\)이다. \(u^2\)과 \(u'^2\)은 주기 \(\pi\)를 가지므로 \([0, 2\pi]\)에서의 적분은 길이 \(\pi\)인 어느 구간에서의 적분의 두 배다.
         따라서 \(\int_0^{2\pi} u'^2 \ge \int_0^{2\pi} u^2\)이고, 등호는 \([t_0, t_0 + \pi]\)에서 \(u = c\sin(t - t_0)\)일 때뿐이다. 그때 \(u\)와 \(c\sin(t - t_0)\)은 둘 다 \(\pi\)만큼 옮기면 부호가 바뀌므로 \(\R\) 전체에서 같다.</p>
         <p><em>\(v\)의 부분.</em> \(\int_0^{2\pi} v = \frac12\int_0^{2\pi} f(t)\,dt + \frac12\int_0^{2\pi} f(t + \pi)\,dt = \int_0^{2\pi} f = 0\)이고 \(v\)는 주기 \(\pi\)를 가지므로 \(\int_0^\pi v = 0\)이다.
-        \(v\)가 \([0, \pi]\)에서 \(0\)이 되지 않으면 부호가 일정해(중간값 정리) 적분이 \(0\)이 아니므로, \(v(t_1) = 0\)인 \(t_1 \in [0, \pi]\)가 있고 \(v(t_1 + \pi) = 0\)이다. 위와 같이 \(\int_0^{2\pi} v'^2 \ge \int_0^{2\pi} v^2\)이다.
+        \(v\)가 \([0, \pi]\)에서 \(0\)이 되지 않으면 부호가 일정해(intermediate value theorem) 적분이 \(0\)이 아니므로, \(v(t_1) = 0\)인 \(t_1 \in [0, \pi]\)가 있고 \(v(t_1 + \pi) = 0\)이다. 위와 같이 \(\int_0^{2\pi} v'^2 \ge \int_0^{2\pi} v^2\)이다.
         등호이면 \([t_1, t_1 + \pi]\)에서 \(v = c\sin(t - t_1)\)이고, \(v'(t_1 + \pi) = v'(t_1)\)(주기 \(\pi\))에서 \(c\cos\pi = c\cos 0\), 곧 \(c = 0\)이다. 따라서 \(v \equiv 0\)이다.</p>
         <p><em>결론.</em> \(\int f'^2 - \int f^2 = \big(\int u'^2 - \int u^2\big) + \big(\int v'^2 - \int v^2\big) \ge 0\)이다. 등호는 \(v \equiv 0\)이고 \(u = c\sin(t - t_0)\)일 때, 곧 \(f = c\sin(t - t_0) = a\cos t + b\sin t\)일 때뿐이다.
         거꾸로 \(f = a\cos t + b\sin t\)이면 \(\int_0^{2\pi} f'^2 = \int_0^{2\pi} f^2 = \pi(a^2 + b^2)\)이다.</p>
       </div>
 
       <aside class="box warning">
-        <p class="box-title">주의</p>
-        <p><a href="#i-5-7-5">보조정리 5.7.5</a>의 구간 길이 \(\pi\)와 <a href="#i-5-7-6">보조정리 5.7.6</a>의 주기 \(2\pi\)는 서로 짝을 이룬다. 길이 \(\ell\)인 구간이면 상수가 \((\pi/\ell)^2\)으로 바뀐다(<a href="#ex-5-7-4">연습 5.7.4</a>).
-        또 <a href="#i-5-7-6">보조정리 5.7.6</a>의 증명은 \(f\)가 \(\R\) 전체에서 매끄러운 주기함수라는 것을 등호 조건의 \(v'(t_1 + \pi) = v'(t_1)\) 단계에서 썼다. 평균이 \(0\)이라는 조건은 두 보조정리 가운데 5.7.6에만 필요하다.</p>
+        <p class="box-title">Warning</p>
+        <p><a href="#i-5-7-5">Lemma 5.7.5</a>의 구간 길이 \(\pi\)와 <a href="#i-5-7-6">Lemma 5.7.6</a>의 주기 \(2\pi\)는 서로 짝을 이룬다. 길이 \(\ell\)인 구간이면 상수가 \((\pi/\ell)^2\)으로 바뀐다(<a href="#ex-5-7-4">Exercise 5.7.4</a>).
+        또 <a href="#i-5-7-6">Lemma 5.7.6</a>의 증명은 \(f\)가 \(\R\) 전체에서 smooth 주기함수라는 것을 등호 조건의 \(v'(t_1 + \pi) = v'(t_1)\) 단계에서 썼다. 평균이 \(0\)이라는 조건은 두 보조정리 가운데 5.7.6에만 필요하다.</p>
       </aside>
     </section>
 
     <section id="sec-isoperimetric">
-      <h2>등주부등식</h2>
+      <h2>The Isoperimetric Inequality</h2>
 
       <div class="thm theorem" id="i-5-7-7">
-        <p><span class="thm-head">정리 5.7.7</span> <span class="thm-name">(등주부등식, isoperimetric inequality)</span>.</p>
+        <p><span class="thm-head">Theorem 5.7.7</span> <span class="thm-name">(isoperimetric inequality)</span>.</p>
         <ul>
-          <li>(a) \(\gamma\)가 닫힌 곡선이고 한 주기의 길이가 \(L\)이면 \(L^2 \ge 4\pi\abs{A(\gamma)}\)이다. 등호는 \(\gamma\)가 원을 (어느 방향으로든) 한 번 도는 곡선을 방향을 보존하도록 재매개화한 것일 때만 성립한다.</li>
-          <li>(b) 특히 \(\gamma\)가 단순 닫힌 곡선이고 \(D\)가 <a href="#i-5-7-4">명제 5.7.4</a>의 둘러싼 영역이면 \(L^2 \ge 4\pi\vol(D)\)이고, 등호는 자취가 원일 때만 성립한다.</li>
+          <li>(a) \(\gamma\)가 closed curve이고 한 주기의 길이가 \(L\)이면 \(L^2 \ge 4\pi\abs{A(\gamma)}\)이다. 등호는 \(\gamma\)가 원을 (어느 방향으로든) 한 번 도는 곡선의 orientation-preserving reparametrization일 때만 성립한다.</li>
+          <li>(b) 특히 \(\gamma\)가 simple closed curve이고 \(D\)가 <a href="#i-5-7-4">Proposition 5.7.4</a>의 둘러싼 영역이면 \(L^2 \ge 4\pi\vol(D)\)이고, 등호는 trace가 원일 때만 성립한다.</li>
         </ul>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 길이가 \(L\)인 닫힌 곡선이 둘러싸는 넓이는 \(L^2/4\pi\), 곧 둘레가 \(L\)인 원의 넓이를 넘지 못하고, 그 최댓값을 갖는 것은 원뿐이다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> 길이가 \(L\)인 closed curve가 둘러싸는 넓이는 \(L^2/4\pi\), 곧 둘레가 \(L\)인 원의 넓이를 넘지 못하고, 그 최댓값을 갖는 것은 원뿐이다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 곡선을 속력이 일정하도록 \([0, 2\pi]\)에 다시 매개화하고 \(x\)의 평균이 \(0\)이 되게 옮긴다. 그러면 \(L^2/2\pi - 2A\)가 \(\int(x'^2 - x^2)\)과 \(\int(x - y')^2\)의 합이 되어, 비르팅거 부등식에서 \(0\) 이상이다.</p>
-        <p><span class="proof-head">증명.</span>
-        (a) <em>정리하기.</em> <a href="5-6-rotation-index.html#i-5-6-4">명제 5.6.4</a>(c)의 호의 길이 매개화 \(\hat\gamma\)는 주기 \(L\)을 가지고, \(\beta(u) = \hat\gamma(Lu/2\pi)\)는 주기 \(2\pi\)인 닫힌 곡선이며 속력이 \(L/2\pi\)로 일정하다.
-        둘 다 \(\gamma\)를 방향을 보존하도록 재매개화한 것이므로 <a href="#i-5-7-2">명제 5.7.2</a>(b)에서 \(A(\beta) = A(\gamma)\)이고, 길이도 \(L\)이다(<a href="../04-curves/4-3-reparametrization.html#i-4-3-6">정리 4.3.6</a>).
-        \(\beta\)를 평행이동해 \(\int_0^{2\pi} x\,du = 0\)이 되게 해도 \(A\)와 \(L\)은 변하지 않는다(<a href="#i-5-7-2">명제 5.7.2</a>(c)). 이제 \(\beta = (x, y)\)라 하자. \(A(\gamma) \ge 0\)인 경우를 보이면 충분하다. \(A \lt 0\)이면 방향을 뒤집은 곡선에 쓰면 된다(<a href="#i-5-7-2">명제 5.7.2</a>(b)).</p>
-        <p><em>부등식.</em> \(x'^2 + y'^2 = (L/2\pi)^2\)이므로 \(\int_0^{2\pi}(x'^2 + y'^2)\,du = L^2/2\pi\)이고, <a href="#i-5-7-2">명제 5.7.2</a>(a)에서 \(A = \int_0^{2\pi} x\,y'\,du\)이다. 따라서</p>
+        <p class="proof-idea">Proof idea: 곡선을 속력이 일정하도록 \([0, 2\pi]\)에 다시 parametrization하고 \(x\)의 평균이 \(0\)이 되게 옮긴다. 그러면 \(L^2/2\pi - 2A\)가 \(\int(x'^2 - x^2)\)과 \(\int(x - y')^2\)의 합이 되어, Wirtinger's inequality에서 \(0\) 이상이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) <em>정리하기.</em> <a href="5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4</a>(c)의 arc length parametrization \(\hat\gamma\)는 주기 \(L\)을 가지고, \(\beta(u) = \hat\gamma(Lu/2\pi)\)는 주기 \(2\pi\)인 closed curve이며 속력이 \(L/2\pi\)로 일정하다.
+        둘 다 \(\gamma\)의 orientation-preserving reparametrization이므로 <a href="#i-5-7-2">Proposition 5.7.2</a>(b)에서 \(A(\beta) = A(\gamma)\)이고, 길이도 \(L\)이다(<a href="../04-curves/4-3-reparametrization.html#i-4-3-6">Theorem 4.3.6</a>).
+        \(\beta\)를 translation으로 옮겨 \(\int_0^{2\pi} x\,du = 0\)이 되게 해도 \(A\)와 \(L\)은 변하지 않는다(<a href="#i-5-7-2">Proposition 5.7.2</a>(c)). 이제 \(\beta = (x, y)\)라 하자. \(A(\gamma) \ge 0\)인 경우를 보이면 충분하다. \(A \lt 0\)이면 orientation을 뒤집은 곡선에 쓰면 된다(<a href="#i-5-7-2">Proposition 5.7.2</a>(b)).</p>
+        <p><em>부등식.</em> \(x'^2 + y'^2 = (L/2\pi)^2\)이므로 \(\int_0^{2\pi}(x'^2 + y'^2)\,du = L^2/2\pi\)이고, <a href="#i-5-7-2">Proposition 5.7.2</a>(a)에서 \(A = \int_0^{2\pi} x\,y'\,du\)이다. 따라서</p>
         <div class="equation" id="eq-5-7-2">
         \[ \begin{aligned} \frac{L^2}{2\pi} - 2A &= \int_0^{2\pi}\big(x'^2 + y'^2 - 2xy'\big)\,du\\ &= \int_0^{2\pi}\big(x'^2 - x^2\big)\,du + \int_0^{2\pi}\big(x - y'\big)^2\,du \end{aligned} \tag{5.7.2} \]
         </div>
-        <p>이다(\(x'^2 + y'^2 - 2xy' = (x'^2 - x^2) + (x^2 - 2xy' + y'^2)\)). \(x\)는 매끄럽고 주기 \(2\pi\)이며 평균이 \(0\)이므로 <a href="#i-5-7-6">보조정리 5.7.6</a>에서 첫째 적분은 \(0\) 이상이고, 둘째 적분도 \(0\) 이상이다.
+        <p>이다(\(x'^2 + y'^2 - 2xy' = (x'^2 - x^2) + (x^2 - 2xy' + y'^2)\)). \(x\)는 매끄럽고 주기 \(2\pi\)이며 평균이 \(0\)이므로 <a href="#i-5-7-6">Lemma 5.7.6</a>에서 첫째 적분은 \(0\) 이상이고, 둘째 적분도 \(0\) 이상이다.
         따라서 \(L^2 \ge 4\pi A\)이다.</p>
-        <p><em>등호.</em> \(L^2 = 4\pi A\)이면 두 적분이 모두 \(0\)이다. <a href="#i-5-7-6">보조정리 5.7.6</a>의 등호 조건에서 \(x = a\cos u + b\sin u\)이고, 둘째 적분에서 연속함수 \((x - y')^2\)이 \(0\)이므로 \(y' = x\), 곧 \(y = a\sin u - b\cos u + c\)이다.
+        <p><em>등호.</em> \(L^2 = 4\pi A\)이면 두 적분이 모두 \(0\)이다. <a href="#i-5-7-6">Lemma 5.7.6</a>의 등호 조건에서 \(x = a\cos u + b\sin u\)이고, 둘째 적분에서 연속함수 \((x - y')^2\)이 \(0\)이므로 \(y' = x\), 곧 \(y = a\sin u - b\cos u + c\)이다.
         \(a = r\cos\varphi\), \(b = r\sin\varphi\)(\(r = \sqrt{a^2 + b^2}\))로 쓰면 덧셈정리에서 \((x, y - c) = r(\cos(u - \varphi), \sin(u - \varphi))\)이다. \(L \gt 0\)이므로 \(r \gt 0\)이고, \(\beta\)는 반지름 \(r\)인 원을 반시계 방향으로 한 번 돈다.
-        \(\gamma\)는 이것을 평행이동하고 방향을 보존하도록 재매개화한 것이다. 거꾸로 원을 한 번 돌면 \(L = 2\pi r\), \(\abs{A} = \pi r^2\)(<a href="#i-5-7-3">예 5.7.3</a>(a))이므로 등호다.</p>
-        <p>(b) <a href="#i-5-7-4">명제 5.7.4</a> 뒤의 설명대로 \(\abs{A(\gamma)} = \vol(D)\)이므로 (a)이다. 등호이면 (a)에서 자취가 원이다.</p>
+        \(\gamma\)는 이 원의 translation에 orientation-preserving reparametrization을 합성한 것이다. 거꾸로 원을 한 번 돌면 \(L = 2\pi r\), \(\abs{A} = \pi r^2\)(<a href="#i-5-7-3">Example 5.7.3</a>(a))이므로 등호다.</p>
+        <p>(b) <a href="#i-5-7-4">Proposition 5.7.4</a> 뒤의 설명대로 \(\abs{A(\gamma)} = \vol(D)\)이므로 (a)이다. 등호이면 (a)에서 trace가 원이다.</p>
       </div>
 
-      <p>“한 번 도는”이라는 조건은 빠질 수 없다. 반지름 \(r\)인 원을 두 번 도는 곡선은 \(L = 4\pi r\), \(A = 2\pi r^2\)이어서 \(L^2 = 16\pi^2r^2 \gt 8\pi^2r^2 = 4\pi A\)이다(<a href="#ex-5-7-2">연습 5.7.2</a>).
-      자취는 원이지만 넓이를 두 번 세는 대가로 길이도 두 배를 쓰기 때문이다.</p>
+      <p>“한 번 도는”이라는 조건은 빠질 수 없다. 반지름 \(r\)인 원을 두 번 도는 곡선은 \(L = 4\pi r\), \(A = 2\pi r^2\)이어서 \(L^2 = 16\pi^2r^2 \gt 8\pi^2r^2 = 4\pi A\)이다(<a href="#ex-5-7-2">Exercise 5.7.2</a>).
+      trace는 원이지만 넓이를 두 번 세는 대가로 길이도 두 배를 쓰기 때문이다.</p>
 
       <aside class="box convention">
-        <p class="box-title">규약 비교</p>
-        <p>do Carmo는 단순 닫힌 곡선에 대해 \(l^2 - 4\pi A \ge 0\)을 증명한다 <a class="cite" href="../../references.html#dC">[dC §1-7 정리 1]</a>. 넓이 공식 \(A = \int xy'\)은 영역을 잘게 나누는 논증과 그린 정리로 설명하고,
-        증명은 E. 슈미트의 방법, 곧 곡선에 두 평행한 접선을 긋고 그 사이에 원을 끼워 비교하는 방법을 쓴다. 이 절은 부호 있는 넓이 \(A(\gamma)\)로 모든 닫힌 곡선에 대해 부등식을 세우고,
-        비르팅거 부등식을 거치는 증명을 택했다. 흔히 비르팅거 부등식은 푸리에 급수로 증명하는데, 여기서는 급수 없이 \(u\), \(v\) 분해와 <a href="#i-5-7-5">보조정리 5.7.5</a>로 증명했다.</p>
+        <p class="box-title">Conventions</p>
+        <p>do Carmo는 simple closed curve에 대해 \(l^2 - 4\pi A \ge 0\)을 증명한다 <a class="cite" href="../../references.html#dC">[dC §1-7 Theorem 1]</a>. 넓이 공식 \(A = \int xy'\)은 영역을 잘게 나누는 논증과 Green's theorem으로 설명하고,
+        증명은 E. Schmidt의 방법, 곧 곡선에 두 평행한 접선을 긋고 그 사이에 원을 끼워 비교하는 방법을 쓴다. 이 절은 signed area \(A(\gamma)\)로 모든 closed curve에 대해 부등식을 세우고,
+        Wirtinger's inequality를 거치는 증명을 택했다. 흔히 Wirtinger's inequality는 Fourier 급수로 증명하는데, 여기서는 급수 없이 \(u\), \(v\) 분해와 <a href="#i-5-7-5">Lemma 5.7.5</a>로 증명했다.</p>
       </aside>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것</p>
-        <p><a href="#i-5-7-4">명제 5.7.4</a>에 쓴 그린 정리는 <a href="../18-integration-stokes/index.html">18장</a>의 스토크스 정리의 특수한 경우다. 3차원에서 부피를 고정하고 겉넓이를 가장 작게 하는 곡면은 구면이고(비누방울),
-        그런 곡면들은 <a href="../08-gauss-map/index.html">8장</a>의 평균곡률이 상수인 곡면이다. 이 절의 결과는 뒤의 장에서 쓰지 않는다.</p>
+        <p class="box-title">Looking ahead</p>
+        <p><a href="#i-5-7-4">Proposition 5.7.4</a>에 쓴 Green's theorem은 <a href="../18-integration-stokes/index.html">Chapter 18</a>의 Stokes's theorem의 특수한 경우다. 공간에서 부피를 고정하고 겉넓이를 가장 작게 하는 surface는 sphere이고(비누방울),
+        그런 surface들은 <a href="../08-gauss-map/index.html">Chapter 8</a>의 mean curvature가 상수인 surface이다. 이 절의 결과는 뒤의 장에서 쓰지 않는다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>닫힌 곡선의 부호 있는 넓이는 \(A(\gamma) = \frac12\int(xy' - yx') = \int xy'\)이다. 재매개화·강체운동에 무관하고, 방향을 뒤집거나 반사하면 부호가 바뀐다(<a href="#i-5-7-2">명제 5.7.2</a>).</li>
-        <li>양의 방향인 단순 닫힌 곡선에서 \(A(\gamma)\)는 둘러싼 영역의 넓이다(그린 정리, <a href="#i-5-7-4">명제 5.7.4</a>). 단순하지 않으면 넓이를 겹쳐 세거나 상쇄한다.</li>
-        <li>비르팅거 부등식: 평균이 \(0\)인 \(2\pi\) 주기함수는 \(\int f'^2 \ge \int f^2\)이고 등호는 \(a\cos t + b\sin t\)뿐이다(<a href="#i-5-7-6">보조정리 5.7.6</a>).</li>
-        <li>등주부등식: \(L^2 \ge 4\pi\abs{A}\)이고 등호는 원을 한 번 도는 곡선뿐이다(<a href="#i-5-7-7">정리 5.7.7</a>).</li>
+        <li>closed curve의 signed area는 \(A(\gamma) = \frac12\int(xy' - yx') = \int xy'\)이다. reparametrization·rigid motion에 무관하고, orientation을 뒤집거나 반사하면 부호가 바뀐다(<a href="#i-5-7-2">Proposition 5.7.2</a>).</li>
+        <li>positively oriented인 simple closed curve에서 \(A(\gamma)\)는 둘러싼 영역의 넓이다(Green's theorem, <a href="#i-5-7-4">Proposition 5.7.4</a>). 단순하지 않으면 넓이를 겹쳐 세거나 상쇄한다.</li>
+        <li>Wirtinger's inequality: 평균이 \(0\)인 \(2\pi\) 주기함수는 \(\int f'^2 \ge \int f^2\)이고 등호는 \(a\cos t + b\sin t\)뿐이다(<a href="#i-5-7-6">Lemma 5.7.6</a>).</li>
+        <li>isoperimetric inequality: \(L^2 \ge 4\pi\abs{A}\)이고 등호는 원을 한 번 도는 곡선뿐이다(<a href="#i-5-7-7">Theorem 5.7.7</a>).</li>
       </ul>
-      <p class="next">다음 장에서는 곡선에서 곡면으로 넘어간다. \(\R^3\) 안의 “매끄러운 곡면”을 정확히 정의하고, 곡면 위의 곡선과 접평면을 다룬다(<a href="../06-regular-surfaces/index.html">6장</a>).
-      이 장의 곡률벡터와 프레네 틀은 8장과 9장에서 곡면 위의 곡선을 분석하는 데 다시 쓰인다.</p>
+      <p class="next">다음 장에서는 곡선에서 surface로 넘어간다. \(\R^3\) 안의 “smooth surface”를 정확히 정의하고, surface 위의 곡선과 tangent plane을 다룬다(<a href="../06-regular-surfaces/index.html">Chapter 6</a>).
+      이 장의 curvature vector와 Frenet frame은 Chapter 8과 Chapter 9에서 surface 위의 곡선을 분석하는 데 다시 쓰인다.</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-5-7-1" data-level="1">
-        <p><span class="thm-head">연습 5.7.1</span> <span class="level">★</span>
-        반지름이 \(a, b\)인 타원의 넓이가 \(\pi ab\)임을 <a href="#eq-5-7-1">(5.7.1)</a>로 확인하고, 등주부등식에서 타원의 둘레가 \(2\pi\sqrt{ab}\) 이상임을 이끌어 내어라. \(a = 2\), \(b = 1\)이면 둘레는 약 \(9.688\)이다. 이 값과 비교하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p><a href="#i-5-7-3">예 5.7.3</a>(b)에서 \(A = \pi ab\)이고 타원은 단순하므로 \(L^2 \ge 4\pi\cdot\pi ab\), 곧 \(L \ge 2\pi\sqrt{ab}\)이다. \(a = 2\), \(b = 1\)이면 \(2\pi\sqrt2 \approx 8.886 \lt 9.688\)이다.
-          등호는 \(a = b\)(원)일 때뿐이다. (타원의 둘레는 초등함수로 나타나지 않는 타원적분이다. 값은 수치 적분으로 얻었다.)</p>
-          <p class="verified">검증: <code>verify/v-5-7-isoperimetric-inequality.py</code></p>
+        <p><span class="thm-head">Exercise 5.7.1</span> <span class="level">★</span>
+        반지름이 \(a, b\)인 타원의 넓이가 \(\pi ab\)임을 <a href="#eq-5-7-1">(5.7.1)</a>로 확인하고, isoperimetric inequality에서 타원의 둘레가 \(2\pi\sqrt{ab}\) 이상임을 이끌어 내어라. \(a = 2\), \(b = 1\)이면 둘레는 약 \(9.688\)이다. 이 값과 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-5-7-3">Example 5.7.3</a>(b)에서 \(A = \pi ab\)이고 타원은 단순하므로 \(L^2 \ge 4\pi\cdot\pi ab\), 곧 \(L \ge 2\pi\sqrt{ab}\)이다. \(a = 2\), \(b = 1\)이면 \(2\pi\sqrt2 \approx 8.886 \lt 9.688\)이다.
+          등호는 \(a = b\)(원)일 때뿐이다. (타원의 둘레는 초등함수로 나타나지 않는 elliptic integral이다. 값은 수치 적분으로 얻었다.)</p>
+          <p class="verified">Verification: <code>verify/v-5-7-isoperimetric-inequality.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-7-2" data-level="1">
-        <p><span class="thm-head">연습 5.7.2</span> <span class="level">★</span>
-        반지름 \(r\)인 원을 \(k\)번(\(k \ge 1\)) 도는 곡선 \((r\cos t, r\sin t)\), 주기 \(2\pi k\)의 \(L\)과 \(A\)를 구하고, \(k \ge 2\)이면 등주부등식이 등호 없이 성립함을 보여라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 5.7.2</span> <span class="level">★</span>
+        반지름 \(r\)인 원을 \(k\)번(\(k \ge 1\)) 도는 곡선 \((r\cos t, r\sin t)\), 주기 \(2\pi k\)의 \(L\)과 \(A\)를 구하고, \(k \ge 2\)이면 isoperimetric inequality가 등호 없이 성립함을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
           <p>속력이 \(r\)이므로 \(L = 2\pi kr\)이고, \(xy' - yx' = r^2\)이므로 \(A = \frac12 r^2 \cdot 2\pi k = k\pi r^2\)이다. \(L^2 - 4\pi A = 4\pi^2k^2r^2 - 4\pi^2kr^2 = 4\pi^2r^2k(k - 1)\)은 \(k \ge 2\)이면 양수다.
           비 \(4\pi A/L^2 = 1/k\)이다.</p>
-          <p class="verified">검증: <code>verify/v-5-7-isoperimetric-inequality.py</code> (\(k = 2\))</p>
+          <p class="verified">Verification: <code>verify/v-5-7-isoperimetric-inequality.py</code> (\(k = 2\))</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-7-3" data-level="1">
-        <p><span class="thm-head">연습 5.7.3</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 5.7.3</span> <span class="level">★</span>
         참인지 거짓인지 판별하고 이유를 대어라.
         (a) 곡선을 \(\lambda\)배 확대하면 \(4\pi A/L^2\)은 변하지 않는다.
-        (b) 8자 곡선의 부호 있는 넓이는 두 고리의 넓이의 합이다.
-        (c) 주기 \(2\pi\)인 모든 매끄러운 함수는 \(\int f'^2 \ge \int f^2\)을 만족한다.
-        (d) 길이가 같은 단순 닫힌 곡선 가운데 둘러싼 넓이가 가장 큰 것은 원이다.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 참. \(A\)는 \(\lambda^2\)배, \(L\)은 \(\lambda\)배가 된다(<a href="#i-5-7-2">명제 5.7.2</a>(c)).
-          (b) 거짓. 두 고리를 반대 방향으로 돌아 상쇄되고 \(0\)이다(<a href="#i-5-7-3">예 5.7.3</a>(d)).
+        (b) figure-eight curve의 signed area는 두 고리의 넓이의 합이다.
+        (c) 주기 \(2\pi\)인 모든 smooth function은 \(\int f'^2 \ge \int f^2\)을 만족한다.
+        (d) 길이가 같은 simple closed curve 가운데 둘러싼 넓이가 가장 큰 것은 원이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. \(A\)는 \(\lambda^2\)배, \(L\)은 \(\lambda\)배가 된다(<a href="#i-5-7-2">Proposition 5.7.2</a>(c)).
+          (b) 거짓. 두 고리를 반대 방향으로 돌아 상쇄되고 \(0\)이다(<a href="#i-5-7-3">Example 5.7.3</a>(d)).
           (c) 거짓. 평균이 \(0\)이어야 한다. \(f = 1\)이 반례다.
-          (d) 참. <a href="#i-5-7-7">정리 5.7.7</a>(b). 넓이는 \(L^2/4\pi\) 이하이고 원이 그 값을 가진다.</p>
+          (d) 참. <a href="#i-5-7-7">Theorem 5.7.7</a>(b). 넓이는 \(L^2/4\pi\) 이하이고 원이 그 값을 가진다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-7-4" data-level="2">
-        <p><span class="thm-head">연습 5.7.4</span> <span class="level">★★</span>
+        <p><span class="thm-head">Exercise 5.7.4</span> <span class="level">★★</span>
         \(g\)가 \([0, \ell]\)을 포함하는 열린구간에서 매끄럽고 \(g(0) = g(\ell) = 0\)이면 \(\int_0^\ell g'^2 \ge (\pi/\ell)^2\int_0^\ell g^2\)이고, 등호는 \(g = c\sin(\pi t/\ell)\)일 때뿐임을 보여라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <details class="solution"><summary>Solution</summary>
           <p>\(G(\tau) = g(\ell\tau/\pi)\)(\(\tau \in [0, \pi]\))로 두면 \(G(0) = G(\pi) = 0\)이고 \(G'(\tau) = (\ell/\pi)g'(\ell\tau/\pi)\)이다. 치환 \(t = \ell\tau/\pi\)로
           \(\int_0^\pi G'^2\,d\tau = (\ell/\pi)^2\int_0^\ell g'^2\,(\pi/\ell)\,dt = (\ell/\pi)\int_0^\ell g'^2\,dt\), \(\int_0^\pi G^2\,d\tau = (\pi/\ell)\int_0^\ell g^2\,dt\)이다.
-          <a href="#i-5-7-5">보조정리 5.7.5</a>에서 \((\ell/\pi)\int g'^2 \ge (\pi/\ell)\int g^2\)이고, 등호는 \(G = c\sin\tau\), 곧 \(g = c\sin(\pi t/\ell)\)일 때뿐이다. 짧은 구간일수록 상수가 커진다.</p>
-          <p class="verified">검증: <code>verify/v-5-7-isoperimetric-inequality.py</code></p>
+          <a href="#i-5-7-5">Lemma 5.7.5</a>에서 \((\ell/\pi)\int g'^2 \ge (\pi/\ell)\int g^2\)이고, 등호는 \(G = c\sin\tau\), 곧 \(g = c\sin(\pi t/\ell)\)일 때뿐이다. 짧은 구간일수록 상수가 커진다.</p>
+          <p class="verified">Verification: <code>verify/v-5-7-isoperimetric-inequality.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-7-5" data-level="2">
-        <p><span class="thm-head">연습 5.7.5</span> <span class="level">★★</span>
-        \(\rho\)가 매끄럽고 주기 \(2\pi\)이며 양수이면, 극좌표 곡선 \(\gamma(t) = \rho(t)(\cos t, \sin t)\)에서 \(xy' - yx' = \rho^2\)이고 \(A(\gamma) = \frac12\int_0^{2\pi}\rho^2\,dt\)임을 보여라.
-        이 값이 영역 \(\{s(\cos\theta, \sin\theta) : 0 \le s \le \rho(\theta)\}\)의 넓이와 같음을 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">예 2.6.10</a>과 같은 방법으로 설명하여라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 5.7.5</span> <span class="level">★★</span>
+        \(\rho\)가 매끄럽고 주기 \(2\pi\)이며 양수이면, polar coordinates 곡선 \(\gamma(t) = \rho(t)(\cos t, \sin t)\)에서 \(xy' - yx' = \rho^2\)이고 \(A(\gamma) = \frac12\int_0^{2\pi}\rho^2\,dt\)임을 보여라.
+        이 값이 영역 \(\{s(\cos\theta, \sin\theta) : 0 \le s \le \rho(\theta)\}\)의 넓이와 같음을 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">Example 2.6.10</a>과 같은 방법으로 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
           <p>\(e_r = (\cos t, \sin t)\), \(e_\theta = (-\sin t, \cos t)\)이면 \(\gamma = \rho e_r\), \(\gamma' = \rho'e_r + \rho e_\theta\)이고 \(xy' - yx' = \det(\gamma, \gamma') = \det(\rho e_r, \rho'e_r + \rho e_\theta) = \rho^2\det(e_r, e_\theta) = \rho^2\)이다.
-          따라서 \(A = \frac12\int\rho^2\)이다. 넓이: 극좌표 사상 \(P(s, \theta) = s(\cos\theta, \sin\theta)\)는 \(\abs{\det DP} = s\)이므로(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">예 2.6.10</a>), 변수변환 공식(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">정리 2.6.9</a>)과
-          푸비니 정리에서 영역의 넓이는 \(\int_{-\pi}^{\pi}\int_0^{\rho(\theta)} s\,ds\,d\theta = \frac12\int_{-\pi}^{\pi}\rho(\theta)^2\,d\theta\)이다(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">예 2.6.10</a>처럼 원점 근처와 음의 \(x\)축 근처의 부피가 \(0\)으로 가는 가장자리를 떼어 내고 극한을 취한다).
-          \(\rho^2\)이 주기 \(2\pi\)를 가지므로 이것은 \(A(\gamma)\)와 같다. 그린 정리 없이 <a href="#i-5-7-4">명제 5.7.4</a>를 확인한 셈이다.</p>
-          <p class="verified">검증: <code>verify/v-5-7-isoperimetric-inequality.py</code></p>
+          따라서 \(A = \frac12\int\rho^2\)이다. 넓이: polar coordinates map \(P(s, \theta) = s(\cos\theta, \sin\theta)\)는 \(\abs{\det DP} = s\)이므로(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">Example 2.6.10</a>), change of variables formula(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">Theorem 2.6.9</a>)와
+          Fubini's theorem에서 영역의 넓이는 \(\int_{-\pi}^{\pi}\int_0^{\rho(\theta)} s\,ds\,d\theta = \frac12\int_{-\pi}^{\pi}\rho(\theta)^2\,d\theta\)이다(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">Example 2.6.10</a>처럼 원점 근처와 음의 \(x\)축 근처의 부피가 \(0\)으로 가는 가장자리를 떼어 내고 극한을 취한다).
+          \(\rho^2\)이 주기 \(2\pi\)를 가지므로 이것은 \(A(\gamma)\)와 같다. Green's theorem 없이 <a href="#i-5-7-4">Proposition 5.7.4</a>를 확인한 셈이다.</p>
+          <p class="verified">Verification: <code>verify/v-5-7-isoperimetric-inequality.py</code></p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="5-6-rotation-index.html">← 5.6 회전지수와 접선회전정리</a>
-    <a rel="next" href="../06-regular-surfaces/index.html">6. 정칙곡면 →</a>
+    <a rel="prev" href="5-6-rotation-index.html">← 5.6 The Rotation Index and the Rotation Index Theorem</a>
+    <a rel="next" href="../06-regular-surfaces/index.html">6. Regular Surfaces →</a>
   </nav>
 </body>
 </html>

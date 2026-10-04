@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>8.3 주곡률과 주방향 — 미분기하 스터디</title>
+  <title>8.3 Principal Curvatures and Principal Directions — DG Study</title>
   <meta name="dg-id" content="8.3">
   <meta name="dg-status" content="draft">
   <meta name="dg-prereq" content="8.2, 8.1, 7.5, 7.1, 4.4, 3.7, 1.6, 1.5, 1.4">
-  <meta name="dg-refs" content="dC §3-2; dC §3-3; dC 3장 부록">
+  <meta name="dg-refs" content="dC §3-2; dC §3-3; dC Ch. 3 appendix">
   <meta name="dg-updated" content="2026-10-01">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
@@ -15,370 +15,370 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">8. 가우스 사상과 제2기본형식</a> ›
-    <span>8.3 주곡률과 주방향</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">8. The Gauss Map and the Second Fundamental Form</a> ›
+    <span>8.3 Principal Curvatures and Principal Directions</span>
   </nav>
 
   <main>
     <header>
-      <h1>8.3 주곡률과 주방향</h1>
-      <p class="meta">대응 교재:
+      <h1>8.3 Principal Curvatures and Principal Directions</h1>
+      <p class="meta">References:
         <a class="cite" href="../../references.html#dC">[dC §3-2]</a>,
-        <a class="cite" href="../../references.html#dC">[dC §3-3 예 4]</a>,
-        <a class="cite" href="../../references.html#dC">[dC 3장 부록]</a></p>
+        <a class="cite" href="../../references.html#dC">[dC §3-3 Example 4]</a>,
+        <a class="cite" href="../../references.html#dC">[dC Ch. 3 appendix]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>선형변환의 고윳값과 고유벡터를 정의하고, 2차원 내적공간의 자기수반 변환이 정규직교 고유기저를 가짐을 증명할 수 있다.</li>
-        <li>주곡률과 주방향을 정의하고, 오일러 공식과 “주곡률은 법곡률의 최댓값과 최솟값”임을 증명할 수 있다.</li>
-        <li>배꼽점을 정의하고, 배꼽점만으로 된 연결 곡면이 평면이나 구면의 일부임을 증명할 수 있다.</li>
-        <li>곡률선을 로드리게스 판정으로 알아보고, 회전면의 주곡률을 생성곡선으로 계산할 수 있다.</li>
+        <li>linear map의 eigenvalue와 eigenvector를 정의하고, dimension이 2인 inner product space의 self-adjoint map이 orthonormal eigenbasis를 가짐을 증명할 수 있다.</li>
+        <li>principal curvature와 principal direction을 정의하고, Euler's formula와 “principal curvature는 normal curvature의 최댓값과 최솟값”임을 증명할 수 있다.</li>
+        <li>umbilical point를 정의하고, umbilical point만으로 된 connected surface가 평면이나 sphere의 일부임을 증명할 수 있다.</li>
+        <li>line of curvature를 Rodrigues' criterion으로 알아보고, surface of revolution의 principal curvature를 generating curve로 계산할 수 있다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="8-2-normal-curvature.html#i-8-2-1">정의 8.2.1 (제2기본형식)</a>, <a href="8-2-normal-curvature.html#i-8-2-3">명제 8.2.3</a>, <a href="8-2-normal-curvature.html#i-8-2-4">정의 8.2.4 (법곡률)</a>, <a href="8-2-normal-curvature.html#i-8-2-10">명제 8.2.10</a></li>
-        <li><a href="8-1-gauss-map.html#i-8-1-4">명제 8.1.4</a>, <a href="8-1-gauss-map.html#i-8-1-6">정의 8.1.6 (자기수반)</a>, <a href="8-1-gauss-map.html#i-8-1-7">명제 8.1.7</a>, <a href="8-1-gauss-map.html#i-8-1-12">정의 8.1.12 (형태작용소)</a>, <a href="8-1-gauss-map.html#i-8-1-13">예 8.1.13</a></li>
-        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">정리 1.6.8 (행렬식의 성질)</a>, <a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-13">따름정리 1.4.13 (대각합)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-10">정리 1.5.10 (그람-슈미트)</a></li>
-        <li><a href="../03-topology-basics/3-7-connectedness.html#i-3-7-16">명제 3.7.16 (국소상수함수)</a>, <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-18">따름정리 3.7.18</a>, <a href="../04-curves/4-4-signed-curvature.html#i-4-4-5">명제 4.4.5 (부호곡률)</a>, <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-6">예 7.1.6 (회전면의 \(E, F, G\))</a></li>
+        <li><a href="8-2-normal-curvature.html#i-8-2-1">Definition 8.2.1 (second fundamental form)</a>, <a href="8-2-normal-curvature.html#i-8-2-3">Proposition 8.2.3</a>, <a href="8-2-normal-curvature.html#i-8-2-4">Definition 8.2.4 (normal curvature)</a>, <a href="8-2-normal-curvature.html#i-8-2-10">Proposition 8.2.10</a></li>
+        <li><a href="8-1-gauss-map.html#i-8-1-4">Proposition 8.1.4</a>, <a href="8-1-gauss-map.html#i-8-1-6">Definition 8.1.6 (self-adjoint)</a>, <a href="8-1-gauss-map.html#i-8-1-7">Proposition 8.1.7</a>, <a href="8-1-gauss-map.html#i-8-1-12">Definition 8.1.12 (shape operator)</a>, <a href="8-1-gauss-map.html#i-8-1-13">Example 8.1.13</a></li>
+        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8 (determinant의 성질)</a>, <a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-13">Corollary 1.4.13 (trace)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-10">Theorem 1.5.10 (Gram–Schmidt)</a></li>
+        <li><a href="../03-topology-basics/3-7-connectedness.html#i-3-7-16">Proposition 3.7.16 (locally constant function)</a>, <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-18">Corollary 3.7.18</a>, <a href="../04-curves/4-4-signed-curvature.html#i-4-4-5">Proposition 4.4.5 (signed curvature)</a>, <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-6">Example 7.1.6 (surface of revolution의 \(E, F, G\))</a></li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p><a href="8-2-normal-curvature.html">8.2절</a>에서 곡면이 방향 \(w\)로 휘는 정도를 법곡률 \(\kappa_n(w) = \mathrm{II}_p(w)\)로 쟀다. \(w\)를 \(T_pS\)의 단위원 위에서 돌리면 \(\kappa_n\)은 컴팩트한 원 위의 연속함수이므로 최댓값과 최솟값을 가진다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">정리 3.6.10</a>).
-      안장면의 원점에서는 \(\kappa_n = 2\cos 2\beta\)였으므로 최댓값은 \(\beta = 0\), 최솟값은 \(\beta = \pi/2\)에서 나온다(<a href="8-2-normal-curvature.html#i-8-2-11">예 8.2.11</a>). 두 방향은 직교한다. 그리고 <a href="8-1-gauss-map.html#ex-8-1-4">연습 8.1.4</a>에서 본 대로, 바로 이 두 방향에서만 \(d\mathbf{N}_0(w)\)가 \(w\)와 평행했다.</p>
-      <p>이것은 안장면만의 우연인가? <a href="#fig-8-3-1">그림 8.3.1</a>은 원환면의 세 점에서 \(\kappa_n\)을 방향의 함수로 그린 것이다. 세 점 모두에서 최댓값과 최솟값이 \(90^\circ\) 떨어진 방향에서 나온다. 이 절은 이것이 자기수반 변환의 일반적인 성질임을 보이고, 그 두 방향과 두 값에 이름을 붙인다.</p>
+      <h2>Motivation</h2>
+      <p><a href="8-2-normal-curvature.html">Section 8.2</a>에서 surface가 방향 \(w\)로 휘는 정도를 normal curvature \(\kappa_n(w) = \mathrm{II}_p(w)\)로 쟀다. \(w\)를 \(T_pS\)의 단위원 위에서 돌리면 \(\kappa_n\)은 compact set인 원 위의 연속함수이므로 최댓값과 최솟값을 가진다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">Theorem 3.6.10</a>).
+      saddle surface의 원점에서는 \(\kappa_n = 2\cos 2\beta\)였으므로 최댓값은 \(\beta = 0\), 최솟값은 \(\beta = \pi/2\)에서 나온다(<a href="8-2-normal-curvature.html#i-8-2-11">Example 8.2.11</a>). 두 방향은 서로 수직이다. 그리고 <a href="8-1-gauss-map.html#ex-8-1-4">Exercise 8.1.4</a>에서 본 대로, 바로 이 두 방향에서만 \(d\mathbf{N}_0(w)\)가 \(w\)와 평행했다.</p>
+      <p>이것은 saddle surface만의 우연인가? <a href="#fig-8-3-1">Figure 8.3.1</a>은 torus of revolution의 세 점에서 \(\kappa_n\)을 방향의 함수로 그린 것이다. 세 점 모두에서 최댓값과 최솟값이 \(90^\circ\) 떨어진 방향에서 나온다. 이 절은 이것이 self-adjoint map의 일반적인 성질임을 보이고, 그 두 방향과 두 값에 이름을 붙인다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 법곡률은 코사인 곡선처럼 흔들린다</p>
-        <p><a href="#fig-8-3-1">그림 8.3.1</a>의 세 곡선은 모두 \(\beta = 0\)에서 같은 최댓값 \(1/r\)을 가지고 \(\beta = \pi/2\)에서 최솟값을 가진다. 곡선의 모양은 \(\kappa_1\cos^2\beta + \kappa_2\sin^2\beta\), 곧 평균 \((\kappa_1 + \kappa_2)/2\)을 중심으로 진폭 \((\kappa_1 - \kappa_2)/2\)로 흔들리는 \(\cos 2\beta\) 곡선이다.
-        법곡률은 모든 방향에서 제멋대로가 아니라 두 수와 두 직교 방향으로 완전히 정해진다. 바깥쪽 적도(\(u = 0\))에서는 곡선 전체가 양수이고, 안쪽 적도(\(u = \pi\))에서는 부호가 바뀐다.</p>
+        <p class="box-title">Intuition: normal curvature는 코사인 곡선처럼 흔들린다</p>
+        <p><a href="#fig-8-3-1">Figure 8.3.1</a>의 세 곡선은 모두 \(\beta = 0\)에서 같은 최댓값 \(1/r\)을 가지고 \(\beta = \pi/2\)에서 최솟값을 가진다. 곡선의 모양은 \(\kappa_1\cos^2\beta + \kappa_2\sin^2\beta\), 곧 평균 \((\kappa_1 + \kappa_2)/2\)을 중심으로 진폭 \((\kappa_1 - \kappa_2)/2\)로 흔들리는 \(\cos 2\beta\) 곡선이다.
+        normal curvature는 모든 방향에서 제멋대로가 아니라 두 수와 서로 수직인 두 방향으로 완전히 정해진다. 바깥쪽 적도(\(u = 0\))에서는 곡선 전체가 양수이고, 안쪽 적도(\(u = \pi\))에서는 부호가 바뀐다.</p>
       </aside>
 
       <figure class="dg-figure" id="fig-8-3-1">
         <img src="figures/fig-8-3-1-euler-formula.svg" alt="가로축 β(0부터 π), 세로축 κ_n(β)인 그래프. 세 곡선이 모두 β=0과 β=π에서 값 1/r(약 1.25)에서 시작하고 끝난다. 검은 실선(u=0)은 β=π/2에서 약 0.36까지 내려가고, 파란 파선(u=π/2)은 0까지, 주황 일점쇄선(u=π)은 약 −0.83까지 내려간다. 최댓값과 최솟값에 점이 찍혀 있다.">
-        <figcaption><span class="fig-head">그림 8.3.1.</span>
-        원환면(\(R = 2\), \(r = 0.8\), 안쪽 \(\mathbf{N}_{\mathbf{x}}\))의 점 \(\mathbf{x}(u, v)\)에서 단위벡터 \(w = \cos\beta\,e_1 + \sin\beta\,e_2\) (\(e_1 = \mathbf{x}_u/r\), \(e_2 = \mathbf{x}_v/(R + r\cos u)\)) 방향의 법곡률 \(\kappa_n(\beta)\). \(u = 0\)(검정), \(u = \pi/2\)(파랑), \(u = \pi\)(주황).
-        점은 최댓값 \(\kappa_1 = 1/r\)(\(\beta = 0, \pi\))과 최솟값 \(\kappa_2 = \cos u/(R + r\cos u)\)(\(\beta = \pi/2\))이다(<a href="#i-8-3-6">예 8.3.6</a>(e)).</figcaption>
+        <figcaption><span class="fig-head">Figure 8.3.1.</span>
+        torus of revolution(\(R = 2\), \(r = 0.8\), 안쪽 \(\mathbf{N}_{\mathbf{x}}\))의 점 \(\mathbf{x}(u, v)\)에서 단위벡터 \(w = \cos\beta\,e_1 + \sin\beta\,e_2\) (\(e_1 = \mathbf{x}_u/r\), \(e_2 = \mathbf{x}_v/(R + r\cos u)\)) 방향의 normal curvature \(\kappa_n(\beta)\). \(u = 0\)(검정), \(u = \pi/2\)(파랑), \(u = \pi\)(주황).
+        점은 최댓값 \(\kappa_1 = 1/r\)(\(\beta = 0, \pi\))과 최솟값 \(\kappa_2 = \cos u/(R + r\cos u)\)(\(\beta = \pi/2\))이다(<a href="#i-8-3-6">Example 8.3.6</a>(e)).</figcaption>
       </figure>
     </section>
 
     <section id="sec-spectral">
-      <h2>고윳값과 2차원 스펙트럼 정리</h2>
-      <p>필요한 선형대수를 먼저 갖춘다. 1장은 고윳값을 다루지 않았으므로 여기서 정의한다. \(V\)는 유한차원 실벡터공간이다.</p>
+      <h2>Eigenvalues and the Spectral Theorem in Dimension 2</h2>
+      <p>필요한 linear algebra를 먼저 갖춘다. Chapter 1은 eigenvalue를 다루지 않았으므로 여기서 정의한다. \(V\)는 finite-dimensional real vector space이다.</p>
 
       <div class="thm definition" id="i-8-3-1">
-        <p><span class="thm-head">정의 8.3.1</span> <span class="thm-name">(고윳값과 고유벡터, eigenvalue and eigenvector)</span>.
-        \(A \in \End(V)\)라 하자. \(\lambda \in \R\)와 \(0\)이 아닌 \(v \in V\)가 \(Av = \lambda v\)를 만족하면 \(\lambda\)를 \(A\)의 <dfn>고윳값</dfn>(eigenvalue), \(v\)를 \(\lambda\)에 대한 <dfn>고유벡터</dfn>(eigenvector)라 한다. 부분공간 \(\ker(A - \lambda\,\id_V)\)를 \(\lambda\)의 고유공간이라 한다.</p>
+        <p><span class="thm-head">Definition 8.3.1</span> <span class="thm-name">(eigenvalue and eigenvector)</span>.
+        \(A \in \End(V)\)라 하자. \(\lambda \in \R\)와 \(0\)이 아닌 \(v \in V\)가 \(Av = \lambda v\)를 만족하면 \(\lambda\)를 \(A\)의 <dfn>eigenvalue</dfn>(고윳값), \(v\)를 \(\lambda\)에 대한 <dfn>eigenvector</dfn>(고유벡터)라 한다. subspace \(\ker(A - \lambda\,\id_V)\)를 \(\lambda\)의 eigenspace라 한다.</p>
       </div>
 
-      <p>\(\lambda\)가 고윳값일 필요충분조건은 \(A - \lambda\,\id\)가 단사가 아닌 것, 곧 가역이 아닌 것이고(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-10">따름정리 1.2.10</a>), 이는 \(\det(A - \lambda\,\id) = 0\)과 같다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">정리 1.6.8</a>(b), <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-10">명제 1.6.10</a>).
-      \(\dim V = 2\)이고 어떤 기저에서 \(A\)의 행렬이 \(\begin{pmatrix} a & b \\ c & d \end{pmatrix}\)이면 \(\det(A - \lambda\,\id) = (a - \lambda)(d - \lambda) - bc\)이므로</p>
+      <p>\(\lambda\)가 eigenvalue일 필요충분조건은 \(A - \lambda\,\id\)가 injective가 아닌 것, 곧 invertible이 아닌 것이고(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-10">Corollary 1.2.10</a>), 이는 \(\det(A - \lambda\,\id) = 0\)과 같다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8</a>(b), <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-10">Proposition 1.6.10</a>).
+      \(\dim V = 2\)이고 어떤 basis에서 \(A\)의 행렬이 \(\begin{pmatrix} a & b \\ c & d \end{pmatrix}\)이면 \(\det(A - \lambda\,\id) = (a - \lambda)(d - \lambda) - bc\)이므로</p>
       <div class="equation" id="eq-8-3-1">
       \[ \det(A - \lambda\,\id) = \lambda^2 - (\tr A)\,\lambda + \det A \tag{8.3.1} \]
       </div>
-      <p>이다. 고윳값은 이 이차방정식의 실근이다. 좌변은 기저에 무관하다(<a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-13">따름정리 1.4.13</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-10">명제 1.6.10</a>).
-      대각행렬 \(\diag(a, d)\)의 고윳값은 \(a, d\)이고 고유벡터는 \(e_1, e_2\)다.</p>
+      <p>이다. eigenvalue는 이 이차방정식의 실근이다. 좌변은 basis에 무관하다(<a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-13">Corollary 1.4.13</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-10">Proposition 1.6.10</a>).
+      대각행렬 \(\diag(a, d)\)의 eigenvalue는 \(a, d\)이고 eigenvector는 \(e_1, e_2\)다.</p>
 
       <div class="thm nonexample" id="i-8-3-2">
-        <p><span class="thm-head">비예 8.3.2</span> <span class="thm-name">(고윳값이 없는 변환, 고유기저가 없는 변환)</span>.
-        (a) \(90^\circ\) 회전 \(J\)(식 <a href="../04-curves/4-4-signed-curvature.html#eq-4-4-1">(4.4.1)</a>)는 \(\tr J = 0\), \(\det J = 1\)이므로 <a href="#eq-8-3-1">(8.3.1)</a>은 \(\lambda^2 + 1 = 0\)이고 실근이 없다. 어떤 방향도 제자리로 보내지 않으니 당연하다.
-        (b) 층밀림 \(\begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}\)은 \((\lambda - 1)^2 = 0\)이라 고윳값 \(1\)이 있지만, 고유공간은 \(\ker\begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} = \Span\{e_1\}\)뿐이다. 고유벡터로 이루어진 기저가 없다.
-        두 변환 모두 자기수반이 아니었다(<a href="8-1-gauss-map.html#i-8-1-9">비예 8.1.9</a>). 자기수반이면 이런 일이 생기지 않는다는 것이 다음 정리다.</p>
+        <p><span class="thm-head">Non-example 8.3.2</span> <span class="thm-name">(a map with no eigenvalue and a map with no eigenbasis)</span>.
+        (a) \(90^\circ\) 회전 \(J\)(<a href="../04-curves/4-4-signed-curvature.html#eq-4-4-1">(4.4.1)</a>)는 \(\tr J = 0\), \(\det J = 1\)이므로 <a href="#eq-8-3-1">(8.3.1)</a>은 \(\lambda^2 + 1 = 0\)이고 실근이 없다. 어떤 방향도 제자리로 보내지 않으니 당연하다.
+        (b) shear \(\begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}\)은 \((\lambda - 1)^2 = 0\)이라 eigenvalue \(1\)이 있지만, eigenspace는 \(\ker\begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} = \Span\{e_1\}\)뿐이다. eigenvector로 이루어진 basis가 없다.
+        두 변환 모두 self-adjoint가 아니었다(<a href="8-1-gauss-map.html#i-8-1-9">Non-example 8.1.9</a>). self-adjoint이면 이런 일이 생기지 않는다는 것이 다음 정리다.</p>
       </div>
 
       <div class="thm theorem" id="i-8-3-3">
-        <p><span class="thm-head">정리 8.3.3</span> <span class="thm-name">(2차원 자기수반 변환의 스펙트럼 정리)</span>.
-        \(V\)가 2차원 내적공간이고 \(A \in \End(V)\)가 자기수반이라 하자.</p>
+        <p><span class="thm-head">Theorem 8.3.3</span> <span class="thm-name">(spectral theorem for self-adjoint linear maps in dimension 2)</span>.
+        \(V\)가 dimension이 2인 inner product space이고 \(A \in \End(V)\)가 self-adjoint라 하자.</p>
         <ul>
-          <li>(a) <a href="#eq-8-3-1">(8.3.1)</a>은 실근 \(\lambda_1 \ge \lambda_2\)를 가지고(중근이면 \(\lambda_1 = \lambda_2\)), \(V\)의 정규직교기저 \((e_1, e_2)\)가 있어서 \(Ae_1 = \lambda_1e_1\), \(Ae_2 = \lambda_2e_2\)이다.</li>
-          <li>(b) \(\lambda_1 = \lambda_2\)이면 \(A = \lambda_1\id_V\)이다. \(\lambda_1 \gt \lambda_2\)이면 두 고유공간은 서로 수직인 직선 \(\Span\{e_1\}\), \(\Span\{e_2\}\)이다.</li>
+          <li>(a) <a href="#eq-8-3-1">(8.3.1)</a>은 실근 \(\lambda_1 \ge \lambda_2\)를 가지고(중근이면 \(\lambda_1 = \lambda_2\)), \(V\)의 orthonormal basis \((e_1, e_2)\)가 있어서 \(Ae_1 = \lambda_1e_1\), \(Ae_2 = \lambda_2e_2\)이다.</li>
+          <li>(b) \(\lambda_1 = \lambda_2\)이면 \(A = \lambda_1\id_V\)이다. \(\lambda_1 \gt \lambda_2\)이면 두 eigenspace는 서로 수직인 직선 \(\Span\{e_1\}\), \(\Span\{e_2\}\)이다.</li>
           <li>(c) 단위벡터 \(v = \cos\beta\,e_1 + \sin\beta\,e_2\)에 대하여 \(\inner{Av}{v} = \lambda_1\cos^2\beta + \lambda_2\sin^2\beta\)이다. 따라서 \(\lambda_1\)과 \(\lambda_2\)는 단위원 위에서 \(\inner{Av}{v}\)의 최댓값과 최솟값이다.</li>
         </ul>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 자기수반 변환은 서로 수직인 두 방향을 골라 각 방향을 늘이거나 줄이기만 한다. 회전이나 층밀림 같은 “비틀기”가 없다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> self-adjoint map은 서로 수직인 두 방향을 골라 각 방향을 늘이거나 줄이기만 한다. 회전이나 shear 같은 “비틀기”가 없다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 정규직교기저에서 행렬이 대칭이므로 특성방정식의 판별식이 \((a - c)^2 + 4b^2 \ge 0\)이다. 고유벡터 하나를 잡으면 그에 수직인 방향은 자기수반성 때문에 제자리로 간다.</p>
-        <p><span class="proof-head">증명.</span>
-        (a), (b) 정규직교기저 \((b_1, b_2)\)를 하나 잡는다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-10">정리 1.5.10</a>). <a href="8-1-gauss-map.html#i-8-1-7">명제 8.1.7</a>(c)에 의해 \(A\)의 행렬은 대칭 \(\begin{pmatrix} a & b \\ b & c \end{pmatrix}\)이다. <a href="#eq-8-3-1">(8.3.1)</a>은 \(\lambda^2 - (a + c)\lambda + (ac - b^2) = 0\)이고 판별식은</p>
+        <p class="proof-idea">Proof idea: orthonormal basis에서 행렬이 symmetric이므로 characteristic equation의 판별식이 \((a - c)^2 + 4b^2 \ge 0\)이다. eigenvector 하나를 잡으면 그에 수직인 방향은 self-adjointness 때문에 제자리로 간다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a), (b) orthonormal basis \((b_1, b_2)\)를 하나 잡는다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-10">Theorem 1.5.10</a>). <a href="8-1-gauss-map.html#i-8-1-7">Proposition 8.1.7</a>(c)에 의해 \(A\)의 행렬은 symmetric \(\begin{pmatrix} a & b \\ b & c \end{pmatrix}\)이다. <a href="#eq-8-3-1">(8.3.1)</a>은 \(\lambda^2 - (a + c)\lambda + (ac - b^2) = 0\)이고 판별식은</p>
         <p>\[ (a + c)^2 - 4(ac - b^2) = (a - c)^2 + 4b^2 \ge 0 \]</p>
         <p>이므로 실근 \(\lambda_1 \ge \lambda_2\)가 있다.
-        판별식이 \(0\)이면 \(a = c\), \(b = 0\)이므로 \(A = a\,\id_V\)이고, 아무 정규직교기저나 (a)를 만족한다.
-        판별식이 양수이면 \(\lambda_1 \gt \lambda_2\)이다. \(\det(A - \lambda_1\id) = 0\)이므로 \(\lambda_1\)의 고유벡터가 있고, 크기로 나누어 단위벡터 \(e_1\)로 둔다. \(e_1\)에 수직인 단위벡터 \(e_2\)를 잡으면 \((e_1, e_2)\)는 정규직교기저다. 자기수반성에서
+        판별식이 \(0\)이면 \(a = c\), \(b = 0\)이므로 \(A = a\,\id_V\)이고, 아무 orthonormal basis나 (a)를 만족한다.
+        판별식이 양수이면 \(\lambda_1 \gt \lambda_2\)이다. \(\det(A - \lambda_1\id) = 0\)이므로 \(\lambda_1\)의 eigenvector가 있고, 크기로 나누어 단위벡터 \(e_1\)로 둔다. \(e_1\)에 수직인 단위벡터 \(e_2\)를 잡으면 \((e_1, e_2)\)는 orthonormal basis다. self-adjointness에서
         \(\inner{Ae_2}{e_1} = \inner{e_2}{Ae_1} = \lambda_1\inner{e_2}{e_1} = 0\)이므로 \(Ae_2 \in \{e_1\}^\perp = \Span\{e_2\}\), 곧 \(Ae_2 = \mu e_2\)이다.
-        \((e_1, e_2)\)에서 \(A\)의 행렬은 \(\diag(\lambda_1, \mu)\)이고 대각합은 기저에 무관하므로 \(\lambda_1 + \mu = a + c = \lambda_1 + \lambda_2\), 곧 \(\mu = \lambda_2\)이다.
-        마지막으로 \(v = xe_1 + ye_2\)가 \(Av = \lambda_1 v\)를 만족하면 \(\lambda_2 y = \lambda_1 y\)이므로 \(y = 0\)이다. 따라서 \(\lambda_1\)의 고유공간은 \(\Span\{e_1\}\)이고, 같은 방식으로 \(\lambda_2\)의 고유공간은 \(\Span\{e_2\}\)다.</p>
-        <p>(c) 정규직교성에서 \(\inner{Av}{v} = \inner{\lambda_1\cos\beta\,e_1 + \lambda_2\sin\beta\,e_2}{\cos\beta\,e_1 + \sin\beta\,e_2} = \lambda_1\cos^2\beta + \lambda_2\sin^2\beta\)이다. 모든 단위벡터는 성분이 \((x, y)\), \(x^2 + y^2 = 1\)이므로 이 꼴로 쓸 수 있다.
+        \((e_1, e_2)\)에서 \(A\)의 행렬은 \(\diag(\lambda_1, \mu)\)이고 trace는 basis에 무관하므로 \(\lambda_1 + \mu = a + c = \lambda_1 + \lambda_2\), 곧 \(\mu = \lambda_2\)이다.
+        마지막으로 \(v = xe_1 + ye_2\)가 \(Av = \lambda_1 v\)를 만족하면 \(\lambda_2 y = \lambda_1 y\)이므로 \(y = 0\)이다. 따라서 \(\lambda_1\)의 eigenspace는 \(\Span\{e_1\}\)이고, 같은 방식으로 \(\lambda_2\)의 eigenspace는 \(\Span\{e_2\}\)다.</p>
+        <p>(c) orthonormality에서 \(\inner{Av}{v} = \inner{\lambda_1\cos\beta\,e_1 + \lambda_2\sin\beta\,e_2}{\cos\beta\,e_1 + \sin\beta\,e_2} = \lambda_1\cos^2\beta + \lambda_2\sin^2\beta\)이다. 모든 단위벡터는 성분이 \((x, y)\), \(x^2 + y^2 = 1\)이므로 이 꼴로 쓸 수 있다.
         \(\lambda_1 - \inner{Av}{v} = (\lambda_1 - \lambda_2)\sin^2\beta \ge 0\)이고 \(\inner{Av}{v} - \lambda_2 = (\lambda_1 - \lambda_2)\cos^2\beta \ge 0\)이며, 등호는 각각 \(v = \pm e_1\), \(v = \pm e_2\)에서 성립한다.</p>
       </div>
     </section>
 
     <section id="sec-principal">
-      <h2>주곡률과 주방향</h2>
-      <p>형태작용소 \(W_p\)는 제1기본형식에 대해 자기수반이므로(<a href="8-1-gauss-map.html#i-8-1-10">정리 8.1.10</a>) <a href="#i-8-3-3">정리 8.3.3</a>을 쓸 수 있다. 이 절에서도 \(\mathbf{N}\)은 열린집합 \(O \subseteq S\) 위의 단위법벡터장이다.</p>
+      <h2>Principal Curvatures and Principal Directions</h2>
+      <p>shape operator \(W_p\)는 first fundamental form에 대해 self-adjoint이므로(<a href="8-1-gauss-map.html#i-8-1-10">Theorem 8.1.10</a>) <a href="#i-8-3-3">Theorem 8.3.3</a>을 쓸 수 있다. 이 절에서도 \(\mathbf{N}\)은 open set \(O \subseteq S\) 위의 unit normal field이다.</p>
 
       <div class="thm definition" id="i-8-3-4">
-        <p><span class="thm-head">정의 8.3.4</span> <span class="thm-name">(주곡률과 주방향, principal curvatures and principal directions)</span>.
-        \(p \in O\)에서 \(W_p\)의 두 고윳값 \(\kappa_1 \ge \kappa_2\)(<a href="#i-8-3-3">정리 8.3.3</a>(a))를 \(\mathbf{N}\)에 대한 \(p\)에서 \(S\)의 <dfn>주곡률</dfn>(principal curvature)이라 하고, 그 고유벡터가 정하는 \(T_pS\)의 방향을 <dfn>주방향</dfn>(principal direction)이라 한다.
-        \(W_pe_i = \kappa_ie_i\)인 \(T_pS\)의 정규직교기저 \((e_1, e_2)\)를 주방향의 정규직교기저라 부른다.</p>
+        <p><span class="thm-head">Definition 8.3.4</span> <span class="thm-name">(principal curvatures and principal directions)</span>.
+        \(p \in O\)에서 \(W_p\)의 두 eigenvalue \(\kappa_1 \ge \kappa_2\)(<a href="#i-8-3-3">Theorem 8.3.3</a>(a))를 \(\mathbf{N}\)에 대한 \(p\)에서 \(S\)의 <dfn>principal curvature</dfn>(주곡률)이라 하고, 그 eigenvector가 정하는 \(T_pS\)의 방향을 <dfn>principal direction</dfn>(주방향)이라 한다.
+        \(W_pe_i = \kappa_ie_i\)인 \(T_pS\)의 orthonormal basis \((e_1, e_2)\)를 principal direction의 orthonormal basis라 부른다.</p>
       </div>
 
-      <p>\(\mathbf{N}\)을 \(-\mathbf{N}\)으로 바꾸면 \(W_p\)가 \(-W_p\)가 되므로 고윳값은 \(-\kappa_1 \le -\kappa_2\)가 되고, 새 주곡률은 \((-\kappa_2, -\kappa_1)\)이다. 순서까지 바뀐다. 주방향(직선으로서)은 바뀌지 않는다.</p>
+      <p>\(\mathbf{N}\)을 \(-\mathbf{N}\)으로 바꾸면 \(W_p\)가 \(-W_p\)가 되므로 eigenvalue는 \(-\kappa_1 \le -\kappa_2\)가 되고, 새 principal curvature는 \((-\kappa_2, -\kappa_1)\)이다. 순서까지 바뀐다. principal direction(직선으로서)은 바뀌지 않는다.</p>
 
       <aside class="box warning">
-        <p class="box-title">흔한 오해: 주방향은 늘 두 개다</p>
-        <p>\(\kappa_1 \gt \kappa_2\)일 때만 주방향이 서로 수직인 정확히 두 방향으로 정해진다. \(\kappa_1 = \kappa_2\)이면 \(W_p = \kappa_1\id\)이므로 <em>모든</em> 방향이 주방향이다(<a href="#i-8-3-3">정리 8.3.3</a>(b)). 구면의 모든 점이 그렇다. 이런 점은 아래에서 배꼽점이라 부른다.</p>
+        <p class="box-title">Common misconception: principal direction은 늘 두 개다</p>
+        <p>\(\kappa_1 \gt \kappa_2\)일 때만 principal direction이 서로 수직인 정확히 두 방향으로 정해진다. \(\kappa_1 = \kappa_2\)이면 \(W_p = \kappa_1\id\)이므로 <em>모든</em> 방향이 principal direction이다(<a href="#i-8-3-3">Theorem 8.3.3</a>(b)). sphere의 모든 점이 그렇다. 이런 점은 아래에서 umbilical point라 부른다.</p>
       </aside>
 
       <div class="thm theorem" id="i-8-3-5">
-        <p><span class="thm-head">정리 8.3.5</span> <span class="thm-name">(오일러 공식; 주곡률은 법곡률의 최댓값과 최솟값이다)</span>.
-        \(p \in O\)이고 \((e_1, e_2)\)가 주방향의 정규직교기저이면, 단위벡터 \(w = \cos\beta\,e_1 + \sin\beta\,e_2\)에 대하여</p>
+        <p><span class="thm-head">Theorem 8.3.5</span> <span class="thm-name">(Euler's formula; principal curvatures are the extreme values of normal curvature)</span>.
+        \(p \in O\)이고 \((e_1, e_2)\)가 principal direction의 orthonormal basis이면, 단위벡터 \(w = \cos\beta\,e_1 + \sin\beta\,e_2\)에 대하여</p>
         <div class="equation" id="eq-8-3-2">
         \[ \kappa_n(w) = \kappa_1\cos^2\beta + \kappa_2\sin^2\beta \tag{8.3.2} \]
         </div>
-        <p>이다(오일러 공식, Euler's formula). 따라서 \(\kappa_1\)과 \(\kappa_2\)는 \(p\)에서 법곡률의 최댓값과 최솟값이다. \(\kappa_1 \gt \kappa_2\)이면 최댓값은 \(w = \pm e_1\)에서만, 최솟값은 \(w = \pm e_2\)에서만 나온다.</p>
+        <p>이다(Euler's formula). 따라서 \(\kappa_1\)과 \(\kappa_2\)는 \(p\)에서 normal curvature의 최댓값과 최솟값이다. \(\kappa_1 \gt \kappa_2\)이면 최댓값은 \(w = \pm e_1\)에서만, 최솟값은 \(w = \pm e_2\)에서만 나온다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 한 점에서 곡면이 모든 방향으로 휘는 정도는 두 수 \(\kappa_1, \kappa_2\)와 두 직교 방향으로 완전히 정해진다. 가장 많이 휘는 방향과 가장 적게 휘는 방향은 늘 직교한다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> 한 점에서 surface가 모든 방향으로 휘는 정도는 두 수 \(\kappa_1, \kappa_2\)와 서로 수직인 두 방향으로 완전히 정해진다. 가장 많이 휘는 방향과 가장 적게 휘는 방향은 늘 서로 수직이다.</p>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        \(\kappa_n(w) = \mathrm{II}_p(w) = \inner{W_p(w)}{w}\)(<a href="8-2-normal-curvature.html#i-8-2-4">정의 8.2.4</a>(b))이므로 <a href="#i-8-3-3">정리 8.3.3</a>(c)를 \(A = W_p\)에 쓰면 된다. 최댓값·최솟값과 그 위치도 같은 정리의 (c)에 있다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(\kappa_n(w) = \mathrm{II}_p(w) = \inner{W_p(w)}{w}\)(<a href="8-2-normal-curvature.html#i-8-2-4">Definition 8.2.4</a>(b))이므로 <a href="#i-8-3-3">Theorem 8.3.3</a>(c)를 \(A = W_p\)에 쓰면 된다. 최댓값·최솟값과 그 위치도 같은 정리의 (c)에 있다.</p>
       </div>
 
       <div class="thm example" id="i-8-3-6">
-        <p><span class="thm-head">예 8.3.6</span> <span class="thm-name">(기준 예제의 주곡률)</span>.
-        <a href="8-1-gauss-map.html#i-8-1-13">예 8.1.13</a>의 형태작용소에서 읽는다.</p>
+        <p><span class="thm-head">Example 8.3.6</span> <span class="thm-name">(principal curvatures of the running examples)</span>.
+        <a href="8-1-gauss-map.html#i-8-1-13">Example 8.1.13</a>의 shape operator에서 읽는다.</p>
         <ul>
-          <li>(a) 평면: \(\kappa_1 = \kappa_2 = 0\)이고 모든 방향이 주방향이다.</li>
-          <li>(b) 구면(바깥쪽): \(W_p = -\tfrac1r\id\)이므로 \(\kappa_1 = \kappa_2 = -1/r\)이고 모든 방향이 주방향이다.</li>
-          <li>(c) 원기둥(바깥쪽): \(W_p(\mathbf{x}_v) = 0\), \(W_p(\mathbf{x}_u) = -\mathbf{x}_u/r\)이고 \(\mathbf{x}_u \perp \mathbf{x}_v\)이므로 \(\kappa_1 = 0\)(축 방향 \(e_1 = \mathbf{x}_v\)), \(\kappa_2 = -1/r\)(둘레 방향 \(e_2 = \mathbf{x}_u/r\))이다. 안쪽 \(\mathbf{N}\)을 쓰면 \(\kappa_1 = 1/r\)(둘레), \(\kappa_2 = 0\)(축)이다.</li>
-          <li>(d) 안장면의 원점(위쪽): \(\kappa_1 = 2\)(\(e_1 = (1, 0, 0)\)), \(\kappa_2 = -2\)(\(e_2 = (0, 1, 0)\)). 오일러 공식은 \(2\cos^2\beta - 2\sin^2\beta = 2\cos 2\beta\)로 <a href="8-2-normal-curvature.html#i-8-2-11">예 8.2.11</a>과 같다.</li>
-          <li>(e) 원환면(\(\mathbf{N}_{\mathbf{x}}\), 안쪽): <a href="8-1-gauss-map.html#eq-8-1-6">(8.1.6)</a>에서 \(\mathbf{x}_u\)와 \(\mathbf{x}_v\)가 고유벡터이고 \(F = 0\)이므로 \(e_1 = \mathbf{x}_u/r\)(경선 방향), \(e_2 = \mathbf{x}_v/(R + r\cos u)\)(위도원 방향)가 주방향의 정규직교기저다. \(R + r\cos u \gt 0\)이고 \(R \gt 0\)이므로 \(\dfrac1r - \dfrac{\cos u}{R + r\cos u} = \dfrac{R}{r(R + r\cos u)} \gt 0\)이다. 따라서</li>
+          <li>(a) 평면: \(\kappa_1 = \kappa_2 = 0\)이고 모든 방향이 principal direction이다.</li>
+          <li>(b) sphere(바깥쪽): \(W_p = -\tfrac1r\id\)이므로 \(\kappa_1 = \kappa_2 = -1/r\)이고 모든 방향이 principal direction이다.</li>
+          <li>(c) cylinder(바깥쪽): \(W_p(\mathbf{x}_v) = 0\), \(W_p(\mathbf{x}_u) = -\mathbf{x}_u/r\)이고 \(\mathbf{x}_u \perp \mathbf{x}_v\)이므로 \(\kappa_1 = 0\)(축 방향 \(e_1 = \mathbf{x}_v\)), \(\kappa_2 = -1/r\)(둘레 방향 \(e_2 = \mathbf{x}_u/r\))이다. 안쪽 \(\mathbf{N}\)을 쓰면 \(\kappa_1 = 1/r\)(둘레), \(\kappa_2 = 0\)(축)이다.</li>
+          <li>(d) saddle surface의 원점(위쪽): \(\kappa_1 = 2\)(\(e_1 = (1, 0, 0)\)), \(\kappa_2 = -2\)(\(e_2 = (0, 1, 0)\)). Euler's formula는 \(2\cos^2\beta - 2\sin^2\beta = 2\cos 2\beta\)로 <a href="8-2-normal-curvature.html#i-8-2-11">Example 8.2.11</a>과 같다.</li>
+          <li>(e) torus of revolution(\(\mathbf{N}_{\mathbf{x}}\), 안쪽): <a href="8-1-gauss-map.html#eq-8-1-6">(8.1.6)</a>에서 \(\mathbf{x}_u\)와 \(\mathbf{x}_v\)가 eigenvector이고 \(F = 0\)이므로 \(e_1 = \mathbf{x}_u/r\)(meridian 방향), \(e_2 = \mathbf{x}_v/(R + r\cos u)\)(circle of latitude 방향)가 principal direction의 orthonormal basis다. \(R + r\cos u \gt 0\)이고 \(R \gt 0\)이므로 \(\dfrac1r - \dfrac{\cos u}{R + r\cos u} = \dfrac{R}{r(R + r\cos u)} \gt 0\)이다. 따라서</li>
         </ul>
         <div class="equation" id="eq-8-3-3">
-        \[ \kappa_1 = \frac1r \quad (\text{경선}), \qquad \kappa_2 = \frac{\cos u}{R + r\cos u} \quad (\text{위도원}) \tag{8.3.3} \]
+        \[ \kappa_1 = \frac1r \quad (\text{meridian}), \qquad \kappa_2 = \frac{\cos u}{R + r\cos u} \quad (\text{circle of latitude}) \tag{8.3.3} \]
         </div>
         <ul>
-          <li>이다. \(\kappa_2\)는 바깥쪽 적도(\(u = 0\))에서 \(1/(R + r)\), 맨 위와 맨 아래 원(\(u = \pm\pi/2\))에서 \(0\), 안쪽 적도(\(u = \pi\))에서 \(-1/(R - r)\)이다(<a href="#fig-8-3-1">그림 8.3.1</a>, <a href="#fig-8-3-2">그림 8.3.2</a>).</li>
+          <li>이다. \(\kappa_2\)는 바깥쪽 적도(\(u = 0\))에서 \(1/(R + r)\), 맨 위와 맨 아래 원(\(u = \pm\pi/2\))에서 \(0\), 안쪽 적도(\(u = \pi\))에서 \(-1/(R - r)\)이다(<a href="#fig-8-3-1">Figure 8.3.1</a>, <a href="#fig-8-3-2">Figure 8.3.2</a>).</li>
         </ul>
-        <p class="verified">검증: <code>verify/v-8-3-principal-curvatures.py</code></p>
+        <p class="verified">Verification: <code>verify/v-8-3-principal-curvatures.py</code></p>
       </div>
     </section>
 
     <section id="sec-umbilic">
-      <h2>배꼽점</h2>
+      <h2>Umbilical Points</h2>
 
       <div class="thm definition" id="i-8-3-7">
-        <p><span class="thm-head">정의 8.3.7</span> <span class="thm-name">(배꼽점, umbilical point)</span>.
-        \(p \in S\)에서 \(\kappa_1 = \kappa_2\)이면 \(p\)를 \(S\)의 <dfn>배꼽점</dfn>(umbilical point)이라 한다. 이 조건은 \(\mathbf{N}\)의 선택에 무관하다.</p>
+        <p><span class="thm-head">Definition 8.3.7</span> <span class="thm-name">(umbilical point)</span>.
+        \(p \in S\)에서 \(\kappa_1 = \kappa_2\)이면 \(p\)를 \(S\)의 <dfn>umbilical point</dfn>(배꼽점)이라 한다. 이 조건은 \(\mathbf{N}\)의 선택에 무관하다.</p>
       </div>
 
-      <p><a href="#i-8-3-3">정리 8.3.3</a>(b)에 의해 \(p\)가 배꼽점일 필요충분조건은 \(W_p = \kappa\,\id\)인 \(\kappa \in \R\)가 있는 것이고, 오일러 공식에 의해 이는 모든 방향의 법곡률이 같은 것, 또 모든 방향이 주방향인 것과 같다.</p>
+      <p><a href="#i-8-3-3">Theorem 8.3.3</a>(b)에 의해 \(p\)가 umbilical point일 필요충분조건은 \(W_p = \kappa\,\id\)인 \(\kappa \in \R\)가 있는 것이고, Euler's formula에 의해 이는 모든 방향의 normal curvature가 같은 것, 또 모든 방향이 principal direction인 것과 같다.</p>
 
       <div class="thm example" id="i-8-3-8">
-        <p><span class="thm-head">예 8.3.8</span> <span class="thm-name">(배꼽점의 예와 비예)</span>.
-        (a) 평면과 구면은 모든 점이 배꼽점이다(<a href="#i-8-3-6">예 8.3.6</a>(a), (b)).
-        (b) 회전 포물면 \(z = u^2 + v^2\)의 원점은 배꼽점이다. 원점에서 접평면은 \(xy\) 평면이고 위쪽 \(\mathbf{N}(0) = e_3\)이므로 곡면이 이미 접평면 위의 그래프 \(f(\xi, \eta) = \xi^2 + \eta^2\)이다. <a href="8-2-normal-curvature.html#i-8-2-10">명제 8.2.10</a>(a)에서 \(W_0\)의 행렬은 헤세 행렬 \(\diag(2, 2)\)이다. 이 곡면은 구면도 평면도 아니지만 원점 하나는 배꼽점이다.
-        (c) 원기둥과 원환면에는 배꼽점이 없다. 원기둥은 \(\kappa_1 - \kappa_2 = 1/r\), 원환면은 \(\kappa_1 - \kappa_2 = R/(r(R + r\cos u)) \gt 0\)이다(<a href="#i-8-3-6">예 8.3.6</a>). 안장면의 원점도 배꼽점이 아니다.</p>
-        <p class="verified">검증: <code>verify/v-8-3-principal-curvatures.py</code></p>
+        <p><span class="thm-head">Example 8.3.8</span> <span class="thm-name">(examples and non-examples of umbilical points)</span>.
+        (a) 평면과 sphere는 모든 점이 umbilical point이다(<a href="#i-8-3-6">Example 8.3.6</a>(a), (b)).
+        (b) paraboloid of revolution \(z = u^2 + v^2\)의 원점은 umbilical point이다. 원점에서 tangent plane은 \(xy\) 평면이고 위쪽 \(\mathbf{N}(0) = e_3\)이므로 surface가 이미 tangent plane 위의 그래프 \(f(\xi, \eta) = \xi^2 + \eta^2\)이다. <a href="8-2-normal-curvature.html#i-8-2-10">Proposition 8.2.10</a>(a)에서 \(W_0\)의 행렬은 Hessian matrix \(\diag(2, 2)\)이다. 이 surface는 sphere도 평면도 아니지만 원점 하나는 umbilical point이다.
+        (c) cylinder와 torus of revolution에는 umbilical point가 없다. cylinder는 \(\kappa_1 - \kappa_2 = 1/r\), torus of revolution은 \(\kappa_1 - \kappa_2 = R/(r(R + r\cos u)) \gt 0\)이다(<a href="#i-8-3-6">Example 8.3.6</a>). saddle surface의 원점도 umbilical point가 아니다.</p>
+        <p class="verified">Verification: <code>verify/v-8-3-principal-curvatures.py</code></p>
       </div>
 
-      <p>배꼽점이 한두 개 있는 곡면은 흔하다. 그런데 <em>모든</em> 점이 배꼽점이면 곡면의 모양이 완전히 정해진다.</p>
+      <p>umbilical point가 한두 개 있는 surface는 흔하다. 그런데 <em>모든</em> 점이 umbilical point이면 surface의 모양이 완전히 정해진다.</p>
 
       <div class="thm theorem" id="i-8-3-9">
-        <p><span class="thm-head">정리 8.3.9</span> <span class="thm-name">(배꼽점만으로 된 곡면)</span>.
-        \(S\)가 연결인 정칙곡면이고 모든 점이 배꼽점이면, \(S\)는 어떤 평면이나 어떤 구면에 포함된다.</p>
+        <p><span class="thm-head">Theorem 8.3.9</span> <span class="thm-name">(surfaces consisting only of umbilical points)</span>.
+        \(S\)가 connected regular surface이고 모든 점이 umbilical point이면, \(S\)는 어떤 평면이나 어떤 sphere에 포함된다.</p>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 어느 점에서나 어느 방향으로나 똑같이 휘는 곡면은 평면과 구면뿐이다. 국소적인 조건(각 점에서 \(W_p\)가 스칼라배)이 곡면 전체의 모양을 정한다. 연결이라는 가정은 빠질 수 없다. 서로 떨어진 두 구면의 합집합도 모든 점이 배꼽점이다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> 어느 점에서나 어느 방향으로나 똑같이 휘는 surface는 평면과 sphere뿐이다. 국소적인 조건(각 점에서 \(W_p\)가 스칼라배)이 surface 전체의 모양을 정한다. connected라는 가정은 빠질 수 없다. 서로 떨어진 두 sphere의 합집합도 모든 점이 umbilical point이다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 국소적으로 \(\mathbf{N}_u = -\kappa\,\mathbf{x}_u\), \(\mathbf{N}_v = -\kappa\,\mathbf{x}_v\)이다. 두 식을 교차로 미분해 빼면 \(\kappa\)가 국소상수이다. \(\kappa = 0\)이면 \(\mathbf{N}\)이 상수라 평면, \(\kappa \neq 0\)이면 \(\mathbf{x} + \mathbf{N}/\kappa\)가 상수라 구면이다. 국소적인 결론을 연결성으로 이어 붙인다.</p>
-        <p><span class="proof-head">증명.</span>
-        <em>1단계(국소 계산).</em> \(\mathbf{x}\colon U \to S\)가 매개화이고 \(U\)가 연결(예를 들어 열린공)이라 하자. \(\mathbf{x}(U)\) 위에서 \(\mathbf{N} = \mathbf{N}_{\mathbf{x}}\)를 쓰고, 각 점의 \(W = \kappa\,\id\)에서 함수 \(\kappa\colon \mathbf{x}(U) \to \R\)를 얻는다. <a href="8-1-gauss-map.html#eq-8-1-2">(8.1.2)</a>에서</p>
+        <p class="proof-idea">Proof idea: 국소적으로 \(\mathbf{N}_u = -\kappa\,\mathbf{x}_u\), \(\mathbf{N}_v = -\kappa\,\mathbf{x}_v\)이다. 두 식을 교차로 미분해 빼면 \(\kappa\)가 locally constant이다. \(\kappa = 0\)이면 \(\mathbf{N}\)이 상수라 평면, \(\kappa \neq 0\)이면 \(\mathbf{x} + \mathbf{N}/\kappa\)가 상수라 sphere이다. 국소적인 결론을 connectedness로 이어 붙인다.</p>
+        <p><span class="proof-head">Proof.</span>
+        <em>1단계(국소 계산).</em> \(\mathbf{x}\colon U \to S\)가 parametrization이고 \(U\)가 connected(예를 들어 open ball)라 하자. \(\mathbf{x}(U)\) 위에서 \(\mathbf{N} = \mathbf{N}_{\mathbf{x}}\)를 쓰고, 각 점의 \(W = \kappa\,\id\)에서 함수 \(\kappa\colon \mathbf{x}(U) \to \R\)를 얻는다. <a href="8-1-gauss-map.html#eq-8-1-2">(8.1.2)</a>에서</p>
         <p>\[ \mathbf{N}_u = -\kappa\,\mathbf{x}_u, \qquad \mathbf{N}_v = -\kappa\,\mathbf{x}_v \]</p>
-        <p>이다(\(\kappa\)는 \(\kappa \circ \mathbf{x}\)의 뜻). 첫 식과 \(\mathbf{x}_u\)의 내적에서 \(\kappa = -\inner{\mathbf{N}_u}{\mathbf{x}_u}/E\)이므로 \(\kappa\)는 \(U\)에서 매끄럽다. 첫 식을 \(v\)로, 둘째 식을 \(u\)로 미분하면 \(\mathbf{N}_{uv} = -\kappa_v\mathbf{x}_u - \kappa\,\mathbf{x}_{uv}\), \(\mathbf{N}_{vu} = -\kappa_u\mathbf{x}_v - \kappa\,\mathbf{x}_{vu}\)이고, 편미분의 교환(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-14">정리 2.2.14</a>)으로 빼면</p>
+        <p>이다(\(\kappa\)는 \(\kappa \circ \mathbf{x}\)의 뜻). 첫 식과 \(\mathbf{x}_u\)의 inner product에서 \(\kappa = -\inner{\mathbf{N}_u}{\mathbf{x}_u}/E\)이므로 \(\kappa\)는 \(U\)에서 매끄럽다. 첫 식을 \(v\)로, 둘째 식을 \(u\)로 미분하면 \(\mathbf{N}_{uv} = -\kappa_v\mathbf{x}_u - \kappa\,\mathbf{x}_{uv}\), \(\mathbf{N}_{vu} = -\kappa_u\mathbf{x}_v - \kappa\,\mathbf{x}_{vu}\)이고, partial derivative의 교환(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-14">Theorem 2.2.14</a>)으로 빼면</p>
         <p>\[ \kappa_v\,\mathbf{x}_u - \kappa_u\,\mathbf{x}_v = 0 \]</p>
-        <p>이다. \(\mathbf{x}_u, \mathbf{x}_v\)는 일차독립이므로 \(\kappa_u = \kappa_v = 0\)이고, \(U\)가 연결이므로 \(\kappa\)는 \(U\)에서 상수다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-18">따름정리 3.7.18</a>).</p>
-        <p><em>2단계(\(\abs{\kappa}\)는 상수).</em> 법벡터를 \(-\mathbf{N}\)으로 바꾸면 \(\kappa\)는 \(-\kappa\)가 되므로, \(\abs{\kappa}\)는 매개화에 무관하게 \(S\) 위의 함수로 잘 정의된다. 모든 점은 1단계와 같은 \(\mathbf{x}(U)\)(열린집합)에 들어 있고 그 위에서 \(\abs{\kappa}\)가 상수이므로 \(\abs{\kappa}\)는 국소상수이고, \(S\)가 연결이므로 상수 \(k_0 \ge 0\)이다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-16">명제 3.7.16</a>).</p>
-        <p><em>3단계(\(k_0 = 0\)이면 평면).</em> 각 \(\mathbf{x}(U)\) 위에서 \(\mathbf{N}_u = \mathbf{N}_v = 0\)이므로 \(\mathbf{N}_{\mathbf{x}}\)는 상수 \(n_0\)이고, \(\inner{\mathbf{x}}{n_0}\)도 편미분 \(\inner{\mathbf{x}_u}{n_0} = \inner{\mathbf{x}_v}{n_0} = 0\)이라 상수다. 그러므로 점 \(q\)에 “\(q\)를 지나고 \(T_qS\)에 평행한 평면” \(P(q) = q + T_qS = \{y : \inner{y}{n_0} = \inner{q}{n_0}\}\)을 대응시키는 사상은 \(\mathbf{x}(U)\) 위에서 상수다.
-        따라서 \(P\)(값은 \(\R^3\)의 평면들의 집합에 있다)는 국소상수이고, <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-16">명제 3.7.16</a>에 의해 상수 \(P_0\)이다. 모든 \(q \in S\)가 \(q \in P(q) = P_0\)이므로 \(S \subseteq P_0\)이다.</p>
-        <p><em>4단계(\(k_0 \gt 0\)이면 구면).</em> 각 \(\mathbf{x}(U)\) 위에서 \(\kappa\)는 \(0\)이 아닌 상수이고, \(c(q) = q + \mathbf{N}_{\mathbf{x}}(q)/\kappa(q)\)로 둔다. 법벡터를 \(-\mathbf{N}\)으로 바꾸면 \(\kappa\)도 \(-\kappa\)가 되어 \(\mathbf{N}/\kappa\)는 그대로이므로, \(c\colon S \to \R^3\)은 잘 정의된다.
-        \(\mathbf{x}(U)\) 위에서 \((c \circ \mathbf{x})_u = \mathbf{x}_u + \mathbf{N}_u/\kappa = \mathbf{x}_u - \mathbf{x}_u = 0\)이고 \((c \circ \mathbf{x})_v = 0\)도 같으므로 \(c\)는 국소상수, 따라서 상수 \(c_0\)이다. 그러면 모든 \(q\)에서 \(\abs{q - c_0} = \abs{\mathbf{N}(q)}/\abs{\kappa} = 1/k_0\)이므로 \(S\)는 중심 \(c_0\), 반지름 \(1/k_0\)인 구면에 포함된다.</p>
+        <p>이다. \(\mathbf{x}_u, \mathbf{x}_v\)는 linearly independent이므로 \(\kappa_u = \kappa_v = 0\)이고, \(U\)가 connected이므로 \(\kappa\)는 \(U\)에서 상수다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-18">Corollary 3.7.18</a>).</p>
+        <p><em>2단계(\(\abs{\kappa}\)는 상수).</em> normal vector를 \(-\mathbf{N}\)으로 바꾸면 \(\kappa\)는 \(-\kappa\)가 되므로, \(\abs{\kappa}\)는 parametrization에 무관하게 \(S\) 위의 함수로 잘 정의된다. 모든 점은 1단계와 같은 \(\mathbf{x}(U)\)(open set)에 들어 있고 그 위에서 \(\abs{\kappa}\)가 상수이므로 \(\abs{\kappa}\)는 locally constant이고, \(S\)가 connected이므로 상수 \(k_0 \ge 0\)이다(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-16">Proposition 3.7.16</a>).</p>
+        <p><em>3단계(\(k_0 = 0\)이면 평면).</em> 각 \(\mathbf{x}(U)\) 위에서 \(\mathbf{N}_u = \mathbf{N}_v = 0\)이므로 \(\mathbf{N}_{\mathbf{x}}\)는 상수 \(n_0\)이고, \(\inner{\mathbf{x}}{n_0}\)도 partial derivative \(\inner{\mathbf{x}_u}{n_0} = \inner{\mathbf{x}_v}{n_0} = 0\)이라 상수다. 그러므로 점 \(q\)에 “\(q\)를 지나고 \(T_qS\)에 평행한 평면” \(P(q) = q + T_qS = \{y : \inner{y}{n_0} = \inner{q}{n_0}\}\)을 대응시키는 map은 \(\mathbf{x}(U)\) 위에서 상수다.
+        따라서 \(P\)(값은 \(\R^3\)의 평면들의 집합에 있다)는 locally constant이고, <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-16">Proposition 3.7.16</a>에 의해 상수 \(P_0\)이다. 모든 \(q \in S\)가 \(q \in P(q) = P_0\)이므로 \(S \subseteq P_0\)이다.</p>
+        <p><em>4단계(\(k_0 \gt 0\)이면 sphere).</em> 각 \(\mathbf{x}(U)\) 위에서 \(\kappa\)는 \(0\)이 아닌 상수이고, \(c(q) = q + \mathbf{N}_{\mathbf{x}}(q)/\kappa(q)\)로 둔다. normal vector를 \(-\mathbf{N}\)으로 바꾸면 \(\kappa\)도 \(-\kappa\)가 되어 \(\mathbf{N}/\kappa\)는 그대로이므로, \(c\colon S \to \R^3\)은 잘 정의된다.
+        \(\mathbf{x}(U)\) 위에서 \((c \circ \mathbf{x})_u = \mathbf{x}_u + \mathbf{N}_u/\kappa = \mathbf{x}_u - \mathbf{x}_u = 0\)이고 \((c \circ \mathbf{x})_v = 0\)도 같으므로 \(c\)는 locally constant, 따라서 상수 \(c_0\)이다. 그러면 모든 \(q\)에서 \(\abs{q - c_0} = \abs{\mathbf{N}(q)}/\abs{\kappa} = 1/k_0\)이므로 \(S\)는 중심 \(c_0\), 반지름 \(1/k_0\)인 sphere에 포함된다.</p>
       </div>
 
-      <p>증명은 방향을 가정하지 않았다. 평면과 구면의 열린 부분집합은 거꾸로 모든 점이 배꼽점이므로, 정리는 “연결 곡면이 배꼽점으로만 이루어질 필요충분조건은 평면이나 구면의 열린 부분집합인 것”이라고 말해도 된다. 특히 <a href="8-1-gauss-map.html">8.1절</a>에서 미뤄 둔 사실, “연결 곡면의 모든 점에서 \(W_p = 0\)이면 평면의 일부”는 3단계다.</p>
+      <p>증명은 orientation을 가정하지 않았다. 평면과 sphere의 열린 부분집합은 거꾸로 모든 점이 umbilical point이므로, 정리는 “connected surface가 umbilical point로만 이루어질 필요충분조건은 평면이나 sphere의 열린 부분집합인 것”이라고 말해도 된다. 특히 <a href="8-1-gauss-map.html">Section 8.1</a>에서 미뤄 둔 사실, “connected surface의 모든 점에서 \(W_p = 0\)이면 평면의 일부”는 3단계다.</p>
     </section>
 
     <section id="sec-lines-of-curvature">
-      <h2>곡률선과 회전면</h2>
-      <p>주방향은 점마다 정해지는 방향이다. 그 방향을 따라 가는 곡선을 생각할 수 있다.</p>
+      <h2>Lines of Curvature and Surfaces of Revolution</h2>
+      <p>principal direction은 점마다 정해지는 방향이다. 그 방향을 따라 가는 곡선을 생각할 수 있다.</p>
 
       <div class="thm definition" id="i-8-3-10">
-        <p><span class="thm-head">정의 8.3.10</span> <span class="thm-name">(곡률선, line of curvature)</span>.
-        \(\gamma\colon I \to S\)가 정칙곡선이고 모든 \(t \in I\)에서 \(\gamma'(t)\)가 \(\gamma(t)\)의 주방향이면 \(\gamma\)를 <dfn>곡률선</dfn>(line of curvature)이라 한다.</p>
+        <p><span class="thm-head">Definition 8.3.10</span> <span class="thm-name">(line of curvature)</span>.
+        \(\gamma\colon I \to S\)가 regular curve이고 모든 \(t \in I\)에서 \(\gamma'(t)\)가 \(\gamma(t)\)의 principal direction이면 \(\gamma\)를 <dfn>line of curvature</dfn>(곡률선)이라 한다.</p>
       </div>
 
       <div class="thm proposition" id="i-8-3-11">
-        <p><span class="thm-head">명제 8.3.11</span> <span class="thm-name">(로드리게스 판정, Rodrigues)</span>.
-        정칙곡선 \(\gamma\colon I \to O\)가 곡률선일 필요충분조건은 함수 \(\lambda\colon I \to \R\)가 있어서</p>
+        <p><span class="thm-head">Proposition 8.3.11</span> <span class="thm-name">(Rodrigues' criterion)</span>.
+        regular curve \(\gamma\colon I \to O\)가 line of curvature일 필요충분조건은 함수 \(\lambda\colon I \to \R\)가 있어서</p>
         <div class="equation" id="eq-8-3-4">
         \[ (\mathbf{N} \circ \gamma)'(t) = -\lambda(t)\,\gamma'(t) \qquad (t \in I) \tag{8.3.4} \]
         </div>
-        <p>인 것이다. 이때 \(\lambda(t)\)는 \(\gamma'(t)\) 방향의 주곡률이다.</p>
+        <p>인 것이다. 이때 \(\lambda(t)\)는 \(\gamma'(t)\) 방향의 principal curvature이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        정의 <a href="../06-regular-surfaces/6-4-differential-of-a-map.html#eq-6-4-1">(6.4.1)</a>에서 \((\mathbf{N} \circ \gamma)'(t) = d\mathbf{N}_{\gamma(t)}(\gamma'(t)) = -W_{\gamma(t)}(\gamma'(t))\)이다. \(\gamma'(t) \neq 0\)이 주방향일 필요충분조건은 \(W\)의 고유벡터인 것, 곧 \(W(\gamma'(t)) = \lambda(t)\gamma'(t)\)인 것이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        정의 <a href="../06-regular-surfaces/6-4-differential-of-a-map.html#eq-6-4-1">(6.4.1)</a>에서 \((\mathbf{N} \circ \gamma)'(t) = d\mathbf{N}_{\gamma(t)}(\gamma'(t)) = -W_{\gamma(t)}(\gamma'(t))\)이다. \(\gamma'(t) \neq 0\)이 principal direction일 필요충분조건은 \(W\)의 eigenvector인 것, 곧 \(W(\gamma'(t)) = \lambda(t)\gamma'(t)\)인 것이다.</p>
       </div>
 
-      <p>평면과 구면에서는 모든 곡선이 곡률선이다. 원기둥에서는 수평 원과 모선이 곡률선이고, 나선(\(b \neq 0\))은 곡률선이 아니다. 나선의 속도 \(\mathbf{x}_u + b\,\mathbf{x}_v\)는 \(W(\mathbf{x}_u + b\,\mathbf{x}_v) = -\mathbf{x}_u/r\)와 평행하지 않기 때문이다. 원환면의 경선과 위도원은 곡률선이다(<a href="#i-8-3-6">예 8.3.6</a>(e)). 이것은 회전면 전체의 성질이다.</p>
+      <p>평면과 sphere에서는 모든 곡선이 line of curvature이다. cylinder에서는 수평 원과 모선이 line of curvature이고, helix(\(b \neq 0\))는 line of curvature가 아니다. helix의 속도 \(\mathbf{x}_u + b\,\mathbf{x}_v\)는 \(W(\mathbf{x}_u + b\,\mathbf{x}_v) = -\mathbf{x}_u/r\)와 평행하지 않기 때문이다. torus of revolution의 meridian과 circle of latitude는 line of curvature이다(<a href="#i-8-3-6">Example 8.3.6</a>(e)). 이것은 surface of revolution 전체의 성질이다.</p>
 
       <div class="thm proposition" id="i-8-3-12">
-        <p><span class="thm-head">명제 8.3.12</span> <span class="thm-name">(회전면의 곡률선과 주곡률)</span>.
-        회전면 \(\mathbf{x}(u, v) = (\rho(u)\cos v,\ \rho(u)\sin v,\ z(u))\)(\(\rho \gt 0\), 생성곡선 \(\alpha = (\rho, z)\))에 \(\mathbf{N} = \mathbf{N}_{\mathbf{x}}\)를 주자. 경선(\(v\) 고정)과 위도원(\(u\) 고정)은 곡률선이고, 대응하는 주곡률은</p>
+        <p><span class="thm-head">Proposition 8.3.12</span> <span class="thm-name">(lines of curvature and principal curvatures of a surface of revolution)</span>.
+        surface of revolution \(\mathbf{x}(u, v) = (\rho(u)\cos v,\ \rho(u)\sin v,\ z(u))\)(\(\rho \gt 0\), generating curve \(\alpha = (\rho, z)\))에 \(\mathbf{N} = \mathbf{N}_{\mathbf{x}}\)를 주자. meridian(\(v\) 고정)과 circle of latitude(\(u\) 고정)은 line of curvature이고, 대응하는 principal curvature는</p>
         <div class="equation" id="eq-8-3-5">
         \[ W(\mathbf{x}_u) = \frac{\rho'z'' - \rho''z'}{\abs{\alpha'}^3}\,\mathbf{x}_u, \qquad W(\mathbf{x}_v) = \frac{z'}{\rho\,\abs{\alpha'}}\,\mathbf{x}_v \tag{8.3.5} \]
         </div>
-        <p>이다. 경선 방향의 주곡률은 \((\rho, z)\) 평면에서 생성곡선의 부호곡률 \(\kappa_s(\alpha)\)(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-5">명제 4.4.5</a>)와 같다.</p>
+        <p>이다. meridian 방향의 principal curvature는 \((\rho, z)\) 평면에서 generating curve의 signed curvature \(\kappa_s(\alpha)\)(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-5">Proposition 4.4.5</a>)와 같다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-2">예 7.5.2</a>(d)에서 \(\mathbf{N} \circ \mathbf{x} = (-z'\cos v,\ -z'\sin v,\ \rho')/\abs{\alpha'}\)이고 \(\abs{\alpha'}\)은 \(u\)만의 함수다. \(v\)로 미분하면
+        <p><span class="proof-head">Proof.</span>
+        <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-2">Example 7.5.2</a>(d)에서 \(\mathbf{N} \circ \mathbf{x} = (-z'\cos v,\ -z'\sin v,\ \rho')/\abs{\alpha'}\)이고 \(\abs{\alpha'}\)은 \(u\)만의 함수다. \(v\)로 미분하면
         \(\mathbf{N}_v = (z'\sin v,\ -z'\cos v,\ 0)/\abs{\alpha'}\)이고 \(\mathbf{x}_v = \rho\,(-\sin v, \cos v, 0)\)이므로 \(\mathbf{N}_v = -\dfrac{z'}{\rho\abs{\alpha'}}\mathbf{x}_v\)이다. <a href="8-1-gauss-map.html#eq-8-1-2">(8.1.2)</a>에서 둘째 식이 나온다.
-        \(F = 0\)이므로(식 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#eq-7-1-4">(7.1.4)</a>) \(\mathbf{x}_u \perp \mathbf{x}_v\)이고, 자기수반성에서 \(\inner{W(\mathbf{x}_u)}{\mathbf{x}_v} = \inner{\mathbf{x}_u}{W(\mathbf{x}_v)} = 0\)이다. 따라서 \(W(\mathbf{x}_u) \in \{\mathbf{x}_v\}^\perp \cap T_pS = \Span\{\mathbf{x}_u\}\)이고, 그 계수는 \(\inner{W(\mathbf{x}_u)}{\mathbf{x}_u}/E = \mathrm{II}(\mathbf{x}_u)/E\)이다.
-        경선 \(u \mapsto \mathbf{x}(u, v)\)에 <a href="8-2-normal-curvature.html#i-8-2-3">명제 8.2.3</a>을 쓰면 \(\mathrm{II}(\mathbf{x}_u) = \inner{\mathbf{x}_{uu}}{\mathbf{N}}\)이고, \(\mathbf{x}_{uu} = (\rho''\cos v,\ \rho''\sin v,\ z'')\)이므로 \(\mathrm{II}(\mathbf{x}_u) = (-\rho''z' + z''\rho')/\abs{\alpha'}\)이다. \(E = \abs{\alpha'}^2\)으로 나누면 첫 식이다.
-        두 좌표곡선의 속도가 늘 고유벡터이므로 곡률선이다. 마지막 주장은 <a href="../04-curves/4-4-signed-curvature.html#eq-4-4-4">(4.4.4)</a>에 \((x, y) = (\rho, z)\)를 넣은 것이다.</p>
+        \(F = 0\)이므로(<a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#eq-7-1-4">(7.1.4)</a>) \(\mathbf{x}_u \perp \mathbf{x}_v\)이고, self-adjointness에서 \(\inner{W(\mathbf{x}_u)}{\mathbf{x}_v} = \inner{\mathbf{x}_u}{W(\mathbf{x}_v)} = 0\)이다. 따라서 \(W(\mathbf{x}_u) \in \{\mathbf{x}_v\}^\perp \cap T_pS = \Span\{\mathbf{x}_u\}\)이고, 그 coefficient는 \(\inner{W(\mathbf{x}_u)}{\mathbf{x}_u}/E = \mathrm{II}(\mathbf{x}_u)/E\)이다.
+        meridian \(u \mapsto \mathbf{x}(u, v)\)에 <a href="8-2-normal-curvature.html#i-8-2-3">Proposition 8.2.3</a>을 쓰면 \(\mathrm{II}(\mathbf{x}_u) = \inner{\mathbf{x}_{uu}}{\mathbf{N}}\)이고, \(\mathbf{x}_{uu} = (\rho''\cos v,\ \rho''\sin v,\ z'')\)이므로 \(\mathrm{II}(\mathbf{x}_u) = (-\rho''z' + z''\rho')/\abs{\alpha'}\)이다. \(E = \abs{\alpha'}^2\)으로 나누면 첫 식이다.
+        두 coordinate curve의 속도가 늘 eigenvector이므로 line of curvature이다. 마지막 주장은 <a href="../04-curves/4-4-signed-curvature.html#eq-4-4-4">(4.4.4)</a>에 \((x, y) = (\rho, z)\)를 넣은 것이다.</p>
       </div>
 
-      <p>어느 쪽이 \(\kappa_1\)(큰 쪽)인지는 곡면에 따라 다르다. 위도원 방향의 값 \(z'/(\rho\abs{\alpha'})\)에도 뜻이 있다. 위도원은 반지름 \(\rho\)인 원이고, \(z'/\abs{\alpha'}\)은 생성곡선의 단위접벡터가 축과 이루는 각의 코사인이다. 원의 곡률 \(1/\rho\)에 뫼니에 정리의 \(\cos\vartheta\)가 곱해진 것이다.</p>
+      <p>어느 쪽이 \(\kappa_1\)(큰 쪽)인지는 surface에 따라 다르다. circle of latitude 방향의 값 \(z'/(\rho\abs{\alpha'})\)에도 뜻이 있다. circle of latitude는 반지름 \(\rho\)인 원이고, \(z'/\abs{\alpha'}\)은 generating curve의 unit tangent vector가 축과 이루는 각의 코사인이다. 원의 curvature \(1/\rho\)에 Meusnier's theorem의 \(\cos\vartheta\)가 곱해진 것이다.</p>
 
       <div class="thm example" id="i-8-3-13">
-        <p><span class="thm-head">예 8.3.13</span> <span class="thm-name">(회전면으로 본 기준 예제와 현수면)</span>.
+        <p><span class="thm-head">Example 8.3.13</span> <span class="thm-name">(running examples as surfaces of revolution, and the catenoid)</span>.
         <a href="#eq-8-3-5">(8.3.5)</a>에 넣는다.</p>
         <ul>
-          <li>(a) 구면 \(\alpha(\theta) = (r\sin\theta, r\cos\theta)\): \(\abs{\alpha'} = r\)이고 \(\mathbf{N}_{\mathbf{x}} = \mathbf{x}/r\)(바깥쪽)이다. \(\rho'z'' - \rho''z' = (r\cos\theta)(-r\cos\theta) - (-r\sin\theta)(-r\sin\theta) = -r^2\)이므로 경선의 주곡률은 \(-r^2/r^3 = -1/r\), 위도원은 \(-r\sin\theta/(r\sin\theta \cdot r) = -1/r\)이다. <a href="#i-8-3-6">예 8.3.6</a>(b)와 같다.</li>
-          <li>(b) 원환면 \(\alpha(u) = (R + r\cos u, r\sin u)\): \(\abs{\alpha'} = r\), \(\rho'z'' - \rho''z' = (-r\sin u)(-r\sin u) - (-r\cos u)(r\cos u) = r^2\)이므로 경선은 \(1/r\), 위도원은 \(r\cos u/((R + r\cos u)r) = \cos u/(R + r\cos u)\)로 <a href="#eq-8-3-3">(8.3.3)</a>과 같다(<a href="#fig-8-3-2">그림 8.3.2</a>).</li>
-          <li>(c) 현수면 \(\alpha(u) = (\cosh u, u)\)(<a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-6">예 7.1.6</a>(d)): \(\abs{\alpha'} = \cosh u\), \(\rho'z'' - \rho''z' = \sinh u \cdot 0 - \cosh u \cdot 1 = -\cosh u\)이다. 경선의 주곡률은 \(-\cosh u/\cosh^3u = -1/\cosh^2u\), 위도원은 \(1/(\cosh u \cdot \cosh u) = 1/\cosh^2u\)이다.
-          따라서 \(\kappa_1 = 1/\cosh^2u\)(위도원), \(\kappa_2 = -1/\cosh^2u\)(경선)이고 모든 점에서 \(\kappa_1 + \kappa_2 = 0\)이다. 이 성질은 <a href="8-4-gaussian-mean-curvature.html">8.4절</a>에서 이름을 얻는다.</li>
+          <li>(a) sphere \(\alpha(\theta) = (r\sin\theta, r\cos\theta)\): \(\abs{\alpha'} = r\)이고 \(\mathbf{N}_{\mathbf{x}} = \mathbf{x}/r\)(바깥쪽)이다. \(\rho'z'' - \rho''z' = (r\cos\theta)(-r\cos\theta) - (-r\sin\theta)(-r\sin\theta) = -r^2\)이므로 meridian의 principal curvature는 \(-r^2/r^3 = -1/r\), circle of latitude는 \(-r\sin\theta/(r\sin\theta \cdot r) = -1/r\)이다. <a href="#i-8-3-6">Example 8.3.6</a>(b)와 같다.</li>
+          <li>(b) torus of revolution \(\alpha(u) = (R + r\cos u, r\sin u)\): \(\abs{\alpha'} = r\), \(\rho'z'' - \rho''z' = (-r\sin u)(-r\sin u) - (-r\cos u)(r\cos u) = r^2\)이므로 meridian은 \(1/r\), circle of latitude는 \(r\cos u/((R + r\cos u)r) = \cos u/(R + r\cos u)\)로 <a href="#eq-8-3-3">(8.3.3)</a>과 같다(<a href="#fig-8-3-2">Figure 8.3.2</a>).</li>
+          <li>(c) catenoid \(\alpha(u) = (\cosh u, u)\)(<a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-6">Example 7.1.6</a>(d)): \(\abs{\alpha'} = \cosh u\), \(\rho'z'' - \rho''z' = \sinh u \cdot 0 - \cosh u \cdot 1 = -\cosh u\)이다. meridian의 principal curvature는 \(-\cosh u/\cosh^3u = -1/\cosh^2u\), circle of latitude는 \(1/(\cosh u \cdot \cosh u) = 1/\cosh^2u\)이다.
+          따라서 \(\kappa_1 = 1/\cosh^2u\)(circle of latitude), \(\kappa_2 = -1/\cosh^2u\)(meridian)이고 모든 점에서 \(\kappa_1 + \kappa_2 = 0\)이다. 이 성질은 <a href="8-4-gaussian-mean-curvature.html">Section 8.4</a>에서 이름을 얻는다.</li>
         </ul>
-        <p class="verified">검증: <code>verify/v-8-3-principal-curvatures.py</code></p>
+        <p class="verified">Verification: <code>verify/v-8-3-principal-curvatures.py</code></p>
       </div>
 
       <figure class="dg-figure" id="fig-8-3-2">
-        <img src="figures/fig-8-3-2-principal-directions.svg" alt="비스듬히 위에서 본 반투명 회색 원환면과 옅은 격자(경선과 위도원). 앞쪽의 경선 하나와 위쪽의 위도원 하나가 주황으로 강조되어 있다. 곡면 위 여러 점에서 파란 화살표 e1이 경선 방향으로, 청록 화살표 e2가 위도원 방향으로 뻗어 있고 두 화살표는 서로 수직이다.">
-        <figcaption><span class="fig-head">그림 8.3.2.</span>
-        원환면(\(R = 2\), \(r = 0.8\), 안쪽 \(\mathbf{N}_{\mathbf{x}}\))의 주방향. 여러 점에서 \(e_1 = \mathbf{x}_u/r\)(파랑, \(\kappa_1 = 1/r\))과 \(e_2 = \mathbf{x}_v/(R + r\cos u)\)(청록, \(\kappa_2 = \cos u/(R + r\cos u)\))를 \(0.45\)배로 그렸다.
-        회색 격자와 주황으로 강조한 경선 \(v = -\pi/3\), 위도원 \(u = \pi/4\)은 곡률선이다(<a href="#i-8-3-12">명제 8.3.12</a>).</figcaption>
+        <img src="figures/fig-8-3-2-principal-directions.svg" alt="비스듬히 위에서 본 반투명 회색 torus of revolution과 옅은 격자(meridian과 circle of latitude). 앞쪽의 meridian 하나와 위쪽의 circle of latitude 하나가 주황으로 강조되어 있다. surface 위 여러 점에서 파란 화살표 e1이 meridian 방향으로, 청록 화살표 e2가 circle of latitude 방향으로 뻗어 있고 두 화살표는 서로 수직이다.">
+        <figcaption><span class="fig-head">Figure 8.3.2.</span>
+        torus of revolution(\(R = 2\), \(r = 0.8\), 안쪽 \(\mathbf{N}_{\mathbf{x}}\))의 principal direction. 여러 점에서 \(e_1 = \mathbf{x}_u/r\)(파랑, \(\kappa_1 = 1/r\))과 \(e_2 = \mathbf{x}_v/(R + r\cos u)\)(청록, \(\kappa_2 = \cos u/(R + r\cos u)\))를 \(0.45\)배로 그렸다.
+        회색 격자와 주황으로 강조한 meridian \(v = -\pi/3\), circle of latitude \(u = \pi/4\)은 line of curvature이다(<a href="#i-8-3-12">Proposition 8.3.12</a>).</figcaption>
       </figure>
 
       <aside class="box convention">
-        <p class="box-title">규약 비교</p>
-        <p>do Carmo는 주곡률 \(k_1 \ge k_2\)를 법곡률의 최댓값과 최솟값으로 정의하고, 3장 부록의 정리로 그것이 \(-d\mathbf{N}_p\)의 고윳값임을 보인다 <a class="cite" href="../../references.html#dC">[dC §3-2 정의 4]</a>, <a class="cite" href="../../references.html#dC">[dC 3장 부록]</a>. 이 study set은 \(W_p\)의 고윳값을 정의로 삼고 최대·최소 성질을 <a href="#i-8-3-5">정리 8.3.5</a>로 증명했다. 값은 같다.
-        do Carmo의 부록은 단위원 위에서 이차형식의 최댓값을 잡는 방법으로 스펙트럼 정리를 증명한다. 이 절은 특성방정식의 판별식을 썼다.
-        곡률선, 로드리게스 판정, 배꼽점은 <a class="cite" href="../../references.html#dC">[dC §3-2 정의 5, 명제 3, 정의 8]</a>, 배꼽점만으로 된 곡면은 <a class="cite" href="../../references.html#dC">[dC §3-2 명제 4]</a>다. do Carmo는 방향이 주어진 곡면에서 증명하고 국소적인 결론을 곡선을 따라 하이네-보렐 정리로 이어 붙인다. 이 절은 국소상수함수(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-16">명제 3.7.16</a>)로 이어 붙였고, 방향을 가정하지 않았다.
-        회전면의 주곡률은 <a class="cite" href="../../references.html#dC">[dC §3-3 예 4]</a>에 있다. 그곳의 매개화는 \(u\)와 \(v\)의 역할이 이 study set과 반대이고 생성곡선을 호의 길이로 매개화한다.</p>
+        <p class="box-title">Conventions</p>
+        <p>do Carmo는 principal curvature \(k_1 \ge k_2\)를 normal curvature의 최댓값과 최솟값으로 정의하고, Chapter 3 appendix의 정리로 그것이 \(-d\mathbf{N}_p\)의 eigenvalue임을 보인다 <a class="cite" href="../../references.html#dC">[dC §3-2 Definition 4]</a>, <a class="cite" href="../../references.html#dC">[dC Ch. 3 appendix]</a>. 이 study set은 \(W_p\)의 eigenvalue를 정의로 삼고 최대·최소 성질을 <a href="#i-8-3-5">Theorem 8.3.5</a>로 증명했다. 값은 같다.
+        do Carmo의 appendix는 단위원 위에서 quadratic form의 최댓값을 잡는 방법으로 spectral theorem을 증명한다. 이 절은 characteristic equation의 판별식을 썼다.
+        line of curvature, Rodrigues' criterion, umbilical point는 <a class="cite" href="../../references.html#dC">[dC §3-2 Definition 5, Proposition 3, Definition 8]</a>, umbilical point만으로 된 surface는 <a class="cite" href="../../references.html#dC">[dC §3-2 Proposition 4]</a>다. do Carmo는 oriented surface에서 증명하고 국소적인 결론을 곡선을 따라 Heine–Borel theorem으로 이어 붙인다. 이 절은 locally constant function(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-16">Proposition 3.7.16</a>)로 이어 붙였고, orientation을 가정하지 않았다.
+        surface of revolution의 principal curvature는 <a class="cite" href="../../references.html#dC">[dC §3-3 Example 4]</a>에 있다. 그곳의 parametrization은 \(u\)와 \(v\)의 역할이 이 study set과 반대이고 generating curve를 arc length로 parametrization한다.</p>
       </aside>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 일반화: 초곡면의 주곡률</p>
-        <p><a href="../25-submanifold-geometry/index.html">25장</a>에서는 \(n\)차원 리만 다양체 안의 초곡면에서 형태작용소가 \((n-1)\)차원 접공간의 자기수반 변환이 되고, \(n - 1\)개의 주곡률과 주방향이 생긴다. 그때 쓰는 것이 이 절의 <a href="#i-8-3-3">정리 8.3.3</a>을 모든 차원으로 넓힌 스펙트럼 정리다. 이 장에서는 2차원 판만 쓴다.</p>
+        <p class="box-title">Looking ahead: hypersurface의 principal curvature</p>
+        <p><a href="../25-submanifold-geometry/index.html">Chapter 25</a>에서는 dimension이 \(n\)인 Riemannian manifold 안의 hypersurface에서 shape operator가 dimension이 \((n-1)\)인 tangent space의 self-adjoint map이 되고, \(n - 1\)개의 principal curvature와 principal direction이 생긴다. 그때 쓰는 것이 이 절의 <a href="#i-8-3-3">Theorem 8.3.3</a>을 모든 dimension으로 넓힌 spectral theorem이다. 이 장에서는 dimension이 2인 경우만 쓴다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>2차원 내적공간의 자기수반 변환은 서로 수직인 두 고유벡터를 가지고, 두 고윳값은 단위원 위 이차형식 \(\inner{Av}{v}\)의 최댓값과 최솟값이다(<a href="#i-8-3-3">정리 8.3.3</a>).</li>
-        <li>\(W_p\)의 고윳값 \(\kappa_1 \ge \kappa_2\)가 주곡률, 고유벡터의 방향이 주방향이다. 오일러 공식 \(\kappa_n = \kappa_1\cos^2\beta + \kappa_2\sin^2\beta\)에 의해 주곡률은 법곡률의 최댓값과 최솟값이다.</li>
-        <li>기준 예제: 구면(바깥쪽) \(-1/r, -1/r\), 원기둥(바깥쪽) \(0, -1/r\), 안장면의 원점 \(2, -2\), 원환면(안쪽) \(1/r\)(경선), \(\cos u/(R + r\cos u)\)(위도원).</li>
-        <li>\(\kappa_1 = \kappa_2\)인 점이 배꼽점이다. 연결 곡면의 모든 점이 배꼽점이면 곡면은 평면이나 구면에 포함된다(<a href="#i-8-3-9">정리 8.3.9</a>).</li>
-        <li>곡률선은 \((\mathbf{N} \circ \gamma)' = -\lambda\gamma'\)로 판정한다. 회전면의 경선과 위도원은 곡률선이고, 경선의 주곡률은 생성곡선의 부호곡률이다.</li>
+        <li>dimension이 2인 inner product space의 self-adjoint map은 서로 수직인 두 eigenvector를 가지고, 두 eigenvalue는 단위원 위 quadratic form \(\inner{Av}{v}\)의 최댓값과 최솟값이다(<a href="#i-8-3-3">Theorem 8.3.3</a>).</li>
+        <li>\(W_p\)의 eigenvalue \(\kappa_1 \ge \kappa_2\)가 principal curvature, eigenvector의 방향이 principal direction이다. Euler's formula \(\kappa_n = \kappa_1\cos^2\beta + \kappa_2\sin^2\beta\)에 의해 principal curvature는 normal curvature의 최댓값과 최솟값이다.</li>
+        <li>running example: sphere(바깥쪽) \(-1/r, -1/r\), cylinder(바깥쪽) \(0, -1/r\), saddle surface의 원점 \(2, -2\), torus of revolution(안쪽) \(1/r\)(meridian), \(\cos u/(R + r\cos u)\)(circle of latitude).</li>
+        <li>\(\kappa_1 = \kappa_2\)인 점이 umbilical point이다. connected surface의 모든 점이 umbilical point이면 surface는 평면이나 sphere에 포함된다(<a href="#i-8-3-9">Theorem 8.3.9</a>).</li>
+        <li>line of curvature는 \((\mathbf{N} \circ \gamma)' = -\lambda\gamma'\)로 판정한다. surface of revolution의 meridian과 circle of latitude는 line of curvature이고, meridian의 principal curvature는 generating curve의 signed curvature이다.</li>
       </ul>
-      <p class="next">다음 절에서는 두 주곡률을 곱과 평균이라는 두 수로 묶는다. 곱 \(K = \kappa_1\kappa_2\)는 법벡터의 선택에 무관하고 곡면의 점을 네 종류로 나누며, 가우스 사상이 넓이를 몇 배로 바꾸는지를 잰다.</p>
+      <p class="next">다음 절에서는 두 principal curvature를 곱과 평균이라는 두 수로 묶는다. 곱 \(K = \kappa_1\kappa_2\)는 normal vector의 선택에 무관하고 surface의 점을 네 종류로 나누며, Gauss map이 넓이를 몇 배로 바꾸는지를 잰다.</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-8-3-1" data-level="1">
-        <p><span class="thm-head">연습 8.3.1</span> <span class="level">★</span>
-        원기둥을 회전면 \(\alpha(u) = (r, u)\)로 매개화한 \(\mathbf{y}(u, v) = (r\cos v, r\sin v, u)\)(<a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-11">예 6.5.11</a>(b))에 <a href="#i-8-3-12">명제 8.3.12</a>를 써서 주곡률을 구하여라. <a href="#i-8-3-6">예 8.3.6</a>(c)와 부호가 다른 까닭을 설명하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(\rho = r\), \(z = u\)이므로 \(\rho' = \rho'' = z'' = 0\), \(z' = 1\), \(\abs{\alpha'} = 1\)이다. <a href="#eq-8-3-5">(8.3.5)</a>에서 경선(모선) 방향은 \(0\), 위도원 방향은 \(1/r\)이다. 따라서 \(\mathbf{N}_{\mathbf{y}}\)에 대해 \(\kappa_1 = 1/r\)(둘레), \(\kappa_2 = 0\)(축)이다.</p>
-          <p><a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-2">예 7.5.2</a>(d)의 식에서 \(\mathbf{N}_{\mathbf{y}} = (-\cos v, -\sin v, 0)\)으로 <em>안쪽</em>이다. 기준 매개화 \(\mathbf{x}(u, v) = (r\cos u, r\sin u, v)\)와는 변수의 순서가 바뀌어 있으므로 \(\mathbf{y}(u, v) = \mathbf{x}(v, u)\)이고, 매개변수 변환의 행렬식이 \(-1\)이라 법벡터가 뒤집힌다(<a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-3">명제 7.5.3</a>(b)). 안쪽 \(\mathbf{N}\)에 대한 값은 <a href="#i-8-3-6">예 8.3.6</a>(c)의 마지막 문장과 같다.</p>
-          <p class="verified">검증: <code>verify/v-8-3-principal-curvatures.py</code></p>
+        <p><span class="thm-head">Exercise 8.3.1</span> <span class="level">★</span>
+        cylinder를 surface of revolution \(\alpha(u) = (r, u)\)로 parametrization한 \(\mathbf{y}(u, v) = (r\cos v, r\sin v, u)\)(<a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-11">Example 6.5.11</a>(b))에 <a href="#i-8-3-12">Proposition 8.3.12</a>를 써서 principal curvature를 구하여라. <a href="#i-8-3-6">Example 8.3.6</a>(c)와 부호가 다른 까닭을 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\rho = r\), \(z = u\)이므로 \(\rho' = \rho'' = z'' = 0\), \(z' = 1\), \(\abs{\alpha'} = 1\)이다. <a href="#eq-8-3-5">(8.3.5)</a>에서 meridian(모선) 방향은 \(0\), circle of latitude 방향은 \(1/r\)이다. 따라서 \(\mathbf{N}_{\mathbf{y}}\)에 대해 \(\kappa_1 = 1/r\)(둘레), \(\kappa_2 = 0\)(축)이다.</p>
+          <p><a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-2">Example 7.5.2</a>(d)의 식에서 \(\mathbf{N}_{\mathbf{y}} = (-\cos v, -\sin v, 0)\)으로 <em>안쪽</em>이다. standard parametrization \(\mathbf{x}(u, v) = (r\cos u, r\sin u, v)\)와는 변수의 순서가 바뀌어 있으므로 \(\mathbf{y}(u, v) = \mathbf{x}(v, u)\)이고, change of parameters의 determinant가 \(-1\)이라 normal vector가 뒤집힌다(<a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-3">Proposition 7.5.3</a>(b)). 안쪽 \(\mathbf{N}\)에 대한 값은 <a href="#i-8-3-6">Example 8.3.6</a>(c)의 마지막 문장과 같다.</p>
+          <p class="verified">Verification: <code>verify/v-8-3-principal-curvatures.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-8-3-2" data-level="1">
-        <p><span class="thm-head">연습 8.3.2</span> <span class="level">★</span>
+        <p><span class="thm-head">Exercise 8.3.2</span> <span class="level">★</span>
         참인지 거짓인지 판별하고 이유를 대어라.
-        (a) 주방향은 \(\mathbf{N}\)의 선택에 무관하다.
+        (a) principal direction은 \(\mathbf{N}\)의 선택에 무관하다.
         (b) \(\mathbf{N}\)을 \(-\mathbf{N}\)으로 바꿔도 \(\kappa_1\)은 그대로다.
-        (c) 배꼽점이 아닌 점에서 주방향은 정확히 두 개이고 서로 수직이다.
-        (d) 모든 점이 배꼽점인 곡면은 평면이나 구면에 포함된다.
-        (e) 연결 곡면 위의 모든 정칙곡선이 곡률선이면 곡면은 평면이나 구면에 포함된다.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 참. \(-W_p\)와 \(W_p\)는 고유벡터가 같다.</p>
-          <p>(b) 거짓. 새 주곡률은 \((-\kappa_2, -\kappa_1)\)이다. 예: 원기둥은 바깥쪽이면 \(\kappa_1 = 0\), 안쪽이면 \(\kappa_1 = 1/r\).</p>
-          <p>(c) 참. <a href="#i-8-3-3">정리 8.3.3</a>(b).</p>
-          <p>(d) 거짓. 연결이어야 한다. 서로 떨어진 두 구면의 합집합이 반례다.</p>
-          <p>(e) 참. 각 점 \(p\)와 각 방향 \(w\)에 대해 \(p\)를 속도 \(w\)로 지나는 정칙곡선(예: \(\mathbf{x}(q + t(a, b))\))이 있으므로 모든 방향이 주방향이고, 모든 점이 배꼽점이다. <a href="#i-8-3-9">정리 8.3.9</a>를 쓴다.</p>
+        (c) umbilical point가 아닌 점에서 principal direction은 정확히 두 개이고 서로 수직이다.
+        (d) 모든 점이 umbilical point인 surface는 평면이나 sphere에 포함된다.
+        (e) connected surface 위의 모든 regular curve가 line of curvature이면 surface는 평면이나 sphere에 포함된다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. \(-W_p\)와 \(W_p\)는 eigenvector가 같다.</p>
+          <p>(b) 거짓. 새 principal curvature는 \((-\kappa_2, -\kappa_1)\)이다. 예: cylinder는 바깥쪽이면 \(\kappa_1 = 0\), 안쪽이면 \(\kappa_1 = 1/r\).</p>
+          <p>(c) 참. <a href="#i-8-3-3">Theorem 8.3.3</a>(b).</p>
+          <p>(d) 거짓. connected여야 한다. 서로 떨어진 두 sphere의 합집합이 반례다.</p>
+          <p>(e) 참. 각 점 \(p\)와 각 방향 \(w\)에 대해 \(p\)를 속도 \(w\)로 지나는 regular curve(예: \(\mathbf{x}(q + t(a, b))\))가 있으므로 모든 방향이 principal direction이고, 모든 점이 umbilical point이다. <a href="#i-8-3-9">Theorem 8.3.9</a>를 쓴다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-8-3-3" data-level="1">
-        <p><span class="thm-head">연습 8.3.3</span> <span class="level">★</span>
-        안장면의 점 \(p = \mathbf{x}(\tfrac12, \tfrac12)\)에서 \(W_p\)의 기저 \((\mathbf{x}_u, \mathbf{x}_v)\)에 대한 행렬은 \(\tfrac{2}{3\sqrt3}\begin{pmatrix} 2 & -1 \\ 1 & -2 \end{pmatrix}\)이다(<a href="8-1-gauss-map.html#i-8-1-11">예 8.1.11</a>의 부호를 바꾼 것). 주곡률과 주방향을 구하고, 두 주방향이 제1기본형식에 대해서는 수직이지만 성분 \((a, b)\)를 \(\R^2\)의 표준 내적으로 곱하면 수직이 아님을 확인하여라.</p>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 8.3.3</span> <span class="level">★</span>
+        saddle surface의 점 \(p = \mathbf{x}(\tfrac12, \tfrac12)\)에서 \(W_p\)의 basis \((\mathbf{x}_u, \mathbf{x}_v)\)에 대한 행렬은 \(\tfrac{2}{3\sqrt3}\begin{pmatrix} 2 & -1 \\ 1 & -2 \end{pmatrix}\)이다(<a href="8-1-gauss-map.html#i-8-1-11">Example 8.1.11</a>의 부호를 바꾼 것). principal curvature와 principal direction을 구하고, 두 principal direction이 first fundamental form에 대해서는 수직이지만 성분 \((a, b)\)를 \(\R^2\)의 표준 inner product로 곱하면 수직이 아님을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
           <p>행렬을 \(cB\), \(c = \tfrac{2}{3\sqrt3}\), \(B = \begin{pmatrix} 2 & -1 \\ 1 & -2 \end{pmatrix}\)로 쓰면 \(\tr = 0\), \(\det = c^2(-4 + 1) = -3c^2 = -\tfrac49\)이다. <a href="#eq-8-3-1">(8.3.1)</a>은 \(\lambda^2 - \tfrac49 = 0\)이므로 \(\kappa_1 = \tfrac23\), \(\kappa_2 = -\tfrac23\)이다.
-          \(\lambda = \tfrac23 = c\sqrt3\)이면 \(B(a, b)^{\mathsf T} = \sqrt3\,(a, b)^{\mathsf T}\)에서 \(2a - b = \sqrt3\,a\), 곧 \(b = (2 - \sqrt3)a\)이다. 주방향은 \(w_1 = \mathbf{x}_u + (2 - \sqrt3)\mathbf{x}_v\)이다. 같은 방식으로 \(\lambda = -\tfrac23\)이면 \(b = (2 + \sqrt3)a\), \(w_2 = \mathbf{x}_u + (2 + \sqrt3)\mathbf{x}_v\)이다.</p>
-          <p>\(E = 2\), \(F = -1\), \(G = 2\)이므로 \(\inner{w_1}{w_2} = E + \big((2 + \sqrt3) + (2 - \sqrt3)\big)F + (2 - \sqrt3)(2 + \sqrt3)G = 2 - 4 + 2 = 0\)이다(식 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#eq-7-1-2">(7.1.2)</a>). 그러나 \((1, 2 - \sqrt3)\cdot(1, 2 + \sqrt3) = 1 + 1 = 2 \neq 0\)이다. 수직성은 제1기본형식으로 재야 한다. (\(\det = -\tfrac49\)는 <a href="8-4-gaussian-mean-curvature.html">8.4절</a>에서 이 점의 가우스 곡률이 된다.)</p>
-          <p class="verified">검증: <code>verify/v-8-3-principal-curvatures.py</code></p>
+          \(\lambda = \tfrac23 = c\sqrt3\)이면 \(B(a, b)^{\mathsf T} = \sqrt3\,(a, b)^{\mathsf T}\)에서 \(2a - b = \sqrt3\,a\), 곧 \(b = (2 - \sqrt3)a\)이다. principal direction은 \(w_1 = \mathbf{x}_u + (2 - \sqrt3)\mathbf{x}_v\)이다. 같은 방식으로 \(\lambda = -\tfrac23\)이면 \(b = (2 + \sqrt3)a\), \(w_2 = \mathbf{x}_u + (2 + \sqrt3)\mathbf{x}_v\)이다.</p>
+          <p>\(E = 2\), \(F = -1\), \(G = 2\)이므로 \(\inner{w_1}{w_2} = E + \big((2 + \sqrt3) + (2 - \sqrt3)\big)F + (2 - \sqrt3)(2 + \sqrt3)G = 2 - 4 + 2 = 0\)이다(<a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#eq-7-1-2">(7.1.2)</a>). 그러나 \((1, 2 - \sqrt3)\cdot(1, 2 + \sqrt3) = 1 + 1 = 2 \neq 0\)이다. 수직성은 first fundamental form으로 재야 한다. (\(\det = -\tfrac49\)는 <a href="8-4-gaussian-mean-curvature.html">Section 8.4</a>에서 이 점의 Gaussian curvature가 된다.)</p>
+          <p class="verified">Verification: <code>verify/v-8-3-principal-curvatures.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-8-3-4" data-level="1">
-        <p><span class="thm-head">연습 8.3.4</span> <span class="level">★</span>
-        (그림 해석) <a href="#fig-8-3-1">그림 8.3.1</a>에서 \(u = \pi\)의 곡선이 \(\kappa_n = 0\)을 지나는 \(\beta \in (0, \pi/2)\)를 오일러 공식으로 구하고 그림과 비교하여라. \(u = 0\)과 \(u = \pi/2\)에서는 \(\kappa_n = 0\)인 방향이 몇 개인가?</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(u = \pi\)에서 \(\kappa_1 = 1/0.8 = 1.25\), \(\kappa_2 = -1/(2 - 0.8) = -1/1.2\)이다. \(\kappa_1\cos^2\beta + \kappa_2\sin^2\beta = 0\)에서 \(\tan^2\beta = -\kappa_1/\kappa_2 = 1.25 \times 1.2 = 1.5\), 곧 \(\beta = \arctan\sqrt{1.5} \approx 0.886\) (약 \(50.8^\circ\))이다. 그림에서 주황 곡선이 \(\pi/4\)보다 조금 오른쪽에서 \(0\)을 지나는 것과 맞는다. 대칭으로 \(\pi - 0.886\)에서도 \(0\)이다.</p>
+        <p><span class="thm-head">Exercise 8.3.4</span> <span class="level">★</span>
+        (그림 해석) <a href="#fig-8-3-1">Figure 8.3.1</a>에서 \(u = \pi\)의 곡선이 \(\kappa_n = 0\)을 지나는 \(\beta \in (0, \pi/2)\)를 Euler's formula로 구하고 그림과 비교하여라. \(u = 0\)과 \(u = \pi/2\)에서는 \(\kappa_n = 0\)인 방향이 몇 개인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(u = \pi\)에서 \(\kappa_1 = 1/0.8 = 1.25\), \(\kappa_2 = -1/(2 - 0.8) = -1/1.2\)이다. \(\kappa_1\cos^2\beta + \kappa_2\sin^2\beta = 0\)에서 \(\tan^2\beta = -\kappa_1/\kappa_2 = 1.25 \times 1.2 = 1.5\), 곧 \(\beta = \arctan\sqrt{1.5} \approx 0.886\) (약 \(50.8^\circ\))이다. 그림에서 주황 곡선이 \(\pi/4\)보다 조금 오른쪽에서 \(0\)을 지나는 것과 맞는다. symmetry로 \(\pi - 0.886\)에서도 \(0\)이다.</p>
           <p>\(u = 0\)이면 \(\kappa_1, \kappa_2 \gt 0\)이라 \(\kappa_n \gt 0\)이고 그런 방향이 없다. \(u = \pi/2\)이면 \(\kappa_2 = 0\)이라 \(\kappa_n = \kappa_1\cos^2\beta = 0\)은 \(\beta = \pi/2\) 하나(직선으로서)뿐이다.</p>
-          <p class="verified">검증: <code>verify/v-8-3-principal-curvatures.py</code></p>
+          <p class="verified">Verification: <code>verify/v-8-3-principal-curvatures.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-8-3-5" data-level="2">
-        <p><span class="thm-head">연습 8.3.5</span> <span class="level">★★</span>
-        정칙곡선 \(\gamma\colon I \to O\)가 평면 \(\Pi\) 안에 있고, 모든 점에서 \(\mathbf{N}(\gamma(t))\)가 \(\Pi\)에 평행하다(곧 \(\Pi\)와 곡면이 \(\gamma\)를 따라 직각으로 만난다)고 하자. \(\gamma\)가 곡률선임을 보여라. 이것으로 회전면의 경선이 곡률선이라는 사실을 다시 얻어라.</p>
-        <details class="hint"><summary>힌트</summary><p>\(\Pi\)의 방향 공간을 \(\Pi_0\)(2차원)라 하면 \(\gamma'\)와 \(\mathbf{N} \circ \gamma\)는 \(\Pi_0\)의 수직인 두 벡터다. \((\mathbf{N} \circ \gamma)'\)도 \(\Pi_0\) 안에 있고 \(\mathbf{N}\)에 수직이다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(m\)을 \(\Pi\)의 단위법벡터라 하면 \(\inner{\gamma'}{m} = 0\), \(\inner{\mathbf{N} \circ \gamma}{m} = 0\)이다. 뒤의 식을 미분하면 \(\inner{(\mathbf{N} \circ \gamma)'}{m} = 0\)이므로 \((\mathbf{N} \circ \gamma)' \in \Pi_0 = m^\perp\)이다. 또 \(\abs{\mathbf{N}} = 1\)에서 \((\mathbf{N} \circ \gamma)' \perp \mathbf{N} \circ \gamma\)이다.
-          \(\Pi_0\)은 2차원이고 서로 수직인 \(0\)이 아닌 두 벡터 \(\gamma'(t)\), \(\mathbf{N}(\gamma(t))\)가 생성하므로, \(\Pi_0\) 안에서 \(\mathbf{N}\)에 수직인 벡터는 \(\gamma'\)의 배수다. 따라서 \((\mathbf{N} \circ \gamma)'(t) = -\lambda(t)\gamma'(t)\)이고, <a href="#i-8-3-11">명제 8.3.11</a>에 의해 \(\gamma\)는 곡률선이다.</p>
-          <p>회전면의 경선 \(u \mapsto \mathbf{x}(u, v_0)\)은 축을 포함하는 평면 \(\Pi = \Span\{(\cos v_0, \sin v_0, 0), e_3\}\) 안에 있고, \(\mathbf{N} = (-z'\cos v_0, -z'\sin v_0, \rho')/\abs{\alpha'}\)도 \(\Pi\)에 평행하다. 그러므로 경선은 곡률선이다.</p>
+        <p><span class="thm-head">Exercise 8.3.5</span> <span class="level">★★</span>
+        regular curve \(\gamma\colon I \to O\)가 평면 \(\Pi\) 안에 있고, 모든 점에서 \(\mathbf{N}(\gamma(t))\)가 \(\Pi\)에 평행하다(곧 \(\Pi\)와 surface가 \(\gamma\)를 따라 직각으로 만난다)고 하자. \(\gamma\)가 line of curvature임을 보여라. 이것으로 surface of revolution의 meridian이 line of curvature라는 사실을 다시 얻어라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(\Pi\)의 방향 공간을 \(\Pi_0\)(dimension이 2)라 하면 \(\gamma'\)와 \(\mathbf{N} \circ \gamma\)는 \(\Pi_0\)의 수직인 두 벡터다. \((\mathbf{N} \circ \gamma)'\)도 \(\Pi_0\) 안에 있고 \(\mathbf{N}\)에 수직이다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(m\)을 \(\Pi\)의 unit normal vector라 하면 \(\inner{\gamma'}{m} = 0\), \(\inner{\mathbf{N} \circ \gamma}{m} = 0\)이다. 뒤의 식을 미분하면 \(\inner{(\mathbf{N} \circ \gamma)'}{m} = 0\)이므로 \((\mathbf{N} \circ \gamma)' \in \Pi_0 = m^\perp\)이다. 또 \(\abs{\mathbf{N}} = 1\)에서 \((\mathbf{N} \circ \gamma)' \perp \mathbf{N} \circ \gamma\)이다.
+          \(\Pi_0\)은 dimension이 2이고 서로 수직이며 \(0\)이 아닌 두 벡터 \(\gamma'(t)\), \(\mathbf{N}(\gamma(t))\)의 span이므로, \(\Pi_0\) 안에서 \(\mathbf{N}\)에 수직인 벡터는 \(\gamma'\)의 배수다. 따라서 \((\mathbf{N} \circ \gamma)'(t) = -\lambda(t)\gamma'(t)\)이고, <a href="#i-8-3-11">Proposition 8.3.11</a>에 의해 \(\gamma\)는 line of curvature이다.</p>
+          <p>surface of revolution의 meridian \(u \mapsto \mathbf{x}(u, v_0)\)은 축을 포함하는 평면 \(\Pi = \Span\{(\cos v_0, \sin v_0, 0), e_3\}\) 안에 있고, \(\mathbf{N} = (-z'\cos v_0, -z'\sin v_0, \rho')/\abs{\alpha'}\)도 \(\Pi\)에 평행하다. 그러므로 meridian은 line of curvature이다.</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-8-3-6" data-level="2">
-        <p><span class="thm-head">연습 8.3.6</span> <span class="level">★★</span>
-        원기둥 \(C_r\) 위의 곡률선은 수평 원의 호이거나 모선(\(z\)축에 평행한 직선)의 선분뿐임을 보여라. (곡률선의 정의역 \(I\)는 구간이다.)</p>
-        <details class="hint"><summary>힌트</summary><p>\(\mathbf{t} = \gamma'/\abs{\gamma'}\)이라 할 때 연속함수 \(\inner{\mathbf{t}}{e_3}^2\)이 어떤 값만 가질 수 있는지 본다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>원기둥의 모든 점은 배꼽점이 아니고(\(\kappa_1 - \kappa_2 = 1/r\)), 주방향은 \(e_3\)(축 방향)과 수평 방향 \(\mathbf{x}_u/r\) 둘뿐이다(<a href="#i-8-3-6">예 8.3.6</a>(c)). 곡률선 \(\gamma\)의 단위접벡터 \(\mathbf{t}(t)\)는 따라서 \(\pm e_3\)이거나 수평이고, \(g(t) = \inner{\mathbf{t}(t)}{e_3}^2\)은 \(1\) 또는 \(0\)만 값으로 가진다.
-          \(g\)는 연속이고 \(I\)는 연결이므로 중간값 정리(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>)에 의해 상수다.</p>
-          <p>\(g \equiv 1\)이면 \(\gamma' = \pm\abs{\gamma'}e_3\)이므로 \(x, y\) 성분이 상수이고 \(\gamma\)는 모선 위에 있다. \(g \equiv 0\)이면 \(z\) 성분의 도함수가 \(0\)이므로 \(z\)가 상수이고, \(\gamma\)는 원기둥과 수평면의 교선인 원 위에 있다. 정칙곡선이므로 각각 선분 또는 원호를 그린다. 나선이 곡률선이 아닌 것은 이 결과의 한 예다.</p>
+        <p><span class="thm-head">Exercise 8.3.6</span> <span class="level">★★</span>
+        cylinder \(C_r\) 위의 line of curvature는 수평 원의 호이거나 모선(\(z\)축에 평행한 직선)의 선분뿐임을 보여라. (line of curvature의 정의역 \(I\)는 구간이다.)</p>
+        <details class="hint"><summary>Hint</summary><p>\(\mathbf{t} = \gamma'/\abs{\gamma'}\)이라 할 때 연속함수 \(\inner{\mathbf{t}}{e_3}^2\)이 어떤 값만 가질 수 있는지 본다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>cylinder의 모든 점은 umbilical point가 아니고(\(\kappa_1 - \kappa_2 = 1/r\)), principal direction은 \(e_3\)(축 방향)과 수평 방향 \(\mathbf{x}_u/r\) 둘뿐이다(<a href="#i-8-3-6">Example 8.3.6</a>(c)). line of curvature \(\gamma\)의 unit tangent vector \(\mathbf{t}(t)\)는 따라서 \(\pm e_3\)이거나 수평이고, \(g(t) = \inner{\mathbf{t}(t)}{e_3}^2\)은 \(1\) 또는 \(0\)만 값으로 가진다.
+          \(g\)는 연속이고 \(I\)는 connected이므로 intermediate value theorem(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">Corollary 3.7.6</a>)에 의해 상수다.</p>
+          <p>\(g \equiv 1\)이면 \(\gamma' = \pm\abs{\gamma'}e_3\)이므로 \(x, y\) 성분이 상수이고 \(\gamma\)는 모선 위에 있다. \(g \equiv 0\)이면 \(z\) 성분의 도함수가 \(0\)이므로 \(z\)가 상수이고, \(\gamma\)는 cylinder와 수평면의 교선인 원 위에 있다. regular curve이므로 각각 선분 또는 원호를 그린다. helix가 line of curvature가 아닌 것은 이 결과의 한 예다.</p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="8-2-normal-curvature.html">← 8.2 제2기본형식과 법곡률</a>
-    <a rel="next" href="8-4-gaussian-mean-curvature.html">8.4 가우스 곡률과 평균곡률 →</a>
+    <a rel="prev" href="8-2-normal-curvature.html">← 8.2 The Second Fundamental Form and Normal Curvature</a>
+    <a rel="next" href="8-4-gaussian-mean-curvature.html">8.4 Gaussian Curvature and Mean Curvature →</a>
   </nav>
 </body>
 </html>

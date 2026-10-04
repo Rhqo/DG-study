@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>5.1 공간곡선의 곡률 — 미분기하 스터디</title>
+  <title>5.1 Curvature of Space Curves — DG Study</title>
   <meta name="dg-id" content="5.1">
   <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="4.1, 4.3, 4.4, 4.5, 2.2, 3.6">
@@ -15,189 +15,189 @@
 </head>
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">전체 목차</a> ›
-    <a href="index.html">5. 공간곡선과 프레네 틀</a> ›
-    <span>5.1 공간곡선의 곡률</span>
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">5. Space Curves and the Frenet Frame</a> ›
+    <span>5.1 Curvature of Space Curves</span>
   </nav>
 
   <main>
     <header>
-      <h1>5.1 공간곡선의 곡률</h1>
-      <p class="meta">대응 교재:
+      <h1>5.1 Curvature of Space Curves</h1>
+      <p class="meta">References:
         <a class="cite" href="../../references.html#dC">[dC §1-5]</a>,
-        <a class="cite" href="../../references.html#dC">[dC §1-6 연습문제 2]</a>,
-        <a class="cite" href="../../references.html#Pr">[Pr 2장]</a></p>
+        <a class="cite" href="../../references.html#dC">[dC §1-6 Exercise 2]</a>,
+        <a class="cite" href="../../references.html#Pr">[Pr Ch. 2]</a></p>
     </header>
 
     <section class="goals">
-      <h2>이 절의 목표</h2>
+      <h2>Goals</h2>
       <ul>
-        <li>호의 길이로 매개화된 공간곡선의 곡률 \(\kappa = \abs{\gamma''(s)}\)를 정의하고, 이것이 재매개화에 무관하며 평면곡선에서는 \(\abs{\kappa_s}\)와 같음을 보일 수 있다.</li>
-        <li>일반 매개변수의 곡선에서 \(\kappa = \abs{d\mathbf{t}/dt}/\abs{\gamma'}\)로 곡률을 계산하고, 나선의 곡률 \(a/(a^2 + b^2)\)을 구할 수 있다.</li>
-        <li>\(\kappa \gt 0\)인 점에서 주법선벡터 \(\mathbf{n}\)과 접촉평면을 정의하고, \(\kappa = 0\)인 점에서는 \(\mathbf{n}\)을 정할 수 없는 이유를 설명할 수 있다.</li>
-        <li>공간곡선의 접촉원을 정의하고, 접촉평면과 접촉원이 곡선에 가장 가깝게 맞닿는 평면과 원임을 증명할 수 있다.</li>
+        <li>arc length로 parametrization된 space curve의 curvature \(\kappa = \abs{\gamma''(s)}\)를 정의하고, 이것이 reparametrization에 무관하며 plane curve에서는 \(\abs{\kappa_s}\)와 같음을 보일 수 있다.</li>
+        <li>일반 매개변수의 곡선에서 \(\kappa = \abs{d\mathbf{t}/dt}/\abs{\gamma'}\)로 curvature를 계산하고, helix의 curvature \(a/(a^2 + b^2)\)을 구할 수 있다.</li>
+        <li>\(\kappa \gt 0\)인 점에서 principal normal vector \(\mathbf{n}\)과 osculating plane을 정의하고, \(\kappa = 0\)인 점에서는 \(\mathbf{n}\)을 정할 수 없는 이유를 설명할 수 있다.</li>
+        <li>space curve의 osculating circle을 정의하고, osculating plane과 osculating circle이 곡선에 가장 가깝게 맞닿는 평면과 원임을 증명할 수 있다.</li>
       </ul>
     </section>
 
     <section class="prereq">
-      <h2>선수 지식</h2>
+      <h2>Prerequisites</h2>
       <ul>
-        <li><a href="../04-curves/4-4-signed-curvature.html#i-4-4-1">정의 4.4.1 (단위접벡터)</a>, <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">따름정리 4.1.12 (크기가 일정한 벡터값 함수)</a>, <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-11">명제 4.1.11 (곱의 미분법과 연쇄법칙)</a></li>
-        <li><a href="../04-curves/4-3-reparametrization.html#i-4-3-5">명제 4.3.5</a>, <a href="../04-curves/4-3-reparametrization.html#i-4-3-9">정리 4.3.9 (호의 길이 매개화의 존재와 유일성)</a>, <a href="../04-curves/4-3-reparametrization.html#i-4-3-10">예 4.3.10 (나선의 호의 길이 매개화)</a></li>
-        <li><a href="../04-curves/4-4-signed-curvature.html#i-4-4-2">정의 4.4.2 (부호곡률)</a>, <a href="../04-curves/4-5-osculating-circle.html#i-4-5-1">정의 4.5.1 (곡률중심과 접촉원)</a>, <a href="../04-curves/4-5-osculating-circle.html#i-4-5-10">명제 4.5.10 (평면에 놓인 공간곡선)</a></li>
-        <li>1변수 테일러 정리(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">보조정리 2.2.16</a>), 최댓값·최솟값 정리(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">정리 3.6.10</a>), 적분의 삼각부등식(<a href="../04-curves/4-2-arc-length.html#i-4-2-9">보조정리 4.2.9</a>)</li>
+        <li><a href="../04-curves/4-4-signed-curvature.html#i-4-4-1">Definition 4.4.1 (unit tangent vector)</a>, <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">Corollary 4.1.12 (vector-valued function of constant norm)</a>, <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-11">Proposition 4.1.11 (product rule and chain rule)</a></li>
+        <li><a href="../04-curves/4-3-reparametrization.html#i-4-3-5">Proposition 4.3.5</a>, <a href="../04-curves/4-3-reparametrization.html#i-4-3-9">Theorem 4.3.9 (existence and uniqueness of arc length parametrization)</a>, <a href="../04-curves/4-3-reparametrization.html#i-4-3-10">Example 4.3.10 (arc length parametrization of the helix)</a></li>
+        <li><a href="../04-curves/4-4-signed-curvature.html#i-4-4-2">Definition 4.4.2 (signed curvature)</a>, <a href="../04-curves/4-5-osculating-circle.html#i-4-5-1">Definition 4.5.1 (center of curvature and osculating circle)</a>, <a href="../04-curves/4-5-osculating-circle.html#i-4-5-10">Proposition 4.5.10 (curvature and center of curvature of a space curve lying in a plane)</a></li>
+        <li>1변수 Taylor's theorem(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">Lemma 2.2.16</a>), extreme value theorem(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">Theorem 3.6.10</a>), 적분의 triangle inequality(<a href="../04-curves/4-2-arc-length.html#i-4-2-9">Lemma 4.2.9</a>)</li>
       </ul>
     </section>
 
     <section id="sec-motivation">
-      <h2>동기</h2>
-      <p><a href="../04-curves/4-5-osculating-circle.html#i-4-5-10">명제 4.5.10</a>에서 평면에 놓인 단위속력 곡선의 곡률의 크기가 \(\abs{\gamma''(s)}\)이고 곡률중심이 \(\gamma + \gamma''/\abs{\gamma''}^2\)임을 보았다.
+      <h2>Motivation</h2>
+      <p><a href="../04-curves/4-5-osculating-circle.html#i-4-5-10">Proposition 4.5.10</a>에서 평면에 놓인 unit-speed curve의 curvature의 크기가 \(\abs{\gamma''(s)}\)이고 center of curvature가 \(\gamma + \gamma''/\abs{\gamma''}^2\)임을 보았다.
       이 두 식에는 평면도, 평면의 좌표도 나오지 않는다. 그러니 평면을 벗어나는 곡선에도 그대로 쓸 수 있을 것이다. 이 절은 이 기대를 정의로 만든다.</p>
-      <p>무엇을 잃고 무엇을 얻는지 먼저 짚어 두자. <a href="../04-curves/4-4-signed-curvature.html#sec-general-parameter">4.4절</a>의 주의 상자에서 보았듯이 공간에는 “왼쪽”이 없으므로 곡률의 <em>부호</em>는 잃는다.
-      대신 방향을 얻는다. 평면곡선의 가속도 \(\gamma''\)은 늘 정해진 평면 안에 있었지만, 공간곡선의 \(\gamma''\)은 \(\mathbf{t}\)에 수직인 평면 안의 어느 방향이든 가리킬 수 있다.
+      <p>무엇을 잃고 무엇을 얻는지 먼저 짚어 두자. <a href="../04-curves/4-4-signed-curvature.html#sec-general-parameter">Section 4.4</a>의 Warning 상자에서 보았듯이 공간에는 “왼쪽”이 없으므로 curvature의 <em>부호</em>는 잃는다.
+      대신 방향을 얻는다. plane curve의 가속도 \(\gamma''\)은 늘 정해진 평면 안에 있었지만, space curve의 \(\gamma''\)은 \(\mathbf{t}\)에 수직인 평면 안의 어느 방향이든 가리킬 수 있다.
       그 방향이 곡선이 “지금 휘어 들어가는 쪽”이고, \(\mathbf{t}\)와 그 방향이 만드는 평면이 곡선이 “지금 놓여 있는 평면”이다.</p>
 
       <aside class="box intuition">
-        <p class="box-title">직관: 순간순간 다른 평면 위의 원</p>
-        <p>나선을 따라 걷는 사람은 매 순간 어떤 원을 따라 도는 것처럼 느낀다. <a href="#fig-5-1-1">그림 5.1.1</a>의 주황 원이 그 원이다. 이 원은 \(\mathbf{t}\)와 \(\mathbf{n}\)이 만드는 하늘색 평면 안에 있고,
-        곡선의 휘어짐을 \(2\)차까지 흉내 낸다(<a href="#i-5-1-14">정리 5.1.14</a>). 평면곡선에서는 이 평면이 늘 같았지만, 나선에서는 걸어가는 동안 평면이 조금씩 기울어진다.
-        원의 반지름의 역수가 곡률이고, 평면이 기울어지는 빠르기는 <a href="5-2-torsion.html">5.2절</a>의 비틀림률이다.</p>
+        <p class="box-title">Intuition: 순간순간 다른 평면 위의 원</p>
+        <p>helix를 따라 걷는 사람은 매 순간 어떤 원을 따라 도는 것처럼 느낀다. <a href="#fig-5-1-1">Figure 5.1.1</a>의 주황 원이 그 원이다. 이 원은 \(\mathbf{t}\)와 \(\mathbf{n}\)이 만드는 하늘색 평면 안에 있고,
+        곡선의 휘어짐을 \(2\)차까지 흉내 낸다(<a href="#i-5-1-14">Theorem 5.1.14</a>). plane curve에서는 이 평면이 늘 같았지만, helix에서는 걸어가는 동안 평면이 조금씩 기울어진다.
+        원의 반지름의 역수가 curvature이고, 평면이 기울어지는 빠르기는 <a href="5-2-torsion.html">Section 5.2</a>의 torsion이다.</p>
       </aside>
 
       <figure class="dg-figure" id="fig-5-1-1">
-        <img src="figures/fig-5-1-1-osculating-plane.svg" alt="옅은 회색 원기둥에 감긴 검은 나선. 나선 위의 한 점 γ(s₀)에서 파란 단위접벡터 t와 주홍 주법선벡터 n이 나온다. n은 원기둥의 축 쪽으로 수평하게 향한다. 두 벡터가 만드는 평면의 일부가 하늘색 평행사변형으로, 그 평면 안에서 γ(s₀)를 지나는 주황 원(접촉원)이 그려져 있다. 원의 중심 c는 n 방향으로 1/κ만큼 떨어진 점이고, γ(s₀)와 c를 잇는 회색 점선이 반지름이다. 원기둥 뒤쪽의 나선은 옅은 점선이다.">
-        <figcaption><span class="fig-head">그림 5.1.1.</span>
-        나선 \(\gamma(t) = (a\cos t, a\sin t, bt)\), \(a = 1\), \(b = 0.3\) 위의 점 \(\gamma(s_0)\)(\(t = \pi/2\))에서의 단위접벡터 \(\mathbf{t}\)(파랑), 주법선벡터 \(\mathbf{n}\)(주홍),
-        접촉평면(하늘색), 접촉원(주황). 곡률은 \(\kappa = a/(a^2 + b^2) \approx 0.917\)이고 접촉원의 반지름은 \(1/\kappa = 1.09\)이다(<a href="#i-5-1-7">예 5.1.7</a>, <a href="#i-5-1-12">정의 5.1.12</a>).
-        중심 \(c\)는 원기둥의 축 반대편, 축에서 \(b^2/a = 0.09\)만큼 떨어져 있다(<a href="#ex-5-1-4">연습 5.1.4</a>). 벡터는 실제 길이로 그렸다.</figcaption>
+        <img src="figures/fig-5-1-1-osculating-plane.svg" alt="옅은 회색 cylinder에 감긴 검은 helix. helix 위의 한 점 γ(s₀)에서 파란 unit tangent vector t와 주홍 principal normal vector n이 나온다. n은 cylinder의 축 쪽으로 수평하게 향한다. 두 벡터가 만드는 평면의 일부가 하늘색 평행사변형으로, 그 평면 안에서 γ(s₀)를 지나는 주황 원(osculating circle)이 그려져 있다. 원의 중심 c는 n 방향으로 1/κ만큼 떨어진 점이고, γ(s₀)와 c를 잇는 회색 점선이 반지름이다. cylinder 뒤쪽의 helix는 옅은 점선이다.">
+        <figcaption><span class="fig-head">Figure 5.1.1.</span>
+        helix \(\gamma(t) = (a\cos t, a\sin t, bt)\), \(a = 1\), \(b = 0.3\) 위의 점 \(\gamma(s_0)\)(\(t = \pi/2\))에서의 unit tangent vector \(\mathbf{t}\)(파랑), principal normal vector \(\mathbf{n}\)(주홍),
+        osculating plane(하늘색), osculating circle(주황). curvature는 \(\kappa = a/(a^2 + b^2) \approx 0.917\)이고 osculating circle의 반지름은 \(1/\kappa = 1.09\)이다(<a href="#i-5-1-7">Example 5.1.7</a>, <a href="#i-5-1-12">Definition 5.1.12</a>).
+        중심 \(c\)는 cylinder의 축 반대편, 축에서 \(b^2/a = 0.09\)만큼 떨어져 있다(<a href="#ex-5-1-4">Exercise 5.1.4</a>). 벡터는 실제 길이로 그렸다.</figcaption>
       </figure>
     </section>
 
     <section id="sec-curvature">
-      <h2>곡률</h2>
-      <p>\(\gamma\colon I \to \R^3\)이 호의 길이로 매개화되어 있다고 하자. 단위접벡터는 \(\mathbf{t}(s) = \gamma'(s)\)이고(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-1">정의 4.4.1</a>) \(\abs{\mathbf{t}} = 1\)이므로,
-      <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">따름정리 4.1.12</a>에 의해 \(\mathbf{t}'(s) = \gamma''(s)\)은 \(\mathbf{t}(s)\)와 직교한다. 곧 \(\mathbf{t}'\)은 속도의 크기가 아니라 방향이 바뀌는 빠르기만 담고 있다.
-      이 빠르기가 곡률이다.</p>
+      <h2>Curvature</h2>
+      <p>\(\gamma\colon I \to \R^3\)이 arc length로 parametrization되어 있다고 하자. unit tangent vector는 \(\mathbf{t}(s) = \gamma'(s)\)이고(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-1">Definition 4.4.1</a>) \(\abs{\mathbf{t}} = 1\)이므로,
+      <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">Corollary 4.1.12</a>에 의해 \(\mathbf{t}'(s) = \gamma''(s)\)은 \(\mathbf{t}(s)\)와 orthogonal하다. 곧 \(\mathbf{t}'\)은 속도의 크기가 아니라 방향이 바뀌는 빠르기만 담고 있다.
+      이 빠르기가 curvature이다.</p>
 
       <div class="thm definition" id="i-5-1-1">
-        <p><span class="thm-head">정의 5.1.1</span> <span class="thm-name">(곡률, curvature)</span>.
-        \(\gamma\colon I \to \R^3\)이 호의 길이로 매개화된 곡선일 때</p>
+        <p><span class="thm-head">Definition 5.1.1</span> <span class="thm-name">(curvature)</span>.
+        \(\gamma\colon I \to \R^3\)이 curve parametrized by arc length일 때</p>
         <div class="equation" id="eq-5-1-1">
         \[ \kappa(s) = \abs{\mathbf{t}'(s)} = \abs{\gamma''(s)} \tag{5.1.1} \]
         </div>
-        <p>를 \(s\)에서 \(\gamma\)의 <dfn>곡률</dfn>(curvature)이라 한다. 일반 매개변수의 정칙곡선 \(\gamma\colon I \to \R^3\)에서는 \(t_0 \in I\)을 하나 골라
-        <a href="../04-curves/4-3-reparametrization.html#i-4-3-9">정리 4.3.9</a>의 방향을 보존하는 호의 길이 매개화 \(\beta = \gamma \circ h\), \(h = s^{-1}\)을 만들고 \(\kappa(t) = \kappa^\beta(s(t))\)로 정한다.</p>
+        <p>를 \(s\)에서 \(\gamma\)의 <dfn>curvature</dfn>(곡률)이라 한다. 일반 매개변수의 regular curve \(\gamma\colon I \to \R^3\)에서는 \(t_0 \in I\)을 하나 골라
+        <a href="../04-curves/4-3-reparametrization.html#i-4-3-9">Theorem 4.3.9</a>의 orientation-preserving arc length parametrization \(\beta = \gamma \circ h\), \(h = s^{-1}\)을 만들고 \(\kappa(t) = \kappa^\beta(s(t))\)로 정한다.</p>
       </div>
 
-      <p>일반 매개변수에서의 정의는 <a href="../04-curves/4-4-signed-curvature.html#sec-general-parameter">4.4절</a>에서 부호곡률에 쓴 약속과 같다. \(t_0\)을 다르게 고르면 \(\beta\)는 \(\beta(\sigma + c)\)로 바뀔 뿐이고
-      (<a href="../04-curves/4-3-reparametrization.html#i-4-3-9">정리 4.3.9</a>(c)), 매개변수를 평행이동해도 대응하는 점에서 도함수가 같으므로 \(\kappa(t)\)는 \(t_0\)에 무관하다.
-      정의에서 \(\kappa \ge 0\)이다. 또 \(\gamma''\)이 매끄러우므로 \(\kappa\)는 연속이고, \(\gamma''(s) \neq 0\)인 곳에서는 \(\kappa = \sqrt{\inner{\gamma''}{\gamma''}}\)이 매끄럽다. \(\gamma'' = 0\)인 점에서는 \(\kappa\)가 매끄럽지 않을 수 있다(<a href="#i-5-1-11">비예 5.1.11</a>에서 \(\kappa\)는 \(\abs{\kappa_s}\)이다).</p>
+      <p>일반 매개변수에서의 정의는 <a href="../04-curves/4-4-signed-curvature.html#sec-general-parameter">Section 4.4</a>에서 signed curvature에 쓴 약속과 같다. \(t_0\)을 다르게 고르면 \(\beta\)는 \(\beta(\sigma + c)\)로 바뀔 뿐이고
+      (<a href="../04-curves/4-3-reparametrization.html#i-4-3-9">Theorem 4.3.9</a>(c)), 매개변수에 상수를 더해도 대응하는 점에서 도함수가 같으므로 \(\kappa(t)\)는 \(t_0\)에 무관하다.
+      정의에서 \(\kappa \ge 0\)이다. 또 \(\gamma''\)이 매끄러우므로 \(\kappa\)는 연속이고, \(\gamma''(s) \neq 0\)인 곳에서는 \(\kappa = \sqrt{\inner{\gamma''}{\gamma''}}\)이 매끄럽다. \(\gamma'' = 0\)인 점에서는 \(\kappa\)가 매끄럽지 않을 수 있다(<a href="#i-5-1-11">Non-example 5.1.11</a>에서 \(\kappa\)는 \(\abs{\kappa_s}\)이다).</p>
 
-      <p>실제 곡선은 호의 길이로 매개화되어 있지 않은 경우가 대부분이다. 다음 명제는 재매개화 없이 곡률을 계산하는 방법을 주고, 곡률이 곡선의 방향과도 무관함을 보인다.</p>
+      <p>실제 곡선은 arc length로 parametrization되어 있지 않은 경우가 대부분이다. 다음 명제는 reparametrization 없이 curvature를 계산하는 방법을 주고, curvature가 곡선의 orientation과도 무관함을 보인다.</p>
 
       <div class="thm proposition" id="i-5-1-2">
-        <p><span class="thm-head">명제 5.1.2</span> <span class="thm-name">(일반 매개변수의 곡률과 재매개화 불변성)</span>.
-        \(\gamma\colon I \to \R^3\)이 정칙곡선이고 \(\mathbf{t}(t) = \gamma'(t)/\abs{\gamma'(t)}\)라 하자.</p>
+        <p><span class="thm-head">Proposition 5.1.2</span> <span class="thm-name">(curvature for a general parameter and reparametrization invariance)</span>.
+        \(\gamma\colon I \to \R^3\)이 regular curve이고 \(\mathbf{t}(t) = \gamma'(t)/\abs{\gamma'(t)}\)라 하자.</p>
         <ul>
           <li>(a) 모든 \(t \in I\)에서 다음이 성립한다.
             <div class="equation" id="eq-5-1-2">
             \[ \kappa(t) = \frac{1}{\abs{\gamma'(t)}}\,\Big\lvert \frac{d\mathbf{t}}{dt}(t) \Big\rvert \tag{5.1.2} \]
             </div>
           </li>
-          <li>(b) \(\beta = \gamma \circ h\colon \tilde I \to \R^3\)이 \(\gamma\)의 재매개화이면, \(h\)가 방향을 보존하든 뒤집든 모든 \(u \in \tilde I\)에서 \(\kappa^\beta(u) = \kappa(h(u))\)이다.</li>
+          <li>(b) \(\beta = \gamma \circ h\colon \tilde I \to \R^3\)이 \(\gamma\)의 reparametrization이면, \(h\)가 방향을 보존하든 뒤집든 모든 \(u \in \tilde I\)에서 \(\kappa^\beta(u) = \kappa(h(u))\)이다.</li>
         </ul>
       </div>
-      <p><strong>이 명제가 말하는 것.</strong> 곡률은 단위접벡터가 움직이는 빠르기를 곡선이 움직이는 빠르기로 나눈 것, 곧 “단위 길이당 접선 방향의 변화”다.
-      그리고 곡선을 어떻게 다시 매개화하든, 거꾸로 지나가든 같은 점에서의 곡률은 같다. 곡률은 자취에만 달린 양이다.</p>
+      <p><strong>이 명제가 말하는 것.</strong> curvature는 unit tangent vector가 움직이는 빠르기를 곡선이 움직이는 빠르기로 나눈 것, 곧 “단위 길이당 접선 방향의 변화”다.
+      그리고 곡선을 어떻게 다시 parametrization하든, 거꾸로 지나가든 같은 점에서의 curvature는 같다. curvature는 trace에만 달린 양이다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: \(\mathbf{t}(t)\)는 호의 길이 매개화 \(\beta\)의 속도 \(\beta'(s(t))\)이므로 연쇄법칙을 한 번 쓰면 (a)가 나온다. (b)는 (a)의 우변이 재매개화에서 \(\abs{h'}\)끼리 약분되는 것을 확인하면 된다.</p>
-        <p><span class="proof-head">증명.</span>
-        (a) \(\beta = \gamma \circ h\)를 \(t_0\)에서 잰 방향을 보존하는 호의 길이 매개화라 하자. \(h'(\sigma) = 1/\abs{\gamma'(h(\sigma))} \gt 0\)이므로 \(\beta'(s(t)) = h'(s(t))\,\gamma'(t) = \gamma'(t)/\abs{\gamma'(t)} = \mathbf{t}(t)\)이다
-        (<a href="../04-curves/4-3-reparametrization.html#i-4-3-5">명제 4.3.5</a>(a)). 이 식의 양변을 \(t\)로 미분하면 <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-11">명제 4.1.11</a>(c)와 식
+        <p class="proof-idea">Proof idea: \(\mathbf{t}(t)\)는 arc length parametrization \(\beta\)의 속도 \(\beta'(s(t))\)이므로 chain rule을 한 번 쓰면 (a)가 나온다. (b)는 (a)의 우변이 reparametrization에서 \(\abs{h'}\)끼리 약분되는 것을 확인하면 된다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) \(\beta = \gamma \circ h\)를 \(t_0\)에서 잰 orientation-preserving arc length parametrization이라 하자. \(h'(\sigma) = 1/\abs{\gamma'(h(\sigma))} \gt 0\)이므로 \(\beta'(s(t)) = h'(s(t))\,\gamma'(t) = \gamma'(t)/\abs{\gamma'(t)} = \mathbf{t}(t)\)이다
+        (<a href="../04-curves/4-3-reparametrization.html#i-4-3-5">Proposition 4.3.5</a>(a)). 이 식의 양변을 \(t\)로 미분하면 <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-11">Proposition 4.1.11</a>(c)와
         <a href="../04-curves/4-2-arc-length.html#eq-4-2-5">(4.2.5)</a>에서</p>
         \[ \frac{d\mathbf{t}}{dt}(t) = \beta''(s(t))\,s'(t) = \beta''(s(t))\,\abs{\gamma'(t)} \]
         <p>이다. 양변의 크기를 재면 \(\abs{d\mathbf{t}/dt} = \kappa^\beta(s(t))\,\abs{\gamma'(t)} = \kappa(t)\,\abs{\gamma'(t)}\)이다.</p>
-        <p>(b) \(\beta = \gamma \circ h\)의 단위접벡터는 \(\mathbf{t}^\beta(u) = \varepsilon\,\mathbf{t}(h(u))\)이다. 여기서 \(\varepsilon = h'/\abs{h'}\)은 \(h\)가 방향을 보존하면 \(1\), 뒤집으면 \(-1\)인 상수다
-        (<a href="../04-curves/4-3-reparametrization.html#i-4-3-5">명제 4.3.5</a>(d)). 연쇄법칙에서 \(d\mathbf{t}^\beta/du = \varepsilon\,h'(u)\,(d\mathbf{t}/dt)(h(u))\)이고 \(\abs{\beta'(u)} = \abs{h'(u)}\,\abs{\gamma'(h(u))}\)이다.
+        <p>(b) \(\beta = \gamma \circ h\)의 unit tangent vector는 \(\mathbf{t}^\beta(u) = \varepsilon\,\mathbf{t}(h(u))\)이다. 여기서 \(\varepsilon = h'/\abs{h'}\)은 \(h\)가 방향을 보존하면 \(1\), 뒤집으면 \(-1\)인 상수다
+        (<a href="../04-curves/4-3-reparametrization.html#i-4-3-5">Proposition 4.3.5</a>(d)). chain rule에서 \(d\mathbf{t}^\beta/du = \varepsilon\,h'(u)\,(d\mathbf{t}/dt)(h(u))\)이고 \(\abs{\beta'(u)} = \abs{h'(u)}\,\abs{\gamma'(h(u))}\)이다.
         (a)를 \(\beta\)에 쓰면</p>
         \[ \kappa^\beta(u) = \frac{\abs{h'(u)}\,\abs{(d\mathbf{t}/dt)(h(u))}}{\abs{h'(u)}\,\abs{\gamma'(h(u))}} = \kappa(h(u)) \]
         <p>이다. 마지막 등호는 (a)를 \(\gamma\)에 쓴 것이다.</p>
       </div>
 
       <div class="thm example" id="i-5-1-3">
-        <p><span class="thm-head">예 5.1.3</span> <span class="thm-name">(직선과 원, 기준 예제)</span>.
+        <p><span class="thm-head">Example 5.1.3</span> <span class="thm-name">(line and circle, running example)</span>.
         (a) \(\abs{v} = 1\)인 직선 \(\gamma(s) = p + sv\)는 \(\gamma'' = 0\)이므로 \(\kappa \equiv 0\)이다.</p>
-        <p>(b) 반지름 \(r\)인 원의 호의 길이 매개화 \(\gamma(s) = (r\cos(s/r),\ r\sin(s/r),\ 0)\)(<a href="../04-curves/4-3-reparametrization.html#i-4-3-8">예 4.3.8</a>(b))에서</p>
+        <p>(b) 반지름 \(r\)인 원의 arc length parametrization \(\gamma(s) = (r\cos(s/r),\ r\sin(s/r),\ 0)\)(<a href="../04-curves/4-3-reparametrization.html#i-4-3-8">Example 4.3.8</a>(b))에서</p>
         \[ \gamma''(s) = -\frac{1}{r}\big(\cos(s/r),\ \sin(s/r),\ 0\big), \qquad \kappa(s) = \frac1r \]
-        <p>이다. <a href="#i-5-1-2">명제 5.1.2</a>(b)에 의해 기준 매개화 \((r\cos t, r\sin t, 0)\)도, 시계 방향으로 도는 매개화도 곡률이 \(1/r\)이다. 이것이 §7의 원의 곡률이다.
-        <a href="../04-curves/4-4-signed-curvature.html#i-4-4-3">예 4.4.3</a>에서는 방향에 따라 \(\pm 1/r\)이었던 것이 여기서는 부호 없이 \(1/r\)이 된다.</p>
-        <p class="verified">검증: <code>verify/v-5-1-curvature.py</code></p>
+        <p>이다. <a href="#i-5-1-2">Proposition 5.1.2</a>(b)에 의해 standard parametrization \((r\cos t, r\sin t, 0)\)도, 시계 방향으로 도는 parametrization도 curvature가 \(1/r\)이다. 이것이 running example의 원의 curvature이다.
+        <a href="../04-curves/4-4-signed-curvature.html#i-4-4-3">Example 4.4.3</a>에서는 방향에 따라 \(\pm 1/r\)이었던 것이 여기서는 부호 없이 \(1/r\)이 된다.</p>
+        <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code></p>
       </div>
 
       <div class="thm nonexample" id="i-5-1-4">
-        <p><span class="thm-head">비예 5.1.4</span> <span class="thm-name">(아무 매개변수로나 두 번 미분하면)</span>.
-        나선 \(\gamma(t) = (a\cos t, a\sin t, bt)\)(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-4">예 4.1.4</a>)에서 \(\gamma''(t) = (-a\cos t, -a\sin t, 0)\)이므로 \(\abs{\gamma''(t)} = a\)이다.
-        그러나 곡률은 \(a/(a^2 + b^2)\)이다(<a href="#i-5-1-7">예 5.1.7</a>). \(a = 1\), \(b = 0.3\)이면 \(1\)과 약 \(0.917\)이다.
-        \(\abs{\gamma''(t)}\)에는 곡선이 휘는 정도와 함께 속력이 변하는 정도, 매개변수가 흐르는 빠르기가 섞여 있다. 식 <a href="#eq-5-1-1">(5.1.1)</a>은 호의 길이 매개화에서만 곡률을 준다.
-        일반 매개변수에서는 <a href="#eq-5-1-2">(5.1.2)</a>를 쓰거나, <a href="5-3-frenet.html">5.3절</a>의 외적 공식을 쓴다.</p>
+        <p><span class="thm-head">Non-example 5.1.4</span> <span class="thm-name">(differentiating twice with respect to an arbitrary parameter)</span>.
+        helix \(\gamma(t) = (a\cos t, a\sin t, bt)\)(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-4">Example 4.1.4</a>)에서 \(\gamma''(t) = (-a\cos t, -a\sin t, 0)\)이므로 \(\abs{\gamma''(t)} = a\)이다.
+        그러나 curvature는 \(a/(a^2 + b^2)\)이다(<a href="#i-5-1-7">Example 5.1.7</a>). \(a = 1\), \(b = 0.3\)이면 \(1\)과 약 \(0.917\)이다.
+        \(\abs{\gamma''(t)}\)에는 곡선이 휘는 정도와 함께 속력이 변하는 정도, 매개변수가 흐르는 빠르기가 섞여 있다. Equation <a href="#eq-5-1-1">(5.1.1)</a>은 arc length parametrization에서만 curvature를 준다.
+        일반 매개변수에서는 <a href="#eq-5-1-2">(5.1.2)</a>를 쓰거나, <a href="5-3-frenet.html">Section 5.3</a>의 cross product 공식을 쓴다.</p>
       </div>
 
-      <p>평면곡선에서 이 곡률은 부호곡률의 크기다. 그러니 \(\kappa\)는 4장의 \(\kappa_s\)에서 부호만 떼어 낸 것이고, 새 이름에 걸맞게 4장과 모순이 없다.</p>
+      <p>plane curve에서 이 curvature는 signed curvature의 크기다. 그러니 \(\kappa\)는 Chapter 4의 \(\kappa_s\)에서 부호만 떼어 낸 것이고, 새 이름에 걸맞게 Chapter 4와 모순이 없다.</p>
 
       <div class="thm proposition" id="i-5-1-5">
-        <p><span class="thm-head">명제 5.1.5</span> <span class="thm-name">(평면곡선의 곡률은 부호곡률의 크기다)</span>.
-        정칙곡선 \(\gamma\)의 자취가 평면 \(\Pi = \{p_0 + xa_1 + ya_2\}\)(\((a_1, a_2)\)는 정규직교)에 들어 있고, \(\kappa_s\)가 \((a_1, a_2)\)에 대한 \(\gamma\)의 부호곡률이면 \(\kappa = \abs{\kappa_s}\)이다.
-        특히 \(xy\)평면의 곡선 \((x(t), y(t), 0)\)의 곡률은 <a href="../04-curves/4-4-signed-curvature.html#i-4-4-2">정의 4.4.2</a>의 \(\abs{\kappa_s}\)이다.</p>
+        <p><span class="thm-head">Proposition 5.1.5</span> <span class="thm-name">(curvature of a plane curve is the absolute value of the signed curvature)</span>.
+        regular curve \(\gamma\)의 trace가 평면 \(\Pi = \{p_0 + xa_1 + ya_2\}\)(\((a_1, a_2)\)는 orthonormal)에 들어 있고, \(\kappa_s\)가 \((a_1, a_2)\)에 대한 \(\gamma\)의 signed curvature이면 \(\kappa = \abs{\kappa_s}\)이다.
+        특히 \(xy\)평면의 곡선 \((x(t), y(t), 0)\)의 curvature는 <a href="../04-curves/4-4-signed-curvature.html#i-4-4-2">Definition 4.4.2</a>의 \(\abs{\kappa_s}\)이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        두 양 모두 방향을 보존하는 호의 길이 매개화로 정의되므로 \(\gamma\)가 단위속력이라 해도 된다. 그러면 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-10">명제 4.5.10</a>(a)에서
+        <p><span class="proof-head">Proof.</span>
+        두 양 모두 orientation-preserving arc length parametrization으로 정의되므로 \(\gamma\)가 단위속력이라 해도 된다. 그러면 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-10">Proposition 4.5.10</a>(a)에서
         \(\abs{\kappa_s(s)} = \abs{\gamma''(s)} = \kappa(s)\)이다. 둘째 주장은 \(p_0 = 0\), \((a_1, a_2) = (e_1, e_2)\)인 경우다.</p>
       </div>
 
       <div class="thm proposition" id="i-5-1-6">
-        <p><span class="thm-head">명제 5.1.6</span> <span class="thm-name">(곡률이 \(0\)인 곡선은 직선이다)</span>.
-        \(\gamma\colon I \to \R^3\)이 정칙곡선이면, \(I\)의 모든 점에서 \(\kappa = 0\)일 필요충분조건은 \(\gamma\)의 자취가 한 직선에 들어 있는 것이다.</p>
+        <p><span class="thm-head">Proposition 5.1.6</span> <span class="thm-name">(curves with curvature \(0\) are straight lines)</span>.
+        \(\gamma\colon I \to \R^3\)이 regular curve이면, \(I\)의 모든 점에서 \(\kappa = 0\)일 필요충분조건은 \(\gamma\)의 trace가 한 직선에 들어 있는 것이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        <a href="#i-5-1-2">명제 5.1.2</a>(b)에 의해 \(\gamma\)가 단위속력이라 해도 된다(재매개화는 자취를 바꾸지 않는다. <a href="../04-curves/4-3-reparametrization.html#i-4-3-5">명제 4.3.5</a>(b)).
-        \(\kappa \equiv 0\)이면 \(\gamma'' \equiv 0\)이므로 \(\gamma'\)의 각 성분은 도함수가 \(0\)이고, 평균값 정리에 의해 \(\gamma' \equiv v\)(상수, \(\abs{v} = 1\))이다. \(s_0 \in I\)을 고르면
-        \(\gamma(s) = \gamma(s_0) + (s - s_0)v\)이므로 자취는 직선 위에 있다.
-        거꾸로 자취가 직선 \(\{p + \lambda v\}\)(\(\abs{v} = 1\)) 위에 있으면 \(\gamma(s) = p + \lambda(s)v\)로 쓸 수 있고(\(\lambda(s) = \inner{\gamma(s) - p}{v}\)는 매끄럽다), \(\abs{\gamma'} = \abs{\lambda'} = 1\)이며
-        \(\lambda'\)은 연속이므로 \(\lambda' \equiv 1\) 또는 \(\lambda' \equiv -1\)이다(중간값 정리, <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>). 따라서 \(\gamma'' = \lambda''v = 0\)이다.</p>
+        <p><span class="proof-head">Proof.</span>
+        <a href="#i-5-1-2">Proposition 5.1.2</a>(b)에 의해 \(\gamma\)가 단위속력이라 해도 된다(reparametrization은 trace를 바꾸지 않는다. <a href="../04-curves/4-3-reparametrization.html#i-4-3-5">Proposition 4.3.5</a>(b)).
+        \(\kappa \equiv 0\)이면 \(\gamma'' \equiv 0\)이므로 \(\gamma'\)의 각 성분은 도함수가 \(0\)이고, mean value theorem에 의해 \(\gamma' \equiv v\)(상수, \(\abs{v} = 1\))이다. \(s_0 \in I\)을 고르면
+        \(\gamma(s) = \gamma(s_0) + (s - s_0)v\)이므로 trace는 직선 위에 있다.
+        거꾸로 trace가 직선 \(\{p + \lambda v\}\)(\(\abs{v} = 1\)) 위에 있으면 \(\gamma(s) = p + \lambda(s)v\)로 쓸 수 있고(\(\lambda(s) = \inner{\gamma(s) - p}{v}\)는 매끄럽다), \(\abs{\gamma'} = \abs{\lambda'} = 1\)이며
+        \(\lambda'\)은 연속이므로 \(\lambda' \equiv 1\) 또는 \(\lambda' \equiv -1\)이다(intermediate value theorem, <a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">Corollary 3.7.6</a>). 따라서 \(\gamma'' = \lambda''v = 0\)이다.</p>
       </div>
 
       <div class="thm example" id="i-5-1-7">
-        <p><span class="thm-head">예 5.1.7</span> <span class="thm-name">(나선의 곡률, 기준 예제)</span>.
-        나선 \(\gamma(t) = (a\cos t, a\sin t, bt)\)(\(a \gt 0\), \(b \neq 0\))의 호의 길이 매개화는 <a href="../04-curves/4-3-reparametrization.html#eq-4-3-2">(4.3.2)</a>의
+        <p><span class="thm-head">Example 5.1.7</span> <span class="thm-name">(curvature of the helix, running example)</span>.
+        helix \(\gamma(t) = (a\cos t, a\sin t, bt)\)(\(a \gt 0\), \(b \neq 0\))의 arc length parametrization은 <a href="../04-curves/4-3-reparametrization.html#eq-4-3-2">(4.3.2)</a>의
         \(\beta(s) = \big(a\cos(s/c),\ a\sin(s/c),\ bs/c\big)\), \(c = \sqrt{a^2 + b^2}\)이다. 한 번 미분하면 \(\beta'(s) = \big(-\tfrac{a}{c}\sin\tfrac{s}{c},\ \tfrac{a}{c}\cos\tfrac{s}{c},\ \tfrac{b}{c}\big)\)이고,
         한 번 더 미분하면(\(\tfrac{b}{c}\)는 상수이므로 사라진다)</p>
         <div class="equation" id="eq-5-1-3">
         \[ \begin{aligned} \beta''(s) &= -\frac{a}{c^2}\Big(\cos\frac{s}{c},\ \sin\frac{s}{c},\ 0\Big),\\ \kappa &= \abs{\beta''(s)} = \frac{a}{c^2} = \frac{a}{a^2 + b^2} \end{aligned} \tag{5.1.3} \]
         </div>
-        <p>이다. 이것이 §7의 나선의 곡률이다. <a href="#eq-5-1-2">(5.1.2)</a>로도 같은 값을 얻는다: \(\mathbf{t}(t) = (-a\sin t, a\cos t, b)/c\)이므로 \(d\mathbf{t}/dt = (-a\cos t, -a\sin t, 0)/c\)이고
+        <p>이다. 이것이 running example의 helix의 curvature이다. <a href="#eq-5-1-2">(5.1.2)</a>로도 같은 값을 얻는다: \(\mathbf{t}(t) = (-a\sin t, a\cos t, b)/c\)이므로 \(d\mathbf{t}/dt = (-a\cos t, -a\sin t, 0)/c\)이고
         \(\kappa = (a/c)/c = a/c^2\)이다. 몇 가지를 읽어 내자.</p>
         <ul>
-          <li>곡률은 상수다. 나선은 어느 점에서나 똑같이 휘어 있다.</li>
+          <li>curvature는 상수다. helix는 어느 점에서나 똑같이 휘어 있다.</li>
           <li>\(b \to 0\)이면 \(\kappa \to 1/a\)이다. 납작하게 누르면 반지름 \(a\)인 원이 된다. \(\abs{b} \to \infty\)이면 \(\kappa \to 0\)이다. 길게 늘이면 거의 곧은 선이 된다.</li>
-          <li>\(\kappa\)는 \(b\)의 부호에 무관하다. 오른손 나선(\(b \gt 0\))과 왼손 나선(\(b \lt 0\))은 곡률로 구별되지 않는다.</li>
-          <li>반지름 \(1/\kappa = (a^2 + b^2)/a = a + b^2/a\)인 원은 나선과 곡률이 같다. 예를 들어 \(a = b = 1\)인 나선과 반지름 \(2\)인 원은 모두 \(\kappa = 1/2\)이다.
-          <strong>곡률이 같다고 모양이 같지는 않다.</strong> 나선이 원보다 더 가지고 있는 정보는 <a href="5-2-torsion.html">5.2절</a>에서 잰다.</li>
+          <li>\(\kappa\)는 \(b\)의 부호에 무관하다. 오른손 helix(\(b \gt 0\))과 왼손 helix(\(b \lt 0\))은 curvature로 구별되지 않는다.</li>
+          <li>반지름 \(1/\kappa = (a^2 + b^2)/a = a + b^2/a\)인 원은 helix와 curvature가 같다. 예를 들어 \(a = b = 1\)인 helix와 반지름 \(2\)인 원은 모두 \(\kappa = 1/2\)이다.
+          <strong>curvature가 같다고 모양이 같지는 않다.</strong> helix가 원보다 더 가지고 있는 정보는 <a href="5-2-torsion.html">Section 5.2</a>에서 잰다.</li>
         </ul>
-        <p class="verified">검증: <code>verify/v-5-1-curvature.py</code> (<code>dgsym.curvature_torsion</code>과도 비교한다)</p>
+        <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code> (<code>dgsym.curvature_torsion</code>과도 비교한다)</p>
       </div>
     </section>
 
     <section id="sec-normal">
-      <h2>주법선벡터와 접촉평면</h2>
-      <p>곡률은 \(\mathbf{t}'\)의 크기다. 이제 방향을 보자. \(\kappa(s) \gt 0\)이면 \(\mathbf{t}'(s)\)을 그 크기로 나눈 단위벡터를 만들 수 있다.</p>
+      <h2>The Principal Normal Vector and the Osculating Plane</h2>
+      <p>curvature는 \(\mathbf{t}'\)의 크기다. 이제 방향을 보자. \(\kappa(s) \gt 0\)이면 \(\mathbf{t}'(s)\)을 그 크기로 나눈 단위벡터를 만들 수 있다.</p>
 
       <div class="thm definition" id="i-5-1-8">
-        <p><span class="thm-head">정의 5.1.8</span> <span class="thm-name">(주법선벡터, principal normal vector)</span>.
-        \(\gamma\colon I \to \R^3\)이 호의 길이로 매개화되어 있고 \(\kappa(s) \gt 0\)이라 하자. 단위벡터</p>
+        <p><span class="thm-head">Definition 5.1.8</span> <span class="thm-name">(principal normal vector)</span>.
+        \(\gamma\colon I \to \R^3\)이 arc length로 parametrization되어 있고 \(\kappa(s) \gt 0\)이라 하자. 단위벡터</p>
         \[ \mathbf{n}(s) = \frac{\mathbf{t}'(s)}{\kappa(s)} = \frac{\gamma''(s)}{\abs{\gamma''(s)}} \]
-        <p>를 \(s\)에서 \(\gamma\)의 <dfn>주법선벡터</dfn>(principal normal vector)라 한다. 일반 매개변수의 정칙곡선에서는 <a href="#i-5-1-1">정의 5.1.1</a>처럼 방향을 보존하는 호의 길이 매개화로 정한다:
+        <p>를 \(s\)에서 \(\gamma\)의 <dfn>principal normal vector</dfn>(주법선벡터)라 한다. 일반 매개변수의 regular curve에서는 <a href="#i-5-1-1">Definition 5.1.1</a>처럼 orientation-preserving arc length parametrization으로 정한다:
         \(\mathbf{n}(t) = \mathbf{n}^\beta(s(t))\).</p>
       </div>
 
@@ -205,282 +205,282 @@
       <div class="equation" id="eq-5-1-4">
       \[ \begin{aligned} &\mathbf{t}'(s) = \kappa(s)\,\mathbf{n}(s),\\ &\inner{\mathbf{t}(s)}{\mathbf{n}(s)} = 0, \qquad \abs{\mathbf{n}(s)} = 1 \end{aligned} \tag{5.1.4} \]
       </div>
-      <p>이다(직교성은 <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">따름정리 4.1.12</a>). 벡터 \(\gamma''(s) = \kappa(s)\mathbf{n}(s)\)는 \(\kappa = 0\)인 점에서도 뜻이 있다. 이것을 \(s\)에서의 <dfn>곡률벡터</dfn>(curvature vector)라 한다.
-      곡률벡터의 크기가 곡률이고, \(\kappa \gt 0\)이면 방향이 주법선이다.</p>
-      <p>\(\mathbf{n}\)은 곡선의 방향을 뒤집어도 바뀌지 않는다. \(\bar\gamma(s) = \gamma(-s)\)이면 \(\bar\gamma''(s) = \gamma''(-s)\)이기 때문이다(<a href="../04-curves/4-3-reparametrization.html#ex-4-3-3">연습 4.3.3</a>). \(\mathbf{t}\)는 부호가 바뀐다.
-      일반 매개변수에서 \(\kappa(t) \gt 0\)이면, <a href="#i-5-1-2">명제 5.1.2</a>의 증명에서 \(d\mathbf{t}/dt = \abs{\gamma'(t)}\,\kappa(t)\,\mathbf{n}(t)\)이므로 \(\mathbf{n}(t) = (d\mathbf{t}/dt)/\abs{d\mathbf{t}/dt}\)로 계산할 수 있다.</p>
+      <p>이다(orthogonality는 <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">Corollary 4.1.12</a>). 벡터 \(\gamma''(s) = \kappa(s)\mathbf{n}(s)\)는 \(\kappa = 0\)인 점에서도 뜻이 있다. 이것을 \(s\)에서의 <dfn>curvature vector</dfn>(곡률벡터)라 한다.
+      curvature vector의 크기가 curvature이고, \(\kappa \gt 0\)이면 방향이 principal normal이다.</p>
+      <p>\(\mathbf{n}\)은 곡선의 orientation을 뒤집어도 바뀌지 않는다. \(\bar\gamma(s) = \gamma(-s)\)이면 \(\bar\gamma''(s) = \gamma''(-s)\)이기 때문이다(<a href="../04-curves/4-3-reparametrization.html#ex-4-3-3">Exercise 4.3.3</a>). \(\mathbf{t}\)는 부호가 바뀐다.
+      일반 매개변수에서 \(\kappa(t) \gt 0\)이면, <a href="#i-5-1-2">Proposition 5.1.2</a>의 증명에서 \(d\mathbf{t}/dt = \abs{\gamma'(t)}\,\kappa(t)\,\mathbf{n}(t)\)이므로 \(\mathbf{n}(t) = (d\mathbf{t}/dt)/\abs{d\mathbf{t}/dt}\)로 계산할 수 있다.</p>
 
-      <p>\(\mathbf{t}(s)\)와 \(\mathbf{n}(s)\)는 서로 직교하는 두 단위벡터이므로 \(\gamma(s)\)를 지나는 평면 하나를 정한다.</p>
+      <p>\(\mathbf{t}(s)\)와 \(\mathbf{n}(s)\)는 서로 orthogonal한 두 단위벡터이므로 \(\gamma(s)\)를 지나는 평면 하나를 정한다.</p>
 
       <div class="thm definition" id="i-5-1-9">
-        <p><span class="thm-head">정의 5.1.9</span> <span class="thm-name">(접촉평면, osculating plane)</span>.
-        \(\kappa(s) \gt 0\)일 때 \(\gamma(s)\)를 지나고 \(\mathbf{t}(s)\), \(\mathbf{n}(s)\)가 생성하는 평면</p>
+        <p><span class="thm-head">Definition 5.1.9</span> <span class="thm-name">(osculating plane)</span>.
+        \(\kappa(s) \gt 0\)일 때 \(\gamma(s)\)를 지나고 \(\mathbf{t}(s)\), \(\mathbf{n}(s)\)의 span을 방향으로 하는 평면</p>
         \[ \{\gamma(s) + x\,\mathbf{t}(s) + y\,\mathbf{n}(s) : x, y \in \R\} \]
-        <p>을 \(s\)에서 \(\gamma\)의 <dfn>접촉평면</dfn>(osculating plane)이라 한다.</p>
+        <p>을 \(s\)에서 \(\gamma\)의 <dfn>osculating plane</dfn>(접촉평면)이라 한다.</p>
       </div>
 
-      <p>접촉평면은 접선(<a href="../04-curves/4-2-arc-length.html#i-4-2-4">정의 4.2.4</a>)을 포함하는 평면들 가운데 하나다. 그 가운데 왜 이 평면이 특별한지는 <a href="#i-5-1-14">정리 5.1.14</a>에서 본다.
-      \(\mathbf{t}\)의 부호가 바뀌어도 생성하는 평면은 같으므로 접촉평면도 곡선의 방향에 무관하다.</p>
+      <p>osculating plane은 접선(<a href="../04-curves/4-2-arc-length.html#i-4-2-4">Definition 4.2.4</a>)을 포함하는 평면들 가운데 하나다. 그 가운데 왜 이 평면이 특별한지는 <a href="#i-5-1-14">Theorem 5.1.14</a>에서 본다.
+      \(\mathbf{t}\)의 부호가 바뀌어도 방향을 정하는 span은 같으므로 osculating plane도 곡선의 orientation에 무관하다.</p>
 
       <div class="thm example" id="i-5-1-10">
-        <p><span class="thm-head">예 5.1.10</span> <span class="thm-name">(원과 나선의 주법선, 기준 예제)</span>.
-        (a) <a href="#i-5-1-3">예 5.1.3</a>(b)의 원에서 \(\mathbf{n}(s) = -(\cos(s/r), \sin(s/r), 0) = -\gamma(s)/r\)이다. 주법선은 원의 중심을 향하고, 접촉평면은 모든 점에서 \(xy\)평면이다.</p>
-        <p>(b) 나선의 <a href="#eq-5-1-3">(5.1.3)</a>에서</p>
+        <p><span class="thm-head">Example 5.1.10</span> <span class="thm-name">(principal normal of the circle and the helix, running example)</span>.
+        (a) <a href="#i-5-1-3">Example 5.1.3</a>(b)의 원에서 \(\mathbf{n}(s) = -(\cos(s/r), \sin(s/r), 0) = -\gamma(s)/r\)이다. principal normal은 원의 중심을 향하고, osculating plane은 모든 점에서 \(xy\)평면이다.</p>
+        <p>(b) helix의 <a href="#eq-5-1-3">(5.1.3)</a>에서</p>
         \[ \mathbf{n}(s) = -\Big(\cos\frac{s}{c},\ \sin\frac{s}{c},\ 0\Big) \]
-        <p>이다. \(\mathbf{n}\)은 수평이고 원기둥의 축 쪽을 향한다. 실제로 \(\beta(s) + a\,\mathbf{n}(s) = (0, 0, bs/c)\)이므로, \(\beta(s)\)를 지나고 방향이 \(\mathbf{n}(s)\)인 직선은 \(z\)축과 수직으로 만난다
-        (<a href="#fig-5-1-1">그림 5.1.1</a>). 접촉평면은 이 수평 방향과 \(\mathbf{t}\)가 생성하는 평면이므로 수평면에서 기울어져 있고, \(s\)가 변하면 축을 따라 돌면서 올라간다.</p>
-        <p class="verified">검증: <code>verify/v-5-1-curvature.py</code></p>
+        <p>이다. \(\mathbf{n}\)은 수평이고 cylinder의 축 쪽을 향한다. 실제로 \(\beta(s) + a\,\mathbf{n}(s) = (0, 0, bs/c)\)이므로, \(\beta(s)\)를 지나고 방향이 \(\mathbf{n}(s)\)인 직선은 \(z\)축과 수직으로 만난다
+        (<a href="#fig-5-1-1">Figure 5.1.1</a>). osculating plane은 이 수평 방향과 \(\mathbf{t}\)를 포함하는 평면이므로 수평면에서 기울어져 있고, \(s\)가 변하면 축을 따라 돌면서 올라간다.</p>
+        <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code></p>
       </div>
 
       <div class="thm nonexample" id="i-5-1-11">
-        <p><span class="thm-head">비예 5.1.11</span> <span class="thm-name">(\(\kappa = 0\)인 점에서는 주법선을 정할 수 없다)</span>.
-        \(xy\)평면의 곡선 \(\gamma(t) = (t, t^3, 0)\)을 보자. <a href="../04-curves/4-5-osculating-circle.html#i-4-5-3">비예 4.5.3</a>(a)에서 부호곡률은 \(\kappa_s = 6t/(1 + 9t^4)^{3/2}\)이고, <a href="#i-5-1-5">명제 5.1.5</a>에서
-        \(\kappa = \abs{\kappa_s}\)이다. 따라서 \(t = 0\)에서만 \(\kappa = 0\)이다. \(t \neq 0\)이면 \(\gamma''\)을 호의 길이로 계산한 것이 \(\kappa_s\mathbf{n}_s\)이므로 \(\mathbf{n} = (\kappa_s/\abs{\kappa_s})\,\mathbf{n}_s\), 곧</p>
+        <p><span class="thm-head">Non-example 5.1.11</span> <span class="thm-name">(the principal normal is undefined where \(\kappa = 0\))</span>.
+        \(xy\)평면의 곡선 \(\gamma(t) = (t, t^3, 0)\)을 보자. <a href="../04-curves/4-5-osculating-circle.html#i-4-5-3">Non-example 4.5.3</a>(a)에서 signed curvature는 \(\kappa_s = 6t/(1 + 9t^4)^{3/2}\)이고, <a href="#i-5-1-5">Proposition 5.1.5</a>에서
+        \(\kappa = \abs{\kappa_s}\)이다. 따라서 \(t = 0\)에서만 \(\kappa = 0\)이다. \(t \neq 0\)이면 \(\gamma''\)을 arc length로 계산한 것이 \(\kappa_s\mathbf{n}_s\)이므로 \(\mathbf{n} = (\kappa_s/\abs{\kappa_s})\,\mathbf{n}_s\), 곧</p>
         \[ \mathbf{n}(t) = \frac{t}{\abs{t}}\cdot\frac{(-3t^2,\ 1,\ 0)}{\sqrt{1 + 9t^4}} \qquad (t \neq 0) \]
-        <p>이다. \(t \to 0^+\)이면 \(\mathbf{n} \to (0, 1, 0)\), \(t \to 0^-\)이면 \(\mathbf{n} \to (0, -1, 0)\)이므로 \(\mathbf{n}(0)\)을 어떻게 정해도 \(\mathbf{n}\)은 \(0\)에서 연속이 아니다(<a href="#fig-5-1-2">그림 5.1.2</a>).
-        곡선이 휘어 들어가는 쪽이 변곡점에서 반대로 바뀌기 때문이다. 이 곡선은 평면에 있으므로 접촉평면은 \(t \neq 0\)에서 모두 \(xy\)평면이고 \(t = 0\)에서도 자연스럽게 정할 수 있지만,
-        공간곡선에서는 \(\kappa = 0\)인 점의 양쪽에서 접촉평면이 서로 다른 평면으로 다가갈 수도 있다(<a href="5-2-torsion.html">5.2절</a>). 그래서 앞으로 주법선이나 접촉평면을 쓸 때는 늘 \(\kappa \gt 0\)을 가정한다.</p>
+        <p>이다. \(t \to 0^+\)이면 \(\mathbf{n} \to (0, 1, 0)\), \(t \to 0^-\)이면 \(\mathbf{n} \to (0, -1, 0)\)이므로 \(\mathbf{n}(0)\)을 어떻게 정해도 \(\mathbf{n}\)은 \(0\)에서 연속이 아니다(<a href="#fig-5-1-2">Figure 5.1.2</a>).
+        곡선이 휘어 들어가는 쪽이 inflection point에서 반대로 바뀌기 때문이다. 이 곡선은 평면에 있으므로 osculating plane은 \(t \neq 0\)에서 모두 \(xy\)평면이고 \(t = 0\)에서도 자연스럽게 정할 수 있지만,
+        space curve에서는 \(\kappa = 0\)인 점의 양쪽에서 osculating plane이 서로 다른 평면으로 다가갈 수도 있다(<a href="5-2-torsion.html">Section 5.2</a>). 그래서 앞으로 principal normal이나 osculating plane을 쓸 때는 늘 \(\kappa \gt 0\)을 가정한다.</p>
       </div>
 
       <figure class="dg-figure" id="fig-5-1-2">
-        <img src="figures/fig-5-1-2-normal-flip.svg" alt="xy평면의 곡선 y = x³. 원점 양쪽의 여섯 점에서 주홍 주법선벡터 n이 그려져 있다. 원점의 왼쪽(x가 음수)에서는 곡선의 아래쪽(오른쪽 아래)을, 오른쪽(x가 양수)에서는 위쪽(왼쪽 위)을 향한다. 원점은 속이 빈 원으로 표시되어 있고, 원점에서 위로 향하는 점선 화살표에 t→0⁺, 아래로 향하는 점선 화살표에 t→0⁻가 적혀 있다. 원점 근처에 κ=0, 양쪽에 κ>0이 표시되어 있다.">
-        <figcaption><span class="fig-head">그림 5.1.2.</span>
-        곡선 \(\gamma(t) = (t, t^3, 0)\)과 \(t = \pm 0.32,\ \pm 0.62,\ \pm 0.95\)에서의 주법선벡터 \(\mathbf{n}\)(주홍, 실제 길이의 \(0.35\)배). \(t = 0\)에서 \(\kappa = 0\)이고,
-        양쪽에서 다가갈 때 \(\mathbf{n}\)의 극한(점선)이 \((0, \pm 1, 0)\)으로 서로 반대다(<a href="#i-5-1-11">비예 5.1.11</a>).</figcaption>
+        <img src="figures/fig-5-1-2-normal-flip.svg" alt="xy평면의 곡선 y = x³. 원점 양쪽의 여섯 점에서 주홍 principal normal vector n이 그려져 있다. 원점의 왼쪽(x가 음수)에서는 곡선의 아래쪽(오른쪽 아래)을, 오른쪽(x가 양수)에서는 위쪽(왼쪽 위)을 향한다. 원점은 속이 빈 원으로 표시되어 있고, 원점에서 위로 향하는 점선 화살표에 t→0⁺, 아래로 향하는 점선 화살표에 t→0⁻가 적혀 있다. 원점 근처에 κ=0, 양쪽에 κ>0이 표시되어 있다.">
+        <figcaption><span class="fig-head">Figure 5.1.2.</span>
+        곡선 \(\gamma(t) = (t, t^3, 0)\)과 \(t = \pm 0.32,\ \pm 0.62,\ \pm 0.95\)에서의 principal normal vector \(\mathbf{n}\)(주홍, 실제 길이의 \(0.35\)배). \(t = 0\)에서 \(\kappa = 0\)이고,
+        양쪽에서 다가갈 때 \(\mathbf{n}\)의 극한(점선)이 \((0, \pm 1, 0)\)으로 서로 반대다(<a href="#i-5-1-11">Non-example 5.1.11</a>).</figcaption>
       </figure>
     </section>
 
     <section id="sec-osculating-circle">
-      <h2>접촉원</h2>
-      <p>평면곡선에서는 곡률중심 \(\gamma + \mathbf{n}_s/\kappa_s\)과 접촉원을 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-1">정의 4.5.1</a>로 정했다. 공간곡선에서는 \(\mathbf{n}_s/\kappa_s\) 대신
-      \(\mathbf{n}/\kappa\)를 쓰고, 원이 놓일 평면으로 접촉평면을 쓴다.</p>
+      <h2>The Osculating Circle</h2>
+      <p>plane curve에서는 center of curvature \(\gamma + \mathbf{n}_s/\kappa_s\)과 osculating circle을 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-1">Definition 4.5.1</a>로 정했다. space curve에서는 \(\mathbf{n}_s/\kappa_s\) 대신
+      \(\mathbf{n}/\kappa\)를 쓰고, 원이 놓일 평면으로 osculating plane을 쓴다.</p>
 
       <div class="thm definition" id="i-5-1-12">
-        <p><span class="thm-head">정의 5.1.12</span> <span class="thm-name">(공간곡선의 곡률중심과 접촉원)</span>.
-        \(\gamma\colon I \to \R^3\)이 호의 길이로 매개화되어 있고 \(\kappa(s_0) \gt 0\)이라 하자.</p>
+        <p><span class="thm-head">Definition 5.1.12</span> <span class="thm-name">(center of curvature and osculating circle of a space curve)</span>.
+        \(\gamma\colon I \to \R^3\)이 arc length로 parametrization되어 있고 \(\kappa(s_0) \gt 0\)이라 하자.</p>
         <div class="equation" id="eq-5-1-5">
         \[ \begin{aligned} c(s_0) &= \gamma(s_0) + \frac{1}{\kappa(s_0)}\,\mathbf{n}(s_0)\\ &= \gamma(s_0) + \frac{\gamma''(s_0)}{\abs{\gamma''(s_0)}^2} \end{aligned} \tag{5.1.5} \]
         </div>
-        <p>를 \(s_0\)에서 \(\gamma\)의 <dfn data-generalizes="../04-curves/4-5-osculating-circle.html#i-4-5-1">곡률중심</dfn>(center of curvature),
-        \(1/\kappa(s_0)\)을 <dfn data-generalizes="../04-curves/4-5-osculating-circle.html#i-4-5-1">곡률반지름</dfn>(radius of curvature)이라 한다.
-        \(s_0\)에서의 접촉평면 안에서 중심이 \(c(s_0)\)이고 반지름이 \(1/\kappa(s_0)\)인 원을 \(s_0\)에서 \(\gamma\)의 <dfn data-generalizes="../04-curves/4-5-osculating-circle.html#i-4-5-1">접촉원</dfn>(osculating circle)이라 한다.
-        일반 매개변수의 정칙곡선에서는 방향을 보존하는 호의 길이 매개화로 정한다.</p>
+        <p>를 \(s_0\)에서 \(\gamma\)의 <dfn data-generalizes="../04-curves/4-5-osculating-circle.html#i-4-5-1">center of curvature</dfn>(곡률중심),
+        \(1/\kappa(s_0)\)을 <dfn data-generalizes="../04-curves/4-5-osculating-circle.html#i-4-5-1">radius of curvature</dfn>(곡률반지름)이라 한다.
+        \(s_0\)에서의 osculating plane 안에서 중심이 \(c(s_0)\)이고 반지름이 \(1/\kappa(s_0)\)인 원을 \(s_0\)에서 \(\gamma\)의 <dfn data-generalizes="../04-curves/4-5-osculating-circle.html#i-4-5-1">osculating circle</dfn>(접촉원)이라 한다.
+        일반 매개변수의 regular curve에서는 orientation-preserving arc length parametrization으로 정한다.</p>
       </div>
 
-      <p>\(c(s_0) - \gamma(s_0) = \mathbf{n}(s_0)/\kappa(s_0)\)는 접촉평면 안의 벡터이므로 중심은 접촉평면 위에 있고, 접촉원은 \(\gamma(s_0)\)를 지나며 거기서 \(\mathbf{n}(s_0)\)에 수직, 곧 \(\mathbf{t}(s_0)\) 방향으로 곡선과 접한다.
-      식 <a href="#eq-5-1-5">(5.1.5)</a>의 둘째 표현에는 \(\gamma''\)만 나오므로 곡률중심과 접촉원은 곡선의 방향에 무관하다. 곡률중심 \(c(s_0)\)은 늘 인자와 함께 쓰고, 나선의 상수 \(c = \sqrt{a^2 + b^2}\)(<a href="../04-curves/4-3-reparametrization.html#eq-4-3-2">(4.3.2)</a>)과는 인자가 있는지로 구분한다. 이 정의가 4장의 정의와 같은 이름을 가질 자격이 있음을 먼저 확인하자.</p>
+      <p>\(c(s_0) - \gamma(s_0) = \mathbf{n}(s_0)/\kappa(s_0)\)는 osculating plane 안의 벡터이므로 중심은 osculating plane 위에 있고, osculating circle은 \(\gamma(s_0)\)를 지나며 거기서 \(\mathbf{n}(s_0)\)에 수직, 곧 \(\mathbf{t}(s_0)\) 방향으로 곡선과 접한다.
+      Equation <a href="#eq-5-1-5">(5.1.5)</a>의 둘째 표현에는 \(\gamma''\)만 나오므로 center of curvature와 osculating circle은 곡선의 orientation에 무관하다. center of curvature \(c(s_0)\)은 늘 인자와 함께 쓰고, helix의 상수 \(c = \sqrt{a^2 + b^2}\)(<a href="../04-curves/4-3-reparametrization.html#eq-4-3-2">(4.3.2)</a>)과는 인자가 있는지로 구분한다. 이 정의가 Chapter 4의 정의와 같은 이름을 가질 자격이 있음을 먼저 확인하자.</p>
 
       <div class="thm proposition" id="i-5-1-13">
-        <p><span class="thm-head">명제 5.1.13</span> <span class="thm-name">(평면곡선에서는 4.5절의 곡률중심·접촉원과 같다)</span>.
-        호의 길이로 매개화된 \(\gamma\)의 자취가 평면 \(\Pi = \{p_0 + xa_1 + ya_2\}\)(\((a_1, a_2)\)는 정규직교)에 들어 있고 \(\kappa(s_0) \gt 0\)이라 하자. 그러면 \(s_0\)에서의 접촉평면은 \(\Pi\)이고,
-        <a href="#i-5-1-12">정의 5.1.12</a>의 곡률중심, 곡률반지름, 접촉원은 좌표 곡선 \(\hat\gamma = (x, y)\)에 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-1">정의 4.5.1</a>을 써서 얻은 것을 \(\Pi\)에 옮긴 것과 같다.</p>
+        <p><span class="thm-head">Proposition 5.1.13</span> <span class="thm-name">(for a plane curve, these agree with the center of curvature and osculating circle of Section 4.5)</span>.
+        arc length로 parametrization된 \(\gamma\)의 trace가 평면 \(\Pi = \{p_0 + xa_1 + ya_2\}\)(\((a_1, a_2)\)는 orthonormal)에 들어 있고 \(\kappa(s_0) \gt 0\)이라 하자. 그러면 \(s_0\)에서의 osculating plane은 \(\Pi\)이고,
+        <a href="#i-5-1-12">Definition 5.1.12</a>의 center of curvature, radius of curvature, osculating circle은 좌표 곡선 \(\hat\gamma = (x, y)\)에 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-1">Definition 4.5.1</a>을 써서 얻은 것을 \(\Pi\)에 옮긴 것과 같다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">증명.</span>
-        <a href="../04-curves/4-5-osculating-circle.html#eq-4-5-6">(4.5.6)</a>처럼 \(\gamma = p_0 + xa_1 + ya_2\)로 쓰면 \(\mathbf{t} = x'a_1 + y'a_2\), \(\mathbf{n} = (x''a_1 + y''a_2)/\kappa\)는 \(a_1, a_2\)가 생성하는 부분공간에 있다.
-        \(\mathbf{t}(s_0)\), \(\mathbf{n}(s_0)\)는 일차독립이므로 이 부분공간을 생성하고, 따라서 접촉평면은 \(\gamma(s_0) \in \Pi\)를 지나고 방향이 \(\Pi\)와 같은 평면, 곧 \(\Pi\)이다.
-        <a href="../04-curves/4-5-osculating-circle.html#i-4-5-10">명제 4.5.10</a>에서 \(\hat\gamma\)의 곡률반지름은 \(1/\abs{\kappa_s} = 1/\abs{\gamma''} = 1/\kappa\)이고, 곡률중심에 대응하는 \(\Pi\)의 점은 \(\gamma + \gamma''/\abs{\gamma''}^2\)이다.
-        이것은 <a href="#eq-5-1-5">(5.1.5)</a>와 같다. 두 정의의 접촉원은 모두 \(\Pi\) 안에서 중심과 반지름이 같은 원이므로 같다.</p>
+        <p><span class="proof-head">Proof.</span>
+        <a href="../04-curves/4-5-osculating-circle.html#eq-4-5-6">(4.5.6)</a>처럼 \(\gamma = p_0 + xa_1 + ya_2\)로 쓰면 \(\mathbf{t} = x'a_1 + y'a_2\), \(\mathbf{n} = (x''a_1 + y''a_2)/\kappa\)는 \(a_1, a_2\)의 span에 있다.
+        \(\mathbf{t}(s_0)\), \(\mathbf{n}(s_0)\)는 linearly independent이므로 이 span의 basis이고, 따라서 osculating plane은 \(\gamma(s_0) \in \Pi\)를 지나고 방향이 \(\Pi\)와 같은 평면, 곧 \(\Pi\)이다.
+        <a href="../04-curves/4-5-osculating-circle.html#i-4-5-10">Proposition 4.5.10</a>에서 \(\hat\gamma\)의 radius of curvature는 \(1/\abs{\kappa_s} = 1/\abs{\gamma''} = 1/\kappa\)이고, center of curvature에 대응하는 \(\Pi\)의 점은 \(\gamma + \gamma''/\abs{\gamma''}^2\)이다.
+        이것은 <a href="#eq-5-1-5">(5.1.5)</a>와 같다. 두 정의의 osculating circle은 모두 \(\Pi\) 안에서 중심과 반지름이 같은 원이므로 같다.</p>
       </div>
 
-      <p>접촉평면과 접촉원이 “가장 잘 맞는” 평면과 원이라는 것을 정확히 하자. 기준은 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-6">따름정리 4.5.6</a>과 같다. 곡선과의 거리가 \(\abs{s - s_0}\)의 몇 제곱으로 작아지는지를 본다.
-      접촉원에는 매개화 하나를 붙여 둔다. \(\kappa_0 = \kappa(s_0)\), \(\mathbf{t}_0 = \mathbf{t}(s_0)\), \(\mathbf{n}_0 = \mathbf{n}(s_0)\), \(c_0 = c(s_0)\)로 쓰고</p>
+      <p>osculating plane과 osculating circle이 “가장 잘 맞는” 평면과 원이라는 것을 정확히 하자. 기준은 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-6">Corollary 4.5.6</a>과 같다. 곡선과의 거리가 \(\abs{s - s_0}\)의 몇 제곱으로 작아지는지를 본다.
+      osculating circle에는 parametrization 하나를 붙여 둔다. \(\kappa_0 = \kappa(s_0)\), \(\mathbf{t}_0 = \mathbf{t}(s_0)\), \(\mathbf{n}_0 = \mathbf{n}(s_0)\), \(c_0 = c(s_0)\)로 쓰고</p>
       <div class="equation" id="eq-5-1-6">
       \[ \begin{aligned} \sigma(s) = c_0 + \frac{1}{\kappa_0}\Big(&-\cos\big(\kappa_0(s - s_0)\big)\,\mathbf{n}_0\\ &+ \sin\big(\kappa_0(s - s_0)\big)\,\mathbf{t}_0\Big) \end{aligned} \tag{5.1.6} \]
       </div>
-      <p>로 두자. \(\sigma(s) - c_0\)은 정규직교인 \(\mathbf{n}_0, \mathbf{t}_0\)의 일차결합이고 크기가 \(1/\kappa_0\)이므로 \(\sigma\)는 접촉원을 한 바퀴 도는 매개화다. 직접 미분하면</p>
+      <p>로 두자. \(\sigma(s) - c_0\)은 orthonormal인 \(\mathbf{n}_0, \mathbf{t}_0\)의 linear combination이고 크기가 \(1/\kappa_0\)이므로 \(\sigma\)는 osculating circle을 한 바퀴 도는 parametrization이다. 직접 미분하면</p>
       \[ \begin{aligned} \sigma'(s) &= \sin\big(\kappa_0(s - s_0)\big)\,\mathbf{n}_0 + \cos\big(\kappa_0(s - s_0)\big)\,\mathbf{t}_0,\\ \sigma''(s) &= \kappa_0\Big(\cos\big(\kappa_0(s - s_0)\big)\,\mathbf{n}_0 - \sin\big(\kappa_0(s - s_0)\big)\,\mathbf{t}_0\Big) \end{aligned} \]
       <p>이므로 \(\abs{\sigma'} = 1\)이고, \(\sigma(s_0) = c_0 - \mathbf{n}_0/\kappa_0 = \gamma(s_0)\), \(\sigma'(s_0) = \mathbf{t}_0\), \(\sigma''(s_0) = \kappa_0\mathbf{n}_0 = \gamma''(s_0)\)이다.</p>
 
       <div class="thm theorem" id="i-5-1-14">
-        <p><span class="thm-head">정리 5.1.14</span> <span class="thm-name">(접촉평면과 접촉원은 곡선에 가장 가깝다)</span>.
-        \(\gamma\colon I \to \R^3\)이 호의 길이로 매개화되어 있고 \(\kappa(s_0) \gt 0\)이며, \([s_0 - \delta, s_0 + \delta] \subseteq I\)이라 하자.</p>
+        <p><span class="thm-head">Theorem 5.1.14</span> <span class="thm-name">(the osculating plane and osculating circle fit the curve most closely)</span>.
+        \(\gamma\colon I \to \R^3\)이 arc length로 parametrization되어 있고 \(\kappa(s_0) \gt 0\)이며, \([s_0 - \delta, s_0 + \delta] \subseteq I\)이라 하자.</p>
         <ul>
-          <li>(a) \(P\)가 \(s_0\)에서의 접선을 포함하는 평면이고 \(\nu\)가 그 단위법벡터라 하자. \(d(s) = \inner{\gamma(s) - \gamma(s_0)}{\nu}\)(점 \(\gamma(s)\)에서 \(P\)까지의 부호 있는 거리)에 대하여,
-          \(P\)가 접촉평면이면 \(M \ge 0\)이 있어 \(\abs{s - s_0} \le \delta\)일 때 \(\abs{d(s)} \le M\abs{s - s_0}^3\)이다. \(P\)가 접촉평면이 아니면
+          <li>(a) \(P\)가 \(s_0\)에서의 접선을 포함하는 평면이고 \(\nu\)가 그 unit normal vector라 하자. \(d(s) = \inner{\gamma(s) - \gamma(s_0)}{\nu}\)(점 \(\gamma(s)\)에서 \(P\)까지의 부호 있는 거리)에 대하여,
+          \(P\)가 osculating plane이면 \(M \ge 0\)이 있어 \(\abs{s - s_0} \le \delta\)일 때 \(\abs{d(s)} \le M\abs{s - s_0}^3\)이다. \(P\)가 osculating plane이 아니면
           \[ \lim_{s \to s_0} \frac{d(s)}{(s - s_0)^2} = \frac{\kappa(s_0)}{2}\inner{\mathbf{n}(s_0)}{\nu} \neq 0 \]
           이다.</li>
-          <li>(b) <a href="#eq-5-1-6">(5.1.6)</a>의 \(\sigma\)에 대하여 \(M \ge 0\)이 있어 \(\abs{s - s_0} \le \delta\)일 때 \(\abs{\gamma(s) - \sigma(s)} \le M\abs{s - s_0}^3\)이다. 특히 \(\gamma(s)\)에서 접촉원까지의 거리도 \(M\abs{s - s_0}^3\) 이하다.</li>
+          <li>(b) <a href="#eq-5-1-6">(5.1.6)</a>의 \(\sigma\)에 대하여 \(M \ge 0\)이 있어 \(\abs{s - s_0} \le \delta\)일 때 \(\abs{\gamma(s) - \sigma(s)} \le M\abs{s - s_0}^3\)이다. 특히 \(\gamma(s)\)에서 osculating circle까지의 거리도 \(M\abs{s - s_0}^3\) 이하다.</li>
         </ul>
       </div>
-      <p><strong>이 정리가 말하는 것.</strong> 접선을 포함하는 평면 가운데 곡선이 \(3\)차로만 벗어나는 것은 접촉평면뿐이고, 다른 평면에서는 \(2\)차로 벗어난다. 또 접촉원은 곡선과 위치, 속도, 가속도가
-      모두 같은 원이어서 곡선에서 \(3\)차로만 벗어난다. \(2\)차까지의 정보, 곧 곡선이 휘는 방향과 정도는 접촉평면과 접촉원에 모두 담겨 있다.</p>
+      <p><strong>이 정리가 말하는 것.</strong> 접선을 포함하는 평면 가운데 곡선이 \(3\)차로만 벗어나는 것은 osculating plane뿐이고, 다른 평면에서는 \(2\)차로 벗어난다. 또 osculating circle은 곡선과 위치, 속도, 가속도가
+      모두 같은 원이어서 곡선에서 \(3\)차로만 벗어난다. \(2\)차까지의 정보, 곧 곡선이 휘는 방향과 정도는 osculating plane과 osculating circle에 모두 담겨 있다.</p>
       <div class="proof">
-        <p class="proof-idea">증명 아이디어: 테일러 정리를 \(2\)차까지 쓴다. \(d(s_0) = d'(s_0) = 0\)이고 \(d''(s_0) = \kappa_0\inner{\mathbf{n}_0}{\nu}\)이므로, 이 값이 \(0\)인지가 접촉평면인지와 같다. (b)는 \(\gamma - \sigma\)의 \(0\), \(1\), \(2\)계 도함수가 \(s_0\)에서 모두 \(0\)이라는 데서 나온다.</p>
-        <p><span class="proof-head">증명.</span>
-        \(J = [s_0 - \delta, s_0 + \delta]\)는 컴팩트이므로 연속함수 \(\abs{\gamma'''}\)은 \(J\)에서 최댓값 \(M_3\)을 가진다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">정리 3.6.10</a>).</p>
+        <p class="proof-idea">Proof idea: Taylor's theorem을 \(2\)차까지 쓴다. \(d(s_0) = d'(s_0) = 0\)이고 \(d''(s_0) = \kappa_0\inner{\mathbf{n}_0}{\nu}\)이므로, 이 값이 \(0\)인지가 osculating plane인지와 같다. (b)는 \(\gamma - \sigma\)의 \(0\), \(1\), \(2\)계 도함수가 \(s_0\)에서 모두 \(0\)이라는 데서 나온다.</p>
+        <p><span class="proof-head">Proof.</span>
+        \(J = [s_0 - \delta, s_0 + \delta]\)는 compact이므로 연속함수 \(\abs{\gamma'''}\)은 \(J\)에서 최댓값 \(M_3\)을 가진다(<a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">Theorem 3.6.10</a>).</p>
         <p>(a) \(\nu \perp \mathbf{t}_0\)이다(\(P\)가 접선을 포함한다). \(d\)를 미분하면 \(d' = \inner{\mathbf{t}}{\nu}\), \(d'' = \inner{\gamma''}{\nu}\), \(d''' = \inner{\gamma'''}{\nu}\)이므로
-        \(d(s_0) = 0\), \(d'(s_0) = 0\), \(d''(s_0) = \kappa_0\inner{\mathbf{n}_0}{\nu}\)이고, 코시-슈바르츠 부등식에서 \(J\) 위에서 \(\abs{d'''} \le M_3\)이다. \(g(h) = d(s_0 + h)\)에
-        <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">보조정리 2.2.16</a>을 \(k = 2\)로 쓰면</p>
+        \(d(s_0) = 0\), \(d'(s_0) = 0\), \(d''(s_0) = \kappa_0\inner{\mathbf{n}_0}{\nu}\)이고, Cauchy–Schwarz inequality에서 \(J\) 위에서 \(\abs{d'''} \le M_3\)이다. \(g(h) = d(s_0 + h)\)에
+        <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">Lemma 2.2.16</a>을 \(k = 2\)로 쓰면</p>
         \[ \begin{aligned} d(s_0 + h) &= \frac{d''(s_0)}{2}h^2 + R(h),\\ R(h) &= \frac12\int_0^h (h - u)^2\,d'''(s_0 + u)\,du, \qquad \abs{R(h)} \le \frac{M_3}{6}\abs{h}^3 \end{aligned} \]
-        <p>이다(\(\abs{h} \le \delta\)). \(P\)가 접촉평면이면 \(\nu\)는 \(\mathbf{n}_0\)에도 수직이므로 \(d''(s_0) = 0\)이고 \(M = M_3/6\)으로 두면 된다.
-        \(P\)가 접촉평면이 아니면 \(\inner{\mathbf{n}_0}{\nu} \neq 0\)이다. 만약 \(\inner{\mathbf{n}_0}{\nu} = 0\)이면 \(\nu\)는 \(\mathbf{t}_0\)와 \(\mathbf{n}_0\)에 모두 수직이므로, \(P = \{x : \inner{x - \gamma(s_0)}{\nu} = 0\}\)은
-        \(\gamma(s_0)\)를 지나고 \(\mathbf{t}_0, \mathbf{n}_0\)을 포함하는 평면, 곧 접촉평면이 되기 때문이다. 그러면 \(d(s_0 + h)/h^2 = d''(s_0)/2 + R(h)/h^2\)이고 \(\abs{R(h)/h^2} \le M_3\abs{h}/6 \to 0\)이다.</p>
+        <p>이다(\(\abs{h} \le \delta\)). \(P\)가 osculating plane이면 \(\nu\)는 \(\mathbf{n}_0\)에도 수직이므로 \(d''(s_0) = 0\)이고 \(M = M_3/6\)으로 두면 된다.
+        \(P\)가 osculating plane이 아니면 \(\inner{\mathbf{n}_0}{\nu} \neq 0\)이다. 만약 \(\inner{\mathbf{n}_0}{\nu} = 0\)이면 \(\nu\)는 \(\mathbf{t}_0\)와 \(\mathbf{n}_0\)에 모두 수직이므로, \(P = \{x : \inner{x - \gamma(s_0)}{\nu} = 0\}\)은
+        \(\gamma(s_0)\)를 지나고 \(\mathbf{t}_0, \mathbf{n}_0\)을 포함하는 평면, 곧 osculating plane이 되기 때문이다. 그러면 \(d(s_0 + h)/h^2 = d''(s_0)/2 + R(h)/h^2\)이고 \(\abs{R(h)/h^2} \le M_3\abs{h}/6 \to 0\)이다.</p>
         <p>(b) \(e(s) = \gamma(s) - \sigma(s)\)로 두면 위의 계산에서 \(e(s_0) = e'(s_0) = e''(s_0) = 0\)이다. \(\sigma'''\)은 크기가 \(\kappa_0^2\)이므로 \(J\) 위에서 \(\abs{e'''} \le M_3 + \kappa_0^2\)이다.
-        \(e\)의 각 성분에 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">보조정리 2.2.16</a>(\(k = 2\))을 쓰면 \(e(s_0 + h) = \frac12\int_0^h (h - u)^2 e'''(s_0 + u)\,du\)이고, <a href="../04-curves/4-2-arc-length.html#i-4-2-9">보조정리 4.2.9</a>에서
-        \(\abs{e(s_0 + h)} \le \frac12\big\lvert\int_0^h (h - u)^2\abs{e'''(s_0 + u)}\,du\big\rvert \le (M_3 + \kappa_0^2)\abs{h}^3/6\)이다. 마지막 주장은 \(\sigma(s)\)가 접촉원 위의 점이므로
-        \(\gamma(s)\)에서 접촉원까지의 거리가 \(\abs{\gamma(s) - \sigma(s)}\) 이하라는 데서 나온다.</p>
+        \(e\)의 각 성분에 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">Lemma 2.2.16</a>(\(k = 2\))을 쓰면 \(e(s_0 + h) = \frac12\int_0^h (h - u)^2 e'''(s_0 + u)\,du\)이고, <a href="../04-curves/4-2-arc-length.html#i-4-2-9">Lemma 4.2.9</a>에서
+        \(\abs{e(s_0 + h)} \le \frac12\big\lvert\int_0^h (h - u)^2\abs{e'''(s_0 + u)}\,du\big\rvert \le (M_3 + \kappa_0^2)\abs{h}^3/6\)이다. 마지막 주장은 \(\sigma(s)\)가 osculating circle 위의 점이므로
+        \(\gamma(s)\)에서 osculating circle까지의 거리가 \(\abs{\gamma(s) - \sigma(s)}\) 이하라는 데서 나온다.</p>
       </div>
 
-      <p>접촉원이 \(2\)차까지 맞는 <em>유일한</em> 원이라는 것, 곧 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-5">정리 4.5.5</a>(b)의 공간판은 <a href="#ex-5-1-7">연습 5.1.7</a>에서 확인한다.
-      (a)의 \(\nu\)는 \(\mathbf{t}_0\)과 \(\mathbf{n}_0\)에 모두 수직인 단위벡터, 곧 \(\pm\mathbf{t}_0 \times \mathbf{n}_0\)이다. 이 벡터가 <a href="5-2-torsion.html">5.2절</a>의 주인공이다.</p>
+      <p>osculating circle이 \(2\)차까지 맞는 <em>유일한</em> 원이라는 것, 곧 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-5">Theorem 4.5.5</a>(b)의 공간판은 <a href="#ex-5-1-7">Exercise 5.1.7</a>에서 확인한다.
+      (a)의 \(\nu\)는 \(\mathbf{t}_0\)과 \(\mathbf{n}_0\)에 모두 수직인 단위벡터, 곧 \(\pm\mathbf{t}_0 \times \mathbf{n}_0\)이다. 이 벡터가 <a href="5-2-torsion.html">Section 5.2</a>의 주인공이다.</p>
 
       <aside class="box warning">
-        <p class="box-title">흔한 오해</p>
+        <p class="box-title">Common misconception</p>
         <ul>
-          <li>“곡률은 \(\abs{\gamma''(t)}\)이다”: 호의 길이 매개화에서만 맞다(<a href="#i-5-1-4">비예 5.1.4</a>). 일반 매개변수에서는 <a href="#eq-5-1-2">(5.1.2)</a>를 쓴다.</li>
-          <li>“곡률이 같은 두 곡선은 합동이다”: 공간곡선에서는 거짓이다. 반지름 \(2\)인 원과 \(a = b = 1\)인 나선은 곡률이 모두 \(1/2\)이다(<a href="#i-5-1-7">예 5.1.7</a>).
-          평면곡선에서는 부호곡률이 곡선을 결정했지만(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-11">따름정리 4.4.11</a>), 공간에서는 양이 하나 더 필요하다(<a href="5-4-fundamental-theorem.html">5.4절</a>).</li>
-          <li>“주법선은 곡선의 방향을 뒤집으면 반대가 된다”: 그렇지 않다. \(\mathbf{t}\)만 부호가 바뀌고, \(\gamma''\)과 \(\mathbf{n}\)은 그대로다. 부호곡률의 \(\mathbf{n}_s\)와 다른 점이다.</li>
+          <li>“curvature는 \(\abs{\gamma''(t)}\)이다”: arc length parametrization에서만 맞다(<a href="#i-5-1-4">Non-example 5.1.4</a>). 일반 매개변수에서는 <a href="#eq-5-1-2">(5.1.2)</a>를 쓴다.</li>
+          <li>“curvature가 같은 두 곡선은 합동이다”: space curve에서는 거짓이다. 반지름 \(2\)인 원과 \(a = b = 1\)인 helix는 curvature가 모두 \(1/2\)이다(<a href="#i-5-1-7">Example 5.1.7</a>).
+          plane curve에서는 signed curvature가 곡선을 결정했지만(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-11">Corollary 4.4.11</a>), 공간에서는 양이 하나 더 필요하다(<a href="5-4-fundamental-theorem.html">Section 5.4</a>).</li>
+          <li>“principal normal은 곡선의 orientation을 뒤집으면 반대가 된다”: 그렇지 않다. \(\mathbf{t}\)만 부호가 바뀌고, \(\gamma''\)과 \(\mathbf{n}\)은 그대로다. signed curvature의 \(\mathbf{n}_s\)와 다른 점이다.</li>
         </ul>
       </aside>
 
       <aside class="box convention">
-        <p class="box-title">규약 비교</p>
-        <p>do Carmo도 곡률을 \(\abs{\alpha''(s)}\)로 정의한다 <a class="cite" href="../../references.html#dC">[dC §1-5]</a>. 다만 곡선을 \(\alpha\), 곡률을 \(k\)로 쓰고, \(\mathbf{n}\)을 “normal vector”라 부르며,
-        \(\alpha''(s) = 0\)인 점을 “1차 특이점”이라 불러 처음부터 제외한다. 이 study set은 곡선을 \(\gamma\), 곡률을 \(\kappa\)로 쓰고(\(k\)는 부호곡률과 구별하기 어렵다), \(\mathbf{n}\)이 필요할 때마다 \(\kappa \gt 0\)을 가정으로 적는다.
-        do Carmo는 접촉평면이 접선과 가까운 한 점이 정하는 평면의 극한임을 국소 표준형으로 보이고 <a class="cite" href="../../references.html#dC">[dC §1-6]</a>,
-        접촉원은 가까운 세 점을 지나는 원의 극한으로 연습문제에서 정의한다 <a class="cite" href="../../references.html#dC">[dC §1-6, 연습문제 2]</a>.
-        이 절은 접촉원을 식 <a href="#eq-5-1-5">(5.1.5)</a>로 정의하고, “가장 가깝다”는 성질을 <a href="#i-5-1-14">정리 5.1.14</a>로 증명한다. 세 점의 극한이라는 성질의 평면판은 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-7">명제 4.5.7</a>이다.</p>
+        <p class="box-title">Conventions</p>
+        <p>do Carmo도 curvature를 \(\abs{\alpha''(s)}\)로 정의한다 <a class="cite" href="../../references.html#dC">[dC §1-5]</a>. 다만 곡선을 \(\alpha\), curvature를 \(k\)로 쓰고, \(\mathbf{n}\)을 “normal vector”라 부르며,
+        \(\alpha''(s) = 0\)인 점을 “1차 singular point”라 불러 처음부터 제외한다. 이 study set은 곡선을 \(\gamma\), curvature를 \(\kappa\)로 쓰고(\(k\)는 signed curvature와 구별하기 어렵다), \(\mathbf{n}\)이 필요할 때마다 \(\kappa \gt 0\)을 가정으로 적는다.
+        do Carmo는 osculating plane이 접선과 가까운 한 점이 정하는 평면의 극한임을 local canonical form으로 보이고 <a class="cite" href="../../references.html#dC">[dC §1-6]</a>,
+        osculating circle은 가까운 세 점을 지나는 원의 극한으로 연습문제에서 정의한다 <a class="cite" href="../../references.html#dC">[dC §1-6, Exercise 2]</a>.
+        이 절은 osculating circle을 <a href="#eq-5-1-5">(5.1.5)</a>로 정의하고, “가장 가깝다”는 성질을 <a href="#i-5-1-14">Theorem 5.1.14</a>로 증명한다. 세 점의 극한이라는 성질의 평면판은 <a href="../04-curves/4-5-osculating-circle.html#i-4-5-7">Proposition 4.5.7</a>이다.</p>
       </aside>
 
       <aside class="box forward">
-        <p class="box-title">나중에 보게 될 것: 곡률벡터를 곡면에 대해 나누기</p>
-        <p>곡면 위의 곡선에서는 곡률벡터 \(\gamma'' = \kappa\mathbf{n}\)을 곡면의 단위법벡터 방향 성분과 접평면 성분으로 나눈다. 법선 성분이 <a href="../08-gauss-map/index.html">8장</a>의 법곡률이고,
-        뫼니에 정리는 “같은 접선을 갖는 곡면 위의 곡선들은 곡률벡터의 법선 성분이 같다”는 것이다. 접평면 성분이 <a href="../09-intrinsic-geometry/index.html">9장</a>의 측지곡률이다.
-        <a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">예 4.5.12</a>에서 구면의 위도원에 대해 이 분해를 미리 계산했다. 이 개념들은 아직 정의하지 않았으므로 이 장의 증명에는 쓰지 않는다.</p>
+        <p class="box-title">Looking ahead: curvature vector를 surface에 대해 나누기</p>
+        <p>surface 위의 곡선에서는 curvature vector \(\gamma'' = \kappa\mathbf{n}\)을 surface의 unit normal vector 방향 성분과 tangent plane 성분으로 나눈다. normal component가 <a href="../08-gauss-map/index.html">Chapter 8</a>의 normal curvature이고,
+        Meusnier's theorem은 “같은 접선을 갖는 surface 위의 곡선들은 curvature vector의 normal component가 같다”는 것이다. tangent plane 성분이 <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>의 geodesic curvature이다.
+        <a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">Example 4.5.12</a>에서 sphere의 circle of latitude에 대해 이 분해를 미리 계산했다. 이 개념들은 아직 정의하지 않았으므로 이 장의 증명에는 쓰지 않는다.</p>
       </aside>
     </section>
 
     <section class="summary">
-      <h2>요약</h2>
+      <h2>Summary</h2>
       <ul>
-        <li>호의 길이로 매개화된 곡선의 곡률은 \(\kappa = \abs{\mathbf{t}'} = \abs{\gamma''} \ge 0\)이다. 일반 매개변수에서는 \(\kappa = \abs{d\mathbf{t}/dt}/\abs{\gamma'}\)이고, 곡률은 재매개화와 곡선의 방향에 무관하다(<a href="#i-5-1-2">명제 5.1.2</a>).</li>
-        <li>평면곡선에서는 \(\kappa = \abs{\kappa_s}\)이고(<a href="#i-5-1-5">명제 5.1.5</a>), \(\kappa \equiv 0\)이면 직선이다(<a href="#i-5-1-6">명제 5.1.6</a>). 원은 \(\kappa = 1/r\), 나선은 \(\kappa = a/(a^2 + b^2)\)이다.</li>
-        <li>\(\kappa \gt 0\)이면 주법선 \(\mathbf{n} = \gamma''/\abs{\gamma''}\)과 \(\mathbf{t}' = \kappa\mathbf{n}\)이 성립하고, \(\mathbf{t}, \mathbf{n}\)이 접촉평면을 생성한다. \(\kappa = 0\)인 점에서는 \(\mathbf{n}\)이 연속으로 정해지지 않을 수 있다.</li>
-        <li>곡률중심은 \(\gamma + \mathbf{n}/\kappa\), 접촉원은 접촉평면 안의 반지름 \(1/\kappa\)인 원이다. 평면곡선에서는 4장의 정의와 같다(<a href="#i-5-1-13">명제 5.1.13</a>).</li>
-        <li>접촉평면과 접촉원은 곡선에서 \(3\)차로만 벗어나고, 접선을 포함하는 다른 평면은 \(2\)차로 벗어난다(<a href="#i-5-1-14">정리 5.1.14</a>).</li>
+        <li>curve parametrized by arc length의 curvature는 \(\kappa = \abs{\mathbf{t}'} = \abs{\gamma''} \ge 0\)이다. 일반 매개변수에서는 \(\kappa = \abs{d\mathbf{t}/dt}/\abs{\gamma'}\)이고, curvature는 reparametrization과 곡선의 orientation에 무관하다(<a href="#i-5-1-2">Proposition 5.1.2</a>).</li>
+        <li>plane curve에서는 \(\kappa = \abs{\kappa_s}\)이고(<a href="#i-5-1-5">Proposition 5.1.5</a>), \(\kappa \equiv 0\)이면 직선이다(<a href="#i-5-1-6">Proposition 5.1.6</a>). 원은 \(\kappa = 1/r\), helix는 \(\kappa = a/(a^2 + b^2)\)이다.</li>
+        <li>\(\kappa \gt 0\)이면 principal normal \(\mathbf{n} = \gamma''/\abs{\gamma''}\)과 \(\mathbf{t}' = \kappa\mathbf{n}\)이 성립하고, osculating plane의 방향은 \(\mathbf{t}, \mathbf{n}\)의 span이다. \(\kappa = 0\)인 점에서는 \(\mathbf{n}\)이 연속으로 정해지지 않을 수 있다.</li>
+        <li>center of curvature는 \(\gamma + \mathbf{n}/\kappa\), osculating circle은 osculating plane 안의 반지름 \(1/\kappa\)인 원이다. plane curve에서는 Chapter 4의 정의와 같다(<a href="#i-5-1-13">Proposition 5.1.13</a>).</li>
+        <li>osculating plane과 osculating circle은 곡선에서 \(3\)차로만 벗어나고, 접선을 포함하는 다른 평면은 \(2\)차로 벗어난다(<a href="#i-5-1-14">Theorem 5.1.14</a>).</li>
       </ul>
-      <p class="next">다음 절에서는 곡률이 같은 원과 나선을 구별하는 양을 찾는다. 접촉평면의 단위법벡터인 종법선벡터 \(\mathbf{b} = \mathbf{t} \times \mathbf{n}\)을 도입하고,
-      이 벡터가 도는 빠르기, 곧 곡선이 접촉평면을 벗어나는 빠르기를 비틀림률로 정의한다.</p>
+      <p class="next">다음 절에서는 curvature가 같은 원과 helix를 구별하는 양을 찾는다. osculating plane의 unit normal vector인 binormal vector \(\mathbf{b} = \mathbf{t} \times \mathbf{n}\)을 도입하고,
+      이 벡터가 도는 빠르기, 곧 곡선이 osculating plane을 벗어나는 빠르기를 torsion으로 정의한다.</p>
     </section>
 
     <section class="exercises">
-      <h2>연습문제</h2>
+      <h2>Exercises</h2>
 
       <div class="exercise" id="ex-5-1-1" data-level="1">
-        <p><span class="thm-head">연습 5.1.1</span> <span class="level">★</span>
-        곡선 \(\gamma(t) = (\cosh t, \sinh t, t)\)의 단위접벡터와 곡률을 <a href="#eq-5-1-2">(5.1.2)</a>로 구하고, 곡률이 가장 큰 점을 구하여라. (비틀림률은 <a href="5-3-frenet.html">5.3절</a>에서 구한다.)</p>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 5.1.1</span> <span class="level">★</span>
+        곡선 \(\gamma(t) = (\cosh t, \sinh t, t)\)의 unit tangent vector와 curvature를 <a href="#eq-5-1-2">(5.1.2)</a>로 구하고, curvature가 가장 큰 점을 구하여라. (torsion은 <a href="5-3-frenet.html">Section 5.3</a>에서 구한다.)</p>
+        <details class="solution"><summary>Solution</summary>
           <p>\(\gamma' = (\sinh t, \cosh t, 1)\)이고 \(\abs{\gamma'}^2 = \sinh^2 t + \cosh^2 t + 1 = 2\cosh^2 t\)이므로(\(\cosh^2 - \sinh^2 = 1\)) \(\abs{\gamma'} = \sqrt2\cosh t\)이다. 따라서
           \(\mathbf{t} = (\tanh t,\ 1,\ \operatorname{sech} t)/\sqrt2\)이다. 미분하면 \(d\mathbf{t}/dt = (\operatorname{sech}^2 t,\ 0,\ -\operatorname{sech} t\tanh t)/\sqrt2\)이고</p>
           \[ \Big\lvert\frac{d\mathbf{t}}{dt}\Big\rvert = \frac{\operatorname{sech} t}{\sqrt2}\sqrt{\operatorname{sech}^2 t + \tanh^2 t} = \frac{\operatorname{sech} t}{\sqrt2} \]
           <p>이다(\(\operatorname{sech}^2 + \tanh^2 = 1\)). 따라서 \(\kappa = \dfrac{\operatorname{sech} t/\sqrt2}{\sqrt2\cosh t} = \dfrac{1}{2\cosh^2 t}\)이다. \(\cosh t \ge 1\)이고 등호는 \(t = 0\)에서만 성립하므로
-          곡률은 \(t = 0\), 곧 점 \((1, 0, 0)\)에서 최댓값 \(1/2\)을 가진다.</p>
-          <p class="verified">검증: <code>verify/v-5-1-curvature.py</code></p>
+          curvature는 \(t = 0\), 곧 점 \((1, 0, 0)\)에서 최댓값 \(1/2\)을 가진다.</p>
+          <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-1-2" data-level="1">
-        <p><span class="thm-head">연습 5.1.2</span> <span class="level">★</span>
-        정칙곡선에 대한 다음 주장이 참인지 거짓인지 판별하고 이유를 대어라.
-        (a) 곡선의 방향을 뒤집어도 곡률은 변하지 않는다.
-        (b) 곡선의 방향을 뒤집으면 주법선벡터의 부호가 바뀐다.
-        (c) 모든 \(t\)에서 \(\gamma''(t) = 0\)이면 자취는 직선에 들어 있다.
-        (d) 모든 점에서 \(\kappa = 0\)이면 어떤 매개화에서나 \(\gamma''(t) = 0\)이다.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) 참. <a href="#i-5-1-2">명제 5.1.2</a>(b).</p>
-          <p>(b) 거짓. 단위속력 곡선의 방향을 뒤집으면 \(\bar\gamma''(s) = \gamma''(-s)\)이므로 곡률벡터와 주법선이 그대로다(<a href="#i-5-1-8">정의 5.1.8</a> 뒤의 설명).</p>
-          <p>(c) 참. \(\gamma'\)이 상수 \(v\)이고, 정칙이므로 \(v \neq 0\)이며 \(\gamma(t) = \gamma(t_0) + (t - t_0)v\)이다(평균값 정리).</p>
-          <p>(d) 거짓. \(\gamma(t) = (e^t, 0, 0)\)은 정칙이고 자취가 \(x\)축에 들어 있으므로 \(\kappa \equiv 0\)이지만(<a href="#i-5-1-6">명제 5.1.6</a>), \(\gamma''(t) = (e^t, 0, 0) \neq 0\)이다.
+        <p><span class="thm-head">Exercise 5.1.2</span> <span class="level">★</span>
+        regular curve에 대한 다음 주장이 참인지 거짓인지 판별하고 이유를 대어라.
+        (a) 곡선의 orientation을 뒤집어도 curvature는 변하지 않는다.
+        (b) 곡선의 orientation을 뒤집으면 principal normal vector의 부호가 바뀐다.
+        (c) 모든 \(t\)에서 \(\gamma''(t) = 0\)이면 trace는 직선에 들어 있다.
+        (d) 모든 점에서 \(\kappa = 0\)이면 어떤 parametrization에서나 \(\gamma''(t) = 0\)이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. <a href="#i-5-1-2">Proposition 5.1.2</a>(b).</p>
+          <p>(b) 거짓. unit-speed curve의 방향을 뒤집으면 \(\bar\gamma''(s) = \gamma''(-s)\)이므로 curvature vector와 principal normal이 그대로다(<a href="#i-5-1-8">Definition 5.1.8</a> 뒤의 설명).</p>
+          <p>(c) 참. \(\gamma'\)이 상수 \(v\)이고, regular이므로 \(v \neq 0\)이며 \(\gamma(t) = \gamma(t_0) + (t - t_0)v\)이다(mean value theorem).</p>
+          <p>(d) 거짓. \(\gamma(t) = (e^t, 0, 0)\)은 regular이고 trace가 \(x\)축에 들어 있으므로 \(\kappa \equiv 0\)이지만(<a href="#i-5-1-6">Proposition 5.1.6</a>), \(\gamma''(t) = (e^t, 0, 0) \neq 0\)이다.
           실제로 \(\mathbf{t} \equiv e_1\)이므로 \(d\mathbf{t}/dt = 0\)이다. \(\gamma''\)은 속력이 변하는 몫을 담고 있을 뿐이다.</p>
-          <p class="verified">검증: <code>verify/v-5-1-curvature.py</code></p>
+          <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-1-3" data-level="1">
-        <p><span class="thm-head">연습 5.1.3</span> <span class="level">★</span>
-        \(\gamma\)가 호의 길이로 매개화되어 있고 자취가 구면 \(S^2(r) = \{p : \abs{p} = r\}\)에 들어 있으면 모든 점에서 \(\kappa \ge 1/r\)임을 보여라. 등호가 성립할 필요충분조건이
-        그 점의 곡률중심이 구의 중심 \(O\)인 것임을 보이고, 위도원(<a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">예 4.5.12</a>)으로 확인하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p><a href="../04-curves/4-5-osculating-circle.html#ex-4-5-7">연습 4.5.7</a>의 논증을 그대로 쓴다. 그 논증은 곡선이 평면에 있다는 가정을 쓰지 않는다.
-          \(\abs{\gamma}^2 = r^2\)을 미분하면 \(\inner{\gamma}{\gamma'} = 0\)이고(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">따름정리 4.1.12</a>), 다시 미분하면 \(\inner{\gamma'}{\gamma'} + \inner{\gamma}{\gamma''} = 0\), 곧 \(\inner{\gamma}{\gamma''} = -1\)이다.
-          코시-슈바르츠 부등식에서 \(1 = \abs{\inner{\gamma}{\gamma''}} \le \abs{\gamma}\,\abs{\gamma''} = r\kappa\)이므로 \(\kappa \ge 1/r\)이다.</p>
-          <p>등호이면 코시-슈바르츠의 등호 조건에서 \(\gamma''\)은 \(\gamma\)의 스칼라배이고, \(\inner{\gamma}{\gamma''} = -1\)과 \(\abs{\gamma''} = 1/r\)에서 \(\gamma'' = -\gamma/r^2\)이다. 이때 \(\kappa \gt 0\)이고
-          곡률중심은 \(\gamma + \gamma''/\abs{\gamma''}^2 = \gamma - \gamma = O\)이다. 거꾸로 \(\kappa \gt 0\)이고 곡률중심이 \(O\)이면 \(\gamma''/\abs{\gamma''}^2 = -\gamma\)이므로 \(\kappa = 1/\abs{\gamma} = 1/r\)이다.
-          위도원은 \(\kappa = 1/(r\sin\theta_0) \ge 1/r\)이고 등호는 적도(\(\theta_0 = \pi/2\))에서만 성립하며, 그때만 곡률중심 \((0, 0, r\cos\theta_0)\)이 \(O\)이다.</p>
-          <p class="verified">검증: <code>verify/v-5-1-curvature.py</code></p>
+        <p><span class="thm-head">Exercise 5.1.3</span> <span class="level">★</span>
+        \(\gamma\)가 arc length로 parametrization되어 있고 trace가 sphere \(S^2(r) = \{p : \abs{p} = r\}\)에 들어 있으면 모든 점에서 \(\kappa \ge 1/r\)임을 보여라. 등호가 성립할 필요충분조건이
+        그 점의 center of curvature가 구의 중심 \(O\)인 것임을 보이고, circle of latitude(<a href="../04-curves/4-5-osculating-circle.html#i-4-5-12">Example 4.5.12</a>)로 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="../04-curves/4-5-osculating-circle.html#ex-4-5-7">Exercise 4.5.7</a>의 논증을 그대로 쓴다. 그 논증은 곡선이 평면에 있다는 가정을 쓰지 않는다.
+          \(\abs{\gamma}^2 = r^2\)을 미분하면 \(\inner{\gamma}{\gamma'} = 0\)이고(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-12">Corollary 4.1.12</a>), 다시 미분하면 \(\inner{\gamma'}{\gamma'} + \inner{\gamma}{\gamma''} = 0\), 곧 \(\inner{\gamma}{\gamma''} = -1\)이다.
+          Cauchy–Schwarz inequality에서 \(1 = \abs{\inner{\gamma}{\gamma''}} \le \abs{\gamma}\,\abs{\gamma''} = r\kappa\)이므로 \(\kappa \ge 1/r\)이다.</p>
+          <p>등호이면 Cauchy–Schwarz inequality의 등호 조건에서 \(\gamma''\)은 \(\gamma\)의 스칼라배이고, \(\inner{\gamma}{\gamma''} = -1\)과 \(\abs{\gamma''} = 1/r\)에서 \(\gamma'' = -\gamma/r^2\)이다. 이때 \(\kappa \gt 0\)이고
+          center of curvature는 \(\gamma + \gamma''/\abs{\gamma''}^2 = \gamma - \gamma = O\)이다. 거꾸로 \(\kappa \gt 0\)이고 center of curvature가 \(O\)이면 \(\gamma''/\abs{\gamma''}^2 = -\gamma\)이므로 \(\kappa = 1/\abs{\gamma} = 1/r\)이다.
+          circle of latitude는 \(\kappa = 1/(r\sin\theta_0) \ge 1/r\)이고 등호는 적도(\(\theta_0 = \pi/2\))에서만 성립하며, 그때만 center of curvature \((0, 0, r\cos\theta_0)\)이 \(O\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-1-4" data-level="1">
-        <p><span class="thm-head">연습 5.1.4</span> <span class="level">★</span>
-        나선 \(\gamma(t) = (a\cos t, a\sin t, bt)\)에 대하여
-        (a) \(\gamma(t)\)를 지나고 방향이 \(\mathbf{n}(t)\)인 직선(주법선)이 \(z\)축과 수직으로 만남을 보여라.
-        (b) 곡률중심들이 그리는 곡선이 반지름 \(b^2/a\)인 나선임을 보여라. \(\abs{b} = a\)이면 어떻게 되는가?
-        <a class="cite" href="../../references.html#dC">[(a): dC §1-5 연습문제 1 변형]</a></p>
-        <details class="solution"><summary>풀이</summary>
-          <p>(a) <a href="#i-5-1-10">예 5.1.10</a>(b)에서 \(\mathbf{n}(t) = -(\cos t, \sin t, 0)\)이다(\(t = s/c\)). \(\gamma(t) + \lambda\mathbf{n}(t) = ((a - \lambda)\cos t,\ (a - \lambda)\sin t,\ bt)\)는 \(\lambda = a\)에서
+        <p><span class="thm-head">Exercise 5.1.4</span> <span class="level">★</span>
+        helix \(\gamma(t) = (a\cos t, a\sin t, bt)\)에 대하여
+        (a) \(\gamma(t)\)를 지나고 방향이 \(\mathbf{n}(t)\)인 직선(principal normal)이 \(z\)축과 수직으로 만남을 보여라.
+        (b) center of curvature가 그리는 곡선이 반지름 \(b^2/a\)인 helix임을 보여라. \(\abs{b} = a\)이면 어떻게 되는가?
+        <a class="cite" href="../../references.html#dC">[(a): dC §1-5 Exercise 1, modified]</a></p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) <a href="#i-5-1-10">Example 5.1.10</a>(b)에서 \(\mathbf{n}(t) = -(\cos t, \sin t, 0)\)이다(\(t = s/c\)). \(\gamma(t) + \lambda\mathbf{n}(t) = ((a - \lambda)\cos t,\ (a - \lambda)\sin t,\ bt)\)는 \(\lambda = a\)에서
           \(z\)축 위의 점 \((0, 0, bt)\)이 된다. \(\mathbf{n}\)의 \(z\)성분이 \(0\)이므로 이 직선은 \(z\)축의 방향 \(e_3\)과 수직이다.</p>
           <p>(b) \(1/\kappa = (a^2 + b^2)/a\)이므로 <a href="#eq-5-1-5">(5.1.5)</a>에서</p>
           \[ \begin{aligned} c(t) &= (a\cos t, a\sin t, bt) - \frac{a^2 + b^2}{a}(\cos t, \sin t, 0)\\ &= \Big(\frac{b^2}{a}\cos(t + \pi),\ \frac{b^2}{a}\sin(t + \pi),\ bt\Big) \end{aligned} \]
-          <p>이다. 이것은 반지름 \(b^2/a\)이고 한 바퀴에 높이가 \(2\pi b\)만큼 변하는 나선을 반 바퀴 돌려 놓은 것이다(<a href="#fig-5-1-1">그림 5.1.1</a>의 \(c\)). \(\abs{b} = a\)이면 반지름이 \(a\)이므로
-          곡률중심들이 원래 나선과 같은 원기둥 위에 있다. 이때 \(c(t) = \gamma(t + \pi) - (0, 0, \pi b)\)이다.</p>
-          <p class="verified">검증: <code>verify/v-5-1-curvature.py</code></p>
+          <p>이다. 이것은 반지름 \(b^2/a\)이고 한 바퀴에 높이가 \(2\pi b\)만큼 변하는 helix를 반 바퀴 돌려 놓은 것이다(<a href="#fig-5-1-1">Figure 5.1.1</a>의 \(c\)). \(\abs{b} = a\)이면 반지름이 \(a\)이므로
+          center of curvature가 이루는 곡선이 원래 helix와 같은 cylinder 위에 있다. 이때 \(c(t) = \gamma(t + \pi) - (0, 0, \pi b)\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-1-5" data-level="2">
-        <p><span class="thm-head">연습 5.1.5</span> <span class="level">★★</span>
-        \(\gamma\)가 호의 길이로 매개화되어 있을 때 \(\gamma(s)\)에서 \(s_0\)에서의 접선까지의 거리를 \(D(s)\)라 하자. \(\displaystyle \lim_{s \to s_0} \frac{2D(s)}{(s - s_0)^2} = \kappa(s_0)\)임을 보여라.
-        (곡률은 곡선이 접선에서 벗어나는 빠르기다.)</p>
-        <details class="hint"><summary>힌트</summary><p>\(w = \gamma(s) - \gamma(s_0)\)이면 \(D^2 = \abs{w}^2 - \inner{w}{\mathbf{t}_0}^2\)이다. \(w\)를 테일러 전개한다.</p></details>
-        <details class="solution"><summary>풀이</summary>
+        <p><span class="thm-head">Exercise 5.1.5</span> <span class="level">★★</span>
+        \(\gamma\)가 arc length로 parametrization되어 있을 때 \(\gamma(s)\)에서 \(s_0\)에서의 접선까지의 거리를 \(D(s)\)라 하자. \(\displaystyle \lim_{s \to s_0} \frac{2D(s)}{(s - s_0)^2} = \kappa(s_0)\)임을 보여라.
+        (curvature는 곡선이 접선에서 벗어나는 빠르기다.)</p>
+        <details class="hint"><summary>Hint</summary><p>\(w = \gamma(s) - \gamma(s_0)\)이면 \(D^2 = \abs{w}^2 - \inner{w}{\mathbf{t}_0}^2\)이다. \(w\)를 Taylor 전개한다.</p></details>
+        <details class="solution"><summary>Solution</summary>
           <p>\(w(s) = \gamma(s) - \gamma(s_0)\)의 \(\mathbf{t}_0\)에 수직인 성분이 \(w - \inner{w}{\mathbf{t}_0}\mathbf{t}_0\)이고 그 크기가 \(D\)이다. \(h = s - s_0\)로 두고
-          <a href="#i-5-1-14">정리 5.1.14</a>의 증명처럼 각 성분에 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">보조정리 2.2.16</a>(\(k = 2\))을 쓰면 \(w = h\mathbf{t}_0 + \tfrac{h^2}{2}\gamma''(s_0) + E(h)\), \(\abs{E(h)} \le M_3\abs{h}^3/6\)이다.
+          <a href="#i-5-1-14">Theorem 5.1.14</a>의 증명처럼 각 성분에 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-16">Lemma 2.2.16</a>(\(k = 2\))을 쓰면 \(w = h\mathbf{t}_0 + \tfrac{h^2}{2}\gamma''(s_0) + E(h)\), \(\abs{E(h)} \le M_3\abs{h}^3/6\)이다.
           \(\gamma''(s_0) \perp \mathbf{t}_0\)이므로 \(w - \inner{w}{\mathbf{t}_0}\mathbf{t}_0 = \tfrac{h^2}{2}\gamma''(s_0) + \big(E - \inner{E}{\mathbf{t}_0}\mathbf{t}_0\big)\)이고, 둘째 항의 크기는 \(\abs{E}\) 이하다.
-          따라서 삼각부등식에서 \(\big\lvert D - \tfrac{h^2}{2}\kappa(s_0)\big\rvert \le \abs{E} \le M_3\abs{h}^3/6\)이고, \(h^2/2\)로 나누면 \(\big\lvert 2D/h^2 - \kappa(s_0)\big\rvert \le M_3\abs{h}/3 \to 0\)이다.</p>
-          <p class="verified">검증: <code>verify/v-5-1-curvature.py</code> (나선에서 \(D^2\)의 급수 전개)</p>
+          따라서 triangle inequality에서 \(\big\lvert D - \tfrac{h^2}{2}\kappa(s_0)\big\rvert \le \abs{E} \le M_3\abs{h}^3/6\)이고, \(h^2/2\)로 나누면 \(\big\lvert 2D/h^2 - \kappa(s_0)\big\rvert \le M_3\abs{h}/3 \to 0\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code> (helix에서 \(D^2\)의 급수 전개)</p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-1-6" data-level="2">
-        <p><span class="thm-head">연습 5.1.6</span> <span class="level">★★</span>
-        \(\gamma\colon [s_1, s_2] \to \R^3\)이 호의 길이로 매개화되어 있을 때, 단위접벡터를 원점에서 그린 곡선 \(s \mapsto \mathbf{t}(s)\)(접벡터 지시곡선)은 단위구면 위에 있고 그 속력이 \(\kappa(s)\)임을 보여라.
-        따라서 \(\int_{s_1}^{s_2} \kappa\,ds\)는 접벡터 지시곡선의 길이다. 나선을 한 바퀴 도는 동안의 이 적분(전곡률)을 구하고 \(2\pi\)와 비교하여라.</p>
-        <details class="solution"><summary>풀이</summary>
-          <p>\(\abs{\mathbf{t}} = 1\)이므로 \(\mathbf{t}(s)\)는 단위구면 위에 있고, 속도가 \(\mathbf{t}'(s)\)이므로 속력은 \(\abs{\mathbf{t}'} = \kappa\)이다(<a href="#eq-5-1-1">(5.1.1)</a>). 길이의 정의
-          <a href="../04-curves/4-2-arc-length.html#i-4-2-7">정의 4.2.7</a>에서 지시곡선의 길이는 \(\int_{s_1}^{s_2}\abs{\mathbf{t}'}\,ds = \int_{s_1}^{s_2}\kappa\,ds\)이다.
-          나선은 한 바퀴의 길이가 \(2\pi c\)(\(c = \sqrt{a^2 + b^2}\), <a href="../04-curves/4-2-arc-length.html#i-4-2-8">예 4.2.8</a>)이고 \(\kappa = a/c^2\)이므로 전곡률은 \((a/c^2)(2\pi c) = 2\pi a/\sqrt{a^2 + b^2} \lt 2\pi\)이다.
-          실제로 \(\mathbf{t} = (-\tfrac ac\sin\tfrac sc,\ \tfrac ac\cos\tfrac sc,\ \tfrac bc)\)는 높이 \(b/c\)에 있는 반지름 \(a/c\)인 원(단위구면의 위도원)을 한 바퀴 돌고, 그 길이가 \(2\pi a/c\)이다.
-          평면의 원은 전곡률이 정확히 \(2\pi\)인데(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-9">정리 4.4.9</a>), 나선은 위로 올라가는 만큼 덜 돈다.</p>
-          <p class="verified">검증: <code>verify/v-5-1-curvature.py</code></p>
+        <p><span class="thm-head">Exercise 5.1.6</span> <span class="level">★★</span>
+        \(\gamma\colon [s_1, s_2] \to \R^3\)이 arc length로 parametrization되어 있을 때, unit tangent vector를 원점에서 그린 곡선 \(s \mapsto \mathbf{t}(s)\)(tangent indicatrix)은 unit sphere 위에 있고 그 속력이 \(\kappa(s)\)임을 보여라.
+        따라서 \(\int_{s_1}^{s_2} \kappa\,ds\)는 tangent indicatrix의 길이다. helix를 한 바퀴 도는 동안의 이 적분(total curvature)을 구하고 \(2\pi\)와 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\abs{\mathbf{t}} = 1\)이므로 \(\mathbf{t}(s)\)는 unit sphere 위에 있고, 속도가 \(\mathbf{t}'(s)\)이므로 속력은 \(\abs{\mathbf{t}'} = \kappa\)이다(<a href="#eq-5-1-1">(5.1.1)</a>). 길이의 정의
+          <a href="../04-curves/4-2-arc-length.html#i-4-2-7">Definition 4.2.7</a>에서 지시곡선의 길이는 \(\int_{s_1}^{s_2}\abs{\mathbf{t}'}\,ds = \int_{s_1}^{s_2}\kappa\,ds\)이다.
+          helix는 한 바퀴의 길이가 \(2\pi c\)(\(c = \sqrt{a^2 + b^2}\), <a href="../04-curves/4-2-arc-length.html#i-4-2-8">Example 4.2.8</a>)이고 \(\kappa = a/c^2\)이므로 total curvature는 \((a/c^2)(2\pi c) = 2\pi a/\sqrt{a^2 + b^2} \lt 2\pi\)이다.
+          실제로 \(\mathbf{t} = (-\tfrac ac\sin\tfrac sc,\ \tfrac ac\cos\tfrac sc,\ \tfrac bc)\)는 높이 \(b/c\)에 있는 반지름 \(a/c\)인 원(unit sphere의 circle of latitude)을 한 바퀴 돌고, 그 길이가 \(2\pi a/c\)이다.
+          평면의 원은 total curvature가 정확히 \(2\pi\)인데(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-9">Theorem 4.4.9</a>), helix는 위로 올라가는 만큼 덜 돈다.</p>
+          <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code></p>
         </details>
       </div>
 
       <div class="exercise" id="ex-5-1-7" data-level="3">
-        <p><span class="thm-head">연습 5.1.7</span> <span class="level">★★★</span>
-        \(\gamma\)가 호의 길이로 매개화되어 있고 \(\kappa(s_0) \gt 0\)이라 하자. 중심 \(q\), 반지름 \(\rho \gt 0\)인 \(\R^3\) 안의 원(어떤 평면 안에 있어도 된다)의 단위속력 매개화 \(\tilde\sigma\)가
-        \(\tilde\sigma(s_0) = \gamma(s_0)\), \(\tilde\sigma'(s_0) = \gamma'(s_0)\), \(\tilde\sigma''(s_0) = \gamma''(s_0)\)을 만족하면, 그 원이 \(s_0\)에서의 접촉원임을 보여라.
-        (<a href="../04-curves/4-5-osculating-circle.html#i-4-5-5">정리 4.5.5</a>(b)의 공간판이다.)</p>
-        <details class="hint"><summary>힌트</summary><p>원이 놓인 평면의 정규직교 방향 \(E, F\)를 잡고 \(\tilde\sigma - q\)를 \((E, F)\) 좌표로 쓴 뒤 <a href="../04-curves/4-4-signed-curvature.html#i-4-4-8">보조정리 4.4.8</a>로 각을 잡는다. 그다음 \(\tilde\sigma\)를 두 번 미분해 본다.</p></details>
-        <details class="solution"><summary>풀이</summary>
-          <p>원이 평면 \(\{q + xE + yF\}\)(\(E, F\)는 정규직교) 안에 있다고 하자. \(x(u) = \inner{\tilde\sigma(u) - q}{E}/\rho\), \(y(u) = \inner{\tilde\sigma(u) - q}{F}/\rho\)로 두면 \((x, y)\)는 매끄럽고 \(x^2 + y^2 = 1\)이므로,
-          <a href="../04-curves/4-4-signed-curvature.html#i-4-4-8">보조정리 4.4.8</a>에 의해 매끄러운 \(\varphi\)가 있어 \((x, y) = (\cos\varphi, \sin\varphi)\)이고 \(\tilde\sigma = q + \rho\cos\varphi\,E + \rho\sin\varphi\,F\)이다.
-          \(\abs{\tilde\sigma'}^2 = \rho^2\varphi'^2 = 1\)이고 \(\varphi'\)은 연속이므로 중간값 정리(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">따름정리 3.7.6</a>)에 의해 \(\varphi' \equiv 1/\rho\) 또는 \(\varphi' \equiv -1/\rho\)이다. 어느 경우든 두 번 미분하면
+        <p><span class="thm-head">Exercise 5.1.7</span> <span class="level">★★★</span>
+        \(\gamma\)가 arc length로 parametrization되어 있고 \(\kappa(s_0) \gt 0\)이라 하자. 중심 \(q\), 반지름 \(\rho \gt 0\)인 \(\R^3\) 안의 원(어떤 평면 안에 있어도 된다)의 단위속력 parametrization \(\tilde\sigma\)가
+        \(\tilde\sigma(s_0) = \gamma(s_0)\), \(\tilde\sigma'(s_0) = \gamma'(s_0)\), \(\tilde\sigma''(s_0) = \gamma''(s_0)\)을 만족하면, 그 원이 \(s_0\)에서의 osculating circle임을 보여라.
+        (<a href="../04-curves/4-5-osculating-circle.html#i-4-5-5">Theorem 4.5.5</a>(b)의 공간판이다.)</p>
+        <details class="hint"><summary>Hint</summary><p>원이 놓인 평면의 orthonormal 방향 \(E, F\)를 잡고 \(\tilde\sigma - q\)를 \((E, F)\) 좌표로 쓴 뒤 <a href="../04-curves/4-4-signed-curvature.html#i-4-4-8">Lemma 4.4.8</a>로 각을 잡는다. 그다음 \(\tilde\sigma\)를 두 번 미분해 본다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>원이 평면 \(\{q + xE + yF\}\)(\(E, F\)는 orthonormal) 안에 있다고 하자. \(x(u) = \inner{\tilde\sigma(u) - q}{E}/\rho\), \(y(u) = \inner{\tilde\sigma(u) - q}{F}/\rho\)로 두면 \((x, y)\)는 매끄럽고 \(x^2 + y^2 = 1\)이므로,
+          <a href="../04-curves/4-4-signed-curvature.html#i-4-4-8">Lemma 4.4.8</a>에 의해 smooth \(\varphi\)가 있어 \((x, y) = (\cos\varphi, \sin\varphi)\)이고 \(\tilde\sigma = q + \rho\cos\varphi\,E + \rho\sin\varphi\,F\)이다.
+          \(\abs{\tilde\sigma'}^2 = \rho^2\varphi'^2 = 1\)이고 \(\varphi'\)은 연속이므로 intermediate value theorem(<a href="../03-topology-basics/3-7-connectedness.html#i-3-7-6">Corollary 3.7.6</a>)에 의해 \(\varphi' \equiv 1/\rho\) 또는 \(\varphi' \equiv -1/\rho\)이다. 어느 경우든 두 번 미분하면
           \(\tilde\sigma'' = -\rho\varphi'^2(\cos\varphi\,E + \sin\varphi\,F) = -(\tilde\sigma - q)/\rho^2\)이다.
           \(s_0\)에서 가정을 쓰면 \(\gamma''(s_0) = -(\gamma(s_0) - q)/\rho^2\)이므로, 크기를 재면 \(\kappa(s_0) = \abs{\gamma(s_0) - q}/\rho^2 = \rho/\rho^2 = 1/\rho\)이고
           \(q = \gamma(s_0) + \rho^2\gamma''(s_0) = \gamma(s_0) + \gamma''(s_0)/\abs{\gamma''(s_0)}^2 = c(s_0)\)이다. 또 원의 평면은 \(q\)를 지나고 방향이 \(\tilde\sigma'(s_0) = \mathbf{t}_0\)과
-          \(\tilde\sigma(s_0) - q = -\mathbf{n}_0/\kappa_0\)(서로 수직인 두 영이 아닌 벡터)으로 생성되므로 접촉평면이다. 중심, 반지름, 평면이 모두 같으므로 이 원은 접촉원이다.</p>
-          <p class="verified">검증: <code>verify/v-5-1-curvature.py</code> (\(\tilde\sigma'' = -(\tilde\sigma - q)/\rho^2\))</p>
+          \(\tilde\sigma(s_0) - q = -\mathbf{n}_0/\kappa_0\)(서로 수직인 두 영이 아닌 벡터)의 span을 방향으로 가지므로 osculating plane이다. 중심, 반지름, 평면이 모두 같으므로 이 원은 osculating circle이다.</p>
+          <p class="verified">Verification: <code>verify/v-5-1-curvature.py</code> (\(\tilde\sigma'' = -(\tilde\sigma - q)/\rho^2\))</p>
         </details>
       </div>
     </section>
   </main>
 
   <nav class="pager">
-    <a rel="prev" href="index.html">← 5. 공간곡선과 프레네 틀 (장 개요)</a>
-    <a rel="next" href="5-2-torsion.html">5.2 비틀림률 →</a>
+    <a rel="prev" href="index.html">← Chapter overview</a>
+    <a rel="next" href="5-2-torsion.html">5.2 Torsion →</a>
   </nav>
 </body>
 </html>
