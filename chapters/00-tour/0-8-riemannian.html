@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.8 Riemannian Geometry: Measuring on a Manifold — DG Study</title>
+  <meta name="dg-id" content="0.8">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.3, 0.4, 0.5, 0.6, 0.7">
+  <meta name="dg-refs" content="Lee-IRM Ch. 2, 3, 5, 6, 7, 8; dC §5-11; Pennec06; Hartley13; AMS; Boumal; Tenenbaum00; Nickel17; Bronstein17">
+  <meta name="dg-updated" content="2026-10-06">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">0. A Guided Tour of Differential Geometry</a> ›
+    <span>0.8 Riemannian Geometry: Measuring on a Manifold</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>0.8 Riemannian Geometry: Measuring on a Manifold</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM, Ch. 2–8]</a>,
+        <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>,
+        <a class="cite" href="../../references.html#AMS">[AMS]</a>,
+        <a class="cite" href="../../references.html#Boumal">[Boumal]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>Riemannian metric이 tangent space마다 주어진 inner product이고 first fundamental form의 일반화임을 설명하고, length와 distance를 계산할 수 있다.</li>
+        <li>geodesic, exponential map, logarithm map을 sphere 위에서 식과 그림으로 설명할 수 있다.</li>
+        <li>curvature의 의미를 geodesic triangle의 내각의 합과 geodesic circle의 둘레로 설명하고, 세 model space를 비교할 수 있다.</li>
+        <li>\(\mathrm{SO}(3)\) 위의 평균, Riemannian optimization, hyperbolic embedding이 이 개념들을 어떻게 쓰는지 말하고, 관심사에 맞는 깊은 장을 고를 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0-6-manifolds.html">Section 0.6</a>: manifold, tangent space, \(\mathrm{SO}(3)\)와 Rodrigues formula <a href="0-6-manifolds.html#eq-0-6-7">(0.6.7)</a></li>
+        <li><a href="0-7-forms.html">Section 0.7</a>: covector와 \(df\), \(n\)-form의 적분</li>
+        <li><a href="0-3-surfaces.html#i-0-3-5">Section 0.3</a>(first fundamental form), <a href="0-4-curvature.html#i-0-4-5">Section 0.4</a>(Gaussian curvature), <a href="0-5-intrinsic.html">Section 0.5</a>(geodesic, parallel transport, Gauss–Bonnet theorem)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="0-7-forms.html#sec-covectors">Section 0.7</a>에서 \(df\)는 vector가 아니라 covector라는 것을 보았다. 화살표 모양의 gradient를 얻으려면 covector를 vector로 바꾸는 규칙, 곧 inner product가 필요하다.
+      <a href="0-6-manifolds.html">Section 0.6</a>의 manifold에는 아직 길이도 각도 없다. chart는 “어디가 어디 옆인지”만 알려 줄 뿐이다.</p>
+      <p>surface에서는 답을 이미 보았다. <a href="0-3-surfaces.html#i-0-3-5">Section 0.3</a>의 first fundamental form은 \(\R^3\)의 inner product를 tangent plane에 제한한 것이었고, <a href="0-5-intrinsic.html#i-0-5-1">Section 0.5</a>에서 geodesic과 Gaussian curvature가 모두 이것만으로 정해진다는 것을 보았다.
+      그렇다면 바깥 공간 없이 각 tangent space에 inner product를 <em>직접</em>주면 된다. 이것이 Riemannian geometry의 출발점이다.</p>
+    </section>
+
+    <section id="sec-metric">
+      <h2>Riemannian Metrics</h2>
+
+      <div class="thm definition" id="i-0-8-1">
+        <p><span class="thm-head">Definition 0.8.1</span> <span class="thm-name">(Riemannian metric, simplified)</span>.
+        smooth manifold \(M\)의 각 점 \(p\)에서 tangent space \(T_pM\)의 inner product \(\inner{\cdot}{\cdot}_g\)를 주고, \(p\)에 대해 매끄럽게 변하게 한 것 \(g\)를 <strong>Riemannian metric</strong>(리만 계량)이라 한다. 짝 \((M, g)\)를 <strong>Riemannian manifold</strong>(리만 다양체)라 한다.
+        chart에서는 symmetric positive definite matrix \((g_{ij}(x))\)로 쓰고</p>
+        <div class="equation" id="eq-0-8-1">
+        \[ \inner{v}{w}_g = \sum_{i,j} g_{ij}\, v^i w^j, \qquad \abs{v}_g = \sqrt{\inner{v}{v}_g} \tag{0.8.1} \]
+        </div>
+        <p>이다. 정확한 정의(smooth symmetric 2-tensor field)와 존재 증명은 <a href="../21-riemannian-metrics/index.html#toc-21-1">Section 21.1</a>.</p>
+      </div>
+
+      <div class="thm example" id="i-0-8-2">
+        <p><span class="thm-head">Example 0.8.2</span> <span class="thm-name">(three metrics)</span>.</p>
+        <ul>
+          <li>(a) <strong>Euclidean metric</strong>(유클리드 계량): \(\R^n\)에서 \(g_{ij} = \delta_{ij}\).</li>
+          <li>(b) <strong>induced metric</strong>(유도 계량): \(M \subseteq \R^N\)이면 \(\R^N\)의 inner product를 \(T_pM\)에 제한한다. 반지름 \(r\)인 sphere의 standard parametrization에서는 first fundamental form 그대로(<a href="0-3-surfaces.html#i-0-3-6">Example 0.3.6</a>) \(E = r^2\), \(F = 0\), \(G = r^2\sin^2\theta\)이므로 \(g = r^2\,d\theta^2 + r^2\sin^2\theta\,d\varphi^2\)이다.</li>
+          <li>(c) <strong>hyperbolic plane</strong>(쌍곡평면): \(\mathbb{U}^2 = \{(x, y) : y \gt 0\}\)에서 \(g = (dx^2 + dy^2)/y^2\). Euclidean inner product를 \(y^2\)로 나눈 것이므로 각은 Euclidean과 같고 길이는 \(1/y\)배다. boundary \(y = 0\)에 가까울수록 같은 Euclidean 길이가 더 길게 재진다(<a href="#fig-0-8-1">Figure 0.8.1</a>).
+          그런데 \(\mathbb{U}^2\) 전체를 길이를 보존하면서 \(\R^3\) 안의 surface로 실현하는 것, 곧 \(\R^3\)으로 가는 <strong>isometric immersion</strong>(등거리 몰입)은 없다. 이것이 <strong>Hilbert's theorem</strong>(힐베르트 정리)이다 <a class="cite" href="../../references.html#dC">[dC §5-11]</a>. 바깥 공간 없이 metric을 주는 정의가 필요한 이유 중 하나다.</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-0-8-riemannian.py</code></p>
+      </div>
+
+      <p>metric이 있으면 곡선의 길이와 두 점 사이의 거리를 정의할 수 있다:</p>
+      <div class="equation" id="eq-0-8-2">
+      \[ \begin{aligned} L_g(\gamma) &= \int_a^b \abs{\gamma'(t)}_g\, dt, \\ d_g(p, q) &= \inf_\gamma L_g(\gamma) \end{aligned} \tag{0.8.2} \]
+      </div>
+      <p>여기서 \(\inf\)는 \(p\)에서 \(q\)로 가는 모든 곡선 \(\gamma\)에 대해 취한다. 예를 들어 \(\mathbb{U}^2\)에서 \((0, 1)\)부터 \((0, e)\)까지의 수직 선분은 \(\int_1^e dy/y = 1\)이다. 같은 계산으로 boundary \(y = 0\)은 무한히 멀다(<a href="#ex-0-8-1">Exercise 0.8.1</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-8-1">
+        <img src="figures/fig-0-8-1-hyperbolic-plane.svg" alt="위쪽 half-plane. 아래 가로선이 boundary y = 0이다. 여러 높이에 회색 작은 원들이 있는데, 위로 갈수록 크고 boundary에 가까울수록 작다. 주황 세로선 하나와 x축 위에 중심을 둔 주황 반원 두 개가 geodesic이다. 큰 반원 위의 두 점 A, B 사이의 호가 파랗게 강조되어 있고, A와 B를 잇는 수평 점선 선분이 함께 그려져 있다.">
+        <figcaption><span class="fig-head">Figure 0.8.1.</span>
+        hyperbolic plane \(\mathbb{U}^2\). 회색 원은 각 점에서 \(\abs{v}_g = 1\)인 tangent vector의 끝점들(실제 크기의 \(0.15\)배)이다. \((x_0, y_0)\)에서 Euclidean 반지름이 \(y_0\)이므로 boundary로 갈수록 작아진다.
+        주황 선은 geodesic(세로선, \(x\)축 위에 중심을 둔 반원)이다. \(A = (-1, \sqrt3)\)에서 \(B = (1, \sqrt3)\)까지 geodesic(파랑)의 길이는 \(\ln 3 \approx 1.099\)이고, 수평 선분(점선)은 \(2/\sqrt3 \approx 1.155\)로 더 길다. geodesic은 길이가 짧게 재지는 위쪽으로 휜다.</figcaption>
+      </figure>
+
+      <p>metric이 있으면 covector를 vector로 바꿀 수 있다. 함수 \(f\)의 <strong>gradient</strong>(기울기) \(\grad f\)는 모든 \(v\)에 대해</p>
+      <div class="equation" id="eq-0-8-3">
+      \[ \begin{aligned} \inner{\grad f}{v}_g &= df(v), \\ (\grad f)^i &= \sum_j g^{ij}\, \pd{f}{x^j} \end{aligned} \tag{0.8.3} \]
+      </div>
+      <p>를 만족하는 vector다(\(g^{ij}\)는 \((g_{ij})\)의 inverse matrix의 성분). 같은 \(df\)라도 metric에 따라 gradient의 방향이 달라진다. \(\mathbb{U}^2\)에서는 \(\grad f = y^2(f_x, f_y)\)다.
+      \(M \subseteq \R^N\)에 induced metric을 주면, \(\grad f\)는 \(f\)를 주변으로 확장한 함수의 Euclidean gradient를 \(T_pM\)으로 orthogonal projection한 것이다. 또 metric은 <strong>volume form</strong>(체적형식) \(dV_g = \sqrt{\det(g_{ij})}\,dx^1 \wedge \cdots \wedge dx^n\)을 주므로 <a href="0-7-forms.html#sec-stokes">Section 0.7</a>의 방식으로 함수를 적분할 수 있고, Laplacian \(\Delta = \divg\grad\)도 정의된다(<a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>).</p>
+    </section>
+
+    <section id="sec-geodesics">
+      <h2>Connections, Geodesics, and the Exponential Map</h2>
+      <p>곡선이 “곧다”는 것은 velocity가 변하지 않는다는 뜻이다. 그런데 \(\gamma'(t)\)와 \(\gamma'(t + h)\)는 서로 다른 tangent space에 있으므로 바로 뺄 수 없다. 서로 다른 점의 tangent vector를 비교하는 규칙이 <strong>connection</strong>(접속) \(\nabla\)다.
+      \(\R^3\) 안의 surface에서는 보통의 미분을 tangent plane으로 projection한 것이 그 규칙이었다(<a href="0-5-intrinsic.html#sec-parallel-transport">Section 0.5</a>의 covariant derivative와 parallel transport).</p>
+
+      <div class="thm theorem" id="i-0-8-3">
+        <p><span class="thm-head">Theorem 0.8.3</span> <span class="thm-name">(fundamental theorem of Riemannian geometry)</span>.
+        Riemannian manifold \((M, g)\)에는 metric과 compatible하고(parallel transport가 길이와 각을 보존하고) torsion이 없는 connection이 정확히 하나 있다. 이것을 <strong>Levi-Civita connection</strong>(레비치비타 접속)이라 한다.
+        여기서는 두 조건의 정확한 정의를 생략했다(<a href="../22-connections/index.html#toc-22-5">Section 22.5</a>).</p>
+      </div>
+
+      <p>Levi-Civita connection은 chart에서 Christoffel symbols \(\Gamma^k_{ij}\)(metric의 첫째 미분으로 정해진다)로 쓰인다. velocity가 변하지 않는 곡선, 즉 \(D_t\gamma' = 0\)인 곡선이 <strong>geodesic</strong>(측지선)이고, 성분으로는</p>
+      <div class="equation" id="eq-0-8-4">
+      \[ \ddot\gamma^k + \sum_{i,j} \Gamma^k_{ij}(\gamma)\, \dot\gamma^i \dot\gamma^j = 0 \tag{0.8.4} \]
+      </div>
+      <p>이다. 이것은 ordinary differential equation이므로 점 \(p\)와 처음 velocity \(v \in T_pM\)을 주면 geodesic \(\gamma_v\)가 하나 정해진다. geodesic은 국소적으로 가장 짧은 곡선이다. sphere에서는 great circle, \(\mathbb{U}^2\)에서는 세로선과 \(x\)축 위에 중심을 둔 반원이다.</p>
+      <p>\(v\) 방향으로 “시간 \(1\)만큼” 가는 geodesic의 끝점을 \(\exp_p(v) = \gamma_v(1)\)이라 하고, \(\exp_p\colon T_pM \to M\)을 <strong>exponential map</strong>(지수사상)이라 한다. \(\gamma_v\)의 속력은 \(\abs{v}_g\)로 일정하므로 \(\exp_p(v)\)는 \(p\)에서 \(v\) 방향으로 길이 \(\abs{v}_g\)만큼 간 점이다.
+      \(0\) 근처에서 \(\exp_p\)는 diffeomorphism이고, 그 역 \(\log_p\)를 <strong>logarithm map</strong>(로그사상)이라 한다. \(\log_p q\)는 “\(q\)가 \(p\)에서 어느 방향으로 얼마나 떨어져 있는가”를 tangent vector로 준다. unit sphere에서는</p>
+      <div class="equation" id="eq-0-8-5">
+      \[ \begin{aligned} \exp_p(v) &= \cos\abs{v}\; p + \sin\abs{v}\, \frac{v}{\abs{v}}, \\ \log_p(q) &= \frac{\theta}{\sin\theta}\,\big(q - \cos\theta\; p\big) \end{aligned} \tag{0.8.5} \]
+      </div>
+      <p>이다. 여기서 \(\theta = \arccos\inner{p}{q}\)이고 \(q \ne \pm p\)다(\(q = p\)이면 \(\log_p p = 0\)). \(d_g(p, q) = \abs{\log_p q} = \theta\)이다(<a href="#fig-0-8-2">Figure 0.8.2</a>). \(\abs{v} = \pi\)인 모든 \(v\)는 대척점 \(-p\)로 가므로 \(\log_p(-p)\)는 하나로 정해지지 않는다. 이런 점을 <strong>cut point</strong>(절단점)라 한다(<a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-8-2">
+        <img src="figures/fig-0-8-2-exp-sphere.svg" alt="왼쪽: tangent plane T_N S²를 나타내는 하늘색 disk 위에 원점을 중심으로 하는 점선 원 세 개(주황, 검정, 초록)와 가장자리의 검정 원 |v| = π, 회색 반직선 여덟 개, 파란 vector v가 있다. 오른쪽: unit sphere 위에 같은 색의 circle of latitude 세 개와 회색 meridian들이 있고, 북극 N에서 출발한 주황 곡선이 exp_N(v)까지 간다. 남극 S가 표시되어 있다. 두 패널 사이에 exp_N 화살표가 있다.">
+        <figcaption><span class="fig-head">Figure 0.8.2.</span>
+        unit sphere의 북극 \(N\)에서의 exponential map. 왼쪽 \(T_N S^2\)의 원 \(\abs{v} = \pi/4, \pi/2, 3\pi/4\)는 오른쪽의 같은 색 circle of latitude(colatitude가 같은 값)로, 반직선은 meridian으로 간다. 원 \(\abs{v} = \pi\) 전체는 남극 \(S\) 한 점으로 간다.
+        파란 \(v\)(길이 \(2\))의 geodesic \(t \mapsto \exp_N(tv)\) (\(0 \le t \le 1\), 주황)의 길이는 \(2\)다. <a href="figures/fig-0-8-2-exp-sphere-interactive.html">Interactive version</a>.</figcaption>
+      </figure>
+
+      <div class="thm remark" id="i-0-8-4">
+        <p><span class="thm-head">Remark 0.8.4</span> <span class="thm-name">(\(\exp\) on \(\mathrm{SO}(3)\))</span>.
+        <a href="0-6-manifolds.html#i-0-6-7">Example 0.6.7</a>의 \(\exp\)는 행렬 지수, 곧 Lie group의 exponential map이었다. Riemannian exponential map과는 일반적으로 다른 개념이다(<a href="../20-lie-groups-frobenius/index.html#toc-20-3">Section 20.3</a>).
+        그러나 \(\mathrm{SO}(3)\)에 tangent vector(행렬) \(A, B\)에 대해 \(\inner{A}{B} = \tfrac12\tr(A^{\mathsf T}B)\)인 metric을 주면 두 개념이 일치한다. 이 metric은 왼쪽 곱과 오른쪽 곱 모두로 보존되는 <strong>bi-invariant metric</strong>(양불변 계량)이고, \(\abs{[\omega]_\times} = \abs{\omega}\)이며, \(I_3\)을 지나는 geodesic이 정확히 \(t \mapsto \exp(t[\omega]_\times)\)이다.
+        따라서 \(\exp_{I_3}\)은 Rodrigues formula <a href="0-6-manifolds.html#eq-0-6-7">(0.6.7)</a>이고, 두 회전 사이의 거리는 \(d(R_1, R_2) = \abs{\log(R_1^{\mathsf T}R_2)}\), 곧 \(R_1^{\mathsf T}R_2\)의 회전각 \(\theta \in [0, \pi]\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-0-8-riemannian.py</code></p>
+      </div>
+
+      <aside class="box application" id="sec-cv-averaging">
+        <p class="box-title">In computer vision: 회전의 평균 (Fréchet mean과 rotation averaging)</p>
+        <p>같은 카메라 방향을 여러 번 추정한 회전 \(R_1, \dots, R_n\)의 “평균”은 무엇일까? 행렬을 그냥 더해 나누면 rotation matrix가 아니다. Riemannian geometry의 답은 거리 제곱의 합을 최소화하는 점, 곧 <strong>Fréchet mean</strong>(프레셰 평균)이다:</p>
+        <p>\[ \bar R = \operatorname*{arg\,min}_{R \in \mathrm{SO}(3)} \sum_{i=1}^n d(R, R_i)^2. \]</p>
+        <p>이 점을 <strong>Karcher mean</strong>(카르허 평균)이라고도 부른다. 이 함수의 Riemannian gradient는 \(-2\sum_i \log_R R_i\)이므로, 다음을 반복하면 된다 <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>, <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>.</p>
+        <ul>
+          <li>현재 추정 \(\bar R\)에서 각 데이터를 \(\log\)로 tangent space에 옮긴다: \(\delta_i = \log(\bar R^{\mathsf T}R_i)\).</li>
+          <li>tangent space(보통의 vector space \(\R^3\))에서 평균한다: \(\delta = \frac1n\sum_i \delta_i\).</li>
+          <li>\(\exp\)로 되돌린다: \(\bar R \leftarrow \bar R\exp([\delta]_\times)\). \(\delta = 0\)이 되면 멈춘다.</li>
+        </ul>
+        <p>평균의 존재와 유일성, 이 반복의 수렴에는 조건이 필요하다. 데이터가 충분히 작은 geodesic ball 안에 모여 있으면 유일하지만, 넓게 퍼져 있으면 local minimum이 여러 개일 수 있다(정확한 조건은 <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>). 같은 생각은 structure from motion에서 상대 회전 \(R_{ij}\)들로부터 절대 회전을 구하는 multiple rotation averaging, \(\mathrm{SE}(3)\)의 pose averaging, 그리고 tangent space에서 공분산을 재는 manifold 위의 통계로 이어진다.</p>
+      </aside>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: Riemannian optimization</p>
+        <p>제약이 있는 최적화를 “manifold 위의 제약 없는 최적화”로 바꿀 수 있다. induced metric을 준 \(M \subseteq \R^N\) 위에서 \(f\)를 줄이려면 <a class="cite" href="../../references.html#AMS">[AMS]</a>, <a class="cite" href="../../references.html#Boumal">[Boumal]</a></p>
+        <ul>
+          <li>Riemannian gradient를 구한다: Euclidean gradient를 \(T_xM\)으로 projection한 것이다(<a href="#eq-0-8-3">(0.8.3)</a> 바로 아래 문단 참고).</li>
+          <li>그 반대 방향의 tangent vector만큼 움직인 뒤 retraction \(\operatorname{retr}_x\colon T_xM \to M\)으로 \(M\)에 되돌린다: \(x_{k+1} = \operatorname{retr}_{x_k}\big(-\alpha_k \grad f(x_k)\big)\). retraction은 \(\exp_x\)를 1차까지 흉내 내는 계산이 싼 map이다. sphere에서는 \(\operatorname{retr}_x(v) = (x + v)/\abs{x + v}\), \(\mathrm{SO}(3)\)에서는 \(R\exp([\delta]_\times)\)를 흔히 쓴다.</li>
+        </ul>
+        <p>예: homography나 fundamental matrix를 DLT로 추정할 때 \(\abs{A\mathbf{h}}^2\)을 \(\abs{\mathbf{h}} = 1\) 아래에서 최소화한다 <a class="cite" href="../../references.html#HZ">[HZ]</a>. 이것은 sphere 위의 최적화이고, 답은 \(A\)의 가장 작은 singular value에 대응하는 right singular vector다.
+        orthonormal frame의 공간인 <strong>Stiefel manifold</strong>(슈티펠 다양체)나 subspace의 공간인 <strong>Grassmann manifold</strong>(그라스만 다양체) 위의 문제도 같은 방법으로 푼다.</p>
+        <p class="verified">Verification: <code>verify/v-0-8-riemannian.py</code></p>
+      </aside>
+    </section>
+
+    <section id="sec-curvature">
+      <h2>Curvature</h2>
+      <p>평면에서는 vector를 closed curve를 따라 parallel transport해도 처음 그대로 돌아온다. sphere에서는 돌아올 때 회전해 있었다(<a href="0-5-intrinsic.html#i-0-5-7">Example 0.5.7</a>). 이 “작은 고리를 한 바퀴 돈 뒤의 회전”을 무한소로 잰 것이 curvature다. Lee의 부호 규약으로</p>
+      <div class="equation" id="eq-0-8-6">
+      \[ R(X, Y)Z = \nabla_X\nabla_Y Z - \nabla_Y\nabla_X Z - \nabla_{[X,Y]} Z \tag{0.8.6} \]
+      </div>
+      <p>를 <strong>curvature operator</strong>(곡률 연산자)라 한다(이 \(R\)은 회전 행렬이 아니다). 두 방향으로 미분하는 순서를 바꾸면 얼마나 달라지는지를 잰다. 여기에 metric을 붙여 수로 만든 \(\Rm(X, Y, Z, W) = \inner{R(X, Y)Z}{W}_g\)가 <strong>curvature tensor</strong>(곡률텐서)다.</p>
+      <p>curvature tensor는 성분이 많으므로, 그림으로 읽을 때는 2차원 방향마다 수 하나를 주는 양을 쓴다. \(p\)에서 두 tangent vector \(v, w\)가 펼치는 평면 방향으로 나가는 geodesic들은 작은 surface를 이룬다. 그 surface의 Gaussian curvature가 <strong>sectional curvature</strong>(단면곡률) \(K(v, w)\)이고, 식으로는 \(K(v, w) = \Rm_p(v, w, w, v) / \big(\abs{v}_g^2\abs{w}_g^2 - \inner{v}{w}_g^2\big)\)이다(<a href="../24-curvature/index.html#toc-24-3">Section 24.3</a>).
+      2차원 manifold에는 평면 방향이 하나뿐이므로 sectional curvature가 곧 <a href="0-4-curvature.html#i-0-4-5">Section 0.4</a>의 Gaussian curvature \(K\)다. 그래서 \(\mathbb{U}^2\)의 curvature도 바깥 공간 없이 metric만으로 계산되고, 값은 \(K \equiv -1\)이다. sectional curvature를 평균한 Ricci curvature와 scalar curvature도 있다(<a href="../24-curvature/index.html#toc-24-4">Section 24.4</a>).</p>
+
+      <p>curvature를 눈으로 보는 가장 쉬운 방법은 geodesic triangle이다. <a href="0-5-intrinsic.html#i-0-5-8">Section 0.5</a>의 Gauss–Bonnet theorem <a href="0-5-intrinsic.html#eq-0-5-2">(0.5.2)</a>를 다시 쓰면 내각이 \(\alpha, \beta, \gamma\)인 geodesic triangle \(T\)에 대해</p>
+      <div class="equation" id="eq-0-8-7">
+      \[ \alpha + \beta + \gamma - \pi = \iint_T K\, dA \tag{0.8.7} \]
+      </div>
+      <p>이다. \(K \gt 0\)이면 내각의 합이 \(\pi\)보다 크고, \(K = 0\)이면 \(\pi\), \(K \lt 0\)이면 \(\pi\)보다 작다(<a href="#fig-0-8-3">Figure 0.8.3</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-8-3">
+        <img src="figures/fig-0-8-3-triangles.svg" alt="왼쪽: unit sphere 위에서 세 점 e₁, e₂, e₃를 잇는 주황 great circle 호 세 개가 sphere의 8분의 1을 하늘색으로 둘러싸고, 세 vertex에 직각 표시가 있다. 오른쪽: 위쪽 half-plane에서 세 점 A, B, C를 잇는 주황 반원 호 세 개가 안쪽으로 오목한 하늘색 삼각형을 이루고, 각 α, β, γ가 표시되어 있다. 각 호를 포함하는 반원 전체가 회색 점선으로 그려져 있다.">
+        <figcaption><span class="fig-head">Figure 0.8.3.</span>
+        왼쪽: unit sphere(\(K = 1\))에서 \(e_1, e_2, e_3\)를 vertex로 하는 geodesic triangle은 세 각이 모두 직각이다. 내각의 합 \(3\pi/2\)에서 \(\pi\)를 빼면 넓이 \(\pi/2\)(\(4\pi\)의 \(1/8\))와 같다.
+        오른쪽: \(\mathbb{U}^2\)(\(K = -1\))에서 \(A = (-1, 1)\), \(B = (1, 1)\), \(C = (0, 3)\)을 잇는 geodesic triangle. 세 변은 중심이 \((0, 0)\), \((-3.5, 0)\), \((3.5, 0)\)인 반원 위에 있고, 각은 약 \(32.47^\circ, 32.47^\circ, 81.20^\circ\)(합 \(\approx 146.15^\circ\))다. 넓이 \(\pi - (\alpha + \beta + \gamma) \approx 0.591\)은 Stokes's theorem \(\iint_T dx\,dy/y^2 = \oint_{\partial T} dx/y\)로 따로 계산해 확인했다.</figcaption>
+      </figure>
+
+      <p>curvature가 상수인 세 공간이 <strong>model space</strong>(모형공간)다: 반지름 \(r\)인 sphere(\(K = 1/r^2\)), Euclidean space(\(K = 0\)), hyperbolic space(\(K = -1\), 모형 \(\mathbb{U}^n\)이나 Poincaré ball \(\mathbb{B}^n\)). 한 점에서 거리가 \(\rho\)인 점들이 이루는 <strong>geodesic circle</strong>(측지원)의 둘레는 차례로</p>
+      <div class="equation" id="eq-0-8-8">
+      \[ \begin{aligned} & 2\pi\sin\rho && (K = 1), \\ & 2\pi\rho && (K = 0), \\ & 2\pi\sinh\rho && (K = -1) \end{aligned} \tag{0.8.8} \]
+      </div>
+      <p>이다(<a href="#fig-0-8-4">Figure 0.8.4</a>). positive curvature에서는 \(p\)에서 퍼져 나간 geodesic들이 다시 모이고(sphere의 meridian은 남극에서 만난다), negative curvature에서는 지수적으로 벌어진다.
+      geodesic의 모임과 벌어짐을 정량적으로 다루는 것이 Jacobi field다(<a href="../26-gauss-bonnet-jacobi/index.html#toc-26-3">Section 26.3</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-8-4">
+        <img src="figures/fig-0-8-4-circle-growth.svg" alt="가로축 ρ, 세로축 L(ρ)인 그래프. 초록 곡선 2π sinh ρ는 지수적으로 빠르게 올라가고, 검정 직선 2πρ는 일정하게 올라가며, 주황 곡선 2π sin ρ는 ρ = π/2에서 최대가 된 뒤 ρ = π에서 0이 된다. 세 곡선은 ρ가 작을 때 거의 겹친다.">
+        <figcaption><span class="fig-head">Figure 0.8.4.</span>
+        반지름 \(\rho\)인 geodesic circle의 둘레 <a href="#eq-0-8-8">(0.8.8)</a>. 작은 \(\rho\)에서는 세 값이 \(2\pi\rho\)에 가깝지만 곧 갈라진다. unit sphere(주황)에서는 \(\rho = \pi\)에서 원이 남극 한 점으로 줄어들고, hyperbolic plane(초록)에서는 둘레가 \(\rho\)에 대해 지수적으로 커진다.
+        \(\mathbb{U}^2\)에서 \((0, 1)\) 중심, 반지름 \(\rho\)인 geodesic circle은 중심 \((0, \cosh\rho)\), 반지름 \(\sinh\rho\)인 Euclidean 원이며, 그 \(g\)-length가 \(2\pi\sinh\rho\)임을 수치로 확인했다.</figcaption>
+      </figure>
+
+      <aside class="box application" id="sec-cv-data">
+        <p class="box-title">In computer vision: 데이터의 기하 — manifold learning과 hyperbolic embedding</p>
+        <ul>
+          <li><strong>manifold learning.</strong> 물체를 몇 개의 자세 parameter로만 바꾸어 찍은 이미지처럼, 고차원 데이터가 저차원 manifold 근처에 놓여 있다고 보는 가정을 manifold hypothesis라 한다. 보장된 사실이 아니라 데이터에 따라 맞기도 하고 틀리기도 하는 가설이다.
+          Isomap <a class="cite" href="../../references.html#Tenenbaum00">[Tenenbaum00]</a>은 가까운 점끼리 이은 graph에서 가장 짧은 path의 길이로 그 manifold 위의 geodesic distance \(d_g\)를 근사하고(표본이 충분히 촘촘하다는 조건 아래), 그 거리를 잘 보존하도록 저차원 좌표를 찾는다. Euclidean 직선 거리로는 “말린 종이” 같은 데이터의 구조를 놓친다.</li>
+          <li><strong>hyperbolic embedding.</strong> 가지가 \(b\)개씩 갈라지는 tree에서 깊이 \(\rho\)인 node의 수는 \(b^\rho\)로 지수적으로 늘어난다. Euclidean plane에서 원의 둘레는 \(\rho\)에 비례할 뿐이지만 hyperbolic space에서는 <a href="#eq-0-8-8">(0.8.8)</a>처럼 지수적으로 늘어나므로, 계층 구조를 저차원에서 적은 왜곡으로 담을 수 있다.
+          Poincaré embeddings <a class="cite" href="../../references.html#Nickel17">[Nickel17]</a>은 Poincaré ball \(\mathbb{B}^n\)에 단어나 개념의 계층을 embedding한다. 여기서는 정성적인 이유만 말했다. 더 넓은 배경은 <a class="cite" href="../../references.html#Bronstein17">[Bronstein17]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>Riemannian metric, model metric, length와 distance, gradient·divergence·Laplacian, volume form: <a href="../21-riemannian-metrics/index.html">Chapter 21</a>. Part I의 출발점은 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-1">Definition 7.1.1 (first fundamental form)</a>.</li>
+        <li>connection, parallel transport, Levi-Civita connection: <a href="../22-connections/index.html">Chapter 22</a>. surface의 경우는 <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>.</li>
+        <li>geodesic, exponential map, normal coordinates, Hopf–Rinow theorem과 cut point: <a href="../23-geodesics/index.html">Chapter 23</a>.</li>
+        <li>curvature tensor, sectional·Ricci·scalar curvature, model space: <a href="../24-curvature/index.html">Chapter 24</a>. Gaussian curvature의 정의는 <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-1">Definition 8.4.1</a>.</li>
+        <li>submanifold의 기하와 Gauss equation(Part I의 surface theory와 다시 만남): <a href="../25-submanifold-geometry/index.html">Chapter 25</a>.</li>
+        <li>Gauss–Bonnet theorem의 Riemannian 증명, Jacobi field와 conjugate point: <a href="../26-gauss-bonnet-jacobi/index.html">Chapter 26</a>(optional). Lie group의 exponential map은 <a href="../20-lie-groups-frobenius/index.html">Chapter 20</a>.</li>
+      </ul>
+    </aside>
+
+    <section id="sec-next">
+      <h2>Where to Go Next</h2>
+      <p>Tour는 여기서 끝난다. 깊은 장(Chapter 1–26)은 Tour에서 단순화한 정의와 생략한 증명을 처음부터 정확하게 쌓는다. 관심사에 따라 다음 순서로 읽기를 권한다. 어느 순서로 읽든 <a href="../01-linear-algebra/index.html">Chapter 1</a>–<a href="../03-topology-basics/index.html">Chapter 3</a>(linear algebra, calculus, topology의 준비)을 먼저 훑어 두면 편하다. 아래 순서는 지름길이므로, 막히면 그 장 개요의 Builds on으로 돌아간다. 특히 Part III은 Chapter 13–18을 바탕으로 한다.</p>
+      <ul>
+        <li><strong>처음부터 끝까지 엄밀하게.</strong> <a href="../01-linear-algebra/index.html">Chapter 1</a>부터 차례로 읽는다. Part I(curve와 surface) → Part II(manifold) → Part III(Riemannian geometry) 순서다.</li>
+        <li><strong>mesh, normal, curvature, geodesic distance를 다루고 싶다면.</strong> <a href="../04-curves/index.html">Chapter 4</a>–<a href="../05-space-curves/index.html">5</a>(curve의 curvature) → <a href="../06-regular-surfaces/index.html">Chapter 6</a>–<a href="../08-gauss-map/index.html">8</a>(surface, first fundamental form, Gaussian·mean curvature) → <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>–<a href="../10-gauss-bonnet/index.html">10</a>(geodesic, Gauss–Bonnet). 준비로는 <a href="../02-calculus-rn/index.html">Chapter 2</a>가 특히 중요하다.</li>
+        <li><strong>\(\mathrm{SO}(3)\)와 pose를 다루고 싶다면.</strong> <a href="0-6-manifolds.html">Section 0.6</a> → <a href="../11-smooth-manifolds/index.html">Chapter 11</a>(chart, smooth structure, \(\RP^n\)) → <a href="../12-smooth-maps/index.html">Chapter 12</a>(smooth map, diffeomorphism) → <a href="../13-tangent-spaces/index.html">Chapter 13</a>(tangent space, differential) → <a href="../14-submanifolds/index.html#toc-14-4">Section 14.4</a>(regular value theorem: \(\mathrm{SO}(3)\)가 manifold인 이유) → <a href="../15-vector-fields-flows/index.html">Chapter 15</a>(vector field, flow, Lie bracket) → <a href="../20-lie-groups-frobenius/index.html">Chapter 20</a>(Lie group, Lie algebra, exponential map) → <a href="../21-riemannian-metrics/index.html">Chapter 21</a>–<a href="../23-geodesics/index.html">23</a>(metric, geodesic, \(\exp\)).</li>
+        <li><strong>gradient field, Poisson editing, discrete exterior calculus.</strong> <a href="../01-linear-algebra/1-3-dual-spaces.html">Section 1.3</a>(dual space) → <a href="../16-covectors-tensors/index.html">Chapter 16</a>–<a href="../19-de-rham/index.html">19</a>(covector, differential form, Stokes's theorem, de Rham cohomology) → <a href="../21-riemannian-metrics/index.html#toc-21-5">Section 21.5</a>–<a href="../21-riemannian-metrics/index.html#toc-21-6">21.6</a>(gradient, divergence, Laplacian). manifold의 기초로 <a href="../11-smooth-manifolds/index.html">Chapter 11</a>–<a href="../15-vector-fields-flows/index.html">15</a>가 필요하다.</li>
+        <li><strong>Riemannian optimization과 manifold 위의 통계(Fréchet mean).</strong> <a href="../11-smooth-manifolds/index.html">Chapter 11</a>–<a href="../14-submanifolds/index.html">14</a>(manifold, tangent space, embedded submanifold) → <a href="../21-riemannian-metrics/index.html">Chapter 21</a>(metric, gradient) → <a href="../22-connections/index.html">Chapter 22</a>–<a href="../23-geodesics/index.html">23</a>(connection, geodesic, \(\exp\), completeness) → <a href="../24-curvature/index.html">Chapter 24</a>(curvature: 평균의 유일성과 수렴에 영향을 준다).</li>
+        <li><strong>geometric deep learning과 hyperbolic embedding.</strong> <a href="../21-riemannian-metrics/index.html#toc-21-2">Section 21.2</a>(sphere와 hyperbolic space의 metric) → <a href="../22-connections/index.html">Chapter 22</a>–<a href="../23-geodesics/index.html">23</a>(connection, geodesic, distance) → <a href="../24-curvature/index.html#toc-24-5">Section 24.5</a>(model space).</li>
+      </ul>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>Riemannian metric은 tangent space마다 주어진 inner product이고, surface의 first fundamental form을 바깥 공간 없이 일반화한 것이다. length, distance, gradient, volume, Laplacian이 모두 여기서 나온다.</li>
+        <li>Levi-Civita connection은 metric이 정하는 유일한 “곧음”의 규칙이고, geodesic은 velocity가 변하지 않는 곡선이다.</li>
+        <li>\(\exp_p\)는 tangent vector를 geodesic을 따라 manifold로 보내고, \(\log_p\)는 그 역이다. \(\mathrm{SO}(3)\)에 bi-invariant metric을 주면 \(\exp\)는 Rodrigues formula이고 거리는 회전각이다.</li>
+        <li>curvature는 parallel transport의 어긋남이고, geodesic triangle의 내각의 합과 geodesic circle의 둘레로 드러난다. sphere, Euclidean space, hyperbolic space가 세 model space다.</li>
+        <li>회전의 평균(Fréchet mean), Riemannian optimization, manifold learning, hyperbolic embedding은 모두 이 언어로 쓰인다.</li>
+      </ul>
+      <p class="next">다음 장부터는 깊은 장이다. Tour에서 “여기서는 단순화한다”고 미뤄 둔 정의와 증명을 <a href="../01-linear-algebra/index.html">Chapter 1</a>의 linear algebra부터 다시 차근차근 쌓는다. 위의 Where to Go Next에서 관심 있는 순서를 골라 시작하면 된다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-0-8-1" data-level="1">
+        <p><span class="thm-head">Exercise 0.8.1</span> <span class="level">★</span>
+        \(\mathbb{U}^2\)에서 \((0, 1)\)부터 \((0, e)\)까지의 수직 선분과, \((0, \varepsilon)\)부터 \((0, 1)\)까지의 수직 선분의 \(g\)-length를 구하여라(\(0 \lt \varepsilon \lt 1\)). \(\varepsilon \to 0\)이면 어떻게 되는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\gamma(t) = (0, t)\)이면 \(\abs{\gamma'(t)}_g = \abs{(0, 1)}/t = 1/t\)이다. 따라서 첫째는 \(\int_1^e dt/t = 1\), 둘째는 \(\int_\varepsilon^1 dt/t = \ln(1/\varepsilon)\)이다. \(\varepsilon \to 0\)이면 무한대로 간다. Euclidean으로는 가까워 보이는 boundary \(y = 0\)이 \(\mathbb{U}^2\) 안에서는 무한히 멀다.</p>
+          <p class="verified">Verification: <code>verify/v-0-8-riemannian.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-8-2" data-level="1">
+        <p><span class="thm-head">Exercise 0.8.2</span> <span class="level">★</span>
+        unit sphere의 북극 \(N = (0, 0, 1)\)에서 \(v = (\pi/2, 0, 0) \in T_N S^2\)일 때 \(\exp_N(v)\)를 구하여라. 남극 \(S\)에 대해 \(\log_N(S)\)가 하나로 정해지지 않는 이유는 무엇인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-0-8-5">(0.8.5)</a>에서 \(\abs{v} = \pi/2\)이므로 \(\exp_N(v) = \cos(\pi/2)N + \sin(\pi/2)(1, 0, 0) = (1, 0, 0)\)이다. 북극에서 \(x\)축 방향으로 meridian을 따라 길이 \(\pi/2\)만큼 가면 적도에 닿는다.
+          \(\abs{v} = \pi\)인 모든 \(v\)에 대해 \(\exp_N(v) = \cos\pi\, N = S\)이므로, \(S\)로 가는 최단 geodesic이 방향마다 하나씩 무수히 많다. 그래서 \(\log_N(S)\)가 하나로 정해지지 않는다(\(S\)는 \(N\)의 cut point).</p>
+          <p class="verified">Verification: <code>verify/v-0-8-riemannian.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-8-3" data-level="1">
+        <p><span class="thm-head">Exercise 0.8.3</span> <span class="level">★</span>
+        (a) unit sphere 위의 geodesic triangle의 세 각이 모두 \(\pi/2\)이면 넓이는 얼마인가? (b) 참인지 거짓인지 판별하여라: “\(\mathbb{U}^2\)에는 내각의 합이 \(\pi\)인 geodesic triangle이 있다.”</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) <a href="#eq-0-8-7">(0.8.7)</a>에서 \(K = 1\)이므로 넓이는 \(3\pi/2 - \pi = \pi/2\)이다. sphere 넓이 \(4\pi\)의 \(1/8\)이고, <a href="#fig-0-8-3">Figure 0.8.3</a>의 왼쪽 삼각형이 그 예다.
+          (b) 거짓이다. \(K = -1\)이므로 내각의 합은 \(\pi - (\text{넓이})\)이고, 삼각형의 넓이는 양수이므로 합은 언제나 \(\pi\)보다 작다.</p>
+          <p class="verified">Verification: <code>verify/v-0-8-riemannian.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-8-4" data-level="1">
+        <p><span class="thm-head">Exercise 0.8.4</span> <span class="level">★</span>
+        unit sphere 위의 height function \(f(x, y, z) = z\)의 Riemannian gradient를 induced metric으로 구하여라. \((1, 0, 0)\), \((0.6, 0, 0.8)\), \(N\)에서의 값은?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(f\)를 \(\R^3\)의 함수로 보면 Euclidean gradient는 \(e_3\)이고, \(T_pS^2 = \{v : \inner{v}{p} = 0\}\)으로의 projection은 \(\grad f(p) = e_3 - \inner{e_3}{p}\,p\)이다.
+          \((1, 0, 0)\)에서는 \(e_3\), \((0.6, 0, 0.8)\)에서는 \((0, 0, 1) - 0.8(0.6, 0, 0.8) = (-0.48, 0, 0.36)\), \(N\)에서는 \(0\)이다. gradient는 meridian을 따라 북극 쪽을 가리키고, 최대점 \(N\)과 최소점 \(S\)에서 \(0\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-8-riemannian.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="0-7-forms.html">← 0.7 Differential Forms and Stokes's Theorem</a>
+    <a rel="next" href="../01-linear-algebra/index.html">1. Linear Algebra Review →</a>
+  </nav>
+</body>
+</html>

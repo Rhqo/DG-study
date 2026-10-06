@@ -21,7 +21,7 @@ ERROR (하나라도 있으면 종료코드 1)
 WARN
   - 남은 한국어 라벨·제목 (check_site.py의 korean_label_issues와 같은 검사)
   - tools/terms.tsv의 한국어 용어가 본문(텍스트, <title>, img alt)에 남았다.
-    </dfn> 바로 뒤 괄호 "(한국어)", tools/terms_keep.txt의 낱말, code/pre/script/style은 보지 않는다.
+    </dfn>·</strong> 바로 뒤 괄호 "(한국어)", tools/terms_keep.txt의 낱말, code/pre/script/style은 보지 않는다.
     한 글자 용어(상, 핵, 공, 틀)는 앞이 한글이 아니고 뒤에 조사(상은/상이/상을/상의/상과/상에 …)가
     붙은 독립된 낱말일 때만 잡는다. 겹치는 후보는 가장 긴 낱말을 고른다(정사영 ≠ 사영, 미분동형사상 = 한 용어).
 """
@@ -258,13 +258,14 @@ def _ancestors(t):
 
 
 def _dfn_paren_len(t):
-    """t가 </dfn> 바로 뒤의 텍스트이고 '(…)'로 시작하면 그 괄호 끝까지의 길이."""
+    """t가 </dfn> 바로 뒤의 텍스트이고 '(…)'로 시작하면 그 괄호 끝까지의 길이.
+    Chapter 0(Tour)은 dfn 대신 <strong>을 쓰므로(§2.3) </strong> 뒤도 같게 본다."""
     parent = t.parent
     if parent is None:
         return 0
     kids = parent.children
     idx = next((i for i, c in enumerate(kids) if c is t), None)
-    if not idx or not isinstance(kids[idx - 1], Node) or kids[idx - 1].tag != "dfn":
+    if not idx or not isinstance(kids[idx - 1], Node) or kids[idx - 1].tag not in ("dfn", "strong"):
         return 0
     m = re.match(r"\s*\([^()]*\)", t.data)
     return m.end() if m else 0

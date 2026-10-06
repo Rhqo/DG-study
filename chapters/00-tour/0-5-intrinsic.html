@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.5 Intrinsic Geometry: Geodesics and Gauss–Bonnet — DG Study</title>
+  <meta name="dg-id" content="0.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.3, 0.4">
+  <meta name="dg-refs" content="dC Ch. 4; Nd; Cr; Kimmel98; Crane13; Caselles97">
+  <meta name="dg-updated" content="2026-10-06">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">0. A Guided Tour of Differential Geometry</a> ›
+    <span>0.5 Intrinsic Geometry: Geodesics and Gauss–Bonnet</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>0.5 Intrinsic Geometry: Geodesics and Gauss–Bonnet</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#dC">[dC Ch. 4]</a>,
+        <a class="cite" href="../../references.html#Nd">[Nd]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr]</a>,
+        <a class="cite" href="../../references.html#Kimmel98">[Kimmel98]</a>,
+        <a class="cite" href="../../references.html#Crane13">[Crane13]</a>,
+        <a class="cite" href="../../references.html#Caselles97">[Caselles97]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>Theorema Egregium이 무엇을 말하는지, 그리고 왜 sphere를 왜곡 없이 평면에 펼 수 없는지 설명할 수 있다.</li>
+        <li>geodesic을 “surface 위에서 가장 곧은 곡선”으로 이해하고, sphere와 cylinder의 geodesic을 말할 수 있다.</li>
+        <li>parallel transport와 holonomy를 circle of latitude에서 계산하고 curvature와 연결할 수 있다.</li>
+        <li>Gauss–Bonnet theorem의 두 형태(geodesic triangle, 닫힌 surface)와 mesh의 angle defect판을 쓸 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0-3-surfaces.html">Section 0.3</a>: first fundamental form(<a href="0-3-surfaces.html#i-0-3-5">Definition 0.3.5</a>), isometry와 conformal map, equirectangular image(<a href="0-3-surfaces.html#fig-0-3-3">Figure 0.3.3</a>)</li>
+        <li><a href="0-4-curvature.html">Section 0.4</a>: Gaussian curvature와 mean curvature(<a href="0-4-curvature.html#i-0-4-5">Definition 0.4.5</a>, <a href="0-4-curvature.html#i-0-4-6">Example 0.4.6</a>)</li>
+        <li><a href="0-2-curves.html">Section 0.2</a>: rotation index theorem(<a href="0-2-curves.html#i-0-2-7">Theorem 0.2.7</a>)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="0-4-curvature.html">Section 0.4</a>는 질문 하나를 남겼다. mean curvature \(H\)는 평면(\(0\))과 cylinder(\(-1/(2r)\))에서 달라서 intrinsic이 아니었다. Gaussian curvature \(K\)는 둘 다 \(0\)이었다. 우연인가?</p>
+      <p>\(K\)의 정의에는 normal vector \(\mathbf{N}\)이 들어 있으므로, \(K\)는 surface가 공간 안에서 휜 모양에 달린 extrinsic한 양처럼 보인다. 그런데 Gauss는 \(K\)가 surface 안에서 잰 길이만으로 정해진다는 것을 발견하고 이 결과를 <strong>Theorema Egregium</strong>(빼어난 정리)이라 불렀다. 이 절은 그 정리에서 출발해 surface 위에서만 하는 기하, 곧 intrinsic geometry를 훑는다. 가장 곧은 곡선(geodesic), 벡터를 평행하게 옮기기(parallel transport), 그리고 curvature의 적분이 topology를 아는 Gauss–Bonnet theorem이다.</p>
+    </section>
+
+    <section id="sec-egregium">
+      <h2>Theorema Egregium</h2>
+      <div class="thm theorem" id="i-0-5-1">
+        <p><span class="thm-head">Theorem 0.5.1</span> <span class="thm-name">(Theorema Egregium)</span>.
+        Gaussian curvature \(K\)는 first fundamental form의 coefficient \(E, F, G\)와 그 일계·이계 partial derivative만으로 정해진다. 따라서 길이를 보존하는 map, 곧 <strong>local isometry</strong>(국소 등거리사상)는 \(K\)를 보존한다. 특히 \(F = 0\)이면</p>
+        <div class="equation" id="eq-0-5-1">
+        \[ \begin{aligned} K = -\frac{1}{2\sqrt{EG}}\Big[ &\frac{\partial}{\partial u}\Big(\frac{G_u}{\sqrt{EG}}\Big) \\ &+ \frac{\partial}{\partial v}\Big(\frac{E_v}{\sqrt{EG}}\Big) \Big] \end{aligned} \tag{0.5.1} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <p class="proof-idea">Proof idea: <a href="0-4-curvature.html#eq-0-4-2">(0.4.2)</a>의 분자 \(LN - M^2\)에는 \(\mathbf{N}\)이 들어 있다. 그런데 \(\mathbf{x}_{uu}, \mathbf{x}_{uv}, \mathbf{x}_{vv}\)를 tangent 성분과 normal 성분으로 나누고 \(\mathbf{x}_{uuv} = \mathbf{x}_{uvu}\)를 쓰면, \(LN - M^2\)이 \(E, F, G\)와 그 도함수만의 식이 된다(Gauss equation, <a href="../09-intrinsic-geometry/index.html#toc-9-3">Section 9.3</a>, 작성 예정).</p>
+      <p>sphere(\(E = r^2\), \(F = 0\), \(G = r^2\sin^2\theta\))로 확인하자. \(\sqrt{EG} = r^2\sin\theta\), \(G_\theta/\sqrt{EG} = 2\cos\theta\)이고 \(E_\varphi = 0\)이므로 <a href="#eq-0-5-1">(0.5.1)</a>은 \(K = -\tfrac{1}{2r^2\sin\theta}\,(-2\sin\theta) = 1/r^2\)이다. \(\mathbf{N}\)을 한 번도 쓰지 않았는데 <a href="0-4-curvature.html#i-0-4-6">Example 0.4.6</a>과 같은 값이 나온다. torus of revolution에서도 같은 계산이 \(\cos u/\big(r(R + r\cos u)\big)\)을 준다.</p>
+
+      <div class="thm example" id="i-0-5-2">
+        <p><span class="thm-head">Example 0.5.2</span> <span class="thm-name">(curvature from \(E, F, G\) alone)</span>.
+        <a href="#eq-0-5-1">(0.5.1)</a>은 \(\R^3\) 안의 surface가 없어도 계산할 수 있다. upper half-plane \(\{(x, y) : y \gt 0\}\)에서 \(E = G = 1/y^2\), \(F = 0\)으로 길이를 재기로 하면 <a href="#eq-0-5-1">(0.5.1)</a>은 \(K \equiv -1\)을 준다. 이것이 <strong>hyperbolic plane</strong>(쌍곡평면) \(\mathbb{U}^2\)이다. 이렇게 “길이를 재는 규칙”만으로 기하를 하는 생각이 manifold와 Riemannian metric으로 이어진다(<a href="0-6-manifolds.html">Section 0.6</a>, <a href="0-8-riemannian.html">Section 0.8</a>).</p>
+        <p class="verified">Verification: <code>verify/v-0-5-intrinsic.py</code></p>
+      </div>
+
+      <div class="thm corollary" id="i-0-5-3">
+        <p><span class="thm-head">Corollary 0.5.3</span> <span class="thm-name">(no distortion-free map of the sphere)</span>.
+        sphere의 어떤 작은 조각도 평면의 영역으로 길이를 보존하며 옮길 수 없다. sphere는 \(K = 1/r^2\)이고 평면은 \(K = 0\)인데, 길이를 보존하는 map은 \(K\)를 보존해야 하기 때문이다.</p>
+      </div>
+      <p>그래서 모든 세계지도는 무엇인가를 왜곡한다. 할 수 있는 것은 무엇을 지킬지 고르는 것이다(<a href="#fig-0-5-1">Figure 0.5.1</a>).</p>
+      <ul>
+        <li><strong>Mercator projection</strong>(메르카토르 사상) \((\theta, \varphi) \mapsto (\varphi,\ \log\cot(\theta/2))\)는 conformal이다. 작은 원이 원으로 가므로 각과 국소적인 모양이 보존되지만, 배율 \(1/\sin\theta\)가 극으로 갈수록 커진다(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-10">Example 7.4.10</a>).</li>
+        <li>Lambert cylindrical equal-area projection \((\theta, \varphi) \mapsto (\varphi,\ \cos\theta)\)는 sphere를 외접하는 cylinder로 수평으로 미는 Archimedes' projection과 같다. 넓이를 보존하지만, 작은 원이 극 근처에서 납작한 ellipse가 된다(<a href="../07-first-fundamental-form/7-3-area.html#i-7-3-12">Example 7.3.12</a>).</li>
+        <li>둘을 동시에 할 수는 없다(이유는 <a href="#ex-0-5-1">Exercise 0.5.1</a>).</li>
+      </ul>
+
+      <figure class="dg-figure" id="fig-0-5-1">
+        <img src="figures/fig-0-5-1-map-projections.svg" alt="위아래 두 개의 직사각형 지도에 회색 경위선과 하늘색 Tissot indicatrix가 격자 모양으로 놓여 있다. 위의 Mercator 지도에서는 모든 표시가 원인데, 적도 근처의 원은 작고 북위·남위 60도의 원은 두 배 크다. 아래의 Lambert 지도는 더 납작하고, 적도에서는 원이지만 북위·남위 60도에서는 가로로 두 배 길고 세로로 절반인 납작한 ellipse가 된다. 아래 지도의 표시는 모두 넓이가 같다.">
+        <figcaption><span class="fig-head">Figure 0.5.1.</span>
+        unit sphere 위의 같은 크기의 작은 원(반지름 \(0.15\))이 지도에서 어떻게 보이는지 나타낸 <strong>Tissot indicatrix</strong>(티소 지시타원). 위: Mercator projection(위도 \(\pm 75^\circ\)에서 자름). 모든 표시가 원이고(conformal) 크기는 \(1/\sin\theta\)배다. 아래: Lambert cylindrical equal-area projection. 표시의 넓이는 모두 같지만(넓이 보존) 가로 \(1/\sin\theta\)배, 세로 \(\sin\theta\)배로 찌그러진다. 경위선은 \(30^\circ\) 간격이다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-geodesics">
+      <h2>Geodesics: The Straightest Curves</h2>
+      <p>평면에서 직선은 두 성질을 가진다. 가장 짧고, 꺾이지 않는다. surface에서 “꺾이지 않는다”는 것을 surface 안에서 재려면, 가속도 가운데 surface가 휘어서 생기는 부분(normal 성분)은 어쩔 수 없는 것으로 치고 surface를 따라 옆으로 꺾는 부분(tangent 성분)만 본다.</p>
+      <div class="thm definition" id="i-0-5-4">
+        <p><span class="thm-head">Definition 0.5.4</span> <span class="thm-name">(geodesic, simplified)</span>.
+        surface \(S\) 위의 곡선 \(\gamma\)가 일정한 속력으로 움직이고 모든 \(t\)에서 가속도 \(\gamma''(t)\)가 \(T_{\gamma(t)}S\)에 수직이면 \(\gamma\)를 <strong>geodesic</strong>(측지선)이라 한다.</p>
+        <p>여기서는 \(\R^3\)의 가속도로 정의했다. 정확한 정의는 가속도의 tangent 성분을 surface 안에서 계산하는 <strong>covariant derivative</strong>(공변미분) \(D_t\)로 \(D_t\gamma' = 0\)이라 쓴다(<a href="../09-intrinsic-geometry/index.html#toc-9-5">Section 9.5</a>, 작성 예정). 둘은 같은 조건이다.</p>
+      </div>
+      <p>geodesic에 대해 알아 둘 사실은 다음과 같다. 정확한 진술은 <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>와 <a href="../23-geodesics/index.html">Chapter 23</a>에 있다.</p>
+      <ul>
+        <li>geodesic의 조건은 \(E, F, G\)로 쓴 2계 ODE(geodesic equation)이다. 그래서 geodesic은 intrinsic이다. 종이를 말아도 종이 위의 geodesic은 geodesic으로 남는다.</li>
+        <li>한 점과 한 방향을 주면 그 방향으로 출발하는 geodesic이 하나 있다(ODE의 existence and uniqueness).</li>
+        <li>짧은 구간에서 geodesic은 두 점을 잇는 가장 짧은 곡선이다. 그러나 길게 가면 가장 짧지 않을 수 있다. sphere의 <strong>great circle</strong>(대원)을 반 바퀴 넘게 가면 반대쪽으로 가는 것이 더 짧다.</li>
+      </ul>
+
+      <div class="thm example" id="i-0-5-5">
+        <p><span class="thm-head">Example 0.5.5</span> <span class="thm-name">(geodesics on the sphere and the cylinder)</span>.
+        sphere의 great circle은 가속도가 중심을 향하므로, 곧 sphere에 수직이므로 geodesic이다. 반대로 적도가 아닌 circle of latitude의 가속도는 \(z\)축을 향해서 sphere에 수직이 아니다. 북위 \(45^\circ\)의 두 점 \(p = \mathbf{x}(\pi/4, -\pi/3)\), \(q = \mathbf{x}(\pi/4, \pi/3)\)(\(r = 1\))을 circle of latitude로 이으면 길이가 \(\tfrac{\sqrt2}{2}\cdot\tfrac{2\pi}{3} \approx 1.481\)이고, great circle로 이으면 \(\arccos\inner{p}{q} = \arccos(1/4) \approx 1.318\)이다(<a href="#fig-0-5-2">Figure 0.5.2</a>(a)). 장거리 비행기 항로가 Mercator 지도에서 극 쪽으로 휘어 보이는 이유다.</p>
+        <p>cylinder를 평면으로 펴면(<a href="0-1-what-is-dg.html#fig-0-1-2">Figure 0.1.2</a>) geodesic은 평면의 직선이 된다. 그래서 cylinder의 geodesic은 직선(축 방향), 원(둘레 방향), 그리고 그 사이의 helix다. 실제로 helix의 가속도 \((-a\cos t, -a\sin t, 0)\)은 축을 향하는 normal 방향이다.</p>
+        <p class="verified">Verification: <code>verify/v-0-5-intrinsic.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-parallel-transport">
+      <h2>Parallel Transport and Holonomy</h2>
+      <p>평면에서는 한 점의 벡터를 다른 점으로 그대로 옮길 수 있다. surface에서는 tangent plane이 점마다 다르므로 “그대로”의 뜻을 정해야 한다. geodesic과 같은 생각을 쓴다: 옮기는 동안 surface 안에서는 돌리지 않는다.</p>
+      <div class="thm definition" id="i-0-5-6">
+        <p><span class="thm-head">Definition 0.5.6</span> <span class="thm-name">(parallel transport and holonomy, simplified)</span>.
+        surface 위의 곡선 \(\alpha(t)\)를 따라 tangent vector \(V(t) \in T_{\alpha(t)}S\)가 움직일 때, 변화율 \(V'(t)\)가 언제나 \(T_{\alpha(t)}S\)에 수직이면(곧 \(D_tV = 0\)) \(V\)가 <strong>parallel transport</strong>(평행이동)된다고 한다. closed curve를 따라 한 바퀴 parallel transport한 벡터가 처음 벡터에서 돌아간 각을 <strong>holonomy</strong>(홀로노미)라 한다.</p>
+      </div>
+      <p>parallel transport는 길이와 각을 보존하고, geodesic처럼 \(E, F, G\)만으로 정해지는 intrinsic한 개념이다(<a href="../09-intrinsic-geometry/index.html#toc-9-4">Section 9.4</a>, 작성 예정). geodesic은 자기 속도벡터를 parallel transport하는 곡선이다. 평면에서는 holonomy가 언제나 \(0\)이지만, 휜 surface에서는 일반적으로 \(0\)이 아니다.</p>
+
+      <figure class="dg-figure" id="fig-0-5-2">
+        <img src="figures/fig-0-5-2-geodesic-transport.svg" alt="두 개의 반투명 sphere. 왼쪽 (a)에는 같은 위도의 두 점 p, q를 잇는 검은 circle of latitude의 호와, 그보다 북쪽으로 휘어 지나가는 주황 great circle의 호가 있다. 오른쪽 (b)에는 위에서 비스듬히 본 sphere 위의 검은 circle of latitude를 따라 주황 화살표들이 그려져 있다. 출발점의 파란 화살표 V_0는 남쪽을 가리키고, 원을 따라가며 주황 화살표가 조금씩 돌아, 한 바퀴 뒤 같은 점의 굵은 주황 화살표 V(2π)는 북쪽을 가리킨다.">
+        <figcaption><span class="fig-head">Figure 0.5.2.</span>
+        unit sphere. (a) 북위 \(45^\circ\)의 두 점 \(p, q\)(경도 차 \(120^\circ\))를 잇는 circle of latitude(검정, 길이 \(\approx 1.481\))와 great circle(주황, geodesic, 길이 \(\approx 1.318\)). (b) colatitude \(\theta_0 = \pi/3\)인 circle of latitude를 따라 경도가 증가하는 쪽으로 \(V_0 = \mathbf{x}_\theta\)(파랑, 남쪽)를 parallel transport한 것(주황, \(30^\circ\)마다, \(0.32\)배). 한 바퀴 뒤의 \(V(2\pi)\)(굵은 주황)는 바깥에서 보아 반시계 방향으로 \(2\pi(1 - \cos\theta_0) = \pi\)만큼 돌아 북쪽을 가리킨다(<a href="#i-0-5-7">Example 0.5.7</a>).</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-0-5-7">
+        <p><span class="thm-head">Example 0.5.7</span> <span class="thm-name">(parallel transport around a circle of latitude)</span>.
+        unit sphere의 colatitude가 \(\theta_0\)인 circle of latitude를 경도가 증가하는 쪽으로 한 바퀴 돌며 벡터를 parallel transport하면, 돌아온 벡터는 처음 벡터에서 바깥쪽 \(\mathbf{N}\)으로 보아 반시계 방향으로</p>
+        <p>\[ 2\pi(1 - \cos\theta_0) \pmod{2\pi} \]</p>
+        <p>만큼 돌아 있다(같은 회전을 시계 방향으로 재면 \(2\pi\cos\theta_0\)이다). 이 값은 circle이 둘러싼 북쪽 극관의 넓이 \(\int_0^{2\pi}\!\int_0^{\theta_0}\sin\theta\,d\theta\,d\varphi = 2\pi(1 - \cos\theta_0)\)에 \(K = 1\)을 곱한 것과 같다. \(\theta_0 = \pi/3\)이면 \(\pi\)만큼 돌아 벡터가 반대 방향이 된다(<a href="#fig-0-5-2">Figure 0.5.2</a>(b)). 적도(\(\theta_0 = \pi/2\))에서는 \(2\pi\), 곧 회전이 없다. 적도는 geodesic이기 때문이다.</p>
+        <p class="verified">Verification: <code>verify/v-0-5-intrinsic.py</code></p>
+      </div>
+      <p>“holonomy = 둘러싼 영역의 \(\iint K\,dA\)”는 우연이 아니다. 작은 고리를 따라 벡터를 한 바퀴 돌리면 그 안의 curvature만큼 돈다. curvature를 “parallel transport가 path에 따라 달라지는 정도”로 보는 이 관점이 일반 공간의 curvature tensor의 정의로 이어진다(<a href="0-8-riemannian.html">Section 0.8</a>).</p>
+    </section>
+
+    <section id="sec-gauss-bonnet">
+      <h2>The Gauss–Bonnet Theorem</h2>
+      <p>평면 삼각형의 내각의 합은 \(\pi\)다. sphere에서 세 great circle로 둘러싼 삼각형은 다르다. 북극과 적도 위의 두 점 \((1, 0, 0)\), \((0, 1, 0)\)을 vertex로 하는 삼각형은 세 각이 모두 직각이어서 합이 \(3\pi/2\)다(<a href="#fig-0-5-3">Figure 0.5.3</a>(a)). 넘치는 \(\pi/2\)는 그 삼각형의 넓이 \(4\pi/8\)과 같다.</p>
+      <div class="thm theorem" id="i-0-5-8">
+        <p><span class="thm-head">Theorem 0.5.8</span> <span class="thm-name">(Gauss–Bonnet theorem, two special cases)</span>.
+        (a) 세 변이 geodesic이고 disk 모양의 영역을 둘러싸는 삼각형, 곧 <strong>geodesic triangle</strong>(측지삼각형) \(T\)의 내각을 \(\alpha, \beta, \gamma\)라 하면</p>
+        <div class="equation" id="eq-0-5-2">
+        \[ \alpha + \beta + \gamma = \pi + \iint_T K\,dA. \tag{0.5.2} \]
+        </div>
+        <p>(b) 경계가 없는 compact orientable surface \(S\)에 대해</p>
+        <div class="equation" id="eq-0-5-3">
+        \[ \iint_S K\,dA = 2\pi\chi(S) \tag{0.5.3} \]
+        </div>
+        <p>이다. \(\chi(S) = n_0 - n_1 + n_2\)는 \(S\)를 삼각형들로 나눈 <strong>triangulation</strong>(삼각분할)에서 vertex·edge·face의 개수로 만든 <strong>Euler characteristic</strong>(오일러 지표)이고, triangulation을 어떻게 해도 같다. sphere는 \(\chi = 2\), 구멍이 \(g\)개인 surface는 \(\chi = 2 - 2g\)이다.</p>
+        <p>여기서는 두 특수한 경우만 적었다. 일반형은 경계 곡선이 surface 안에서 옆으로 꺾이는 정도인 <strong>geodesic curvature</strong>(측지곡률) \(\kappa_g\)(geodesic에서는 \(0\))와 vertex의 exterior angle을 함께 더한다(<a href="../10-gauss-bonnet/index.html#toc-10-1">Section 10.1</a>, <a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>, 작성 예정).</p>
+      </div>
+      <p class="proof-idea">Proof idea: (a)는 <a href="#i-0-5-7">Example 0.5.7</a>의 holonomy와 같은 이야기다. 삼각형의 경계를 따라 벡터를 parallel transport하면 \(\iint_T K\,dA\)만큼 돌고, 그 회전각을 변(geodesic)과 vertex의 꺾임으로 세면 내각의 합이 나온다. \(K = 0\)인 평면 영역에서는 <a href="0-2-curves.html#i-0-2-7">Theorem 0.2.7</a>(접선이 한 바퀴 돈다)이 된다. (b)는 \(S\)를 geodesic triangle에 가까운 작은 삼각형들로 나누고 (a)를 모두 더한 뒤, vertex마다 모인 각의 합이 \(2\pi\)라는 것을 써서 \(n_0, n_1, n_2\)로 정리한다.</p>
+
+      <figure class="dg-figure" id="fig-0-5-3">
+        <img src="figures/fig-0-5-3-gauss-bonnet.svg" alt="(a) 반투명 sphere 위에 하늘색으로 칠한 삼각형이 있다. 세 변은 주황 great circle의 호이고, 세 vertex에 모두 직각 표시가 있다. (b) 평면에 정삼각형 다섯 개가 한 점을 중심으로 부채꼴처럼 놓여 있고, 여섯 번째 자리(오른쪽 아래 60도)가 비어 연한 주홍으로 칠해져 있으며 delta라고 표시되어 있다. 각 삼각형의 중심각에 theta_j가 표시되어 있다.">
+        <figcaption><span class="fig-head">Figure 0.5.3.</span>
+        (a) unit sphere의 octant triangle. 세 변은 great circle의 호(주황)이고 세 내각이 모두 \(\pi/2\)다. 내각의 합 \(3\pi/2 = \pi + 1\cdot(4\pi/8)\)이 <a href="#eq-0-5-2">(0.5.2)</a>와 맞는다. (b) angle defect. 정이십면체(icosahedron)의 한 vertex에는 정삼각형 다섯 개가 모여 각의 합이 \(5\pi/3\)이다. 이것을 평면에 펼치면 \(\delta = 2\pi - 5\pi/3 = \pi/3\)의 틈(주홍)이 남는다. vertex \(12\)개의 \(\delta\)를 더하면 \(4\pi = 2\pi\chi(S^2)\)이다.</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-0-5-9">
+        <p><span class="thm-head">Example 0.5.9</span> <span class="thm-name">(Gauss–Bonnet for the running examples and for meshes)</span>.
+        sphere: \(\iint K\,dA = (1/r^2)(4\pi r^2) = 4\pi = 2\pi\cdot 2\). 반지름이 얼마든, 찌그러뜨려 달걀 모양이 되든 값은 \(4\pi\)다. torus of revolution: \(\iint K\,dA = \int_0^{2\pi}\!\!\int_0^{2\pi} \frac{\cos u}{r(R + r\cos u)}\,r(R + r\cos u)\,du\,dv = 0 = 2\pi\cdot 0\). 바깥쪽 절반의 \(+4\pi\)와 안쪽 절반의 \(-4\pi\)가 정확히 상쇄된다(<a href="0-4-curvature.html#fig-0-4-2">Figure 0.4.2</a>).</p>
+        <p>polyhedral surface(mesh)에서는 curvature가 vertex에 모여 있다. vertex \(i\)에 모인 각의 합을 \(\sum_j\theta_j\)라 할 때 angle defect \(\delta_i = 2\pi - \sum_j\theta_j\)를 쓰면, 닫힌 mesh에서 정확히</p>
+        <div class="equation" id="eq-0-5-4">
+        \[ \sum_i \delta_i = 2\pi\chi \tag{0.5.4} \]
+        </div>
+        <p>이다(Descartes 정리와 그 일반형). torus 모양으로 삼각형을 이어 붙인 mesh는 바깥쪽 vertex의 \(\delta \gt 0\)과 안쪽의 \(\delta \lt 0\)이 상쇄되어 합이 \(0\)이다. <a href="0-4-curvature.html">Section 0.4</a>의 \(K_i \approx \delta_i/A_i\)는 이 식을 점마다 나눈 것이다.</p>
+        <p class="verified">Verification: <code>verify/v-0-5-intrinsic.py</code></p>
+      </div>
+      <p>좌변은 점마다의 휘어짐을 모은 양이고 우변은 구멍의 개수만 아는 양이다. 그래서 surface를 아무리 구부려도 \(\iint K\,dA\)는 변하지 않는다. 이 연결은 줄기 <a href="../../index.html#thread-t5">T5</a>로 이어진다(<a href="0-7-forms.html">Section 0.7</a>의 Stokes's theorem과 de Rham cohomology).</p>
+    </section>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: 지도와 360° 영상의 왜곡</p>
+      <p>360° camera의 영상을 저장하는 equirectangular image는 경도와 위도를 그대로 픽셀 좌표로 쓴다(<a href="0-3-surfaces.html#fig-0-3-3">Figure 0.3.3</a>). conformal도 넓이 보존도 아니어서 극 근처가 가로로 크게 늘어난다. <a href="#i-0-5-3">Corollary 0.5.3</a> 때문에 왜곡이 없는 평면 영상은 없고, 방식마다 다른 것을 지킨다. 위의 Mercator(conformal)와 Lambert(넓이 보존) 말고 흔히 만나는 것은 다음 둘이다.</p>
+      <ul>
+        <li>Web Mercator: 온라인 지도 서비스가 흔히 쓰는 Mercator의 변형이다. 국소적인 모양은 거의 보존되지만 극지방의 넓이가 크게 부풀어 보인다.</li>
+        <li>cube map: sphere를 중심에서 정육면체의 여섯 면으로 투영한다(각 면은 gnomonic projection, 곧 시야각 \(90^\circ\)인 pinhole 영상이다). great circle이 지나는 평면은 중심을 지나므로, 각 면에서 geodesic이 직선이 된다. 그러나 conformal도 넓이 보존도 아니다.</li>
+      </ul>
+      <p>sphere 위의 영상에 평면용 convolution을 그대로 쓰면, 같은 물체가 위도에 따라 다른 모양과 크기로 찍히는 문제가 생긴다. 이것이 Theorema Egregium의 실용적인 얼굴이다.</p>
+    </aside>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: mesh 위의 geodesic distance</p>
+      <p>mesh 위 두 점 사이의 geodesic distance는 shape matching, 대응점 찾기, remeshing, surface 위의 영역 분할에 쓰인다. mesh의 edge를 따라가는 Dijkstra shortest path는 edge 방향에 묶여 있어서 실제 거리보다 길게 나오기 쉽다. 그래서 다음과 같이 연속 이론을 이산화한다.</p>
+      <ul>
+        <li>fast marching: 출발점에서의 거리 \(d\)는 eikonal equation \(\abs{\grad d} = 1\)을 만족한다. Kimmel과 Sethian은 이것을 triangle mesh 위에서 파면을 밀어 내듯 푸는 방법을 주었다 <a class="cite" href="../../references.html#Kimmel98">[Kimmel98]</a>.</li>
+        <li>heat method <a class="cite" href="../../references.html#Crane13">[Crane13]</a>: (1) 출발점에 열을 놓고 짧은 시간 \(t\) 동안 heat equation \(\partial_t u = \Delta_S u\)를 푼다(linear system 하나). (2) 열이 퍼지는 방향만 남긴 단위 vector field \(X = -\grad u/\abs{\grad u}\)를 만든다. (3) Poisson equation \(\Delta_S f = \divg X\)를 풀고 출발점에서 \(0\)이 되게 상수를 더하면, \(f\)가 geodesic distance의 근사다. 두 linear system의 행렬은 출발점과 무관하므로 미리 분해해 두면 출발점이 바뀌어도 빠르게 다시 푼다.</li>
+      </ul>
+      <p>geodesic은 영상 안에서도 쓰인다. geodesic active contour는 영상 평면에 edge 근처에서 작아지는 “길이를 재는 규칙” \(g(\abs{\grad I})\,\sqrt{dx^2 + dy^2}\)을 주고, 그 규칙에서 가장 짧은 곡선, 곧 geodesic으로 물체의 경계를 찾는다 <a class="cite" href="../../references.html#Caselles97">[Caselles97]</a>. <a href="0-2-curves.html">Section 0.2</a>의 snake를 geodesic 문제로 바꾼 것이고, <a href="#i-0-5-2">Example 0.5.2</a>처럼 \(\R^3\) 없이 metric만 주어진 기하의 예다.</p>
+    </aside>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: surface 위의 vector field와 holonomy</p>
+      <p>quad remeshing, texture synthesis, hatching 같은 그래픽스 작업은 surface 위에 부드럽게 변하는 방향장(tangent vector field나 direction field)을 설계해야 한다. 이웃한 두 vertex의 tangent vector는 서로 다른 tangent plane에 있으므로, 비교하려면 한쪽을 다른 쪽으로 옮기는 discrete parallel transport가 필요하다. vertex 하나를 둘러싸는 작은 고리를 따라 옮기면 벡터는 그 vertex의 angle defect \(\delta_i\)만큼 돈다. <a href="#i-0-5-7">Example 0.5.7</a>의 “holonomy = 둘러싼 curvature”의 이산판이다.</p>
+      <p>또 닫힌 surface 위의 vector field는 zero(singularity)를 가질 수밖에 없는 경우가 있다. isolated zero의 index를 모두 더하면 \(\chi(S)\)라는 <strong>Poincaré–Hopf theorem</strong>(푸앵카레-호프 정리) 때문이다(<a href="../10-gauss-bonnet/index.html#toc-10-5">Section 10.5</a>, 작성 예정). sphere(\(\chi = 2\))에는 zero가 없는 tangent vector field가 없고 torus(\(\chi = 0\))에는 있다. sphere 쪽의 사실을 <strong>hairy ball theorem</strong>(털난 공 정리)이라 한다. 그래서 sphere 모양 mesh의 방향장을 설계할 때는 singularity를 어디에 둘지가 설계의 일부가 된다. 이산 이론은 <a class="cite" href="../../references.html#Cr">[Cr]</a>에 정리되어 있다.</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>Theorema Egregium: <a href="../09-intrinsic-geometry/index.html#toc-9-1">Section 9.1</a>(Christoffel symbols), <a href="../09-intrinsic-geometry/index.html#toc-9-2">Section 9.2</a>(Gauss equation), <a href="../09-intrinsic-geometry/index.html#toc-9-3">Section 9.3</a>(Theorema Egregium과 “왜곡 없는 지도는 없다”). Chapter 9는 작성 예정이다.</li>
+        <li>\(H\)가 intrinsic이 아님: <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-3">Example 8.4.3</a>과 그 뒤의 Looking back 상자</li>
+        <li>지도: isometry <a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-1">Definition 7.2.1</a>, Mercator <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-10">Example 7.4.10</a>, Archimedes' projection <a href="../07-first-fundamental-form/7-3-area.html#i-7-3-12">Example 7.3.12</a></li>
+        <li>covariant derivative와 parallel transport, geodesic: <a href="../09-intrinsic-geometry/index.html#toc-9-4">Section 9.4</a>, <a href="../09-intrinsic-geometry/index.html#toc-9-5">Section 9.5</a>. 계량만 주어진 surface와 hyperbolic plane: <a href="../09-intrinsic-geometry/index.html#toc-9-6">Section 9.6</a></li>
+        <li>Gauss–Bonnet theorem: <a href="../10-gauss-bonnet/index.html#toc-10-1">Section 10.1</a>(local), <a href="../10-gauss-bonnet/index.html#toc-10-2">Section 10.2</a>(geodesic triangle), <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>(Euler characteristic), <a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>(global), <a href="../10-gauss-bonnet/index.html#toc-10-5">Section 10.5</a>(응용, Poincaré–Hopf). Chapter 10은 작성 예정이다.</li>
+        <li>평면판: rotation index theorem <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a></li>
+        <li>일반 공간의 geodesic과 Gauss–Bonnet: <a href="../23-geodesics/index.html">Chapter 23</a>, <a href="../26-gauss-bonnet-jacobi/index.html">Chapter 26</a></li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>Theorema Egregium: \(K\)는 \(E, F, G\)만으로 정해지는 intrinsic한 양이다 <a href="#eq-0-5-1">(0.5.1)</a>. 그래서 sphere는 어떤 조각도 왜곡 없이 평면에 펼 수 없고, 지도는 conformal(Mercator)과 넓이 보존(Lambert) 가운데 하나를 고른다.</li>
+        <li>geodesic은 가속도가 surface에 수직인 곡선, 곧 surface 안에서 꺾이지 않는 곡선이다. sphere에서는 great circle, cylinder에서는 직선·원·helix다. 짧은 구간에서 가장 짧다.</li>
+        <li>parallel transport는 surface 안에서 돌리지 않고 벡터를 옮기는 것이고, closed curve를 돌면 둘러싼 \(\iint K\,dA\)만큼 돈다(holonomy).</li>
+        <li>Gauss–Bonnet theorem: geodesic triangle의 내각의 합은 \(\pi + \iint K\,dA\), 닫힌 surface에서 \(\iint K\,dA = 2\pi\chi\). mesh에서는 angle defect의 합이 정확히 \(2\pi\chi\)다.</li>
+      </ul>
+      <p class="next">다음 절에서는 둘러싼 공간 \(\R^3\)을 아예 버린다. Theorema Egregium이 보여 주듯 기하의 상당 부분이 surface 안에서 결정된다면, 처음부터 \(\R^3\) 없이 “가까이서 보면 \(\R^n\)인 공간”, 곧 manifold를 정의할 수 있다. 카메라의 회전 전체 \(\mathrm{SO}(3)\)가 그런 공간이다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-0-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 0.5.1</span> <span class="level">★</span>
+        sphere의 한 영역에서 평면으로 가는 map이 conformal이면서 넓이를 보존할 수 없는 이유를 설명하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>conformal map은 점마다 모든 방향의 길이를 같은 배율 \(\lambda\)로 바꾼다. 그러면 넓이는 몇 배가 되는가?</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>conformal map은 각 점에서 모든 tangent vector의 길이를 같은 배율 \(\lambda(p) \gt 0\)으로 바꾼다(<a href="0-3-surfaces.html#sec-isometry">Section 0.3</a>: Gram matrix가 \(\lambda^2\)배). 그러면 작은 정사각형은 변이 \(\lambda\)배인 정사각형이 되어 넓이는 \(\lambda^2\)배다. 넓이도 보존하면 \(\lambda^2 = 1\), 곧 \(\lambda = 1\)이고, map은 모든 길이를 보존한다. 그러면 Theorema Egregium에 의해 \(K\)도 보존되어야 하는데 sphere는 \(K = 1/r^2\), 평면은 \(K = 0\)이므로 모순이다(<a href="#i-0-5-3">Corollary 0.5.3</a>).</p>
+          <p class="verified">Verification: <code>verify/v-0-5-intrinsic.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-5-2" data-level="1">
+        <p><span class="thm-head">Exercise 0.5.2</span> <span class="level">★</span>
+        unit sphere 위의 geodesic triangle의 세 내각이 모두 \(2\pi/3\)이다. 이 삼각형의 넓이는 얼마인가? 반지름 \(r\)인 sphere라면?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-0-5-2">(0.5.2)</a>에서 \(K = 1\)이므로 넓이는 \(\alpha + \beta + \gamma - \pi = 2\pi - \pi = \pi\)이다. sphere 넓이 \(4\pi\)의 \(1/4\)이다(정사면체의 vertex를 sphere에 올려 중심에서 투영하면 이런 삼각형 네 개가 sphere를 덮는다). 반지름 \(r\)이면 \(K = 1/r^2\)이므로 \(\pi = \iint K\,dA = \operatorname{Area}/r^2\)이고 넓이는 \(\pi r^2\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-5-intrinsic.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-5-3" data-level="1">
+        <p><span class="thm-head">Exercise 0.5.3</span> <span class="level">★</span>
+        unit sphere의 북위 \(45^\circ\)(colatitude \(\theta_0 = \pi/4\)) circle of latitude를 따라 벡터를 한 바퀴 parallel transport하면 몇 도 돌아 있는가? circle을 북극 쪽으로 작게 할수록, 적도 쪽으로 가져갈수록 값은 어떻게 되는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-0-5-7">Example 0.5.7</a>에서 \(2\pi(1 - \cos\theta_0) = 2\pi(1 - \sqrt2/2) \approx 1.840\) rad, 곧 약 \(105.4^\circ\)이다(바깥에서 보아 반시계 방향). \(\theta_0 \to 0\)이면 극관의 넓이가 \(0\)으로 가므로 회전도 \(0\)으로 간다. 작은 고리 안의 \(K\)가 거의 없기 때문이다. \(\theta_0 \to \pi/2\)이면 값이 \(2\pi\)로 가서 회전이 사라진다. 적도는 geodesic이어서 자기 위의 벡터를 돌리지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-0-5-intrinsic.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-5-4" data-level="1">
+        <p><span class="thm-head">Exercise 0.5.4</span> <span class="level">★</span>
+        정육면체의 각 vertex의 angle defect를 구하고 <a href="#eq-0-5-4">(0.5.4)</a>를 확인하여라. 정육면체 겉면의 한 면 가운데에 vertex를 하나 더 넣고 그 면을 삼각형 네 개로 나누면, 새 vertex의 angle defect와 \(\chi\)는 어떻게 되는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>vertex마다 정사각형 세 개가 모여 각의 합이 \(3\pi/2\)이므로 \(\delta = \pi/2\)이고, \(8\)개를 더하면 \(4\pi\)다. \(\chi = n_0 - n_1 + n_2 = 8 - 12 + 6 = 2\)이므로 \(2\pi\chi = 4\pi\)와 맞는다.
+          면 가운데에 넣은 vertex에는 평평한 면 위의 각 네 개가 모여 합이 \(2\pi\)이므로 \(\delta = 0\)이다. 개수는 vertex \(+1\), edge \(+4\), 면 \(-1 + 4 = +3\)이므로 \(\chi = 9 - 16 + 9 = 2\)로 그대로다. 평평한 곳을 더 잘게 나누어도 curvature는 생기지 않고, \(\chi\)는 triangulation에 무관하다.</p>
+          <p class="verified">Verification: <code>verify/v-0-5-intrinsic.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="0-4-curvature.html">← 0.4 How Surfaces Bend: Curvature</a>
+    <a rel="next" href="0-6-manifolds.html">0.6 Manifolds: Spaces That Look Flat Up Close →</a>
+  </nav>
+</body>
+</html>

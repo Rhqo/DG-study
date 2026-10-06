@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.7 Differential Forms and Stokes's Theorem — DG Study</title>
+  <meta name="dg-id" content="0.7">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.6">
+  <meta name="dg-refs" content="Lee-ISM Ch. 11, 14, 15, 16, 17; Nd; Cr; BT; Perez03; Desbrun05; Tong03">
+  <meta name="dg-updated" content="2026-10-06">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">0. A Guided Tour of Differential Geometry</a> ›
+    <span>0.7 Differential Forms and Stokes's Theorem</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>0.7 Differential Forms and Stokes's Theorem</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM, Ch. 11, 14–17]</a>,
+        <a class="cite" href="../../references.html#Nd">[Nd]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr]</a>,
+        <a class="cite" href="../../references.html#BT">[BT]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>covector가 무엇이고 \(df\)가 왜 covector인지, reverse-mode 자동미분이 왜 covector를 끌어오는 계산인지 설명할 수 있다.</li>
+        <li>1-form의 line integral과 wedge product(signed area)를 계산할 수 있다.</li>
+        <li>exterior derivative \(d\)와 Stokes's theorem이 gradient·curl·divergence와 미적분학의 적분 정리들을 하나로 묶는다는 것을 설명할 수 있다.</li>
+        <li>closed form과 exact form의 차이가 공간의 구멍을 드러낸다는 것(de Rham cohomology)을 예로 보이고, Poisson image editing과 연결할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0-6-manifolds.html">Section 0.6</a>: tangent space, differential, chain rule <a href="0-6-manifolds.html#eq-0-6-5">(0.6.5)</a>, backpropagation 상자</li>
+        <li>학부 미적분: line integral, Green's theorem(깊이 보려면 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">Theorem 2.6.13</a>), \(2 \times 2\) determinant</li>
+        <li>(선택) dual space: <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-1">Definition 1.3.1</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="0-6-manifolds.html#sec-tangent">Section 0.6</a>의 backpropagation 상자는 질문 하나를 남겼다. tangent vector는 differential을 따라 앞으로 밀려 가는데, gradient는 왜 행벡터가 되어 거꾸로 끌려오는가?</p>
+      <p>함수 \(f\colon M \to \R\)의 \(p\)에서의 미분을 생각해 보자. tangent vector \(v\)를 하나 주면 “\(v\) 방향으로 \(f\)가 얼마나 빨리 변하는가”라는 수 하나가 나온다. 이 수는 \(v\)에 대해 linear하다.
+      즉 \(df_p\)는 화살표가 아니라 <em>화살표를 받아 수를 내주는 linear function</em>이다. 우리가 gradient라고 부르는 \((\partial_1 f, \dots, \partial_n f)\)는 이 linear function의 coefficient를 늘어놓은 것이다.
+      이 절은 이런 “vector를 재는 도구”에서 출발해, 길이·넓이·부피를 재는 differential form, 그리고 미적분학의 기본정리를 모든 dimension으로 넓힌 Stokes's theorem까지 간다.</p>
+    </section>
+
+    <section id="sec-covectors">
+      <h2>Covectors: Measuring Vectors</h2>
+
+      <div class="thm definition" id="i-0-7-1">
+        <p><span class="thm-head">Definition 0.7.1</span> <span class="thm-name">(covector and 1-form, simplified)</span>.
+        tangent space \(T_pM\)에서 \(\R\)로 가는 linear map을 \(p\)에서의 <strong>covector</strong>(여벡터)라 하고, 그 전체를 <strong>cotangent space</strong>(여접공간) \(T_p^*M\)이라 한다. 곧 \(T_p^*M\)은 \(T_pM\)의 <strong>dual space</strong>(쌍대공간)다.
+        각 점 \(p\)에 covector \(\omega_p\)를 매끄럽게 하나씩 붙인 것을 <strong>1-form</strong>(1-형식)이라 한다. 정확한 정의는 cotangent bundle의 section으로 한다(<a href="../16-covectors-tensors/index.html#toc-16-1">Section 16.1</a>).</p>
+      </div>
+
+      <p>함수 \(f\)의 미분 \(df\)는 1-form이고 \(df_p(v)\)는 \(v\) 방향의 directional derivative다. chart의 좌표 \(x^i\)도 함수이므로 \(dx^i\)가 1-form이며, \(dx^i(v) = v^i\)(\(v\)의 \(i\)번째 성분)이다. \(dx^1, \dots, dx^n\)은 \(T_p^*M\)의 basis이고</p>
+      <div class="equation" id="eq-0-7-1">
+      \[ df = \sum_{i=1}^n \pd{f}{x^i}\, dx^i, \qquad df_p(v) = \sum_{i=1}^n \pd{f}{x^i}(p)\, v^i \tag{0.7.1} \]
+      </div>
+      <p>이다. 행벡터 \((\partial_1 f, \dots, \partial_n f)\)와 열벡터 \(v\)의 곱이다.</p>
+
+      <aside class="box intuition">
+        <p class="box-title">Intuition: covector는 등고선의 묶음이다</p>
+        <p>linear function \(\alpha\colon \R^2 \to \R\)의 등위선 \(\alpha = 0, h, 2h, \dots\)는 평행한 직선의 묶음이다. \(\alpha(v)\)는 대략 \(v\)가 가로지르는 직선의 개수에 \(h\)를 곱한 값이다(방향까지 세며, \(h\)가 작을수록 정확하다).
+        \(df_p\)의 묶음은 \(f\)의 등고선을 \(p\) 근처에서 확대해 곧게 편 것이다(<a href="#fig-0-7-1">Figure 0.7.1</a>). 등고선이 촘촘할수록 \(f\)가 빨리 변한다. 화살표(vector)와 등고선 묶음(covector)은 서로 다른 종류의 대상이다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-0-7-1">
+        <img src="figures/fig-0-7-1-covector-stack.svg" alt="왼쪽 패널: 원점을 중심으로 하는 f = x² + y²의 회색 등고선들과 점 p, p 둘레의 점선 정사각형. 오른쪽 패널: 그 정사각형을 확대한 그림으로, 비스듬한 자주색 평행선들이 df_p의 등위선 묶음이고 회색 점선이 f의 실제 등고선이다. p에서 출발한 파란 화살표 v가 자주색 선 여섯 개를 가로지른다.">
+        <figcaption><span class="fig-head">Figure 0.7.1.</span>
+        \(f(x, y) = x^2 + y^2\)와 \(p = (1, 1/2)\). 오른쪽은 \(p\) 근처를 확대한 것으로, 자주색 직선은 \(df_p = 2\,dx + dy\)의 등위선 \(2(x - 1) + (y - 1/2) = k/8\)이다.
+        \(v = (1/4, 1/4)\)는 직선 \(6\)개를 가로지르므로 \(df_p(v) = 6 \cdot (1/8) = 3/4\)이고, 실제로 \(2 \cdot (1/4) + 1/4 = 3/4\)이다.</figcaption>
+      </figure>
+
+      <p>covector는 map을 따라 <em>거꾸로</em> 옮겨진다. smooth map \(F\colon M \to N\)과 \(N\)의 1-form \(\omega\)가 있으면 \(M\)의 tangent vector \(v\)를 먼저 \(dF_p\)로 \(N\)에 보낸 뒤 \(\omega\)로 잴 수 있다. 이것이 \(\omega\)의 <strong>pullback</strong>(당김) \(F^*\omega\)다:</p>
+      <div class="equation" id="eq-0-7-2">
+      \[ \begin{aligned} (F^*\omega)_p(v) &= \omega_{F(p)}\big(dF_p(v)\big), \\ d(f \circ F) &= F^*(df) \end{aligned} \tag{0.7.2} \]
+      </div>
+      <p>둘째 식은 chain rule <a href="0-6-manifolds.html#eq-0-6-5">(0.6.5)</a>을 covector의 말로 쓴 것이다. 성분으로는 행벡터에 Jacobian matrix를 <em>오른쪽에서</em> 곱한다. tangent vector의 성분이 chart를 바꿀 때 Jacobian matrix \(J\)로 바뀌면(<a href="0-6-manifolds.html#eq-0-6-4">(0.6.4)</a>),
+      covector의 성분(행벡터)은 \(J^{-1}\)을 오른쪽에서 곱해 바뀐다. 그래야 \(\alpha(v)\)가 chart에 무관하다. 둘의 변환 규칙이 반대라서 vector는 <strong>contravariant</strong>(반변), covector는 <strong>covariant</strong>(공변)라 부른다(<a href="../01-linear-algebra/index.html">Chapter 1</a>).</p>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: reverse mode는 covector의 pullback이다</p>
+        <p><a href="0-6-manifolds.html#sec-tangent">Section 0.6</a>의 backpropagation에서 loss의 미분 \(d\ell\)은 출력 쪽의 covector다. 층 \(f_k\)를 하나 거슬러 올라갈 때마다 <a href="#eq-0-7-2">(0.7.2)</a>의 pullback \(f_k^*\)을 적용한다. 행벡터 \(\alpha\)가 \(\alpha J_k\)가 되는 VJP가 바로 이것이다.
+        그래서 gradient는 tangent vector와 반대 방향으로 흐른다.</p>
+        <p>gradient descent로 parameter를 움직이려면 covector \(d\ell\)(행벡터)을 parameter 공간의 vector(열벡터)로 바꿔야 한다. 보통은 transpose해서 성분을 그대로 옮기는데, 이것은 Euclidean inner product를 쓴다는 숨은 선택이다. 다른 inner product를 쓰면 같은 covector가 다른 방향의 vector가 된다(preconditioning). 이 선택이 <a href="0-8-riemannian.html#sec-metric">Section 0.8</a>의 Riemannian metric이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-line-integrals">
+      <h2>Line Integrals</h2>
+      <p>1-form은 곡선을 따라 적분하기 위해 태어난 대상이다. 곡선 \(\gamma\colon [a, b] \to M\)의 각 순간에 velocity \(\gamma'(t)\)를 \(\omega\)로 재고 더한 것이 <strong>line integral</strong>(선적분)이다:</p>
+      <div class="equation" id="eq-0-7-3">
+      \[ \int_\gamma \omega = \int_a^b \omega_{\gamma(t)}\big(\gamma'(t)\big)\, dt \tag{0.7.3} \]
+      </div>
+      <p>이 값은 곡선의 방향을 유지하는 reparametrization에 무관하고, 방향을 뒤집으면 부호가 바뀐다. 길이와 달리 \(\abs{\gamma'}\)를 쓰지 않으므로 inner product가 필요 없다. \(\omega\)가 어떤 함수의 미분 \(df\)라면 chain rule에 의해 \(df_{\gamma(t)}(\gamma'(t)) = (f \circ \gamma)'(t)\)이므로</p>
+      <div class="equation" id="eq-0-7-4">
+      \[ \int_\gamma df = f\big(\gamma(b)\big) - f\big(\gamma(a)\big) \tag{0.7.4} \]
+      </div>
+      <p>이다. 미적분학의 기본정리 그대로다. 특히 closed curve를 따라 \(df\)를 적분하면 \(0\)이다.</p>
+
+      <div class="thm example" id="i-0-7-2">
+        <p><span class="thm-head">Example 0.7.2</span> <span class="thm-name">(\(x\,dy\) around the unit circle)</span>.
+        \(\omega = x\,dy\)와 unit circle \(\gamma(t) = (\cos t, \sin t)\) (\(0 \le t \le 2\pi\), 반시계 방향)을 보자. \(\gamma'(t) = (-\sin t, \cos t)\)이므로 \(\omega_{\gamma(t)}(\gamma'(t)) = \cos t \cdot \cos t\)이고</p>
+        <p>\[ \oint_\gamma x\,dy = \int_0^{2\pi} \cos^2 t\, dt = \pi \]</p>
+        <p>이다. 이 값은 unit disk의 넓이와 같다. 우연이 아님을 아래 Stokes's theorem이 설명한다.</p>
+        <p class="verified">Verification: <code>verify/v-0-7-forms.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-wedge">
+      <h2>Wedge Products and Signed Area</h2>
+      <p>1-form이 vector 하나를 재듯이, vector 두 개가 만드는 평행사변형을 재는 대상이 2-form이다. 두 1-form의 <strong>wedge product</strong>(쐐기곱) \(dx \wedge dy\)는</p>
+      <p>\[ (dx \wedge dy)(v, w) = v^1 w^2 - v^2 w^1 = \det\begin{pmatrix} v^1 & w^1 \\ v^2 & w^2 \end{pmatrix} \]</p>
+      <p>로 정의한다. \(v\)와 \(w\)가 만드는 평행사변형의 <strong>signed area</strong>(부호 있는 넓이)다(<a href="#fig-0-7-2">Figure 0.7.2</a>). \(v\)에서 \(w\)로 반시계 방향으로 돌면 양수, 시계 방향이면 음수다.
+      그래서 \(dx \wedge dy = -dy \wedge dx\)이고 \(dx \wedge dx = 0\)이다. 이 study set은 \(dx^{i_1}\wedge\cdots\wedge dx^{i_k}(v_1, \dots, v_k) = \det\big(dx^{i_a}(v_b)\big)\)인 determinant 규약을 쓴다(<a href="../../notation.html#sec-wedge">Notation and Conventions</a>).
+      \(\R^3\)에서 \(dx \wedge dy \wedge dz(u, v, w) = \det(u\ v\ w)\)는 평행육면체의 signed volume이다. 이렇게 \(k\)개의 vector를 받아 <strong>alternating</strong>(교대)이고 multilinear인 값을 내는 것을 매끄럽게 붙인 것이 <strong>differential \(k\)-form</strong>(미분형식)이다.</p>
+
+      <figure class="dg-figure" id="fig-0-7-2">
+        <img src="figures/fig-0-7-2-wedge.svg" alt="두 패널에 같은 하늘색 평행사변형이 있다. 왼쪽 패널에서는 첫 번째 vector v가 파랑, 두 번째 vector w가 초록이고 v에서 w로 가는 반시계 방향 호 화살표와 +11/4가 적혀 있다. 오른쪽 패널에서는 순서를 바꾸어 w가 파랑(첫 번째), v가 초록(두 번째)이고 시계 방향 호 화살표와 −11/4가 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 0.7.2.</span>
+        \(v = (2, 1/2)\), \(w = (1/2, 3/2)\)일 때 \(dx \wedge dy(v, w) = 2 \cdot \tfrac32 - \tfrac12 \cdot \tfrac12 = 11/4\)(왼쪽)이고 \(dx \wedge dy(w, v) = -11/4\)(오른쪽)이다. 파랑이 첫 번째 인자, 초록이 두 번째 인자다. 넓이는 같고 방향(호 화살표)만 다르다.</figcaption>
+      </figure>
+
+      <p>2-form은 oriented surface 위에서 적분한다. \(\R^2\)의 영역 \(D\)에서 \(\int_D f\,dx \wedge dy = \iint_D f\,dx\,dy\)(반시계 방향 orientation)이다.
+      여기서 <strong>orientation</strong>(방향)은 각 tangent space에서 어느 basis 순서를 “양”으로 볼지를 연속적으로 고른 것이다. Möbius strip처럼 orientation을 고를 수 없는 manifold도 있다(<a href="../18-integration-stokes/index.html#toc-18-1">Section 18.1</a>).</p>
+    </section>
+
+    <section id="sec-exterior-derivative">
+      <h2>The Exterior Derivative</h2>
+      <p>함수(0-form) \(f\)의 미분이 1-form \(df\)였던 것처럼, \(k\)-form을 미분해 \((k+1)\)-form을 만드는 연산 \(d\)가 있다. 이것을 <strong>exterior derivative</strong>(외미분)라 한다. \(\R^2\)의 1-form에서는</p>
+      <div class="equation" id="eq-0-7-5">
+      \[ d(P\,dx + Q\,dy) = \Big(\pd{Q}{x} - \pd{P}{y}\Big)\, dx \wedge dy \tag{0.7.5} \]
+      </div>
+      <p>이다. 괄호 안은 평면 vector field \((P, Q)\)의 curl, 곧 점 둘레의 단위 넓이당 회전량이다. \(\omega = df\)이면 \(P = f_x\), \(Q = f_y\)이고 \(f_{yx} = f_{xy}\)이므로 \(d(df) = 0\)이다. 일반적으로 언제나 \(d \circ d = 0\)이다.
+      \(\R^3\)에서 표준 inner product와 orientation으로 1-form과 2-form을 vector field와 짝지으면, \(d\)는 익숙한 세 연산이 된다.</p>
+      <table>
+        <thead>
+          <tr><th>\(d\)</th><th>form</th><th>vector calculus</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0-form → 1-form</td><td>\(df = f_x\,dx + f_y\,dy + f_z\,dz\)</td><td>\(\grad f\)</td></tr>
+          <tr><td>1-form → 2-form</td><td>\(d(A\,dx + B\,dy + C\,dz)\)</td><td>\(\operatorname{curl}(A, B, C)\)</td></tr>
+          <tr><td>2-form → 3-form</td><td>\(d(a\,dy\wedge dz + b\,dz\wedge dx + c\,dx\wedge dy)\)</td><td>\(\divg(a, b, c)\)</td></tr>
+        </tbody>
+      </table>
+      <p>\(d \circ d = 0\)은 \(\operatorname{curl}\grad f = 0\)과 \(\divg\operatorname{curl} V = 0\)을 한 번에 말한다. 또 \(d\)는 pullback과 교환한다(\(F^* d\omega = d F^*\omega\)). 그래서 \(d\)는 좌표에 무관하게 정의된다(<a href="../17-differential-forms/index.html#toc-17-3">Section 17.3</a>).</p>
+    </section>
+
+    <section id="sec-stokes">
+      <h2>Stokes's Theorem</h2>
+
+      <div class="thm theorem" id="i-0-7-3">
+        <p><span class="thm-head">Theorem 0.7.3</span> <span class="thm-name">(Stokes's theorem)</span>.
+        \(M\)이 compact이고 oriented인 \(n\)-dimensional smooth manifold with boundary이고, \(\omega\)가 \(M\) 위의 smooth \((n-1)\)-form이면</p>
+        <div class="equation" id="eq-0-7-6">
+        \[ \int_M d\omega = \int_{\partial M} \omega \tag{0.7.6} \]
+        </div>
+        <p>이다. boundary \(\partial M\)에는 바깥쪽 normal을 첫 번째로 두는 orientation(Stokes orientation)을 준다. 여기서는 manifold 위의 적분과 orientation의 정의를 생략하고 진술만 했다(<a href="../18-integration-stokes/index.html#toc-18-4">Section 18.4</a>).</p>
+      </div>
+
+      <p>“안쪽에서 일어난 변화를 모두 더하면 boundary에서 본 양과 같다”는 정리다. 미적분학의 적분 정리들이 모두 이것의 특수한 경우다.</p>
+      <ul>
+        <li>\(n = 1\), \(M = [a, b]\): \(\int_a^b f'(t)\,dt = f(b) - f(a)\), 그리고 <a href="#eq-0-7-4">(0.7.4)</a></li>
+        <li>\(n = 2\), \(M \subseteq \R^2\): <a href="#eq-0-7-5">(0.7.5)</a>를 넣으면 Green's theorem \(\iint_M (Q_x - P_y)\,dx\,dy = \oint_{\partial M} P\,dx + Q\,dy\)</li>
+        <li>\(\R^3\) 안의 surface와 영역: 고전적인 Stokes's theorem과 divergence theorem(<a href="../18-integration-stokes/index.html#toc-18-5">Section 18.5</a>)</li>
+      </ul>
+      <p>예를 들어 <a href="#i-0-7-2">Example 0.7.2</a>의 \(\omega = x\,dy\)는 \(d\omega = dx \wedge dy\)이므로, unit disk \(D\)에서 \(\int_D dx \wedge dy = \pi\)(넓이)와 \(\oint_{\partial D} x\,dy = \pi\)가 같은 것은 <a href="#eq-0-7-6">(0.7.6)</a> 그 자체다.</p>
+      <p class="proof-idea">Proof idea: \(M\)을 작은 조각으로 자른다. 작은 조각에서는 boundary를 한 바퀴 돈 \(\omega\)의 적분이 거의 “\(d\omega\)의 coefficient \(\times\) 넓이”다(평면에서는 <a href="#eq-0-7-5">(0.7.5)</a>의 괄호가 단위 넓이당 회전량이라는 말이고, Taylor 전개로 확인한다). 이웃한 두 조각은 공유하는 변을 서로 반대 방향으로 돌기 때문에 안쪽 변의 기여는 모두 지워지고, 바깥 boundary만 남는다(<a href="#fig-0-7-3">Figure 0.7.3</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-7-3">
+        <img src="figures/fig-0-7-3-stokes.svg" alt="하늘색 직사각형 M이 점선으로 3×2개의 정사각형 조각으로 나뉘어 있다. 각 조각 안쪽에 반시계 방향으로 도는 주황 화살표 고리가 있어, 이웃한 두 조각의 고리가 공유하는 변을 따라 서로 반대 방향으로 지나간다. 바깥 boundary ∂M은 굵은 검정 반시계 방향 화살표다. 오른쪽 변의 한 점에서 바깥쪽을 가리키는 주황빛 붉은 화살표와 위쪽을 가리키는 파란 화살표가 있다.">
+        <figcaption><span class="fig-head">Figure 0.7.3.</span>
+        직사각형 \(M = [0, 3] \times [0, 2]\)을 단위 정사각형 \(6\)개로 나누고 각 조각의 boundary를 반시계 방향으로 돈다(주황). 안쪽 변에서는 이웃한 두 고리가 반대 방향으로 지나가 기여가 지워지고, 바깥 boundary \(\partial M\)(검정)만 남는다.
+        오른쪽 변의 점에서 바깥쪽 normal(주홍) 다음에 boundary 방향(파랑)을 두면 양의 순서다. 이것이 Stokes orientation이다. (schematic)</figcaption>
+      </figure>
+
+      <p><a href="0-5-intrinsic.html#i-0-5-8">Section 0.5</a>의 Gauss–Bonnet theorem도 “안쪽의 curvature = boundary와 topology”라는 같은 모양의 정리다. Chapter 26에서 Stokes's theorem을 써서 다시 증명한다(<a href="../26-gauss-bonnet-jacobi/index.html#toc-26-1">Section 26.1</a>).</p>
+    </section>
+
+    <section id="sec-de-rham">
+      <h2>Closed Forms, Exact Forms, and Holes</h2>
+      <p>\(d\omega = 0\)인 form을 <strong>closed form</strong>(닫힌 형식), 어떤 \(\eta\)에 대해 \(\omega = d\eta\)인 form을 <strong>exact form</strong>(완전 형식)이라 한다. \(d \circ d = 0\)이므로 exact form은 모두 closed다. 반대는 어떨까?</p>
+
+      <div class="thm example" id="i-0-7-4">
+        <p><span class="thm-head">Example 0.7.4</span> <span class="thm-name">(a closed form that is not exact)</span>.
+        구멍 뚫린 평면 \(\R^2 \setminus \{0\}\)에서</p>
+        <div class="equation" id="eq-0-7-7">
+        \[ \omega = \frac{-y\,dx + x\,dy}{x^2 + y^2} \tag{0.7.7} \]
+        </div>
+        <p>를 보자. <a href="#eq-0-7-5">(0.7.5)</a>로 계산하면 \(d\omega = 0\)이므로 closed다. 그런데 unit circle을 따라 적분하면 \(\omega_{\gamma(t)}(\gamma'(t)) = \sin^2 t + \cos^2 t = 1\)이므로 \(\oint \omega = 2\pi \ne 0\)이다. \(\omega = df\)였다면 <a href="#eq-0-7-4">(0.7.4)</a>에 의해 \(0\)이어야 하므로 \(\omega\)는 exact가 아니다.
+        국소적으로는 \(\omega = d\theta\)(\(\theta\)는 polar angle)이지만, \(\theta\)를 원점 둘레 전체에서 연속인 함수로 정할 수는 없다. 한 바퀴 돌면 \(2\pi\)가 늘기 때문이다(<a href="#fig-0-7-4">Figure 0.7.4</a>).</p>
+        <p class="verified">Verification: <code>verify/v-0-7-forms.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-0-7-4">
+        <img src="figures/fig-0-7-4-dtheta.svg" alt="원점에서 뻗어 나가는 자주색 반직선 16개가 ω = dθ의 등위선 묶음이다. 원점은 흰 작은 원으로 비어 있다. 원점을 둘러싼 파란 원 γ₁과, 원점을 둘러싸지 않는 오른쪽 위의 작은 주황 원 γ₂가 있고, 둘 다 반시계 방향 화살표가 붙어 있다.">
+        <figcaption><span class="fig-head">Figure 0.7.4.</span>
+        <a href="#eq-0-7-7">(0.7.7)</a>의 \(\omega\)를 등위선 묶음으로 그린 것: 반직선 \(\theta = 2\pi k/16\)(자주색). 원점을 감싸는 \(\gamma_1\)(반지름 \(1.5\))은 모든 반직선을 같은 방향으로 한 번씩 가로질러 \(\oint_{\gamma_1}\omega = 2\pi\)이다.
+        원점을 감싸지 않는 \(\gamma_2\)(중심 \((1.9, 1.1)\), 반지름 \(0.6\))는 만나는 반직선을 한 번은 앞으로, 한 번은 뒤로 가로질러 \(\oint_{\gamma_2}\omega = 0\)이다.</figcaption>
+      </figure>
+
+      <p>closed인데 exact가 아닌 form은 공간의 구멍 때문에 생긴다. 실제로 \(\R^n\)이나 <strong>star-shaped</strong>(별 모양) 영역에서는 closed form이 모두 exact다. 이것이 <strong>Poincaré lemma</strong>(푸앵카레 보조정리)다(<a href="../19-de-rham/index.html#toc-19-2">Section 19.2</a>). 그래서 “closed이지만 exact가 아닌 것”을 세면 구멍을 셀 수 있다.</p>
+
+      <div class="thm definition" id="i-0-7-5">
+        <p><span class="thm-head">Definition 0.7.5</span> <span class="thm-name">(de Rham cohomology)</span>.
+        \(M\)의 closed \(k\)-form 전체를 exact \(k\)-form 전체로 나눈 vector space</p>
+        <div class="equation" id="eq-0-7-8">
+        \[ H^k_{\mathrm{dR}}(M) = \frac{\{\omega : d\omega = 0\}}{\{d\eta\}} \tag{0.7.8} \]
+        </div>
+        <p>를 \(M\)의 \(k\)번째 <strong>de Rham cohomology</strong>(드람 코호몰로지)라 한다. 두 closed form의 차이가 exact이면 같은 원소로 본다.</p>
+      </div>
+
+      <p>몇 가지 값은 다음과 같다(<a href="../19-de-rham/index.html#toc-19-5">Section 19.5</a>). \(H^0_{\mathrm{dR}}(M)\)의 dimension은 \(M\)의 connected component의 개수다. \(H^1_{\mathrm{dR}}(\R^2 \setminus \{0\}) \cong \R\)이고 \([\omega]\)가 basis다.
+      sphere는 \(H^1_{\mathrm{dR}}(S^2) = 0\)이고, torus는 두 방향의 고리 때문에 \(H^1_{\mathrm{dR}}(T^2) \cong \R^2\)이다. compact manifold에서는 dimension의 부호를 바꾼 합 \(\sum_k (-1)^k \dim H^k_{\mathrm{dR}}(M)\)이 Euler characteristic \(\chi(M)\)이다.
+      \(S^2\)는 \(1 - 0 + 1 = 2\), \(T^2\)는 \(1 - 2 + 1 = 0\)으로 <a href="0-5-intrinsic.html#eq-0-5-3">Section 0.5</a>의 Gauss–Bonnet theorem에 나온 값과 같다.</p>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: Poisson image editing</p>
+        <p>Poisson image editing <a class="cite" href="../../references.html#Perez03">[Perez03]</a>은 붙여 넣을 영역 \(\Omega\)에서 원하는 gradient field \(\mathbf{v}\)(예: 원본 이미지 \(g\)의 \(\grad g\). CV 문헌에서는 흔히 \(\nabla g\)로 쓴다)를 정하고, \(\Omega\)의 boundary에서는 배경 이미지의 값 \(f^*\)와 맞도록</p>
+        <p>\[ \min_f \iint_\Omega \abs{\grad f - \mathbf{v}}^2\,dx\,dy, \qquad f\big|_{\partial\Omega} = f^*\big|_{\partial\Omega} \]</p>
+        <p>를 푼다. 그 해는 Poisson equation \(\Delta f = \divg\mathbf{v}\)(\(\Omega\) 안), \(f = f^*\)(boundary)를 만족한다. 여기서 \(\Delta = \divg\grad\)이다(이 study set의 부호 규약).</p>
+        <ul>
+          <li>정확히 \(\grad f = \mathbf{v}\)인 \(f\)가 있는지는 1-form \(v^1\,dx + v^2\,dy\)가 exact인지와 같다. 필요조건은 closed, 곧 curl이 \(0\)인 것이다. 두 이미지의 gradient를 섞은 field(mixing gradients)는 보통 curl이 \(0\)이 아니므로 그런 \(f\)가 없다. 그래도 Poisson equation의 해 \(f\)는 boundary 조건 아래에서 \(\grad f\)가 \(\mathbf{v}\)에 최소제곱으로 가장 가까운 함수다.</li>
+          <li>curl이 \(0\)이어도 \(\Omega\)에 구멍이 있으면 부족하다. <a href="#i-0-7-4">Example 0.7.4</a>처럼 구멍을 도는 적분이 \(0\)이 아니면 exact가 아니다. 이 차이를 재는 것이 \(H^1_{\mathrm{dR}}(\Omega)\)다.</li>
+          <li>이산화하면 \(\Delta\)가 sparse matrix가 되어 linear system 하나를 푸는 문제가 된다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: discrete exterior calculus와 Hodge decomposition</p>
+        <p>triangle mesh에서는 form을 이렇게 이산화한다: 0-form은 vertex마다, 1-form은 방향을 준 edge마다(그 edge를 따른 적분값), 2-form은 face마다 수 하나. 그러면 \(d_0\)는 edge \(a \to b\)에 \(f(b) - f(a)\)를 주는 incidence matrix(이산 <a href="#eq-0-7-4">(0.7.4)</a>)이고,
+        \(d_1\)은 face의 boundary를 도는 edge 값의 합(이산 <a href="#eq-0-7-6">(0.7.6)</a>)이다. 정의에 의해 Stokes's theorem이 성립하고 \(d_1 d_0 = 0\)이 정확히 성립한다
+        <a class="cite" href="../../references.html#Desbrun05">[Desbrun05]</a>, <a class="cite" href="../../references.html#Cr">[Cr]</a>. 길이·넓이 같은 metric 정보는 <strong>Hodge star</strong>(호지 스타)라는 대각 행렬로만 들어가며, mesh processing의 cotan Laplacian이 이렇게 얻어진다(부호는 \(-\Delta\) 쪽이다).</p>
+        <p>compact하고 boundary가 없는 oriented surface 위의 vector field(1-form)는 gradient 성분(curl이 없음), 회전 성분(divergence가 없음), 그리고 curl과 divergence가 모두 \(0\)인 harmonic 성분의 합으로 유일하게 나뉜다. 이것이 <strong>Hodge decomposition</strong>(호지 분해)이고, harmonic 1-form 전체는 \(\dim H^1_{\mathrm{dR}}\)차원 vector space다(genus \(g\)인 surface에서 \(2g\)차원). mesh 위 vector field의 분석과 설계에 쓴다
+        <a class="cite" href="../../references.html#Tong03">[Tong03]</a>.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>dual space와 determinant: <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-1">Definition 1.3.1 (dual space)</a>, <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-4">Definition 1.3.4 (dual basis)</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-1">Definition 1.6.1 (multilinear and alternating)</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-11">Definition 1.6.11 (orientation)</a>.</li>
+        <li>covector, \(df\), pullback, line integral: <a href="../16-covectors-tensors/index.html">Chapter 16</a>(특히 <a href="../16-covectors-tensors/index.html#toc-16-2">Section 16.2</a>, <a href="../16-covectors-tensors/index.html#toc-16-3">Section 16.3</a>).</li>
+        <li>wedge product와 exterior derivative: <a href="../17-differential-forms/index.html">Chapter 17</a>.</li>
+        <li>orientation, 적분, Stokes's theorem과 고전적 적분 정리: <a href="../18-integration-stokes/index.html">Chapter 18</a>. 평면의 경우는 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-13">Theorem 2.6.13 (Green's theorem)</a>.</li>
+        <li>closed·exact form, Poincaré lemma, \(\R^2 \setminus \{0\}\) 위의 \(d\theta\), torus의 cohomology: <a href="../19-de-rham/index.html">Chapter 19</a>. 더 깊이는 <a class="cite" href="../../references.html#BT">[BT]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>covector는 tangent vector를 받아 수를 내는 linear map이고, \(df\)가 대표적인 예다. 그림으로는 등위선의 묶음이다.</li>
+        <li>covector는 pullback으로 거꾸로 옮겨진다. reverse-mode 자동미분의 VJP가 바로 이것이다.</li>
+        <li>1-form은 곡선을 따라, \(k\)-form은 \(k\)차원 oriented manifold 위에서 적분한다. wedge product는 signed area·volume을 준다.</li>
+        <li>exterior derivative \(d\)는 gradient·curl·divergence를 하나로 묶고 \(d \circ d = 0\)이다. Stokes's theorem \(\int_M d\omega = \int_{\partial M}\omega\)는 미적분학의 적분 정리를 모두 포함한다.</li>
+        <li>closed이지만 exact가 아닌 form은 구멍에서 생기고, de Rham cohomology가 그것을 센다. Poisson image editing의 “gradient field가 정말 gradient인가”가 이 질문이다.</li>
+      </ul>
+      <p class="next">다음 절에서는 manifold 위에 길이와 각을 재는 inner product, 곧 Riemannian metric을 얹는다. 그러면 covector를 vector로 바꿀 수 있고(gradient), geodesic과 curvature를 manifold 위에서 정의할 수 있다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-0-7-1" data-level="1">
+        <p><span class="thm-head">Exercise 0.7.1</span> <span class="level">★</span>
+        \(f(x, y) = x^2 y\)일 때 \(df\)를 구하고, \(p = (1, 2)\)에서 \(df_p(v)\)를 \(v = (1, 1)\)에 대해 계산하여라. 이 값은 무엇을 뜻하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-0-7-1">(0.7.1)</a>에서 \(df = 2xy\,dx + x^2\,dy\)이므로 \(df_p = 4\,dx + dy\)이고 \(df_p(v) = 4 \cdot 1 + 1 \cdot 1 = 5\)이다. \(p\)에서 \(v\) 방향으로 움직일 때 \(f\)가 변하는 빠르기, 곧 \(\frac{d}{ds}f(1 + s, 2 + s)\big|_{s=0} = 5\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-7-forms.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-7-2" data-level="1">
+        <p><span class="thm-head">Exercise 0.7.2</span> <span class="level">★</span>
+        \(v = (1, 0)\), \(w = (1, 2)\)일 때 \(dx \wedge dy(v, w)\)와 \(dx \wedge dy(w, v)\)를 구하고 그림으로 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(dx \wedge dy(v, w) = 1 \cdot 2 - 0 \cdot 1 = 2\), \(dx \wedge dy(w, v) = 1 \cdot 0 - 2 \cdot 1 = -2\)이다. \(v\)와 \(w\)가 만드는 평행사변형의 넓이는 \(2\)이고, \(v\)에서 \(w\)로는 반시계 방향으로 돌므로 양수, 순서를 바꾸면 시계 방향이 되어 음수다.</p>
+          <p class="verified">Verification: <code>verify/v-0-7-forms.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-7-3" data-level="1">
+        <p><span class="thm-head">Exercise 0.7.3</span> <span class="level">★</span>
+        \(\omega = -y\,dx\)를 unit circle을 따라 반시계 방향으로 적분하고, Stokes's theorem <a href="#eq-0-7-6">(0.7.6)</a>으로 결과를 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\gamma(t) = (\cos t, \sin t)\)이면 \(\omega_{\gamma(t)}(\gamma'(t)) = -\sin t \cdot (-\sin t) = \sin^2 t\)이므로 \(\oint \omega = \int_0^{2\pi}\sin^2 t\,dt = \pi\)이다.
+          <a href="#eq-0-7-5">(0.7.5)</a>에서 \(P = -y\), \(Q = 0\)이므로 \(d\omega = (0 - (-1))\,dx \wedge dy = dx \wedge dy\)이고, unit disk \(D\)에서 \(\int_D dx \wedge dy = \pi\)(넓이)이다. 두 값이 같다는 것이 Stokes's theorem이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-7-forms.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-7-4" data-level="1">
+        <p><span class="thm-head">Exercise 0.7.4</span> <span class="level">★</span>
+        <a href="#eq-0-7-7">(0.7.7)</a>의 \(\omega\)를 오른쪽 half-plane \(\{x \gt 0\}\)으로 제한하면 exact인가? 참인지 거짓인지 판별하고 이유를 써라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>참이다. \(x \gt 0\)에서 \(\theta = \arctan(y/x)\)는 smooth function이고, 미분하면 \(\partial_x\theta = -y/(x^2 + y^2)\), \(\partial_y\theta = x/(x^2 + y^2)\)이므로 \(\omega = d\theta\)이다.
+          오른쪽 half-plane에는 원점을 감싸는 closed curve가 없으므로 <a href="#i-0-7-4">Example 0.7.4</a>의 장애가 생기지 않는다. 오른쪽 half-plane은 star-shaped 영역이므로 Poincaré lemma와도 맞는다.</p>
+          <p class="verified">Verification: <code>verify/v-0-7-forms.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="0-6-manifolds.html">← 0.6 Manifolds: Spaces That Look Flat Up Close</a>
+    <a rel="next" href="0-8-riemannian.html">0.8 Riemannian Geometry: Measuring on a Manifold →</a>
+  </nav>
+</body>
+</html>

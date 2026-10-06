@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.4 How Surfaces Bend: Curvature — DG Study</title>
+  <meta name="dg-id" content="0.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.2, 0.3">
+  <meta name="dg-refs" content="dC Ch. 3; Pr; Cr; Meyer03; Desbrun99; PMP">
+  <meta name="dg-updated" content="2026-10-06">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">0. A Guided Tour of Differential Geometry</a> ›
+    <span>0.4 How Surfaces Bend: Curvature</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>0.4 How Surfaces Bend: Curvature</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#dC">[dC Ch. 3]</a>,
+        <a class="cite" href="../../references.html#Pr">[Pr]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr]</a>,
+        <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>,
+        <a class="cite" href="../../references.html#Desbrun99">[Desbrun99]</a>,
+        <a class="cite" href="../../references.html#PMP">[PMP]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>Gauss map과 shape operator \(W_p = -d\mathbf{N}_p\)가 무엇을 재는지 그림으로 설명할 수 있다.</li>
+        <li>normal curvature와 principal curvature의 관계(Euler's formula)를 이해하고 saddle surface에서 계산할 수 있다.</li>
+        <li>Gaussian curvature \(K\)와 mean curvature \(H\)를 정의하고, running example의 값과 점의 분류(elliptic, hyperbolic, parabolic)를 말할 수 있다.</li>
+        <li>mesh에서 curvature를 추정하는 cotangent formula와 angle defect, mean curvature flow가 이 정의와 어떻게 이어지는지 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0-2-curves.html">Section 0.2</a>: plane curve의 signed curvature(<a href="0-2-curves.html#i-0-2-4">Definition 0.2.4</a>)</li>
+        <li><a href="0-3-surfaces.html">Section 0.3</a>: tangent plane과 unit normal vector(<a href="0-3-surfaces.html#i-0-3-3">Definition 0.3.3</a>, <a href="0-3-surfaces.html#i-0-3-4">Example 0.3.4</a>), first fundamental form(<a href="0-3-surfaces.html#i-0-3-5">Definition 0.3.5</a>)</li>
+        <li>linear algebra: \(2 \times 2\) symmetric matrix의 eigenvalue와 eigenvector, determinant와 trace</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="0-3-surfaces.html">Section 0.3</a>에서 평면과 cylinder는 \(E = G = 1\), \(F = 0\)인 parametrization을 가져서 surface 안에서 잰 길이, 각, 넓이가 같았다(<a href="0-3-surfaces.html#i-0-3-7">Example 0.3.7</a>). 그런데 cylinder는 분명히 휘어 있다. 둘을 구별하는 것은 무엇인가?</p>
+      <p>답은 normal vector다. 평면 위에서는 어디로 움직여도 \(\mathbf{N}\)이 그대로이지만, cylinder 위에서 둘레를 따라 움직이면 \(\mathbf{N}\)이 돈다. 곡선의 curvature가 unit tangent vector \(\mathbf{t}\)가 도는 빠르기였듯이(<a href="0-2-curves.html">Section 0.2</a>), surface의 curvature는 unit normal vector \(\mathbf{N}\)이 기우는 빠르기다. 다만 surface에서는 움직이는 방향이 여럿이므로 빠르기가 수 하나가 아니라 linear map이 된다.</p>
+    </section>
+
+    <section id="sec-gauss-map">
+      <h2>The Gauss Map and the Shape Operator</h2>
+      <div class="thm definition" id="i-0-4-1">
+        <p><span class="thm-head">Definition 0.4.1</span> <span class="thm-name">(Gauss map and shape operator)</span>.
+        unit normal vector가 정해진 surface \(S\)에서, 점 \(p\)를 단위벡터 \(\mathbf{N}(p)\)로 보내는 map \(\mathbf{N}\colon S \to S^2\)을 <strong>Gauss map</strong>(가우스 사상)이라 한다. \(w \in T_pS\)에 대해 \(\alpha(0) = p\), \(\alpha'(0) = w\)인 \(S\) 위의 곡선 \(\alpha\)를 잡고</p>
+        <p>\[ d\mathbf{N}_p(w) = \frac{d}{dt}\Big|_{t=0} \mathbf{N}\big(\alpha(t)\big) \]</p>
+        <p>로 정하면 이 값은 곡선의 선택에 무관하고 \(w\)에 대해 linear이다. \(\abs{\mathbf{N}} = 1\)이므로 \(d\mathbf{N}_p(w) \perp \mathbf{N}(p)\), 곧 \(d\mathbf{N}_p(w) \in T_pS\)이다. linear map</p>
+        <p>\[ W_p = -d\mathbf{N}_p\colon T_pS \to T_pS \]</p>
+        <p>를 \(p\)에서의 <strong>shape operator</strong>(형태작용소)라 한다.</p>
+      </div>
+      <p>\(W_p(w)\)는 “\(w\) 방향으로 한 걸음 갈 때 \(\mathbf{N}\)이 얼마나, 어느 쪽으로 기우는가”를 잰다. 앞의 마이너스 부호는 surface가 \(\mathbf{N}\) 쪽으로 휠 때 curvature가 양수가 되도록 붙인 것이다(아래 <a href="#i-0-4-3">Definition 0.4.3</a>). 곡선을 따라 미분해서 정의하는 것은 정확한 정의 그대로다. 그 미분이 잘 정의된다는 것을 보이려면 surface 사이의 map의 differential이 필요하다(<a href="../06-regular-surfaces/6-4-differential-of-a-map.html#i-6-4-1">Definition 6.4.1</a>, <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-4">Proposition 8.1.4</a>).</p>
+
+      <div class="thm example" id="i-0-4-2">
+        <p><span class="thm-head">Example 0.4.2</span> <span class="thm-name">(shape operators of the plane, sphere, and cylinder)</span>.</p>
+        <ul>
+          <li>평면: \(\mathbf{N}\)이 상수이므로 \(W_p = 0\)이다.</li>
+          <li>sphere \(S^2(r)\)(바깥쪽 \(\mathbf{N} = \mathbf{x}/r\)): \(\mathbf{N}(\alpha(t)) = \alpha(t)/r\)이므로 \(d\mathbf{N}_p(w) = w/r\), 곧 \(W_p = -\tfrac1r\,\mathrm{id}\)이다. 모든 방향으로 똑같이 휜다.</li>
+          <li>cylinder(바깥쪽 \(\mathbf{N} = (\cos u, \sin u, 0)\)): 축 방향(\(\mathbf{x}_v\))으로 가면 \(\mathbf{N}\)이 그대로이므로 \(W_p(\mathbf{x}_v) = 0\)이다. 둘레 방향(\(\mathbf{x}_u\))으로 가면 \(\mathbf{N}_u = (-\sin u, \cos u, 0) = \mathbf{x}_u/r\)이므로 \(W_p(\mathbf{x}_u) = -\tfrac1r\,\mathbf{x}_u\)이다. basis \((\mathbf{x}_u, \mathbf{x}_v)\)에서 \(W_p = \diag(-1/r,\ 0)\)이다.</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-0-4-curvature.py</code></p>
+      </div>
+      <p>\(W_p\)에는 중요한 성질이 하나 있다. 모든 \(w_1, w_2 \in T_pS\)에 대해 \(\inner{W_p w_1}{w_2} = \inner{w_1}{W_p w_2}\)이다(self-adjoint, <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-10">Theorem 8.1.10</a>). 그래서 \(T_pS\)의 orthonormal basis에서 \(W_p\)의 행렬은 symmetric matrix이고, 실수 eigenvalue 두 개와 서로 수직인 eigenvector를 가진다.</p>
+    </section>
+
+    <section id="sec-normal-curvature">
+      <h2>Normal Curvature and Principal Curvatures</h2>
+      <p>한 방향의 휘어짐은 곡선으로 볼 수 있다. 점 \(p\)와 단위 tangent vector \(w\)에 대해, \(w\)와 \(\mathbf{N}(p)\)가 펼치는 평면으로 surface를 자르면 plane curve가 나온다. 이것을 \(w\) 방향의 <strong>normal section</strong>(법단면)이라 한다(<a href="#fig-0-4-1">Figure 0.4.1</a>). 이 곡선의 signed curvature를 \(\mathbf{N}\) 쪽으로 휠 때 양수가 되도록 잰 값이 \(w\) 방향으로 surface가 휘는 정도다.</p>
+      <div class="thm definition" id="i-0-4-3">
+        <p><span class="thm-head">Definition 0.4.3</span> <span class="thm-name">(normal curvature and principal curvatures)</span>.
+        단위벡터 \(w \in T_pS\)에 대해 \(\kappa_n(w) = \inner{W_p(w)}{w}\)를 \(w\) 방향의 <strong>normal curvature</strong>(법곡률)라 한다. \(W_p\)의 두 eigenvalue \(\kappa_1 \ge \kappa_2\)를 <strong>principal curvature</strong>(주곡률), 그 eigenvector의 방향을 <strong>principal direction</strong>(주방향)이라 한다.</p>
+      </div>
+      <p>\(\kappa_n(w)\)는 위의 normal section의 curvature와 같다. 더 일반적으로, \(p\)에서 \(w\) 방향으로 지나가는 \(S\) 위의 unit-speed curve는 어떻게 그리든 가속도의 \(\mathbf{N}\) 성분이 \(\kappa_n(w)\)다(Meusnier's theorem, <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-5">Theorem 8.2.5</a>). quadratic form \(\mathrm{II}_p(w) = \inner{W_p(w)}{w}\)를 <strong>second fundamental form</strong>(제2기본형식)이라 하며, 단위벡터에서의 값이 normal curvature다.</p>
+      <p>principal direction의 단위벡터를 \(\mathbf{e}_1, \mathbf{e}_2\)라 하고 \(w = \cos\theta\,\mathbf{e}_1 + \sin\theta\,\mathbf{e}_2\)로 쓰면</p>
+      <div class="equation" id="eq-0-4-1">
+      \[ \kappa_n(w) = \kappa_1\cos^2\theta + \kappa_2\sin^2\theta \tag{0.4.1} \]
+      </div>
+      <p>이다(Euler's formula, <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-5">Theorem 8.3.5</a>). 곧 모든 방향의 휘어짐은 두 수 \(\kappa_1, \kappa_2\)로 정해지고, \(\kappa_1\)은 normal curvature의 최댓값, \(\kappa_2\)는 최솟값이다. symmetric matrix의 eigenvalue가 Rayleigh quotient의 최대·최소인 것과 같은 이야기다.</p>
+
+      <figure class="dg-figure" id="fig-0-4-1">
+        <img src="figures/fig-0-4-1-saddle-sections.svg" alt="말안장 모양의 회색 saddle surface와 원점의 하늘색 tangent plane이다. 원점에서 주홍 N이 위로, 파란 e_1, e_2가 x축과 y축 방향으로 뻗어 있다. 주황 실선 곡선은 x 방향 normal section으로 양쪽 끝이 위로(N 쪽으로) 휘고 kappa_n = 2라고 적혀 있다. 주황 점선 곡선은 y 방향 normal section으로 아래로 휘고 kappa_n = -2라고 적혀 있다. 회색 점선 두 개는 surface 위에 놓인 대각선 방향의 직선이다.">
+        <figcaption><span class="fig-head">Figure 0.4.1.</span>
+        saddle surface \(z = x^2 - y^2\)(\(x^2 + y^2 \le 1\))의 원점에서 \(\mathbf{N} = (0, 0, 1)\)(주홍, 위쪽), tangent plane \(z = 0\)(하늘색), principal direction \(\mathbf{e}_1, \mathbf{e}_2\)(파랑). normal section \(z = x^2\)(주황 실선)은 \(\mathbf{N}\) 쪽으로 휘어 \(\kappa_n = 2\), \(z = -y^2\)(주황 점선)은 반대로 휘어 \(\kappa_n = -2\)이다. 회색 점선은 \(\kappa_n = 0\)인 방향의 직선 \(x = \pm y\)로, surface 위에 통째로 놓여 있다(<a href="#i-0-4-4">Example 0.4.4</a>). <a href="figures/fig-0-4-1-saddle-sections-interactive.html">Interactive version</a>.</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-0-4-4">
+        <p><span class="thm-head">Example 0.4.4</span> <span class="thm-name">(saddle surface at the origin)</span>.
+        \(z = f(x, y) = x^2 - y^2\)는 원점에서 tangent plane이 \(z = 0\)이고 \(\mathbf{N} = (0, 0, 1)\)이다. 이렇게 surface가 tangent plane 위의 그래프로 놓여 있으면 원점의 \(W_p\)는 \(f\)의 Hessian matrix와 같다(<a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-10">Proposition 8.2.10</a>): \(W_p = \begin{pmatrix} 2 & 0 \\ 0 & -2 \end{pmatrix}\). 따라서 \(\kappa_1 = 2\)(\(x\) 방향), \(\kappa_2 = -2\)(\(y\) 방향)이고 <a href="#eq-0-4-1">(0.4.1)</a>은 \(\kappa_n = 2\cos^2\theta - 2\sin^2\theta = 2\cos 2\theta\)이다. \(\theta = \pm\pi/4\)에서 \(\kappa_n = 0\)인데, 실제로 직선 \(x = \pm y\), \(z = 0\)이 surface에 놓여 있다.</p>
+        <p class="verified">Verification: <code>verify/v-0-4-curvature.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-k-h">
+      <h2>Gaussian Curvature and Mean Curvature</h2>
+      <div class="thm definition" id="i-0-4-5">
+        <p><span class="thm-head">Definition 0.4.5</span> <span class="thm-name">(Gaussian curvature and mean curvature)</span>.</p>
+        <p>\[ K = \kappa_1\kappa_2 = \det W_p, \qquad H = \frac{\kappa_1 + \kappa_2}{2} = \frac12\tr W_p \]</p>
+        <p>를 \(p\)에서의 <strong>Gaussian curvature</strong>(가우스 곡률)와 <strong>mean curvature</strong>(평균곡률)라 한다. \(K \gt 0\)인 점을 <strong>elliptic point</strong>(타원점), \(K \lt 0\)인 점을 <strong>hyperbolic point</strong>(쌍곡점), \(K = 0\)이지만 \(W_p \neq 0\)인 점을 <strong>parabolic point</strong>(포물점)라 한다.</p>
+      </div>
+      <p>\(\mathbf{N}\)을 \(-\mathbf{N}\)으로 바꾸면 \(W_p\)가 \(-W_p\)가 되므로 \(\kappa_1, \kappa_2\)와 \(H\)의 부호가 바뀌고, \(K = \det W_p\)는 그대로다(\(2 \times 2\) 행렬이라 \(\det(-W) = \det W\)). 그래서 \(H\)를 말할 때는 언제나 \(\mathbf{N}\)의 방향을 함께 밝혀야 한다. \(K\)의 부호는 모양을 직접 말해 준다(<a href="#fig-0-4-2">Figure 0.4.2</a>).</p>
+      <ul>
+        <li>elliptic(\(K \gt 0\)): 모든 방향으로 같은 쪽으로 휜다. 구, 둥근 언덕 꼭대기.</li>
+        <li>hyperbolic(\(K \lt 0\)): 방향에 따라 반대쪽으로 휜다. 말안장, 산의 고갯마루.</li>
+        <li>parabolic(\(K = 0\), \(W_p \neq 0\)): 한 방향으로는 휘고 다른 방향으로는 휘지 않는다. cylinder.</li>
+      </ul>
+      <p>계산에서는 \(W_p\)를 basis \((\mathbf{x}_u, \mathbf{x}_v)\)로 적는다. second fundamental form의 coefficient를 \(L = \inner{\mathbf{x}_{uu}}{\mathbf{N}}\), \(M = \inner{\mathbf{x}_{uv}}{\mathbf{N}}\), \(N = \inner{\mathbf{x}_{vv}}{\mathbf{N}}\)이라 하면(coefficient \(N\)과 벡터 \(\mathbf{N}\)은 다른 것이다) \(W_p\)의 행렬은 \(\begin{pmatrix} E & F \\ F & G \end{pmatrix}^{-1}\begin{pmatrix} L & M \\ M & N \end{pmatrix}\)이고, 따라서</p>
+      <div class="equation" id="eq-0-4-2">
+      \[ \begin{aligned} K &= \frac{LN - M^2}{EG - F^2}, \\ H &= \frac{EN - 2FM + GL}{2(EG - F^2)} \end{aligned} \tag{0.4.2} \]
+      </div>
+      <p>이다(<a href="../08-gauss-map/8-5-local-coordinates.html#i-8-5-5">Theorem 8.5.5</a>). first fundamental form의 행렬로 “나누는” 것은, 좌표 basis \((\mathbf{x}_u, \mathbf{x}_v)\)가 orthonormal이 아니기 때문이다.</p>
+
+      <div class="thm example" id="i-0-4-6">
+        <p><span class="thm-head">Example 0.4.6</span> <span class="thm-name">(\(K\) and \(H\) of the running examples)</span>.</p>
+        <ul>
+          <li>sphere(바깥쪽 \(\mathbf{N}\)): \(L = -r\), \(M = 0\), \(N = -r\sin^2\theta\). \(\kappa_1 = \kappa_2 = -1/r\), \(K = 1/r^2\), \(H = -1/r\). 바깥쪽 \(\mathbf{N}\)에서 멀어지는 쪽으로 휘므로 principal curvature가 음수다.</li>
+          <li>cylinder(바깥쪽 \(\mathbf{N}\)): \(L = -r\), \(M = N = 0\). \(\kappa_1 = 0\), \(\kappa_2 = -1/r\), \(K = 0\), \(H = -1/(2r)\). 모든 점이 parabolic이다.</li>
+          <li>saddle surface의 원점(위쪽 \(\mathbf{N}\)): \(K = -4\), \(H = 0\). hyperbolic point다.</li>
+          <li>torus of revolution(\(\mathbf{N} = \mathbf{x}_u \times \mathbf{x}_v/\abs{\mathbf{x}_u \times \mathbf{x}_v}\), 안쪽): \(K = \dfrac{\cos u}{r(R + r\cos u)}\), \(H = \dfrac{R + 2r\cos u}{2r(R + r\cos u)}\). 바깥쪽 절반(\(\cos u \gt 0\))은 elliptic, 안쪽 절반은 hyperbolic, 맨 위와 맨 아래의 원 \(u = \pm\pi/2\)는 parabolic이다(<a href="#fig-0-4-2">Figure 0.4.2</a>).</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-0-4-curvature.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-0-4-2">
+        <img src="figures/fig-0-4-2-torus-curvature.svg" alt="torus of revolution을 Gaussian curvature로 칠한 그림이다. 바깥쪽은 빨강(K 양수), 구멍 쪽 안쪽은 파랑(K 음수)이고, 그 경계인 맨 위의 원이 검은 선으로 그려져 있다. 오른쪽 색 막대는 -1.04(파랑)에서 0(흰색)을 거쳐 0.45(빨강)까지다.">
+        <figcaption><span class="fig-head">Figure 0.4.2.</span>
+        torus of revolution(\(R = 2\), \(r = 0.8\))의 Gaussian curvature \(K = \cos u/\big(r(R + r\cos u)\big)\). 빨강 \(K \gt 0\)(elliptic), 파랑 \(K \lt 0\)(hyperbolic), 검은 원 \(u = \pi/2\)는 parabolic(\(u = -\pi/2\)의 원은 아래쪽이라 가려져 있다). 색 막대의 양 끝은 바깥쪽 적도의 최댓값 \(1/(r(R + r)) \approx 0.45\)와 안쪽 적도의 최솟값 \(-1/(r(R - r)) \approx -1.04\)이다. <a href="figures/fig-0-4-2-torus-curvature-interactive.html">Interactive version</a>에서는 점마다 \(K\) 값을 볼 수 있다.</figcaption>
+      </figure>
+
+      <aside class="box intuition">
+        <p class="box-title">Intuition: \(K\)는 Gauss map이 넓이를 바꾸는 비율</p>
+        <p>surface의 작은 조각 \(R\)의 normal vector들을 모두 원점으로 옮기면 unit sphere 위에 조각 \(\mathbf{N}(R)\)이 생긴다. \(\abs{K(p)}\)는 \(R\)을 \(p\)로 줄여 갈 때 넓이의 비 \(\operatorname{Area}(\mathbf{N}(R))/\operatorname{Area}(R)\)의 극한이다(<a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-11">Proposition 8.4.11</a>). 반지름 \(r\)인 sphere 전체의 normal은 unit sphere 전체(넓이 \(4\pi\))를 덮으므로 비는 \(4\pi/(4\pi r^2) = 1/r^2 = K\)이다. 평면과 cylinder의 normal은 점이나 원 위에만 있어 넓이가 \(0\)이므로 \(K = 0\)이다. \(K\)의 부호는 \(\mathbf{N}(R)\)이 \(R\)과 같은 방향으로 도는지(elliptic), 뒤집혀 도는지(hyperbolic)를 말한다.</p>
+      </aside>
+
+      <p>cylinder와 평면은 <a href="0-3-surfaces.html#i-0-3-7">Example 0.3.7</a>에서 길이를 보존하는 map으로 이어졌다. 그런데 \(H\)는 평면에서 \(0\), cylinder에서 \(-1/(2r)\)로 다르다. 그러므로 \(H\)는 intrinsic이 아니다. \(K\)는 둘 다 \(0\)이다. 이것이 우연인지가 다음 절의 질문이다.</p>
+    </section>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: mesh 위의 curvature 추정</p>
+      <p>triangle mesh에는 이계도함수가 없으므로 curvature를 이웃 vertex의 위치로 추정한다. 가장 널리 쓰이는 것은 Meyer 등의 discrete operator다 <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>. 바탕에는 surface 위의 Laplacian, 곧 <strong>Laplace–Beltrami operator</strong>(라플라스-벨트라미 연산자) \(\Delta_S = \operatorname{div}_S\operatorname{grad}_S\)(평면의 \(\partial_x^2 + \partial_y^2\)를 surface로 옮긴 것, <a href="../21-riemannian-metrics/index.html">Chapter 21</a>)에 관한 다음 사실이 있다. 위치 \(\mathbf{x}\)의 각 좌표에 \(\Delta_S\)를 적용하면</p>
+      <div class="equation" id="eq-0-4-3">
+      \[ \Delta_S\,\mathbf{x} = 2H\,\mathbf{N} \tag{0.4.3} \]
+      </div>
+      <p>이다. 우변의 <strong>mean curvature vector</strong>(평균곡률 벡터) \(2H\mathbf{N}\)은 \(\mathbf{N}\)을 뒤집어도 같다(둘 다 부호가 바뀐다). sphere(바깥쪽 \(\mathbf{N}\), \(H = -1/r\))에서는 \(-\tfrac2r\mathbf{N}\)으로 중심을 향한다. vertex \(i\)에서는 cotangent formula</p>
+      <p>\[ (\Delta_S\,\mathbf{x})_i \approx \frac{1}{2A_i}\sum_{j \sim i} (\cot\alpha_{ij} + \cot\beta_{ij})\,(\mathbf{x}_j - \mathbf{x}_i) \]</p>
+      <p>로 근사한다. \(j\)는 \(i\)의 이웃 vertex, \(\alpha_{ij}, \beta_{ij}\)는 변 \(ij\)의 맞은편에 있는 두 각, \(A_i\)는 \(i\) 둘레의 작은 넓이(Voronoi 넓이 등)다. 이 벡터의 길이가 \(2\abs{H}\)이고 방향이 normal이다. Gaussian curvature는 <strong>angle defect</strong>(각 결손)로 추정한다: \(i\)에 모인 triangle들의 각을 모두 더한 \(\sum_j\theta_j\)에 대해 \(K_i \approx (2\pi - \sum_j\theta_j)/A_i\)이다(<a href="0-5-intrinsic.html">Section 0.5</a>). 두 값에서 \(\kappa_{1,2} = H \pm \sqrt{H^2 - K}\)를 얻는다. vertex가 2562개인 icosphere로 unit sphere를 근사하면, 두 공식은 모든 vertex에서 \(2H = -2\)와 \(K = 1\)을 1–2% 안으로 재현한다.</p>
+      <p>이렇게 얻은 principal curvature와 principal direction으로 mesh의 feature line(ridge와 valley line)을 찾기도 한다. principal curvature가 자기 principal direction을 따라 극값이 되는 점들을 잇는 것이다. Laplacian과 \(H\)의 부호 규약은 문헌마다 다르다. 여기서는 이 study set의 규약(\(\Delta = \operatorname{div}\operatorname{grad}\), \(W_p = -d\mathbf{N}_p\))으로 썼다.</p>
+      <p class="verified">Verification: <code>verify/v-0-4-curvature.py</code></p>
+    </aside>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: mean curvature flow와 mesh smoothing</p>
+      <p>scan으로 얻은 mesh의 잡음을 줄이는 고전적인 방법은 각 점을 mean curvature vector 방향으로 조금씩 움직이는 것이다. 이 움직임을 <strong>mean curvature flow</strong>(평균곡률 흐름)라 한다.</p>
+      <p>\[ \frac{\partial\mathbf{x}}{\partial t} = 2H\,\mathbf{N} = \Delta_S\,\mathbf{x} \]</p>
+      <p><a href="#eq-0-4-3">(0.4.3)</a> 덕분에 이것은 위치에 대한 열방정식(diffusion)이기도 하다. 뾰족 튀어나온 곳은 \(\abs{H}\)가 커서 빨리 들어가고 평평한 곳은 거의 움직이지 않는다. 반지름 \(r_0\)인 sphere는 \(r' = 2H = -2/r\)에 따라 \(r(t)^2 = r_0^2 - 4t\)로 줄어든다(<a href="#ex-0-4-4">Exercise 0.4.4</a>). Desbrun 등은 cotangent formula로 이 flow를 이산화하고, 큰 시간 간격에서도 안정하도록 implicit time step(\((I - \delta t\,\Delta_S)\,\mathbf{x}^{\text{new}} = \mathbf{x}^{\text{old}}\) 꼴의 linear system, \(\Delta_S\)는 cotangent formula의 행렬)으로 푼다 <a class="cite" href="../../references.html#Desbrun99">[Desbrun99]</a>. 단순한 “이웃 평균” Laplacian은 vertex를 surface를 따라 옆으로 미끄러뜨리기도 하지만, cotangent 가중치는 vertex를 거의 normal 방향으로만 움직인다.</p>
+      <p>mean curvature flow는 넓이를 가장 빨리 줄이는 flow다. 속도 \(V\)로 surface를 움직일 때 넓이의 변화율이 \(-\int \inner{2H\mathbf{N}}{V}\,dA\)이므로, 크기가 같은 \(V\) 가운데 \(2H\mathbf{N}\) 방향일 때 넓이가 가장 빨리 줄어든다(이 공식은 이 study set에서 증명하지 않는다. sphere에서는 \(dA/dt = -16\pi\)로 직접 확인된다). 그래서 모든 점에서 \(H = 0\)인 surface, 곧 <strong>minimal surface</strong>(극소곡면)는 이 flow에서 움직이지 않고, 경계를 고정한 변형에 대해 넓이의 critical point다. 비누막이 그 예이고, 평면, catenoid(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-13">Example 8.3.13</a>), helicoid가 minimal surface다. saddle surface \(z = x^2 - y^2\)는 \(H = 0\)인 점이 두 직선 \(x = \pm y\) 위에만 있으므로 minimal surface가 아니다. compact minimal surface는 없다(<a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-10">Corollary 8.4.10</a>).</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>Gauss map과 shape operator: <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-1">Definition 8.1.1</a>, <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-4">Proposition 8.1.4</a>, self-adjoint <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-10">Theorem 8.1.10</a>, <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-12">Definition 8.1.12</a>, running example <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-13">Example 8.1.13</a></li>
+        <li>second fundamental form과 normal curvature: <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-1">Definition 8.2.1</a>, <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-4">Definition 8.2.4</a>, Meusnier <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-5">Theorem 8.2.5</a>, normal section <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-9">Definition 8.2.9</a>, Hessian <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-10">Proposition 8.2.10</a>, saddle <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-11">Example 8.2.11</a></li>
+        <li>principal curvature: <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-4">Definition 8.3.4</a>, Euler's formula <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-5">Theorem 8.3.5</a>, umbilical point <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-7">Definition 8.3.7</a>, line of curvature <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-10">Definition 8.3.10</a></li>
+        <li>\(K\)와 \(H\): <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-1">Definition 8.4.1</a>, 성질 <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-2">Proposition 8.4.2</a>, running example <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-3">Example 8.4.3</a>, 점의 분류 <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-4">Definition 8.4.4</a>와 <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-5">Example 8.4.5</a>, compact surface에는 elliptic point가 있다 <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-9">Theorem 8.4.9</a>, 넓이의 비 <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-11">Proposition 8.4.11</a></li>
+        <li>좌표 공식: <a href="../08-gauss-map/8-5-local-coordinates.html#i-8-5-5">Theorem 8.5.5</a>, torus of revolution <a href="../08-gauss-map/8-5-local-coordinates.html#i-8-5-9">Example 8.5.9</a>, graph surface <a href="../08-gauss-map/8-5-local-coordinates.html#i-8-5-11">Proposition 8.5.11</a>, saddle surface <a href="../08-gauss-map/8-5-local-coordinates.html#i-8-5-12">Example 8.5.12</a></li>
+        <li>Laplace–Beltrami operator(gradient, divergence, Laplacian): <a href="../21-riemannian-metrics/index.html">Chapter 21</a>(작성 예정)</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>Gauss map \(\mathbf{N}\colon S \to S^2\)의 변화율에 마이너스를 붙인 shape operator \(W_p = -d\mathbf{N}_p\)가 surface가 휘는 정도를 잰다. \(W_p\)는 self-adjoint다.</li>
+        <li>방향 \(w\)의 normal curvature는 \(\inner{W_p w}{w}\)이고, 그 최댓값과 최솟값이 principal curvature \(\kappa_1 \ge \kappa_2\)다 <a href="#eq-0-4-1">(0.4.1)</a>.</li>
+        <li>\(K = \kappa_1\kappa_2\)는 \(\mathbf{N}\)의 방향에 무관하고 부호로 점을 분류한다. \(H = (\kappa_1 + \kappa_2)/2\)는 \(\mathbf{N}\)을 뒤집으면 부호가 바뀐다. 좌표 공식은 <a href="#eq-0-4-2">(0.4.2)</a>다.</li>
+        <li>sphere \(K = 1/r^2\), cylinder \(K = 0\), saddle 원점 \(K = -4\), torus of revolution은 바깥쪽 \(K \gt 0\)과 안쪽 \(K \lt 0\)이다.</li>
+        <li>mesh에서는 cotangent formula로 \(2H\mathbf{N} = \Delta_S\mathbf{x}\)를, angle defect로 \(K\)를 추정하고, mean curvature flow로 smoothing한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 \(K\)가 \(\mathbf{N}\) 없이 \(E, F, G\)만으로 정해진다는 Gauss의 발견(Theorema Egregium)을 본다. 그 결과로 surface 위의 “직선”(geodesic), 벡터를 평행하게 옮기기(parallel transport), 그리고 \(K\)의 적분이 topology를 아는 Gauss–Bonnet theorem이 나온다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-0-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 0.4.1</span> <span class="level">★</span>
+        반지름 \(r\)인 cylinder에서 unit normal vector를 안쪽(축을 향하는 쪽)으로 고르면 \(\kappa_1\), \(\kappa_2\), \(K\), \(H\)는 각각 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathbf{N}\)을 뒤집으면 \(W_p\)가 \(-W_p\)가 된다. 바깥쪽에서의 eigenvalue \(0, -1/r\)이 \(0, 1/r\)이 되므로 \(\kappa_1 = 1/r\)(둘레 방향), \(\kappa_2 = 0\)(축 방향)이다. 따라서 \(K = 0\)으로 그대로이고 \(H = 1/(2r)\)로 부호가 바뀐다. 이번에는 둘레 방향의 normal section(원)이 \(\mathbf{N}\) 쪽으로 휘므로 양수다. 예를 들어 parametrization을 \((u, v) \mapsto (r\cos v,\ r\sin v,\ u)\)로 순서를 바꾸면 \(\mathbf{x}_u \times \mathbf{x}_v\)가 안쪽을 향하고 같은 결과가 나온다.</p>
+          <p class="verified">Verification: <code>verify/v-0-4-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-4-2" data-level="1">
+        <p><span class="thm-head">Exercise 0.4.2</span> <span class="level">★</span>
+        graph \(z = \tfrac12(a x^2 + b y^2)\)의 원점(위쪽 \(\mathbf{N}\))에서 \(\kappa_1, \kappa_2\), \(K\), \(H\)를 구하고, \((a, b) = (1, 3),\ (1, -1),\ (0, 2),\ (0, 0)\)일 때 점을 분류하여라.</p>
+        <details class="hint"><summary>Hint</summary><p><a href="#i-0-4-4">Example 0.4.4</a>처럼 \(W_p\)는 원점에서 Hessian matrix다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>Hessian은 \(\diag(a, b)\)이므로 principal curvature는 \(a\)와 \(b\)(큰 쪽이 \(\kappa_1\)), principal direction은 \(x\)축과 \(y\)축이다. \(K = ab\), \(H = (a + b)/2\)이다.
+          \((1, 3)\): \(K = 3 \gt 0\), elliptic(위로 열린 그릇). \((1, -1)\): \(K = -1 \lt 0\), hyperbolic(saddle), \(H = 0\). \((0, 2)\): \(K = 0\)이고 \(W_p \neq 0\)이므로 parabolic(골짜기 모양, cylinder와 같은 꼴). \((0, 0)\): \(W_p = 0\)이므로 parabolic이 아니라 planar point다. surface \(z = 0\)은 평면이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-4-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-4-3" data-level="1">
+        <p><span class="thm-head">Exercise 0.4.3</span> <span class="level">★</span>
+        <a href="#fig-0-4-2">Figure 0.4.2</a>의 torus of revolution(\(R = 2\), \(r = 0.8\))에서 \(K\)가 가장 큰 곳과 가장 작은 곳은 어디이고, 그 값은 얼마인가? \(K\)의 부호가 \(R\)과 \(r\)에 의존하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(K(u) = \cos u/\big(r(R + r\cos u)\big)\)를 미분하면 \(dK/du = -R\sin u/\big(r(R + r\cos u)^2\big)\)이므로 \(u = 0\)에서 최대, \(u = \pi\)에서 최소다. 최댓값은 바깥쪽 적도에서 \(1/(r(R + r)) = 1/2.24 \approx 0.446\), 최솟값은 안쪽 적도에서 \(-1/(r(R - r)) = -1/0.96 \approx -1.042\)이다. 안쪽이 더 많이 휜다(\(\abs{K}\)가 크다). \(R + r\cos u \gt 0\)이므로 부호는 \(\cos u\)로만 정해지고 \(R\), \(r\)에 의존하지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-0-4-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-4-4" data-level="1">
+        <p><span class="thm-head">Exercise 0.4.4</span> <span class="level">★</span>
+        반지름 \(r_0\)인 sphere가 mean curvature flow \(\partial\mathbf{x}/\partial t = 2H\mathbf{N}\)를 따를 때, 모양은 sphere로 남는다고 하자. 반지름 \(r(t)\)는 어떻게 변하고, 언제 한 점으로 줄어드는가? \(\mathbf{N}\)을 안쪽으로 골라도 답이 같은가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>바깥쪽 \(\mathbf{N}\)에서 \(H = -1/r\)이므로 속도는 \(2H\mathbf{N} = -\tfrac{2}{r}\mathbf{N}\), 곧 중심 쪽으로 크기 \(2/r\)이다. 따라서 \(r'(t) = -2/r\), \((r^2)' = -4\)이고 \(r(t)^2 = r_0^2 - 4t\)이다. \(t = r_0^2/4\)에 한 점으로 줄어든다. 작은 sphere일수록 \(\abs{H}\)가 커서 빨리 줄어든다. \(\mathbf{N}\)을 안쪽으로 고르면 \(H = 1/r\)이 되지만 \(2H\mathbf{N}\)은 같은 벡터이므로 답이 같다.</p>
+          <p class="verified">Verification: <code>verify/v-0-4-curvature.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="0-3-surfaces.html">← 0.3 Surfaces and Tangent Planes</a>
+    <a rel="next" href="0-5-intrinsic.html">0.5 Intrinsic Geometry: Geodesics and Gauss–Bonnet →</a>
+  </nav>
+</body>
+</html>

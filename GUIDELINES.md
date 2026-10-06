@@ -72,6 +72,31 @@
   - Part 0의 복습 장은 기본 정의가 몰려 있어 정의가 5–7개여도 된다(01장 파일럿).
   - 절을 나누는 것은 **작성 단계에서만** 한다. 다른 장이 이미 링크한 절은 번호를 바꾸지 않는다(§15.6).
 
+### 2.3 Chapter 0 (Tour)의 원칙 (2026-10-06 사용자 결정)
+
+Chapter 0 「A Guided Tour of Differential Geometry」는 깊은 장(01–26) **앞에 두는 가벼운 입구**다. 깊은 장은 그대로 둔다.
+
+- **목적**: 전체 개념을 한 바퀴 훑어 직관과 지도를 얻는 것. 관심이 생긴 주제만 Go deeper 링크로 깊은 장에 들어간다.
+- **독자**: 컴퓨터비전·그래픽스를 공부하는 CS 학부생. 미적분과 행렬·벡터 계산은 알지만, 증명을 따라가지 않아도 읽을 수 있어야 한다.
+- **분량**: 절 하나에 15–25분. 핵심 정의 1–3개, 그림 2개 이상. 예는 기준 예제(§7) 위주로 든다.
+- **엄밀성**: 정확하되 가볍게 쓴다.
+  - 단순화할 때는 "여기서는 …로 단순화한다"고 밝히고, 정확한 진술은 Go deeper로 보낸다. **틀린 단순화는 하지 않는다.**
+  - 증명은 쓰지 않는다. 필요하면 "Proof idea" 한 문단으로 쓴다.
+  - 정의와 정리는 상자로 두되, 가정을 줄인 형태라면 그렇다고 적는다.
+- **절의 구성**
+  - Goals, Prerequisites(앞 Tour 절, 고교·학부 기초), Motivation
+  - 본문: 그림 중심, 핵심 정의·정리 상자
+  - **In computer vision 상자**(`aside.box.application`) 1–3개: 컴퓨터비전·그래픽스·기계학습의 실제 기법과 연결한다. 연결이 정확해야 하고 과장하지 않는다(예: normal estimation, mesh curvature, SO(3)와 카메라 자세, 동차좌표와 ℝP², Poisson image editing, Riemannian optimization).
+  - **Go deeper 상자**(`aside.box.deeper`): 깊은 장의 해당 절·정리를 링크한다. 아직 쓰이지 않은 장은 장 개요로 링크한다.
+  - Summary(끝에 다음 절 예고 `p.next`)
+  - Exercises: 제목은 "Quick check". ★ 문제 2–4개로 개념 확인 위주이며, 풀이를 단다.
+- **용어 표시**: Tour에서는 `<dfn>`을 쓰지 않는다. 공식 정의는 깊은 장에 있다(§3.3 한 개념 한 정의). 처음 나올 때 `<strong>curvature</strong>(곡률)`처럼 굵게 쓰고 한국어를 괄호에 적는다. 가능하면 깊은 장의 정의로 링크한다.
+- **수식**: 필요한 만큼만 쓰고 계산 과정은 짧게 한다. 기호는 §6을 따르고, 새 기호는 꼭 필요할 때만 쓴다.
+- **그림**: §12를 따른다. 직관을 위한 그림을 아끼지 않는다. 3D 곡면에는 인터랙티브 그림(§12.7)을 권장한다. 정적 SVG는 항상 둔다.
+- **번호**: 장 번호는 0이다(Definition 0.3.1, Figure 0.4.2 …).
+- **verify**: Tour 절의 수치와 공식도 계산이 있으면 verify 스크립트로 확인한다.
+- **연결**: Tour 절끼리는 §3.2대로 앞뒤를 잇는다. 깊은 장은 해당 Tour 절을 링크로 가리킬 수 있다(선택).
+
 ---
 
 ## 3. 유기적 연결과 일관성
@@ -631,6 +656,7 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 
 | Part | 장 | 제목 (English) | 폴더 |
 |---|---|---|---|
+| Tour | 00 | A Guided Tour of Differential Geometry | `00-tour` |
 | 0. Preliminaries | 01 | Linear Algebra Review | `01-linear-algebra` |
 | | 02 | Calculus on ℝⁿ | `02-calculus-rn` |
 | | 03 | Basic Topology | `03-topology-basics` |
@@ -822,6 +848,8 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
   - `forward`: Looking ahead (나중에 보게 될 일반화)
   - `backward`: Looking back (앞에서 본 것과 비교)
   - `history`: History (역사, 선택)
+  - `application`: In computer vision (주로 Chapter 0 Tour, §2.3)
+  - `deeper`: Go deeper (깊은 장으로 가는 링크, §2.3)
 - **번호 붙은 식**
   ```html
   <div class="equation" id="eq-6-2-1">\[ … \tag{6.2.1} \]</div>

@@ -373,3 +373,54 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
   - 링크 괄호 속 항목 이름은 짧은 형태가 많아 대상 thm-name과 135곳에서 다르다. 원래 한국어판도 짧은 이름을 썼으므로 맞추지 않았다.
   - 다음 세션: §8의 "다시 시작할 때 할 일"(08장 검토, 13장 작성 …)로 돌아간다. 새로 쓰는 장은 처음부터 GUIDELINES §8의 영어 용어 규칙을 따른다.
 
+
+## 10. Chapter 0: A Guided Tour (2026-10-06, 사용자 지시)
+
+사용자는 컴퓨터비전 전공 CS 학생이다. 깊은 장이 직관을 얻기에 너무 어려워졌다고 했다. 깊은 장은 그대로 두고, Preliminaries 앞에 전체 개념을 가볍게 훑는 입구를 만들기로 했다.
+- **결정**
+  - 이름은 「A Guided Tour of Differential Geometry」, 폴더는 `chapters/00-tour/`, 장 번호는 0이다.
+  - 규칙은 GUIDELINES §2.3이다. 독자는 CV·그래픽스 CS 학부생이다.
+    - 증명은 쓰지 않는다. dfn 대신 strong으로 표시한다.
+    - 절마다 In computer vision 상자(`aside.box.application`)와 Go deeper 상자(`aside.box.deeper`)를 둔다.
+    - Exercises 제목은 "Quick check"다.
+  - 절은 8개다(0.1–0.8). 절 계획은 `chapters/00-tour/index.html`에 있다.
+- **기반 작업**(완료)
+  - GUIDELINES §2.3, §9 표, §11.3 상자 종류
+  - style.css에 application·deeper 상자 추가
+  - 루트 index.html에 Tour 표와 "어디서 시작할까" 상자 추가
+  - 01 index의 pager prev
+  - references.html `#sec-refs-applications`: CV·그래픽스 문헌 23개
+  - term_guard가 `</strong>(한국어)`도 첫 병기로 본다
+- **진행**
+  - 작성 agent 2명(opus)을 동시에 띄웠다. A는 0.1–0.5, B는 0.6–0.8을 쓴다.
+  - 서로의 파일이 아직 없으면 `index.html#toc-0-M`으로 임시 링크하고 보고한다.
+  - 2026-10-06: 작성 완료(A·B 모두 check_all --chapter 0 OK).
+    - 통합: \(\mathrm{SO}(3)\)로 통일, references에 Harris88 추가, terms.tsv에 38개 추가, glossary `#sec-glossary-tour` 신설, toc-note 수정(manifold learning은 0.8로 옮김)
+    - 검토 agent 2명(opus)을 동시에 띄웠다. R1은 0.1–0.4, R2는 0.5–0.8을 맡는다. 둘 다 장 전체를 읽고 일관성을 본다.
+  - 사용자 지시(2026-10-06): 끝나면 알아서 push한다.
+  - 2026-10-06: **검토 완료, Chapter 0 전체 reviewed.**
+    - R1(0.1–0.4)이 고친 것
+      - 수학 오류 1건: saddle surface의 H = 0인 점은 원점만이 아니라 두 직선 x = ±y다.
+      - seam의 이유, conformal·넓이 보존 문장, LSCM의 null space 설명을 바로잡았다.
+      - "정점"을 vertex로 통일했다.
+      - 첫 병기가 빠진 용어 13개를 보충했다.
+      - 그림 2개의 시점을 바꿨다.
+    - R2(0.5–0.8)가 고친 것
+      - gimbal lock의 β = −π/2 경우
+      - "SO(3)를 덮는 chart 하나는 없다"의 조건(정의역이 ℝ³의 open set)
+      - heat method의 과장된 진술
+      - curvature operator와 curvature tensor의 구별(§6.5)
+      - "카메라 방향 = SO(3)"를 orientation으로 고쳤다
+      - Where to Go Next의 선수 장 누락
+      - 기호 충돌(θ, R)
+      - 첫 병기가 빠진 용어 약 35개를 보충했다
+    - 분량: 0.6이 약 25분으로 가장 길다. 줄이려면 구조를 바꿔야 한다(Vector Fields and Flows를 한 문단으로). 지금은 그대로 둔다.
+    - 통합 담당이 반영한 것
+      - references: Harris88, Mokhtarian92
+      - terms.tsv·glossary: 곡률 연산자, 심사도법, 아이코날 방정식, 다양체 가설, retraction, 호의 길이 매개화, 프레네-세레 공식, mesh의 vertex
+      - 상태: 00 index의 toc와 dg-status, 루트 Tour 표를 Reviewed로 바꿨다.
+    - 전체 check_all OK
+    - 남은 것
+      - verify 3곳이 본문에서 지운 주장을 아직 검사한다(Varadhan, DLT 수렴, Figure 0.6.2의 σ 값). 해는 없다.
+      - θ_j(angle defect)와 θ₀(colatitude)가 가까이 쓰인다. 사소하다.
+  - 다음: §8의 "다시 시작할 때 할 일"(08장 검토, 13장 작성 …)로 돌아간다. 깊은 장을 쓸 때 해당 Tour 절을 링크할 수 있다(§2.3).

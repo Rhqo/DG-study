@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.1 What Is Differential Geometry? — DG Study</title>
+  <meta name="dg-id" content="0.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="">
+  <meta name="dg-refs" content="Nd; Cr; dC Ch. 1–4">
+  <meta name="dg-updated" content="2026-10-06">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">0. A Guided Tour of Differential Geometry</a> ›
+    <span>0.1 What Is Differential Geometry?</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>0.1 What Is Differential Geometry?</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Nd">[Nd]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr]</a>,
+        <a class="cite" href="../../references.html#dC">[dC Ch. 1–4]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>differential geometry가 무엇을 연구하는지, 왜 calculus와 linear algebra가 그 도구인지 설명할 수 있다.</li>
+        <li>“확대하면 평평하다”는 원리를 곡선과 surface에서 말로 설명하고, 평평한 근사에서 벗어나는 정도가 curvature라는 것을 이해한다.</li>
+        <li>intrinsic한 양과 extrinsic한 양을 예로 구별할 수 있다.</li>
+        <li>Tour와 study set 전체의 지도를 보고, 관심 있는 주제의 깊은 장을 찾아갈 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>없음. 미적분(도함수, partial derivative, 적분)과 행렬·벡터 계산(inner product, 행렬 곱, eigenvalue)이면 충분하다.</li>
+        <li>(선택) 같은 내용을 엄밀하게 준비하려면 <a href="../01-linear-algebra/index.html">Chapter 1</a>(linear algebra), <a href="../02-calculus-rn/index.html">Chapter 2</a>(calculus on \(\R^n\)), <a href="../03-topology-basics/index.html">Chapter 3</a>(topology)을 본다.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>컴퓨터비전이 다루는 대상에는 휘어진 것이 많다. segmentation이 내놓는 물체의 윤곽선(contour)은 평면 위의 곡선이다. depth camera, LiDAR, multi-view stereo가 복원하는 것은 3차원 공간 속의 <strong>surface</strong>(곡면)이다. 카메라가 취할 수 있는 회전 전체의 모임도 평평한 \(\R^n\)이 아니라 휘어진 공간이다(<a href="0-6-manifolds.html">Section 0.6</a>). 이런 대상 위에서 “방향”, “길이”, “가장 짧은 길”, “얼마나 휘었는가”를 물으려면 직선과 평면에서 쓰던 도구를 고쳐 써야 한다.</p>
+      <p><strong>differential geometry</strong>(미분기하학)는 휘어진 곡선, surface, 그리고 더 일반적인 공간을 calculus와 linear algebra로 연구하는 분야다. 이 절은 그 바탕이 되는 세 가지 생각을 소개한다.</p>
+      <ol>
+        <li>확대하면 평평하다. 각 점 근처는 linear algebra로 근사된다.</li>
+        <li>surface 안에서 재는 것과 밖에서 보는 것은 다르다(intrinsic vs. extrinsic).</li>
+        <li>평평한 근사에서 벗어나는 정도를 재는 수가 curvature이고, 이것이 이 분야의 중심이다.</li>
+      </ol>
+      <p>마지막으로 Tour의 여덟 절과 깊은 장(Chapter 1–26)이 어떻게 이어지는지 지도를 준다.</p>
+    </section>
+
+    <section id="sec-zoom">
+      <h2>Zoom In and It Looks Flat</h2>
+      <p>지구는 둥글지만 운동장은 평평해 보인다. 꺾인 데가 없는 곡선이나 surface를 한 점 근처에서 충분히 확대하면 직선이나 평면과 구별할 수 없게 된다(<a href="#fig-0-1-1">Figure 0.1.1</a>). 이것을 식으로 쓴 것이 미분이다. 곡선 \(\gamma(t)\)에 대해 \(h\)가 작으면</p>
+      <p>\[ \gamma(t_0 + h) \approx \gamma(t_0) + h\,\gamma'(t_0) \]</p>
+      <p>이고, 오른쪽은 \(h\)의 일차식, 곧 직선(접선)이다. 변수가 여럿인 map \(F\colon \R^n \to \R^m\)에서는 Jacobian matrix \(DF(p)\)가 같은 역할을 한다: \(F(p + h) \approx F(p) + DF(p)\,h\). 이 근사를 <strong>linear approximation</strong>(선형근사)이라 한다(정확한 정의는 <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-1">Definition 2.1.1</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-1-1">
+        <img src="figures/fig-0-1-1-zoom.svg" alt="왼쪽은 가로로 긴 ellipse γ와 그 위의 점 p, p에서의 접선(파랑), p를 중심으로 하는 점선 상자 A다. 오른쪽은 상자 A를 확대한 것으로, 곡선이 접선에서 조금 벗어나 있고 그 안의 더 작은 상자 B에서는 곡선과 접선이 거의 겹친다.">
+        <figcaption><span class="fig-head">Figure 0.1.1.</span>
+        ellipse \(\gamma(t) = (2\cos t,\ \sin t)\)와 점 \(p = \gamma(\pi/3)\), \(p\)에서의 접선(파랑). 왼쪽의 상자 \(A\)(한 변 \(1\))를 확대한 것이 오른쪽이다. \(A\)에서는 곡선이 접선에서 조금 벗어나 보이지만, 그 안의 상자 \(B\)(한 변 \(0.2\))에서는 둘을 거의 구별할 수 없다. \(p\)에서 curvature는 \(\kappa \approx 0.34\)이고, \(B\)의 가장자리(\(h = 0.1\))에서 곡선과 접선의 차이는 약 \(\kappa h^2/2 \approx 0.0017\)이다(<a href="#eq-0-1-1">(0.1.1)</a>).</figcaption>
+      </figure>
+
+      <p>differential geometry의 기본 전략은 다음과 같다.</p>
+      <ul>
+        <li>각 점에서 대상을 linear algebra의 대상으로 근사한다. 곡선이면 접선, surface면 tangent plane(<a href="0-3-surfaces.html">Section 0.3</a>), 일반적인 공간이면 tangent space(<a href="0-6-manifolds.html">Section 0.6</a>)다.</li>
+        <li>근사가 점에 따라 어떻게 바뀌는지를 calculus로 추적한다.</li>
+        <li>근사에서 벗어나는 2차 항을 잰다. 그것이 휘어짐, 곧 curvature다.</li>
+      </ul>
+      <p>마지막 항목을 곡선에서 미리 보자. 곡선을 속력 \(1\)로 따라간다고 하자(<a href="0-2-curves.html">Section 0.2</a>의 arc length parametrization). 그러면 Taylor expansion을 2차 항까지 쓸 때</p>
+      <div class="equation" id="eq-0-1-1">
+      \[ \gamma(s_0 + h) = \gamma(s_0) + h\,\mathbf{t} + \tfrac12\,\kappa\,h^2\,\mathbf{n} + O(h^3) \tag{0.1.1} \]
+      </div>
+      <p>이다. \(O(h^3)\)은 크기가 \(h^3\)의 상수배 이하인 나머지 항이다. 여기서 \(\mathbf{t} = \gamma'(s_0)\)는 진행 방향의 unit tangent vector, \(\mathbf{n}\)은 곡선이 휘어 들어가는 쪽을 가리키는 단위벡터, \(\kappa \ge 0\)은 그 점의 <strong>curvature</strong>(곡률)이다. 곧 곡선이 접선에서 벗어나는 거리는 처음에 \(\kappa h^2/2\)만큼이다. 이 식의 \(\kappa\)를 정확히 정의하고 계산하는 것이 <a href="0-2-curves.html">Section 0.2</a>의 일이다.</p>
+      <p class="verified">Verification: <code>verify/v-0-1-what-is-dg.py</code></p>
+    </section>
+
+    <section id="sec-intrinsic-extrinsic">
+      <h2>Intrinsic vs. Extrinsic</h2>
+      <p>종이 한 장을 말아 원통을 만들어 보자(<a href="#fig-0-1-2">Figure 0.1.2</a>). 종이 위에 그린 선분은 helix의 일부가 되고 삼각형도 휘어 보인다. 그러나 종이를 늘이거나 찢지 않았으므로 종이 위에서 잰 길이, 각, 넓이는 하나도 변하지 않는다. 반면 종이에 수직인 unit normal vector \(\mathbf{N}\)은 평평할 때는 모두 같은 방향이고, 말았을 때는 점마다 방향이 다르다.</p>
+
+      <figure class="dg-figure" id="fig-0-1-2">
+        <img src="figures/fig-0-1-2-intrinsic-extrinsic.svg" alt="왼쪽은 공간 속의 평평한 직사각형 종이에 주황 선분과 파란 삼각형 T가 그려져 있고, 주홍 normal vector N 세 개가 모두 같은 방향을 가리킨다. 오른쪽은 같은 종이를 cylinder 모양으로 말아 놓은 것으로, 선분은 helix의 일부가 되고 삼각형 T는 cylinder를 따라 휘어 있으며 normal vector 세 개는 cylinder의 축에서 바깥쪽으로 서로 다른 방향을 가리킨다.">
+        <figcaption><span class="fig-head">Figure 0.1.2.</span>
+        같은 종이(\(0 \le x \le 3\pi/2\), \(0 \le y \le 2\))를 평평하게 둔 것(왼쪽)과 반지름 \(1\)인 cylinder에 감은 것(오른쪽). 감는 map은 \((x, y) \mapsto (\cos(x + c),\ \sin(x + c),\ y)\)이다(\(c\)는 보기 좋게 돌린 상수). 주황 선분은 helix의 일부가 되고 파란 삼각형 \(T\)는 휘지만, 선분의 길이와 \(T\)의 변의 길이와 내각은 그대로다(그림 스크립트가 확인한다). 주홍 화살표는 unit normal vector \(\mathbf{N}\)(길이 \(0.6\)배)이다.</figcaption>
+      </figure>
+
+      <div class="thm definition" id="i-0-1-1">
+        <p><span class="thm-head">Definition 0.1.1</span> <span class="thm-name">(intrinsic and extrinsic quantities, informal)</span>.
+        surface 위에서 잰 길이만으로 정해지는 양, 곧 surface를 늘이거나 줄이지 않고 구부리기만 해서는 변하지 않는 양을 <strong>intrinsic</strong>(내재적)이라 한다. surface가 공간 안에 놓인 모양에 따라 달라질 수 있는 양은 <strong>extrinsic</strong>(외재적)이라 한다.</p>
+        <p>여기서는 “늘이지 않고 구부리기”를 말로만 쓴다. 정확한 개념은 길이를 보존하는 map인 isometry(<a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-1">Definition 7.2.1</a>)이고, <a href="0-3-surfaces.html">Section 0.3</a>에서 surface 위의 길이를 재는 도구와 함께 다시 본다.</p>
+      </div>
+
+      <aside class="box intuition">
+        <p class="box-title">Intuition: surface 위에 사는 개미</p>
+        <p>surface 위에서만 기어 다니는 개미를 생각하자. 개미는 줄자와 각도기로 길이와 각을 잴 수 있지만, surface 밖으로 나가 전체 모양을 볼 수는 없다. 개미가 잴 수 있는 양이 intrinsic이고, 밖에서 보아야 알 수 있는 양이 extrinsic이다. <a href="#fig-0-1-2">Figure 0.1.2</a>의 두 종이는 개미에게는 똑같다. 반면 사람은 한쪽이 말려 있다는 것을 바로 본다.</p>
+      </aside>
+
+      <div class="thm example" id="i-0-1-2">
+        <p><span class="thm-head">Example 0.1.2</span> <span class="thm-name">(plane and cylinder)</span>.
+        <a href="#fig-0-1-2">Figure 0.1.2</a>에서 다음은 intrinsic이므로 두 종이에서 같다: 곡선의 길이, 두 곡선이 만나는 각, 영역의 넓이, 삼각형의 내각의 합(\(\pi\)), 종이 안에서 두 점을 잇는 가장 짧은 길의 길이. 다음은 extrinsic이고 두 종이에서 다르다: \(\mathbf{N}\)의 방향, 그리고 <a href="0-4-curvature.html">Section 0.4</a>에서 정의할 mean curvature \(H\). 선분과 helix가 대응한다는 사실은 <a href="0-5-intrinsic.html">Section 0.5</a>에서 “cylinder 위의 가장 곧은 곡선은 helix”라는 결론으로 다시 나온다.</p>
+      </div>
+
+      <p>그렇다면 sphere는 어떨까? 귤껍질을 찢지 않고 평평하게 펼 수 없다는 경험이 말해 주듯, sphere의 어떤 작은 조각도 늘이지 않고는 평면에 펼 수 없다. 이유는 surface가 얼마나 휘었는지를 재는 수 하나(Gaussian curvature \(K\))가 놀랍게도 intrinsic이기 때문이다. Gauss의 이 발견(Theorema Egregium)은 <a href="0-5-intrinsic.html">Section 0.5</a>의 주제이고, “왜곡 없는 세계지도는 없다”는 결론을 준다. intrinsic과 extrinsic의 구별은 study set 전체를 꿰는 줄기 하나(<a href="../../index.html#thread-t3">T3</a>)다.</p>
+    </section>
+
+    <section id="sec-curvature">
+      <h2>Why Curvature Is Central</h2>
+      <p>curvature가 중심 개념인 이유는 세 가지다.</p>
+      <ul>
+        <li><strong>평평한 근사에서 벗어나는 첫 정보다.</strong> 1차 근사(접선, tangent plane)는 어느 점에서나 평평하므로 휘어짐을 모른다. 휘어짐은 <a href="#eq-0-1-1">(0.1.1)</a>처럼 2차 항에 처음 나타난다.</li>
+        <li><strong>위치와 방향에 무관한 모양의 기술이다.</strong> 물체를 회전하거나 평행하게 옮겨도(rigid motion) curvature는 변하지 않는다. 거꾸로 plane curve는 부호까지 붙인 curvature를 길이의 함수로 알면, rigid motion의 차이를 빼고 완전히 결정된다(<a href="0-2-curves.html">Section 0.2</a>). 그래서 contour의 curvature는 물체가 영상 안에서 어디에 어느 방향으로 있든 같은 shape descriptor가 된다.</li>
+        <li><strong>국소적인 양이 전체 모양을 제약한다.</strong> 닫힌 surface에서 Gaussian curvature를 전부 적분하면 구멍의 개수로 정해지는 값이 나온다(Gauss–Bonnet theorem, <a href="0-5-intrinsic.html">Section 0.5</a>). 점마다 잰 국소적인 값이 전체의 topology를 안다.</li>
+      </ul>
+      <p>curvature는 Tour를 거치며 점점 넓어진다. 곡선의 curvature \(\kappa\)와 torsion \(\tau\)(<a href="0-2-curves.html">Section 0.2</a>), surface의 principal curvature, Gaussian curvature \(K\), mean curvature \(H\)(<a href="0-4-curvature.html">Section 0.4</a>), \(K\)가 intrinsic이라는 Theorema Egregium(<a href="0-5-intrinsic.html">Section 0.5</a>), 그리고 일반 공간의 curvature tensor(<a href="0-8-riemannian.html">Section 0.8</a>) 순서다. 이것이 줄기 <a href="../../index.html#thread-t1">T1</a>이다.</p>
+    </section>
+
+    <section id="sec-running-examples">
+      <h2>Running Examples</h2>
+      <p>Tour는 새 예를 매번 만들지 않고 같은 대상을 거듭 쓴다. 깊은 장도 같은 식과 같은 문자를 쓰므로(<a href="../../notation.html">Notation and Conventions</a>), Tour에서 본 값을 깊은 장에서 그대로 다시 만난다.</p>
+      <table>
+        <thead>
+          <tr><th>Example</th><th>Formula</th><th>Tour</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>circle (반지름 \(r\))</td><td>\(\gamma(t) = (r\cos t,\ r\sin t,\ 0)\)</td><td><a href="0-2-curves.html">0.2</a></td></tr>
+          <tr><td>helix (\(a \gt 0\), \(b \neq 0\))</td><td>\(\gamma(t) = (a\cos t,\ a\sin t,\ bt)\)</td><td><a href="0-2-curves.html">0.2</a></td></tr>
+          <tr><td>sphere \(S^2(r)\)</td><td>\(\mathbf{x}(\theta, \varphi) = (r\sin\theta\cos\varphi,\ r\sin\theta\sin\varphi,\ r\cos\theta)\)</td><td><a href="0-3-surfaces.html">0.3</a>–<a href="0-5-intrinsic.html">0.5</a></td></tr>
+          <tr><td>cylinder (반지름 \(r\))</td><td>\(\mathbf{x}(u, v) = (r\cos u,\ r\sin u,\ v)\)</td><td><a href="0-3-surfaces.html">0.3</a>–<a href="0-5-intrinsic.html">0.5</a></td></tr>
+          <tr><td>torus of revolution \(T_{R,r}\) (\(0 \lt r \lt R\))</td><td>\(\mathbf{x}(u, v) = \big((R + r\cos u)\cos v,\ (R + r\cos u)\sin v,\ r\sin u\big)\)</td><td><a href="0-3-surfaces.html">0.3</a>–<a href="0-5-intrinsic.html">0.5</a></td></tr>
+          <tr><td>saddle surface</td><td>\(z = x^2 - y^2\)</td><td><a href="0-4-curvature.html">0.4</a></td></tr>
+          <tr><td>hyperbolic plane \(\mathbb{U}^2\)</td><td>upper half-plane \(y \gt 0\)에서 \(E = G = 1/y^2\), \(F = 0\)</td><td><a href="0-5-intrinsic.html">0.5</a>, <a href="0-8-riemannian.html">0.8</a></td></tr>
+          <tr><td>\(S^2\), torus \(T^2\), \(\RP^2\), \(\mathrm{SO}(3)\)</td><td>(Section 0.6에서 소개)</td><td><a href="0-6-manifolds.html">0.6</a>–<a href="0-8-riemannian.html">0.8</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sec-map">
+      <h2>A Map of the Study Set</h2>
+      <p>이 study set은 Tour(Chapter 0)와 네 Part로 되어 있다. Tour는 증명 없이 그림과 계산 예로 전체를 한 바퀴 돈다. 깊은 장은 같은 내용을 정의와 증명으로 처음부터 쌓는다.</p>
+      <ul>
+        <li><strong>Part 0. Preliminaries</strong> (<a href="../01-linear-algebra/index.html">Chapter 1</a>–<a href="../03-topology-basics/index.html">Chapter 3</a>): linear algebra, calculus on \(\R^n\), topology의 기초</li>
+        <li><strong>Part I. Curves and Surfaces</strong> (<a href="../04-curves/index.html">Chapter 4</a>–<a href="../10-gauss-bonnet/index.html">Chapter 10</a>): \(\R^3\) 안의 곡선과 surface. 모든 것을 그림으로 볼 수 있는 단계</li>
+        <li><strong>Part II. Smooth Manifolds</strong> (<a href="../11-smooth-manifolds/index.html">Chapter 11</a>–<a href="../20-lie-groups-frobenius/index.html">Chapter 20</a>): 둘러싼 공간 없이 정의한 휘어진 공간과 그 위의 calculus</li>
+        <li><strong>Part III. Riemannian Geometry</strong> (<a href="../21-riemannian-metrics/index.html">Chapter 21</a>–<a href="../26-gauss-bonnet-jacobi/index.html">Chapter 26</a>): 그 공간 위에서 길이, geodesic, curvature를 재는 법</li>
+      </ul>
+      <p><a href="#fig-0-1-3">Figure 0.1.3</a>은 Tour의 각 절이 어느 깊은 장으로 이어지는지 보여 준다. 각 절 끝의 Go deeper 상자가 이 화살표를 실제 링크로 준다.</p>
+
+      <figure class="dg-figure" id="fig-0-1-3">
+        <img src="figures/fig-0-1-3-roadmap.svg" alt="왼쪽 열에 Tour의 절 0.1부터 0.8까지 여덟 개의 파란 상자가 있고, 각 상자에서 오른쪽의 회색 상자로 화살표가 간다. 0.1은 Chapter 1–3(Preliminaries), 0.2는 Chapter 4–5(Curves), 0.3은 Chapter 6–7(Surfaces, First Form), 0.4는 Chapter 8(Gauss Map), 0.5는 Chapter 9–10(Geodesics, Gauss–Bonnet), 0.6은 Chapter 11–15와 20(Manifolds), 0.7은 Chapter 16–19(Forms, Stokes), 0.8은 Chapter 21–26(Riemannian)으로 간다. 오른쪽 끝의 괄호가 회색 상자들을 Part 0, Part I, Part II, Part III으로 묶는다.">
+        <figcaption><span class="fig-head">Figure 0.1.3.</span>
+        Tour의 절(왼쪽)과 그 절의 Go deeper가 가리키는 깊은 장(오른쪽), 그리고 깊은 장이 속한 Part. 화살표 하나가 대략 한 절의 내용을 정확히 다루는 장들이다. Chapter 1–26이 빠짐없이 한 번씩 나온다. (schematic)</figcaption>
+      </figure>
+
+      <p>장을 가로지르는 여섯 줄기(threads)도 있다. 한 줄기를 따라가면 같은 질문이 곡선에서 surface로, surface에서 일반 공간으로 넓어지는 모습을 볼 수 있다. 자세한 내용은 <a href="../../index.html#sec-threads">Contents의 Threads</a>에 있다.</p>
+      <table>
+        <thead>
+          <tr><th>Thread</th><th>Tour에서 지나가는 곳</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><a href="../../index.html#thread-t1">T1</a> What is curvature?</td><td>0.1, 0.2(\(\kappa, \tau\)), 0.4(\(K, H\)), 0.5(Theorema Egregium), 0.8(curvature tensor)</td></tr>
+          <tr><td><a href="../../index.html#thread-t2">T2</a> Differentials and tangent spaces</td><td>0.1(linear approximation), 0.3(tangent plane), 0.6(tangent space, differential)</td></tr>
+          <tr><td><a href="../../index.html#thread-t3">T3</a> Intrinsic vs. extrinsic</td><td>0.1, 0.3(first fundamental form), 0.5(Theorema Egregium), 0.6(manifold), 0.8(Riemannian metric)</td></tr>
+          <tr><td><a href="../../index.html#thread-t4">T4</a> Parallel transport and geodesics</td><td>0.5(geodesic, parallel transport), 0.8(connection, exponential map)</td></tr>
+          <tr><td><a href="../../index.html#thread-t5">T5</a> Integration and topology</td><td>0.2(arc length), 0.3(area), 0.5(Gauss–Bonnet theorem), 0.7(Stokes's theorem)</td></tr>
+          <tr><td><a href="../../index.html#thread-t6">T6</a> Duality and tensors</td><td>0.7(covector, differential form), 0.8(metric, curvature tensor)</td></tr>
+        </tbody>
+      </table>
+      <p>Tour의 각 절은 같은 순서로 읽힌다. Motivation에서 질문을 세우고, 그림과 핵심 정의·정리 상자로 답한 뒤, <em>In computer vision</em> 상자에서 실제 기법과 연결하고, <em>Go deeper</em> 상자에서 깊은 장의 정확한 위치를 알려 준다. 끝의 Quick check는 개념 확인용 짧은 문제이고 모두 풀이가 있다. 증명은 쓰지 않는다. 내용을 단순화한 곳은 그렇다고 밝히고, 정확한 진술은 Go deeper로 보낸다.</p>
+    </section>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: 이 장에서 만날 응용</p>
+      <ul>
+        <li><a href="0-2-curves.html">Section 0.2</a>: contour의 curvature와 corner, curvature scale space <a class="cite" href="../../references.html#Mokhtarian86">[Mokhtarian86]</a>, <a class="cite" href="../../references.html#Mokhtarian92">[Mokhtarian92]</a>, active contour(snake) <a class="cite" href="../../references.html#Kass88">[Kass88]</a></li>
+        <li><a href="0-3-surfaces.html">Section 0.3</a>: point cloud의 normal estimation <a class="cite" href="../../references.html#Hoppe92">[Hoppe92]</a>, UV unwrapping과 conformal parametrization <a class="cite" href="../../references.html#Levy02">[Levy02]</a></li>
+        <li><a href="0-4-curvature.html">Section 0.4</a>: mesh 위의 curvature 추정 <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>, mean curvature flow와 mesh smoothing <a class="cite" href="../../references.html#Desbrun99">[Desbrun99]</a></li>
+        <li><a href="0-5-intrinsic.html">Section 0.5</a>: mesh 위의 geodesic distance <a class="cite" href="../../references.html#Kimmel98">[Kimmel98]</a>, <a class="cite" href="../../references.html#Crane13">[Crane13]</a>, geodesic active contour <a class="cite" href="../../references.html#Caselles97">[Caselles97]</a>, 지도와 360° 영상의 왜곡, surface 위의 방향장과 holonomy</li>
+        <li><a href="0-6-manifolds.html">Section 0.6</a>: 카메라 자세 \(\mathrm{SO}(3)\), \(\mathrm{SE}(3)\) <a class="cite" href="../../references.html#Sola18">[Sola18]</a>, <a class="cite" href="../../references.html#Barfoot">[Barfoot]</a>, homogeneous coordinates와 projective plane \(\RP^2\) <a class="cite" href="../../references.html#HZ">[HZ]</a>, backpropagation의 chain rule = differential의 합성</li>
+        <li><a href="0-7-forms.html">Section 0.7</a>: reverse mode 자동미분 = covector의 pullback, Poisson image editing <a class="cite" href="../../references.html#Perez03">[Perez03]</a>, discrete exterior calculus <a class="cite" href="../../references.html#Desbrun05">[Desbrun05]</a>, mesh 위 vector field의 Hodge decomposition <a class="cite" href="../../references.html#Tong03">[Tong03]</a></li>
+        <li><a href="0-8-riemannian.html">Section 0.8</a>: rotation averaging <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>과 Fréchet mean <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>, Riemannian optimization <a class="cite" href="../../references.html#AMS">[AMS]</a>, <a class="cite" href="../../references.html#Boumal">[Boumal]</a>, manifold learning <a class="cite" href="../../references.html#Tenenbaum00">[Tenenbaum00]</a>, hyperbolic embedding <a class="cite" href="../../references.html#Nickel17">[Nickel17]</a>, geometric deep learning <a class="cite" href="../../references.html#Bronstein17">[Bronstein17]</a></li>
+      </ul>
+      <p>mesh 처리 전반은 <a class="cite" href="../../references.html#PMP">[PMP]</a>, mesh 위의 differential geometry(discrete differential geometry)는 <a class="cite" href="../../references.html#Cr">[Cr]</a>에 잘 정리되어 있다.</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>linear approximation과 Jacobian matrix: <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-1">Definition 2.1.1</a>(total derivative), <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-11">Theorem 2.1.11</a>(그 행렬은 Jacobian matrix)</li>
+        <li>길이와 각의 도구: <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-1">Definition 1.5.1</a>(inner product), <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-12">Definition 1.5.12</a>(Gram matrix). Section 0.3의 first fundamental form은 Gram matrix다.</li>
+        <li>topology의 기초: <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-12">Definition 3.2.12</a>(homeomorphism), <a href="../03-topology-basics/3-6-compactness.html#i-3-6-1">Definition 3.6.1</a>(compactness). Section 0.3과 0.6의 “compact인 sphere는 parametrization이나 chart 하나로 덮을 수 없다”는 논증에 쓰인다.</li>
+        <li>intrinsic의 정확한 뜻: <a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-1">Definition 7.2.1</a>(isometry), <a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-9">Example 7.2.9</a>(평면을 cylinder에 감기), <a href="../09-intrinsic-geometry/index.html#toc-9-3">Section 9.3</a>(Theorema Egregium, 작성 예정)</li>
+        <li>곡선의 2차 근사 <a href="#eq-0-1-1">(0.1.1)</a>의 정확한 형태: <a href="../05-space-curves/5-5-local-canonical-form.html#i-5-5-2">Theorem 5.5.2</a>(local canonical form)</li>
+        <li>study set 전체의 표와 줄기: <a href="../../index.html#sec-roadmap">Contents</a></li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>differential geometry는 휘어진 대상을 각 점에서 linear algebra로 근사하고, 그 근사가 점에 따라 어떻게 바뀌는지를 calculus로 추적하는 분야다.</li>
+        <li>확대하면 평평하다: 곡선에는 접선, surface에는 tangent plane, 일반 공간에는 tangent space가 있다. 평평한 근사에서 벗어나는 2차 항이 curvature다 <a href="#eq-0-1-1">(0.1.1)</a>.</li>
+        <li>surface 안에서 재는 양(intrinsic)과 공간 속 모양에 달린 양(extrinsic)은 다르다. 평면과 cylinder는 intrinsic하게 같고 extrinsic하게 다르다.</li>
+        <li>curvature는 rigid motion에 불변인 모양의 기술이고, 적분하면 topology를 안다.</li>
+        <li>Tour의 각 절은 Go deeper로 깊은 장과 이어진다(<a href="#fig-0-1-3">Figure 0.1.3</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 가장 간단한 휘어진 대상인 곡선에서 시작한다. <a href="#eq-0-1-1">(0.1.1)</a>의 curvature \(\kappa\)를 정확히 정의하고, 원과 helix에서 계산하고, contour의 corner 찾기와 연결한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-0-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 0.1.1</span> <span class="level">★</span>
+        <a href="#fig-0-1-2">Figure 0.1.2</a>의 두 종이에서 다음 양을 intrinsic과 extrinsic으로 나누어라. (a) 주황 곡선의 길이 (b) 삼각형 \(T\)의 넓이 (c) 한 점에서 \(\mathbf{N}\)이 가리키는 방향 (d) \(T\)의 세 내각의 합 (e) 종이 위의 두 점 사이의 \(\R^3\)에서의 직선거리(종이를 뚫고 잰 거리)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a), (b), (d)는 intrinsic이다. 모두 종이 위에서 잰 길이로 정해지고, 종이를 말아도 변하지 않는다(그림 스크립트가 길이와 각을 확인한다). 그래서 (d)는 두 종이에서 모두 \(\pi\)다.
+          (c)와 (e)는 extrinsic이다. \(\mathbf{N}\)의 방향은 평평한 종이에서는 어디서나 같고 말린 종이에서는 점마다 다르다. (e)의 직선거리는 종이를 말면 줄어든다. 예를 들어 종이의 양 끝 \(x = 0\)과 \(x = 3\pi/2\)의 두 점(같은 높이)은 평평할 때는 \(3\pi/2 \approx 4.71\)만큼 떨어져 있지만, 말면 반지름 \(1\)인 원 위에서 \(270^\circ\) 떨어진 두 점이 되어 직선거리가 \(\sqrt2 \approx 1.41\)이다. 종이 위에서 잰 거리는 여전히 \(3\pi/2\)다.</p>
+          <p class="verified">Verification: <code>verify/v-0-1-what-is-dg.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 0.1.2</span> <span class="level">★</span>
+        반지름 \(r\)인 원을 속력 \(1\)로 도는 곡선 \(\gamma(s) = \big(r\cos(s/r),\ r\sin(s/r)\big)\)를 생각하자. \(s = 0\)의 점 \((r, 0)\)에서 접선은 \(x = r\)이다. \(\gamma(h)\)에서 이 접선까지의 거리를 구하고, \(h\)가 작을 때 <a href="#eq-0-1-1">(0.1.1)</a>과 비교하여 원의 curvature \(\kappa\)를 읽어라. \(r = 1\), \(h = 0.1\)이면 거리는 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\gamma(h)\)의 \(x\)좌표가 \(r\cos(h/r)\)이므로 거리는 \(r - r\cos(h/r) = r\big(1 - \cos(h/r)\big)\)이다. \(\cos x = 1 - x^2/2 + x^4/24 - \cdots\)이므로</p>
+          <p>\[ r\Big(1 - \cos\frac{h}{r}\Big) = \frac{h^2}{2r} - \frac{h^4}{24r^3} + \cdots \]</p>
+          <p>이다. <a href="#eq-0-1-1">(0.1.1)</a>의 \(\tfrac12\kappa h^2\)과 비교하면 \(\kappa = 1/r\)이다. 반지름이 작을수록 많이 휜다. \(r = 1\), \(h = 0.1\)이면 거리는 \(1 - \cos 0.1 \approx 0.0050\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-1-what-is-dg.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 0.1.3</span> <span class="level">★</span>
+        여러 장의 사진에서 추정한 카메라 회전들의 “평균”을 구하는 문제(rotation averaging)를 공부하고 싶다. <a href="#fig-0-1-3">Figure 0.1.3</a>과 이 절의 In computer vision 상자를 보고, Tour의 어느 절과 어느 Part의 장을 읽으면 되는지 답하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>회전 전체의 공간 \(\mathrm{SO}(3)\)이 manifold라는 것은 <a href="0-6-manifolds.html">Section 0.6</a>에서, 그 위에서 거리와 평균(Fréchet mean)을 정의하는 법은 <a href="0-8-riemannian.html">Section 0.8</a>에서 본다(In computer vision 상자의 <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>, <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>). 깊이 들어가려면 Part II의 <a href="../11-smooth-manifolds/index.html">Chapter 11</a>–<a href="../15-vector-fields-flows/index.html">Chapter 15</a>와 <a href="../20-lie-groups-frobenius/index.html">Chapter 20</a>(Lie group), 그리고 Part III의 <a href="../21-riemannian-metrics/index.html">Chapter 21</a>–<a href="../23-geodesics/index.html">Chapter 23</a>(metric, geodesic, exponential map)을 읽는다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 0. A Guided Tour of Differential Geometry (Chapter overview)</a>
+    <a rel="next" href="0-2-curves.html">0.2 Curves: Speed, Arc Length, and Curvature →</a>
+  </nav>
+</body>
+</html>

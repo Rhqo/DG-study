@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.6 Manifolds: Spaces That Look Flat Up Close — DG Study</title>
+  <meta name="dg-id" content="0.6">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.1, 0.3, 0.5">
+  <meta name="dg-refs" content="Lee-ISM Ch. 1, 2, 3, 7, 8, 9; Tu-IM; HZ; Sola18; Barfoot">
+  <meta name="dg-updated" content="2026-10-06">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">0. A Guided Tour of Differential Geometry</a> ›
+    <span>0.6 Manifolds: Spaces That Look Flat Up Close</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>0.6 Manifolds: Spaces That Look Flat Up Close</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Lee-ISM">[Lee-ISM, Ch. 1–3, 7–9]</a>,
+        <a class="cite" href="../../references.html#Tu-IM">[Tu-IM]</a>,
+        <a class="cite" href="../../references.html#HZ">[HZ]</a>,
+        <a class="cite" href="../../references.html#Sola18">[Sola18]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>chart와 atlas로 manifold를 정의하는 생각을 설명하고, sphere \(S^2\)의 두 stereographic projection 사이의 transition map을 계산할 수 있다.</li>
+        <li>tangent space와 differential이 chart 위에서는 Jacobian matrix라는 것, 그리고 chain rule이 backpropagation과 같은 계산이라는 것을 설명할 수 있다.</li>
+        <li>vector field와 그 flow를 그림으로 설명할 수 있다.</li>
+        <li>\(\RP^2\)와 \(\mathrm{SO}(3)\)가 manifold인 이유와, 이것이 homogeneous coordinates와 카메라 자세에서 왜 중요한지 말할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0-3-surfaces.html">Section 0.3</a>: surface의 parametrization(<a href="0-3-surfaces.html#i-0-3-1">Definition 0.3.1</a>)과 tangent plane(<a href="0-3-surfaces.html#i-0-3-3">Definition 0.3.3</a>)</li>
+        <li><a href="0-5-intrinsic.html">Section 0.5</a>: Theorema Egregium(<a href="0-5-intrinsic.html#i-0-5-1">Theorem 0.5.1</a>). surface의 기하는 surface 안에서 잴 수 있다.</li>
+        <li>학부 미적분: partial derivative, Jacobian matrix, chain rule. 깊이 보려면 <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-10">Definition 2.1.10 (Jacobian matrix)</a>과 <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-1">Theorem 2.2.1 (chain rule)</a></li>
+        <li>행렬의 곱, transpose, determinant</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="0-5-intrinsic.html#i-0-5-1">Section 0.5</a>에서 Gaussian curvature는 surface 안에서 잰 길이와 각만으로 정해진다는 것(Theorema Egregium)을 보았다. surface 위의 기하는 바깥 공간 \(\R^3\)을 보지 않고도 할 수 있다는 뜻이다.
+      그렇다면 처음부터 바깥 공간 없이 “surface 같은 공간”을 정의할 수는 없을까?</p>
+      <p>컴퓨터비전에는 이런 공간이 흔하다. 카메라가 놓일 수 있는 모든 방향(orientation), 곧 rotation matrix 전체는 \(\mathrm{SO}(3)\)를 이룬다. 행렬 성분은 9개지만 자유도는 3이다.
+      이미지 평면에 “무한히 먼 점”까지 더한 projective plane \(\RP^2\)는 원점을 지나는 직선들의 모임이어서, 처음부터 어떤 \(\R^N\) 안에 놓인 surface로 주어지지 않는다.
+      이 공간들의 공통점은 단 하나, <em>가까이서 보면 \(\R^n\)처럼 보인다</em>는 것이다(<a href="0-1-what-is-dg.html#sec-zoom">Section 0.1</a>의 “확대하면 평평하다”).</p>
+      <p>지구를 생각해 보자. 세계지도첩(atlas)의 각 장은 지구의 일부를 평면에 그린 것이고, 이웃한 두 장이 겹치는 곳에는 “이 지도의 이 점은 저 지도의 저 점”이라는 대응이 있다.
+      지구 전체를 한 장에 빈틈없이 담을 수는 없지만, 여러 장을 모으면 지구 전체를 덮는다. manifold는 바로 이렇게 정의한다.</p>
+    </section>
+
+    <section id="sec-charts">
+      <h2>Charts and Atlases</h2>
+      <p>공간 \(M\)의 일부 \(U\)에 좌표 \((x^1, \dots, x^n)\)을 붙이는 일대일 대응 \(\varphi\colon U \to \R^n\)을 <strong><a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-13">chart</a></strong>(차트)라 하고, \(M\)을 덮는 chart들의 모임을 <strong>atlas</strong>(아틀라스)라 한다.
+      두 chart \(\varphi\), \(\psi\)가 겹치는 곳에서는 같은 점이 두 좌표를 가진다. 한 좌표에서 다른 좌표로 바꾸는 map \(\psi \circ \varphi^{-1}\)을 <strong><a href="../11-smooth-manifolds/11-2-smooth-structures.html#i-11-2-1">transition map</a></strong>(좌표변환)이라 한다.
+      transition map은 \(\R^n\)의 open set 사이의 보통 map이므로 미적분을 쓸 수 있다.</p>
+
+      <div class="thm definition" id="i-0-6-1">
+        <p><span class="thm-head">Definition 0.6.1</span> <span class="thm-name">(smooth manifold, simplified)</span>.
+        \(n\)-dimensional <strong>smooth manifold</strong>(매끄러운 다양체) \(M\)은 다음을 갖춘 공간이다.</p>
+        <ul>
+          <li>(1) chart \((U, \varphi)\)들: \(U\)는 \(M\)의 open set이고, \(\varphi\colon U \to \varphi(U)\)는 \(\R^n\)의 open set 위로 가는 일대일 대응으로서 연속이고 역도 연속이다(homeomorphism).</li>
+          <li>(2) chart의 \(U\)들이 \(M\) 전체를 덮는다.</li>
+          <li>(3) 두 chart \((U, \varphi)\), \((V, \psi)\)가 겹치는 곳에서 transition map
+          <div class="equation" id="eq-0-6-1">
+          \[ \psi \circ \varphi^{-1}\colon \varphi(U \cap V) \to \psi(U \cap V) \tag{0.6.1} \]
+          </div>
+          이 smooth(\(C^\infty\))다.</li>
+        </ul>
+        <p>여기서는 단순화했다. 정확한 정의에서는 \(M\)이 Hausdorff이고 second countable인 topological space여야 하고, atlas를 하나 고르는 대신 그것이 정하는 maximal atlas, 곧 <strong>smooth structure</strong>(매끄러운 구조)를 준다
+        (<a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-3">Definition 11.1.3</a>, <a href="../11-smooth-manifolds/11-2-smooth-structures.html#i-11-2-9">Definition 11.2.9</a>).</p>
+      </div>
+
+      <p>조건 (3)이 핵심이다. 함수 \(f\colon M \to \R\)이 매끄럽다는 것을 “어떤 chart로 옮긴 \(f \circ \varphi^{-1}\)이 매끄럽다”로 정의하고 싶다.
+      다른 chart \(\psi\)로 옮긴 것은 \(f \circ \psi^{-1} = (f \circ \varphi^{-1}) \circ (\varphi \circ \psi^{-1})\)이므로, transition map이 매끄러우면 어느 chart로 판정해도 답이 같다.
+      좌표는 우리가 붙인 것이지만, smoothness는 좌표에 무관한 \(M\)의 성질이 된다.</p>
+
+      <div class="thm example" id="i-0-6-2">
+        <p><span class="thm-head">Example 0.6.2</span> <span class="thm-name">(sphere \(S^2\) and stereographic projection)</span>.
+        unit sphere \(S^2 = \{(x, y, z) : x^2 + y^2 + z^2 = 1\}\)의 북극을 \(N = (0, 0, 1)\), 남극을 \(S = (0, 0, -1)\)이라 하자.
+        \(N\)에서 \(S^2\)의 점 \(p\)를 지나는 직선이 평면 \(z = 0\)과 만나는 점을 \(\sigma(p)\)라 하면(<a href="#fig-0-6-1">Figure 0.6.1</a>)</p>
+        <p>\[ \sigma(x, y, z) = \frac{(x, y)}{1 - z}, \qquad \tilde\sigma(x, y, z) = \frac{(x, y)}{1 + z} \]</p>
+        <p>이다. \(\sigma\)를 북극에서의 <strong>stereographic projection</strong>(입체사영)이라 하고, \(\tilde\sigma\)는 남극에서 같은 방법으로 projection한 것이다. \(\sigma\)는 \(S^2 \setminus \{N\}\)에서, \(\tilde\sigma\)는 \(S^2 \setminus \{S\}\)에서 \(\R^2\) 위로 가는 chart이고, 둘을 합치면 \(S^2\)를 덮는다.
+        두 chart가 겹치는 곳 \(S^2 \setminus \{N, S\}\)에서 transition map은</p>
+        <div class="equation" id="eq-0-6-2">
+        \[ \tilde\sigma \circ \sigma^{-1}(u) = \frac{u}{\abs{u}^2}, \qquad u \in \R^2 \setminus \{0\} \tag{0.6.2} \]
+        </div>
+        <p>이다(<a href="#fig-0-6-2">Figure 0.6.2</a>). 분모가 \(0\)이 아닌 유리함수이므로 매끄럽고, 따라서 \(\{\sigma, \tilde\sigma\}\)는 \(S^2\)의 atlas다.
+        (계산은 <a href="../11-smooth-manifolds/11-3-spheres-stereographic.html#i-11-3-1">Proposition 11.3.1</a>.)</p>
+        <p>chart 하나로는 \(S^2\) 전체를 덮을 수 없다. \(S^2\)는 compact(bounded closed set)이고 compact성은 homeomorphism으로 옮겨 가는데, \(\R^2\)의 공집합이 아닌 open set은 compact가 아니기 때문이다(<a href="../11-smooth-manifolds/11-3-spheres-stereographic.html#i-11-3-8">Non-example 11.3.8</a>, <a href="0-3-surfaces.html#i-0-3-2">Example 0.3.2</a>와 같은 이유). 이 사실은 뒤의 <a href="#sec-cv-pose">Euler angle</a>에서 다시 나온다.</p>
+        <p class="verified">Verification: <code>verify/v-0-6-manifolds.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-0-6-1">
+        <img src="figures/fig-0-6-1-stereographic.svg" alt="반투명 unit sphere와 그 적도를 지나는 하늘색 평면. 북극 N에서 위쪽 hemisphere의 점 p를 지나는 파란 직선이 평면 위의 σ(p)에 닿고, N에서 아래쪽 hemisphere의 점 q를 지나는 주황 직선이 평면 위의 σ(q)에 닿는다. p와 q를 지나는 circle of latitude와, 그 image인 평면 위의 점선 원도 같은 색으로 그렸다.">
+        <figcaption><span class="fig-head">Figure 0.6.1.</span>
+        북극 \(N\)에서의 stereographic projection \(\sigma\). 위쪽 hemisphere의 점 \(p\)(colatitude \(60^\circ\))는 unit circle 밖의 \(\sigma(p)\)로, 아래쪽 hemisphere의 점 \(q\)(colatitude \(120^\circ\))는 안쪽의 \(\sigma(q)\)로 간다.
+        colatitude \(\theta\)인 circle of latitude는 반지름 \(\cot(\theta/2)\)인 원(점선)으로 간다(여기서 \(\sqrt3\)과 \(1/\sqrt3\)). 적도는 그대로 있다.
+        <a href="figures/fig-0-6-1-stereographic-interactive.html">Interactive version</a>(돌려 볼 수 있다).</figcaption>
+      </figure>
+
+      <figure class="dg-figure" id="fig-0-6-2">
+        <img src="figures/fig-0-6-2-transition.svg" alt="두 개의 정사각형 패널. 왼쪽은 chart σ의 좌표 평면, 오른쪽은 chart σ̃의 좌표 평면이다. 각 패널에 원점을 중심으로 하는 다섯 개의 색깔 원과 여덟 개의 회색 반직선이 있다. 왼쪽에서 가장 큰 주황 원은 오른쪽에서 가장 작은 주황 원이 되는 식으로, 같은 색 원의 반지름이 서로 역수다. 점 σ(x)와 σ̃(x)가 표시되어 있고, 두 패널 사이에 u ↦ u/|u|² 화살표가 있다.">
+        <figcaption><span class="fig-head">Figure 0.6.2.</span>
+        두 chart의 좌표 평면과 transition map <a href="#eq-0-6-2">(0.6.2)</a>. 같은 색 원은 \(S^2\)의 같은 circle of latitude(colatitude \(30^\circ, 60^\circ, 90^\circ, 120^\circ, 150^\circ\))의 image이고, 회색 반직선은 meridian의 image다.
+        반지름이 \(\cot(\theta/2)\)에서 \(\tan(\theta/2)\)로, 곧 역수로 바뀐다. 점 \(x\)는 colatitude \(60^\circ\), longitude \(30^\circ\)다.
+        각 chart가 놓친 극은 다른 chart의 원점이다: \(\sigma(S) = 0\), \(\tilde\sigma(N) = 0\).</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-0-6-3">
+        <p><span class="thm-head">Example 0.6.3</span> <span class="thm-name">(torus \(T^2\))</span>.
+        torus \(T^2 = S^1 \times S^1\)의 점은 두 각 \((s, t)\)로 쓸 수 있다. 각은 \(2\pi\)의 정수배만큼 모호하므로, 성분마다 길이 \(2\pi\)인 열린 구간에서 각을 고르면 chart가 된다. 구간을 바꾸는 transition map은 각에 \(2\pi\)의 정수배를 더할 뿐이므로 매끄럽다.
+        \(\R^3\) 안의 torus of revolution \(T_{R,r}\)은 \(T^2\)와 smooth manifold로서 같다(<a href="../12-smooth-maps/12-2-diffeomorphisms.html#i-12-2-8">Example 12.2.8</a>). manifold는 어디에 놓였는지가 아니라 chart로 정해진다.</p>
+      </div>
+
+      <div class="thm example" id="i-0-6-4">
+        <p><span class="thm-head">Example 0.6.4</span> <span class="thm-name">(real projective plane \(\RP^2\))</span>.
+        <strong>real projective plane</strong>(실사영평면) \(\RP^2\)는 \(\R^3\)에서 원점을 지나는 직선 전체의 모임이다(<a href="../03-topology-basics/3-4-quotient-spaces.html#i-3-4-11">Definition 3.4.11</a>). \(0\)이 아닌 벡터 \((x, y, w)\)가 정하는 직선을 \([x : y : w]\)로 쓰고 <strong>homogeneous coordinates</strong>(동차좌표)라 한다.
+        \(\lambda \ne 0\)이면 \([x : y : w] = [\lambda x : \lambda y : \lambda w]\)이다. \(w \ne 0\)인 점들의 집합 \(U_3\)에서</p>
+        <div class="equation" id="eq-0-6-3">
+        \[ \begin{aligned} \varphi_3[x : y : w] &= \Big(\frac{x}{w},\ \frac{y}{w}\Big), \\ \varphi_1 \circ \varphi_3^{-1}(u^1, u^2) &= \Big(\frac{u^2}{u^1},\ \frac{1}{u^1}\Big) \end{aligned} \tag{0.6.3} \]
+        </div>
+        <p>이다. 첫 식이 chart이고, 대표를 \(\lambda\)배 해도 값이 같으므로 잘 정의된다. \(\varphi_1\)(\(x \ne 0\)인 곳), \(\varphi_2\)(\(y \ne 0\)인 곳)도 같은 방식으로 정의하며, 두 번째 식처럼 transition map은 분모가 \(0\)이 아닌 곳에서 유리함수이므로 매끄럽다.
+        세 chart가 \(\RP^2\)를 덮으므로 \(\RP^2\)는 2-dimensional smooth manifold다(<a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-1">Proposition 11.4.1</a>).</p>
+        <p class="verified">Verification: <code>verify/v-0-6-manifolds.py</code></p>
+      </div>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: homogeneous coordinates와 \(\RP^2\)</p>
+        <p>이미지의 점 \((x, y)\)를 \([x : y : 1]\)로 쓰는 homogeneous coordinates는 \(\RP^2\)의 점을 chart \(\varphi_3\)의 좌표로 적은 것이다. 계산 끝에 마지막 성분으로 나누는 “dehomogenization”이 바로 <a href="#eq-0-6-3">(0.6.3)</a>의 \(\varphi_3\)이다
+        <a class="cite" href="../../references.html#HZ">[HZ]</a>.</p>
+        <ul>
+          <li><strong>point at infinity</strong>(무한원점). \(U_3\)에 들어가지 않는 점 \([x : y : 0]\)은 이미지 평면의 방향 \((x, y)\)에 해당하는 “무한히 먼 점”이다. 이런 점은 chart \(\varphi_3\)에서는 보이지 않지만 \(\varphi_1\)이나 \(\varphi_2\)에서는 보통 점이다. manifold에서는 어느 점도 특별하지 않다.</li>
+          <li><strong>vanishing point</strong>(소실점). pinhole camera는 homogeneous coordinates로 \(\mathbf{x} \simeq K(R\mathbf{X} + \mathbf{t})\)이다. \((R, \mathbf{t})\)는 카메라 자세, \(K\)는 intrinsic matrix(curvature가 아니다)이고, \(\simeq\)는 \(0\)이 아닌 상수배를 무시한 같음, 곧 \(\RP^2\)의 점으로서 같음이다. 방향 \(\mathbf{d}\)인 평행한 3차원 직선들은 이미지에서 한 점 \(KR\mathbf{d}\)(homogeneous coordinates)를 지난다.
+          \(\mathbf{d}\)가 이미지 평면과 평행하면 이 점의 마지막 성분이 \(0\)이 되어 point at infinity가 되고, 이미지 속 직선들도 평행하게 남는다.</li>
+          <li><strong>homography.</strong> 평면 장면을 찍은 두 이미지, 또는 회전만 한 카메라의 두 이미지는 invertible \(3 \times 3\) 행렬 \(H\)에 대해 \([\mathbf{x}] \mapsto [H\mathbf{x}]\)로 이어진다. 이 map은 \(\RP^2\)에서 \(\RP^2\)로 가는 diffeomorphism이다(smoothness는 <a href="../12-smooth-maps/12-1-smooth-maps.html#ex-12-1-5">Exercise 12.1.5</a>, 역은 \(H^{-1}\)). \(H\)와 \(\lambda H\)는 같은 map이므로 자유도는 \(9 - 1 = 8\)이다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-smooth-maps">
+      <h2>Smooth Maps and Diffeomorphisms</h2>
+      <p>manifold 사이의 map \(F\colon M \to N\)은 chart로 옮겨 판정한다. \(p\) 둘레의 chart \(\varphi\)와 \(F(p)\) 둘레의 chart \(\psi\)를 고르면 \(\hat F = \psi \circ F \circ \varphi^{-1}\)은 \(\R^m\)의 open set에서 \(\R^n\)으로 가는 보통 map이다(\(m = \dim M\), \(n = \dim N\)).
+      모든 점에서 이것이 매끄러우면 \(F\)를 <strong><a href="../12-smooth-maps/12-1-smooth-maps.html#i-12-1-6">smooth map</a></strong>(매끄러운 사상)이라 한다. 조건 (3) 덕분에 어느 chart로 판정해도 같다.
+      smooth map이 일대일 대응이고 역도 smooth map이면 <strong><a href="../12-smooth-maps/12-2-diffeomorphisms.html#i-12-2-1">diffeomorphism</a></strong>(미분동형사상)이라 한다. diffeomorphic한 두 manifold는 smooth manifold로서 같은 것이다.</p>
+      <p>“일대일 대응이고 매끄럽다”만으로는 부족하다. \(f(x) = x^3\)은 \(\R\)에서 \(\R\)로 가는 smooth map이고 일대일 대응이지만 역 \(x^{1/3}\)이 \(0\)에서 미분가능하지 않으므로 diffeomorphism이 아니다(<a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-3">Non-example 2.3.3</a>).</p>
+    </section>
+
+    <section id="sec-tangent">
+      <h2>Tangent Spaces and Differentials</h2>
+      <p>\(S^2\)처럼 \(\R^3\) 안에 있는 manifold라면 \(p\)에서의 tangent space는 <a href="0-3-surfaces.html#i-0-3-3">Section 0.3</a>의 tangent plane \(\{v : \inner{v}{p} = 0\}\)이다. 바깥 공간이 없는 \(M\)에서는 tangent vector를 어디에 그려야 할까?
+      답은 “\(p\)를 지나는 곡선의 velocity”다. 곡선 \(\gamma\)가 \(\gamma(0) = p\)이면, chart \(\varphi\)로 옮긴 곡선 \(\varphi \circ \gamma\)는 \(\R^n\)의 곡선이므로 velocity \(v = (\varphi \circ \gamma)'(0) \in \R^n\)이 있다.
+      이 \(v\)를 chart \(\varphi\)에 대한 tangent vector의 성분으로 본다. 다른 chart \(\psi\)를 쓰면 성분은 transition map의 Jacobian matrix만큼 바뀐다. chain rule에 의해</p>
+      <div class="equation" id="eq-0-6-4">
+      \[ (\psi \circ \gamma)'(0) = D(\psi \circ \varphi^{-1})\big(\varphi(p)\big)\, (\varphi \circ \gamma)'(0) \tag{0.6.4} \]
+      </div>
+      <p>이기 때문이다. 성분은 chart마다 다르지만 서로 정해진 규칙으로 바뀌므로, 성분들이 가리키는 “하나의 tangent vector”를 생각할 수 있다.</p>
+
+      <div class="thm definition" id="i-0-6-5">
+        <p><span class="thm-head">Definition 0.6.5</span> <span class="thm-name">(tangent space and differential, simplified)</span>.
+        \(p \in M\)을 지나는 곡선들의 velocity 전체를 <strong>tangent space</strong>(접공간) \(T_pM\)이라 한다. 두 곡선의 velocity는 한 chart에서 성분이 같을 때 같다고 본다. \(T_pM\)은 \(n\)-dimensional vector space다.
+        smooth map \(F\colon M \to N\)의 \(p\)에서의 <strong>differential</strong>(미분) \(dF_p\colon T_pM \to T_{F(p)}N\)은 곡선의 velocity를 그 곡선의 image의 velocity로 보내는 linear map이다:
+        \(dF_p\big(\gamma'(0)\big) = (F \circ \gamma)'(0)\). chart로 성분을 쓰면 \(dF_p\)는 \(\hat F = \psi \circ F \circ \varphi^{-1}\)의 Jacobian matrix \(D\hat F(\varphi(p))\)다.</p>
+        <p>여기서는 tangent vector를 곡선의 velocity로 단순화했다. 공식 정의는 함수를 미분하는 연산(derivation)으로 하고, 두 정의가 같음을 Chapter 13에서 보인다(<a href="../13-tangent-spaces/index.html#toc-13-2">Section 13.2</a>, <a href="../13-tangent-spaces/index.html#toc-13-5">Section 13.5</a>).</p>
+      </div>
+
+      <p>differential의 가장 중요한 성질은 chain rule이다. smooth map \(F\colon M \to N\), \(G\colon N \to P\)에 대하여</p>
+      <div class="equation" id="eq-0-6-5">
+      \[ d(G \circ F)_p = dG_{F(p)} \circ dF_p \tag{0.6.5} \]
+      </div>
+      <p>이다. chart로 쓰면 이것은 Jacobian matrix의 곱 \(D(\hat G \circ \hat F) = D\hat G \cdot D\hat F\)이며, 곡선 \(\gamma\)를 \(F\)로 보낸 뒤 \(G\)로 보내는 것과 한 번에 \(G \circ F\)로 보내는 것이 같다는 말이다.
+      tangent vector는 differential을 따라 <em>앞으로 밀려 간다</em>(push forward).</p>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: backpropagation은 differential의 합성이다</p>
+        <p>신경망 \(f = f_L \circ \cdots \circ f_1\)의 differential은 <a href="#eq-0-6-5">(0.6.5)</a>에 의해 Jacobian matrix의 곱 \(J_L \cdots J_1\)이다. 자동미분은 이 곱을 두 순서로 계산한다.</p>
+        <ul>
+          <li><strong>forward mode</strong>: 입력 쪽의 tangent vector \(v\)를 \(v \mapsto J_1 v \mapsto J_2 J_1 v \mapsto \cdots\)로 앞으로 밀어 보낸다. Jacobian–vector product(JVP)이며, 입력 방향 하나당 한 번 계산한다.</li>
+          <li><strong>reverse mode</strong>(backpropagation): scalar loss \(\ell\)의 미분은 행벡터 \(d\ell\)이고, 이것을 \(d\ell \mapsto d\ell\, J_L \mapsto d\ell\, J_L J_{L-1} \mapsto \cdots\)로 출력 쪽에서 거꾸로 끌어온다. vector–Jacobian product(VJP)이며, 한 번의 계산으로 모든 parameter에 대한 gradient를 얻는다.</li>
+        </ul>
+        <p>실제 프레임워크는 Jacobian 행렬을 만들지 않고 각 층의 JVP·VJP만 계산한다. 그런데 왜 gradient는 tangent vector와 반대 방향으로, 행벡터로 움직일까? gradient의 정체가 tangent vector가 아니라 covector이기 때문이다. 이것이 <a href="0-7-forms.html#sec-covectors">Section 0.7</a>의 출발점이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-vector-fields">
+      <h2>Vector Fields and Flows</h2>
+      <p>각 점 \(p\)에 tangent vector \(X_p \in T_pM\)을 매끄럽게 하나씩 붙인 것을 <strong><a href="../15-vector-fields-flows/index.html#toc-15-1">vector field</a></strong>(벡터장)라 한다. 바람의 지도처럼, 점마다 “어느 쪽으로 얼마나 빨리 흘러가는지”를 정한 것이다.
+      곡선 \(\gamma\)가 모든 시각에 \(\gamma'(t) = X_{\gamma(t)}\)를 만족하면 \(X\)의 <strong>integral curve</strong>(적분곡선)라 한다. chart에서 이것은 ordinary differential equation이므로, 각 점에서 출발하는 integral curve가 적어도 짧은 시간 동안 존재하고 하나뿐이다(<a href="../02-calculus-rn/2-7-ode.html#i-2-7-6">Theorem 2.7.6</a>).
+      모든 점을 동시에 시간 \(t\)만큼 흘려보내는 map \(\theta_t\colon p \mapsto\)(\(p\)에서 출발한 integral curve의 시각 \(t\)의 점)을 \(X\)의 <strong>flow</strong>(흐름)라 한다. \(\theta_s \circ \theta_t = \theta_{s+t}\)이고, 각 \(\theta_t\)는 diffeomorphism이다.
+      여기서는 \(\theta_t\)가 모든 \(t\)에서 정의된다고 단순화했다. compact manifold 위에서는 늘 그렇지만, 일반적으로는 짧은 시간에만 정의될 수 있다(<a href="../15-vector-fields-flows/index.html#toc-15-4">Section 15.4</a>).</p>
+
+      <div class="thm example" id="i-0-6-6">
+        <p><span class="thm-head">Example 0.6.6</span> <span class="thm-name">(rotation vector field on \(S^2\))</span>.
+        \(X(x, y, z) = (-y, x, 0)\)은 \(\inner{X(p)}{p} = 0\)이므로 \(S^2\)의 vector field다. integral curve는 circle of latitude이고, flow \(\theta_t\)는 \(z\)축 둘레로 각 \(t\)만큼 돌리는 회전이다(<a href="#fig-0-6-3">Figure 0.6.3</a>).
+        실제로 \(\theta_t(p) = R_z(t)p\)를 \(t\)로 미분하면 \(X(\theta_t(p))\)가 된다. \(X\)는 두 극에서 \(0\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-0-6-manifolds.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-0-6-3">
+        <img src="figures/fig-0-6-3-flow.svg" alt="반투명 unit sphere 위에 다섯 개의 circle of latitude가 회색으로 그려져 있고, 그 위의 여러 점에서 circle of latitude를 따라 동쪽으로 향하는 파란 화살표가 있다. colatitude 60도인 circle of latitude 위의 점 p에서 θ_{π/2}(p)까지 4분의 1 바퀴가 주황색으로 강조되어 있다. 북극 N과 남극 S가 표시되어 있다.">
+        <figcaption><span class="fig-head">Figure 0.6.3.</span>
+        \(S^2\)의 vector field \(X(x, y, z) = (-y, x, 0)\)(파란 화살표, 실제 길이의 \(0.3\)배)와 integral curve(회색 circle of latitude). 주황 곡선은 \(p\)(colatitude \(60^\circ\))에서 출발한 integral curve의 \(0 \le t \le \pi/2\) 부분이고, 끝점이 \(\theta_{\pi/2}(p)\)다.
+        <a href="figures/fig-0-6-3-flow-interactive.html">Interactive version</a>.</figcaption>
+      </figure>
+
+      <p>두 vector field의 flow를 번갈아 따라가면 제자리로 돌아오지 않을 수 있다. 그 어긋남을 재는 것이 <strong>Lie bracket</strong>(리 괄호) \([X, Y]\)이다(<a href="../15-vector-fields-flows/index.html#toc-15-2">Section 15.2</a>).</p>
+    </section>
+
+    <section id="sec-lie-groups">
+      <h2>Lie Groups: Rotations as a Manifold</h2>
+      <p>manifold이면서 group이고, 곱과 역원이 smooth map인 것을 <strong>Lie group</strong>(리 군)이라 한다. invertible \(n \times n\) 행렬 전체 \(\GL(n, \R)\)은 \(\R^{n^2}\)의 open set이므로 manifold이고 행렬 곱으로 Lie group이 된다(<a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-8">Example 11.4.8</a>).
+      컴퓨터비전에서 가장 중요한 Lie group은 회전 전체다.</p>
+
+      <div class="thm example" id="i-0-6-7">
+        <p><span class="thm-head">Example 0.6.7</span> <span class="thm-name">(the rotation group \(\mathrm{SO}(3)\))</span>.
+        \(\mathrm{SO}(3) = \{R \in \R^{3 \times 3} : R^{\mathsf T} R = I_3,\ \det R = 1\}\)이라 하자.</p>
+        <ul>
+          <li><em>dimension.</em> \(R^{\mathsf T}R\)은 symmetric이므로 \(R^{\mathsf T}R = I_3\)은 독립인 방정식 \(6\)개이고, 성분 \(9\)개에서 빼면 \(\mathrm{SO}(3)\)는 \(3\)차원 manifold다(정확히는 regular value theorem, <a href="../14-submanifolds/index.html#toc-14-4">Section 14.4</a>). 성분이 모두 \([-1, 1]\)에 있고 닫힌 조건으로 정해지므로 compact다.</li>
+          <li><em>tangent space at \(I_3\).</em> \(R(0) = I_3\)인 곡선 \(R(t)\)에 대해 \(R(t)^{\mathsf T}R(t) = I_3\)을 미분하면 \(R'(0)^{\mathsf T} + R'(0) = 0\)이다. 따라서 \(T_{I_3}\mathrm{SO}(3)\)은 <strong>skew-symmetric matrix</strong>(반대칭행렬) 전체 \(\mathfrak{so}(3)\)이고, 이것은 벡터 \(\omega \in \R^3\)과 일대일로 대응한다:</li>
+        </ul>
+        <div class="equation" id="eq-0-6-6">
+        \[ \begin{aligned} [\omega]_\times &= \begin{pmatrix} 0 & -\omega^3 & \omega^2 \\ \omega^3 & 0 & -\omega^1 \\ -\omega^2 & \omega^1 & 0 \end{pmatrix}, \\ [\omega]_\times v &= \omega \times v \end{aligned} \tag{0.6.6} \]
+        </div>
+        <ul>
+          <li><strong>exponential map</strong>(지수사상). 행렬 지수 \(\exp([\omega]_\times) = \sum_{k \ge 0} [\omega]_\times^k/k!\)는 축 \(\omega/\abs{\omega}\) 둘레로 각 \(\abs{\omega}\)만큼 돌리는 회전이고, \(\omega \ne 0\)일 때 Rodrigues formula로 계산된다(\(\omega = 0\)이면 \(I_3\)):</li>
+        </ul>
+        <div class="equation" id="eq-0-6-7">
+        \[ \begin{aligned} \exp([\omega]_\times) &= I_3 + \frac{\sin\abs{\omega}}{\abs{\omega}}\,[\omega]_\times \\ &\quad + \frac{1 - \cos\abs{\omega}}{\abs{\omega}^2}\,[\omega]_\times^2 \end{aligned} \tag{0.6.7} \]
+        </div>
+        <p>모든 회전은 \(\abs{\omega} \le \pi\)인 어떤 \(\omega\)의 \(\exp\)다. \(\abs{\omega} \lt \pi\)에서는 \(\exp\)가 일대일이고 그 역 \(\log\)도 매끄럽다(<a href="0-8-riemannian.html#sec-cv-averaging">Section 0.8</a>의 평균 회전에서 쓴다). \(\abs{\omega} = \pi\)이면 \(\pm\omega\)가 같은 회전을 준다(<a href="#fig-0-6-4">Figure 0.6.4</a>). 곡선 \(t \mapsto \exp(t[\omega]_\times)\)는 \(I_3\)에서 velocity \([\omega]_\times\)로 출발해 같은 축 둘레로 일정하게 도는 회전들이고, 이런 곡선을 <strong>one-parameter subgroup</strong>(일매개변수 부분군)이라 한다.</p>
+        <p class="verified">Verification: <code>verify/v-0-6-manifolds.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-0-6-4">
+        <img src="figures/fig-0-6-4-so3-ball.svg" alt="반지름 π인 하늘색 disk와 가로축 ω¹, 세로축 ω³. 원점에서 파란 화살표 ω가 뻗어 있고, 같은 방향의 주황 선분이 disk의 경계 위 두 점 πω̂와 −πω̂를 잇는다. 두 끝점은 주황 사각형으로 표시되어 있다. 반지름 π/2인 회색 점선 원이 있다. 원점에는 exp(0) = I₃라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 0.6.4.</span>
+        \(\mathrm{SO}(3)\)를 rotation vector의 공 \(\{\abs{\omega} \le \pi\} \subseteq \R^3\)로 본 그림(평면 \(\omega^2 = 0\)으로 자른 모습). \(\omega\)(여기서 \(\abs{\omega} = 2\), 축은 \(\omega^1\)축과 \(35^\circ\))는 \(\exp\)에 의해 축 \(\hat\omega = \omega/\abs{\omega}\) 둘레의 각 \(2\) 회전으로 간다. 회색 점선은 각 \(\pi/2\)인 회전들이다.
+        경계의 두 점 \(\pm\pi\hat\omega\)는 같은 회전(각 \(\pi\))이므로, 주황 선분 \(t \mapsto \exp(t[\hat\omega]_\times)\) (\(-\pi \le t \le \pi\))는 \(\mathrm{SO}(3)\) 안의 closed curve다.</figcaption>
+      </figure>
+
+      <aside class="box application" id="sec-cv-pose">
+        <p class="box-title">In computer vision: 카메라 자세 \(\mathrm{SO}(3)\)와 \(\mathrm{SE}(3)\)</p>
+        <p>카메라 자세는 world 좌표를 camera 좌표로 바꾸는 \(\mathbf{X}_c = R\mathbf{X}_w + \mathbf{t}\)의 쌍 \((R, \mathbf{t})\)이다. 이런 쌍 전체 \(\mathrm{SE}(3)\)는 \(4 \times 4\) 행렬 \(\begin{pmatrix} R & \mathbf{t} \\ 0 & 1 \end{pmatrix}\)의 곱으로 Lie group이 되고, manifold로서는 \(\mathrm{SO}(3) \times \R^3\)이므로 6차원이다
+        <a class="cite" href="../../references.html#Sola18">[Sola18]</a>, <a class="cite" href="../../references.html#Barfoot">[Barfoot]</a>.</p>
+        <ul>
+          <li><strong>Euler angle과 gimbal lock.</strong> \((\alpha, \beta, \gamma) \mapsto R_z(\alpha)R_y(\beta)R_x(\gamma)\)는 매끄럽고 모든 회전에 닿지만, \(\beta = \pm\pi/2\)에서 differential의 rank가 \(2\)로 떨어진다. 예를 들어 \(\beta = \pi/2\)이면 \(R = R_z(\alpha - \gamma)R_y(\pi/2)\)이 되어 \(\alpha\)와 \(\gamma\)가 같은 축을 돌리고, 둘의 차 \(\alpha - \gamma\)만 의미가 있다(\(\beta = -\pi/2\)이면 합 \(\alpha + \gamma\)만 남는다). 이것이 gimbal lock이다.
+          특정한 각 순서의 문제가 아니다. \(\mathrm{SO}(3)\)는 compact이므로 <a href="#i-0-6-2">Example 0.6.2</a>의 \(S^2\)처럼 chart 하나로 덮을 수 없고, 그래서 \(\R^3\)의 open set에서 오는 어떤 3-parameter 표현도 어딘가에서 일대일이 아니거나 rank가 떨어진다(<a href="#ex-0-6-3">Exercise 0.6.3</a>).</li>
+          <li><strong>tangent space에서 최적화.</strong> 그래서 bundle adjustment나 pose graph optimization은 현재 추정 \(\hat R\) 근처에서 \(R = \hat R\exp([\delta]_\times)\), \(\delta \in \R^3\)으로 국소 좌표를 잡고 \(\delta\)를 푼 뒤 \(\hat R\)을 갱신한다. \(\delta\)는 \(\mathfrak{so}(3)\), 곧 tangent space의 원소다.
+          <strong>unit quaternion</strong>(단위 사원수)을 쓰는 방법도 있다. unit quaternion 전체는 \(S^3\)이고 \(q\)와 \(-q\)가 같은 회전을 주므로, \(\mathrm{SO}(3)\)는 \(S^3\)에서 \(q\)와 \(-q\)를 같게 본 \(\RP^3\)와 diffeomorphic하다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>manifold의 정확한 정의: <a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-3">Definition 11.1.3 (topological manifold)</a>, <a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-13">Definition 11.1.13 (chart)</a>, <a href="../11-smooth-manifolds/11-2-smooth-structures.html#i-11-2-9">Definition 11.2.9 (smooth structure)</a>. Hausdorff·second countable 조건이 왜 필요한지는 <a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-10">Non-example 11.1.10</a>.</li>
+        <li>sphere: <a href="../11-smooth-manifolds/11-3-spheres-stereographic.html#i-11-3-1">Proposition 11.3.1</a>(transition map의 계산), <a href="../11-smooth-manifolds/11-3-spheres-stereographic.html#i-11-3-8">Non-example 11.3.8</a>(chart 하나로는 부족함).</li>
+        <li>\(\RP^n\)과 torus: <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-1">Proposition 11.4.1</a>, <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-12">Example 11.4.12</a>.</li>
+        <li>smooth map과 diffeomorphism: <a href="../12-smooth-maps/12-1-smooth-maps.html#i-12-1-6">Definition 12.1.6</a>, <a href="../12-smooth-maps/12-2-diffeomorphisms.html#i-12-2-1">Definition 12.2.1</a>, <a href="../12-smooth-maps/12-2-diffeomorphisms.html#i-12-2-8">Example 12.2.8</a>(\(T^2 \cong T_{R,r}\)), <a href="../12-smooth-maps/12-1-smooth-maps.html#ex-12-1-5">Exercise 12.1.5</a>(projective transformation).</li>
+        <li>tangent space와 differential: <a href="../13-tangent-spaces/index.html">Chapter 13</a>(derivation으로 정의, coordinate 계산, chain rule, curve의 velocity).</li>
+        <li>\(\mathrm{SO}(3)\)가 manifold인 이유: <a href="../14-submanifolds/index.html#toc-14-4">Section 14.4</a>(regular value theorem).</li>
+        <li>vector field, flow, Lie bracket: <a href="../15-vector-fields-flows/index.html">Chapter 15</a>.</li>
+        <li>Lie group, Lie algebra, exponential map: <a href="../20-lie-groups-frobenius/index.html">Chapter 20</a>(optional).</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>manifold는 chart들로 덮인 공간이고, chart 사이의 transition map이 매끄럽다. 그래서 바깥 공간 없이도 미적분을 할 수 있다.</li>
+        <li>\(S^2\)는 두 stereographic projection으로 덮이고 transition map은 \(u \mapsto u/\abs{u}^2\)다. compact manifold는 chart 하나로 덮을 수 없다.</li>
+        <li>\(\RP^2\)의 chart \(\varphi_3[x : y : w] = (x/w, y/w)\)는 homogeneous coordinates의 dehomogenization이고, homography는 \(\RP^2\)의 diffeomorphism이다.</li>
+        <li>tangent vector는 곡선의 velocity이고, differential \(dF_p\)는 chart 위에서 Jacobian matrix다. chain rule <a href="#eq-0-6-5">(0.6.5)</a>은 backpropagation의 수학이다.</li>
+        <li>vector field는 flow를 만든다. \(\mathrm{SO}(3)\)는 3차원 Lie group이고, \(T_{I_3}\mathrm{SO}(3) = \mathfrak{so}(3)\)에서 Rodrigues formula <a href="#eq-0-6-7">(0.6.7)</a>로 회전을 만든다.</li>
+      </ul>
+      <p class="next">다음 절에서는 tangent vector를 “재는” 대상인 covector를 다룬다. gradient가 differential과 반대 방향으로 끌려오는 이유, 그리고 covector를 넓이와 부피로 넓힌 differential form과 Stokes's theorem이 주제다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-0-6-1" data-level="1">
+        <p><span class="thm-head">Exercise 0.6.1</span> <span class="level">★</span>
+        unit circle \(S^1\)의 stereographic projection은 \(\sigma(x, y) = x/(1 - y)\), \(\tilde\sigma(x, y) = x/(1 + y)\)다. 점 \((3/5, 4/5)\)에서 두 값을 구하고, transition map이 \(u \mapsto 1/u\)임을 이 점에서 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\sigma = (3/5)/(1/5) = 3\), \(\tilde\sigma = (3/5)/(9/5) = 1/3\)이다. \(1/3 = 1/u\) (\(u = 3\))이므로 맞다. <a href="#eq-0-6-2">(0.6.2)</a>에서 \(n = 1\)이면 \(u/\abs{u}^2 = 1/u\)다.</p>
+          <p class="verified">Verification: <code>verify/v-0-6-manifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-6-2" data-level="1">
+        <p><span class="thm-head">Exercise 0.6.2</span> <span class="level">★</span>
+        (a) \([2 : 4 : 2]\)와 \([1 : 2 : 1]\)은 \(\RP^2\)의 같은 점인가? chart \(\varphi_3\)으로 좌표를 구하여라. (b) \([1 : 2 : 0]\)은 어느 chart에 들어가는가? 그 chart에서의 좌표는?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \([2 : 4 : 2] = [2 \cdot 1 : 2 \cdot 2 : 2 \cdot 1]\)이므로 같은 점이다. 실제로 \(\varphi_3\)은 둘 다 \((2/2, 4/2) = (1/1, 2/1) = (1, 2)\)를 준다.
+          (b) 마지막 성분이 \(0\)이므로 \(U_3\)에는 없다(이미지 평면의 point at infinity). 첫 성분이 \(0\)이 아니므로 \(U_1\)에 있고, \(\varphi_1[x : y : w] = (y/x, w/x)\)에서 좌표는 \((2, 0)\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-6-manifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-6-3" data-level="1">
+        <p><span class="thm-head">Exercise 0.6.3</span> <span class="level">★</span>
+        \(z\)축 둘레로 각 \(t\)만큼 돌리는 회전 \(R_z(t)\)는 \(\mathrm{SO}(3)\)의 곡선이다(<a href="#i-0-6-6">Example 0.6.6</a>의 flow). \(R_z'(0)\)을 구하고 skew-symmetric matrix \([\omega]_\times\)로 쓸 때 \(\omega\)를 구하여라. 참인지 거짓인지도 판별하여라: “Euler angle을 잘 고르면 \(\mathrm{SO}(3)\) 전체를 덮는 chart 하나를 얻는다.”</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(R_z(t) = \begin{pmatrix} \cos t & -\sin t & 0 \\ \sin t & \cos t & 0 \\ 0 & 0 & 1 \end{pmatrix}\)을 \(t = 0\)에서 미분하면 \(R_z'(0) = \begin{pmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix} = [e_3]_\times\)이므로 \(\omega = e_3 = (0, 0, 1)\)이다. \(z\)축 둘레의 단위 속도 회전이다.
+          명제는 거짓이다. 그런 chart가 있다면 compact인 \(\mathrm{SO}(3)\)가 \(\R^3\)의 open set과 homeomorphic이 되는데, 공집합이 아닌 \(\R^3\)의 open set은 compact가 아니다. 그래서 어떤 각 순서를 쓰든 일대일이 아니거나 rank가 떨어지는 점(gimbal lock)이 생긴다. \(\R^3\)의 open set에서 \(\mathrm{SO}(3)\) 전체로 가는 일대일이고 rank가 늘 \(3\)인 표현이 있다면, 그 역이 바로 그런 chart가 되기 때문이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-6-manifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-6-4" data-level="1">
+        <p><span class="thm-head">Exercise 0.6.4</span> <span class="level">★</span>
+        \(F(x, y) = (x^2, xy)\), \(G(u, v) = u + v\)라 하자. \(D(G \circ F)(1, 2)\)를 chain rule <a href="#eq-0-6-5">(0.6.5)</a>로 구하고, \(G \circ F\)를 직접 미분한 값과 비교하여라. forward mode로 \(e_1 = (1, 0)\)을 밀어 보낸 \(DF(1,2)\,e_1\)과 reverse mode로 끌어온 \(DG \cdot DF(1, 2)\)는 각각 무엇인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(DF(1, 2) = \begin{pmatrix} 2x & 0 \\ y & x \end{pmatrix}_{(1,2)} = \begin{pmatrix} 2 & 0 \\ 2 & 1 \end{pmatrix}\), \(DG = \begin{pmatrix} 1 & 1 \end{pmatrix}\)이므로 \(D(G \circ F)(1, 2) = \begin{pmatrix} 4 & 1 \end{pmatrix}\)이다.
+          직접 미분하면 \(G \circ F = x^2 + xy\)이고 partial derivative는 \((2x + y, x) = (4, 1)\)이므로 같다.
+          forward mode의 JVP는 \(DF(1, 2)\,e_1 = (2, 2)\)이고, 여기에 \(DG\)를 곱하면 \(4\)(\(x\) 방향 미분)가 된다. reverse mode의 VJP는 행벡터 \(\begin{pmatrix} 1 & 1 \end{pmatrix}\)을 끌어온 \(\begin{pmatrix} 4 & 1 \end{pmatrix}\)이고, 두 partial derivative를 한 번에 준다.</p>
+          <p class="verified">Verification: <code>verify/v-0-6-manifolds.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="0-5-intrinsic.html">← 0.5 Intrinsic Geometry: Geodesics and Gauss–Bonnet</a>
+    <a rel="next" href="0-7-forms.html">0.7 Differential Forms and Stokes's Theorem →</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.3 Surfaces and Tangent Planes — DG Study</title>
+  <meta name="dg-id" content="0.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.1, 0.2">
+  <meta name="dg-refs" content="dC Ch. 2; Pr; Cr; Hoppe92; Levy02; PMP">
+  <meta name="dg-updated" content="2026-10-06">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">0. A Guided Tour of Differential Geometry</a> ›
+    <span>0.3 Surfaces and Tangent Planes</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>0.3 Surfaces and Tangent Planes</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#dC">[dC Ch. 2]</a>,
+        <a class="cite" href="../../references.html#Pr">[Pr]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr]</a>,
+        <a class="cite" href="../../references.html#Hoppe92">[Hoppe92]</a>,
+        <a class="cite" href="../../references.html#Levy02">[Levy02]</a>,
+        <a class="cite" href="../../references.html#PMP">[PMP]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>parametrization을 UV 좌표로 이해하고, regular surface가 무엇인지 말로 설명할 수 있다.</li>
+        <li>tangent plane과 unit normal vector를 parametrization이나 implicit equation에서 계산할 수 있다.</li>
+        <li>first fundamental form \(E, F, G\)로 surface 위의 길이, 각, 넓이를 계산하고, UV map의 왜곡을 읽을 수 있다.</li>
+        <li>isometry, conformal map, 넓이를 보존하는 map의 차이를 \(E, F, G\)로 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0-1-what-is-dg.html">Section 0.1</a>: linear approximation, intrinsic과 extrinsic(<a href="0-1-what-is-dg.html#i-0-1-1">Definition 0.1.1</a>)</li>
+        <li><a href="0-2-curves.html">Section 0.2</a>: 속도벡터, 곡선의 길이(<a href="0-2-curves.html#eq-0-2-1">(0.2.1)</a>)</li>
+        <li>미적분: partial derivative, 2변수 함수의 chain rule, 이중적분. 행렬·벡터: inner product, cross product, symmetric matrix의 eigenvalue</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="0-2-curves.html">Section 0.2</a>에서 곡선은 매개변수 하나로 움직이는 점이었다. surface는 매개변수가 둘 필요하다. 그래픽스에는 이미 익숙한 예가 있다. textured mesh의 각 점에는 texture image 안의 좌표 \((u, v)\)가 붙어 있다(UV 좌표). 거꾸로 보면 UV 평면의 영역에서 \(\R^3\)으로 가는 map이 surface를 그린다. 이 절은 세 질문에 답한다.</p>
+      <ol>
+        <li>어떤 map이 surface를 “제대로” 그리는가? (parametrization)</li>
+        <li>한 점에서 surface의 평평한 근사는 무엇이고, 바깥쪽은 어디인가? (tangent plane과 normal vector)</li>
+        <li>UV 평면의 길이와 넓이는 실제 surface에서 얼마인가? 곧 texture는 얼마나 늘어나고 찌그러지는가? (first fundamental form)</li>
+      </ol>
+    </section>
+
+    <section id="sec-parametrization">
+      <h2>Parametrizations: UV Coordinates</h2>
+      <div class="thm definition" id="i-0-3-1">
+        <p><span class="thm-head">Definition 0.3.1</span> <span class="thm-name">(parametrization and regular surface, simplified)</span>.
+        \(U \subseteq \R^2\)가 open set이고 \(\mathbf{x}\colon U \to \R^3\), \((u, v) \mapsto \mathbf{x}(u, v)\)가 smooth map이라 하자. 다음 두 조건을 만족하면 \(\mathbf{x}\)를 <strong>parametrization</strong>(매개화)이라 한다.</p>
+        <ul>
+          <li>(1) \(\mathbf{x}\)는 일대일이고, \(\mathbf{x}\)와 그 역이 모두 연속이다(image 위로의 homeomorphism).</li>
+          <li>(2) 모든 점에서 partial derivative \(\mathbf{x}_u, \mathbf{x}_v\)가 linearly independent다. 곧 \(\mathbf{x}_u \times \mathbf{x}_v \neq 0\)이다.</li>
+        </ul>
+        <p>집합 \(S \subseteq \R^3\)의 모든 점 근처가 parametrization 하나의 image로 덮이면 \(S\)를 <strong>regular surface</strong>(정칙곡면)라 한다. 여기서는 “근처”를 엄밀히 정의하지 않았다. 정확한 정의는 <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>이다.</p>
+      </div>
+      <p>조건 (2)는 regular curve의 \(\gamma' \neq 0\)(<a href="0-2-curves.html#i-0-2-1">Definition 0.2.1</a>)에 해당한다. 어느 방향으로도 UV 좌표가 한 점으로 뭉개지지 않는다는 뜻이다. 조건 (1)은 surface가 스스로를 뚫고 지나가거나 한 점에 두 UV 좌표가 붙는 것을 막는다.</p>
+
+      <div class="thm example" id="i-0-3-2">
+        <p><span class="thm-head">Example 0.3.2</span> <span class="thm-name">(sphere, cylinder, and torus of revolution)</span>.
+        Tour의 running example 세 surface와 그 parametrization이다.</p>
+        <ul>
+          <li>sphere \(S^2(r)\): \(\mathbf{x}(\theta, \varphi) = (r\sin\theta\cos\varphi,\ r\sin\theta\sin\varphi,\ r\cos\theta)\), \(0 \lt \theta \lt \pi\), \(0 \lt \varphi \lt 2\pi\). \(\theta\)는 북극에서 잰 각(colatitude), \(\varphi\)는 경도다. image는 \(x^2 + y^2 + z^2 = r^2\)에서 두 극을 잇는 반원 하나(\(\varphi = 0\), 두 극 포함)를 뺀 것이다.</li>
+          <li>cylinder: \(\mathbf{x}(u, v) = (r\cos u,\ r\sin u,\ v)\), \(0 \lt u \lt 2\pi\), \(v \in \R\). image는 \(x^2 + y^2 = r^2\)에서 직선 하나를 뺀 것이다.</li>
+          <li>torus of revolution \(T_{R,r}\) (\(0 \lt r \lt R\)): \(\mathbf{x}(u, v) = \big((R + r\cos u)\cos v,\ (R + r\cos u)\sin v,\ r\sin u\big)\), \(0 \lt u, v \lt 2\pi\). 반지름 \(r\)인 원(관을 자른 자리, 각 \(u\))을 \(z\)축 둘레로 돌린 것(각 \(v\))이다. image는 \(\big(\sqrt{x^2 + y^2} - R\big)^2 + z^2 = r^2\)에서 원 두 개를 뺀 것이다.</li>
+        </ul>
+        <p>위의 parametrization은 모두 곡선 하나나 둘을 빠뜨리고, 빠진 곳은 다른 parametrization(예: 돌린 것)으로 덮는다. 특히 sphere와 torus of revolution은 compact이므로 어떤 parametrization 하나로도 전체를 덮을 수 없다(open set \(U\)와 homeomorphic한 집합은 compact일 수 없다). 닫힌 mesh의 UV를 펼 때 seam을 잘라야 하는 것도 같은 종류의 제약이다. 닫힌 surface 전체를 평면에 일대일·연속으로 펼 수는 없다.</p>
+        <p class="verified">Verification: <code>verify/v-0-3-surfaces.py</code></p>
+      </div>
+
+      <p>세 surface는 모두 방정식 하나 \(f(x, y, z) = 0\)의 해집합으로도 주어진다. 일반적으로 \(f = 0\)인 모든 점에서 gradient \(\grad f \neq 0\)이면 \(f^{-1}(0)\)은 regular surface다(<a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-3">Theorem 6.5.3</a>). 그래픽스와 3D vision의 implicit surface, 예를 들어 signed distance function(SDF)의 zero level set이 이렇게 주어진 surface다.</p>
+
+      <figure class="dg-figure" id="fig-0-3-1">
+        <img src="figures/fig-0-3-1-torus-uv.svg" alt="왼쪽은 가로축 v(0부터 2π), 세로축 u(0부터 2π)인 정사각형 U에 하늘색과 흰색 checkerboard(가로 16칸, 세로 8칸)가 칠해져 있고, 점 q에서 위쪽과 오른쪽으로 길이가 같은 파란 화살표가 있다. 곡선 화살표 x가 오른쪽의 torus of revolution을 가리킨다. torus에는 같은 checkerboard가 입혀져 있는데, 바깥쪽의 칸은 넓고 구멍 쪽의 칸은 좁다. 점 p에서 짧은 파란 화살표 x_u(관을 도는 방향)와 그보다 세 배 긴 x_v(둘레 방향)가 있다.">
+        <figcaption><span class="fig-head">Figure 0.3.1.</span>
+        parametrization은 UV 좌표다. torus of revolution \(T_{R,r}\)(\(R = 2\), \(r = 0.8\))의 \(\mathbf{x}\)가 \(U = (0, 2\pi)^2\)의 checkerboard를 surface에 입힌다(texture mapping). \(U\)에서 크기가 같은 칸이 surface의 바깥쪽에서는 넓고 안쪽에서는 좁다. 점 \(q = (\pi/3,\ 4.6)\)에서 \(\mathbf{x}_u\)와 \(\mathbf{x}_v\)(파랑, 둘 다 \(0.4\)배)의 길이의 비는 \((R + r\cos u)/r = 3\)이다(<a href="#i-0-3-6">Example 0.3.6</a>). <a href="figures/fig-0-3-1-torus-uv-interactive.html">Interactive version</a>에서 돌려 볼 수 있다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-tangent-plane">
+      <h2>Tangent Plane and Normal Vector</h2>
+      <p>곡선의 linear approximation이 접선이었던 것처럼, surface의 linear approximation은 평면이다. UV 좌표의 한 방향으로만 움직인 곡선 \(u \mapsto \mathbf{x}(u, v_0)\)와 \(v \mapsto \mathbf{x}(u_0, v)\)의 속도벡터가 \(\mathbf{x}_u\)와 \(\mathbf{x}_v\)이고, 이 둘이 그 평면을 펼친다.</p>
+      <div class="thm definition" id="i-0-3-3">
+        <p><span class="thm-head">Definition 0.3.3</span> <span class="thm-name">(tangent plane and unit normal vector)</span>.
+        parametrization \(\mathbf{x}\)와 \(p = \mathbf{x}(q)\)에 대해</p>
+        <p>\[ T_pS = \{\, a\,\mathbf{x}_u(q) + b\,\mathbf{x}_v(q) : a, b \in \R \,\} \]</p>
+        <p>를 \(p\)에서 \(S\)의 <strong>tangent plane</strong>(접평면)이라 한다. 이것은 \(S\) 위에서 \(p\)를 지나는 모든 곡선 \(\alpha\)의 속도벡터 \(\alpha'(0)\)의 모임과 같고, 그래서 parametrization을 어떻게 골라도 같다. 또</p>
+        <p>\[ \mathbf{N}(p) = \frac{\mathbf{x}_u \times \mathbf{x}_v}{\abs{\mathbf{x}_u \times \mathbf{x}_v}}(q) \]</p>
+        <p>를 \(p\)에서의 <strong>unit normal vector</strong>(단위법벡터)라 한다. 다른 parametrization을 쓰면 \(\mathbf{N}\)이 \(-\mathbf{N}\)으로 바뀔 수 있다.</p>
+      </div>
+      <p>\(T_pS\)는 원점을 지나는 \(\R^3\)의 2-dimensional subspace다. 그림에서는 그것을 \(p\)로 옮겨 그린다(<a href="#fig-0-3-2">Figure 0.3.2</a>). surface가 \(f = 0\)으로 주어지면 \(T_pS\)는 \(\grad f(p)\)에 수직인 평면이고, \(\mathbf{N} = \pm\grad f/\abs{\grad f}\)이다(<a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-4">Proposition 6.5.4</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-3-2">
+        <img src="figures/fig-0-3-2-sphere-tangent-plane.svg" alt="반투명한 회색 sphere 위의 점 p에 하늘색 평행사변형 T_pS가 접해 있다. p에서 파란 x_theta는 아래쪽(남쪽), 짧은 파란 x_phi는 오른쪽(동쪽)을 가리키고, 주홍 N은 sphere 밖으로 위쪽을 가리킨다. 주황 곡선이 p를 지나고, 그 속도 alpha'(0)(주황 화살표)이 평행사변형 안에 있다.">
+        <figcaption><span class="fig-head">Figure 0.3.2.</span>
+        unit sphere의 점 \(p = \mathbf{x}(0.55, -0.52)\)에서 \(\mathbf{x}_\theta\), \(\mathbf{x}_\varphi\)(파랑, \(0.5\)배), tangent plane \(T_pS\)(하늘색), unit normal vector \(\mathbf{N}\)(주홍, \(0.6\)배, 바깥쪽). 주황 곡선 \(\alpha(t) = \mathbf{x}(0.55 + 0.6t,\ -0.52 + 0.9t)\)의 속도 \(\alpha'(0) = 0.6\,\mathbf{x}_\theta + 0.9\,\mathbf{x}_\varphi\)는 \(T_pS\) 안에 있다. \(\mathbf{x}_\varphi\)가 짧은 것은 북쪽의 circle of latitude가 작기 때문이다(\(\abs{\mathbf{x}_\varphi} = \sin\theta\)).</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-0-3-4">
+        <p><span class="thm-head">Example 0.3.4</span> <span class="thm-name">(unit normal vectors of the running examples)</span>.
+        sphere에서는 \(\mathbf{x}_\theta \times \mathbf{x}_\varphi = r\sin\theta\,\mathbf{x}\)이므로 \(\mathbf{N} = \mathbf{x}/r\), 곧 바깥쪽이다. tangent plane \(T_pS\)는 \(p\)에 수직인 평면이다.
+        cylinder에서는 \(\mathbf{N} = (\cos u,\ \sin u,\ 0)\)으로 역시 바깥쪽이다.
+        torus of revolution에서는 \(\mathbf{N} = -(\cos u\cos v,\ \cos u\sin v,\ \sin u)\)이고, 이것은 <em>안쪽</em>, 곧 관의 중심원을 향한다. 같은 공식이 surface에 따라 바깥쪽이 되기도 하고 안쪽이 되기도 한다. <a href="0-4-curvature.html">Section 0.4</a>에서 curvature의 부호가 \(\mathbf{N}\)의 방향에 따라 바뀌므로 이 방향을 기억해 두자.</p>
+        <p class="verified">Verification: <code>verify/v-0-3-surfaces.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-first-form">
+      <h2>Measuring on the Surface: The First Fundamental Form</h2>
+      <p>surface 위의 곡선을 UV 좌표로 \(\alpha(t) = \mathbf{x}\big(u(t), v(t)\big)\)라 쓰면, chain rule에서 \(\alpha' = u'\,\mathbf{x}_u + v'\,\mathbf{x}_v\)이다. 그 길이는 UV 속도 \((u', v')\)와 \(\mathbf{x}_u, \mathbf{x}_v\)의 inner product 세 개로 정해진다. 그 세 수가 UV 평면의 눈금을 실제 길이로 바꾸는 환산표다.</p>
+      <div class="thm definition" id="i-0-3-5">
+        <p><span class="thm-head">Definition 0.3.5</span> <span class="thm-name">(first fundamental form)</span>.
+        \(p \in S\)에서 quadratic form \(\mathrm{I}_p(w) = \inner{w}{w} = \abs{w}^2\) (\(w \in T_pS\))를 <strong>first fundamental form</strong>(제1기본형식)이라 한다. parametrization \(\mathbf{x}\)에서 \(w = a\,\mathbf{x}_u + b\,\mathbf{x}_v\)이면</p>
+        <div class="equation" id="eq-0-3-1">
+        \[ \begin{aligned} \mathrm{I}_p(w) &= E\,a^2 + 2F\,ab + G\,b^2 \\
+           &= \begin{pmatrix} a & b \end{pmatrix}\begin{pmatrix} E & F \\ F & G \end{pmatrix}\begin{pmatrix} a \\ b \end{pmatrix} \end{aligned} \tag{0.3.1} \]
+        </div>
+        <p>이다. 여기서 \(E = \inner{\mathbf{x}_u}{\mathbf{x}_u}\), \(F = \inner{\mathbf{x}_u}{\mathbf{x}_v}\), \(G = \inner{\mathbf{x}_v}{\mathbf{x}_v}\)이고, 가운데 행렬은 basis \((\mathbf{x}_u, \mathbf{x}_v)\)의 Gram matrix다.</p>
+      </div>
+      <p>\(\mathrm{I}_p\) 자체는 \(\R^3\)의 길이를 \(T_pS\)에 제한한 것일 뿐이다. 새로운 것은 그것을 UV 좌표로 적은 coefficient \(E, F, G\)다. 이 세 함수만 있으면 surface 위의 길이, 각, 넓이를 UV 평면에서 계산할 수 있다.</p>
+      <div class="equation" id="eq-0-3-2">
+      \[ L(\alpha) = \int_{t_0}^{t_1} \sqrt{E\,u'^2 + 2F\,u'v' + G\,v'^2}\;dt, \tag{0.3.2} \]
+      </div>
+      <div class="equation" id="eq-0-3-3">
+      \[ \operatorname{Area}\big(\mathbf{x}(Q)\big) = \iint_Q \sqrt{EG - F^2}\;du\,dv. \tag{0.3.3} \]
+      </div>
+      <p>두 tangent vector가 이루는 각도 Gram matrix로 계산하는 inner product에서 나온다. \(\sqrt{EG - F^2} = \abs{\mathbf{x}_u \times \mathbf{x}_v}\)는 UV 평면의 작은 칸 \(du\,dv\)가 surface 위에서 차지하는 넓이의 배율이다.</p>
+
+      <div class="thm example" id="i-0-3-6">
+        <p><span class="thm-head">Example 0.3.6</span> <span class="thm-name">(\(E, F, G\) of the running examples)</span>.</p>
+        <ul>
+          <li>sphere: \(E = r^2\), \(F = 0\), \(G = r^2\sin^2\theta\). \(\theta\) 방향 한 눈금은 실제로 \(r\,d\theta\)이고, \(\varphi\) 방향 한 눈금은 \(r\sin\theta\,d\varphi\)로 극에 가까울수록 짧다(circle of latitude의 반지름이 \(r\sin\theta\)). \(\sqrt{EG - F^2} = r^2\sin\theta\)이므로 넓이는 \(\int_0^{2\pi}\!\int_0^\pi r^2\sin\theta\,d\theta\,d\varphi = 4\pi r^2\)이다.</li>
+          <li>cylinder: \(E = r^2\), \(F = 0\), \(G = 1\).</li>
+          <li>torus of revolution: \(E = r^2\), \(F = 0\), \(G = (R + r\cos u)^2\). \(v\) 방향 한 눈금은 바깥쪽(\(u = 0\))에서 \((R + r)\,dv\), 안쪽(\(u = \pi\))에서 \((R - r)\,dv\)다. <a href="#fig-0-3-1">Figure 0.3.1</a>의 칸이 바깥에서 넓고 안에서 좁은 이유다. 넓이는 \(4\pi^2 Rr\)이다(<a href="#ex-0-3-2">Exercise 0.3.2</a>).</li>
+        </ul>
+        <p>세 경우 모두 \(F = 0\)이다. 두 좌표 방향이 직각으로 만난다는 뜻이고, parametrization의 성질이지 surface의 성질은 아니다.</p>
+        <p class="verified">Verification: <code>verify/v-0-3-surfaces.py</code></p>
+      </div>
+
+      <p>first fundamental form을 UV 평면에 그림으로 그릴 수 있다. 각 점 \(q\)에서 surface 위의 길이가 \(\varepsilon\)인 tangent vector \(w = a\,\mathbf{x}_u + b\,\mathbf{x}_v\)를 모으면, 그 UV 성분 \((a, b)\)는 ellipse \(E a^2 + 2F ab + G b^2 = \varepsilon^2\)를 이룬다(<a href="#fig-0-3-3">Figure 0.3.3</a>). 반축의 방향은 Gram matrix의 eigenvector이고 길이는 \(\varepsilon/\sqrt{\lambda}\)이다(\(\lambda\)는 eigenvalue). surface 위의 작은 disk가 UV 평면에서 이 ellipse로 보이는 것이다. ellipse가 원이면 그 점에서 UV map은 모든 방향을 같은 비율로 줄이거나 늘인다. ellipse가 한쪽으로 길면, 그 방향으로는 UV의 큰 범위가 surface의 짧은 길이에 몰린다. texture가 그 방향으로 압축되어 보인다는 뜻이다.</p>
+
+      <figure class="dg-figure" id="fig-0-3-3">
+        <img src="figures/fig-0-3-3-metric-ellipses.svg" alt="두 개의 UV 평면에 작은 하늘색 ellipse가 격자 모양으로 놓여 있다. 왼쪽(가로 phi, 세로 theta, 위가 북극)에서는 적도 근처의 ellipse가 거의 원이고, 위아래 끝(극 근처)으로 갈수록 가로로 길어진다. 오른쪽(가로 v, 세로 u)에서는 모든 ellipse가 세로로 길쭉한데, u = 0과 2π 근처(바깥쪽)에서 가장 가늘고 u = π 근처(안쪽)에서 가장 굵다.">
+        <figcaption><span class="fig-head">Figure 0.3.3.</span>
+        UV 평면 위의 ellipse \(\{(a, b) : E a^2 + 2F ab + G b^2 = \varepsilon^2\}\), \(\varepsilon = 0.13\). 왼쪽: unit sphere의 \((\theta, \varphi)\). 가로를 경도 \(\varphi\), 세로를 \(\theta\)(위가 북극)로 놓았으므로 지구 사진이나 360° 영상을 저장하는 equirectangular image와 같은 배치다. \(\varphi\) 방향 반축 \(\varepsilon/\sin\theta\)가 극에서 커진다. 오른쪽: torus of revolution(\(R = 2\), \(r = 0.8\))의 \((u, v)\). \(u\) 방향 반축은 \(\varepsilon/r\)로 일정하고, \(v\) 방향 반축 \(\varepsilon/(R + r\cos u)\)는 바깥쪽에서 작고 안쪽에서 크다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-isometry">
+      <h2>Isometries and Conformal Maps</h2>
+      <p>두 surface 사이의 map이 모든 곡선의 길이를 보존하면 <strong>isometry</strong>(등거리사상)라 한다(<a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-1">Definition 7.2.1</a>). 좌표로 판정하는 방법이 있다. 같은 \(U\) 위의 두 parametrization \(\mathbf{x}\), \(\mathbf{y}\)가 모든 점에서 같은 \(E, F, G\)를 가지면, \(\mathbf{x}(q) \mapsto \mathbf{y}(q)\)는 길이를 보존한다. <a href="#eq-0-3-2">(0.3.2)</a>의 적분이 같기 때문이다(<a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-8">Corollary 7.2.8</a>).</p>
+      <div class="thm example" id="i-0-3-7">
+        <p><span class="thm-head">Example 0.3.7</span> <span class="thm-name">(plane and cylinder)</span>.
+        평면의 parametrization \((u, v) \mapsto (u, v, 0)\)과 cylinder의 parametrization \(\mathbf{y}(u, v) = \big(r\cos(u/r),\ r\sin(u/r),\ v\big)\)는 둘 다 \(E = 1\), \(F = 0\), \(G = 1\)이다(<a href="#ex-0-3-1">Exercise 0.3.1</a>). 그래서 평면의 띠를 cylinder에 감는 map은 길이를 보존한다. <a href="0-1-what-is-dg.html#fig-0-1-2">Figure 0.1.2</a>에서 종이를 말아도 intrinsic한 양이 변하지 않았던 이유가 이것이다. intrinsic한 양이란 \(E, F, G\)로 정해지는 양이다.</p>
+      </div>
+      <p>길이 대신 각만 보존하는 map을 <strong>conformal map</strong>(등각사상)이라 한다(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-1">Definition 7.4.1</a>). 좌표로는 두 Gram matrix가 점마다 양수배 차이일 때, 곧 \((\bar E, \bar F, \bar G) = \lambda^2(E, F, G)\)일 때다(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-6">Theorem 7.4.6</a>). 특히 \(E = G\), \(F = 0\)인 parametrization에서는 <a href="#fig-0-3-3">Figure 0.3.3</a>의 ellipse가 모두 원이 된다. 작은 원은 크기만 바뀐 원으로 간다. 넓이만 보존하는 map은 \(\sqrt{EG - F^2}\)를 보존한다.</p>
+      <p>sphere를 평면에 펴는 지도에서는 셋 가운데 isometry는 불가능하고, conformal과 넓이 보존을 동시에 가질 수도 없다. 그 이유가 <a href="0-5-intrinsic.html">Section 0.5</a>의 Theorema Egregium이다.</p>
+    </section>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: point cloud의 normal estimation</p>
+      <p>LiDAR나 depth camera가 주는 point cloud에는 parametrization이 없다. 그래도 normal vector는 대부분의 처리(surface reconstruction, shading, ICP의 point-to-plane 오차)에 필요하다. 표준적인 방법은 tangent plane을 최소제곱으로 맞추는 것이다 <a class="cite" href="../../references.html#Hoppe92">[Hoppe92]</a>. 점 \(p\)의 \(k\)개 nearest neighbor \(p_1, \dots, p_k\)와 그 평균 \(\mathbf{c}\)로 covariance matrix</p>
+      <p>\[ C = \frac1k\sum_{j=1}^{k} (p_j - \mathbf{c})(p_j - \mathbf{c})^{\mathsf{T}} \]</p>
+      <p>를 만든다. \(C\)는 \(3 \times 3\) symmetric matrix이므로 eigenvalue \(\lambda_1 \ge \lambda_2 \ge \lambda_3 \ge 0\)과 orthonormal eigenvector가 있다. 가장 작은 eigenvalue의 eigenvector \(\mathbf{e}_{\min}\)이 이웃 점들이 가장 덜 퍼진 방향이다. \(\mathbf{c}\)를 지나고 단위벡터 \(\mathbf{n}\)에 수직인 평면 가운데 거리 제곱의 합 \(\sum_j \inner{p_j - \mathbf{c}}{\mathbf{n}}^2\)이 가장 작은 것은 \(\mathbf{n} = \pm\mathbf{e}_{\min}\)일 때다. 그래서 \(\mathbf{e}_{\min}\)이 \(\mathbf{N}\)의 추정이다(<a href="#fig-0-3-4">Figure 0.3.4</a>). 나머지 두 eigenvector는 \(T_pS\)를 펼친다.</p>
+      <p>eigenvector는 부호가 정해지지 않으므로 \(\pm\mathbf{e}_{\min}\) 가운데 어느 쪽이 바깥인지는 PCA가 알려 주지 않는다. Hoppe 등은 이웃한 점들을 잇는 graph 위에서 minimal spanning tree를 따라 normal의 방향을 이웃과 맞추며 퍼뜨린다. <a href="#i-0-3-3">Definition 0.3.3</a>에서 parametrization을 바꾸면 \(\mathbf{N}\)이 \(-\mathbf{N}\)이 될 수 있었던 것과 같은 문제다. \(\lambda_3\)이 \(\lambda_2\)에 비해 크면 그 근처가 평면에 가깝지 않다는 뜻이다(잡음, 큰 curvature, 모서리). surface가 SDF \(f\)로 주어지면 PCA가 필요 없다: \(\mathbf{N} = \grad f/\abs{\grad f}\)이고, neural SDF에서는 이 gradient를 자동미분으로 구한다.</p>
+      <figure class="dg-figure" id="fig-0-3-4">
+        <img src="figures/fig-0-3-4-pca-normal.svg" alt="원의 호를 따라 흩어진 검은 점들(잡음 있는 point cloud)이 있다. 가운데 점 근처의 이웃 15개가 주황으로 표시되어 있고, 그 위에 가로로 납작한 하늘색 covariance ellipse가 있다. 이웃의 평균에서 파란 화살표 e_max가 호를 따라 왼쪽으로, 주홍 화살표가 아래쪽(실선)과 위쪽(점선)으로 뻗어 있다. 회색 점선은 참 normal인 반지름 방향이고 주홍 화살표와 거의 겹친다.">
+        <figcaption><span class="fig-head">Figure 0.3.4.</span>
+        PCA normal estimation을 2차원에서 본 것. 반지름 \(1\)인 원의 호 위의 점 70개에 표준편차 \(0.02\)의 잡음을 더했다. 가운데 점의 이웃 \(k = 15\)개(주황)의 covariance matrix에서 큰 eigenvalue의 eigenvector \(\mathbf{e}_{\max}\)(파랑)는 접선 방향, 작은 eigenvalue의 eigenvector \(\pm\mathbf{e}_{\min}\)(주홍)은 normal 방향의 추정이다. 실선과 점선 화살표는 부호를 정할 수 없음을 나타낸다. 참 normal(회색 점선)과의 각 오차는 약 \(1.8^\circ\)이다. 3차원 point cloud에서도 \(3 \times 3\) covariance matrix로 똑같이 한다.</figcaption>
+      </figure>
+    </aside>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: UV unwrapping과 texture distortion</p>
+      <p>mesh에 texture를 입히려면 각 triangle을 UV 평면의 triangle로 보내는 map, 곧 piecewise linear parametrization이 필요하다. 한 triangle 위에서 UV에서 surface로 가는 map의 Jacobian \(J\)(\(3 \times 2\))로 first fundamental form은 \(J^{\mathsf{T}}J\)이고, 그 두 eigenvalue의 제곱근 \(\sigma_1 \ge \sigma_2\)(\(J\)의 singular value)가 <a href="#fig-0-3-3">Figure 0.3.3</a>의 ellipse를 정한다(반축 \(\varepsilon/\sigma_i\)). 판정은 다음과 같다.</p>
+      <ul>
+        <li>isometric: \(\sigma_1 = \sigma_2 = 1\). 길이, 각, 넓이가 모두 보존된다.</li>
+        <li>conformal: \(\sigma_1 = \sigma_2\). 작은 정사각형 texel이 크기만 바뀐 정사각형으로 간다.</li>
+        <li>넓이 보존: \(\sigma_1\sigma_2 = 1\).</li>
+      </ul>
+      <p>sphere처럼 휜 surface는 isometric하게 펼 수 없으므로(<a href="0-5-intrinsic.html">Section 0.5</a>), seam을 어디에 자르고 왜곡을 어떤 종류로 받아들일지 골라야 한다. Least Squares Conformal Maps(LSCM)는 각 triangle에서 conformal 조건(Cauchy–Riemann equations)을 어긴 정도의 제곱을 넓이로 가중해 더한 에너지를 최소로 하는 UV를 linear system 하나로 구한다 <a class="cite" href="../../references.html#Levy02">[Levy02]</a>. 이 에너지는 UV 전체를 한 점으로 줄이면 \(0\)이 되고, UV 전체를 회전하거나 옮겨도 값이 같다. 그래서 vertex 두 개의 UV를 고정해 크기·회전·위치를 정하고 해를 하나로 만든다. conformal에 가까운 map을 찾으므로 각과 모양은 잘 보존되지만 넓이의 배율 \(\sigma_1\sigma_2\)는 곳에 따라 크게 달라질 수 있다. mesh parametrization의 여러 방법은 <a class="cite" href="../../references.html#PMP">[PMP]</a>에 정리되어 있다.</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>regular surface와 parametrization: <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>, 조건을 하나씩 어긴 예 <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-3">Non-example 6.1.3</a>, sphere의 standard parametrization <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-7">Example 6.1.7</a></li>
+        <li>parametrization을 바꾸는 일: <a href="../06-regular-surfaces/6-3-smooth-functions.html#i-6-3-1">Theorem 6.3.1</a>(change of parameters)</li>
+        <li>tangent plane: <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-1">Definition 6.2.1</a>, <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">Proposition 6.2.4</a>(total derivative의 image), <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-5">Corollary 6.2.5</a>(parametrization에 무관)</li>
+        <li>implicit surface: <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-3">Theorem 6.5.3</a>(regular value의 preimage), <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-4">Proposition 6.5.4</a>(\(\grad f\)에 수직), torus of revolution <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-8">Example 6.5.8</a></li>
+        <li>first fundamental form: <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-1">Definition 7.1.1</a>, running example <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-2">Example 7.1.2</a>, <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-5">Example 7.1.5</a>, 곡선의 길이 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-9">Proposition 7.1.9</a>, coefficient의 변환 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-7">Proposition 7.1.7</a></li>
+        <li>넓이: <a href="../07-first-fundamental-form/7-3-area.html#i-7-3-2">Definition 7.3.2</a>, sphere와 torus of revolution의 넓이 <a href="../07-first-fundamental-form/7-3-area.html#i-7-3-10">Example 7.3.10</a></li>
+        <li>isometry와 conformal map: <a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-7">Theorem 7.2.7</a>, 평면을 cylinder에 감기 <a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-9">Example 7.2.9</a>, <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-6">Theorem 7.4.6</a>, isothermal parametrization <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-7">Definition 7.4.7</a></li>
+        <li>normal의 부호를 surface 전체에서 맞출 수 있는가(orientation): <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-1">Definition 7.5.1</a>, Möbius strip은 맞출 수 없다 <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-10">Proposition 7.5.10</a></li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>parametrization \(\mathbf{x}\colon U \to \R^3\)은 UV 좌표다. 일대일이고 \(\mathbf{x}_u \times \mathbf{x}_v \neq 0\)이어야 하며, regular surface는 이런 조각들로 덮인다. \(\grad f \neq 0\)인 \(f = 0\)도 regular surface다.</li>
+        <li>tangent plane \(T_pS\)는 \(\mathbf{x}_u, \mathbf{x}_v\)가 펼치는 평면이고 unit normal vector는 \(\mathbf{N} = \mathbf{x}_u \times \mathbf{x}_v / \abs{\mathbf{x}_u \times \mathbf{x}_v}\)다. sphere와 cylinder에서는 바깥쪽, torus of revolution에서는 안쪽이다.</li>
+        <li>first fundamental form의 coefficient \(E, F, G\)는 Gram matrix이고, 길이 <a href="#eq-0-3-2">(0.3.2)</a>와 넓이 <a href="#eq-0-3-3">(0.3.3)</a>를 UV 평면에서 계산하게 해 준다. UV map의 왜곡은 Gram matrix가 정하는 ellipse로 보인다.</li>
+        <li>\(E, F, G\)가 같으면 isometry, 비례하면 conformal, \(\sqrt{EG - F^2}\)가 같으면 넓이 보존이다.</li>
+      </ul>
+      <p class="next">다음 절에서는 normal vector \(\mathbf{N}\)이 점에 따라 어떻게 기우는지를 잰다. first fundamental form이 같은 평면과 cylinder를 구별하는 것, 곧 surface가 공간 안에서 휘는 정도가 그 답이다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-0-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 0.3.1</span> <span class="level">★</span>
+        cylinder의 parametrization \(\mathbf{y}(u, v) = \big(r\cos(u/r),\ r\sin(u/r),\ v\big)\)의 \(E, F, G\)를 구하고, 평면 \((u, v) \mapsto (u, v, 0)\)의 것과 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathbf{y}_u = \big(-\sin(u/r),\ \cos(u/r),\ 0\big)\), \(\mathbf{y}_v = (0, 0, 1)\)이므로 \(E = \sin^2(u/r) + \cos^2(u/r) = 1\), \(F = 0\), \(G = 1\)이다. 평면의 parametrization도 \(\mathbf{x}_u = (1, 0, 0)\), \(\mathbf{x}_v = (0, 1, 0)\)에서 \(E = 1\), \(F = 0\), \(G = 1\)이다. coefficient가 모두 같으므로 \((u, v, 0) \mapsto \mathbf{y}(u, v)\)는 길이를 보존한다(<a href="#i-0-3-7">Example 0.3.7</a>). <a href="#i-0-3-6">Example 0.3.6</a>의 \(E = r^2\)과 다른 것은 \(u\)를 각 대신 둘레를 따라 잰 길이로 바꾸었기 때문이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-3-surfaces.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 0.3.2</span> <span class="level">★</span>
+        <a href="#eq-0-3-3">(0.3.3)</a>로 torus of revolution의 넓이가 \(4\pi^2 Rr\)임을 보여라. \(R = 2\), \(r = 0.8\)이면 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-0-3-6">Example 0.3.6</a>에서 \(EG - F^2 = r^2(R + r\cos u)^2\)이고 \(R + r\cos u \ge R - r \gt 0\)이므로 \(\sqrt{EG - F^2} = r(R + r\cos u)\)이다. 따라서</p>
+          <p>\[ \begin{aligned} \int_0^{2\pi}\!\!\int_0^{2\pi} r(R + r\cos u)\,du\,dv &= 2\pi \cdot r\,(2\pi R + r\cdot 0) \\ &= 4\pi^2 Rr \end{aligned} \]</p>
+          <p>이다(\(\cos u\)의 한 주기 적분은 \(0\)). parametrization이 빠뜨린 두 원은 넓이가 \(0\)이므로 surface 전체의 넓이와 같다. \(R = 2\), \(r = 0.8\)이면 \(4\pi^2 \cdot 1.6 \approx 63.17\)이다. 바깥쪽의 넓은 칸과 안쪽의 좁은 칸이 \(\cos u\)의 적분에서 정확히 상쇄되어, 둘레 \(2\pi R\)인 cylinder를 길이 \(2\pi r\)로 자른 것과 넓이가 같다.</p>
+          <p class="verified">Verification: <code>verify/v-0-3-surfaces.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-3-3" data-level="1">
+        <p><span class="thm-head">Exercise 0.3.3</span> <span class="level">★</span>
+        point cloud의 한 점에서 이웃의 covariance matrix를 구했더니 eigenvalue가 (a) \(2.0,\ 1.1,\ 0.01\) (b) \(2.0,\ 0.02,\ 0.01\) (c) \(1.0,\ 0.9,\ 0.8\)이었다. 각 경우에 이웃 점들은 어떤 모양으로 놓여 있고, normal을 믿을 수 있는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 두 방향으로 넓게 퍼지고 한 방향으로는 거의 퍼지지 않았다. 점들이 평면 근처에 있으므로 \(\lambda_3 = 0.01\)의 eigenvector를 normal로 믿을 수 있다(부호는 따로 정해야 한다).
+          (b) 한 방향으로만 퍼졌다. 점들이 직선 근처에 있으므로(가는 막대, 모서리, 또는 scan line 하나) 직선에 수직인 방향이 평면 전체이고, \(\lambda_2 \approx \lambda_3\)이라 그 둘의 eigenvector는 잘 정해지지 않는다. normal을 믿을 수 없다.
+          (c) 세 방향으로 비슷하게 퍼졌다. 이웃이 평면에 가깝지 않다(잡음이 크거나, curvature가 커서 이웃 크기 안에서 surface가 많이 휘었거나, 여러 surface가 만나는 곳). 역시 normal을 믿기 어렵다. 이웃의 크기 \(k\)를 바꿔 보는 것이 보통의 대응이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-3-4" data-level="1">
+        <p><span class="thm-head">Exercise 0.3.4</span> <span class="level">★</span>
+        360° 영상을 equirectangular image(가로 \(\varphi\), 세로 \(\theta\), 같은 각 간격의 픽셀)로 저장한다. 북위 \(60^\circ\)(곧 \(\theta = 30^\circ\))에서 가로 한 픽셀과 세로 한 픽셀이 sphere 위에서 차지하는 길이의 비는 얼마인가? <a href="#fig-0-3-3">Figure 0.3.3</a>의 왼쪽과 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>픽셀 하나의 각이 \(\Delta\)이면 세로 한 픽셀은 \(\sqrt{E}\,\Delta = r\Delta\), 가로 한 픽셀은 \(\sqrt{G}\,\Delta = r\sin\theta\,\Delta\)이다. 비는 \(\sin 30^\circ = 1/2\)이다. 이 위도에서 가로 두 픽셀이 세로 한 픽셀과 같은 길이를 덮으므로, 영상 안의 물체는 가로로 두 배 늘어나 보인다. <a href="#fig-0-3-3">Figure 0.3.3</a>에서 \(\theta\)가 작은 줄의 ellipse가 가로로 긴 것이 이것이다(ellipse는 길이 \(\varepsilon\)이 UV에서 얼마나 넓게 펼쳐지는지를 보인다).</p>
+          <p class="verified">Verification: <code>verify/v-0-3-surfaces.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="0-2-curves.html">← 0.2 Curves: Speed, Arc Length, and Curvature</a>
+    <a rel="next" href="0-4-curvature.html">0.4 How Surfaces Bend: Curvature →</a>
+  </nav>
+</body>
+</html>

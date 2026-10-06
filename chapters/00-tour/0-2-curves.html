@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.2 Curves: Speed, Arc Length, and Curvature — DG Study</title>
+  <meta name="dg-id" content="0.2">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.1">
+  <meta name="dg-refs" content="dC Ch. 1; Pr Ch. 1–2; Nd; Mokhtarian86; Mokhtarian92; Kass88">
+  <meta name="dg-updated" content="2026-10-06">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">0. A Guided Tour of Differential Geometry</a> ›
+    <span>0.2 Curves: Speed, Arc Length, and Curvature</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>0.2 Curves: Speed, Arc Length, and Curvature</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#dC">[dC Ch. 1]</a>,
+        <a class="cite" href="../../references.html#Pr">[Pr Ch. 1–2]</a>,
+        <a class="cite" href="../../references.html#Nd">[Nd]</a>,
+        <a class="cite" href="../../references.html#Mokhtarian86">[Mokhtarian86]</a>, <a class="cite" href="../../references.html#Mokhtarian92">[Mokhtarian92]</a>,
+        <a class="cite" href="../../references.html#Kass88">[Kass88]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>parametrized curve의 속도벡터와 속력을 계산하고, arc length parametrization이 왜 필요한지 설명할 수 있다.</li>
+        <li>curvature를 “단위 길이당 접선 방향이 도는 각”으로 이해하고, plane curve의 signed curvature와 osculating circle을 그림으로 읽을 수 있다.</li>
+        <li>일반 매개변수의 curvature 공식으로 원, helix, ellipse의 curvature를 구할 수 있다.</li>
+        <li>contour의 curvature가 corner 검출, curvature scale space, snake에서 어떻게 쓰이는지 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="0-1-what-is-dg.html">Section 0.1</a>: linear approximation과 곡선의 2차 근사 <a href="0-1-what-is-dg.html#eq-0-1-1">(0.1.1)</a></li>
+        <li>미적분: 도함수, chain rule, 정적분. 벡터의 inner product, \(\R^3\)의 cross product, \(2 \times 2\) 행렬의 determinant</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="0-1-what-is-dg.html">Section 0.1</a>에서 곡선이 접선에서 벗어나는 거리는 처음에 \(\kappa h^2/2\)라고 했다(<a href="0-1-what-is-dg.html#eq-0-1-1">(0.1.1)</a>). 이 절은 그 \(\kappa\)를 정확히 정의한다.</p>
+      <p>컴퓨터비전에서 이 질문은 이렇게 나타난다. segmentation mask의 경계(contour)에서 corner를 찾고 싶다. 경계는 어디서 날카롭게 휘는가? 그 답은 다음 세 가지에 따라 바뀌면 안 된다.</p>
+      <ul>
+        <li>contour를 몇 개의 점으로, 어떤 간격으로 sampling했는가(parametrization)</li>
+        <li>경계를 시계 방향으로 돌았는가, 반시계 방향으로 돌았는가(orientation)</li>
+        <li>물체가 영상 안의 어디에, 어느 방향으로 놓였는가(rigid motion)</li>
+      </ul>
+      <p>첫째 요구에 답하는 것이 arc length parametrization이고, 둘째는 curvature에 부호를 붙이는 방식(signed curvature), 셋째는 curvature가 rotation과 translation에 변하지 않는다는 성질이다.</p>
+    </section>
+
+    <section id="sec-velocity">
+      <h2>Parametrized Curves and Velocity</h2>
+      <div class="thm definition" id="i-0-2-1">
+        <p><span class="thm-head">Definition 0.2.1</span> <span class="thm-name">(parametrized curve and regular curve)</span>.
+        열린구간 \(I\)에서 \(\R^3\)(또는 \(\R^2\))으로 가는 smooth map \(\gamma\colon I \to \R^3\)을 <strong>parametrized curve</strong>(매개곡선)라 한다. \(\gamma'(t)\)를 \(t\)에서의 속도벡터, \(\abs{\gamma'(t)}\)를 속력이라 한다. 모든 \(t\)에서 \(\gamma'(t) \neq 0\)이면 \(\gamma\)를 <strong>regular curve</strong>(정칙곡선)라 한다.</p>
+      </div>
+      <p>곡선은 점들의 모임(그림)만이 아니라 그 위를 지나가는 방식까지 포함한 것이다. regular라는 조건은 “멈추지 않고 지나간다”는 뜻이다. 멈추는 점이 있으면 smooth map이어도 그림이 뾰족할 수 있다. 예를 들어 \(\gamma(t) = (t^2, t^3)\)은 \(t = 0\)에서 \(\gamma'(0) = 0\)이고 그 점에서 trace가 뾰족하다(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-9">Non-example 4.1.9</a>).</p>
+
+      <div class="thm example" id="i-0-2-2">
+        <p><span class="thm-head">Example 0.2.2</span> <span class="thm-name">(circle and helix)</span>.
+        반지름 \(r\)인 원 \(\gamma(t) = (r\cos t,\ r\sin t,\ 0)\)의 속도벡터는 \(\gamma'(t) = (-r\sin t,\ r\cos t,\ 0)\)이고 속력은 \(r\)이다.
+        helix \(\gamma(t) = (a\cos t,\ a\sin t,\ bt)\) (\(a \gt 0\), \(b \neq 0\))는 반지름 \(a\)인 cylinder를 감아 오르며 한 바퀴에 \(2\pi b\)만큼 올라간다. \(\gamma'(t) = (-a\sin t,\ a\cos t,\ b)\)이므로 속력은 \(\sqrt{a^2 + b^2}\)으로 일정하고, 한 바퀴의 길이는 \(2\pi\sqrt{a^2 + b^2}\)이다. 두 곡선 모두 regular다.</p>
+        <p class="verified">Verification: <code>verify/v-0-2-curves.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-arc-length">
+      <h2>Arc Length</h2>
+      <p>같은 원을 \(\gamma(t) = (r\cos 2t,\ r\sin 2t,\ 0)\)으로 두 배 빠르게 돌아도 그림은 같다. 그런데 속도벡터는 두 배가 되고, 그 변화율도 달라진다. 곡선의 모양을 잴 때는 “시간”이 아니라 “지나온 길이”를 기준으로 삼아야 한다.</p>
+      <div class="thm definition" id="i-0-2-3">
+        <p><span class="thm-head">Definition 0.2.3</span> <span class="thm-name">(arc length parametrization)</span>.
+        regular curve \(\gamma\)와 \(t_0 \in I\)에 대해</p>
+        <div class="equation" id="eq-0-2-1">
+        \[ s(t) = \int_{t_0}^{t} \abs{\gamma'(\tau)}\,d\tau \tag{0.2.1} \]
+        </div>
+        <p>를 \(t_0\)부터 잰 <strong>arc length</strong>(호의 길이)라 한다. \(s'(t) = \abs{\gamma'(t)} \gt 0\)이므로 \(s\)는 strictly increasing이고 역함수 \(t = t(s)\)가 있다. 곡선을 \(s\)로 다시 쓴 \(\gamma(t(s))\)를 <strong>arc length parametrization</strong>(호의 길이 매개화)이라 한다. 이 곡선은 속력이 항상 \(1\)이다(unit-speed).</p>
+      </div>
+      <p>예를 들어 helix는 \(s = \sqrt{a^2 + b^2}\,t\)이므로 \(\gamma\big(s/\sqrt{a^2 + b^2}\big)\)가 arc length parametrization이다. 이후로 arc length 매개변수는 \(s\)로 쓰고, \(s\)에 대한 미분도 \('\)으로 쓴다. 실제 계산에서 arc length parametrization을 식으로 구하기 어려운 경우가 많지만(ellipse가 그렇다), 존재한다는 사실만으로 정의에 쓸 수 있다. 계산은 아래의 일반 매개변수 공식 <a href="#eq-0-2-3">(0.2.3)</a>으로 한다.</p>
+    </section>
+
+    <section id="sec-curvature">
+      <h2>Curvature: How Fast the Direction Turns</h2>
+      <p>unit-speed curve에서 \(\mathbf{t}(s) = \gamma'(s)\)는 길이가 \(1\)인 접선 방향, 곧 unit tangent vector다. 곡선이 휘면 이 방향이 돈다. curvature는 단위 길이를 가는 동안 방향이 얼마나 빨리 도는지를 잰다(<a href="#fig-0-2-1">Figure 0.2.1</a>). \(\inner{\mathbf{t}}{\mathbf{t}} = 1\)을 미분하면 \(2\inner{\mathbf{t}'}{\mathbf{t}} = 0\)이므로 \(\mathbf{t}'\)은 언제나 \(\mathbf{t}\)에 수직이다. 길이는 변하지 않고 방향만 변하기 때문이다.</p>
+
+      <figure class="dg-figure" id="fig-0-2-1">
+        <img src="figures/fig-0-2-1-tangent-turning.svg" alt="왼쪽은 사인 곡선 모양의 곡선 위 아홉 점(번호 1부터 9)에서 파란 unit tangent vector를 그린 것이다. 앞의 언덕 부분에는 kappa_s 음수, 뒤의 골짜기 부분에는 kappa_s 양수라고 적혀 있고, 가운데 점 5가 inflection point(주황 동그라미, kappa_s = 0)다. 오른쪽은 같은 아홉 벡터를 원점에서 그린 것으로 모두 점선 단위원 위에 끝이 있고, 1과 9는 45도, 5는 -45도 방향이며 각 theta가 표시되어 있다.">
+        <figcaption><span class="fig-head">Figure 0.2.1.</span>
+        곡선 \(\gamma(t) = (t, \sin t)\), \(0 \le t \le 2\pi\) 위에서 arc length로 같은 간격인 아홉 점의 unit tangent vector \(\mathbf{t}\)(파랑, \(0.7\)배). 오른쪽은 같은 벡터들을 원점에서 그린 것이다. 1에서 5까지는 \(\mathbf{t}\)가 시계 방향으로 돌고(\(\kappa_s \lt 0\)), 5에서 9까지는 반시계 방향으로 돈다(\(\kappa_s \gt 0\)). 회전 방향이 바뀌는 5가 inflection point다.</figcaption>
+      </figure>
+
+      <div class="thm definition" id="i-0-2-4">
+        <p><span class="thm-head">Definition 0.2.4</span> <span class="thm-name">(curvature and signed curvature)</span>.
+        \(\gamma\)가 arc length로 parametrization된 곡선이고 \(\mathbf{t}(s) = \gamma'(s)\)일 때</p>
+        <div class="equation" id="eq-0-2-2">
+        \[ \kappa(s) = \abs{\mathbf{t}'(s)} = \abs{\gamma''(s)} \tag{0.2.2} \]
+        </div>
+        <p>를 \(s\)에서 \(\gamma\)의 <strong>curvature</strong>(곡률)라 한다. plane curve에서는 \(\mathbf{t}\)를 반시계 방향으로 \(90^\circ\) 돌린 단위벡터 \(\mathbf{n}_s\)를 쓴다. \(\mathbf{t}' \perp \mathbf{t}\)이므로 \(\mathbf{t}'(s) = \kappa_s(s)\,\mathbf{n}_s(s)\)인 수 \(\kappa_s(s)\)가 하나 있고, 이것을 <strong>signed curvature</strong>(부호곡률)라 한다. \(\abs{\kappa_s} = \kappa\)이다.</p>
+      </div>
+      <p>\(\kappa_s \gt 0\)이면 진행 방향의 왼쪽으로(반시계 방향으로) 돌고, \(\kappa_s \lt 0\)이면 오른쪽으로 돈다. 부호가 바뀌는 점을 <strong>inflection point</strong>(변곡점)라 한다. \(\mathbf{t}\)가 \(x\)축과 이루는 각을 \(\theta(s)\)라 하면 \(\kappa_s = d\theta/ds\)이다(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-9">Theorem 4.4.9</a>). 곧 curvature는 “단위 길이당 접선이 도는 각(라디안)”이다. 반지름 \(r\)인 원을 길이 \(\ell\)만큼 가면 접선은 \(\ell/r\) 라디안 돌므로 원의 curvature는 \(1/r\)이다.</p>
+      <p>거꾸로 curvature가 \(\kappa_s \neq 0\)인 점에서는 반지름 \(1/\abs{\kappa_s}\)이고 중심이 \(\gamma + \mathbf{n}_s/\kappa_s\)인 원이 그 점에서 곡선과 가장 잘 맞는다. 이 원을 <strong>osculating circle</strong>(접촉원)이라 하고, 곡선과 2차 항까지 일치한다(<a href="../04-curves/4-5-osculating-circle.html#i-4-5-5">Theorem 4.5.5</a>). 많이 휜 곳은 작은 원, 거의 곧은 곳은 큰 원에 맞는다(<a href="#fig-0-2-2">Figure 0.2.2</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-2-2">
+        <img src="figures/fig-0-2-2-osculating.svg" alt="가로로 긴 ellipse 위의 세 점에서 그린 파란 osculating circle이다. 오른쪽 끝의 점에서는 반지름 1/2인 작은 원이 ellipse 안쪽에 접하고, 중심(주황 점)까지 점선이 있다. 위쪽 꼭대기에서는 반지름 4인 큰 원의 일부가 ellipse 위쪽을 감싸듯 지나간다. 그 사이의 점에서는 반지름 약 1.98인 원이 그려져 있고 중심은 ellipse 아래쪽 밖에 있다.">
+        <figcaption><span class="fig-head">Figure 0.2.2.</span>
+        ellipse \(\gamma(t) = (2\cos t,\ \sin t)\)(반시계 방향)의 \(t = 0,\ \pi/4,\ \pi/2\)에서의 osculating circle(파랑)과 center of curvature(주황). 반지름은 각각 \(1/2\), 약 \(1.98\), \(4\)이다. \(t = \pi/2\)의 원은 중심이 \((0, -3)\)이라 일부만 보인다(<a href="#i-0-2-5">Example 0.2.5</a>, <a href="#ex-0-2-1">Exercise 0.2.1</a>).</figcaption>
+      </figure>
+
+      <p>데이터는 대개 arc length로 주어지지 않는다. 일반 매개변수 \(t\)에서는 chain rule로 정리한 다음 공식을 쓴다(<a href="../05-space-curves/5-1-curvature.html#i-5-1-2">Proposition 5.1.2</a>, <a href="../04-curves/4-4-signed-curvature.html#i-4-4-5">Proposition 4.4.5</a>).</p>
+      <div class="equation" id="eq-0-2-3">
+      \[ \begin{aligned} \kappa &= \frac{\abs{\gamma' \times \gamma''}}{\abs{\gamma'}^3},\\
+         \kappa_s &= \frac{\det(\gamma', \gamma'')}{\abs{\gamma'}^3} = \frac{x'y'' - y'x''}{(x'^2 + y'^2)^{3/2}}. \end{aligned} \tag{0.2.3} \]
+      </div>
+      <p>둘째 식에서 \(\gamma = (x, y)\)이다. \(\abs{\gamma'}^3\)으로 나누는 것이 속력의 영향을 지운다. 함수의 그래프 \(y = f(x)\)를 \(\gamma(x) = (x, f(x))\)로 보면</p>
+      <div class="equation" id="eq-0-2-4">
+      \[ \kappa_s = \frac{f''}{(1 + f'^2)^{3/2}} \tag{0.2.4} \]
+      </div>
+      <p>이다. 그래서 이계도함수 \(f''\)이 곧 curvature인 것은 기울기가 거의 \(0\)인 곳에서뿐이다.</p>
+
+      <div class="thm example" id="i-0-2-5">
+        <p><span class="thm-head">Example 0.2.5</span> <span class="thm-name">(curvature of the running examples)</span>.
+        (a) 반지름 \(r\)인 원: \(\kappa = 1/r\). 반시계 방향으로 돌면 \(\kappa_s = 1/r\), 시계 방향으로 돌면 \(\kappa_s = -1/r\)이다.
+        (b) helix: <a href="#eq-0-2-3">(0.2.3)</a>에서 \(\kappa = a/(a^2 + b^2)\)으로 일정하다. 반지름 \(a\)인 원보다 덜 휜다. 위로 올라가는 성분만큼 옆으로 도는 것이 느려지기 때문이다.
+        (c) ellipse \(\gamma(t) = (2\cos t,\ \sin t)\): \(\det(\gamma', \gamma'') = 2\)이므로 \(\kappa_s(t) = 2/(4\sin^2 t + \cos^2 t)^{3/2}\)이다. 뾰족한 양 끝(\(t = 0\))에서 \(2\), 납작한 위쪽(\(t = \pi/2\))에서 \(1/4\)이다(<a href="#fig-0-2-2">Figure 0.2.2</a>).</p>
+        <p class="verified">Verification: <code>verify/v-0-2-curves.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-shape">
+      <h2>Curvature Determines the Shape</h2>
+      <p>curvature는 곡선을 회전하거나 평행하게 옮겨도 변하지 않는다. 놀라운 것은 그 반대다.</p>
+      <div class="thm theorem" id="i-0-2-6">
+        <p><span class="thm-head">Theorem 0.2.6</span> <span class="thm-name">(curvature determines a plane curve)</span>.
+        smooth function \(k\colon [0, L] \to \R\)이 주어지면 signed curvature가 \(\kappa_s(s) = k(s)\)인 unit-speed plane curve가 있다. 그런 곡선은 rotation과 translation(rigid motion)의 차이를 빼면 하나뿐이다.</p>
+      </div>
+      <p class="proof-idea">Proof idea: \(\kappa_s = d\theta/ds\)이므로 접선의 각은 \(\theta(s) = \theta_0 + \int_0^s k\)이고, 곡선은 \(\gamma(s) = \gamma_0 + \int_0^s (\cos\theta, \sin\theta)\)이다. 자유롭게 고를 수 있는 것은 처음 방향 \(\theta_0\)(회전)과 처음 위치 \(\gamma_0\)(translation)뿐이다. 정확한 진술과 증명은 <a href="../04-curves/4-4-signed-curvature.html#i-4-4-10">Theorem 4.4.10</a>과 <a href="../04-curves/4-4-signed-curvature.html#i-4-4-11">Corollary 4.4.11</a>에 있다.</p>
+      <p>곧 함수 하나 \(s \mapsto \kappa_s(s)\)가 plane curve의 모양 정보를 전부 담고, 빠진 것은 위치와 방향뿐이다. curvature가 좋은 shape descriptor인 이유가 이것이다. closed curve 전체에 대해서는 다음이 성립한다.</p>
+      <div class="thm theorem" id="i-0-2-7">
+        <p><span class="thm-head">Theorem 0.2.7</span> <span class="thm-name">(rotation index theorem)</span>.
+        스스로 만나지 않는 닫힌 regular plane curve(simple closed curve)를 arc length로 한 바퀴 돌면</p>
+        <p>\[ \int_0^L \kappa_s(s)\,ds = \pm 2\pi \]</p>
+        <p>이다. 반시계 방향으로 돌면 \(+2\pi\)다.</p>
+      </div>
+      <p>왼쪽으로 도는 부분(\(\kappa_s \gt 0\))과 오른쪽으로 도는 부분(\(\kappa_s \lt 0\))이 얼마나 있든, 한 바퀴 돌면 접선도 정확히 한 바퀴 돈다. 국소적인 양의 적분이 전체의 모양(“스스로 만나지 않고 한 바퀴”)으로 정해진다는 이 정리는 <a href="0-5-intrinsic.html">Section 0.5</a>의 Gauss–Bonnet theorem을 평면에서 미리 본 것이다. 정확한 진술은 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a>이다. <a href="#fig-0-2-2">Figure 0.2.2</a>의 ellipse에서 수치로 확인하면 \(\int\kappa_s\,ds = 2\pi\)이다.</p>
+      <p class="verified">Verification: <code>verify/v-0-2-curves.py</code></p>
+    </section>
+
+    <section id="sec-torsion">
+      <h2>Space Curves: Torsion and the Frenet Frame</h2>
+      <p>space curve는 왼쪽·오른쪽이 정해지지 않으므로 \(\kappa \ge 0\)만 쓴다. \(\kappa \gt 0\)인 점에서 휘어 들어가는 방향 \(\mathbf{n} = \mathbf{t}'/\kappa\)(principal normal vector)와 \(\mathbf{b} = \mathbf{t} \times \mathbf{n}\)(binormal vector)을 두면, \((\mathbf{t}, \mathbf{n}, \mathbf{b})\)는 점마다 orthonormal basis를 이룬다. 이것을 <strong>Frenet frame</strong>(프레네 틀)이라 한다(<a href="#fig-0-2-3">Figure 0.2.3</a>). <a href="0-1-what-is-dg.html#eq-0-1-1">(0.1.1)</a>의 \(\mathbf{n}\)이 이것이다.</p>
+      <p>곡선은 순간순간 \(\mathbf{t}\)와 \(\mathbf{n}\)이 펼치는 평면(osculating plane) 안에서 휜다. 이 평면이 도는 빠르기, 곧 그 normal인 \(\mathbf{b}\)가 변하는 빠르기가 <strong>torsion</strong>(비틀림률) \(\tau\)다: \(\mathbf{b}' = -\tau\,\mathbf{n}\). 평면 안에 머무는 곡선은 \(\tau = 0\)이다. frame의 변화를 frame 자신으로 적으면 <strong>Frenet–Serret formulas</strong>(프레네-세레 공식)</p>
+      <div class="equation" id="eq-0-2-5">
+      \[ \mathbf{t}' = \kappa\,\mathbf{n}, \qquad \mathbf{n}' = -\kappa\,\mathbf{t} + \tau\,\mathbf{b}, \qquad \mathbf{b}' = -\tau\,\mathbf{n} \tag{0.2.5} \]
+      </div>
+      <p>이 나온다(\('\)은 arc length에 대한 미분). 세 벡터를 열로 놓은 행렬로 쓰면</p>
+      <p>\[ \begin{pmatrix} \mathbf{t} & \mathbf{n} & \mathbf{b} \end{pmatrix}' = \begin{pmatrix} \mathbf{t} & \mathbf{n} & \mathbf{b} \end{pmatrix}
+         \begin{pmatrix} 0 & -\kappa & 0 \\ \kappa & 0 & -\tau \\ 0 & \tau & 0 \end{pmatrix} \]</p>
+      <p>이다. 오른쪽 행렬이 antisymmetric인 것은 frame이 orthonormal basis로 남기 때문이다. 곧 frame은 곡선을 따라 “회전”만 한다. helix에서는 \(\kappa = a/(a^2 + b^2)\), \(\tau = b/(a^2 + b^2)\)이고, 오른손 나사처럼 감기는 \(b \gt 0\)이면 \(\tau \gt 0\)이다. plane curve처럼 space curve도 \(\kappa(s) \gt 0\)과 \(\tau(s)\)를 알면 rigid motion을 빼고 결정된다(<a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-8">Theorem 5.4.8</a>).</p>
+
+      <figure class="dg-figure" id="fig-0-2-3">
+        <img src="figures/fig-0-2-3-helix-frenet.svg" alt="수직 축 둘레를 두 바퀴 감아 오르는 helix다. 앞쪽 부분은 실선, 뒤쪽 부분은 회색 점선이다. 세 점에서 Frenet frame을 그렸다: 파란 t는 helix를 따라 비스듬히 위로, 주홍 n은 수평으로 축을 향해, 청록 b는 거의 위쪽으로 조금 기울어져 있다.">
+        <figcaption><span class="fig-head">Figure 0.2.3.</span>
+        helix \(\gamma(t) = (\cos t,\ \sin t,\ 0.3t)\)(\(a = 1\), \(b = 0.3\)), \(0 \le t \le 4\pi\)와 \(t = \pi/3,\ 5\pi/3,\ 7\pi/3\)에서의 Frenet frame: \(\mathbf{t}\)(파랑), \(\mathbf{n}\)(주홍), \(\mathbf{b}\)(청록), 길이 \(0.7\)배. \(\mathbf{n}\)은 언제나 수평으로 cylinder의 축을 향하고, \(\mathbf{b}\)는 위쪽으로 기울어진 채 helix를 따라 돈다. \(\kappa \approx 0.917\), \(\tau \approx 0.275\)이다.</figcaption>
+      </figure>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: torsion의 부호</p>
+        <p>do Carmo는 \(\mathbf{b}' = \tau\mathbf{n}\)으로 정의하므로 torsion의 부호가 이 study set과 반대다 <a class="cite" href="../../references.html#dC">[dC §1-5]</a>. 이 study set은 \(\mathbf{b}' = -\tau\mathbf{n}\)을 쓴다(오른손 helix에서 \(\tau \gt 0\)). 자세한 비교는 <a href="../05-space-curves/5-2-torsion.html#i-5-2-5">Definition 5.2.5</a> 뒤의 상자에 있다.</p>
+      </aside>
+    </section>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: contour의 curvature와 corner</p>
+      <p>binary mask의 경계를 따라가면 픽셀 좌표의 열 \((x_i, y_i)\)이 나온다. 이것이 discrete한 plane curve다. 날카로운 corner는 \(\abs{\kappa_s}\)이 국소적으로 최대인 점이고, inflection point(\(\kappa_s = 0\))는 contour를 convex한 조각과 concave한 조각으로 나눈다. 픽셀 좌표는 양자화되어 있어서 그대로 미분하면 잡음이 매우 크다. 그래서 먼저 좌표를 smoothing한 뒤 <a href="#eq-0-2-3">(0.2.3)</a>을 finite difference로 계산한다. 점을 contour를 따라 같은 간격으로 다시 뽑으면 arc length parametrization의 근사가 된다.</p>
+      <p>\(\kappa_s(s)\)는 물체의 위치와 회전에 무관하고, <a href="#i-0-2-6">Theorem 0.2.6</a>에 의해 위치와 방향을 뺀 모양을 모두 담는 descriptor다. 단, 크기에는 의존한다: 곡선을 \(\lambda\)배 확대하면 curvature는 \(1/\lambda\)배가 된다(<a href="#ex-0-2-3">Exercise 0.2.3</a>). 그래서 흔히 둘레를 \(1\)로 정규화한다.</p>
+      <p>영상에서 corner를 찾는 Harris corner detector는 이것과 다른 방법이다. Harris는 contour를 따라가지 않는다. 각 픽셀 주변에서 image gradient \(\grad I\)(CV 문헌에서는 흔히 \(\nabla I\)로 쓴다)의 second-moment matrix(structure tensor) \(\sum w\,\grad I\,\grad I^{\mathsf{T}}\)를 만들고, 그 두 eigenvalue가 모두 클 때, 곧 밝기가 두 방향으로 모두 크게 변할 때 corner라 한다 <a class="cite" href="../../references.html#Harris88">[Harris88]</a>. 실제 Harris detector는 eigenvalue를 직접 구하지 않고, 이 행렬의 determinant와 trace로 만든 점수로 판정한다. 둘 다 “corner”를 찾지만 재는 대상이 다르다. 하나는 경계 곡선의 휘어짐이고, 다른 하나는 밝기 변화가 2차원적인지 여부다.</p>
+    </aside>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: curvature scale space</p>
+      <p>contour의 작은 요철은 잡음일 수도 있고 중요한 모양일 수도 있다. Mokhtarian과 Mackworth는 하나의 scale을 고르지 않고 모든 scale을 함께 본다 <a class="cite" href="../../references.html#Mokhtarian86">[Mokhtarian86]</a>, <a class="cite" href="../../references.html#Mokhtarian92">[Mokhtarian92]</a>. contour를 정규화한 arc length \(u \in [0, 1)\)로 parametrization하고, 좌표 \(x(u), y(u)\)를 폭 \(\sigma\)인 Gaussian으로 smoothing한 뒤, 각 \(\sigma\)에서 \(\kappa_s\)의 zero crossing(inflection point)의 위치 \(u\)를 찾는다. \(\sigma\)를 키우면 inflection point는 둘씩 만나 사라지고, \(\sigma\)가 충분히 크면 contour는 대개 convex가 된다. \((u, \sigma)\) 평면에 그 위치를 찍은 그림이 <strong>curvature scale space</strong>(곡률 척도 공간) image다(<a href="#fig-0-2-4">Figure 0.2.4</a>). 이 image가 contour의 여러 scale에 걸친 기술이 되고, 두 contour를 비교하는 데 쓰인다.</p>
+      <p>smoothing한 곡선의 매개변수 \(u\)는 더 이상 그 곡선의 arc length가 아니다. 그래서 여기서는 일반 매개변수 공식 <a href="#eq-0-2-3">(0.2.3)</a>이 꼭 필요하다. inflection point는 contour를 회전하거나 옮겨도, 방향을 뒤집어도(\(\kappa_s \mapsto -\kappa_s\)) 곡선 위의 같은 자리에 있다. 그래서 이 image는 rigid motion에 무관하고, 방향을 뒤집으면 \(u\)축이 뒤집힐 뿐이다. \(u\)와 \(\sigma\)를 둘레에 대한 비율로 재므로 크기에도 무관하다.</p>
+      <figure class="dg-figure" id="fig-0-2-4">
+        <img src="figures/fig-0-2-4-css.svg" alt="위에는 같은 닫힌 contour를 세 scale(sigma = 0.002, 0.01, 0.04)로 smoothing한 것이 나란히 있고, 주황 점이 inflection point다. 가장 작은 sigma에서는 잡음 때문에 주황 점이 수십 개이고, 가장 큰 sigma에서는 네 개만 남는다. 파란 네모는 u = 0인 출발점이다. 아래에는 가로축 u(0부터 1), 세로축 sigma(로그 눈금)인 평면에 inflection point의 위치를 찍은 그림이 있고, 점들이 위로 갈수록 둘씩 만나 닫히는 아치 모양의 곡선들을 이룬다. 세 scale의 높이에 회색 점선이 있다.">
+        <figcaption><span class="fig-head">Figure 0.2.4.</span>
+        curvature scale space. 위: 잡음이 섞인 닫힌 contour(\(r(\varphi) = 1 + 0.22\cos 3\varphi + 0.1\sin(5\varphi + 0.7) + \text{noise}\), 1024점)를 \(\sigma = 0.002,\ 0.01,\ 0.04\)(둘레에 대한 비율)로 smoothing한 것과 inflection point(주황). 아래: 모든 \(\sigma\)에서의 inflection point의 위치 \(u\). 아치 하나는 \(\sigma\)가 커지며 만나서 사라지는 inflection point 한 쌍이다. \(\kappa_s\)는 <a href="#eq-0-2-3">(0.2.3)</a>으로 계산했다(그림 스크립트는 같은 미분으로 원의 \(\kappa_s = 1/r\)과 \(\int\kappa_s\,ds = 2\pi\)를 확인한다).</figcaption>
+      </figure>
+    </aside>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: snake와 spline의 bending energy</p>
+      <p>active contour(snake)는 contour \(\mathbf{v}(s)\)를 에너지</p>
+      <p>\[ E(\mathbf{v}) = \int \tfrac12\big(\alpha\,\abs{\mathbf{v}'(s)}^2 + \beta\,\abs{\mathbf{v}''(s)}^2\big)\,ds + E_{\text{image}}(\mathbf{v}) \]</p>
+      <p>가 작아지도록 움직인다 <a class="cite" href="../../references.html#Kass88">[Kass88]</a>. \(E_{\text{image}}\)는 contour를 edge 쪽으로 끌어당기는 항이다. \(\alpha\) 항은 늘어나는 것을, \(\beta\) 항은 휘는 것을 억제한다. 매개변수 \(s\)가 arc length에 가까우면 <a href="#eq-0-2-2">(0.2.2)</a>에 의해 \(\abs{\mathbf{v}''} \approx \kappa\)이므로 \(\beta\) 항은 bending energy \(\tfrac{\beta}{2}\int \kappa^2\,ds\)에 가깝다. 매개변수가 arc length에서 멀어지면 이 대응은 깨진다.</p>
+      <p>smoothing spline도 비슷하다. 데이터에 맞추는 오차와 \(\lambda\int f''(x)^2\,dx\)의 합을 최소로 한다. <a href="#eq-0-2-4">(0.2.4)</a>에서 \(f''\)이 curvature와 같은 것은 기울기 \(f'\)이 작을 때뿐이므로, 이 항은 기울기가 작은 곳에서만 bending energy \(\int\kappa^2\,ds\)의 근사다. geodesic을 쓰는 active contour는 <a href="0-5-intrinsic.html">Section 0.5</a>에서 본다.</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>parametrized curve, 속도, regular curve: <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-1">Definition 4.1.1</a>, <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-7">Definition 4.1.7</a>, <a href="../04-curves/4-2-arc-length.html#i-4-2-1">Definition 4.2.1</a></li>
+        <li>arc length와 그 존재·유일성: <a href="../04-curves/4-2-arc-length.html#i-4-2-7">Definition 4.2.7</a>, <a href="../04-curves/4-3-reparametrization.html#i-4-3-9">Theorem 4.3.9</a>, helix의 예 <a href="../04-curves/4-3-reparametrization.html#i-4-3-10">Example 4.3.10</a></li>
+        <li>signed curvature와 tangent angle: <a href="../04-curves/4-4-signed-curvature.html#i-4-4-2">Definition 4.4.2</a>, <a href="../04-curves/4-4-signed-curvature.html#i-4-4-5">Proposition 4.4.5</a>(일반 매개변수), <a href="../04-curves/4-4-signed-curvature.html#i-4-4-9">Theorem 4.4.9</a></li>
+        <li>curvature가 곡선을 정한다: <a href="../04-curves/4-4-signed-curvature.html#i-4-4-10">Theorem 4.4.10</a>(plane), <a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-8">Theorem 5.4.8</a>(space)</li>
+        <li>osculating circle: <a href="../04-curves/4-5-osculating-circle.html#i-4-5-1">Definition 4.5.1</a>, <a href="../04-curves/4-5-osculating-circle.html#i-4-5-5">Theorem 4.5.5</a>(2차 접촉)</li>
+        <li>space curve의 curvature, torsion, Frenet–Serret: <a href="../05-space-curves/5-1-curvature.html#i-5-1-1">Definition 5.1.1</a>, <a href="../05-space-curves/5-2-torsion.html#i-5-2-5">Definition 5.2.5</a>, <a href="../05-space-curves/5-3-frenet.html#i-5-3-1">Theorem 5.3.1</a>, helix의 frame <a href="../05-space-curves/5-3-frenet.html#i-5-3-3">Example 5.3.3</a></li>
+        <li>closed curve의 total curvature: <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a>(rotation index theorem)</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>parametrized curve는 smooth map \(\gamma\colon I \to \R^3\)이고, \(\gamma' \neq 0\)이면 regular다.</li>
+        <li>arc length로 다시 parametrization하면 속력이 \(1\)이 되어 parametrization의 영향이 사라진다 <a href="#eq-0-2-1">(0.2.1)</a>.</li>
+        <li>curvature \(\kappa = \abs{\mathbf{t}'}\)은 단위 길이당 접선이 도는 각이다. plane curve의 \(\kappa_s\)는 도는 방향까지 담고, \(1/\abs{\kappa_s}\)는 osculating circle의 반지름이다. 일반 매개변수에서는 <a href="#eq-0-2-3">(0.2.3)</a>을 쓴다.</li>
+        <li>\(\kappa_s(s)\)는 plane curve를 rigid motion을 빼고 결정하고, simple closed curve의 total curvature는 \(\pm 2\pi\)다.</li>
+        <li>space curve는 torsion \(\tau\)까지 써서 Frenet frame의 회전 <a href="#eq-0-2-5">(0.2.5)</a>으로 기술한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 매개변수가 둘인 대상, surface로 넘어간다. 곡선의 속도벡터와 길이에 해당하는 것이 surface의 tangent plane과 first fundamental form이고, 이것은 그래픽스의 UV 좌표가 왜곡되는 정도를 재는 도구가 된다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-0-2-1" data-level="1">
+        <p><span class="thm-head">Exercise 0.2.1</span> <span class="level">★</span>
+        ellipse \(\gamma(t) = (2\cos t,\ \sin t)\)의 signed curvature를 <a href="#eq-0-2-3">(0.2.3)</a>으로 구하고, \(t = 0\)과 \(t = \pi/2\)에서 osculating circle의 반지름을 구하여라. <a href="#fig-0-2-2">Figure 0.2.2</a>와 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\gamma' = (-2\sin t,\ \cos t)\), \(\gamma'' = (-2\cos t,\ -\sin t)\)이므로 \(\det(\gamma', \gamma'') = (-2\sin t)(-\sin t) - (\cos t)(-2\cos t) = 2\sin^2 t + 2\cos^2 t = 2\)이고 \(\abs{\gamma'}^2 = 4\sin^2 t + \cos^2 t\)이다. 따라서</p>
+          <p>\[ \kappa_s(t) = \frac{2}{(4\sin^2 t + \cos^2 t)^{3/2}} \]</p>
+          <p>이다. \(t = 0\)에서 \(\kappa_s = 2/1 = 2\)이므로 반지름은 \(1/2\), \(t = \pi/2\)에서 \(\kappa_s = 2/8 = 1/4\)이므로 반지름은 \(4\)다. 반시계 방향으로 도므로 \(\kappa_s \gt 0\)이고 center of curvature는 ellipse 안쪽에 있다. 그림의 작은 원과 큰 원이 이것이다.</p>
+          <p class="verified">Verification: <code>verify/v-0-2-curves.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-2-2" data-level="1">
+        <p><span class="thm-head">Exercise 0.2.2</span> <span class="level">★</span>
+        helix의 \(\kappa = a/(a^2 + b^2)\)과 \(\tau = b/(a^2 + b^2)\)에서 \(b \to 0\)과 \(b \to \infty\)일 때의 극한을 구하고, 그림으로 뜻을 설명하여라. \(a\)를 고정할 때 \(\tau\)는 언제 가장 큰가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(b \to 0\)이면 \(\kappa \to 1/a\), \(\tau \to 0\)이다. helix가 납작해져 반지름 \(a\)인 원이 되고, 원은 평면 안에 있으므로 torsion이 없다. \(b \to \infty\)이면 \(\kappa \to 0\), \(\tau \to 0\)이다. 한 바퀴에 올라가는 높이 \(2\pi b\)가 매우 커서 helix가 거의 수직선이 된다.
+          \(a\)를 고정하면 \(\partial\tau/\partial b = (a^2 - b^2)/(a^2 + b^2)^2\)이므로 \(b \gt 0\)에서 \(\tau\)는 \(b = a\)일 때 최대 \(1/(2a)\)다. 너무 납작해도, 너무 길쭉해도 비틀림이 작다.</p>
+          <p class="verified">Verification: <code>verify/v-0-2-curves.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-0-2-3" data-level="1">
+        <p><span class="thm-head">Exercise 0.2.3</span> <span class="level">★</span>
+        닫힌 contour \(\gamma\)를 (a) 반대 방향으로 돌 때, (b) \(30^\circ\) 회전할 때, (c) \(2\)배 확대할 때 \(\kappa_s\), \(\kappa\), inflection point의 위치는 각각 어떻게 되는가?</p>
+        <details class="hint"><summary>Hint</summary><p>각 경우에 unit tangent vector \(\mathbf{t}\)와 arc length가 어떻게 바뀌는지 본다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 반대로 돌면 \(\mathbf{t}\)가 \(-\mathbf{t}\)가 되고, 왼쪽과 오른쪽이 바뀐다. 그래서 같은 점에서 \(\kappa_s\)의 부호가 바뀌고 \(\kappa = \abs{\kappa_s}\)는 그대로다. 반시계로 도는 원의 \(1/r\)이 시계로 돌면 \(-1/r\)이 되는 것과 같다. inflection point는 \(\kappa_s = 0\)인 점이므로 같은 자리에 있다.
+          (b) 회전은 접선의 각 \(\theta\)에 상수를 더할 뿐이므로 \(\kappa_s = d\theta/ds\)는 변하지 않는다. \(\kappa\)와 inflection point도 그대로다(위치는 함께 회전한다).
+          (c) \(2\)배 확대하면 길이가 \(2\)배가 되고 접선의 각은 그대로이므로, 같은 각을 도는 데 두 배의 길이가 든다. 따라서 \(\kappa_s\)와 \(\kappa\)는 \(1/2\)배가 된다(반지름 \(r\)인 원이 반지름 \(2r\)인 원이 되는 것과 같다). inflection point는 \(\kappa_s\)의 부호만으로 정해지므로 대응하는 자리에 그대로 있다. 그래서 둘레로 정규화한 curvature scale space는 (b), (c)에서 같은 그림이고, (a)에서는 \(u\)축을 뒤집은 그림이다(출발점을 바꾸면 \(u\) 방향으로 밀린 그림이 된다).</p>
+          <p class="verified">Verification: <code>verify/v-0-2-curves.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="0-1-what-is-dg.html">← 0.1 What Is Differential Geometry?</a>
+    <a rel="next" href="0-3-surfaces.html">0.3 Surfaces and Tangent Planes →</a>
+  </nav>
+</body>
+</html>
