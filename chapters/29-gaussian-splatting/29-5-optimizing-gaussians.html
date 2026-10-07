@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>29.5 Optimizing Gaussians — DG Study</title>
+  <meta name="dg-id" content="29.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="29.2, 29.3, 29.4, 0.7, 0.8">
+  <meta name="dg-refs" content="Kerbl23; Ye24; Kingma15; Amari98; AMS; Boumal">
+  <meta name="dg-updated" content="2026-10-07">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">29. The Geometry of Gaussian Splatting</a> ›
+    <span>29.5 Optimizing Gaussians</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>29.5 Optimizing Gaussians</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>,
+        <a class="cite" href="../../references.html#Kingma15">[Kingma15]</a>,
+        <a class="cite" href="../../references.html#Amari98">[Amari98]</a>,
+        <a class="cite" href="../../references.html#AMS">[AMS]</a>,
+        <a class="cite" href="../../references.html#Boumal">[Boumal]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>3DGS가 최적화하는 parameter의 공간과, activation이 그것을 기하적 manifold로 보내는 방식을 설명할 수 있다.</li>
+        <li>gradient는 covector이므로 update 방향을 정하려면 metric이 필요하고, 좌표를 고르는 것이 곧 metric을 고르는 것임을 \(s\)와 \(\log s\), natural gradient의 예로 설명할 수 있다.</li>
+        <li>quaternion 정규화를 통과한 gradient가 \(T_{\hat q}S^3\)로의 projection을 \(\abs{q}\)로 나눈 것임을 유도하고, plain gradient descent에서 \(\abs{q}\)가 단조 증가해 실효 step이 줄어드는 것을 보일 수 있다. Adam에서는 왜 그렇지 않은지 말할 수 있다.</li>
+        <li>Adam을 대각 metric으로 보는 해석과 Riemannian gradient descent + retraction이라는 대안을 비교하고, densification의 threshold가 화면 좌표의 metric에 의존한다는 것을 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>: \(df\)는 covector이고 chain rule은 pullback이다 <a href="../00-tour/0-7-forms.html#eq-0-7-2">(0.7.2)</a>. 같은 절의 상자 “reverse mode는 covector의 pullback이다”: transpose로 gradient를 vector로 바꾸는 것은 숨은 metric의 선택이다.</li>
+        <li><a href="../00-tour/0-8-riemannian.html#sec-metric">Section 0.8</a>: metric이 있으면 \(\grad f = g^{-1}df\) <a href="../00-tour/0-8-riemannian.html#eq-0-8-3">(0.8.3)</a>, hyperbolic plane, Riemannian optimization과 retraction</li>
+        <li><a href="29-2-covariance-parametrization.html">Section 29.2</a>: activation <a href="29-2-covariance-parametrization.html#eq-29-2-4">(29.2.4)</a>, rotation gradient <a href="29-2-covariance-parametrization.html#eq-29-2-3">(29.2.3)</a>. <a href="29-3-splatting-linearization.html#sec-backprop">Section 29.3</a>: 위치 gradient가 화면 좌표를 거쳐 온다는 것</li>
+        <li>gradient descent와 Adam의 update 식 <a class="cite" href="../../references.html#Kingma15">[Kingma15]</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="29-4-space-of-covariances.html">Section 29.4</a>에서 covariance의 공간에 metric을 고르는 일이 보간과 평균의 답을 바꾼다는 것을 보았다. 학습에도 같은 일이 숨어 있다. 학습은 parameter를 loss가 줄어드는 쪽으로 움직이는 일이다. 그런데 backpropagation이 주는 것은 <a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>에서 본 대로 covector \(dL\)이고, “움직일 방향”은 vector다. covector를 vector로 바꾸려면 metric이 필요하다(<a href="../00-tour/0-8-riemannian.html#eq-0-8-3">(0.8.3)</a>). 평범한 gradient descent는 지금 쓰는 좌표의 Euclidean metric을 말없이 고른다.</p>
+      <p>3DGS의 parameter에는 이 선택이 여러 군데 숨어 있다. scale을 \(s\)로 둘지 \(\log s\)로 둘지, quaternion을 정규화해서 쓸지, Adam을 쓸지, densification의 기준을 어떤 화면 좌표로 잴지가 모두 metric의 선택이다. 이 절은 그 선택들이 무엇을 바꾸는지를 장난감 문제와 수치로 본다.</p>
+    </section>
+
+    <section id="sec-parameters">
+      <h2>The Parameter Space</h2>
+      <p>3DGS는 Gaussian마다 다음 수들을 저장하고 최적화한다 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>.</p>
+      <table>
+        <thead>
+          <tr><th>stored parameter</th><th>space</th><th>activation</th><th>geometric object</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>mean \(\mu\)</td><td>\(\R^3\)</td><td>none</td><td>\(\R^3\)</td></tr>
+          <tr><td>quaternion \(q\)</td><td>\(\R^4 \setminus \{0\}\)</td><td>\(q/\abs{q}\), then \(R(\hat q)\)</td><td>\(\mathrm{SO}(3)\)</td></tr>
+          <tr><td>log-scale \(\ell\)</td><td>\(\R^3\)</td><td>\(s_i = e^{\ell_i}\)</td><td>\(\R^3_{\gt 0}\)</td></tr>
+          <tr><td>opacity logit \(o\)</td><td>\(\R\)</td><td>sigmoid</td><td>\((0, 1)\)</td></tr>
+          <tr><td>SH coefficients</td><td>\(\R^{48}\)</td><td>none</td><td>\(\R^{48}\) (<a href="29-6-spherical-harmonics.html">Section 29.6</a>)</td></tr>
+        </tbody>
+      </table>
+      <p>합하면 \(3 + 4 + 3 + 1 + 48 = 59\)개의 수다. activation은 이 59차원 parameter 공간을 58차원 manifold \(\R^3 \times \mathrm{SO}(3) \times \R^3_{\gt 0} \times (0, 1) \times \R^{48}\)으로 보낸다(<a href="29-2-covariance-parametrization.html#sec-activations">Section 29.2</a>). quaternion의 norm 한 차원이 남는다. loss \(L\)은 이 manifold의 점(그리고 \(\Phi\)로 만든 \(\Sigma\))에만 의존하므로, parameter에 대한 gradient는 chain rule로 끌어온 covector다.</p>
+      <p>\[ dL_{\text{param}} = dL_{\text{geom}} \circ dA, \]</p>
+      <p>여기서 \(A\)는 activation map이다. <a href="../00-tour/0-7-forms.html#eq-0-7-2">(0.7.2)</a>의 pullback이 바로 이 식이고, backpropagation이 계산하는 것이 이것이다.</p>
+    </section>
+
+    <section id="sec-covectors">
+      <h2>Gradients Are Covectors; Updates Need a Metric</h2>
+      <p>parameter 공간의 한 점에서 metric \(g\)(SPD 행렬)를 고르면 covector \(dL\)에 대응하는 vector가 하나 정해진다.</p>
+      <div class="equation" id="eq-29-5-1">
+      \[ \grad_g L = g^{-1}\,dL^{\mathsf T}, \qquad \theta \leftarrow \theta - \eta\,\grad_g L \tag{29.5.1} \]
+      </div>
+      <p>\(g = I\)이면 보통의 gradient descent다. 기하적으로 \(\grad_g L\)의 방향은 \(g\)의 unit ball \(\{\abs{v}_g = 1\}\) 위에서 \(dL(v)\)를 가장 크게 만드는 방향, 곧 가장 가파른 오르막이다. “가파름”은 길이를 재는 법에 달려 있다.</p>
+
+      <figure class="dg-figure" id="fig-29-5-1">
+        <img src="figures/fig-29-5-1-covector-metric.svg" alt="같은 축을 쓰는 두 패널. 두 패널 모두 원점에서 오른쪽 아래로 기운 자주색 평행선들(dL = 2dv¹ + dv²의 등위선)이 있고, 그중 하나가 굵다. (a) g = I에서는 하늘색 단위원이 있고, 원점에서 파란 화살표가 오른쪽 위로 뻗어 주황 점에서 원에 닿으며, 그 점에서 굵은 자주색 선이 원에 접한다. 왼쪽 위에 grad_g L = (2.00, 1.00)이라 적혀 있다. (b) g = [[1, 1.2], [1.2, 3]]에서는 하늘색 ellipse가 왼쪽 위에서 오른쪽 아래로 기울어 있고, 파란 화살표가 오른쪽 약간 아래로 뻗어 주황 점에서 ellipse에 닿는다. 왼쪽 위에 grad_g L = (3.08, −0.90)이라 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 29.5.1.</span>
+        covector 하나, metric 둘, gradient 둘. <em>무엇을</em>: 한 점(원점)에서의 \(dL = 2\,dv^1 + dv^2\)과 두 metric (a) \(g = I\), (b) \(g = \begin{pmatrix} 1 &amp; 1.2 \\ 1.2 &amp; 3 \end{pmatrix}\). <em>읽는 법</em>: 자주색 평행선은 \(dL\)의 등위선(간격 \(0.5\))으로, Tour의 <a href="../00-tour/0-7-forms.html#fig-0-7-1">Figure 0.7.1</a>처럼 covector를 그린 것이다. 하늘색 영역은 metric의 unit ball \(\abs{v}_g \le 1\), 파란 화살표는 그 안에서 \(dL\)이 가장 큰 방향의 unit vector이고, 주황 점이 그 끝이다. 굵은 자주색 선은 주황 점을 지나는 등위선이다. 왼쪽 위의 수가 \(\grad_g L = g^{-1}dL^{\mathsf T}\)의 값이다. <em>볼 것</em>: 등위선은 두 패널에서 똑같다(같은 covector). 그런데 가장 가파른 방향은 (a)에서 \((2, 1)\) 쪽, (b)에서 \((3.08, -0.90)\) 쪽으로 다르다. (b)의 방향은 \(dL\)의 \(dv^2\) coefficient가 양수인데도 \(v^2\)를 줄이는 쪽이다. 두 경우 모두 굵은 등위선이 unit ball에 접하는 점이 주황 점이다. <em>본문과의 연결</em>: <a href="#eq-29-5-1">(29.5.1)</a>. metric을 바꾸면 같은 covector가 다른 update를 준다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-5-1">Figure 29.5.1</a>의 두 패널에서 자주색 등위선은 같다. 바뀐 것은 하늘색 unit ball뿐이다. 원에서는 등위선에 수직인 방향이 가장 가파르지만, 기울어진 ellipse에서는 ellipse가 가장 높은 등위선에 접하는 점이 가장 가파른 방향이고, 그것은 등위선에 수직이 아니다. 이 metric에서는 \(v^1\)으로 가는 것이 “싸고” \(v^2\)로 가는 것이 “비싸서”, 오르막을 오르면서 \(v^2\)를 조금 줄이는 것이 더 효율적이다.</p>
+      <p>좌표를 바꾸는 것도 metric을 바꾸는 것이다. \(\theta = h(\varphi)\)로 쓰고 \(\varphi\)에서 평범한 gradient descent를 하면, chain rule에 의해 \(\theta\)는 \(-\eta\,Dh\,Dh^{\mathsf T}\nabla_\theta L\)만큼 움직인다(1차까지). 곧 \(\theta\) 좌표에서 metric \(g = (Dh\,Dh^{\mathsf T})^{-1}\)을 쓴 gradient descent다. 가장 단순한 예가 scale이다.</p>
+      <div class="thm example" id="i-29-5-1">
+        <p><span class="thm-head">Example 29.5.1</span> <span class="thm-name">(scale versus log-scale)</span>.
+        loss \(L(s)\)를 \(s \gt 0\)에 대해 줄인다고 하자. \(s\)에서 gradient descent를 하면 \(s \leftarrow s - \eta L'(s)\)이다. 3DGS처럼 \(\ell = \log s\)에서 하면 \(\partial L/\partial\ell = sL'(s)\)이므로</p>
+        <div class="equation" id="eq-29-5-2">
+        \[ \begin{aligned} s &amp;\leftarrow s\,\exp\big(-\eta\,sL'(s)\big) \\ &amp;= s - \eta\,s^2L'(s) + O(\eta^2), \\ g &amp;= \frac{ds^2}{s^2} \end{aligned} \tag{29.5.2} \]
+        </div>
+        <p>이다. 곧 log-scale의 gradient descent는 metric \(ds^2/s^2\)을 쓴 gradient descent이고(\(g^{-1} = s^2\)), update는 곱셈형이다. 이 metric은 단위를 바꾸는 \(s \mapsto cs\)에 불변이다(\(d(cs)^2/(cs)^2 = ds^2/s^2\)). \(\partial L/\partial\ell = sL'(s)\)가 같으면 0.1 mm짜리 Gaussian과 1 m짜리 Gaussian이 같은 비율로 움직인다. 또 \(\exp(\cdot) \gt 0\)이므로 어떤 step도 \(s\)를 음수로 만들지 않는다. \(s\)에서의 gradient descent는 그렇지 않다. 아래 장난감 문제(<a href="#fig-29-5-2">Figure 29.5.2</a>의 loss)에서 \((\mu, s) = (-1.5, 0.3)\)인 작고 먼 Gaussian에 step \(0.3\)을 쓰면 한 번에 \(s \approx -0.12\)로 정의역 밖에 나간다. 같은 출발점에서 log-scale은 37번 만에 최솟값의 \(0.01\) 이내에 든다.</p>
+        <p class="verified">Verification: <code>verify/v-29-5-optimizing-gaussians.py</code></p>
+      </div>
+
+      <p>metric을 더 적극적으로 고를 수도 있다. distribution의 family에는 자연스러운 metric인 Fisher information metric이 있고, 그것으로 \(dL\)을 vector로 바꾼 것을 <strong>natural gradient</strong>라 한다 <a class="cite" href="../../references.html#Amari98">[Amari98]</a>. 1차원 Gaussian \(\mathcal N(\mu, s^2)\)의 family에서 Fisher metric은</p>
+      <div class="equation" id="eq-29-5-3">
+      \[ g_{\mathrm F} = \frac{d\mu^2 + 2\,ds^2}{s^2} \tag{29.5.3} \]
+      </div>
+      <p>이다. 이것은 <a href="../00-tour/0-8-riemannian.html#i-0-8-2">Example 0.8.2</a>(c)의 hyperbolic plane의 metric \((dx^2 + dy^2)/y^2\)과 같은 꼴이다(\(\mu = \sqrt2\,x\), \(s = y\)로 바꾸면 그 metric의 2배이므로 curvature는 \(-1/2\)로 일정하다). 작은 Gaussian(작은 \(s\)) 근처에서는 같은 \(d\mu\)가 크게 재지므로, natural gradient는 작은 Gaussian의 위치를 조심스럽게 움직인다. natural gradient의 1차 update는 parameter를 어떻게 다시 쓰든 같다. \((\mu, s)\)에서 계산하든 \((\mu, \log s)\)에서 계산하든 같은 \(s\)의 변화를 준다.</p>
+      <p>세 선택을 한 문제에서 비교하자. 화면 위의 1D footprint \(G(x) = \exp\big(-(x - \mu)^2/(2s^2)\big)\)(3DGS의 splat처럼 정점이 1)를 목표 \(\mu^* = 1\), \(s^* = 1\)에 맞추는 \(L^2\) loss \(L(\mu, s) = \int(G - G^*)^2\,dx\)를 쓴다. 이 적분은 닫힌 꼴이 있다.</p>
+
+      <figure class="dg-figure" id="fig-29-5-2">
+        <img src="figures/fig-29-5-2-trajectories.svg" alt="가로축 center μ(-1.2부터 3.2), 세로축 scale s(0부터 3)인 평면에 회색 등고선이 (1, 1)을 중심으로 둥글게 그려져 있고, (1, 1)에 주홍 별(minimum)이 있다. 세 개의 검은 사각형(start)이 왼쪽 아래(-0.6, 0.35), 왼쪽 위(-0.4, 2.6), 오른쪽 아래(2.6, 0.5)에 있다. 각 출발점에서 검정(GD in (μ, s)), 파랑(GD in (μ, log s)), 주황(natural gradient) 곡선 세 개가 서로 다른 path로 별까지 간다. 곡선 위의 점은 10 iteration마다 찍혀 있다. 왼쪽 위 출발점에서 파란 곡선은 먼저 거의 수직으로 내려간 뒤 오른쪽으로 꺾이고, 주황 곡선은 오른쪽 위로 크게 휜다. 왼쪽 아래 출발점에서 검은 곡선은 위쪽으로 휘어 가고, 파란 곡선은 아래쪽으로 휘어 간다.">
+        <figcaption><span class="fig-head">Figure 29.5.2.</span>
+        같은 loss, 세 metric, 세 path. <em>무엇을</em>: 1D footprint의 \(L^2\) loss \(L(\mu, s)\)(목표 \((1, 1)\))를 step \(0.05\)로 세 방법으로 줄였다. 출발점은 \((-0.6, 0.35)\), \((-0.4, 2.6)\), \((2.6, 0.5)\)이다. <em>읽는 법</em>: 가로축은 중심 \(\mu\), 세로축은 scale \(s\)이고 회색 곡선은 \(L\)의 등고선이다. 검정은 \((\mu, s)\)의 gradient descent, 파랑은 \((\mu, \log s)\)의 gradient descent(<a href="#eq-29-5-2">(29.5.2)</a>), 주황은 Fisher metric <a href="#eq-29-5-3">(29.5.3)</a>의 natural gradient다. 곡선 위의 점은 처음 200번 동안 10번마다 찍었다(간격이 넓을수록 빠르다). <em>볼 것</em>: 같은 출발점에서 세 path가 모두 다르다. 왼쪽 위(큰 Gaussian)에서 파랑은 먼저 \(s\)를 크게 줄이고(곱셈형 update는 큰 \(s\)에서 크다), 주황은 \(\mu\)를 먼저 크게 옮긴다. 왼쪽 아래(작은 Gaussian)에서 \(0.01\) 이내에 드는 데 검정 63번, 파랑 66번, 주황 160번이 걸린다. 주황이 느린 것은 Fisher metric이 작은 Gaussian의 \(\mu\) 이동을 \(s^2\)만큼 줄이기 때문이다. <em>본문과의 연결</em>: gradient는 covector이고 update는 metric이 정한다(<a href="#eq-29-5-1">(29.5.1)</a>). 좌표를 바꾸는 것도 metric을 바꾸는 것이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-5-2">Figure 29.5.2</a>에서 세 출발점의 곡선들을 차례로 보자. 세 방법은 같은 등고선(같은 covector field)을 보고 있지만 서로 다른 길로 같은 별에 간다. 어느 것이 늘 낫지는 않다. 큰 Gaussian에서 출발하면 세 방법이 비슷하게 빠르지만(60–69번), 작은 Gaussian에서 출발하면 natural gradient가 가장 느리다. step을 \(0.3\)으로 키워 더 작고 먼 Gaussian \((-1.5, 0.3)\)에서 출발하면 차이가 극단적이 된다. \((\mu, s)\)의 gradient descent는 첫 step에서 \(s \lt 0\)이 되어 실패하고, natural gradient는 \(\mu\)를 거의 옮기지 못한 채 \(s\)만 \(0\)으로 줄여 멈추며, log-scale만 37번 만에 수렴한다(<a href="#i-29-5-1">Example 29.5.1</a>). 3DGS가 scale에 \(\exp\)를 쓰는 것을 이 장난감은 지지하지만, 이것은 한 문제의 관찰이다.</p>
+    </section>
+
+    <section id="sec-quaternion">
+      <h2>The Quaternion Normalization</h2>
+      <p>3DGS는 정규화하지 않은 \(q \in \R^4 \setminus \{0\}\)을 저장하고, 쓸 때 \(\hat q = q/\abs{q}\)로 정규화한다. loss는 \(\hat q\)에만 의존한다. 이 정규화를 통과한 gradient의 기하를 보자.</p>
+      <div class="thm proposition" id="i-29-5-2">
+        <p><span class="thm-head">Proposition 29.5.2</span> <span class="thm-name">(gradient through \(q/\abs{q}\))</span>.
+        \(L(q) = \tilde L(q/\abs{q})\)이면</p>
+        <div class="equation" id="eq-29-5-4">
+        \[ \nabla_q L = \frac{1}{\abs{q}}\big(I_4 - \hat q\hat q^{\mathsf T}\big)\,\nabla_{\hat q}\tilde L \tag{29.5.4} \]
+        </div>
+        <p>이다. 곧 \(\nabla_q L\)은 \(\hat q\)에서의 gradient를 tangent space \(T_{\hat q}S^3 = \{v : \inner{v}{\hat q} = 0\}\)로 projection한 것을 \(\abs{q}\)로 나눈 것이고, 특히 \(\inner{\nabla_q L}{q} = 0\)이다. 그러므로 plain gradient descent의 step \(\delta = -\eta\nabla_q L\)에 대해</p>
+        <div class="equation" id="eq-29-5-5">
+        \[ \abs{q + \delta}^2 = \abs{q}^2 + \abs{\delta}^2 \ge \abs{q}^2 \tag{29.5.5} \]
+        </div>
+        <p>이고, \(\hat q\)가 움직이는 각은 1차까지 \(\abs{\delta}/\abs{q} = \eta\,\big|(I_4 - \hat q\hat q^{\mathsf T})\nabla_{\hat q}\tilde L\big|/\abs{q}^2\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(n(q) = q/\abs{q}\)의 Jacobian matrix는 \(Dn(q) = (I_4 - \hat q\hat q^{\mathsf T})/\abs{q}\)이고 symmetric이다(\(\partial_j(q_i/\abs{q}) = \delta_{ij}/\abs{q} - q_iq_j/\abs{q}^3\)). chain rule로 covector를 당기면 \(\nabla_q L = Dn(q)^{\mathsf T}\nabla_{\hat q}\tilde L\)이다. \(Dn(q)\,q = 0\)이므로 \(\inner{\nabla_q L}{q} = 0\)이고, orthogonal인 두 vector의 합의 길이는 피타고라스 정리로 <a href="#eq-29-5-5">(29.5.5)</a>다. 각은 \(\tan\vartheta = \abs{\delta}/\abs{q}\)에서 나온다.</p>
+      </div>
+      <p>\(q\) 방향은 submersion \(q \mapsto \hat q\)의 fiber(반직선) 방향이고(<a href="29-2-covariance-parametrization.html#sec-activations">Section 29.2</a>), loss가 그 방향으로는 변하지 않으므로 gradient에 그 성분이 없다. 그런데 gradient descent는 직선으로 움직이므로 접선 방향의 step이 sphere를 벗어나 바깥으로 나간다. 결과는 두 가지다. \(\abs{q}\)는 줄지 않고, 같은 크기의 \(\nabla_{\hat q}\tilde L\)에 대해 회전각은 \(1/\abs{q}^2\)에 비례해 작아진다. 저장된 quaternion이 길어질수록 rotation의 실효 learning rate가 저절로 줄어드는 셈이다. gradient에 잡음이 있으면(iteration마다 다른 view를 쓰는 학습처럼) 매 step의 \(\abs{\delta}^2\)가 쌓여 \(\abs{q}^2 = \abs{q_0}^2 + \sum_k\abs{\delta_k}^2\)로 계속 자란다.</p>
+
+      <figure class="dg-figure" id="fig-29-5-3">
+        <img src="figures/fig-29-5-3-quaternion-norm.svg" alt="두 패널. 왼쪽 (a)에는 검은 단위원과 원점에서 나가는 회색 점선 반직선 세 개가 있다. 원 위의 점 q₀ = (1, 0)에서 파란 화살표가 위쪽(원에 접하는 방향)으로 뻗어 원 바깥의 점 q₁(|q₁| = 1.17)에 닿고, q₁에서 다시 그 반직선에 수직인 파란 화살표가 q₂(|q₂| = 1.31)로 간다. 각 반직선이 원과 만나는 곳에 주황 점이 있고, 원점 근처에 31.0°와 27.2°라는 각이 적혀 있다. 오른쪽 (b)는 가로축 iteration(0부터 400), 세로축 |q_k|인 그래프다. 실선 GD 곡선 세 개(초록 step 0.05, 파랑 0.2, 검정 0.5)는 처음에 오르다가 각각 1.01, 1.06, 1.38에서 평평해진다. 점선 Adam 곡선 두 개 가운데 주황(lr 0.01)은 0.75까지 내려갔다가 0.76에 머물고, 주홍(lr 0.05)은 0.86까지 내려갔다가 1.29로 올라간다. 1에 회색 가로선이 있다.">
+        <figcaption><span class="fig-head">Figure 29.5.3.</span>
+        정규화를 통과한 gradient descent는 \(\abs{q}\)를 키우고 실효 step을 줄인다. <em>무엇을</em>: (a) 2차원 판(\(q \in \R^2\), \(\hat q\)는 원 위). \(q_0 = (1, 0)\)에서 길이 \(0.6\)인 step을 두 번, 매번 지금의 \(q\)에 수직으로(<a href="#i-29-5-2">Proposition 29.5.2</a>대로) 밟았다. (b) 장난감 loss \(L = \tfrac12\|\Sigma(q) - \Sigma^*\|_F^2\)(\(s = (1, 0.6, 0.3)\), 무작위 목표 회전)를 \(q = (1, 0, 0, 0)\)에서 출발해 400번 최적화할 때의 \(\abs{q_k}\). <em>읽는 법</em>: (a)의 검은 원은 \(\abs{q} = 1\), 파란 화살표가 step, 검은 점이 저장된 \(q_k\), 회색 점선은 원점에서 \(q_k\)로 가는 반직선, 주황 점은 정규화한 \(\hat q_k\)다. (b)의 실선은 plain gradient descent(step 0.05, 0.2, 0.5), 점선은 Adam(learning rate 0.01, 0.05, \(\varepsilon\)은 공식 구현과 같은 \(10^{-15}\))이다. <em>볼 것</em>: (a)에서 \(\abs{q_1} = \sqrt{1.36} = 1.17\), \(\abs{q_2} = \sqrt{1.72} = 1.31\)이고, 같은 길이의 step이 주는 회전각이 \(31.0^\circ\)에서 \(27.2^\circ\)로 줄었다. (b)에서 gradient descent의 \(\abs{q}\)는 한 번도 줄지 않고 1.01, 1.06, 1.38에서 멈춘다(수렴하면 gradient가 \(0\)이 되어 더 자라지 않는다). Adam의 \(\abs{q}\)는 줄기도 한다. lr 0.01에서는 0.75까지 내려가 0.76에 머물고, lr 0.05에서는 0.86까지 내려갔다가 1.29로 올라간다. <em>본문과의 연결</em>: <a href="#eq-29-5-4">(29.5.4)</a>와 <a href="#eq-29-5-5">(29.5.5)</a>는 plain gradient descent의 성질이다. Adam은 좌표마다 step을 다시 재므로 step이 \(q\)에 수직이라는 성질이 깨진다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-5-3">Figure 29.5.3</a>의 (a)에서 파란 step은 원에 접하는 방향인데, 직선으로 가므로 원 바깥에 떨어진다. 다음 step은 더 큰 원에 접하므로 같은 길이로도 회전각이 작다(\(31.0^\circ \to 27.2^\circ\)). (b)의 실선들이 이것을 실제 최적화에서 보인다. 점선(Adam)은 다르다. Adam은 \(\nabla_q L\)을 좌표마다 나누어 정규화하므로, update가 더 이상 \(q\)에 수직이 아니고 \(\abs{q}\)가 줄 수도 있다. 3DGS의 공식 구현은 rotation을 항등 quaternion \((1, 0, 0, 0)\)으로 시작하고 Adam으로 학습한다. 저장된 \(q\)는 다시 정규화하지 않고, \(\Sigma\)를 만들 때마다 \(q/\abs{q}\)로 정규화하며, 이 정규화의 gradient는 PyTorch의 자동미분이 <a href="#eq-29-5-4">(29.5.4)</a>대로 계산한다. 그러므로 실제 학습에서 \(\abs{q}\)가 어떻게 변하는지는 Adam의 동역학이 정하고, 위의 단조성 진술은 그대로 적용되지 않는다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 저장된 quaternion의 길이는 숨은 learning rate다</p>
+        <p>정규화 \(q/\abs{q}\)는 \(\R^4 \setminus \{0\}\)에서 \(S^3\)으로 가는 submersion이고, loss는 그 fiber 방향(\(\abs{q}\))을 보지 못한다. 그런데 그 보이지 않는 \(\abs{q}\)가 rotation의 step 크기를 정한다. plain gradient descent에서는 회전각이 \(\eta/\abs{q}^2\)에 비례하고 \(\abs{q}\)는 줄지 않으므로, 학습이 길어질수록 rotation은 저절로 굳는다. Adam에서는 update의 크기가 gradient의 크기와 거의 무관하게 \(\eta\) 정도이므로 회전각은 대략 \(\eta/\abs{q}\)이고, \(\abs{q}\)는 오르내린다. 두 경우 모두 rotation의 실효 learning rate가 설정한 값과 다르고 Gaussian마다 다르다. 이 숨은 자유도를 없애는 방법은 둘이다. 매 step 뒤에 \(q\)를 다시 정규화해 저장하거나(sphere 위의 retraction \(q \mapsto q/\abs{q}\)), 아래에서 보듯 \(\mathrm{SO}(3)\) 위에서 직접 update하는 것이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-preconditioners">
+      <h2>Adam, Natural Gradient, and Retractions</h2>
+      <p><strong>Adam</strong> <a class="cite" href="../../references.html#Kingma15">[Kingma15]</a>은 gradient의 이동평균 \(m\)과 제곱의 이동평균 \(v\)로 좌표마다 \(\theta_i \leftarrow \theta_i - \eta\,\hat m_i/(\sqrt{\hat v_i} + \varepsilon)\)만큼 움직인다. <a href="#eq-29-5-1">(29.5.1)</a>과 비교하면 이것은 대각 행렬 \(g = \diag(\sqrt{\hat v_i} + \varepsilon)\)을 metric으로 쓰고, gradient 대신 그 이동평균을 쓴 update로 <em>볼 수 있다</em>. 이것은 해석이다. 이 \(g\)는 점의 함수가 아니라 지난 gradient들의 함수이고 시간에 따라 변하므로, 엄밀한 뜻의 Riemannian metric은 아니다. 그래도 이 해석에서 두 가지가 바로 읽힌다.</p>
+      <ul>
+        <li><strong>단위의 선택이 곧 metric이다.</strong> Adam의 step은 각 좌표에서 대략 \(\eta\)이고 gradient의 크기에 거의 무관하다. 그래서 좌표 \(\theta_i\)를 \(c\theta_i\)로 바꾸면 그 좌표에서의 step은 그대로 \(\eta\)이고, 원래 좌표로는 \(\eta/c\)만큼 움직인다. 각 parameter 묶음에 따로 주는 learning rate가 바로 이 대각 metric을 정한다. 공식 구현은 위치의 learning rate(초기값 \(1.6 \times 10^{-4}\))에 scene extent(학습 카메라 중심들이 평균에서 떨어진 최대 거리의 1.1배)를 곱하는데, 위치의 단위를 장면 크기로 맞추는 선택으로 읽을 수 있다(해석이다).</li>
+        <li><strong>작은 gradient도 큰 step이 된다.</strong> <a href="29-2-covariance-parametrization.html#i-29-2-3">Example 29.2.3</a>에서 거의 isotropic인 Gaussian의 rotation gradient는 \(s_i^2 - s_j^2\)에 비례해 작았다. Adam은 그 크기를 정규화하므로 그런 Gaussian도 rotation이 \(\eta\) 정도씩 움직인다. 공식 구현은 Adam의 \(\varepsilon\)을 \(10^{-15}\)으로 두므로 아주 작은 gradient도 거의 그대로 정규화된다. 방향의 정보는 여전히 작은 신호에서 오므로, 이 움직임이 얼마나 의미 있는지는 그 신호가 잡음에 비해 얼마나 큰지에 달려 있다(해석이다).</li>
+      </ul>
+      <p><strong>natural gradient</strong>는 metric을 Fisher information으로 고정한다 <a class="cite" href="../../references.html#Amari98">[Amari98]</a>. 1차 update가 parametrization에 무관하다는 장점이 있지만, 3DGS의 loss는 distribution의 likelihood가 아니라 렌더링 오차이므로 Fisher metric이 “옳은” metric이라는 보장은 없다. <a href="#fig-29-5-2">Figure 29.5.2</a>에서 작은 Gaussian에서 느렸던 것이 그 예다.</p>
+      <p><strong>Riemannian gradient descent와 retraction</strong>은 rotation을 처음부터 \(\mathrm{SO}(3)\) 위에서 다룬다 <a class="cite" href="../../references.html#AMS">[AMS]</a>, <a class="cite" href="../../references.html#Boumal">[Boumal]</a>. <a href="29-2-covariance-parametrization.html#eq-29-2-3">(29.2.3)</a>의 \(\nabla_\omega L = (\partial L/\partial\omega_1, \partial L/\partial\omega_2, \partial L/\partial\omega_3)\)는 bi-invariant metric(<a href="../00-tour/0-8-riemannian.html#i-0-8-4">Remark 0.8.4</a>)에 대한 Riemannian gradient를 Lie algebra의 좌표로 쓴 것이므로,</p>
+      <div class="equation" id="eq-29-5-6">
+      \[ R \leftarrow R\,\exp\big(-\eta\,[\nabla_\omega L]_\times\big) \tag{29.5.6} \]
+      </div>
+      <p>로 update하면 된다(<a href="../00-tour/0-6-manifolds.html#eq-0-6-7">(0.6.7)</a>의 Rodrigues formula). 정규화도 없고, 숨은 \(\abs{q}\)도 없고, \(q\)와 \(-q\)의 2대1 모호성도 없다. 다만 <a href="29-2-covariance-parametrization.html#i-29-2-2">Proposition 29.2.2</a>의 rank 저하는 \(\Phi\) 자체의 성질이므로 그대로 남는다. scale의 log-scale update는 이 관점에서 \(\R_{\gt 0}\) 위의 metric \(ds^2/s^2\)에 대한 Riemannian gradient descent이고, \(\exp\)가 그 exponential map이다.</p>
+    </section>
+
+    <section id="sec-densification">
+      <h2>Densification Uses the Norm of a Covector</h2>
+      <p>3DGS는 Gaussian이 부족한 곳을 화면 공간의 위치 gradient로 찾는다. Gaussian이 보인 view(iteration)마다 view-space position gradient의 크기를 재고, 그 평균이 threshold \(\tau_{\mathrm{pos}} = 0.0002\) 이상이면 그 Gaussian을 clone하거나 split한다(공식 구현은 100 iteration마다 이 판정을 한다) <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>. 그런데 <a href="29-3-splatting-linearization.html#sec-backprop">Section 29.3</a>의 \(\partial L/\partial u_0\)는 화면 위의 covector다. covector의 “크기” \(\abs{\partial L/\partial u_0}\)를 재려면 화면에 metric(정확히는 그 dual의 norm)이 있어야 하고, 보통은 그 gradient를 계산한 화면 좌표의 Euclidean norm을 쓴다. 따라서 threshold의 뜻은 어떤 화면 좌표를 쓰느냐에 달려 있다.</p>
+      <p>공식 구현은 이 gradient를 NDC 좌표(화면을 가로세로 \([-1, 1]\)로 정규화한 좌표)에 대해 계산한다. 픽셀 좌표와 NDC 좌표 사이에는 \(u_{\mathrm{px}} = \big((u_{\mathrm{ndc}} + 1)W - 1\big)/2\)가 있으므로 \(\partial L/\partial u_{\mathrm{ndc}} = (W/2)\,\partial L/\partial u_{\mathrm{px}}\)이고, 세로도 \(H/2\)배다. covector는 좌표 변환의 Jacobian을 곱해 끌려오기 때문이다. 결과적으로</p>
+      <div class="equation" id="eq-29-5-7">
+      \[ \Big\|\frac{\partial L}{\partial u_{\mathrm{ndc}}}\Big\| = \Big\|\diag\big(\tfrac W2, \tfrac H2\big)\frac{\partial L}{\partial u_{\mathrm{px}}}\Big\| \tag{29.5.7} \]
+      </div>
+      <p>이다. 이 metric이 하는 일은 둘이다. 하나는 해상도의 보정이다. 같은 장면을 가로세로 \(k\)배의 해상도로 렌더링한다고 하자. Gaussian의 footprint가 덮는 픽셀 수는 \(k^2\)배가 되고, 픽셀마다 평균하는 loss에서 픽셀 하나의 무게는 \(1/k^2\)배가 되며, footprint의 기울기 \(\partial G/\partial u_{\mathrm{px}}\)는 footprint가 \(k\)배 넓어지므로 \(1/k\)배가 된다. 그래서 픽셀 단위 gradient는 대략 \(1/k\)배가 되고, <a href="#eq-29-5-7">(29.5.7)</a>의 \(W/2\)가 이것을 상쇄한다. NDC norm은 해상도에 거의 무관하다. 다른 하나는 방향에 따른 무게다. NDC의 한 단위는 가로로 \(W/2\) px, 세로로 \(H/2\) px이므로, \(W \ne H\)이면 픽셀 단위로 같은 크기의 gradient라도 가로 방향이 세로 방향보다 \(W/H\)배 크게 재진다. 이 두 성질은 공식 구현의 정규화에서 따라 나오는 결과이고, 해상도에 대한 논증은 L1 loss를 기준으로 한 근사다(SSIM 항은 창의 크기가 픽셀 단위로 고정되어 있어 정확히 따르지 않는다).</p>
+
+      <figure class="dg-figure" id="fig-29-5-4">
+        <img src="figures/fig-29-5-4-densify-threshold.svg" alt="두 패널. 왼쪽 (a)는 log-log 그래프로, 가로축은 image width W(240, 480, 960, 1920; 16:9, same scene), 세로축은 W = 1920일 때의 값으로 나눈 gradient norm이다. 검은 선(pixel units)은 W = 240에서 8, W = 1920에서 1로 곧게 내려가고 ∝ 1/W라고 적혀 있다. 주황 선(NDC)은 1에서 수평이고 constant라고 적혀 있다. 오른쪽 (b)는 1920×1080에서 가로축 ∂L/∂u_px, 세로축 ∂L/∂v_px(단위 10⁻⁷/pixel)인 평면이다. 원점 중심의 세로로 긴 파란 ellipse(‖∂L/∂u_ndc‖ = τ, 반축 2.08과 3.70)와 반지름 3인 회색 점선 원(pixel length 3)이 있다. 점 (3, 0)은 ellipse 밖에 있고 NDC 2.88×10⁻⁴ > τ, densified라고 적혀 있다. 점 (0, 3)은 ellipse 안에 있고 NDC 1.62×10⁻⁴ < τ, not densified라고 적혀 있다. 왼쪽 위에 inside the blue ellipse: not densified라는 주석이 있다.">
+        <figcaption><span class="fig-head">Figure 29.5.4.</span>
+        densification의 기준이 쓰는 NDC metric. <em>무엇을</em>: (a) 장난감 실험. 검은 배경 위의 2D Gaussian splat 하나(opacity 0.8, NDC 좌표로 중심 \((0.1, -0.05)\), covariance \(\diag(0.03^2, 0.05^2)\))를 NDC로 \((0.012, 0.004)\)만큼 옮긴 목표에 맞추는 L1 loss(픽셀 평균)를 같은 장면, 다른 해상도(16:9, \(W = 240, \dots, 1920\))로 계산하고, splat 중심에 대한 gradient의 norm을 픽셀 단위와 NDC 단위로 쟀다. (b) \(1920 \times 1080\)에서 densification 기준 \(\|\partial L/\partial u_{\mathrm{ndc}}\| \le \tau\) (\(\tau = 2 \times 10^{-4}\))를 픽셀 단위 gradient의 평면에 그린 것. <em>읽는 법</em>: (a)는 log-log 그래프이고, 두 선 모두 \(W = 1920\)일 때의 값으로 나누었다. 검정이 픽셀 단위, 주황이 NDC다. (b)의 축은 픽셀 단위 gradient(\(10^{-7}\)/pixel)이고, 파란 ellipse 안쪽이 densify하지 않는 영역, 회색 점선 원은 픽셀 단위 길이가 3인 gradient들, 두 검은 점은 그 원 위의 가로 방향 \((3, 0)\)과 세로 방향 \((0, 3)\)이다. <em>볼 것</em>: (a)에서 픽셀 단위 gradient는 해상도를 8배로 올리면 \(1/8\)이 되지만(기울기 \(-1\)), NDC norm은 0.2% 안에서 일정하다. (b)의 ellipse는 원이 아니다(반축 \(2\tau/W = 2.08\), \(2\tau/H = 3.70\)). 그래서 픽셀 단위로 길이가 같은 두 gradient 가운데 가로 방향은 NDC norm \(2.88 \times 10^{-4} \gt \tau\)라 densify되고, 세로 방향은 \(1.62 \times 10^{-4} \lt \tau\)라 되지 않는다. <em>본문과의 연결</em>: <a href="#eq-29-5-7">(29.5.7)</a>. covector의 norm은 metric을 골라야 정해지고, NDC라는 선택은 해상도는 보정하지만 화면비를 방향의 무게로 남긴다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-5-4">Figure 29.5.4</a>의 (a)를 먼저 보자. 같은 장면을 해상도만 바꿔 렌더링하면 검은 선(픽셀 단위 gradient)은 해상도에 반비례해 내려가고, 주황 선(NDC)은 수평이다. 그래서 <code>-r</code> 옵션으로 영상을 줄여 학습해도 같은 \(\tau_{\mathrm{pos}} = 0.0002\)를 대략 같은 뜻으로 쓸 수 있다. NDC로 재는 것을 이렇게 읽는 것은 해석이지만, 그 결과는 (a)의 수치로 확인된다. 이제 (b)를 보자. \(1920 \times 1080\)에서 파란 ellipse는 세로로 길다. 가로 성분에 \(W/2 = 960\), 세로 성분에 \(H/2 = 540\)의 무게가 붙기 때문이다. 회색 원 위의 두 점은 픽셀 단위로 길이가 같지만, 가로 방향의 점만 ellipse 밖에 있다. 화면비가 1이 아닌 영상에서는 화면 가로로 당겨지는 Gaussian이 세로로 당겨지는 Gaussian보다 쉽게 densify된다.</p>
+      <p>이 norm에는 다른 미묘함도 있다. 한 view에서 \(\partial L/\partial u_0\)는 Gaussian이 덮은 픽셀들의 기여(각각 covector)의 합이다. 서로 반대 방향으로 당기는 픽셀들은 합에서 상쇄되므로, 합의 norm은 각 norm의 합보다 작을 수 있다(예: 기여 \((1, 0.2)\), \((-0.9, -0.1)\), \((0.2, 0)\)의 합의 norm은 0.32, norm의 합은 2.13). 큰 Gaussian이 양쪽으로 당겨지는 경우 이 기준이 그것을 놓칠 수 있다는 뜻이다. 공식 구현은 view마다 합을 구한 뒤 그 norm을 view에 걸쳐 평균한다. 이 상쇄를 지적하고, 픽셀별 기여를 더하기 전에 성분마다 절댓값을 취하는 기준(homodirectional gradient)으로 바꾼 후속 연구가 있다 <a class="cite" href="../../references.html#Ye24">[Ye24]</a>.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: densification threshold는 metric에 묶여 있다</p>
+        <p>\(\tau_{\mathrm{pos}}\)는 covector의 크기에 대한 기준이고, covector의 크기는 metric 없이는 정해지지 않는다. 3DGS는 NDC 좌표의 Euclidean metric을 쓰는 셈이며, 그 결과 (1) 픽셀 단위 gradient가 해상도에 반비례해 줄어드는 것을 \(W/2\), \(H/2\)가 상쇄하므로 같은 \(\tau_{\mathrm{pos}}\)를 여러 해상도에서 대략 같은 뜻으로 쓸 수 있고(L1 loss에 대한 근사), (2) 화면비가 1이 아니면 가로와 세로 방향의 gradient를 다른 무게로 잰다(<a href="#eq-29-5-7">(29.5.7)</a>). 다른 rasterizer로 3DGS를 다시 구현할 때 픽셀 단위 gradient에 같은 \(\tau_{\mathrm{pos}}\)를 쓰면 기준의 뜻이 해상도에 따라 달라지므로, 먼저 NDC 단위로 바꿔야 한다. 또 기준이 “합의 norm”이므로 상쇄되는 기여에는 둔감하다. 무엇을 기준으로 할지(합의 norm, norm의 합, 다른 metric)는 설계의 선택이고, 그 선택이 어떤 Gaussian을 늘릴지를 정한다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>inner product가 vector와 covector를 잇는 isomorphism, 첨자 올리고 내리기: <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-15">Proposition 1.5.15</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-16">Example 1.5.16</a>. covector와 pullback: <a href="../16-covectors-tensors/index.html#toc-16-1">Section 16.1</a>, <a href="../16-covectors-tensors/index.html#toc-16-2">Section 16.2</a>.</li>
+        <li>musical isomorphism과 \(\grad f = (df)^\sharp\): <a href="../21-riemannian-metrics/index.html#toc-21-5">Section 21.5</a>. hyperbolic metric과 model space: <a href="../21-riemannian-metrics/index.html#toc-21-2">Section 21.2</a>, <a href="../24-curvature/index.html#toc-24-5">Section 24.5</a>.</li>
+        <li>submersion과 fiber(\(q \mapsto q/\abs{q}\)): <a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>. Lie group의 exponential map과 \(\mathrm{SO}(3)\) 위의 미분: <a href="../20-lie-groups-frobenius/index.html#toc-20-3">Section 20.3</a>, <a href="../28-lie-groups-poses/index.html#toc-28-2">Section 28.2</a>. manifold 위의 Gauss–Newton/LM: <a href="../28-lie-groups-poses/index.html#toc-28-3">Section 28.3</a>.</li>
+        <li>Riemannian optimization의 입문: Tour의 <a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a> 상자와 <a class="cite" href="../../references.html#Boumal">[Boumal]</a>, <a class="cite" href="../../references.html#AMS">[AMS]</a>. exponential map과 retraction: <a href="../23-geodesics/index.html#toc-23-2">Section 23.2</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>3DGS의 Gaussian 하나는 59개의 수(\(\mu\), \(q\), log-scale, opacity logit, SH 48개)이고, activation이 이것을 58차원 manifold로 보낸다. backpropagation은 이 사이의 pullback이다.</li>
+        <li>gradient는 covector이므로 update에는 metric이 필요하다 <a href="#eq-29-5-1">(29.5.1)</a>. 좌표를 바꾸는 것이 metric을 바꾸는 것이다. log-scale의 gradient descent는 scale에 불변인 metric \(ds^2/s^2\)의 gradient descent이고 곱셈형이다. Fisher metric은 hyperbolic plane과 같은 꼴이다.</li>
+        <li>\(q/\abs{q}\)를 통과한 gradient는 \(T_{\hat q}S^3\)로의 projection을 \(\abs{q}\)로 나눈 것이다. plain gradient descent에서 \(\abs{q}\)는 줄지 않고 회전각은 \(1/\abs{q}^2\)로 작아진다. Adam에서는 이 단조성이 깨진다.</li>
+        <li>Adam은 대각 metric으로 볼 수 있고(해석), learning rate와 단위의 선택이 그 metric이다. \(\mathrm{SO}(3)\) 위의 retraction update \(R\exp(-\eta[\nabla_\omega L]_\times)\)는 숨은 자유도를 없앤다.</li>
+        <li>densification의 기준 \(\tau_{\mathrm{pos}}\)는 covector의 norm이므로 화면 좌표의 metric에 의존한다. 공식 구현의 NDC metric은 해상도 변화를 대략 상쇄하지만, 화면비가 1이 아니면 방향마다 다른 무게를 준다.</li>
+      </ul>
+      <p class="next">다음 절에서는 Gaussian의 마지막 parameter인 색을 본다. 보는 방향에 따라 달라지는 색은 sphere \(S^2\) 위의 함수이고, 3DGS는 그것을 spherical harmonics로 쓴다. spherical harmonics는 \(S^2\)의 Laplace–Beltrami operator의 eigenfunction이고, Gaussian을 돌리면 그 coefficient도 정해진 행렬로 돌려야 한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-29-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 29.5.1</span> <span class="level">★</span>
+        \(L'(s) = 0.5\), 학습률 \(\eta = 0.1\)일 때 \(s = 2\)와 \(s = 0.02\)에서 각각 \(s\)의 gradient descent 한 step과 \(\log s\)의 gradient descent 한 step을 계산하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(s = 2\): \(s\)에서는 \(2 - 0.1 \cdot 0.5 = 1.95\), \(\log s\)에서는 <a href="#eq-29-5-2">(29.5.2)</a>로 \(2\exp(-0.1 \cdot 2 \cdot 0.5) = 2e^{-0.1} \approx 1.810\)이다. \(s = 0.02\): \(s\)에서는 \(0.02 - 0.05 = -0.03\)으로 정의역 밖이고, \(\log s\)에서는 \(0.02\,e^{-0.001} \approx 0.01998\)로 0.1%만 줄어든다. log-scale은 큰 scale은 크게, 작은 scale은 작게(비율로) 움직인다. metric \(ds^2/s^2\)에서 같은 covector가 \(s^2L'(s)\)라는 vector가 되기 때문이다.</p>
+          <p class="verified">Verification: <code>verify/v-29-5-optimizing-gaussians.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-5-2" data-level="1">
+        <p><span class="thm-head">Exercise 29.5.2</span> <span class="level">★</span>
+        \(\abs{q_0} = 1\)에서 시작해 plain gradient descent의 step이 매번 길이 \(0.1\)이었다면 100번 뒤의 \(\abs{q}\)는 얼마인가? 그때 같은 길이의 step이 주는 회전각은 처음의 몇 배인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-29-5-5">(29.5.5)</a>를 100번 쓰면 \(\abs{q}^2 = 1 + 100 \cdot 0.01 = 2\)이므로 \(\abs{q} = \sqrt2\)이다. 회전각은 \(\abs{\delta}/\abs{q}\)이므로 \(1/\sqrt2 \approx 0.71\)배다. 같은 \(\nabla_{\hat q}\tilde L\)이라면 step 길이도 \(1/\abs{q}\)로 줄어(<a href="#eq-29-5-4">(29.5.4)</a>) 회전각은 \(1/\abs{q}^2 = 1/2\)배가 된다.</p>
+          <p class="verified">Verification: <code>verify/v-29-5-optimizing-gaussians.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-5-3" data-level="1">
+        <p><span class="thm-head">Exercise 29.5.3</span> <span class="level">★</span>
+        \(1920 \times 1080\) 영상을 \(960 \times 540\)으로 줄여 같은 장면을 학습한다. (a) 픽셀 단위로 <em>같은</em> gradient라면 NDC norm은 몇 배가 되는가? (b) 실제로는 같은 Gaussian의 픽셀 단위 gradient가 대략 몇 배가 되는가(<a href="#fig-29-5-4">Figure 29.5.4</a>의 논증)? (c) 그러면 \(\tau_{\mathrm{pos}}\)를 바꿔야 하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) <a href="#eq-29-5-7">(29.5.7)</a>에서 NDC norm은 \(W/2\), \(H/2\)에 비례하므로 반이 된다. (b) 해상도가 \(k = 1/2\)배이면 footprint가 덮는 픽셀 수는 \(1/4\)배, 픽셀 하나의 loss 무게는 4배, footprint의 기울기는 2배이므로 픽셀 단위 gradient는 대략 \(1/4 \cdot 4 \cdot 2 = 2\)배가 된다. (c) (a)와 (b)가 상쇄되어 NDC norm은 대략 그대로이므로, 같은 \(\tau_{\mathrm{pos}}\)를 써도 대략 같은 Gaussian이 골라진다. 이것이 NDC로 재는 것의 이점이다. 다만 이 논증은 L1 loss에 대한 근사이고, 두 해상도의 화면비가 같으므로 가로·세로의 상대적 무게는 그대로다.</p>
+          <p class="verified">Verification: <code>verify/v-29-5-optimizing-gaussians.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-5-4" data-level="2">
+        <p><span class="thm-head">Exercise 29.5.4</span> <span class="level">★★</span>
+        scale의 단위를 바꿔 \(\tilde s = cs\)(\(c \gt 0\))로 쓴다. \(\log\tilde s\)에서의 gradient descent와 \(\log s\)에서의 gradient descent가 같은 Gaussian의 움직임을 줌을 보여라. \(\tilde s\)에서의 gradient descent는 \(s\)에서의 것과 같은가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\log\tilde s = \log s + \log c\)이므로 두 좌표는 상수만큼 차이 나고, \(\partial L/\partial\log\tilde s = \partial L/\partial\log s\)이다. 같은 step \(-\eta\,\partial L/\partial\log s\)가 두 좌표에서 같은 변화를 주므로 Gaussian은 똑같이 움직인다. metric으로는 \(d\tilde s^2/\tilde s^2 = ds^2/s^2\)이다. 반면 \(\partial L/\partial\tilde s = L'(s)/c\)이고 \(\tilde s\)의 step \(-\eta L'(s)/c\)는 \(s\)로 \(-\eta L'(s)/c^2\)이다. 같은 \(\eta\)라도 단위에 따라 \(c^2\)배 다르게 움직인다. Euclidean metric \(ds^2\)은 단위에 불변이 아니다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-5-5" data-level="2">
+        <p><span class="thm-head">Exercise 29.5.5</span> <span class="level">★★</span>
+        참인지 거짓인지 판별하고 이유를 써라. “Adam은 gradient를 좌표마다 정규화하므로 parameter의 단위(scale)를 바꿔도 Gaussian의 움직임이 같다.”</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>거짓이다. 좌표 \(\varphi_i = c_i\theta_i\)에서 Adam을 돌리면 gradient가 \(1/c_i\)배가 되지만 Adam은 그것을 정규화하므로, \(\varphi\)에서의 step(수치)은 \(\theta\)에서 돌렸을 때와 같다(\(\varepsilon \to 0\)에서). 그런데 그것을 \(\theta\)로 되돌리면 \(1/c_i\)배다. 곧 Adam의 step 크기는 gradient의 크기에는 무관하지만 좌표의 단위에는 그대로 묶여 있다. 단위(또는 parameter 묶음별 learning rate)를 고르는 것이 Adam의 대각 metric을 고르는 일이다. 3DGS가 위치의 learning rate에 장면의 크기를 곱하는 것은 위치의 단위를 장면 크기로 맞추는 선택으로 볼 수 있다.</p>
+          <p class="verified">Verification: <code>verify/v-29-5-optimizing-gaussians.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="29-4-space-of-covariances.html">← 29.4 The Space of Covariances</a>
+    <a rel="next" href="29-6-spherical-harmonics.html">29.6 View-Dependent Color: Spherical Harmonics →</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>29.1 A Gaussian Is a Metric — DG Study</title>
+  <meta name="dg-id" content="29.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.3, 0.7, 0.8">
+  <meta name="dg-refs" content="Kerbl23; Zwicker01; Hoppe92; Guedon24; Huang24">
+  <meta name="dg-updated" content="2026-10-07">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">29. The Geometry of Gaussian Splatting</a> ›
+    <span>29.1 A Gaussian Is a Metric</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>29.1 A Gaussian Is a Metric</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>,
+        <a class="cite" href="../../references.html#Zwicker01">[Zwicker01]</a>,
+        <a class="cite" href="../../references.html#Hoppe92">[Hoppe92]</a>,
+        <a class="cite" href="../../references.html#Guedon24">[Guedon24]</a>,
+        <a class="cite" href="../../references.html#Huang24">[Huang24]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>3DGS의 primitive \(G(x)\)가 \(\Sigma^{-1}\)이 정하는 inner product 하나로 정해진다는 것을 설명하고, level set인 ellipsoid의 축과 반축을 \(\Sigma\)의 eigenvector와 eigenvalue로 읽을 수 있다.</li>
+        <li>Gaussian을 표준 Gaussian의 affine image \(x = \mu + RSy\)로 보고, 좌표를 바꿀 때 \(\Sigma \mapsto A\Sigma A^{\mathsf T}\), \(\Sigma^{-1} \mapsto A^{-\mathsf T}\Sigma^{-1}A^{-1}\)으로 서로 반대로 변하는 이유를 contravariant와 covariant의 차이로 설명할 수 있다.</li>
+        <li>납작한 Gaussian의 가장 짧은 축이 normal 역할을 하는 이유를 PCA normal estimation과 같은 원리로 설명하고, 그 normal을 믿을 수 없는 경우를 말할 수 있다.</li>
+        <li>화면 위 2D covariance의 eigenvalue로 Gaussian이 차지하는 범위(3σ 반지름)와 배정되는 tile 수를 계산할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>: first fundamental form의 Gram matrix와 그것이 정하는 ellipse(<a href="../00-tour/0-3-surfaces.html#i-0-3-5">Definition 0.3.5</a>, <a href="../00-tour/0-3-surfaces.html#fig-0-3-3">Figure 0.3.3</a>), point cloud의 PCA normal estimation(<a href="../00-tour/0-3-surfaces.html#fig-0-3-4">Figure 0.3.4</a>)</li>
+        <li><a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>: covector, pullback <a href="../00-tour/0-7-forms.html#eq-0-7-2">(0.7.2)</a>, contravariant와 covariant</li>
+        <li><a href="../00-tour/0-8-riemannian.html#sec-metric">Section 0.8</a>: Riemannian metric(<a href="../00-tour/0-8-riemannian.html#i-0-8-1">Definition 0.8.1</a>)</li>
+        <li>linear algebra: symmetric matrix는 orthonormal eigenvector로 대각화된다(spectral theorem). 3DGS 논문 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>의 기본 수식</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="../00-tour/0-8-riemannian.html#sec-metric">Section 0.8</a>에서 Riemannian metric은 tangent space마다 하나씩 주어진 inner product였고, chart에서는 symmetric positive definite matrix \((g_{ij})\)로 적혔다. 3D Gaussian Splatting(3DGS) <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>의 장면은 수많은 3D Gaussian으로 이루어지고, Gaussian마다 \(3 \times 3\) symmetric positive definite matrix \(\Sigma\)가 하나씩 붙어 있다. 같은 종류의 행렬이 나온 것은 우연이 아니다. 이 절의 주장은 제목 그대로다. Gaussian 하나는 \(\R^3\)에 놓인 metric 하나이고, Gaussian의 값은 그 metric으로 잰 거리만으로 정해진다.</p>
+      <p>이 관점으로 세 질문에 답한다.</p>
+      <ol>
+        <li>\(\Sigma\)와 \(\Sigma^{-1}\) 가운데 무엇이 metric이고, 좌표를 바꾸면 각각 어떻게 변하는가? splatting은 왜 \(\Sigma^{-1}\)이 아니라 \(\Sigma\)를 투영하는가?</li>
+        <li>3DGS가 \(\Sigma\)를 rotation \(R\)과 scale \(s\)로 쓰는 것은 기하적으로 무엇인가?</li>
+        <li>납작해진 Gaussian은 왜 surface 조각처럼 행동하고, 그 normal은 무엇인가?</li>
+      </ol>
+      <aside class="box convention">
+        <p class="box-title">Conventions: 이 장의 기호</p>
+        <ul>
+          <li>점과 벡터는 열벡터이고 굵게 쓰지 않는다: 점 \(x \in \R^3\), Gaussian의 평균 \(\mu\). transpose는 \(A^{\mathsf T}\), \(A^{-\mathsf T} = (A^{-1})^{\mathsf T}\)로 쓴다.</li>
+          <li>covariance \(\Sigma = RSS^{\mathsf T}R^{\mathsf T}\)에서 \(R \in \mathrm{SO}(3)\)의 \(i\)번째 열을 \(r_i\), scale을 \(s = (s_1, s_2, s_3)\), \(S = \diag(s_1, s_2, s_3)\)로 쓴다. 따라서 \(\Sigma\)의 eigenvalue는 \(\lambda_i = s_i^2\)이다. 이 \(S\)는 surface가 아니다.</li>
+          <li>Section 29.3부터 쓰는 \(W\)는 world 좌표를 camera 좌표로 돌리는 rotation(view matrix의 회전 부분)이고, \(J\)는 투영의 Jacobian matrix다. 3DGS 논문의 기호를 따른 것이며, Part I의 shape operator \(W_p\)와는 관계가 없다.</li>
+          <li>Euclidean inner product는 \(\inner{u}{v}\), 그 길이는 \(\abs{v}\)다. Gaussian의 metric으로 잰 것에는 첨자 \(\Sigma\)를 붙인다(<a href="#eq-29-1-2">(29.1.2)</a>).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-primitive">
+      <h2>The 3DGS Primitive</h2>
+      <p>3DGS의 장면은 Gaussian들의 모임이다. Gaussian 하나는 평균 \(\mu \in \R^3\), covariance matrix \(\Sigma\), opacity \(\alpha \in (0, 1)\), 그리고 보는 방향에 따라 바뀌는 색(<a href="29-6-spherical-harmonics.html">Section 29.6</a>)을 가진다. 공간의 점 \(x\)에서 Gaussian의 값은</p>
+      <div class="equation" id="eq-29-1-1">
+      \[ G(x) = \exp\!\Big(-\tfrac12\,(x - \mu)^{\mathsf T}\,\Sigma^{-1}\,(x - \mu)\Big) \tag{29.1.1} \]
+      </div>
+      <p>이다 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>. 확률밀도와 달리 정규화 상수 \((2\pi)^{-3/2}(\det\Sigma)^{-1/2}\)가 없으므로 \(G(\mu) = 1\)이다. 렌더링에서는 \(G\)를 화면에 투영한 2D Gaussian에 opacity \(\alpha\)를 곱한 값이 그 픽셀에서의 불투명도가 된다(<a href="29-3-splatting-linearization.html#sec-ewa">Section 29.3</a>).</p>
+      <p>\(\Sigma\)는 symmetric이고 \(0\)이 아닌 모든 \(v\)에 대해 \(v^{\mathsf T}\Sigma v \gt 0\)이다. 이런 행렬을 <strong>symmetric positive definite matrix</strong>(대칭 양의 정부호 행렬)라 하고, \(3 \times 3\)인 것 전체를 \(\mathrm{SPD}(3)\)으로 쓴다. \(\Sigma\)가 SPD이면 \(\Sigma^{-1}\)도 SPD다(eigenvalue가 \(1/\lambda_i \gt 0\)). <a href="29-4-space-of-covariances.html#sec-cone">Section 29.4</a>에서는 \(\mathrm{SPD}(3)\) 자체를 하나의 manifold로 본다.</p>
+    </section>
+
+    <section id="sec-inner-product">
+      <h2>\(\Sigma^{-1}\) Is an Inner Product</h2>
+      <div class="thm definition" id="i-29-1-1">
+        <p><span class="thm-head">Definition 29.1.1</span> <span class="thm-name">(the metric of a Gaussian)</span>.
+        \(\Sigma \in \mathrm{SPD}(3)\)에 대해</p>
+        <div class="equation" id="eq-29-1-2">
+        \[ \inner{u}{v}_\Sigma = u^{\mathsf T}\Sigma^{-1}v, \qquad \abs{v}_\Sigma = \sqrt{\inner{v}{v}_\Sigma} \tag{29.1.2} \]
+        </div>
+        <p>로 정한 inner product를 Gaussian \((\mu, \Sigma)\)의 metric이라 부르자. \(\abs{x - \mu}_\Sigma\)를 \(\mu\)에서 \(x\)까지의 <strong>Mahalanobis distance</strong>(마할라노비스 거리)라 한다.</p>
+      </div>
+      <p>\(\Sigma^{-1}\)이 symmetric이므로 \(\inner{u}{v}_\Sigma\)는 symmetric bilinear이고, positive definite이므로 \(\inner{v}{v}_\Sigma \gt 0\) (\(v \ne 0\))이다. 곧 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-1">Definition 1.5.1</a>의 inner product이고, standard basis에 대한 그 Gram matrix가 \(\Sigma^{-1}\)이다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-12">Definition 1.5.12</a>). 이 기호로 <a href="#eq-29-1-1">(29.1.1)</a>을 다시 쓰면</p>
+      <p>\[ G(x) = \exp\!\big(-\tfrac12\abs{x - \mu}_\Sigma^2\big) \]</p>
+      <p>이다. Gaussian의 값은 Gaussian 자신의 metric으로 잰 \(\mu\)까지의 거리 하나로 정해진다. Euclidean 공간의 “반지름 \(k\)인 구”에 해당하는 것은 이 metric의 구 \(\{x : \abs{x - \mu}_\Sigma = k\}\)이고, 그 위에서 \(G = e^{-k^2/2}\)로 일정하다. 이 구를 <strong>\(k\sigma\) ellipsoid</strong>라 부르자(아래 <a href="#i-29-1-2">Proposition 29.1.2</a>).</p>
+      <table>
+        <thead>
+          <tr><th>\(k\)</th><th>1</th><th>2</th><th>3</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>\(G = e^{-k^2/2}\) on \(\abs{x - \mu}_\Sigma = k\)</td><td>0.607</td><td>0.135</td><td>0.011</td></tr>
+        </tbody>
+      </table>
+
+      <p>모양을 읽으려면 \(\Sigma\)를 대각화한다. \(\Sigma\)는 symmetric이므로 spectral theorem에 의해 \(\Sigma = R\Lambda R^{\mathsf T}\)로 쓸 수 있다. 여기서 \(\Lambda = \diag(\lambda_1, \lambda_2, \lambda_3)\)이고 \(\lambda_i \gt 0\)이며, \(R\)의 열 \(r_1, r_2, r_3\)은 orthonormal eigenvector다. 한 열의 부호를 바꿔도 eigenvector이므로 \(\det R = 1\), 곧 \(R \in \mathrm{SO}(3)\)으로 고를 수 있다. \(\lambda_i = s_i^2\) (\(s_i \gt 0\))로 쓰면 \(\Sigma^{-1} = R\Lambda^{-1}R^{\mathsf T}\)이므로</p>
+      <div class="equation" id="eq-29-1-3">
+      \[ \abs{v}_\Sigma^2 = \sum_{i=1}^3 \frac{\inner{r_i}{v}^2}{s_i^2} \tag{29.1.3} \]
+      </div>
+      <p>이다. \(\inner{r_i}{v}\)는 \(v\)의 \(r_i\) 방향 성분이다. 곧 \(r_i\) 방향으로는 길이를 \(s_i\)로 나누어 잰다.</p>
+
+      <div class="thm proposition" id="i-29-1-2">
+        <p><span class="thm-head">Proposition 29.1.2</span> <span class="thm-name">(level sets are ellipsoids)</span>.
+        \(\Sigma = R\,\diag(s_1^2, s_2^2, s_3^2)\,R^{\mathsf T}\)이면 \(k \gt 0\)에 대해 level set \(\{x : \abs{x - \mu}_\Sigma = k\}\)는 중심이 \(\mu\)이고 축이 \(r_1, r_2, r_3\)이며 반축의 길이가 \(ks_1, ks_2, ks_3\)인 ellipsoid다. 특히 \(1\sigma\) ellipsoid는 \(\Sigma\)가 정하는 metric의 unit sphere다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(x - \mu = \sum_i c_i r_i\)로 쓰면 <a href="#eq-29-1-3">(29.1.3)</a>에서 \(\abs{x - \mu}_\Sigma^2 = \sum_i c_i^2/s_i^2\)이다. 따라서 level set은 \(\sum_i c_i^2/(ks_i)^2 = 1\), 곧 \((r_1, r_2, r_3)\) 좌표에서 반축이 \(ks_i\)인 ellipsoid다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-29-1-1">
+        <img src="figures/fig-29-1-1-mahalanobis.svg" alt="평면 위에 파란 농도로 칠한 2D Gaussian G(x)가 있다. 중심 μ에서 오른쪽 위로 30도 기운 길쭉한 ellipse 세 개가 있고, 가장 안쪽이 검은 실선(k = 1), 바깥 두 개가 짙은 회색(k = 2, 3)이다. μ를 중심으로 한 반지름 2의 회색 점선 원이 있다. 원 위의 두 점 가운데 파란 점 p는 장축 방향에 있어 k = 1 ellipse 위에 놓이고, 주홍 점 q는 단축 방향에 있어 k = 2 ellipse보다 바깥에 있다. p에는 |p − μ| = 2, |p − μ|_Σ = 1, G = 0.607, q에는 |q − μ| = 2, |q − μ|_Σ = 2.86, G = 0.017이 적혀 있다. 오른쪽에 G의 색 막대가 있다.">
+        <figcaption><span class="fig-head">Figure 29.1.1.</span>
+        Euclidean distance와 Mahalanobis distance. <em>무엇을</em>: \(\mu = (1, 0.5)\), 장축이 \(x^1\)축과 \(30^\circ\)를 이루고 \(s = (2, 0.7)\)인 2D Gaussian(곧 \(\Sigma \approx \begin{pmatrix} 3.12 & 1.52 \\ 1.52 & 1.37 \end{pmatrix}\)). <em>읽는 법</em>: 배경의 파란 농도가 \(G(x)\)이고(오른쪽 색 막대), 검은 곡선과 짙은 회색 곡선은 \(\abs{x - \mu}_\Sigma = k\) (\(k = 1, 2, 3\))인 level set이다. 회색 점선 원은 Euclidean distance가 2인 점들이다. 파란 화살표와 주홍 화살표는 \(\mu\)에서 그 원 위의 두 점 \(p = \mu + 2r_1\)(장축 방향), \(q = \mu + 2r_2\)(단축 방향)으로 간다. <em>볼 것</em>: \(p\)와 \(q\)는 Euclidean으로는 똑같이 2만큼 떨어져 있지만, \(p\)는 \(k = 1\) ellipse 위에 있어 \(G(p) = 0.607\)이고 \(q\)는 \(k = 2\) ellipse보다 바깥(\(\abs{q - \mu}_\Sigma = 2/0.7 \approx 2.86\))에 있어 \(G(q) \approx 0.017\)이다. 값이 약 36배 다르다. <em>본문과의 연결</em>: Gaussian의 값은 Euclidean distance가 아니라 <a href="#eq-29-1-2">(29.1.2)</a>의 metric으로 잰 거리로 정해지고, level set은 <a href="#i-29-1-2">Proposition 29.1.2</a>의 ellipse다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-1-1">Figure 29.1.1</a>을 보자. 회색 점선 원 위의 두 점 \(p\)와 \(q\)는 \(\mu\)에서 Euclidean으로 똑같이 2만큼 떨어져 있다. 그런데 장축 방향의 \(p\)는 가장 안쪽의 검은 ellipse(\(k = 1\)) 위에 있고, 단축 방향의 \(q\)는 두 번째 ellipse(\(k = 2\))보다도 바깥에 있다. 값은 \(G(p) = 0.607\), \(G(q) \approx 0.017\)이다. Gaussian의 입장에서 \(p\)는 가깝고 \(q\)는 멀다. Gaussian이 보는 거리는 \(\Sigma^{-1}\)의 metric으로 잰 거리다.</p>
+      <p>이 그림은 Tour의 <a href="../00-tour/0-3-surfaces.html#fig-0-3-3">Figure 0.3.3</a>과 같은 종류의 그림이다. 거기서는 first fundamental form의 Gram matrix \(\begin{pmatrix} E &amp; F \\ F &amp; G \end{pmatrix}\)가 정하는 inner product의 unit circle을 UV 평면에 그렸고, 반축의 길이가 Gram matrix의 eigenvalue \(\lambda\)에 대해 \(1/\sqrt{\lambda}\)(그림에서는 \(\varepsilon/\sqrt\lambda\))였다. 여기서는 Gram matrix가 \(\Sigma^{-1}\)이고 그 eigenvalue가 \(1/s_i^2\)이므로 반축이 \(s_i\)다. Gaussian의 \(1\sigma\) ellipse는 metric의 unit circle이다.</p>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: 상수 Riemannian metric</p>
+        <p><a href="../00-tour/0-8-riemannian.html#i-0-8-1">Definition 0.8.1</a>의 말로 하면, \(\R^3\)의 모든 점에서 같은 행렬 \((g_{ij}) = \Sigma^{-1}\)을 주는 것은 Riemannian metric이다. 이 metric에서 곡선의 길이는 <a href="../00-tour/0-8-riemannian.html#eq-0-8-2">(0.8.2)</a>로 재고, 두 점 사이의 거리는 정확히 \(\abs{x - y}_\Sigma\)이며 geodesic은 직선이다. 새로워진 것은 하나다. whitening map \(x \mapsto \Sigma^{-1/2}(x - \mu)\)가 이 metric을 Euclidean metric으로 바꾸는 isometry이므로(\(\abs{\Sigma^{-1/2}v}^2 = v^{\mathsf T}\Sigma^{-1}v\)), Gaussian 하나만 보면 공간은 평평하다. curvature가 있는 공간은 Gaussian들의 metric 자체를 점으로 모은 \(\mathrm{SPD}(3)\)에서 나타난다(<a href="29-4-space-of-covariances.html#sec-metrics">Section 29.4</a>).</p>
+      </aside>
+    </section>
+
+    <section id="sec-affine-image">
+      <h2>A Gaussian Is an Affine Image of the Standard Gaussian</h2>
+      <p>\(\Sigma = R\Lambda R^{\mathsf T}\)에서 \(\Lambda = SS^{\mathsf T}\) (\(S = \diag(s)\))이므로</p>
+      <div class="equation" id="eq-29-1-4">
+      \[ \Sigma = RSS^{\mathsf T}R^{\mathsf T}, \qquad x = \mu + RSy \tag{29.1.4} \]
+      </div>
+      <p>이다. 첫 식이 3DGS가 쓰는 식이다 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>. 둘째 식은 그 뜻이다. 확률의 말로는 \(y\)가 standard normal distribution(covariance \(I_3\))을 따르면 \(x = \mu + RSy\)의 covariance가 \((RS)I_3(RS)^{\mathsf T} = \Sigma\)라는 말이다. 기하의 말로는 affine map \(y \mapsto \mu + RSy\)가 반지름 \(k\)인 구 \(\abs{y} = k\)를 \(k\sigma\) ellipsoid로 보낸다는 말이다. 실제로 \(\Sigma^{-1} = RS^{-2}R^{\mathsf T}\)이므로</p>
+      <p>\[ \abs{RSy}_\Sigma^2 = y^{\mathsf T}SR^{\mathsf T}\,(RS^{-2}R^{\mathsf T})\,RSy = y^{\mathsf T}y = \abs{y}^2 \]</p>
+      <p>이다. 곧 \(RS\)는 Euclidean metric의 \(\R^3\)에서 Gaussian의 metric의 \(\R^3\)으로 가는 isometry다. 3D 그림은 시점에 따라 헷갈리므로 2D에서 같은 일을 보자.</p>
+
+      <figure class="dg-figure" id="fig-29-1-2">
+        <img src="figures/fig-29-1-2-affine-image.svg" alt="두 패널. 왼쪽 (a)는 가로축 y¹, 세로축 y²인 평면에 정사각 격자가 있고, 원점 중심의 원 세 개(k = 1은 검은 실선과 하늘색 채움, k = 2, 3은 회색)와 파란 화살표 e₁, 초록 화살표 e₂, 주황 점 y*가 있다. 곡선 화살표 μ + RS가 오른쪽 패널을 가리킨다. 오른쪽 (b)는 가로축 x¹, 세로축 x²인 평면에 같은 격자가 30도 돌고 늘어난 모양으로 그려져 있고, 원 세 개가 μ를 중심으로 30도 기운 ellipse 세 개가 되었다. μ에서 파란 화살표 s₁r₁이 장축을 따라, 초록 화살표 s₂r₂가 단축을 따라 뻗고, 주황 점 x*가 y*의 image 자리에 있다.">
+        <figcaption><span class="fig-head">Figure 29.1.2.</span>
+        Gaussian은 표준 Gaussian의 affine image다. <em>무엇을</em>: affine map \(y \mapsto x = \mu + RSy\), \(\mu = (1, 0.5)\), \(R\) = \(30^\circ\) 회전, \(s = (2, 0.7)\) (<a href="#fig-29-1-1">Figure 29.1.1</a>과 같은 Gaussian). <em>읽는 법</em>: (a)는 정의역 \(y\)-평면으로, 검은 원과 회색 원이 \(\abs{y} = 1, 2, 3\)(표준 Gaussian의 level set), 가는 회색 선이 좌표 격자, 파랑 \(e_1\)과 초록 \(e_2\)가 standard basis, 주황 점이 \(y^* = (1.3, 0.9)\)다. (b)는 같은 것을 \(\mu + RS\)로 보낸 image다. 격자는 \(S\)로 가로 2배·세로 0.7배 늘어난 뒤 \(R\)로 \(30^\circ\) 돌았고, 원은 ellipse \(\abs{x - \mu}_\Sigma = 1, 2, 3\)이 되었다. 파랑 \(s_1r_1\)과 초록 \(s_2r_2\)는 \(e_1, e_2\)의 image이고, 주황 점 \(x^* = \mu + RSy^*\)는 \(y^*\)의 image다. <em>볼 것</em>: \(e_1\)(길이 1)은 길이 \(s_1 = 2\)인 장축 화살표가, \(e_2\)는 길이 \(s_2 = 0.7\)인 단축 화살표가 된다. \(y^*\)는 (a)에서 \(k = 1\)과 \(k = 2\) 사이(\(\abs{y^*} \approx 1.58\))에 있고, \(x^*\)도 (b)에서 같은 두 ellipse 사이에 있다. <em>본문과의 연결</em>: <a href="#eq-29-1-4">(29.1.4)</a>의 \(RS\)는 \(\abs{y}\)를 \(\abs{x - \mu}_\Sigma\)로 보존하는 isometry이고, 반축 \(s_i\)와 축 \(r_i\)는 <a href="#i-29-1-2">Proposition 29.1.2</a>의 것이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-1-2">Figure 29.1.2</a>의 (a)에서 (b)로 따라가 보자. (a)의 정사각 격자와 동심원이 (b)에서는 \(30^\circ\) 기운 직사각 격자와 동심 ellipse가 된다. 파란 \(e_1\)은 장축 방향의 \(s_1r_1\)(길이 2)로, 초록 \(e_2\)는 단축 방향의 \(s_2r_2\)(길이 0.7)로 간다. 주황 점 \(y^*\)는 (a)에서 첫째 원과 둘째 원 사이에 있고, 그 image \(x^*\)도 (b)에서 첫째 ellipse와 둘째 ellipse 사이에 있다. 원 위에서 같은 거리에 있던 점들은 ellipse 위에서도 같은 Mahalanobis distance에 있다. 그래서 Gaussian을 다루는 계산은 언제나 “표준 Gaussian에서 계산하고 \(\mu + RS\)로 옮긴다”로 할 수 있다.</p>
+      <p>이 관점은 이 장에서 두 번 다시 쓰인다. <a href="29-2-covariance-parametrization.html">Section 29.2</a>는 \((R, s) \mapsto \Sigma\)를 parametrization으로 보고 그 symmetry와 singularity를 본다. <a href="29-3-splatting-linearization.html#sec-affine">Section 29.3</a>은 affine map을 한 번 더 합성해도 Gaussian이 Gaussian으로 남는다는 사실(아래 <a href="#eq-29-1-5">(29.1.5)</a>)에서 출발한다.</p>
+    </section>
+
+    <section id="sec-transformation">
+      <h2>How \(\Sigma\) and \(\Sigma^{-1}\) Transform</h2>
+      <p>좌표를 바꾸면 두 행렬은 서로 반대로 변한다. invertible matrix \(A\)와 \(b \in \R^3\)으로 새 좌표 \(x' = Ax + b\)를 쓰자. world 좌표에서 camera 좌표로 가는 것(\(A = W\)), 단위를 미터에서 센티미터로 바꾸는 것(\(A = 100\,I_3\))이 그런 예다.</p>
+      <div class="thm proposition" id="i-29-1-3">
+        <p><span class="thm-head">Proposition 29.1.3</span> <span class="thm-name">(transformation law)</span>.
+        \(G\)가 <a href="#eq-29-1-1">(29.1.1)</a>의 Gaussian이고 \(x' = Ax + b\) (\(A\) invertible)이면, \(x'\)의 함수 \(G\big(A^{-1}(x' - b)\big)\)는 다음의 평균과 covariance를 가진 Gaussian이다.</p>
+        <div class="equation" id="eq-29-1-5">
+        \[ \mu' = A\mu + b, \qquad \Sigma' = A\Sigma A^{\mathsf T} \tag{29.1.5} \]
+        </div>
+        <p>따라서 metric의 행렬은</p>
+        <div class="equation" id="eq-29-1-6">
+        \[ \Sigma'^{-1} = A^{-\mathsf T}\,\Sigma^{-1}A^{-1} \tag{29.1.6} \]
+        </div>
+        <p>로 바뀌고, 모든 \(v\)에 대해 \(\abs{Av}_{\Sigma'} = \abs{v}_\Sigma\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(x = A^{-1}(x' - b)\)이면 \(x - \mu = A^{-1}\big(x' - (A\mu + b)\big) = A^{-1}(x' - \mu')\)이다. 따라서</p>
+        <p>\[ (x - \mu)^{\mathsf T}\Sigma^{-1}(x - \mu) = (x' - \mu')^{\mathsf T}A^{-\mathsf T}\Sigma^{-1}A^{-1}(x' - \mu') \]</p>
+        <p>이고, \(A^{-\mathsf T}\Sigma^{-1}A^{-1} = (A\Sigma A^{\mathsf T})^{-1}\)이다. 마지막 주장은 \((Av)^{\mathsf T}A^{-\mathsf T}\Sigma^{-1}A^{-1}(Av) = v^{\mathsf T}\Sigma^{-1}v\)이다.</p>
+      </div>
+      <p>두 식을 성분으로 보면 차이가 분명하다. \(x - \mu\)는 vector이므로 그 성분은 \(A\)로 바뀐다(contravariant). \(\Sigma\)는 평균적인 \((x - \mu)(x - \mu)^{\mathsf T}\)이므로 vector 두 개의 곱처럼, 곧 \(A\)를 양쪽에 한 번씩 곱해 바뀐다. 성분 \(\Sigma^{ij}\)의 두 첨자가 모두 위에 있는 contravariant 2-tensor다. 반대로 \(\Sigma^{-1}\)은 vector 두 개를 받아 수를 내는 inner product의 행렬이므로, 두 첨자가 모두 아래에 있는 covariant 2-tensor로서 \(A^{-1}\)로 바뀐다. 이것은 Gram matrix의 변환 공식 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-13">Proposition 1.5.13</a>(c)와 같다. <a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>에서 vector의 성분과 covector의 성분이 반대로 바뀌어 그 짝 \(\alpha(v)\)가 좌표에 무관했던 것처럼, 여기서도 두 변환이 반대이기 때문에 Mahalanobis distance가 좌표에 무관하다. 예를 들어 단위를 센티미터로 바꾸면 \(\Sigma\)는 \(10^4\)배, \(\Sigma^{-1}\)은 \(10^{-4}\)배가 되지만 \(\abs{x - \mu}_\Sigma\)와 \(G(x)\)는 그대로다(<a href="#ex-29-1-3">Exercise 29.1.3</a>).</p>
+      <p>차이가 결정적으로 드러나는 것은 \(A\)가 invertible이 아닐 때다. \(2 \times 3\) 행렬 \(P\)로 3차원을 2차원으로 투영하면 \(P^{-1}\)이 없으므로 <a href="#eq-29-1-6">(29.1.6)</a>은 쓸 수 없다. 그러나 <a href="#eq-29-1-5">(29.1.5)</a>의 \(P\Sigma P^{\mathsf T}\)는 여전히 뜻이 있다. \(x\)가 covariance \(\Sigma\)인 Gaussian을 따를 때 \(Px\)의 covariance이고, 3D Gaussian을 \(P\)의 fiber(평행한 직선)를 따라 적분해 얻은 2D Gaussian의 covariance다(<a href="29-3-splatting-linearization.html#i-29-3-1">Proposition 29.3.1</a>). contravariant인 \(\Sigma\)는 어떤 linear map으로든 앞으로 밀어 보낼 수 있고(pushforward), covariant인 \(\Sigma^{-1}\)은 <a href="../00-tour/0-7-forms.html#eq-0-7-2">(0.7.2)</a>처럼 뒤로 당길 수만 있다(pullback).</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: splatting은 \(\Sigma\)를 투영한 뒤에 inverse matrix를 구한다</p>
+        <p>3DGS의 rasterizer는 Gaussian마다 (1) 3D covariance \(\Sigma\)를 화면으로 밀어 2D covariance \(\Sigma_{2D} = JW\Sigma W^{\mathsf T}J^{\mathsf T}\)를 만들고(<a href="29-3-splatting-linearization.html#eq-29-3-4">(29.3.4)</a>, 여기에 <a href="29-3-splatting-linearization.html#sec-filters">dilation</a> \(0.3\,I_2\)를 더한다), (2) 그 inverse matrix(공식 구현에서는 conic이라 부른다)를 구한 뒤, (3) 픽셀 \(u\)마다 \(-\tfrac12 (u - u_0)^{\mathsf T}\Sigma_{2D}^{-1}(u - u_0)\)을 계산한다 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>. 이 순서는 변환 법칙이 정한다. 투영은 invertible이 아니므로 3D의 metric \(\Sigma^{-1}\)을 화면으로 보낼 방법이 없고, 밀어 보낼 수 있는 것은 contravariant인 \(\Sigma\)뿐이다. 그런데 픽셀에서 값을 계산하려면 화면 위에서 거리를 재야 하므로 화면의 metric이 필요하다. 그래서 2D에서 다시 inverse matrix를 구한다.</p>
+        <p>반대로 화면의 metric을 3D로 당기면 \(P^{\mathsf T}\Sigma_{2D}^{-1}P\)가 되는데, 이것은 rank 2인 symmetric matrix라서 inner product가 아니다. kernel 방향, 곧 ray 방향의 길이를 \(0\)으로 잰다. 같은 ray 위의 점들은 화면에서 구별되지 않는다는 사실이 metric의 말로는 이렇게 나타난다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-normal">
+      <h2>The Shortest Axis Is a Normal</h2>
+      <p>\(s_3\)이 \(s_1, s_2\)보다 훨씬 작은 Gaussian을 생각하자. \(1\sigma\) ellipsoid는 반지름이 \(s_1, s_2\)이고 두께가 \(2s_3\)인 납작한 disk에 가깝다. disk는 평면 조각이다. 그 평면은 \(r_1, r_2\)가 펼치고, normal은 가장 짧은 축 \(r_3\), 곧 \(\Sigma\)의 가장 작은 eigenvalue의 eigenvector다.</p>
+      <p>이것은 Tour의 PCA normal estimation(<a href="../00-tour/0-3-surfaces.html#fig-0-3-4">Figure 0.3.4</a>)과 같은 원리다 <a class="cite" href="../../references.html#Hoppe92">[Hoppe92]</a>. 거기서는 이웃 점들의 covariance matrix를 만들고 그 가장 작은 eigenvalue의 eigenvector를 normal로 썼다. 같은 사실을 식으로 쓰면 이렇다. unit vector \(n\)에 대해 \(n^{\mathsf T}\Sigma n\)은 Gaussian을 \(n\) 방향으로 잰 분산이고, <a href="#eq-29-1-3">(29.1.3)</a>과 같은 계산으로 \(n^{\mathsf T}\Sigma n = \sum_i s_i^2\inner{r_i}{n}^2 \ge s_3^2\)이다. 등호는 \(n = \pm r_3\)일 때다. surface에 붙은 납작한 Gaussian은 surface에 수직인 방향으로 가장 덜 퍼져 있다.</p>
+
+      <figure class="dg-figure" id="fig-29-1-3">
+        <img src="figures/fig-29-1-3-flat-normal.svg" alt="두 패널. 왼쪽 (a)는 반투명한 회색 sphere 조각 위에 하늘색의 납작한 ellipsoid 일곱 개가 붙어 있고, 각 ellipsoid에서 주홍 화살표가 sphere 바깥쪽으로 뻗어 있다. 맨 위의 화살표에 r₃라고 적혀 있다. 오른쪽 (b)는 같은 구를 y = 0으로 자른 cross-section으로, 검은 원호 위에 가늘고 긴 하늘색 ellipse 세 개가 원호에 접해 놓여 있다. 각 ellipse에서 파란 화살표 s₁r₁은 원호의 접선 방향으로, 주홍 화살표 r₃는 원호에 수직인 바깥 방향으로 뻗어 있다. 원호 옆에 surface라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 29.1.3.</span>
+        납작한 Gaussian은 surface 조각처럼 행동하고, 가장 짧은 축이 normal이다. <em>무엇을</em>: 반지름 2인 sphere 위에 놓은 Gaussian들. 각 Gaussian은 \(s = (0.32, 0.20, 0.04)\)이고, \(r_1, r_2\)는 그 점의 tangent plane 안에(평면 안의 방향은 무작위), \(r_3\)은 sphere의 unit normal로 두었다. <em>읽는 법</em>: (a)의 회색 면은 sphere, 하늘색 납작한 덩어리는 각 Gaussian의 \(1\sigma\) ellipsoid(파란 테두리는 \(r_1, r_2\) 평면의 가장자리), 주홍 화살표는 \(+r_3\)(길이 0.45로 그렸다)이다. (b)는 \(y = 0\)인 평면으로 자른 cross-section이다. 검은 원호가 surface, 하늘색 ellipse는 \(s = (0.32, 0.04)\)인 2D Gaussian, 파란 화살표는 장축 \(s_1r_1\), 주홍 화살표는 가장 짧은 축 \(r_3\)이다. <em>볼 것</em>: 모든 Gaussian에서 주홍 화살표가 surface에 수직이다. 각 Gaussian의 \(\Sigma\)에서 가장 작은 eigenvalue \(s_3^2 = 0.0016\)의 eigenvector를 계산하면 정확히 sphere의 normal이 나온다(스크립트에서 확인). <em>본문과의 연결</em>: \(n^{\mathsf T}\Sigma n \ge s_3^2\)이고 등호는 \(n = \pm r_3\)일 때다. PCA normal estimation(<a href="../00-tour/0-3-surfaces.html#fig-0-3-4">Figure 0.3.4</a>)과 같은 원리다. 회전해 볼 수 있는 <a href="figures/fig-29-1-3-flat-normal-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-1-3">Figure 29.1.3</a>의 (a)에서 하늘색 Gaussian들은 sphere에 붙은 작은 disk처럼 보이고, 주홍 화살표가 모두 sphere 바깥쪽을 가리킨다. 3D 그림은 앞뒤가 헷갈릴 수 있으므로 (b)에 cross-section을 그렸다. (b)에서 각 ellipse의 장축(파랑)은 원호의 접선 방향이고 가장 짧은 축(주홍)은 원호에 수직이다. 이렇게 \(\{\mu + c_1r_1 + c_2r_2\}\)가 surface의 tangent plane을 근사하고 \(r_3\)이 normal이 되는 Gaussian을 surfel(surface element)처럼 쓸 수 있다.</p>
+      <p>3DGS의 loss에는 Gaussian을 납작하게 만드는 항이 없다. 그래서 normal이나 mesh가 필요한 응용을 위해, Gaussian을 납작하게 유도하거나 처음부터 납작하게 만드는 방법이 제안되었다. SuGaR <a class="cite" href="../../references.html#Guedon24">[Guedon24]</a>는 Gaussian이 surface에 붙어 납작해지도록 regularization을 더하고, 2D Gaussian Splatting <a class="cite" href="../../references.html#Huang24">[Huang24]</a>은 세 번째 scale을 없앤 2D Gaussian(평면 위의 disk)을 primitive로 쓴다. 후자는 <a href="../30-radiance-field-surfaces/index.html#toc-30-3">Section 30.3</a>에서 다룬다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 납작한 Gaussian의 normal은 언제 믿을 수 있는가</p>
+        <ul>
+          <li><strong>부호는 정해지지 않는다.</strong> \(\Sigma = \sum_i s_i^2\,r_ir_i^{\mathsf T}\)는 \(r_3\)을 \(r_3r_3^{\mathsf T}\)로만 포함하므로, \(r_3\)과 \(-r_3\)은 같은 Gaussian을 준다. 어느 쪽이 바깥인지는 \(\Sigma\)가 알려 주지 않는다. PCA normal의 부호 문제와 같고, 카메라 쪽을 향하게 고르는 식의 외부 규칙이 필요하다.</li>
+          <li><strong>두 작은 scale이 같으면 normal이 없다.</strong> \(s_2 = s_3\)이면 바늘 모양이 되어 가장 작은 eigenvalue의 eigenspace가 2차원이므로 \(r_3\)이 하나로 정해지지 않는다(<a href="#ex-29-1-5">Exercise 29.1.5</a>, Tour의 <a href="../00-tour/0-3-surfaces.html#ex-0-3-3">Exercise 0.3.3</a>(b)). \(s_1 = s_2 = s_3\)이면 어느 방향도 특별하지 않다.</li>
+          <li><strong>간격이 좁으면 흔들린다.</strong> \(\Sigma\)가 \(\delta\Sigma\)만큼 변할 때 \(r_3\)의 1차 변화는 \(\delta r_3 = \sum_{j = 1, 2} \frac{r_j^{\mathsf T}\,\delta\Sigma\,r_3}{s_3^2 - s_j^2}\,r_j\)이다. 분모가 eigenvalue의 간격이므로, \(s_2\)가 \(s_3\)에 가까울수록 같은 잡음이 normal을 크게 흔든다. 같은 분모 \(s_i^2 - s_j^2\)가 <a href="29-2-covariance-parametrization.html">Section 29.2</a>에서 rotation의 gradient로 다시 나온다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-footprint">
+      <h2>The Footprint on the Screen</h2>
+      <p><a href="29-3-splatting-linearization.html#sec-ewa">Section 29.3</a>에서 보듯이 3D Gaussian을 화면으로 투영하면 2D Gaussian이 된다. 그 covariance \(\Sigma_{2D} = \begin{pmatrix} a &amp; b \\ b &amp; c \end{pmatrix}\)(단위는 pixel²)도 지금까지와 똑같이 읽는다. level set은 ellipse이고, 반축은 \(k\sqrt{\lambda}\)다. \(2 \times 2\) symmetric matrix의 eigenvalue는 \(m = (a + c)/2\)로 쓸 때</p>
+      <div class="equation" id="eq-29-1-7">
+      \[ \begin{aligned} \lambda_{\max} &amp;= m + \sqrt{m^2 - \det\Sigma_{2D}}, \\ \lambda_{\min} &amp;= m - \sqrt{m^2 - \det\Sigma_{2D}} \end{aligned} \tag{29.1.7} \]
+      </div>
+      <p>이다. 3DGS는 화면을 \(16 \times 16\) 픽셀의 tile로 나누고, Gaussian을 그것이 겹치는 tile마다 배정해 depth 순으로 정렬한다 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>. 공식 구현은 <a href="#eq-29-1-7">(29.1.7)</a>로 \(\lambda_{\max}\)를 구해 반지름 \(r = \lceil 3\sqrt{\lambda_{\max}}\,\rceil\) 픽셀인 원으로 Gaussian의 범위를 잡고, 그 원을 둘러싼 정사각형과 겹치는 tile을 고른다. \(3\sigma\) ellipse의 장반축이 \(3\sqrt{\lambda_{\max}}\)이므로 ellipse는 이 원 안에 들어간다. 이때 쓰는 \(\Sigma_{2D}\)는 <a href="29-3-splatting-linearization.html#sec-filters">Section 29.3</a>의 dilation(대각 성분에 0.3을 더하는 것)을 마친 행렬이고, <a href="#eq-29-1-7">(29.1.7)</a>의 근호 안의 값이 0.1보다 작으면 0.1로 바꾼다.</p>
+
+      <figure class="dg-figure" id="fig-29-1-4">
+        <img src="figures/fig-29-1-4-footprint.svg" alt="16픽셀 간격의 회색 격자(tile)가 그려진 화면 영역. 가운데에 오른쪽 아래로 기운 가늘고 긴 파란 ellipse가 있고, 중심에서 장축을 따라 파란 화살표와 3√λmax = 60이라는 글자가 있다. 그 ellipse를 감싸는 주황 점선 원(circle r = 60 px)과 원을 감싸는 회색 정사각형이 있다. 정사각형 안의 tile 64개는 연한 주황으로, 그중 ellipse가 지나가는 tile 19개는 하늘색으로 칠해져 있다. 위에 3-sigma ellipse meets 19 tiles, 아래에 square bbox: 64 tiles라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 29.1.4.</span>
+        화면 위 2D Gaussian의 범위와 tile 배정. <em>무엇을</em>: 중심이 \((130, 100)\) 픽셀이고 \(\lambda_{\max} = 20^2\), \(\lambda_{\min} = (10/3)^2\) pixel²이며 장축이 \(u\)축과 \(30^\circ\)인 2D Gaussian(세로축은 영상 관례대로 아래로 증가). <em>읽는 법</em>: 회색 격자의 한 칸이 \(16 \times 16\) tile이다. 파란 곡선은 \(3\sigma\) ellipse(장반축 60 px, 단반축 10 px), 주황 점선은 반지름 \(r = \lceil 3\sqrt{\lambda_{\max}}\,\rceil = 60\) px인 원, 회색 사각형은 그 원의 bounding box다. 연한 주황 칸은 bounding box와 겹쳐 이 Gaussian이 배정되는 tile이고, 하늘색 칸은 그 가운데 \(3\sigma\) ellipse가 실제로 지나가는 tile이다. <em>볼 것</em>: 배정되는 tile은 64개인데 ellipse가 닿는 tile은 19개다. 원의 넓이와 ellipse의 넓이의 비는 \(\sqrt{\lambda_{\max}/\lambda_{\min}} = 6\)이다. <em>본문과의 연결</em>: 반지름은 <a href="#eq-29-1-7">(29.1.7)</a>의 \(\lambda_{\max}\)로 정해지고, 낭비되는 정도는 아래 상자에서 설명한다.</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-29-1-4">
+        <p><span class="thm-head">Example 29.1.4</span> <span class="thm-name">(footprint of an elongated Gaussian)</span>.
+        <a href="#fig-29-1-4">Figure 29.1.4</a>의 Gaussian에서 dilation을 마친 \(\Sigma_{2D}\)가 \(R_{30^\circ}\diag(400,\ 100/9)\,R_{30^\circ}^{\mathsf T}\)라 하자. <a href="#eq-29-1-7">(29.1.7)</a>에 넣으면 \(m = (400 + 100/9)/2\), \(\det\Sigma_{2D} = 400 \cdot 100/9\)이므로 \(\lambda_{\max} = 400\)이고 \(r = \lceil 3 \cdot 20\rceil = 60\)이다. 중심 \(u = 130\)에서 \(\pm 60\)은 tile 열 4–11(8개), \(v = 100\)에서 \(\pm 60\)은 tile 행 2–9(8개)를 덮으므로 \(8 \times 8 = 64\)개 tile에 배정된다. 그림을 따라가면 파란 ellipse는 왼쪽 위에서 오른쪽 아래로 대각선을 따라 지나가며 하늘색 칸 19개만 지난다. 나머지 45개 tile에서는 이 Gaussian을 정렬 목록에 넣고 픽셀마다 계산한 뒤 버리게 된다.</p>
+        <p class="verified">Verification: <code>verify/v-29-1-gaussian-metric.py</code></p>
+      </div>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 길쭉한 Gaussian이 비싼 이유</p>
+        <p>범위를 원으로 잡는 것은 Euclidean metric의 ball로 Gaussian의 metric의 ball을 덮는 일이다. 반지름을 \(\lambda_{\max}\) 쪽에 맞춰야 하므로 낭비되는 넓이의 비율은 두 metric이 얼마나 다른지, 곧 \(\sqrt{\lambda_{\max}/\lambda_{\min}}\)(2D Gaussian의 장축과 단축의 비)로 정해진다. 등방적인 Gaussian은 낭비가 없고, 비가 10인 Gaussian은 원 넓이의 90%가 ellipse 밖이다. 원 안이라도 ellipse 밖의 픽셀은 Mahalanobis distance가 3보다 크므로 \(G \lt e^{-4.5} \approx 0.011\)이다. 공식 구현은 \(\alpha G \lt 1/255\)인 기여를 건너뛰므로, 실제로 쓰이는 범위는 Mahalanobis distance로 \(\sqrt{2\ln(255\alpha)}\) 이내이고, \(\alpha \lt 1\)이므로 이것은 언제나 \(\sqrt{2\ln 255} \approx 3.33\)보다 작다. 범위를 고르는 기준을 Gaussian 자신의 metric(ellipse)으로 바꾸면 이 낭비를 줄일 수 있다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>inner product와 Gram matrix: <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-1">Definition 1.5.1</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-12">Definition 1.5.12</a>, Gram matrix의 변환 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-13">Proposition 1.5.13</a>. inner product가 vector를 covector로 바꾸는 일(\(\Sigma^{-1}v\)): <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-15">Proposition 1.5.15</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-16">Example 1.5.16</a>.</li>
+        <li>contravariant와 covariant: <a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-7">Definition 1.4.7</a>. 두 첨자가 모두 위·아래에 있는 tensor: <a href="../16-covectors-tensors/index.html#toc-16-4">Section 16.4</a>.</li>
+        <li>spectral theorem과 Rayleigh quotient(eigenvalue가 \(n^{\mathsf T}\Sigma n\)의 최대·최소): 2차원에서는 <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-3">Theorem 8.3.3</a>과 <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-5">Theorem 8.3.5</a>(shape operator에서 같은 논증).</li>
+        <li>정규화 상수의 \(\sqrt{\det\Sigma}\)가 부피의 배율인 이유: <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-8">Proposition 2.6.8</a>, <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">Theorem 2.6.9</a>.</li>
+        <li>Riemannian metric과 isometry의 정확한 정의: <a href="../21-riemannian-metrics/index.html#toc-21-1">Section 21.1</a>, <a href="../21-riemannian-metrics/index.html#toc-21-3">Section 21.3</a>.</li>
+        <li>투영의 Jacobian과 그 kernel(= ray 방향): <a href="../27-cameras-rays/index.html#toc-27-1">Section 27.1</a>. surfel과 2D Gaussian: <a href="../30-radiance-field-surfaces/index.html#toc-30-3">Section 30.3</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>3DGS의 Gaussian은 \(G(x) = \exp(-\tfrac12\abs{x - \mu}_\Sigma^2)\)이다. \(\Sigma^{-1}\)이 inner product \(\inner{u}{v}_\Sigma = u^{\mathsf T}\Sigma^{-1}v\)를 정하고, Gaussian의 값은 이 metric으로 잰 거리(Mahalanobis distance)만으로 정해진다.</li>
+        <li>\(\Sigma = R\,\diag(s_i^2)\,R^{\mathsf T}\)이면 level set은 축이 \(r_i\), 반축이 \(ks_i\)인 ellipsoid이고, \(1\sigma\) ellipsoid는 metric의 unit sphere다. Gaussian은 표준 Gaussian의 affine image \(x = \mu + RSy\)다.</li>
+        <li>좌표를 \(x' = Ax + b\)로 바꾸면 \(\Sigma \mapsto A\Sigma A^{\mathsf T}\)(contravariant), \(\Sigma^{-1} \mapsto A^{-\mathsf T}\Sigma^{-1}A^{-1}\)(covariant, metric)이다. 투영처럼 invertible이 아닌 map으로는 \(\Sigma\)만 밀어 보낼 수 있다. 그래서 rasterizer는 \(\Sigma\)를 투영한 뒤 2D에서 inverse matrix를 구한다.</li>
+        <li>납작한 Gaussian의 가장 짧은 축 \(r_3\)은 PCA normal과 같은 원리로 normal이다. 부호는 정해지지 않고, \(s_2 \approx s_3\)이면 흔들리거나 정해지지 않는다.</li>
+        <li>화면 위 범위는 \(r = \lceil 3\sqrt{\lambda_{\max}}\rceil\)인 원으로 잡히고, 길쭉한 Gaussian은 장단축 비만큼 낭비가 생긴다.</li>
+      </ul>
+      <p class="next">다음 절에서는 3DGS가 \(\Sigma\)를 rotation과 scale로 쓰는 map \((R, s) \mapsto RSS^{\mathsf T}R^{\mathsf T}\) 자체를 본다. 여러 \((R, s)\)가 같은 \(\Sigma\)를 주고, 두 scale이 같아지는 곳에서는 rotation이 아예 학습되지 않는다. 그 이유가 이 절의 마지막 상자에 나온 분모 \(s_i^2 - s_j^2\)다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-29-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 29.1.1</span> <span class="level">★</span>
+        \(\Sigma = R\,\diag(4,\ 1,\ 0.01)\,R^{\mathsf T}\)이고 \(R\)은 \(z\)축 둘레의 \(30^\circ\) 회전이다. \(1\sigma\) ellipsoid의 세 반축의 길이와 방향, normal로 쓸 축을 구하여라. 또 \(v = 0.3\,e_3\)과 \(w = 2(\cos 30^\circ, \sin 30^\circ, 0)\)의 \(\abs{\cdot}_\Sigma\)를 구하고, 둘 중 어느 쪽 끝점에서 \(G\)가 더 큰지 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(s = (2, 1, 0.1)\)이고 축은 \(R\)의 열, 곧 \(r_1 = (\cos 30^\circ, \sin 30^\circ, 0)\), \(r_2 = (-\sin 30^\circ, \cos 30^\circ, 0)\), \(r_3 = e_3\)이다. 반축은 \(r_1\) 방향 2, \(r_2\) 방향 1, \(e_3\) 방향 0.1이다. 가장 짧은 축 \(e_3\)(부호는 \(\pm\))이 normal이다. <a href="#eq-29-1-3">(29.1.3)</a>에서 \(\abs{v}_\Sigma^2 = 0.3^2/0.1^2 = 9\)이므로 \(\abs{v}_\Sigma = 3\), \(\abs{w}_\Sigma^2 = 2^2/2^2 = 1\)이므로 \(\abs{w}_\Sigma = 1\)이다. Euclidean으로는 \(v\)가 훨씬 짧지만(0.3 대 2), \(G(\mu + v) = e^{-4.5} \approx 0.011\)이고 \(G(\mu + w) = e^{-0.5} \approx 0.607\)이므로 \(w\)의 끝점에서 더 크다. 납작한 Gaussian은 normal 방향으로 조금만 벗어나도 거의 사라진다.</p>
+          <p class="verified">Verification: <code>verify/v-29-1-gaussian-metric.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 29.1.2</span> <span class="level">★</span>
+        참인지 거짓인지 판별하여라. “\(\Sigma\)의 eigenvalue가 \(\lambda_1, \lambda_2, \lambda_3\)이면 \(1\sigma\) ellipsoid의 반축은 \(\lambda_1, \lambda_2, \lambda_3\)이다.”</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>거짓이다. 반축은 \(\sqrt{\lambda_i} = s_i\)다(<a href="#i-29-1-2">Proposition 29.1.2</a>). \(\Sigma\)는 길이의 제곱 단위(분산)이고, metric의 Gram matrix \(\Sigma^{-1}\)의 eigenvalue \(1/\lambda_i\)에서 unit sphere의 반축 \(1/\sqrt{1/\lambda_i}\)가 나온다. Tour의 <a href="../00-tour/0-3-surfaces.html#fig-0-3-3">Figure 0.3.3</a>에서 반축이 \(\varepsilon/\sqrt{\lambda}\)였던 것과 같은 계산이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 29.1.3</span> <span class="level">★</span>
+        미터 단위로 \(\Sigma = \diag(0.04,\ 0.01,\ 10^{-4})\) m²인 Gaussian을 센티미터 단위로 바꾼다. 새 \(\Sigma'\)과 \(\Sigma'^{-1}\)을 구하고, \(\mu\)에서 \(r_1\) 방향으로 10 cm 떨어진 점의 Mahalanobis distance가 두 단위에서 같음을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(A = 100\,I_3\)이므로 <a href="#eq-29-1-5">(29.1.5)</a>에서 \(\Sigma' = 10^4\Sigma = \diag(400,\ 100,\ 1)\) cm², <a href="#eq-29-1-6">(29.1.6)</a>에서 \(\Sigma'^{-1} = 10^{-4}\Sigma^{-1} = \diag(1/400,\ 1/100,\ 1)\)이다. 미터로는 \(v = (0.1, 0, 0)\)이고 \(\abs{v}_\Sigma = 0.1/\sqrt{0.04} = 0.5\), 센티미터로는 \(Av = (10, 0, 0)\)이고 \(\abs{Av}_{\Sigma'} = 10/\sqrt{400} = 0.5\)이다. \(\Sigma\)와 \(\Sigma^{-1}\)은 반대 방향으로 \(10^4\)배씩 변하고, 그 짝인 거리는 변하지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-29-1-gaussian-metric.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-1-4" data-level="2">
+        <p><span class="thm-head">Exercise 29.1.4</span> <span class="level">★★</span>
+        \(P = \begin{pmatrix} 1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \end{pmatrix}\)(\(z\)를 버리는 투영)와 \(\Sigma = \diag(s_1^2, s_2^2, s_3^2)\)에 대해 \(P\Sigma P^{\mathsf T}\)를 구하여라. 3D의 metric \(\Sigma^{-1}\)의 왼쪽 위 \(2 \times 2\) 블록을 그냥 잘라 쓴 것과 \((P\Sigma P^{\mathsf T})^{-1}\)은 같은가? \(\Sigma\)가 대각이 아니면 어떤가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(P\Sigma P^{\mathsf T} = \diag(s_1^2, s_2^2)\)이고 그 역은 \(\diag(1/s_1^2, 1/s_2^2)\)이다. \(\Sigma\)가 대각이면 \(\Sigma^{-1}\)의 블록도 \(\diag(1/s_1^2, 1/s_2^2)\)라서 우연히 같다. 일반적으로는 다르다. 예를 들어 \(\Sigma = \begin{pmatrix} 1 &amp; 0 &amp; 0.9 \\ 0 &amp; 1 &amp; 0 \\ 0.9 &amp; 0 &amp; 1 \end{pmatrix}\)이면 \(P\Sigma P^{\mathsf T} = I_2\)이므로 그 역도 \(I_2\)이지만, \(\Sigma^{-1}\)의 \((1,1)\) 성분은 \(1/(1 - 0.81) \approx 5.26\)이다. 투영한 Gaussian의 metric은 \(\Sigma\)를 먼저 밀어 보낸 뒤 inverse matrix를 구해야 얻는다. 블록을 자르는 것은 \(z = \mu_z\)인 평면으로 Gaussian을 자른 cross-section(conditional)의 metric이고, 투영(marginal)의 metric이 아니다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-1-5" data-level="1">
+        <p><span class="thm-head">Exercise 29.1.5</span> <span class="level">★</span>
+        \(s = (1,\ 0.01,\ 0.01)\)인 바늘 모양 Gaussian에서 “가장 짧은 축”으로 normal을 정할 수 있는가? \(s = (1,\ 1,\ 0.01)\)이면?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>첫째는 정할 수 없다. 가장 작은 eigenvalue \(10^{-4}\)가 두 번 나오므로 그 eigenspace는 \(r_1\)에 수직인 평면 전체이고, 그 안의 어느 unit vector도 “가장 짧은 축”이다. 바늘은 surface가 아니라 곡선 조각처럼 행동한다. Tour의 <a href="../00-tour/0-3-surfaces.html#ex-0-3-3">Exercise 0.3.3</a>(b)에서 이웃 점들이 직선 근처에 있을 때와 같은 상황이다. 둘째는 가장 작은 eigenvalue가 하나뿐이므로 normal \(\pm r_3\)이 정해진다. 둥근 disk이므로 \(r_1, r_2\)는 정해지지 않지만 normal에는 상관없다.</p>
+          <p class="verified">Verification: <code>verify/v-29-1-gaussian-metric.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 29. The Geometry of Gaussian Splatting</a>
+    <a rel="next" href="29-2-covariance-parametrization.html">29.2 Parametrizing Covariances with Rotations and Scales →</a>
+  </nav>
+</body>
+</html>

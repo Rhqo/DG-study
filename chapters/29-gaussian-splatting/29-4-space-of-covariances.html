@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>29.4 The Space of Covariances — DG Study</title>
+  <meta name="dg-id" content="29.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="29.1, 29.2, 29.3, 0.8">
+  <meta name="dg-refs" content="Arsigny06; PennecFA06; Bhatia19; Takatsu11; Pennec06; Kerbl23">
+  <meta name="dg-updated" content="2026-10-07">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">29. The Geometry of Gaussian Splatting</a> ›
+    <span>29.4 The Space of Covariances</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>29.4 The Space of Covariances</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Arsigny06">[Arsigny06]</a>,
+        <a class="cite" href="../../references.html#PennecFA06">[PennecFA06]</a>,
+        <a class="cite" href="../../references.html#Bhatia19">[Bhatia19]</a>,
+        <a class="cite" href="../../references.html#Takatsu11">[Takatsu11]</a>,
+        <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>,
+        <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>\(\mathrm{SPD}(3)\)가 \(\mathrm{Sym}(3) \cong \R^6\) 안의 open convex cone이고 tangent space가 \(\mathrm{Sym}(3)\)임을 설명하고, \(\mathrm{SPD}(2)\)를 \(\R^3\)의 cone으로 그려 읽을 수 있다.</li>
+        <li>Euclidean, log-Euclidean, affine-invariant, Bures–Wasserstein metric의 geodesic(보간) 공식을 쓰고, 각 metric이 무엇에 불변이며 어떤 curvature를 가지는지, flat Gaussian을 얼마나 멀리 두는지 비교할 수 있다.</li>
+        <li>두 납작한 Gaussian의 보간에서 swelling effect(부피가 중간에 부푸는 현상)를 계산하고 설명할 수 있다.</li>
+        <li>여러 Gaussian을 하나로 합치는 moment matching이 \(\mathrm{KL}(p\,\|\,q)\)를 최소화함을 보이고, Riemannian 평균과 목적이 어떻게 다른지, 3DGS의 split과 clone이 이 공간에서 무엇인지 말할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="29-1-gaussian-metric.html">Section 29.1</a>: \(\Sigma\)의 eigen decomposition과 \(1\sigma\) ellipsoid, 변환 법칙(<a href="29-1-gaussian-metric.html#i-29-1-3">Proposition 29.1.3</a>). <a href="29-2-covariance-parametrization.html">Section 29.2</a>: \((q, s)\)를 성분별로 평균하면 안 되는 이유. <a href="29-3-splatting-linearization.html#sec-filters">Section 29.3</a>: covariance를 더하는 일</li>
+        <li><a href="../00-tour/0-8-riemannian.html">Section 0.8</a>: Riemannian metric, length와 distance <a href="../00-tour/0-8-riemannian.html#eq-0-8-2">(0.8.2)</a>, geodesic과 \(\exp\)/\(\log\), curvature와 model space, Fréchet mean(<a href="../00-tour/0-8-riemannian.html#sec-cv-averaging">In computer vision: 회전의 평균</a>)</li>
+        <li>행렬 함수: symmetric matrix \(\Sigma = V\diag(\lambda_i)V^{\mathsf T}\)에 대해 \(\log\Sigma = V\diag(\log\lambda_i)V^{\mathsf T}\), \(\Sigma^{t} = V\diag(\lambda_i^t)V^{\mathsf T}\)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="29-3-splatting-linearization.html">Section 29.3</a>까지는 Gaussian 하나를 화면으로 보내는 일을 보았다. 3DGS를 쓰다 보면 Gaussian을 여럿 함께 다뤄야 할 때가 많다. 멀리서 볼 때 쓸 거친 표현(LOD)이나 압축을 위해 비슷한 Gaussian 여럿을 하나로 합치고, 동적 장면에서는 두 시각의 Gaussian 사이를 보간하고, densification에서는 Gaussian 하나를 둘로 나눈다. <a href="29-2-covariance-parametrization.html#sec-alternatives">Section 29.2</a>는 이런 일을 저장된 \((q, s)\)로 하면 대표의 선택에 따라 답이 달라지므로 \(\Sigma\)의 공간에서 해야 한다고 했다.</p>
+      <p>그런데 \(\Sigma\)의 공간에서 “두 \(\Sigma\)의 중간”은 무엇인가? 성분별 평균은 하나의 답일 뿐이다. <a href="../00-tour/0-8-riemannian.html">Section 0.8</a>의 말로 하면 중간은 geodesic의 중점이고, geodesic은 metric이 정한다. 이 절은 \(\mathrm{SPD}(3)\)이 어떤 manifold인지 보고, 그 위에서 널리 쓰이는 metric 넷을 나란히 비교한다. 같은 두 Gaussian의 “중간”이 metric에 따라 눈에 띄게 다르다.</p>
+    </section>
+
+    <section id="sec-cone">
+      <h2>\(\mathrm{SPD}(3)\) Is an Open Convex Cone</h2>
+      <div class="thm proposition" id="i-29-4-1">
+        <p><span class="thm-head">Proposition 29.4.1</span> <span class="thm-name">(the space of covariances)</span>.
+        \(\mathrm{SPD}(n)\)은 \(n \times n\) symmetric matrix 전체 \(\mathrm{Sym}(n) \cong \R^{n(n+1)/2}\)의 open subset이고, convex이며, 양수배에 대해 닫혀 있다(convex cone). 따라서 \(\mathrm{SPD}(n)\)은 \(n(n+1)/2\)차원 manifold이고(\(n = 3\)이면 6차원), 각 점의 tangent space는 \(T_\Sigma\mathrm{SPD}(n) = \mathrm{Sym}(n)\)이다. 경계 \(\{\det\Sigma = 0\}\)는 positive semidefinite이지만 invertible이 아닌 행렬, 곧 어떤 방향으로 두께가 \(0\)인 Gaussian이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> 가장 작은 eigenvalue \(\lambda_{\min}(\Sigma) = \min_{\abs{v} = 1} v^{\mathsf T}\Sigma v\)는 \(\Sigma\)의 연속함수이므로 \(\{\lambda_{\min} \gt 0\}\)은 open이다. \(\Sigma_0, \Sigma_1\)이 SPD이면 \(0 \le t \le 1\)에 대해 \(v^{\mathsf T}\big((1-t)\Sigma_0 + t\Sigma_1\big)v\)는 양수 \(v^{\mathsf T}\Sigma_0v\)와 \(v^{\mathsf T}\Sigma_1v\)의 convex combination이므로 양수이고, \(c \gt 0\)이면 \(c\Sigma\)도 SPD다. vector space의 open subset은 같은 차원의 manifold이고(<a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-3">Proposition 11.4.3</a>), 그 tangent space는 vector space 자체다.</p>
+      </div>
+      <p>6차원은 그릴 수 없으므로 \(\mathrm{SPD}(2)\)(3차원)를 보자. \(2 \times 2\) symmetric matrix를</p>
+      <div class="equation" id="eq-29-4-1">
+      \[ \begin{aligned} \Sigma &amp;= \begin{pmatrix} z + x &amp; y \\ y &amp; z - x \end{pmatrix}, \\ \det\Sigma &amp;= z^2 - x^2 - y^2 \end{aligned} \tag{29.4.1} \]
+      </div>
+      <p>로 쓰면 eigenvalue는 \(z \pm \sqrt{x^2 + y^2}\)이다. 따라서 \(\mathrm{SPD}(2) = \{z \gt \sqrt{x^2 + y^2}\}\)는 \((x, y, z)\) 공간의 둥근 cone의 안쪽이다. 좌표의 뜻도 읽힌다. 높이 \(z = \tr\Sigma/2\)는 크기, 축에서의 거리 \(r = \sqrt{x^2 + y^2}\)는 두 eigenvalue의 차의 절반(anisotropy), 축 둘레의 각 \(\psi\)는 장축 방향의 두 배다(장축이 \(\psi/2\) 방향).</p>
+
+      <figure class="dg-figure" id="fig-29-4-1">
+        <img src="figures/fig-29-4-1-spd-cone.svg" alt="두 패널. 왼쪽 (a)는 apex가 아래(0)에 있고 위로 열린 회색 cone이다. 가운데 축이 검은 점선이고 axis: zI (isotropic)라고 적혀 있다. cone의 중간 높이에 파란 원(slice z = 1)이 있고, cone 면에 det Σ = 0이라고 적혀 있다. 오른쪽 (b)는 연한 하늘색 disk 위에 작은 검은 ellipse들이 동심원 모양으로 배치된 그림이다. disk 중심의 glyph는 원이고, 바깥으로 갈수록 glyph가 납작해지며, 방향이 원을 따라 돌아간다. 가장자리 근처의 glyph는 가는 막대처럼 보인다. disk의 경계에 r = 1: det Σ = 0이라고 적혀 있고, 아래에 center: Σ = I (circle)과 near the boundary: almost flat이라는 주석이 있다.">
+        <figcaption><span class="fig-head">Figure 29.4.1.</span>
+        \(\mathrm{SPD}(2)\)는 cone이다. <em>무엇을</em>: <a href="#eq-29-4-1">(29.4.1)</a>의 좌표 \((x, y, z)\)로 본 \(\mathrm{Sym}(2) \cong \R^3\)과 그 안의 \(\mathrm{SPD}(2)\). <em>읽는 법</em>: (a)의 회색 면은 경계 \(z = \sqrt{x^2 + y^2}\)(\(\det\Sigma = 0\)), 검은 점선은 축(isotropic matrix \(zI\)), 파란 원은 cross-section \(z = 1\)(곧 \(\tr\Sigma = 2\))이다. \(\mathrm{SPD}(2)\)는 cone의 안쪽이다. (b)는 그 cross-section을 위에서 본 것이다. cross-section 위의 점 \((x, y) = r(\cos\psi, \sin\psi)\)마다 그 \(\Sigma\)의 \(1\sigma\) ellipse를 작게 그렸다(반축 \(0.13\sqrt{1 \pm r}\), 장축 방향 \(\psi/2\)). <em>볼 것</em>: 중심(\(r = 0\))의 glyph는 원이고, 바깥으로 갈수록 납작해져 경계 \(r = 1\) 근처에서는 거의 선분이다. 한 원을 따라 한 바퀴(\(\psi\): \(0 \to 2\pi\)) 돌면 glyph는 반 바퀴만 돈다. ellipse는 \(180^\circ\) 돌리면 제자리이기 때문이다. <em>본문과의 연결</em>: <a href="#i-29-4-1">Proposition 29.4.1</a>의 open convex cone이다. 납작한 Gaussian은 경계 가까이에 있고, 이 경계까지의 “거리”가 metric마다 다르다(<a href="#fig-29-4-2">Figure 29.4.2</a>). <a href="figures/fig-29-4-1-spd-cone-interactive.html">Interactive version</a>에서는 cone 안에 <a href="#fig-29-4-3">Figure 29.4.3</a>의 네 geodesic을 그려 돌려 볼 수 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-4-1">Figure 29.4.1</a>의 (b)에서 가운데의 둥근 glyph에서 바깥쪽으로 가면 glyph가 점점 납작해진다. 경계 위에서는 한 eigenvalue가 \(0\), 곧 두께가 \(0\)인 Gaussian이다. cone은 convex이므로 두 점을 잇는 선분 \((1-t)\Sigma_0 + t\Sigma_1\)은 늘 안에 있다. 그래서 성분별 평균도 SPD다. 그러나 그것이 “좋은” 중간인지는 다른 문제다.</p>
+    </section>
+
+    <section id="sec-metrics">
+      <h2>Four Metrics on \(\mathrm{SPD}(3)\)</h2>
+      <p>tangent space가 \(\mathrm{Sym}(3)\)이므로, metric은 각 \(\Sigma\)에서 symmetric matrix 두 개 \(U, V\)를 받아 수를 내는 inner product \(g_\Sigma(U, V)\)다. 아래는 문헌에서 널리 쓰이는 넷이다. 각각의 geodesic \(\Sigma(t)\) (\(0 \le t \le 1\), \(\Sigma(0) = \Sigma_0\), \(\Sigma(1) = \Sigma_1\))이 두 covariance의 보간이다.</p>
+
+      <div class="thm definition" id="i-29-4-2">
+        <p><span class="thm-head">Definition 29.4.2</span> <span class="thm-name">(four metrics on SPD and their geodesics)</span>.
+        \(\Sigma \in \mathrm{SPD}(n)\), \(U, V \in \mathrm{Sym}(n)\)이다.</p>
+        <ul>
+          <li><strong>Euclidean</strong>: \(g^{\mathrm E}_\Sigma(U, V) = \tr(UV)\)(Frobenius inner product). geodesic과 거리는</li>
+        </ul>
+        <div class="equation" id="eq-29-4-2">
+        \[ \begin{aligned} \Sigma(t) &amp;= (1 - t)\Sigma_0 + t\Sigma_1, \\ d_{\mathrm E} &amp;= \|\Sigma_1 - \Sigma_0\|_F. \end{aligned} \tag{29.4.2} \]
+        </div>
+        <ul>
+          <li><strong>log-Euclidean</strong> <a class="cite" href="../../references.html#Arsigny06">[Arsigny06]</a>: matrix logarithm \(\log\colon \mathrm{SPD}(n) \to \mathrm{Sym}(n)\)으로 Frobenius inner product를 당긴 metric. </li>
+        </ul>
+        <div class="equation" id="eq-29-4-3">
+        \[ \begin{aligned} \Sigma(t) &amp;= \exp\big((1 - t)\log\Sigma_0 + t\log\Sigma_1\big), \\ d_{\mathrm{LE}} &amp;= \|\log\Sigma_1 - \log\Sigma_0\|_F. \end{aligned} \tag{29.4.3} \]
+        </div>
+        <ul>
+          <li><strong>affine-invariant</strong> <a class="cite" href="../../references.html#PennecFA06">[PennecFA06]</a>: \(g^{\mathrm{AI}}_\Sigma(U, V) = \tr(\Sigma^{-1}U\Sigma^{-1}V)\).</li>
+        </ul>
+        <div class="equation" id="eq-29-4-4">
+        \[ \begin{aligned} \Sigma(t) &amp;= \Sigma_0^{1/2}\big(\Sigma_0^{-1/2}\Sigma_1\Sigma_0^{-1/2}\big)^{t}\,\Sigma_0^{1/2}, \\ d_{\mathrm{AI}} &amp;= \big\|\log\big(\Sigma_0^{-1/2}\Sigma_1\Sigma_0^{-1/2}\big)\big\|_F. \end{aligned} \tag{29.4.4} \]
+        </div>
+        <ul>
+          <li><strong>Bures–Wasserstein</strong> <a class="cite" href="../../references.html#Bhatia19">[Bhatia19]</a>, <a class="cite" href="../../references.html#Takatsu11">[Takatsu11]</a>: \(g^{\mathrm{BW}}_\Sigma(U, V) = \tfrac12\tr(L_U V)\), 여기서 \(L_U\)는 \(\Sigma L_U + L_U\Sigma = U\)의 해다. \(T = \Sigma_0^{-1/2}\big(\Sigma_0^{1/2}\Sigma_1\Sigma_0^{1/2}\big)^{1/2}\Sigma_0^{-1/2}\)으로 쓰면</li>
+        </ul>
+        <div class="equation" id="eq-29-4-5">
+        \[ \begin{aligned} \Sigma(t) &amp;= M_t\,\Sigma_0\,M_t, \quad M_t = (1 - t)I + tT, \\ d_{\mathrm{BW}}^2 &amp;= \tr\Sigma_0 + \tr\Sigma_1 \\ &amp;\quad - 2\tr\big(\Sigma_0^{1/2}\Sigma_1\Sigma_0^{1/2}\big)^{1/2}. \end{aligned} \tag{29.4.5} \]
+        </div>
+        <p>\(d_{\mathrm{BW}}\)은 평균이 같은 두 Gaussian distribution 사이의 Wasserstein distance \(W_2\)이고, 평균이 다르면 \(W_2^2 = \abs{\mu_0 - \mu_1}^2 + d_{\mathrm{BW}}^2\)이다. \(T\)는 \(\mathcal N(0, \Sigma_0)\)을 \(\mathcal N(0, \Sigma_1)\)으로 보내는 optimal transport map이고, geodesic은 \(x \mapsto (1-t)x + tTx\)로 점들을 직선으로 옮겨 얻는다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-29-4-space-of-covariances.py</code>(각 geodesic의 metric-length가 거리 공식과 같음을 수치 적분으로 확인)</p>
+
+      <p>네 metric이 무엇을 지키는지가 차이를 만든다. affine-invariant metric은 이름 그대로 모든 invertible \(A\)에 대해 \(d_{\mathrm{AI}}(A\Sigma_0A^{\mathsf T}, A\Sigma_1A^{\mathsf T}) = d_{\mathrm{AI}}(\Sigma_0, \Sigma_1)\)이다. <a href="29-1-gaussian-metric.html#eq-29-1-5">(29.1.5)</a>에 의해 좌표를 \(x \mapsto Ax + b\)로 바꾸면 모든 covariance가 \(\Sigma \mapsto A\Sigma A^{\mathsf T}\)로 바뀌므로, affine-invariant 보간과 평균은 world coordinate system의 회전, 단위, 축마다 다른 정규화에 전혀 의존하지 않는다. 대가는 계산(행렬 제곱근과 logarithm)이다. log-Euclidean은 \(\log\)으로 \(\mathrm{Sym}(n)\)이라는 vector space에 옮겨 거기서 평평하게 계산하므로 빠르고, 회전과 균일한 scaling에는 불변이지만 일반적인 \(A\)에는 불변이 아니다. Euclidean과 Bures–Wasserstein은 회전에만 불변이다.</p>
+
+      <table>
+        <thead>
+          <tr><th>metric</th><th>invariant under</th><th>sectional curvature</th><th>flat Gaussian (\(\det \to 0\))</th><th>\(\det\Sigma(t)\)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Euclidean</td><td>rotations</td><td>\(0\)</td><td>finite distance</td><td>swells</td></tr>
+          <tr><td>log-Euclidean</td><td>rotations, uniform scaling</td><td>\(0\)</td><td>infinitely far</td><td>\(\det\Sigma_0^{1-t}\det\Sigma_1^{t}\)</td></tr>
+          <tr><td>affine-invariant</td><td>all \(\Sigma \mapsto A\Sigma A^{\mathsf T}\)</td><td>\(\le 0\)</td><td>infinitely far</td><td>\(\det\Sigma_0^{1-t}\det\Sigma_1^{t}\)</td></tr>
+          <tr><td>Bures–Wasserstein</td><td>rotations</td><td>\(\ge 0\)</td><td>finite distance</td><td>swells</td></tr>
+        </tbody>
+      </table>
+      <p>curvature는 정성적으로만 적는다. Euclidean과 log-Euclidean은 \(\mathrm{Sym}(n)\)의 평평한 metric을 옮긴 것이므로 curvature가 \(0\)이다. affine-invariant metric은 sectional curvature가 \(0\) 이하이고 complete이다. <a href="../00-tour/0-8-riemannian.html#sec-curvature">Section 0.8</a>의 hyperbolic plane과 같은 쪽이며, 그래서 Fréchet mean이 언제나 하나뿐이다 <a class="cite" href="../../references.html#PennecFA06">[PennecFA06]</a>. Bures–Wasserstein metric은 sectional curvature가 \(0\) 이상이다 <a class="cite" href="../../references.html#Takatsu11">[Takatsu11]</a>. \(\mathrm{SPD}(2)\)에서는 이 부호들을 기호계산으로 확인할 수 있다. affine-invariant metric의 sectional curvature는 \(-1/2\)과 \(0\) 사이에 있고, \(\det\)가 일정한 cross-section에 접하는 방향으로는 정확히 \(-1/2\)이다. 이 값은 <a href="#i-29-4-2">Definition 29.4.2</a>의 정규화 \(g^{\mathrm{AI}} = \tr(\Sigma^{-1}U\Sigma^{-1}V)\)에 대한 것이다. metric에 상수 \(c\)를 곱하면 curvature는 \(1/c\)배가 되므로, 평균이 \(0\)인 Gaussian family의 Fisher information metric \(\tfrac12\tr(\Sigma^{-1}U\Sigma^{-1}V)\)으로 재면 같은 범위가 \([-1, 0]\)이 된다. 부호는 정규화에 무관하다.</p>
+      <aside class="box backward">
+        <p class="box-title">Looking back: covariance의 공간 안의 hyperbolic plane</p>
+        <p><a href="../00-tour/0-8-riemannian.html#i-0-8-2">Example 0.8.2</a>(c)의 hyperbolic plane은 curvature가 \(-1\)로 일정한 model space였다. affine-invariant metric을 준 \(\mathrm{SPD}(2)\)에서 \(\det\Sigma = 1\)인 cross-section(크기는 고정하고 모양과 방향만 바뀌는 Gaussian들)은 curvature가 \(-1/2\)로 일정한 hyperbolic plane이고(좌표 \(\Sigma = \tfrac1v\begin{pmatrix} 1 &amp; u \\ u &amp; u^2 + v^2 \end{pmatrix}\)에서 metric이 \(2(du^2 + dv^2)/v^2\), 곧 \(\mathbb{U}^2\)의 metric의 2배다), \(\mathrm{SPD}(2)\)는 그것과 크기 방향(\(\log\det\))의 곱이다. 새로워진 것은 해석이다. hyperbolic plane의 boundary가 무한히 멀었던 것처럼(<a href="../00-tour/0-8-riemannian.html#ex-0-8-1">Exercise 0.8.1</a>), 이 metric에서는 납작한 Gaussian(cone의 경계)이 무한히 멀다. 모양의 공간에서 “점점 납작해지는 것”은 끝없이 먼 길이다.</p>
+      </aside>
+
+      <figure class="dg-figure" id="fig-29-4-2">
+        <img src="figures/fig-29-4-2-distance-to-flat.svg" alt="가로축이 ε = s₂²(log 눈금, 오른쪽으로 갈수록 1에서 10⁻⁶로 작아짐, flatter →), 세로축이 distance from I to diag(1, ε)인 그래프. 파랑 실선(log-Euclidean)과 주황 점선(affine-invariant)이 겹쳐서 직선으로 계속 올라가 ε = 10⁻⁶에서 약 13.8이 된다. grows without bound: flat Gaussians are at infinity라는 주석이 있다. 검정(Euclidean)과 초록(Bures–Wasserstein) 곡선은 처음에 조금 오르다가 1 아래에서 평평해지고, stays below 1: the boundary is reachable이라는 주석이 있다. 범례가 그래프 오른쪽에 있다.">
+        <figcaption><span class="fig-head">Figure 29.4.2.</span>
+        납작한 Gaussian까지의 거리. <em>무엇을</em>: \(I\)(둥근 Gaussian)에서 \(\diag(1, \varepsilon)\)(둘째 축의 scale \(s_2 = \sqrt\varepsilon\))까지의 거리를 네 metric으로 잰 것. 닫힌 꼴은 Euclidean \(1 - \varepsilon\), log-Euclidean과 affine-invariant \(\abs{\log\varepsilon}\)(두 곡선이 겹친다), Bures–Wasserstein \(1 - \sqrt\varepsilon\)이다. <em>읽는 법</em>: 가로축은 \(\varepsilon\)을 log 눈금으로 오른쪽으로 갈수록 작게(더 납작하게) 놓았다. 세로축이 거리다. <em>볼 것</em>: log-Euclidean과 affine-invariant에서는 \(\varepsilon\)이 10배 작아질 때마다 거리가 \(\ln 10 \approx 2.3\)씩 늘어 끝이 없다(\(\varepsilon = 10^{-6}\)에서 13.8). Euclidean과 Bures–Wasserstein에서는 거리가 1을 넘지 않는다. <em>본문과의 연결</em>: 표의 “flat Gaussian” 열이다. 앞의 두 metric에서 cone의 경계는 무한히 멀고, 뒤의 둘에서는 유한한 거리에 있다.</figcaption>
+      </figure>
+      <p><a href="#fig-29-4-2">Figure 29.4.2</a>는 표의 넷째 열을 그림으로 보인다. 둥근 Gaussian에서 출발해 한 축을 계속 얇게 만들면, 파랑과 주황(log-Euclidean, affine-invariant)의 거리는 직선으로 끝없이 늘고 검정과 초록(Euclidean, Bures–Wasserstein)의 거리는 1 아래에서 멈춘다. 3DGS의 log-scale chart(<a href="29-2-covariance-parametrization.html#eq-29-2-4">(29.2.4)</a>)는 앞의 쪽이다. \(s_2 \to 0\)은 \(\log s_2 \to -\infty\)이므로, scale 좌표로 보면 Gaussian을 완전히 납작하게 만드는 데는 무한히 긴 길이 필요하다. 이것은 \(\Sigma\)가 경계 밖으로 나가는 일이 없다는 장점이고, 동시에 surfel처럼 완전히 납작한 Gaussian은 극한으로만 얻는다는 뜻이다(<a href="../30-radiance-field-surfaces/index.html#toc-30-3">Section 30.3</a>의 2D Gaussian은 처음부터 경계 위에서 산다).</p>
+    </section>
+
+    <section id="sec-swelling">
+      <h2>Interpolation and the Swelling Effect</h2>
+      <p>두 metric이 실제로 얼마나 다른 답을 주는지 보자. 두 납작한 2D Gaussian \(\Sigma_0 = \diag(1, 0.15^2)\)과, 그것을 \(70^\circ\) 돌린 \(\Sigma_1\) 사이를 네 metric의 geodesic으로 보간한다. 3D에서 surfel처럼 납작한 Gaussian 둘을 보간하는 상황의 cross-section이다.</p>
+
+      <figure class="dg-figure" id="fig-29-4-3">
+        <img src="figures/fig-29-4-3-interpolation.svg" alt="위 패널 (a)에는 네 줄의 ellipse가 있다. 각 줄은 왼쪽 t = 0의 가로로 납작한 ellipse에서 오른쪽 t = 1의 70도 기운 납작한 ellipse까지 다섯 개의 ellipse를 보인다. Euclidean 줄(검정)은 가운데 t = 0.5에서 크고 둥근 ellipse가 되며 그 아래에 det = 0.2334, ratio 1.40이라고 적혀 있다. log-Euclidean 줄(파랑)과 affine-invariant 줄(주황)은 가운데에서 작은 ellipse가 되며 det = 0.0225이고, ratio는 각각 1.91과 1.40이다. Bures–Wasserstein 줄(초록)은 가운데에서 길쭉하지만 넓은 ellipse이며 det = 0.0604, ratio 2.61이다. 아래 패널 (b)는 가로축 t, 세로축 det Σ(t)인 그래프이고 범례가 위쪽 가운데에 있다. 검정 곡선은 0.0225에서 0.23 근처까지 크게 솟았다가 내려오고, 초록 곡선은 0.06 근처까지 조금 솟으며, 파랑과 주황 점선은 0.0225에서 평평하게 겹친다.">
+        <figcaption><span class="fig-head">Figure 29.4.3.</span>
+        같은 두 Gaussian을 네 metric으로 보간하기. <em>무엇을</em>: \(\Sigma_0 = \diag(1, 0.15^2)\)(\(s = (1, 0.15)\), 장축이 가로)과 그것을 \(70^\circ\) 돌린 \(\Sigma_1\) 사이의 geodesic <a href="#eq-29-4-2">(29.4.2)</a>–<a href="#eq-29-4-5">(29.4.5)</a>. <em>읽는 법</em>: (a)의 각 줄이 한 metric이고, 왼쪽부터 \(t = 0, 0.25, 0.5, 0.75, 1\)일 때의 \(1\sigma\) ellipse다. 모든 ellipse를 같은 축척으로 그렸다. 가운데 열 아래의 두 수는 \(t = 0.5\)일 때의 \(\det\Sigma\)와 장단축 비(ratio)다. (b)는 \(\det\Sigma(t)\)(\(\sqrt{\det}\)이 넓이에 비례)를 \(t\)의 함수로 그린 것이다. 양 끝의 값 0.0225에 그은 회색 가로선은 파랑·주황 선에 가려 있고, 오른쪽 끝에 \(\det\Sigma_0 = \det\Sigma_1\)이라고 적었다. <em>볼 것</em>: 양 끝의 Gaussian은 장단축 비가 6.67인 납작한 ellipse다. Euclidean 보간의 중간은 \(\det\)가 0.2334로 양 끝의 10배이고 거의 둥글다(비 1.40). 이것이 swelling effect다. Bures–Wasserstein은 \(\det\) 0.0604(2.7배)로 덜 부풀고 비 2.61로 더 길쭉하다. log-Euclidean과 affine-invariant는 \(\det\)가 처음부터 끝까지 0.0225로 일정하지만 중간에서 납작함을 잃는다(비 1.91과 1.40). 네 metric 모두 중간의 장축은 \(35^\circ\)(두 방향의 가운데)다. <em>본문과의 연결</em>: log-Euclidean과 affine-invariant의 \(\det\Sigma(t) = (\det\Sigma_0)^{1-t}(\det\Sigma_1)^t\) <a href="#eq-29-4-6">(29.4.6)</a>을 보여 준다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-4-3">Figure 29.4.3</a>의 (a)를 위에서 아래로 보자. 맨 위 줄(Euclidean)의 가운데 ellipse는 양 끝의 납작한 ellipse보다 훨씬 크고 둥글다. 가로로 납작한 것과 비스듬히 납작한 것을 성분별로 평균하면 두 방향의 퍼짐이 모두 남아 “덮는 영역”이 커지기 때문이다. (b)의 검은 곡선이 그 부피(\(\det\))를 잰다. 중간에서 10배까지 부푼다. 이 현상을 <strong>swelling effect</strong>라 한다. 둘째와 셋째 줄(log-Euclidean, affine-invariant)은 부피가 일정하다. 실제로 두 metric(log-Euclidean, affine-invariant)에서는 \(\det\)가 geodesic을 따라 기하평균으로 변한다.</p>
+      <div class="equation" id="eq-29-4-6">
+      \[ \det\Sigma(t) = (\det\Sigma_0)^{1-t}\,(\det\Sigma_1)^{t} \tag{29.4.6} \]
+      </div>
+      <p>log-Euclidean에서는 \(\log\det\Sigma = \tr\log\Sigma\)가 \(t\)의 일차함수이기 때문이고, affine-invariant에서는 \(\det\big(\Sigma_0^{1/2}M^t\Sigma_0^{1/2}\big) = \det\Sigma_0(\det M)^t\)이기 때문이다. 맨 아래 줄(Bures–Wasserstein)은 부피가 조금 부풀지만 모양은 가장 길쭉하게 남는다. 두 distribution의 질량을 직선으로 옮기는(optimal transport) 보간이기 때문이다. 두 covariance의 축이 같으면(commute하면) 이 보간은 표준편차를 linear interpolation하는 것과 정확히 같다(<a href="#ex-29-4-1">Exercise 29.4.1</a>). 분산을 섞는 Euclidean보다 덜 부푸는 이유다.</p>
+      <p>어느 metric도 “납작한 disk가 모양을 유지한 채 돌아가는” 보간을 주지는 않는다(가운데의 장단축 비가 모두 6.67보다 작다). 그런 보간은 \(R\)을 SLERP하고 \(\log s\)를 linear interpolation하는 \((R, s)\) 보간이다. 그러나 이것은 <a href="29-2-covariance-parametrization.html#i-29-2-1">Proposition 29.2.1</a>의 대표 문제(어느 축끼리 짝지을 것인가)를 먼저 풀어야 하고, scale이 비슷한 축에서는 짝이 불안정하다. 무엇을 지킬지에 따라 고를 일이다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 보간과 평균에 어느 metric을 쓸 것인가</p>
+        <ul>
+          <li><strong>부피를 지키려면</strong> log-Euclidean이나 affine-invariant. Euclidean은 납작한 Gaussian 둘의 중간을 몇 배까지 부풀린다(<a href="#fig-29-4-3">Figure 29.4.3</a>에서 10배). 렌더링에서는 중간 시각의 Gaussian이 갑자기 두꺼워져 보인다.</li>
+          <li><strong>좌표에 무관하려면</strong> affine-invariant. world 좌표의 단위나 축별 정규화를 바꿔도 보간의 결과가 같은 Gaussian이다. log-Euclidean은 회전과 균일한 scaling까지만 무관하다.</li>
+          <li><strong>질량을 옮기는 의미가 중요하면</strong> Bures–Wasserstein. 평균까지 포함한 Gaussian distribution 사이의 \(W_2\) geodesic이므로, 위치와 모양을 함께 “밀어 옮기는” 보간이 된다.</li>
+          <li><strong>모양(납작함)을 지키려면</strong> 위 넷이 아니라 대표를 맞춘 \((R, s)\) 보간이 필요하다. 이때는 축의 짝짓기 문제를 따로 다뤄야 한다.</li>
+        </ul>
+        <p>평균도 같다. 각 metric의 Fréchet mean(<a href="../00-tour/0-8-riemannian.html#sec-cv-averaging">Section 0.8</a>)은 Euclidean이면 산술평균, log-Euclidean이면 \(\exp\big(\sum_i w_i\log\Sigma_i\big)\), affine-invariant이면 Tour의 회전 평균과 같은 \(\log\)–평균–\(\exp\) 반복으로 구하는 Karcher mean이다 <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>. 앞의 둘과 affine-invariant mean은 \(\det\)를 \(\prod_i(\det\Sigma_i)^{w_i}\)로 지킨다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-merge">
+      <h2>Merging Gaussians: Moment Matching</h2>
+      <p>평균이 서로 다른 Gaussian 여럿을 하나로 합치는 일은 보간과 성격이 다르다. 가중치 \(w_i \ge 0\)(\(\sum_i w_i = 1\))를 준 mixture \(p = \sum_i w_i\,\mathcal N(\mu_i, \Sigma_i)\)를 Gaussian 하나 \(q = \mathcal N(\mu, \Sigma)\)로 바꾸고 싶다. 가장 흔한 처방은 mixture의 평균과 covariance를 그대로 쓰는 <strong>moment matching</strong>이다.</p>
+      <div class="equation" id="eq-29-4-7">
+      \[ \begin{aligned} \mu &amp;= \sum_i w_i\,\mu_i, \\ \Sigma &amp;= \sum_i w_i\big(\Sigma_i + (\mu_i - \mu)(\mu_i - \mu)^{\mathsf T}\big) \end{aligned} \tag{29.4.7} \]
+      </div>
+      <p>둘째 항 \((\mu_i - \mu)(\mu_i - \mu)^{\mathsf T}\)이 평균들이 흩어진 정도를 covariance에 더한다. 이 처방에는 정확한 최적성이 있다.</p>
+      <div class="thm proposition" id="i-29-4-3">
+        <p><span class="thm-head">Proposition 29.4.3</span> <span class="thm-name">(moment matching minimizes \(\mathrm{KL}(p\,\|\,q)\))</span>.
+        \(p\)가 평균 \(\mu_p\), covariance \(\Sigma_p\)(invertible)를 가진 distribution이고 \(\int p\log p\)가 유한할 때, Gaussian \(q\) 가운데 \(\mathrm{KL}(p\,\|\,q) = \int p\log(p/q)\)를 최소로 하는 것은 \(q = \mathcal N(\mu_p, \Sigma_p)\)이다. mixture에 대해서는 이것이 <a href="#eq-29-4-7">(29.4.7)</a>이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(\mathrm{KL}(p\,\|\,q) = \int p\log p - \int p\log q\)이고 앞 항은 \(q\)에 무관하다. \(q = \mathcal N(\mu, \Sigma)\)이면</p>
+        <p>\[ \begin{aligned} -\int p\log q &amp;= \tfrac12\log\det(2\pi\Sigma) \\ &amp;\quad + \tfrac12\tr\big(\Sigma^{-1}(\Sigma_p + (\mu_p - \mu)(\mu_p - \mu)^{\mathsf T})\big) \end{aligned} \]</p>
+        <p>이다. 이것은 \(p\)를 평균과 covariance로만 본다. \(\mu = \mu_p\)일 때 둘째 항이 가장 작고, 남은 \(\tfrac12\big(\log\det\Sigma + \tr(\Sigma^{-1}\Sigma_p)\big)\)을 \(\Sigma\)로 미분해 \(0\)으로 두면 \(\Sigma^{-1} - \Sigma^{-1}\Sigma_p\Sigma^{-1} = 0\), 곧 \(\Sigma = \Sigma_p\)이다. \(P = \Sigma^{-1}\)로 쓰면 이 함수는 \(\tfrac12\big(-\log\det P + \tr(P\Sigma_p)\big)\)이고 \(P\)에 대해 convex이므로, 이 유일한 critical point가 최소다. mixture의 covariance는 “각 성분 안의 퍼짐 + 성분 평균들의 퍼짐”이므로 <a href="#eq-29-4-7">(29.4.7)</a>이다.</p>
+      </div>
+      <p>\(\mathrm{KL}(p\,\|\,q)\)를 줄이는 \(q\)는 \(p\)가 질량을 가진 곳을 빠뜨리지 않으려 한다(\(p \gt 0\)인데 \(q \approx 0\)이면 벌이 크다). 곧 moment matching은 <em>덮는</em> Gaussian이다. 반면 앞 절의 Riemannian 평균은 covariance들의 <em>대표 모양</em>을 찾는다. 두 목적은 다르다.</p>
+
+      <figure class="dg-figure" id="fig-29-4-4">
+        <img src="figures/fig-29-4-4-merge.svg" alt="같은 축을 쓰는 두 패널. 왼쪽 (a) different centers에는 회색으로 칠한 납작한 Gaussian 두 개가 왼쪽 아래와 오른쪽 위에 서로 다른 방향으로 놓여 있다. 그 둘을 감싸는 넓은 주황 ellipse(moment matching)와 그 바깥의 주황 점선(2σ), 그리고 가운데의 작은 파란 ellipse(affine-invariant mean)와 파란 점선(2σ)이 있다. 파란 ellipse는 두 회색 Gaussian 사이의 빈 곳에 놓여 있다. 왼쪽 아래에 KL(p‖q): moment 0.86, AI mean 4.0이라고 적혀 있다. 오른쪽 (b) same center에는 같은 두 Gaussian이 원점에서 X자로 겹쳐 있고, 주황 ellipse가 파란 ellipse보다 크고 둥글다. det: inputs 0.0144, moment 0.0703, AI mean 0.0144라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 29.4.4.</span>
+        두 Gaussian을 하나로 합치기. <em>무엇을</em>: \(s = (0.8, 0.15)\)이고 장축이 \(+20^\circ\)와 \(-30^\circ\)인 납작한 2D Gaussian 둘(가중치 각 \(1/2\)). (a)에서는 중심이 \((-1.2, 0)\)과 \((1.2, 0.3)\)으로 다르고, (b)에서는 둘 다 원점이다. <em>읽는 법</em>: 회색 채움은 입력의 \(1\sigma\) ellipse(가는 회색 선은 \(2\sigma\))다. 주황은 moment matching <a href="#eq-29-4-7">(29.4.7)</a>, 파랑은 평균 위치에 두 covariance의 affine-invariant mean을 붙인 Gaussian이다. 실선이 \(1\sigma\), 점선이 \(2\sigma\)이고, \(+\)가 합친 Gaussian의 중심이다. 두 패널은 같은 축을 쓴다. <em>볼 것</em>: (a)에서 주황은 두 입력을 함께 덮지만 파랑은 두 입력 사이의 빈 곳에 놓인다. mixture \(p\)에 대한 \(\mathrm{KL}(p\,\|\,q)\)는 주황 0.86, 파랑 4.0이다. (b)에서는 중심이 같으므로 moment matching이 성분별 평균(Euclidean mean)과 같아지고, \(\det\)가 입력의 0.0144에서 0.0703으로 약 5배 부푼다. 파랑은 \(\det\) 0.0144를 지킨다. <em>본문과의 연결</em>: <a href="#i-29-4-3">Proposition 29.4.3</a>의 “덮는 Gaussian”과 Riemannian 평균의 “대표 모양”의 차이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-4-4">Figure 29.4.4</a>의 (a)를 보자. 두 회색 Gaussian이 떨어져 있을 때 주황 ellipse는 둘을 모두 감싸고, 파란 ellipse는 둘 사이의 빈 곳에 작게 놓인다. mixture를 대신하는 Gaussian으로는 주황이 낫다(KL 0.86 대 4.0). (b)처럼 중심이 같으면 사정이 달라진다. 주황은 성분별 평균, 곧 <a href="#fig-29-4-3">Figure 29.4.3</a>의 Euclidean 보간의 중점과 같아져 부피가 5배 부푼다. 같은 surface 조각을 두 시점에서 추정한 두 Gaussian을 합치는 경우라면, 덮는 범위보다 대표 모양(파랑)이 원하는 답일 것이다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 합칠 때 원하는 것은 덮는 범위인가, 대표 모양인가</p>
+        <p>LOD나 compression에서 Gaussian 여럿을 하나로 바꿀 때, 먼저 정할 것은 목적이다. 멀리서 렌더링했을 때 원래 묶음이 차지하던 영역을 하나가 대신해야 한다면 moment matching이 맞다. 이것은 \(\mathrm{KL}(p\,\|\,q)\)라는 분명한 기준의 최적해다. 같은 대상을 여러 번 추정한 Gaussian을 하나로 모으는 일이라면 Riemannian 평균이 맞다. moment matching은 중심이 같을 때 Euclidean 평균이 되어 부피가 부푼다. 두 경우 모두 가중치 \(w_i\)를 무엇으로 줄지(예: opacity, 부피 \(\sqrt{\det\Sigma_i}\), 또는 둘의 곱)도 렌더링 결과를 바꾸는 선택이다. 이 상자는 특정 논문의 방법을 설명하는 것이 아니라, 선택지의 기하를 정리한 것이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-split-clone">
+      <h2>Split and Clone in \(\mathrm{SPD}(3)\)</h2>
+      <p>3DGS의 adaptive density control은 두 연산으로 Gaussian을 늘린다 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>. 두 연산 모두 view-space position gradient가 큰 Gaussian(기준은 <a href="29-5-optimizing-gaussians.html#sec-densification">Section 29.5</a>)에 적용되고, 크기로 둘을 가른다. 공식 구현에서는 가장 큰 scale \(\max_i s_i\)가 scene extent의 1%(percent_dense \(= 0.01\)) 이하이면 clone, 그보다 크면 split이다.</p>
+      <ul>
+        <li><strong>clone</strong>: 재구성이 부족한 곳의 작은 Gaussian을 복사한다. 논문은 같은 크기의 사본을 만들어 positional gradient 방향으로 옮긴다고 설명한다. 공식 구현은 모든 parameter를 그대로 복사해 사본을 같은 위치에 두고, 이어지는 최적화가 둘을 갈라 놓는다(새 사본의 Adam moment는 \(0\)에서 시작한다).</li>
+        <li><strong>split</strong>: 분산이 큰 곳의 큰 Gaussian을 둘로 나눈다. 원래 Gaussian을 probability distribution으로 써서 새 위치 둘을 sample하고, scale을 \(\varphi = 1.6\)으로 나눈 Gaussian 둘로 바꾼다(논문은 이 값을 실험으로 정했다고 밝힌다). 공식 구현에서는 자식 수 \(N = 2\), 나누는 값이 \(0.8N = 1.6\)이고, 부모는 지운다. rotation, opacity, SH coefficient는 부모의 것을 그대로 받는다.</li>
+      </ul>
+      <div class="thm example" id="i-29-4-4">
+        <p><span class="thm-head">Example 29.4.4</span> <span class="thm-name">(split as an inverse of merging)</span>.
+        split의 두 자식은 covariance가 \(\Sigma/1.6^2 = \Sigma/2.56\)이고 축과 장단축 비는 부모와 같다. \(\mathrm{SPD}(3)\)에서 이것은 부모에서 출발해 반직선 \(\{c\Sigma : c \gt 0\}\)을 따라 원점 쪽으로 옮긴 것이다. 이 반직선은 네 metric 모두에서 geodesic이다(parametrization만 다르다. affine-invariant와 log-Euclidean에서는 \(t \mapsto e^t\Sigma\)). 곧 split은 모양을 그대로 두고 크기만 줄이는, 이 공간에서 가장 곧은 움직임이다. 그렇다면 두 자식을 다시 moment matching(<a href="#eq-29-4-7">(29.4.7)</a>)으로 합치면 부모가 돌아올까? 두 위치 \(x_1, x_2\)가 \(\mathcal N(\mu, \Sigma)\)에서 독립으로 뽑히면</p>
+        <p>\[ \begin{aligned} \mathbb{E}\big[\tfrac12\textstyle\sum_i(x_i - \bar x)(x_i - \bar x)^{\mathsf T}\big] &amp;= \tfrac14\mathbb{E}[(x_1 - x_2)(x_1 - x_2)^{\mathsf T}] \\ &amp;= \tfrac12\Sigma \end{aligned} \]</p>
+        <p>이므로, 두 자식의 moment의 기댓값은</p>
+        <p>\[ \frac{\Sigma}{2.56} + \frac{\Sigma}{2} \approx 0.89\,\Sigma \]</p>
+        <p>이다. 평균은 \(\mu\) 그대로다. 곧 split은 평균적으로 moment matching을 거꾸로 한 것과 가깝고(부모의 퍼짐의 89%를 지킨다), 남는 차이는 이후의 최적화가 조정한다. clone은 \(\Sigma\)를 바꾸지 않으므로 \(\mathrm{SPD}(3)\)에서는 제자리이고, 변화는 개수(그리고 이후의 위치)에만 있다.</p>
+        <p class="verified">Verification: <code>verify/v-29-4-space-of-covariances.py</code>(Monte Carlo로 \(0.89\Sigma\) 확인)</p>
+      </div>
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: split의 1.6</p>
+        <p>split의 축소 비율은 실험으로 정한 값이지만, moment의 말로 읽으면 의미가 보인다. 자식 둘의 moment의 기댓값은 \((1/\varphi^2 + 1/2)\Sigma\)이다. \(\varphi = \sqrt2 \approx 1.41\)이면 정확히 \(\Sigma\)가 되어 split이 평균적으로 부모가 덮던 영역을 그대로 덮고, \(\varphi\)가 그보다 크면 조금 줄인다. \(\varphi = 1.6\)은 약 11%를 줄이는 선택이다. 이것은 하나의 해석이다. moment matching은 가중치를 \(1/2\)씩 주지만, 공식 구현은 두 자식에게 부모의 opacity를 그대로 주므로 split 직후의 두 자식은 부모보다 더 많이 가린다. 실제 split의 효과는 이어지는 최적화와 opacity의 조정까지 포함해 정해진다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>open subset은 manifold이다: <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-3">Proposition 11.4.3</a>, <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-4">Definition 11.4.4</a>.</li>
+        <li>Riemannian metric, length, distance, pullback metric(log-Euclidean은 \(\log\)로 당긴 metric): <a href="../21-riemannian-metrics/index.html#toc-21-1">Section 21.1</a>, <a href="../21-riemannian-metrics/index.html#toc-21-3">Section 21.3</a>, <a href="../21-riemannian-metrics/index.html#toc-21-4">Section 21.4</a>.</li>
+        <li>geodesic, \(\exp\), completeness(affine-invariant는 complete): <a href="../23-geodesics/index.html#toc-23-1">Section 23.1</a>, <a href="../23-geodesics/index.html#toc-23-2">Section 23.2</a>, <a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a>.</li>
+        <li>sectional curvature와 model space(hyperbolic plane): <a href="../24-curvature/index.html#toc-24-3">Section 24.3</a>, <a href="../24-curvature/index.html#toc-24-5">Section 24.5</a>. nonpositive curvature에서 평균이 유일한 이유는 이 study set의 범위 밖이며 <a class="cite" href="../../references.html#PennecFA06">[PennecFA06]</a>, <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>을 본다.</li>
+        <li>pose와 회전의 보간·평균(같은 \(\log\)–평균–\(\exp\) 반복): <a href="../28-lie-groups-poses/index.html#toc-28-4">Section 28.4</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(\mathrm{SPD}(3)\)은 \(\mathrm{Sym}(3) \cong \R^6\)의 open convex cone이고 tangent space는 \(\mathrm{Sym}(3)\)이다. \(\mathrm{SPD}(2)\)는 \(\R^3\)의 둥근 cone이고, 경계는 납작한 Gaussian이다.</li>
+        <li>Euclidean, log-Euclidean, affine-invariant, Bures–Wasserstein metric은 각각 직선, \(\log\) 공간의 직선, \(\Sigma_0^{1/2}(\Sigma_0^{-1/2}\Sigma_1\Sigma_0^{-1/2})^t\Sigma_0^{1/2}\), optimal transport의 보간을 geodesic으로 준다. affine-invariant만 모든 좌표 변환에 불변이다.</li>
+        <li>Euclidean과 Bures–Wasserstein 보간은 부피가 중간에 부푼다(swelling). log-Euclidean과 affine-invariant는 \(\det\)를 기하평균으로 보간한다. 어느 것도 납작함을 지키지는 않는다.</li>
+        <li>curvature: Euclidean·log-Euclidean은 \(0\), affine-invariant는 \(\le 0\)(평균이 유일), Bures–Wasserstein은 \(\ge 0\)이다. 납작한 Gaussian은 log-Euclidean·affine-invariant에서 무한히 멀다.</li>
+        <li>moment matching은 \(\mathrm{KL}(p\,\|\,q)\)를 최소화하는 “덮는” 병합이고, Riemannian 평균은 “대표 모양”이다. split은 평균적으로 moment matching의 역에 가깝다(\(0.89\Sigma\)).</li>
+      </ul>
+      <p class="next">다음 절에서는 학습 자체를 본다. 3DGS의 parameter는 \(\R^3\), \(\R^4 \setminus \{0\}\), log-scale, logit, SH coefficient로 이루어진 공간에 있고, gradient는 그 위의 covector다. covector를 update 방향으로 바꾸려면 metric이 필요한데, 좌표를 고르는 것이 곧 metric을 고르는 것이다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-29-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 29.4.1</span> <span class="level">★</span>
+        \(\Sigma_0 = \diag(4, 1)\), \(\Sigma_1 = \diag(1, 4)\)일 때 네 metric의 geodesic의 중점(\(t = 1/2\))과 그 \(\det\)를 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>두 행렬이 대각이라 모든 계산이 성분별로 된다. Euclidean: \(\diag(2.5, 2.5)\), \(\det = 6.25\). log-Euclidean: \(\exp\big(\tfrac12(\log 4 + 0)\big) = 2\)이므로 \(2I\), \(\det = 4\). affine-invariant: \(\Sigma_0^{-1/2}\Sigma_1\Sigma_0^{-1/2} = \diag(1/4, 4)\)의 \(1/2\)제곱은 \(\diag(1/2, 2)\)이고, \(\Sigma_0^{1/2}\diag(1/2, 2)\Sigma_0^{1/2} = \diag(2, 2)\)이므로 \(2I\), \(\det = 4\). Bures–Wasserstein: 표준편차를 linear interpolation하므로 \(\big((2 + 1)/2\big)^2 = 2.25\)이고 \(2.25\,I\), \(\det = 5.0625\). 양 끝의 \(\det\)는 4이므로 Euclidean과 Bures–Wasserstein은 부풀고 나머지 둘은 그대로다. 모두 둥근 Gaussian이 된다.</p>
+          <p class="verified">Verification: <code>verify/v-29-4-space-of-covariances.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-4-2" data-level="1">
+        <p><span class="thm-head">Exercise 29.4.2</span> <span class="level">★</span>
+        3DGS의 Gaussian 하나가 학습 중에 \(s_3\)이 \(10^{-2}\)에서 \(10^{-3}\)으로 납작해졌다(\(s_1 = s_2 = 1\)). \(\Sigma\)의 Euclidean 거리와 affine-invariant 거리로 각각 얼마나 움직였는가? 어느 쪽이 log-scale parameter \(\ell_3 = \log s_3\)의 변화와 비례하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\Sigma\)는 \(\diag(1, 1, 10^{-4})\)에서 \(\diag(1, 1, 10^{-6})\)으로 갔다. Euclidean 거리는 \(10^{-4} - 10^{-6} \approx 9.9 \times 10^{-5}\)로 거의 \(0\)이다. affine-invariant 거리는 \(\abs{\log(10^{-6}/10^{-4})} = \ln 100 \approx 4.61\)이다. \(\ell_3\)의 변화는 \(\ln 10 \approx 2.30\)이고, \(\log\lambda_3 = 2\ell_3\)이므로 affine-invariant(그리고 log-Euclidean) 거리는 \(\ell_3\)의 변화의 정확히 2배다. log-scale은 이 metric들의 눈으로 scale을 잰다.</p>
+          <p class="verified">Verification: <code>verify/v-29-4-space-of-covariances.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-4-3" data-level="1">
+        <p><span class="thm-head">Exercise 29.4.3</span> <span class="level">★</span>
+        중심이 \((0, 0)\)과 \((2, 0)\)이고 둘 다 \(s = 0.5\)인 둥근 2D Gaussian(가중치 각 \(1/2\))을 moment matching으로 합친 Gaussian을 구하여라. 결과는 둥근가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-29-4-7">(29.4.7)</a>에서 \(\mu = (1, 0)\)이고 \(\mu_i - \mu = (\mp 1, 0)\)이므로 \(\Sigma = 0.25\,I + \tfrac12\big(\diag(1, 0) + \diag(1, 0)\big) = \diag(1.25,\ 0.25)\)이다. 둥근 두 Gaussian이 가로로 늘어선 것을 덮어야 하므로 결과는 가로로 길쭉한 ellipse(장단축 비 \(\sqrt5 \approx 2.24\))다. Riemannian 평균만 쓰면 \(0.25\,I\)라는 둥근 Gaussian이 되어 두 입력 사이의 빈 곳에 놓인다.</p>
+          <p class="verified">Verification: <code>verify/v-29-4-space-of-covariances.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-4-4" data-level="2">
+        <p><span class="thm-head">Exercise 29.4.4</span> <span class="level">★★</span>
+        affine-invariant metric \(g^{\mathrm{AI}}_\Sigma(U, V) = \tr(\Sigma^{-1}U\Sigma^{-1}V)\)이 \(\Sigma \mapsto A\Sigma A^{\mathsf T}\)(\(A\) invertible)에 의해 보존됨을 보여라. 이것이 왜 “world 좌표의 단위를 바꿔도 보간이 같다”는 뜻인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>map \(\Sigma \mapsto A\Sigma A^{\mathsf T}\)의 differential은 \(U \mapsto AUA^{\mathsf T}\)(linear)이다. 따라서</p>
+          <p>\[ \begin{aligned} &amp; g^{\mathrm{AI}}_{A\Sigma A^{\mathsf T}}(AUA^{\mathsf T}, AVA^{\mathsf T}) \\ &amp;= \tr\big((A\Sigma A^{\mathsf T})^{-1}AUA^{\mathsf T}\,(A\Sigma A^{\mathsf T})^{-1}AVA^{\mathsf T}\big) \\ &amp;= \tr\big(A^{-\mathsf T}\Sigma^{-1}U\Sigma^{-1}VA^{\mathsf T}\big) \\ &amp;= \tr(\Sigma^{-1}U\Sigma^{-1}V) \end{aligned} \]</p>
+          <p>이다(둘째 줄에서 \(A^{-1}A = I\), \(A^{\mathsf T}A^{-\mathsf T} = I\)를 쓰고, 마지막은 \(\tr(XY) = \tr(YX)\)). metric을 보존하는 map은 geodesic을 geodesic으로 보낸다. 좌표를 \(x \mapsto Ax + b\)로 바꾸면 모든 covariance가 \(A\Sigma A^{\mathsf T}\)로 바뀌므로(<a href="29-1-gaussian-metric.html#eq-29-1-5">(29.1.5)</a>), 새 좌표에서 보간한 결과는 옛 좌표에서 보간한 결과를 바꾼 것과 같다. 단위를 미터에서 센티미터로 바꾸는 것은 \(A = 100\,I\)인 경우다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="29-3-splatting-linearization.html">← 29.3 Splatting Is Linearization</a>
+    <a rel="next" href="29-5-optimizing-gaussians.html">29.5 Optimizing Gaussians →</a>
+  </nav>
+</body>
+</html>

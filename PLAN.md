@@ -424,3 +424,52 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
       - verify 3곳이 본문에서 지운 주장을 아직 검사한다(Varadhan, DLT 수렴, Figure 0.6.2의 σ 값). 해는 없다.
       - θ_j(angle defect)와 θ₀(colatitude)가 가까이 쓰인다. 사소하다.
   - 다음: §8의 "다시 시작할 때 할 일"(08장 검토, 13장 작성 …)로 돌아간다. 깊은 장을 쓸 때 해당 Tour 절을 링크할 수 있다(§2.3).
+
+## 11. Part IV: 3D Vision Through Differential Geometry (2026-10-07, 사용자 지시)
+
+사용자는 3D vision 전문가(NeRF, 3DGS, SfM. 지금 관심은 3DGS)다. 3D vision에 쓰이는 기하를 differential geometry로 해석하는 내용을 요청했다. 목차를 먼저 승인받았다.
+- **결정**
+  - 31장(Deformation and Dynamic Scenes)은 뺀다.
+  - Part IV는 27–30장, 18절이다. 목차와 읽는 순서는 Tour 다음, Part 0 앞이다.
+  - 29장(3DGS)부터 쓴다.
+  - 그림 설명을 많고 자세하게 쓴다. 사용자: "예시 그림이 이해되지 않는 경우들이 있었어."
+- **기반 작업**(완료)
+  - GUIDELINES: §2.4(Part IV 원칙), §9 표(27–30), §11.3 `insight` 상자, §12.6 그림 설명 규칙(캡션 네 부분, 본문에서 그림 따라 읽기, 그림 안의 단서)
+  - style.css에 `aside.box.insight`(What geometry explains) 추가
+  - references.html `#sec-refs-3d-vision`: 문헌 24개
+  - 장 계획 4개(27–30)
+  - 루트 index에 Part IV 표 추가
+  - pager: 00 → 27 → … → 30 → 01
+  - Tour 0.8의 Where to Go Next에 Part IV 경로 추가
+- **진행**
+  - 29장 작성 agent 1명(opus)을 띄웠다. 29.1–29.6을 차례로 쓴다.
+  - 다음 할 일
+    1. 보고를 받는다.
+    2. 검토 agent를 띄운다. 그림 설명 규칙을 특히 본다.
+    3. 통합하고 commit한다.
+    4. push한다. 사용자 지시(2026-10-07): "29장까지 작성하고, 검토가 끝나면 알아서 commit하고 push하고 나한테 알려줘"
+    5. 이어서 27, 28, 30장을 쓴다(27·28은 서로 독립).
+  - 제안할 것: Tour 그림의 캡션을 §12.6 규칙으로 감사하는 일. 사용자는 2026-10-07에 "일단 29장까지"라고 했으므로 보류한다.
+  - 2026-10-07: **29장 작성·검토 완료(reviewed).**
+    - 6절, 그림 23개(interactive 3개), verify 6개(약 500개 검사)
+    - 검토자 R1(29.1–29.3), R2(29.4–29.6)가 공식 코드와 대조했다: gaussian-splatting 54c035f, diff-gaussian-rasterization main과 9c5c202, simple-knn, mip-splatting.
+    - 고친 사실
+      - clone은 같은 위치에 복사한다(논문의 설명과 다르다).
+      - densification의 NDC norm은 해상도에 거의 무관하다. 처음 원고의 해상도 주장은 틀렸다.
+      - 초기 scale은 3-NN 거리의 RMS다.
+      - `--antialiasing` 옵션, Mip-Splatting filter 값
+    - 고친 수학
+      - EWA 오차 계수는 c₄ = 0.839다(처음 0.918). 오차 표를 quadrature로 다시 계산했다.
+      - 2D 예의 rank 주석
+      - affine-invariant curvature의 정규화
+      - BW 보간 진술에 commute 조건을 붙였다.
+    - 통합
+      - references에 Ye24(AbsGS) 추가
+      - terms.tsv 3개
+      - glossary `#sec-glossary-3d-vision`
+      - notation `#sec-3d-vision`과 Symbol Conflicts(W, J, ℓ)
+    - 남은 것
+      - 27.1, 27.4, 28.1, 28.2, 30.3으로 가는 링크는 장 index의 toc 앵커를 가리킨다. 그 절을 쓸 때 실제 파일로 바꾼다.
+      - 27장의 투영 기호를 29.3처럼 φ로 맞춘다(27 index는 π).
+      - ω_k(아래첨자, 29장)와 Tour의 ω^k가 다르다.
+      - 400px에서 그림 글자가 작다. 사이트 전체에 click-to-enlarge CSS를 검토한다.

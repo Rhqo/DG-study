@@ -97,6 +97,25 @@ Chapter 0 「A Guided Tour of Differential Geometry」는 깊은 장(01–26) **
 - **verify**: Tour 절의 수치와 공식도 계산이 있으면 verify 스크립트로 확인한다.
 - **연결**: Tour 절끼리는 §3.2대로 앞뒤를 잇는다. 깊은 장은 해당 Tour 절을 링크로 가리킬 수 있다(선택).
 
+### 2.4 Part IV (3D Vision)의 원칙 (2026-10-07 사용자 결정)
+
+Part IV 「3D Vision Through Differential Geometry」(27–30장)는 3D vision(SfM, NeRF, 3D Gaussian Splatting)에 쓰이는 기하를 differential geometry로 해석한다. 목차에서 Tour 바로 다음에 두고, 읽는 순서도 Tour → Part IV → Part 0이다. 장 번호(27–30)는 식별자일 뿐이다.
+
+- **독자**: 3D vision 전공자. SfM, NeRF, 3DGS의 실제 파이프라인과 논문 수식은 알지만 differential geometry는 Tour 수준이다.
+- **선수**: Tour(0.1–0.8)만 가정한다. 깊은 장은 Go deeper로만 연결한다.
+- **목표**: 3D vision의 설계를 기하로 **설명**한다. 왜 그렇게 설계했는지, 어떤 근사이고 언제 깨지는지, 어디에 특이점이 있는지를 다룬다. 용어 대응표에서 끝내지 않는다.
+- **수준**
+  - 3D vision 쪽은 연구 수준으로 쓴다. 논문의 수식을 그대로 쓰고 인용한다(references.html `#sec-refs-3d-vision`). 논문 결과를 과장하거나 지어내지 않는다.
+  - DG 쪽은 Tour처럼 직관 위주로 쓴다. 짧은 유도는 허용하고 `div.proof`의 머리를 "Derivation."으로 한다. 엄밀한 증명은 Go deeper로 보낸다.
+  - **확립된 사실과 해석을 구분한다.** 해석이나 비유면 "이렇게 볼 수 있다", "해석이다"라고 밝힌다. 예: Adam을 대각 metric으로 보는 것은 해석이다.
+- **절의 구성**: Tour(§2.3)와 같다. 다만 In computer vision 상자 대신 다음 두 상자를 쓴다.
+  - **What geometry explains 상자**(`aside.box.insight`) 1–3개: DG 관점에서 새로 보이는 것. 예: 특이점, 근사가 깨지는 조건, 설계의 이유, 실무 함정. 가능하면 수치 실험(verify, 그림)으로 뒷받침한다.
+  - **Go deeper 상자**(`aside.box.deeper`): Tour 절과 깊은 장의 해당 절·정리를 링크한다.
+- **Exercises**: 제목은 "Quick check"다. ★–★★ 문제 3–5개를 두고 모두 풀이를 단다. 계산 문제는 verify로 확인한다.
+- **용어 표시**: Tour와 같다. dfn을 쓰지 않고 `<strong>term</strong>(한국어)`로 쓴다. 정착된 번역어가 없는 CV 용어는 영어만 쓴다.
+- **그림**: 그림 설명을 많고 자세하게 쓴다. §12.6의 "그림 설명 규칙"을 반드시 따른다(사용자 요청: 예시 그림이 이해되지 않는 경우가 있었다).
+- **수치 실험**: "큰 Gaussian에서 EWA 근사가 깨진다", "isotropic이면 rotation gradient가 0이다" 같은 주장은 스크립트로 확인한다. 그 결과를 그림이나 표로 보여 준다.
+
 ---
 
 ## 3. 유기적 연결과 일관성
@@ -652,11 +671,15 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 
 대응 교재 번호는 판본에 따라 다를 수 있다. 작성할 때 `refs/`로 다시 확인한다(§4.4). 표의 "(선택)" 장은 핵심 흐름이 끝난 뒤에 작성한다.
 
-**장 제목과 폴더 (정본)**: 모든 페이지의 제목, 링크, breadcrumb는 아래 이름을 그대로 쓴다.
+**장 제목과 폴더 (정본)**: 모든 페이지의 제목, 링크, breadcrumb는 아래 이름을 그대로 쓴다. 표의 순서가 읽는 순서다. Part IV(27–30)는 Tour 다음, Part 0 앞에 온다(§2.4).
 
 | Part | 장 | 제목 (English) | 폴더 |
 |---|---|---|---|
 | Tour | 00 | A Guided Tour of Differential Geometry | `00-tour` |
+| IV. 3D Vision Through Differential Geometry | 27 | Cameras, Projections, and Rays | `27-cameras-rays` |
+| | 28 | Poses and Motion: Lie Groups for SfM and SLAM | `28-lie-groups-poses` |
+| | 29 | The Geometry of Gaussian Splatting | `29-gaussian-splatting` |
+| | 30 | Surfaces from Radiance Fields | `30-radiance-field-surfaces` |
 | 0. Preliminaries | 01 | Linear Algebra Review | `01-linear-algebra` |
 | | 02 | Calculus on ℝⁿ | `02-calculus-rn` |
 | | 03 | Basic Topology | `03-topology-basics` |
@@ -850,6 +873,7 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
   - `history`: History (역사, 선택)
   - `application`: In computer vision (주로 Chapter 0 Tour, §2.3)
   - `deeper`: Go deeper (깊은 장으로 가는 링크, §2.3)
+  - `insight`: What geometry explains (Part IV, §2.4)
 - **번호 붙은 식**
   ```html
   <div class="equation" id="eq-6-2-1">\[ … \tag{6.2.1} \]</div>
@@ -1037,6 +1061,17 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 ### 12.6 캡션
 
 - `Figure N.M.K.` 다음에 무엇을 보여주는지 1–3문장, 사용한 매개변수, (개념도 표시)를 적는다. 문장은 한국어, 용어는 영어다(§8.2). 캡션 안의 수식은 MathJax로 쓴다.
+- **그림 설명 규칙** (2026-10-07 사용자 요청: "예시 그림이 이해되지 않는 경우가 있었다". Chapter 0과 Part IV에서는 필수, 깊은 장에서는 권장)
+  - **캡션은 네 부분으로 쓴다.**
+    1. 무엇을 그렸는가: 대상, 식, 매개변수
+    2. 읽는 법: 각 색·선·화살표·점·축·패널이 무엇인지. 예: "파란 타원은 …, 주황 화살표는 …, 가로축은 …"
+    3. 볼 것: 독자가 알아차려야 할 핵심을 수치와 함께. 예: "\(\sigma_1 = \sigma_2\)에 가까워질수록 회색 곡선이 0으로 떨어진다"
+    4. 본문과의 연결: 어떤 정의·식·주장을 보여 주는지
+  - **본문에서 그림을 따라 읽힌다.** 그림을 참조하는 문단은 "Figure 29.3.2의 왼쪽 패널을 보자. …" 식으로 시선이 갈 곳을 차례로 짚는다. 그림 번호만 걸고 넘어가지 않는다.
+  - **그림 안에 단서를 둔다.** 패널 제목 (a)(b)(c), 축 이름, 범례, 핵심 지점을 가리키는 짧은 영어 주석(화살표 + 라벨)을 넣는다. 그림 안에는 한글을 쓰지 않는다(§12.3).
+  - **한 그림에는 한 메시지만 담는다.** 담을 것이 많으면 패널을 나누거나 그림을 나눈다. 비교가 핵심이면 같은 축과 같은 스케일의 패널을 나란히 둔다(before/after, 매개변수 sweep).
+  - **3D 그림은 시점이 모호하면 2D 단면이나 투영을 함께 둔다.** 회전해야 이해되는 그림은 인터랙티브 판(§12.7)도 둔다.
+  - **개념도에도 같은 규칙을 적용한다.** 기호와 화살표가 무엇인지 캡션에서 모두 설명한다.
 - 모든 그림은 본문에서 **한 번 이상 참조**한다.
 - `alt` 속성에 그림 내용을 한국어 문장(용어는 영어)으로 요약한다(스크린리더용).
 

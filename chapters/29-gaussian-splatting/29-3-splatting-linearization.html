@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>29.3 Splatting Is Linearization — DG Study</title>
+  <meta name="dg-id" content="29.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="29.1, 29.2, 0.6, 0.7">
+  <meta name="dg-refs" content="Kerbl23; Zwicker01; Yu24; HZ">
+  <meta name="dg-updated" content="2026-10-07">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">29. The Geometry of Gaussian Splatting</a> ›
+    <span>29.3 Splatting Is Linearization</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>29.3 Splatting Is Linearization</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>,
+        <a class="cite" href="../../references.html#Zwicker01">[Zwicker01]</a>,
+        <a class="cite" href="../../references.html#Yu24">[Yu24]</a>,
+        <a class="cite" href="../../references.html#HZ">[HZ]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>affine map은 Gaussian을 정확히 Gaussian으로 보내지만 perspective projection은 그렇지 않다는 것을 설명하고, splatting의 \(\Sigma_{2D} = JW\Sigma W^{\mathsf T}J^{\mathsf T}\)를 투영의 differential \(J\)로 만든 1차 근사로 유도할 수 있다.</li>
+        <li>이 근사를 “ray의 부채꼴을 중심 ray에 평행한 직선 다발로 바꾸는 것”으로 그림으로 설명하고, 근사가 정확한 경우와 깨지는 경우를 말할 수 있다.</li>
+        <li>근사의 오차가 투영의 2차 항에서 오며 Gaussian의 크기/깊이 비와 off-axis 각에 따라 어떻게 커지는지 수치로 말할 수 있다.</li>
+        <li>screen-space dilation과 Mip-Splatting의 filter를 “covariance를 더하는 low-pass filter”로 설명하고, 정규화의 유무가 무엇을 바꾸는지 말할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="29-1-gaussian-metric.html">Section 29.1</a>: 변환 법칙 \(\Sigma \mapsto A\Sigma A^{\mathsf T}\)(<a href="29-1-gaussian-metric.html#i-29-1-3">Proposition 29.1.3</a>), \(\Sigma\)는 투영으로 밀어 보낼 수 있다(<a href="29-1-gaussian-metric.html#sec-transformation">How Σ and Σ⁻¹ Transform</a>), 화면 위 범위 <a href="29-1-gaussian-metric.html#eq-29-1-7">(29.1.7)</a></li>
+        <li><a href="../00-tour/0-6-manifolds.html#sec-tangent">Section 0.6</a>: differential은 chart에서 Jacobian matrix다(<a href="../00-tour/0-6-manifolds.html#i-0-6-5">Definition 0.6.5</a>), chain rule <a href="../00-tour/0-6-manifolds.html#eq-0-6-5">(0.6.5)</a></li>
+        <li><a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>: backpropagation은 covector의 pullback이다</li>
+        <li>pinhole camera model(\(f_x, f_y, c_x, c_y\))과 3DGS의 rasterization 파이프라인 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="29-2-covariance-parametrization.html">Section 29.2</a>까지는 3D 공간 안의 Gaussian 하나를 보았다. 렌더링을 하려면 그 Gaussian이 화면에서 어떤 모양으로 보이는지, 곧 화면 위의 footprint가 필요하다. <a href="29-1-gaussian-metric.html#sec-transformation">Section 29.1</a>에서 본 대로 covariance는 linear map으로 밀어 보낼 수 있다. 그런데 카메라의 투영은 linear map이 아니다. 깊이로 나누기 때문이다.</p>
+      <p>3DGS는 이 문제를 EWA splatting <a class="cite" href="../../references.html#Zwicker01">[Zwicker01]</a>의 방법으로 푼다. 투영을 Gaussian의 중심에서 1차 근사하고, 그 근사가 affine map이라는 사실을 이용한다. 결과가 논문의 식 \(\Sigma' = JW\Sigma W^{\mathsf T}J^{\mathsf T}\)이다 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>. 이 절은 세 질문에 답한다. \(J\)는 기하적으로 무엇인가? 1차 근사는 무엇을 버리는가? 버린 것은 얼마나 큰가?</p>
+    </section>
+
+    <section id="sec-affine">
+      <h2>Affine Maps Send Gaussians to Gaussians</h2>
+      <p>파이프라인의 첫 단계는 world 좌표 \(x\)를 camera 좌표 \(t = (t_x, t_y, t_z)\)로 바꾸는 것이다. view matrix의 회전 부분을 \(W \in \mathrm{SO}(3)\), translation을 \(b\)라 하면</p>
+      <div class="equation" id="eq-29-3-1">
+      \[ \begin{aligned} t &amp;= Wx + b, \\ t_0 &amp;= W\mu + b, \qquad \Sigma_c = W\Sigma W^{\mathsf T} \end{aligned} \tag{29.3.1} \]
+      </div>
+      <p>이다. 이 \(W\)는 3DGS 논문의 기호이고, Part I의 shape operator \(W_p\)와는 관계가 없다. affine map이므로 <a href="29-1-gaussian-metric.html#i-29-1-3">Proposition 29.1.3</a>에 의해 이 단계는 정확하다. camera 좌표의 Gaussian은 중심 \(t_0\), covariance \(\Sigma_c\)인 Gaussian이다.</p>
+      <p>정확한 것이 하나 더 있다. 3차원에서 2차원으로 가는 linear map, 예를 들어 \(t_z\)를 버리는 orthographic projection도 Gaussian을 Gaussian으로 보낸다.</p>
+      <div class="thm proposition" id="i-29-3-1">
+        <p><span class="thm-head">Proposition 29.3.1</span> <span class="thm-name">(linear images and marginals of a Gaussian)</span>.
+        \(A\)가 rank 2인 \(2 \times 3\) 행렬이고 \(G\)가 중심 \(t_0\), covariance \(\Sigma_c\)인 3D Gaussian이라 하자. \(\R^2\)의 점 \(u\)에 대해 \(G\)를 affine fiber \(\{t : A(t - t_0) = u\}\)(\(\ker A\)에 평행한 직선)를 따라 적분한 값은</p>
+        <p>\[ \int_{A(t - t_0) = u} G\,d\ell = C\,\exp\!\Big(-\tfrac12\,u^{\mathsf T}(A\Sigma_cA^{\mathsf T})^{-1}u\Big) \]</p>
+        <p>이다(\(C\)는 \(u\)에 무관한 양수). 곧 직선을 따라 적분하면 covariance가 \(A\Sigma_cA^{\mathsf T}\)인 2D Gaussian이 된다. 확률의 말로는, \(t\)가 Gaussian을 따르면 \(At\)도 Gaussian을 따르고 그 covariance가 \(A\Sigma_cA^{\mathsf T}\)라는 말이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> <a href="29-1-gaussian-metric.html#sec-affine-image">Section 29.1</a>처럼 \(t = t_0 + \Sigma_c^{1/2}y\)(\(y\)는 표준 Gaussian)로 쓰고 \(B = A\Sigma_c^{1/2}\)(rank 2)라 하면 \(A(t - t_0) = By\)이다. \(y\)의 좌표를 회전해 \(\ker B\)가 셋째 좌표축이 되게 하면 \(B = (B_0\ \ 0)\) (\(B_0\)는 invertible \(2 \times 2\))이고, fiber는 셋째 축에 평행한 직선이다. 표준 Gaussian을 그 축을 따라 적분하면 나머지 두 좌표 \(y'\)의 표준 Gaussian이 남고(적분 변수를 \(t\)에서 \(y\)로 바꿀 때 생기는 상수는 \(C\)에 들어간다), \(u = B_0y'\)의 covariance는 \(B_0B_0^{\mathsf T} = BB^{\mathsf T} = A\Sigma_cA^{\mathsf T}\)이다. 같은 계산이 <a href="29-1-gaussian-metric.html#ex-29-1-4">Exercise 29.1.4</a>의 “투영은 블록을 자르는 것이 아니다”의 내용이다.</p>
+      </div>
+      <p>volume rendering에서 한 픽셀이 보는 것은 그 픽셀을 지나는 ray 위에 쌓인 밀도다. 그래서 EWA volume splatting은 3D kernel을 ray를 따라 적분한 것을 footprint로 쓴다 <a class="cite" href="../../references.html#Zwicker01">[Zwicker01]</a>. ray들이 서로 평행하다면(orthographic camera) <a href="#i-29-3-1">Proposition 29.3.1</a>이 그 적분을 정확히 계산해 준다. 문제는 pinhole camera의 ray가 평행하지 않다는 것이다.</p>
+    </section>
+
+    <section id="sec-perspective">
+      <h2>Perspective Projection Is Not Affine</h2>
+      <p>camera 좌표에서 픽셀 좌표로 가는 pinhole projection은</p>
+      <div class="equation" id="eq-29-3-2">
+      \[ \begin{aligned} &amp; \varphi\colon \{t_z \gt 0\} \to \R^2, \\ &amp; \varphi(t) = \Big(f_x\frac{t_x}{t_z} + c_x,\ \ f_y\frac{t_y}{t_z} + c_y\Big) \end{aligned} \tag{29.3.2} \]
+      </div>
+      <p>이다 <a class="cite" href="../../references.html#HZ">[HZ]</a>. \(\varphi\)는 smooth map이고, 같은 픽셀로 가는 점들, 곧 fiber \(\varphi^{-1}(u)\)는 카메라 중심 \(O\)에서 나가는 ray(반직선)다. ray들은 \(O\)에서 부채꼴로 퍼진다. 그래서 \(\varphi\)는 affine이 아니고, Gaussian의 image는 Gaussian이 아니다. 가까운 쪽 절반은 크게, 먼 쪽 절반은 작게 보이므로 image의 distribution은 한쪽으로 치우친다(<a href="#fig-29-3-1">Figure 29.3.1</a>의 (b)).</p>
+    </section>
+
+    <section id="sec-ewa">
+      <h2>Linearize: The Differential \(J\)</h2>
+      <p>EWA의 처방은 미적분의 기본 처방이다. \(\varphi\)를 Gaussian의 중심 \(t_0\)에서 1차 Taylor 근사로 바꾼다.</p>
+      <p>\[ \varphi(t) \approx \tilde\varphi(t) = \varphi(t_0) + J\,(t - t_0), \qquad J = D\varphi(t_0). \]</p>
+      <p>\(J\)는 <a href="../00-tour/0-6-manifolds.html#i-0-6-5">Definition 0.6.5</a>의 differential \(d\varphi_{t_0}\)을 좌표로 쓴 Jacobian matrix이고, <a href="#eq-29-3-2">(29.3.2)</a>를 미분하면</p>
+      <div class="equation" id="eq-29-3-3">
+      \[ J = \begin{pmatrix} \dfrac{f_x}{t_z} &amp; 0 &amp; -\dfrac{f_x t_x}{t_z^2} \\[2mm] 0 &amp; \dfrac{f_y}{t_z} &amp; -\dfrac{f_y t_y}{t_z^2} \end{pmatrix}_{t = t_0} \tag{29.3.3} \]
+      </div>
+      <p>이다. 3DGS 논문은 \(3 \times 3\) 결과 \(\Sigma'\)의 셋째 행과 셋째 열을 버려 \(2 \times 2\) 행렬을 얻고 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>, 공식 구현은 셋째 행이 \(0\)인 \(3 \times 3\) 행렬로 \(J\)를 쓴다. 어느 쪽이든 위의 \(2 \times 3\) 행렬을 쓰는 것과 같다. \(\tilde\varphi\)는 affine이므로 <a href="#eq-29-3-1">(29.3.1)</a>과 <a href="#i-29-3-1">Proposition 29.3.1</a>을 차례로 쓰면</p>
+      <div class="equation" id="eq-29-3-4">
+      \[ \begin{aligned} u_0 &amp;= \varphi(t_0), \\ \Sigma_{2D} &amp;= J\,\Sigma_c\,J^{\mathsf T} = JW\Sigma W^{\mathsf T}J^{\mathsf T} \end{aligned} \tag{29.3.4} \]
+      </div>
+      <p>를 얻는다. 이것이 화면 위의 2D Gaussian이다. 한 문장으로 하면 <strong>splatting은 differential에 의한 pushforward</strong>다. tangent vector가 \(d\varphi\)로 밀려 가듯이(<a href="../00-tour/0-6-manifolds.html#eq-0-6-5">(0.6.5)</a>), contravariant 2-tensor인 \(\Sigma_c\)도 \(J\)로 밀려 간다. 정확한 \(\varphi\)는 Gaussian을 Gaussian이 아닌 것으로 보내지만, 그 differential은 Gaussian을 Gaussian으로 보낸다.</p>
+      <p>\(J\)의 kernel을 보자. <a href="#eq-29-3-3">(29.3.3)</a>에서 \(Jt_0 = 0\)이다. 곧 \(\ker J\)는 중심을 지나는 ray의 방향 \(t_0\)이다. 깊이 방향으로 움직이면 픽셀이 변하지 않는다는 말이고, 이것이 \(\varphi\)의 fiber가 ray라는 사실의 무한소판이다(<a href="../27-cameras-rays/index.html#toc-27-1">Section 27.1</a>). 이 사실에서 1차 근사의 기하가 나온다.</p>
+
+      <div class="thm proposition" id="i-29-3-2">
+        <p><span class="thm-head">Proposition 29.3.2</span> <span class="thm-name">(what the linearization does)</span>.
+        \(\tilde\varphi\)의 fiber는 중심 ray \(Ot_0\)에 평행한 직선들이다. 그리고 \(\tilde\varphi(t)\)는 다음 두 단계로 계산된다. (1) \(t\)를 \(t_0\) 방향으로 미끄러뜨려 깊이 평면 \(\{t_z = t_{0z}\}\) 위의 점 \(t'\)으로 보낸다. (2) \(t'\)을 정확한 \(\varphi\)로 투영한다. 특히 깊이 평면 위의 점에서는 \(\tilde\varphi = \varphi\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(\ker J = \Span\{t_0\}\)이므로 \(\tilde\varphi\)는 \(t_0\) 방향의 직선 위에서 일정하다. \(t = t_0 + v\)에서 \(t' = t_0 + v + \lambda t_0\)(\(\lambda = -v_z/t_{0z}\))은 같은 직선 위에 있고 \(t'_z = t_{0z}\)다. 깊이가 고정된 평면 위에서 \(\varphi(t') = (f_xt'_x/t_{0z} + c_x, \dots)\)는 \(t'\)의 affine 함수이고, \(t_0\)에서 \(\tilde\varphi\)와 값과 (평면 방향의) 미분이 같으므로 그 평면 위에서 \(\tilde\varphi\)와 같다. 따라서 \(\tilde\varphi(t) = \tilde\varphi(t') = \varphi(t')\)이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-29-3-1">
+        <img src="figures/fig-29-3-1-fan-vs-parallel.svg" alt="두 패널. 왼쪽 (a)는 가로축 t_x, 세로축 t_z(depth)인 평면이다. 아래 원점에 카메라 중심 O가 있고, t_z = 1에 검은 가로선(image line), t_z = 2.5에 회색 점선(depth line)이 있다. 오른쪽 위에 회색으로 칠한 Gaussian과 그 2σ 원(검정), 중심 t₀가 있다. O에서 원에 접하는 주황 직선 두 개(exact rays)가 부채꼴로 퍼지고, 원에 접하면서 O와 t₀를 잇는 회색 선에 평행한 파란 점선 두 개가 depth line과 점 P₋, P₊에서 만난다. O에서 P₋, P₊로 가는 가는 파란 선이 있다. image line 바로 위에 주황 구간(exact), 바로 아래에 파란 구간(EWA)이 표시되어 있고 파란 구간이 왼쪽으로 조금 치우치고 짧다. 오른쪽 (b)는 가로축 image coordinate u, 세로축 density인 그래프로, 주황 곡선(exact p(u))은 꼭대기가 조금 왼쪽에 있고 오른쪽 꼬리가 길며, 파란 곡선(EWA Gaussian)은 좌우로 symmetric하다. u₀ = φ(t₀)에 파란 점선, exact mean에 주황 점선이 있다.">
+        <figcaption><span class="fig-head">Figure 29.3.1.</span>
+        투영과 그 1차 근사를 \(t_xt_z\)-평면에서 본 그림. <em>무엇을</em>: 2D cross-section에서 중심 \(t_0 = (2.5\tan 30^\circ,\ 2.5)\), 표준편차 \(s = 0.5\)(\(s/t_z = 0.2\))인 Gaussian과, \(f = 1\)인 카메라(image line \(t_z = 1\), \(u = t_x/t_z\)). <em>읽는 법</em>: (a)의 회색 농도가 Gaussian, 검은 원이 \(2\sigma\) 원이다. 주황 직선은 \(O\)에서 원에 접하는 정확한 ray이고, image line 위의 주황 구간(exact)은 원이 정확히 투영된 범위다. 파란 점선은 중심 ray \(Ot_0\)(회색)에 평행하면서 원에 접하는 직선, 곧 \(\tilde\varphi\)의 fiber다. 이것이 깊이 직선 \(t_z = 2.5\)(회색 점선)와 만나는 점이 \(P_\pm\)이고, \(O\)에서 \(P_\pm\)로 가는 가는 파란 선이 image line에 남기는 파란 구간(EWA)이 EWA의 범위 \(u_0 \pm 2\sigma_u\)다. (b)는 image line 위의 distribution이다. 주황은 Gaussian을 정확한 \(\varphi\)로 보낸 distribution의 밀도 \(p(u)\)(수치 적분), 파랑은 EWA의 Gaussian이다. <em>볼 것</em>: (a)에서 정확한 구간은 \([0.17, 1.20]\), EWA 구간은 \([0.12, 1.04]\)이다. 정확한 범위는 바깥쪽(\(u\)가 큰 쪽)으로 밀려 있고 더 넓다. (b)에서 정확한 distribution은 꼭대기가 \(u = 0.54\)로 \(u_0 = 0.58\)보다 왼쪽에 있지만 오른쪽 꼬리가 길어 평균은 \(0.60\)으로 오른쪽에 있다. 가까운 쪽(작은 \(t_z\))의 절반이 더 크게 투영되기 때문이다. <em>본문과의 연결</em>: <a href="#i-29-3-2">Proposition 29.3.2</a>의 두 단계, 곧 “\(t_0\)에 평행하게 깊이 직선으로 미끄러뜨린 뒤 정확히 투영”을 그린 것이다. 1차 근사가 버리는 것은 ray의 부채꼴 모양이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-3-1">Figure 29.3.1</a>의 (a)를 따라가 보자. 정확한 투영은 \(O\)에서 원에 접하는 두 주황 직선이 정한다. EWA는 이 부채꼴을 버리고, 중심 ray에 평행한 두 파란 점선을 쓴다. 파란 점선을 깊이 직선까지 따라 내려간 점 \(P_\pm\)를 다시 정확히 투영하면 image line의 파란 구간이 나온다. 원의 위쪽(먼 쪽)에 닿는 왼쪽 끝에서는 주황과 파랑의 차이가 작지만(0.17 대 0.12), 아래쪽(가까운 쪽)에 닿는 오른쪽 끝에서는 주황 ray가 훨씬 더 벌어진다(1.20 대 1.04). 그래서 정확한 구간이 더 넓고 바깥으로 치우친다. (b)는 같은 일을 distribution으로 본 것이다. EWA의 파란 Gaussian은 symmetric하지만 정확한 주황 distribution은 바깥쪽 꼬리가 길다.</p>
+      <p>Proposition에서 바로 나오는 결과가 하나 있다. 깊이 평면 위에 놓인 점들은 \(\tilde\varphi = \varphi\)이므로, <strong>image plane에 평행한 납작한 Gaussian은 정확히 투영된다</strong>. 그 Gaussian이 화면 가장자리에 있어도(off-axis) 마찬가지다. 오차는 Gaussian이 깊이 방향으로 두께를 가질 때만 생긴다.</p>
+      <p>EWA의 원래 맥락에서 이것은 ray를 따라 적분하는 문제였다. 1차 근사 아래에서는 ray들이 서로 평행한 직선(\(\tilde\varphi\)의 fiber)이 되므로, <a href="#i-29-3-1">Proposition 29.3.1</a>에 의해 ray를 따른 적분이 정확히 \(\Sigma_{2D}\)를 covariance로 하는 2D Gaussian이 된다 <a class="cite" href="../../references.html#Zwicker01">[Zwicker01]</a>. 3DGS는 그 2D Gaussian의 모양만 쓰고, 적분에서 나오는 상수 대신 정점의 값을 opacity \(\alpha\)로 둔다 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>.</p>
+    </section>
+
+    <section id="sec-error">
+      <h2>How Wrong Is the Linearization?</h2>
+      <p>버린 것은 Taylor 전개의 2차 이상의 항이다. \(t = t_0 + \delta\)이면</p>
+      <p>\[ \begin{aligned} \varphi(t_0 + \delta) &amp;= \varphi(t_0) + J\delta + \tfrac12 H(\delta, \delta) + O(\abs{\delta}^3), \\ H_x &amp;= f_x\begin{pmatrix} 0 &amp; 0 &amp; -t_z^{-2} \\ 0 &amp; 0 &amp; 0 \\ -t_z^{-2} &amp; 0 &amp; 2t_xt_z^{-3} \end{pmatrix} \end{aligned} \]</p>
+      <p>이다. \(H_x\)는 \(\varphi\)의 첫째 성분의 Hessian matrix이고 \(H_y\)도 같은 꼴이다. 모든 성분에 \(t_z\) 방향이 들어 있다. 앞에서 본 대로 깊이 방향의 퍼짐 \(\delta_z\)가 없으면 2차 항이 \(0\)이다. 크기를 가늠하면, \(\delta\)가 Gaussian의 표준편차 \(s\) 정도일 때 2차 항과 1차 항의 비는 대략 \(s/t_z\)이고, off-axis 각 \(\theta\)(\(\tan\theta = t_x/t_z\))가 커지면 \(2t_x/t_z^3\) 항이 커진다.</p>
+
+      <div class="thm proposition" id="i-29-3-3">
+        <p><span class="thm-head">Proposition 29.3.3</span> <span class="thm-name">(leading-order error for an isotropic Gaussian)</span>.
+        \(\Sigma_c = s^2I_3\), \(t_0 = t_z(\tan\theta, 0, 1)\)이라 하자. \(s/t_z\)가 작을 때 정확한 pushforward와 EWA를 비교하면</p>
+        <ul>
+          <li>중심의 어긋남: \(\mathbb{E}[\varphi(t)] - \varphi(t_0) \approx \tfrac12\mathbb{E}[H(\delta, \delta)]\)이고, 이것은 \(\big(f_x s^2\tan\theta/t_z^2,\ 0\big)\)이다. footprint의 가장 큰 표준편차(\(f_xs/(t_z\cos\theta)\))로 나누면 \((s/t_z)\sin\theta\)이다.</li>
+          <li>covariance의 상대 오차: on-axis(\(\theta = 0\))에서 \(\mathrm{Var}[\varphi_x] \approx (f_xs/t_z)^2\big(1 + 3(s/t_z)^2\big)\), 곧 약 \(3(s/t_z)^2\)이다.</li>
+        </ul>
+        <p>on-axis에서는 symmetry 때문에 중심의 어긋남이 정확히 \(0\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(\mathbb{E}[\delta\delta^{\mathsf T}] = s^2I_3\)이므로 \(\mathbb{E}[H_x(\delta, \delta)] = s^2\tr H_x = 2f_xs^2t_x/t_z^3\)이고, \(t_x = t_z\tan\theta\)를 넣는다. footprint의 \(x\) 방향 분산은 \(J\Sigma_cJ^{\mathsf T}\)의 \((1,1)\) 성분 \((f_xs/t_z)^2(1 + \tan^2\theta)\)이다. on-axis에서 \(\varphi_x = f_x\delta_x/(t_z + \delta_z)\)이고 \(\varepsilon = \delta_z/t_z\)에 대해 \(\mathbb{E}[(1 + \varepsilon)^{-2}] = 1 + 3\mathbb{E}[\varepsilon^2] + O(\varepsilon^4)\)이다.</p>
+      </div>
+      <p>공식이 맞는지, 그리고 \(s/t_z\)가 클 때는 어떤지를 수치로 확인하자. 3D Gaussian을 정확한 \(\varphi\)로 보낸 distribution과 \(\tilde\varphi\)로 보낸 distribution의 평균과 covariance를 비교한다. 3DGS가 화면에서 Gaussian의 범위를 \(3\sigma\)로 잡는 것(<a href="29-1-gaussian-metric.html#sec-footprint">Section 29.1</a>)에 맞추고 정확한 pushforward의 moment가 유한하도록(\(t_z \le 0\)인 점을 빼기 위해서다), Gaussian을 3D의 \(3\sigma\) ellipsoid 안으로 제한했다. 평균과 covariance는 이 잘린 Gaussian에 대한 적분을 수치적분(spherical coordinates에서 Gauss–Legendre quadrature)으로 정확히 계산했다. 제한 때문에 위 공식의 상수가 조금 바뀐다. 중심의 어긋남에는 \(\sqrt{c_2}\)가 곱해지고(\(c_2 = \mathbb{E}[y_1^2] = 0.918\), 잘린 표준 Gaussian \(y\)의 축당 분산), covariance 오차의 coefficient 3은 \(3c_4\)가 된다(\(c_4 = \mathbb{E}[y_1^2y_3^2]/\mathbb{E}[y_1^2] = 0.839\)). 자르지 않은 Gaussian이면 두 상수가 모두 1이다.</p>
+
+      <figure class="dg-figure" id="fig-29-3-2">
+        <img src="figures/fig-29-3-2-ewa-grid.svg" alt="2행 2열의 네 패널. 모두 같은 축 범위(가로 약 -4부터 5, 세로 -3.4부터 3.4)를 쓴다. 각 패널에 회색 점 구름(exact samples), 파란 실선 ellipse(EWA 2σ ellipse)와 중심의 파란 십자, 주황 점선 ellipse(exact image of 2σ ellipsoid), 주황 X(exact mean)가 있다. (a) s/t_z = 0.03, θ = 0°와 (b) s/t_z = 0.03, θ = 45°에서는 파란 선과 주황 점선이 거의 겹친다. (b)의 ellipse는 가로로 길다. (c) s/t_z = 0.25, θ = 0°에서는 주황 점선 원이 파란 원보다 조금 크다. (d) s/t_z = 0.25, θ = 45°에서는 주황 점선 ellipse가 파란 ellipse보다 오른쪽으로 크게 밀려 있고 더 크며, 주황 X도 파란 십자보다 오른쪽에 있다.">
+        <figcaption><span class="fig-head">Figure 29.3.2.</span>
+        정확한 투영과 EWA를 작은/큰 Gaussian, on-axis/off-axis에서 비교한다. <em>무엇을</em>: \(\Sigma_c = s^2I_3\), \(t_0 = (\tan\theta, 0, 1)\)인 Gaussian. (a) \(s/t_z = 0.03\), \(\theta = 0\), (b) \(s/t_z = 0.03\), \(\theta = 45^\circ\), (c) \(s/t_z = 0.25\), \(\theta = 0\), (d) \(s/t_z = 0.25\), \(\theta = 45^\circ\). <em>읽는 법</em>: 가로·세로축은 \(u_0 = \varphi(t_0)\)를 원점으로 하고 on-axis footprint의 표준편차 \(f s/t_z\)를 단위로 잰 화면 좌표이며, 네 패널이 같은 축을 쓴다. 회색 점은 3D Gaussian의 sample 2500개(\(3\sigma\)에서 자름)를 정확한 \(\varphi\)로 보낸 것이다. 파란 실선은 EWA의 \(2\sigma\) ellipse(파란 \(+\)가 중심 \(u_0\)), 주황 점선은 3D의 \(2\sigma\) ellipsoid를 정확히 투영한 윤곽(dual quadric으로 계산), 주황 \(\times\)는 정확한 pushforward의 평균이다. <em>볼 것</em>: 작은 Gaussian((a), (b))에서는 파랑과 주황이 겹친다. (b)의 ellipse가 가로로 긴 것은 off-axis에서 \(J\)가 \(1/\cos^2\theta = 2\)배(분산)로 늘이기 때문이고, 이것은 근사가 아니라 정확한 효과다. 큰 Gaussian의 on-axis (c)에서는 윤곽이 원으로 남지만 반지름이 \(1/\sqrt{1 - (2s/t_z)^2} = 1.155\)배다. 큰 Gaussian의 off-axis (d)에서는 윤곽이 바깥(오른쪽)으로 EWA 표준편차의 0.94배만큼 밀리고, 평균도 0.21배만큼 밀린다. <em>본문과의 연결</em>: <a href="#i-29-3-3">Proposition 29.3.3</a>이 예측하는 대로 어긋남은 \(s/t_z\)와 \(\theta\)가 함께 클 때 커진다. 바깥 윤곽(\(2\sigma\))이 평균보다 더 많이 밀리는 것은 윤곽을 정하는 점들이 중심에서 더 멀어 2차 항의 영향을 더 받기 때문이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-3-2">Figure 29.3.2</a>를 (a)부터 보자. 표준편차가 깊이의 3%인 Gaussian은 on-axis에서도 \(45^\circ\)에서도 파란 EWA ellipse와 주황 정확한 윤곽이 구별되지 않는다. (b)의 ellipse가 가로로 긴 것은 \(J\)가 off-axis에서 화면을 늘이기 때문이고, EWA는 이것을 정확히 잡는다. 아래 줄로 내려가 Gaussian을 깊이의 25%로 키우면 차이가 보인다. on-axis (c)에서는 symmetry 때문에 중심은 그대로이고 윤곽만 커진다. off-axis (d)에서는 주황 윤곽이 오른쪽으로 크게 밀리고, 회색 점 구름도 오른쪽으로 꼬리를 끈다. <a href="#fig-29-3-3">Figure 29.3.3</a>은 이 어긋남을 \(s/t_z\)와 \(\theta\)의 함수로 잰다.</p>
+
+      <figure class="dg-figure" id="fig-29-3-3">
+        <img src="figures/fig-29-3-3-ewa-error.svg" alt="두 개의 log-log 그래프. 가로축은 둘 다 s/t_z(0.01부터 0.3), 0.1에 회색 세로선이 있다. 왼쪽 (a)의 세로축은 relative center offset이고, θ = 15°(초록), 30°(주황), 45°(주홍), 60°(파랑) 곡선이 기울기 1로 올라가며 각이 클수록 위에 있다. 각 곡선 아래에 회색 점선 예측선이 거의 겹친다. 오른쪽 (b)의 세로축은 relative covariance error이고, θ = 0°(검정), 30°(주황), 60°(파랑) 곡선이 기울기 2로 올라가며, 회색 점선 3c₄(s/t_z)²가 검정 곡선과 겹치다가 s/t_z가 0.2를 넘으면 곡선이 점선보다 위로 휜다.">
+        <figcaption><span class="fig-head">Figure 29.3.3.</span>
+        EWA 오차의 크기. <em>무엇을</em>: <a href="#fig-29-3-2">Figure 29.3.2</a>와 같은 isotropic Gaussian(\(3\sigma\)에서 자름)을 정확한 \(\varphi\)와 1차 근사 \(\tilde\varphi\)로 보낸 두 distribution의 평균과 covariance를 수치적분으로 계산해 비교했다. <em>읽는 법</em>: 두 그래프 모두 log-log이고 가로축은 \(s/t_z\)다. (a)의 세로축은 두 distribution의 평균의 차를 1차 근사 footprint의 가장 큰 표준편차로 나눈 값, (b)의 세로축은 두 covariance의 차의 Frobenius norm을 1차 근사 covariance의 norm으로 나눈 값이다. 색은 off-axis 각 \(\theta\)이고, 회색 점선은 <a href="#i-29-3-3">Proposition 29.3.3</a>의 예측을 잘린 Gaussian에 맞춘 \(\sqrt{c_2}\,(s/t_z)\sin\theta\)와 \(3c_4\,(s/t_z)^2\) (\(c_2 = 0.918\), \(c_4 = 0.839\))이다. <em>볼 것</em>: (a)의 곡선은 기울기 1(\(s/t_z\)에 비례), (b)의 곡선은 기울기 2(\((s/t_z)^2\)에 비례)로 올라가고, 작은 \(s/t_z\)에서 예측과 겹친다. \(s/t_z = 0.1\)(회색 세로선)에서 중심은 \(\theta = 30^\circ\)일 때 4.9%, \(60^\circ\)일 때 8.5% 어긋나고, covariance는 on-axis 2.6%, \(60^\circ\) 5.8% 틀린다. \(s/t_z\)가 0.2를 넘으면 곡선이 예측보다 빨리 커진다(고차 항). <em>본문과의 연결</em>: 아래 <a href="#i-29-3-4">Example 29.3.4</a>의 표가 이 그래프의 값이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-3-3">Figure 29.3.3</a>의 (a)를 보자. 네 색의 곡선이 모두 기울기 1의 직선이고, \(s/t_z\)가 0.1 근처에 이를 때까지 회색 예측선과 겹친다. 각이 \(30^\circ\)에서 \(60^\circ\)로 커지면 곡선은 \(\sin 60^\circ/\sin 30^\circ \approx 1.73\)배 위로 올라간다. 중심의 어긋남은 \(\sin\theta\)에 비례하기 때문이다. (b)에서는 기울기가 2다. on-axis의 검은 곡선은 예측선 \(3c_4(s/t_z)^2\)와 겹치다가 0.2 근처부터 위로 휘고, off-axis 곡선들은 같은 기울기로 그보다 위에 있다. 크기를 두 배로 하면 중심의 오차는 두 배, covariance의 오차는 네 배가 된다.</p>
+
+      <div class="thm example" id="i-29-3-4">
+        <p><span class="thm-head">Example 29.3.4</span> <span class="thm-name">(numbers)</span>.
+        <a href="#fig-29-3-3">Figure 29.3.3</a>의 계산에서 몇 점을 표로 옮긴다. 각 칸은 “중심의 어긋남 / covariance의 상대 오차”다.</p>
+        <table>
+          <thead>
+            <tr><th>\(\theta\)</th><th>\(s/t_z = 0.01\)</th><th>\(0.1\)</th><th>\(0.2\)</th><th>\(0.3\)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>\(0^\circ\)</td><td>0 / 0.03%</td><td>0 / 2.6%</td><td>0 / 12%</td><td>0 / 37%</td></tr>
+            <tr><td>\(30^\circ\)</td><td>0.48% / 0.03%</td><td>4.9% / 3.4%</td><td>11% / 16%</td><td>20% / 59%</td></tr>
+            <tr><td>\(60^\circ\)</td><td>0.83% / 0.05%</td><td>8.5% / 5.8%</td><td>19% / 29%</td><td>34% / 125%</td></tr>
+          </tbody>
+        </table>
+        <p>화면 위의 크기로 바꾸어 읽으면 이렇다. 초점거리 \(f = 1000\) px에서 footprint의 표준편차가 10 px인 Gaussian은 \(s/t_z \approx 0.01\)이므로 EWA의 오차는 무시할 수 있다. footprint의 표준편차가 200 px, 곧 화면의 큰 부분을 덮는 Gaussian은 \(s/t_z \approx 0.2\)이므로 covariance가 12% 이상 틀리고, 화면 가장자리라면 중심도 footprint 크기의 10–20%만큼 어긋난다. 이 환산은 isotropic Gaussian에 대한 것이다. 일반적으로 covariance의 오차를 정하는 것은 깊이 방향(\(t_z\) 방향)의 퍼짐이다. 깊이 방향으로 길쭉한 \(s = (0.01, 0.01, 0.2)\)은 on-axis에서 12% 틀리지만, 옆으로 길쭉한 \(s = (0.2, 0.01, 0.01)\)은 0.03%만 틀린다.</p>
+        <p class="verified">Verification: <code>verify/v-29-3-splatting-linearization.py</code></p>
+      </div>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: EWA가 정확한 곳과 깨지는 곳</p>
+        <ul>
+          <li><strong>정확한 곳.</strong> world → camera는 언제나 정확하다. image plane에 평행한 납작한 Gaussian도 정확하다(<a href="#i-29-3-2">Proposition 29.3.2</a>). 깊이가 일정한 평면 위에서는 투영이 affine이기 때문이다.</li>
+          <li><strong>깨지는 곳.</strong> 오차는 \(\varphi\)의 Hessian, 곧 ray가 부채꼴로 퍼지는 정도에서 온다. covariance는 \((\text{깊이 방향 퍼짐}/t_z)^2\)에 비례해, 중심은 \((\text{크기}/t_z)\times\sin\theta\)에 비례해 틀린다. 카메라 가까이에 있는 큰 Gaussian, 깊이 방향으로 두꺼운 Gaussian, 넓은 화각의 가장자리에 있는 Gaussian이 위험하다.</li>
+          <li><strong>틀리는 방향.</strong> 정확한 footprint는 바깥쪽(principal point에서 먼 쪽)으로 치우치고 그쪽 꼬리가 길다. EWA는 언제나 symmetric한 ellipse를 \(\varphi(t_0)\)에 놓으므로 그 치우침을 표현하지 못한다. 학습은 이 차이를 다른 Gaussian의 위치와 모양으로 메우려 할 것이므로, 같은 장면을 다른 시점에서 보면 일관되지 않을 수 있다(해석이다).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-other-cameras">
+      <h2>Other Camera Models</h2>
+      <p>위의 논리는 pinhole에만 쓰이는 것이 아니다. 카메라 모델이 어떤 smooth map \(\varphi\)이든, Gaussian의 중심에서 그 differential \(J = D\varphi(t_0)\)을 계산해 <a href="#eq-29-3-4">(29.3.4)</a>에 넣으면 같은 1차 근사가 된다. 예를 들어 fisheye lens의 equidistant model \(u = f\,\vartheta\,(t_x, t_y)/\sqrt{t_x^2 + t_y^2}\) (\(\vartheta\)는 optical axis와 ray가 이루는 각)을 쓰면 \(J\)는 이 식의 Jacobian matrix로 바뀐다. 근사의 질은 그 모델의 Hessian이 정한다.</p>
+      <p>pinhole은 넓은 각에서 특히 나쁘다. <a href="#eq-29-3-3">(29.3.3)</a>의 \(J\)는 \(\theta\)가 커질수록 화면을 늘인다. 카메라에서 같은 거리에 있는 Gaussian이라도 off-axis 각이 \(\theta\)이면 반지름 방향(principal point에서 멀어지는 방향)으로 on-axis일 때의 \(1/\cos^2\theta\)배로 늘어나고, \(\theta \to 90^\circ\)에서 발산한다. 같은 Gaussian이라도 화각의 가장자리에서는 footprint가 커지고 2차 항도 커진다(<a href="#i-29-3-4">Example 29.3.4</a>의 \(60^\circ\) 줄). 공식 구현은 \(J\)를 계산할 때 \(t_x/t_z\)를 \(\pm 1.3\tan(\mathrm{FoV}_x/2)\) 안으로(\(t_y/t_z\)도 같은 방식으로) 자르는데, 화면 밖 멀리 있는 Gaussian에서 \(J\)가 지나치게 커지는 것을 막는 장치로 볼 수 있다. 화면 전체가 넓은 각을 덮는 fisheye·360 카메라에서는 pinhole의 \(J\)를 그대로 쓸 수 없고, 그 모델의 \(J\)를 써야 한다. 카메라를 \(S^2\)의 chart로 보는 관점은 <a href="../27-cameras-rays/index.html#toc-27-4">Section 27.4</a>에서 다룬다.</p>
+    </section>
+
+    <section id="sec-filters">
+      <h2>Dilation and Filters: Adding Covariance</h2>
+      <p>화면은 픽셀로 sample된다. footprint가 픽셀보다 가늘면 픽셀 중심 사이로 빠져나가 aliasing이 생긴다. 고전적인 처방은 low-pass filter, 곧 Gaussian filter와의 convolution이다. Gaussian끼리의 convolution은 covariance를 더한다. 정규화한 2D Gaussian density \(\mathcal N(0, \Sigma)\)에 대해 \(\mathcal N(0, \Sigma_1) * \mathcal N(0, \Sigma_2) = \mathcal N(0, \Sigma_1 + \Sigma_2)\)이고, 정점이 1인 \(G_{\Sigma}(u) = \exp(-\tfrac12 u^{\mathsf T}\Sigma^{-1}u)\)로 쓰면</p>
+      <div class="equation" id="eq-29-3-5">
+      \[ G_{\Sigma} * \mathcal N(0, \Sigma_f) = \sqrt{\frac{\det\Sigma}{\det(\Sigma + \Sigma_f)}}\;G_{\Sigma + \Sigma_f} \tag{29.3.5} \]
+      </div>
+      <p>이다. 확률의 말로는 독립인 두 Gaussian 변수의 합의 covariance가 각 covariance의 합이라는 사실이고, <a href="29-1-gaussian-metric.html#eq-29-1-5">(29.1.5)</a>와 같은 종류의 계산이다. 앞의 인수는 적분(화면 위의 “양”)을 보존하려고 정점이 낮아지는 비율이다.</p>
+      <ul>
+        <li><strong>3DGS의 screen-space dilation.</strong> 공식 구현은 \(\Sigma_{2D}\)의 대각 성분에 \(0.3\)(pixel²)을 더한다. 곧 \(\Sigma_{2D} \leftarrow \Sigma_{2D} + 0.3\,I_2\)이고, 표준편차 약 \(0.55\) px인 Gaussian filter를 건 것이다. 기본 설정에서는 <a href="#eq-29-3-5">(29.3.5)</a>의 정규화 인수를 곱하지 않으므로 정점(\(\alpha\))이 그대로 남는다. 2024년 10월에 갱신된 공식 코드에는 Mip-Splatting의 2D filter를 따른 <code>--antialiasing</code> 옵션(기본값은 꺼짐)이 있는데, 켜면 같은 \(0.3\,I_2\)를 더하면서 opacity에 정규화 인수 \(\sqrt{\det\Sigma_{2D}/\det(\Sigma_{2D} + 0.3\,I_2)}\)를 곱한다.</li>
+        <li><strong>Mip-Splatting <a class="cite" href="../../references.html#Yu24">[Yu24]</a>.</strong> 두 filter를 둔다. 3D smoothing filter는 3D covariance에 isotropic 항을 더한다. 그 크기는 학습에 쓴 카메라들이 그 Gaussian을 sample한 가장 높은 빈도(대략 초점거리/깊이)에서 정해지므로, Gaussian이 학습 영상이 구별할 수 있는 것보다 가늘어지지 않는다. 공식 구현에서 이 항의 분산은 \(0.2\,(d/f)^2\)이다(\(d\)는 학습 카메라들에서 잰 가장 작은 깊이, \(f\)는 초점거리). 2D Mip filter는 dilation 대신 픽셀 하나의 box filter를 흉내 내는 Gaussian(분산 \(0.1\) pixel²)을 화면에서 더한다. 두 filter 모두 covariance를 더하는 low-pass filter이고, <a href="#eq-29-3-5">(29.3.5)</a>의 정규화 인수를 함께 곱해 convolution을 그대로 따른다.</li>
+      </ul>
+
+      <figure class="dg-figure" id="fig-29-3-4">
+        <img src="figures/fig-29-3-4-dilation.svg" alt="세 패널. 왼쪽 위 (a)와 왼쪽 아래 (b)는 가로 8, 세로 5 픽셀의 격자이고, 각 픽셀을 그 중심에서 잰 Gaussian의 값으로 칠했다(흰색 0, 검정 1). (a)에서는 오른쪽 아래로 기운 가는 파란 띠(Σ의 2σ ellipse)를 따라 검은 픽셀이 계단처럼 놓이는데, 셋째와 여섯째 열에서는 픽셀이 거의 흰색이라 선이 끊겨 보인다. 제목은 column sums 0.23–0.90이다. (b)에서는 넓은 주황 점선 띠(Σ + 0.3I의 2σ ellipse)를 따라 회색과 검정 픽셀이 끊김 없이 이어지고, 제목은 column sums 1.45–1.58이다. 오른쪽 (c)는 가로축 offset across the line(px), 세로축 value인 그래프로, 좁고 높은 파란 곡선(original: area 0.56), 넓고 높이가 1인 주황 점선(dilated: area 1.48), 넓고 낮은 초록 곡선(normalized: area 0.56)이 있다.">
+        <figcaption><span class="fig-head">Figure 29.3.4.</span>
+        covariance를 더하는 것은 low-pass filter다. <em>무엇을</em>: 화면 위의 가늘고 긴 2D Gaussian \(\Sigma = R_{20^\circ}\diag(100,\ 0.05)R_{20^\circ}^{\mathsf T}\) pixel²(길이 방향 표준편차 10 px, 폭 방향 0.22 px, 정점 1)와 그것에 \(0.3\,I_2\)를 더한 것. <em>읽는 법</em>: (a)와 (b)는 같은 \(8 \times 5\) 픽셀 영역이다. 각 칸이 픽셀 하나이고, 칸의 색은 픽셀 중심(회색 점)에서 잰 Gaussian의 값, 곧 rasterizer가 그 픽셀에 쓰는 값이다(흰색 0, 검정 1). 파란 실선은 \(\Sigma\)의 \(2\sigma\) ellipse, 주황 점선은 \(\Sigma + 0.3\,I_2\)의 \(2\sigma\) ellipse다. 제목의 column sums는 각 열(세로 한 줄) 다섯 픽셀 값의 합이 열에 따라 변하는 범위다. (c)는 폭 방향의 cross-section이다. 파랑은 원래 Gaussian(정점 1), 주황 점선은 정점을 그대로 둔 dilation, 초록은 <a href="#eq-29-3-5">(29.3.5)</a>의 정규화 인수를 곱한 convolution이다. 범례의 area는 곡선 아래 넓이다. <em>볼 것</em>: (a)에서 원래의 가는 선은 픽셀 중심을 지나는 곳에서만 진하고, 셋째와 여섯째 열에서는 거의 사라져 끊어진 점선처럼 sample된다. 열의 합이 0.23에서 0.90까지 4배 가까이 변한다. 같은 선이 조금만 움직여도 이 무늬가 바뀌므로 화면에서 깜박인다(aliasing). (b)에서는 선이 끊기지 않고 열의 합이 1.45–1.58로 거의 일정하다. (c)에서 dilation은 폭을 \(0.22\)에서 \(0.59\) px로 넓히면서 정점을 1로 두므로 넓이가 \(0.56\)에서 \(1.48\)로 2.65배가 된다. 정규화한 convolution은 같은 폭에서 정점을 \(0.38\)로 낮춰 넓이 \(0.56\)을 지킨다. <em>본문과의 연결</em>: (a)→(b)가 covariance를 더하는 low-pass filter의 효과이고, (c)의 주황과 초록의 차이, 곧 정규화 인수가 3DGS의 (기본) dilation과 Mip-Splatting의 filter의 차이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-29-3-4">Figure 29.3.4</a>의 (a)를 보자. 파란 띠는 폭이 픽셀의 절반도 안 되어 픽셀 중심을 군데군데만 지나고, 그 사이의 열(셋째, 여섯째)에서는 픽셀 값이 0.2 아래로 떨어진다. 이대로 그리면 선이 끊긴 점선이 된다. (b)처럼 \(0.3\,I_2\)를 더하면 띠가 어디서나 픽셀 중심을 지나 선이 이어진다. (c)는 그 대가를 보여 준다. 정점을 1로 둔 주황 점선은 정규화한 초록 곡선보다 넓이가 2.65배 크다. 화면 위에서 불투명도가 차지하는 “양”이 늘어난 것이다. 이 비율 \(\sqrt{\det(\Sigma_{2D} + 0.3\,I_2)/\det\Sigma_{2D}}\)(이 그림에서도 2.65)는 \(\Sigma_{2D}\)가 작을수록 커진다. 그래서 학습 때보다 멀리서(작게) 보면 작은 Gaussian들이 실제보다 두껍고 밝게 보일 수 있다. Mip-Splatting이 지적한 zoom-out artifact가 이것이다 <a class="cite" href="../../references.html#Yu24">[Yu24]</a>.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: dilation은 모양만 바꾸지 않는다</p>
+        <p>dilation은 metric의 말로 하면 Gaussian의 unit ball을 키우는 것이다(\(\Sigma \mapsto \Sigma + \Sigma_f\)). 그런데 렌더링에서 Gaussian은 모양과 함께 정점의 값 \(\alpha\)를 가진다. 정점을 그대로 두고 unit ball만 키우면 적분이 \(\sqrt{\det(\Sigma + \Sigma_f)/\det\Sigma}\)배로 커진다. 원래 크기가 픽셀보다 훨씬 큰 Gaussian에서는 이 비가 거의 1이지만, 픽셀보다 작은 Gaussian에서는 몇 배가 된다. 정확한 low-pass filter는 convolution <a href="#eq-29-3-5">(29.3.5)</a>이고, 그것은 covariance를 더하는 동시에 정점을 같은 인수로 낮춘다. Mip-Splatting <a class="cite" href="../../references.html#Yu24">[Yu24]</a>이 3D와 2D filter에 이 인수를 쓰는 이유다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-backprop">
+      <h2>Gradients Flow Through \(J\)</h2>
+      <p>학습에서는 loss의 gradient를 Gaussian의 위치 \(\mu\)로 되돌려야 한다. 화면 위의 2D Gaussian은 두 path로 \(t_0\)에 의존한다. 중심 \(u_0 = \varphi(t_0)\)이 하나이고, 모양 \(\Sigma_{2D} = J(t_0)\Sigma_cJ(t_0)^{\mathsf T}\)이 또 하나다. 따라서 chain rule에 의해</p>
+      <p>\[ \frac{\partial L}{\partial t_0} = \frac{\partial L}{\partial u_0}\,D\varphi(t_0) + \sum_{a,b}\frac{\partial L}{\partial(\Sigma_{2D})_{ab}}\,\frac{\partial(\Sigma_{2D})_{ab}}{\partial t_0} \]</p>
+      <p>이고, 둘째 항은 \(J\)의 미분 \(\partial J/\partial t_0\)(곧 \(\varphi\)의 2차 미분)을 통과한다. 첫째 항은 covector \(\partial L/\partial u_0\)을 \(d\varphi\)로 당긴 것이다(<a href="../00-tour/0-7-forms.html#eq-0-7-2">(0.7.2)</a>). 둘째 항은 “footprint를 키우거나 줄이려면 Gaussian을 카메라 쪽으로 당기거나 밀어야 한다”는 정보를 위치에 전한다(<a href="#ex-29-3-5">Exercise 29.3.5</a>). 공식 구현의 backward pass는 이 둘째 항까지 계산한다(<a href="#sec-other-cameras">위</a>의 clamp가 걸린 Gaussian에서는 둘째 항 가운데 \(t_x\), \(t_y\) 성분을 \(0\)으로 둔다). 위치 gradient 가운데 화면 좌표에 대한 부분 \(\partial L/\partial u_0\)이 densification에 쓰이는데, 그 기하는 <a href="29-5-optimizing-gaussians.html">Section 29.5</a>에서 본다.</p>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>total derivative, Jacobian matrix, chain rule: <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-1">Definition 2.1.1</a>, <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-10">Definition 2.1.10</a>, <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-11">Theorem 2.1.11</a>, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-1">Theorem 2.2.1</a>. 2차 항과 나머지: <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-17">Theorem 2.2.17 (Taylor's theorem)</a>.</li>
+        <li>pushforward density와 변수변환: <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">Theorem 2.6.9</a>, linear map이 부피를 \(\abs{\det A}\)배 한다는 사실 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-8">Proposition 2.6.8</a>(\(\det\)가 정규화 인수 <a href="#eq-29-3-5">(29.3.5)</a>에 나타나는 이유).</li>
+        <li>manifold 사이 map의 differential과 pushforward: <a href="../13-tangent-spaces/index.html#toc-13-3">Section 13.3</a>. fiber가 ray인 submersion: <a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>.</li>
+        <li>카메라를 smooth map으로 보기(kernel = ray, lens distortion), ray의 공간과 fisheye: <a href="../27-cameras-rays/index.html#toc-27-1">Section 27.1</a>, <a href="../27-cameras-rays/index.html#toc-27-4">Section 27.4</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>world → camera는 affine이므로 \(\Sigma_c = W\Sigma W^{\mathsf T}\)는 정확하다. linear map으로 투영하거나 평행한 직선을 따라 적분해도 Gaussian은 Gaussian으로 남는다(covariance \(A\Sigma_cA^{\mathsf T}\)).</li>
+        <li>pinhole projection \(\varphi\)는 affine이 아니다(fiber가 부채꼴 ray). EWA는 \(\varphi\)를 그 differential \(J = D\varphi(t_0)\)(<a href="#eq-29-3-3">(29.3.3)</a>)로 바꾸고, \(\Sigma_{2D} = JW\Sigma W^{\mathsf T}J^{\mathsf T}\)를 얻는다. splatting은 differential에 의한 pushforward다.</li>
+        <li>\(\ker J\)는 중심 ray이고, 1차 근사는 부채꼴 ray를 중심 ray에 평행한 직선으로 바꾸는 것이다. image plane에 평행한 납작한 Gaussian은 정확히 투영된다.</li>
+        <li>오차는 \(\varphi\)의 2차 항에서 온다. isotropic Gaussian에서 중심은 약 \((s/t_z)\sin\theta\), covariance는 on-axis에서 약 \(3(s/t_z)^2\)만큼 틀린다. \(s/t_z = 0.1\)이면 몇 %, \(0.3\)이면 수십 %이고 넓은 각에서는 100%를 넘는다.</li>
+        <li>dilation과 Mip-Splatting의 filter는 covariance를 더하는 low-pass filter다. 정규화 인수 \(\sqrt{\det\Sigma/\det(\Sigma + \Sigma_f)}\)를 곱하느냐가 둘의 차이다.</li>
+      </ul>
+      <p class="next">다음 절에서는 시선을 Gaussian 하나에서 Gaussian들의 covariance 전체의 공간 \(\mathrm{SPD}(3)\)으로 옮긴다. 두 covariance 사이를 보간하거나 여러 covariance를 평균하려면 이 공간에 metric이 필요하고, 어떤 metric을 고르느냐에 따라 답이 달라진다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-29-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 29.3.1</span> <span class="level">★</span>
+        \(f_x = f_y = 500\) px이고 Gaussian의 camera 좌표 중심이 \(t_0 = (1,\ 0.5,\ 4)\) m이다. \(J\)를 구하고 \(Jt_0 = 0\)을 확인하여라. 이 사실은 기하적으로 무엇을 뜻하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-29-3-3">(29.3.3)</a>에서 \(J = \begin{pmatrix} 125 &amp; 0 &amp; -31.25 \\ 0 &amp; 125 &amp; -15.625 \end{pmatrix}\) (px/m)이다. \(Jt_0 = (125 - 125,\ 62.5 - 62.5) = (0, 0)\)이다. \(t_0\) 방향, 곧 카메라 중심에서 Gaussian 중심으로 가는 ray 방향으로 움직이면 1차로 픽셀이 변하지 않는다. 깊이 방향의 퍼짐은 footprint에 1차로 기여하지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-29-3-splatting-linearization.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 29.3.2</span> <span class="level">★</span>
+        표준편차 \(s = 0.2\) m인 isotropic Gaussian이 optical axis 위 깊이 2 m에 있다(\(f = 1000\) px). \(\Sigma_{2D}\)와 footprint의 표준편차를 구하고, <a href="#i-29-3-4">Example 29.3.4</a>로 EWA covariance의 오차를 가늠하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>on-axis이므로 \(f/t_z = 500\)이고 \(J = 500\begin{pmatrix} 1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \end{pmatrix}\)이며 \(\Sigma_{2D} = 500^2 \cdot 0.04\,I_2 = 10^4 I_2\) px²이다. 표준편차는 100 px이다. \(s/t_z = 0.1\)이므로 표에서 covariance의 오차는 약 2.6%이다. <a href="#i-29-3-3">Proposition 29.3.3</a>의 \(3(s/t_z)^2 = 3\%\)와 같은 크기이고, 표의 값이 조금 작은 것은 Gaussian을 \(3\sigma\)에서 잘랐기 때문이다(\(3c_4(s/t_z)^2 \approx 2.5\%\)에 고차 항이 더해진 값). on-axis이므로 중심은 어긋나지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-29-3-splatting-linearization.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-3-3" data-level="2">
+        <p><span class="thm-head">Exercise 29.3.3</span> <span class="level">★★</span>
+        camera 좌표에서 \(\Sigma_c\)의 셋째 행과 셋째 열이 \(0\)인(깊이 평면 \(t_z = t_{0z}\) 안에 납작한) Gaussian은 off-axis여도 EWA가 정확함을 보여라. image plane에 대해 기울어진 납작한 Gaussian도 정확한가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>이 Gaussian의 sample \(t = t_0 + \delta\)는 \(\delta_z = 0\)이므로 평면 \(t_z = t_{0z}\) 위에 있다. 그 평면에서 \(\varphi(t) = (f_xt_x/t_{0z} + c_x,\ f_yt_y/t_{0z} + c_y)\)는 \(t\)의 affine 함수이고, \(t_0\)에서의 1차 근사 \(\tilde\varphi\)와 일치한다(<a href="#i-29-3-2">Proposition 29.3.2</a>). 따라서 image는 정확히 Gaussian이고 covariance는 \(J\Sigma_cJ^{\mathsf T}\)이다. 기울어진 평면 위에서는 \(t_z\)가 점마다 다르므로 \(\varphi\)는 affine이 아니다(평면에서 평면으로 가는 homography다). 2차 항 \(H(\delta, \delta)\)의 \(\delta_z\)가 \(0\)이 아니므로 EWA는 근사가 된다.</p>
+          <p class="verified">Verification: <code>verify/v-29-3-splatting-linearization.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-3-4" data-level="1">
+        <p><span class="thm-head">Exercise 29.3.4</span> <span class="level">★</span>
+        \(\Sigma_{2D} = \diag(0.01,\ 4)\) pixel²인 가는 Gaussian에 dilation \(+0.3\,I_2\)를 하면 화면 위의 적분은 몇 배가 되는가? 정규화한 convolution이라면 정점은 얼마가 되어야 하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>정점이 1인 Gaussian의 적분은 \(2\pi\sqrt{\det\Sigma}\)이므로 비는</p>
+          <p>\[ \sqrt{\frac{\det(\Sigma + 0.3\,I_2)}{\det\Sigma}} = \sqrt{\frac{0.31 \cdot 4.3}{0.01 \cdot 4}} = \sqrt{33.3} \approx 5.77 \]</p>
+          <p>배다. 정규화한 convolution <a href="#eq-29-3-5">(29.3.5)</a>는 정점을 그 역수 \(\approx 0.173\)으로 낮춘다. 가는 방향(분산 0.01)이 픽셀보다 훨씬 작기 때문에 비가 크다.</p>
+          <p class="verified">Verification: <code>verify/v-29-3-splatting-linearization.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-29-3-5" data-level="2">
+        <p><span class="thm-head">Exercise 29.3.5</span> <span class="level">★★</span>
+        on-axis에 있는 isotropic Gaussian(\(\Sigma_c = s^2I_3\), \(t_0 = (0, 0, t_z)\))에 대해 \(\Sigma_{2D}\)를 \(t_z\)의 함수로 쓰고 \(\partial\Sigma_{2D}/\partial t_z\)를 구하여라. footprint를 키우려는 loss는 Gaussian의 위치를 어느 쪽으로 움직이는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(J = (f/t_z)\begin{pmatrix} 1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \end{pmatrix}\)이므로 \(\Sigma_{2D} = f^2s^2/t_z^2\,I_2\)이고 \(\partial\Sigma_{2D}/\partial t_z = -2f^2s^2/t_z^3\,I_2\)이다. footprint를 키우려는 loss는 \(\partial L/\partial\Sigma_{2D}\)가 음의 정부호(키우면 \(L\)이 준다)이므로 \(\partial L/\partial t_z = \tr\big(\frac{\partial L}{\partial\Sigma_{2D}}\frac{\partial\Sigma_{2D}}{\partial t_z}\big) \gt 0\)이고, gradient descent는 \(t_z\)를 줄인다. 곧 Gaussian을 카메라 쪽으로 당긴다. 이 gradient는 \(J\)가 \(t_z\)에 의존하기 때문에만 생긴다.</p>
+          <p class="verified">Verification: <code>verify/v-29-3-splatting-linearization.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="29-2-covariance-parametrization.html">← 29.2 Parametrizing Covariances with Rotations and Scales</a>
+    <a rel="next" href="29-4-space-of-covariances.html">29.4 The Space of Covariances →</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>29. The Geometry of Gaussian Splatting — DG Study</title>
+  <meta name="dg-id" content="29">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-updated" content="2026-10-07">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb"><a href="../../index.html">Contents</a> › <span>29. The Geometry of Gaussian Splatting</span></nav>
+
+  <main>
+    <header>
+      <h1>29. The Geometry of Gaussian Splatting</h1>
+      <p class="meta">Part IV. 3D Vision Through Differential Geometry · Tour 다음에 읽는다</p>
+      <p class="threads">Threads: <strong>T2</strong> Differentials and tangent spaces · <strong>T6</strong> Duality and tensors</p>
+    </header>
+
+    <section class="questions">
+      <h2>Questions</h2>
+      <ul>
+        <li>3D Gaussian의 covariance는 기하적으로 무엇이고, \(\Sigma = RSS^{\mathsf T}R^{\mathsf T}\) parametrization에는 어떤 symmetry와 singularity가 있는가?</li>
+        <li>splatting의 \(JW\Sigma W^{\mathsf T}J^{\mathsf T}\)는 어떤 근사이고 언제 깨지는가?</li>
+        <li>covariance를 평균·보간·최적화할 때, 그리고 view-dependent color를 회전할 때 기하는 무엇을 요구하는가?</li>
+      </ul>
+    </section>
+
+    <section class="inherits">
+      <h2>Builds on</h2>
+      <ul>
+        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>: first fundamental form의 Gram matrix와 그 ellipse(<a href="../00-tour/0-3-surfaces.html#fig-0-3-3">Figure 0.3.3</a>), PCA normal estimation(<a href="../00-tour/0-3-surfaces.html#fig-0-3-4">Figure 0.3.4</a>) → Section 29.1의 “Gaussian = metric”, “가장 짧은 축 = normal”</li>
+        <li><a href="../00-tour/0-6-manifolds.html">Section 0.6</a>: differential = Jacobian matrix(<a href="../00-tour/0-6-manifolds.html#i-0-6-5">Definition 0.6.5</a>), \(\mathrm{SO}(3)\)와 Rodrigues formula(<a href="../00-tour/0-6-manifolds.html#i-0-6-7">Example 0.6.7</a>), gimbal lock과 quaternion(<a href="../00-tour/0-6-manifolds.html#sec-cv-pose">In computer vision: 카메라 자세</a>) → Section 29.2의 rank 저하, Section 29.3의 splatting = pushforward</li>
+        <li><a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>: covector와 pullback, backpropagation → Section 29.1의 contravariant \(\Sigma\)와 covariant \(\Sigma^{-1}\), Section 29.5의 “gradient는 covector”</li>
+        <li><a href="../00-tour/0-8-riemannian.html">Section 0.8</a>: Riemannian metric, geodesic, curvature, hyperbolic plane, Fréchet mean, Riemannian optimization, \(\Delta = \divg\grad\) → Section 29.4의 \(\mathrm{SPD}(3)\) 위의 metric, Section 29.5의 Fisher metric과 retraction, Section 29.6의 spherical harmonics</li>
+        <li>투영의 Jacobian은 <a href="../27-cameras-rays/index.html">Chapter 27</a>, quaternion과 \(\mathrm{SO}(3)\) 위의 미분은 <a href="../28-lie-groups-poses/index.html">Chapter 28</a>에서 자세히 다루지만, 이 장은 필요한 만큼을 스스로 설명한다. 3D vision 쪽(3DGS의 파이프라인과 논문 수식)은 안다고 가정한다.</li>
+      </ul>
+    </section>
+
+    <h2>Sections</h2>
+    <ol class="toc">
+      <li id="toc-29-1" data-file="29-1-gaussian-metric.html">
+        <a class="toc-title" href="29-1-gaussian-metric.html">29.1 A Gaussian Is a Metric</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: \(\Sigma^{-1}\)은 국소 inner product, ellipsoid = 그 metric의 unit sphere, principal axis, Mahalanobis distance, 가장 짧은 축 = normal(PCA normal estimation과 같은 원리)</p>
+      </li>
+      <li id="toc-29-2" data-file="29-2-covariance-parametrization.html">
+        <a class="toc-title" href="29-2-covariance-parametrization.html">29.2 Parametrizing Covariances with Rotations and Scales</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: \(\mathrm{SO}(3) \times \R^3_{\gt 0} \to \mathrm{SPD}(3)\)는 surjective이지만 injective가 아니다(축의 순서·부호), scale 두 개가 같으면 differential의 rank가 떨어져 rotation gradient가 0, exp·sigmoid activation = chart</p>
+      </li>
+      <li id="toc-29-3" data-file="29-3-splatting-linearization.html">
+        <a class="toc-title" href="29-3-splatting-linearization.html">29.3 Splatting Is Linearization</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: affine map은 Gaussian을 Gaussian으로, perspective map은 그렇지 않다, EWA의 \(JW\Sigma W^{\mathsf T}J^{\mathsf T}\) = 1차 근사(pushforward), 오차 = 투영의 2차 항(큰 Gaussian, 넓은 FOV, fisheye), dilation과 Mip-Splatting의 filter</p>
+      </li>
+      <li id="toc-29-4" data-file="29-4-space-of-covariances.html">
+        <a class="toc-title" href="29-4-space-of-covariances.html">29.4 The Space of Covariances</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: \(\mathrm{SPD}(3)\)는 6차원 open cone, Euclidean·log-Euclidean·affine-invariant·Wasserstein(Bures) metric, 보간과 평균의 swelling effect, Gaussian 병합·split/clone·compression·LOD의 해석</p>
+      </li>
+      <li id="toc-29-5" data-file="29-5-optimizing-gaussians.html">
+        <a class="toc-title" href="29-5-optimizing-gaussians.html">29.5 Optimizing Gaussians</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: parameter manifold, gradient는 covector이므로 gradient descent는 좌표(metric)에 의존한다, quaternion normalize의 gradient = \(T_qS^3\)로의 projection, log-scale = 곱셈형 update, Adam = 대각 metric(해석), positional gradient densification</p>
+      </li>
+      <li id="toc-29-6" data-file="29-6-spherical-harmonics.html">
+        <a class="toc-title" href="29-6-spherical-harmonics.html">29.6 View-Dependent Color: Spherical Harmonics</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: spherical harmonics = \(S^2\)에서 Laplace–Beltrami의 eigenfunction, degree \(\ell\)의 eigenvalue \(-\ell(\ell+1)\)와 \(2\ell+1\)개, degree 3까지 16개, Gaussian을 회전하면 SH도 회전해야 한다(\(\mathrm{SO}(3)\) representation, Wigner D)</p>
+      </li>
+    </ol>
+
+    <section class="handoff">
+      <h2>Leads to</h2>
+      <ul>
+        <li>납작한 Gaussian의 가장 짧은 축 = normal(<a href="29-1-gaussian-metric.html#sec-normal">Section 29.1</a>) → <a href="../30-radiance-field-surfaces/index.html#toc-30-3">Section 30.3</a>(2D Gaussian과 surfel, normal consistency)</li>
+        <li>투영의 differential \(J\)와 그 kernel(= ray 방향), 넓은 화각과 fisheye(<a href="29-3-splatting-linearization.html">Section 29.3</a>) → <a href="../27-cameras-rays/index.html#toc-27-1">Section 27.1</a>, <a href="../27-cameras-rays/index.html#toc-27-4">Section 27.4</a></li>
+        <li>quaternion, \(R\exp([\omega]_\times)\) update, retraction(<a href="29-2-covariance-parametrization.html">Section 29.2</a>, <a href="29-5-optimizing-gaussians.html">Section 29.5</a>) → <a href="../28-lie-groups-poses/index.html#toc-28-2">Section 28.2</a>, <a href="../28-lie-groups-poses/index.html#toc-28-3">Section 28.3</a>. 회전의 보간과 평균은 <a href="../28-lie-groups-poses/index.html#toc-28-4">Section 28.4</a></li>
+        <li>\(\mathrm{SPD}(3)\)의 metric, geodesic, curvature(<a href="29-4-space-of-covariances.html">Section 29.4</a>) → 깊은 장 <a href="../21-riemannian-metrics/index.html">Chapter 21</a>, <a href="../23-geodesics/index.html">Chapter 23</a>, <a href="../24-curvature/index.html">Chapter 24</a></li>
+        <li>\(S^2\)의 Laplace–Beltrami operator와 spherical harmonics(<a href="29-6-spherical-harmonics.html">Section 29.6</a>) → <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>, ray와 방향의 공간 <a href="../27-cameras-rays/index.html#toc-27-4">Section 27.4</a></li>
+        <li>Open question: Gaussian들로부터 부호까지 일관된 normal과 surface를 어떻게 얻는가? implicit surface의 curvature는 regularization에서 무엇을 뜻하는가? → <a href="../30-radiance-field-surfaces/index.html">Chapter 30</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="../28-lie-groups-poses/index.html">← 28. Poses and Motion: Lie Groups for SfM and SLAM</a>
+    <a rel="next" href="../30-radiance-field-surfaces/index.html">30. Surfaces from Radiance Fields →</a>
+  </nav>
+</body>
+</html>
