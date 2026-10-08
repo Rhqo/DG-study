@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>30. Surfaces from Radiance Fields — DG Study</title>
   <meta name="dg-id" content="30">
-  <meta name="dg-status" content="planned">
-  <meta name="dg-updated" content="2026-10-07">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-updated" content="2026-10-08">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
@@ -32,42 +32,51 @@
     <section class="inherits">
       <h2>Builds on</h2>
       <ul>
-        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>(parametrization, tangent plane, first fundamental form), <a href="../00-tour/0-4-curvature.html">Section 0.4</a>(shape operator, \(K\), \(H\)), <a href="../29-gaussian-splatting/index.html">Chapter 29</a>(Gaussian의 기하)</li>
-        <li>3D vision 쪽(SfM, NeRF, 3DGS의 파이프라인과 논문 수식)은 안다고 가정한다. 엄밀한 증명이 필요하면 각 절의 Go deeper를 따라 깊은 장으로 간다.</li>
+        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>: parametrization과 normal \(\mathbf{x}_u \times \mathbf{x}_v\), first fundamental form과 넓이 요소, \(\grad f \neq 0\)인 \(f = 0\)도 regular surface라는 사실, PCA normal의 부호 문제 → Section 30.1의 implicit surface, Section 30.3의 2D Gaussian = 국소 parametrization, Section 30.4의 pixel footprint</li>
+        <li><a href="../00-tour/0-4-curvature.html">Section 0.4</a>: shape operator \(W_p = -d\mathbf{N}_p\), \(K\)와 \(H\)(바깥쪽 \(\mathbf{N}\)에서 sphere의 \(H = -1/r\)), \(\Delta_S\mathbf{x} = 2H\mathbf{N}\) → Section 30.2의 \(W_p = -\tfrac{1}{\abs{\grad f}}P\,\Hess f\), \(\Delta f = -2H\)</li>
+        <li><a href="../00-tour/0-5-intrinsic.html#sec-geodesics">Section 0.5</a>(geodesic distance, fast marching, heat method), <a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>(cut point) → Section 30.1의 SDF, medial axis, eikonal equation</li>
+        <li><a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>(납작한 Gaussian의 가장 짧은 축 = normal, 부호가 없음), <a href="../29-gaussian-splatting/29-2-covariance-parametrization.html">Section 29.2</a>(scale이 같으면 rotation이 정해지지 않음), <a href="../29-gaussian-splatting/29-3-splatting-linearization.html">Section 29.3</a>(EWA = 투영의 1차 근사, \(\ker J\) = ray, dilation과 Mip filter) → Section 30.3의 surfel, ray–splat intersection, low-pass filter, Section 30.4의 silhouette</li>
+        <li>3D vision 쪽(NeRF, NeuS, VolSDF, 3DGS, 2DGS의 파이프라인과 논문 수식)은 안다고 가정한다. 엄밀한 증명이 필요하면 각 절의 Go deeper를 따라 깊은 장으로 간다.</li>
       </ul>
     </section>
 
     <h2>Sections</h2>
     <ol class="toc">
       <li id="toc-30-1" data-file="30-1-implicit-surfaces-eikonal.html">
-        <span class="toc-title">30.1 Implicit Surfaces and the Eikonal Equation</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: level set과 regular value theorem, normal = \(\grad f / |\grad f|\), SDF \(\iff |\grad f| = 1\), IGR·NeuS·VolSDF의 eikonal loss</p>
+        <a class="toc-title" href="30-1-implicit-surfaces-eikonal.html">30.1 Implicit Surfaces and the Eikonal Equation</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: zero level set과 regular value, \(\mathbf{N} = \grad f/\abs{\grad f}\)(부호까지 정해짐), SDF와 medial axis, eikonal equation의 해는 많고 distance function은 viscosity solution, eikonal loss가 보장하지 않는 것, VolSDF·NeuS의 SDF→density와 weight의 bias, TSDF, SDF와 geodesic distance</p>
       </li>
       <li id="toc-30-2" data-file="30-2-implicit-curvature.html">
-        <span class="toc-title">30.2 Curvature of Implicit Surfaces</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: Hessian과 shape operator, mean curvature = \(\tfrac12 \operatorname{div}(\grad f/|\grad f|)\)(부호 규약), Gaussian curvature 공식, curvature regularization, marching cubes</p>
+        <a class="toc-title" href="30-2-implicit-curvature.html">30.2 Curvature of Implicit Surfaces</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: \(W_p = -\tfrac{1}{\abs{\grad f}}P\,\Hess f\), SDF의 Hessian eigenvalue = \(0, -\kappa_1, -\kappa_2\)와 offset, \(\divg\mathbf{N} = -2H\)와 \(\Delta f = -2H\), bordered Hessian의 \(K\), Neuralangelo curvature loss(L1, \(H = 0\)이지 평평함이 아님), marching cubes와 모호성 · Running examples: sphere, cylinder, torus of revolution, saddle</p>
       </li>
       <li id="toc-30-3" data-file="30-3-surfels-2dgs.html">
-        <span class="toc-title">30.3 Surfels and 2D Gaussian Splatting</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 2D Gaussian = tangent plane 위의 국소 parametrization, normal이 정의되는 이유, ray–splat intersection, normal consistency(cross product로 구한 normal)와 depth distortion, SuGaR·Gaussian surfel</p>
+        <a class="toc-title" href="30-3-surfels-2dgs.html">30.3 Surfels and 2D Gaussian Splatting</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 2D Gaussian = 평면의 국소 parametrization(\(E = s_u^2\), \(G = s_v^2\), normal \(t_u \times t_v\)), ray–splat intersection = homography(두 직선의 cross product), edge-on과 low-pass filter, depth distortion = weight distribution의 분산, normal consistency = splat이 rendering된 surface에 접함, SuGaR와 Poisson, orientation</p>
       </li>
       <li id="toc-30-4" data-file="30-4-depth-maps.html">
-        <span class="toc-title">30.4 Depth Maps as Parametrized Surfaces</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: \(x(u,v) = d(u,v)\,K^{-1}(u,v,1)^{\mathsf T}\), tangent vector와 normal, first fundamental form = pixel footprint, smoothness prior와 second fundamental form</p>
+        <a class="toc-title" href="30-4-depth-maps.html">30.4 Depth Maps as Parametrized Surfaces</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: \(X = d\,\mathsf{K}^{-1}(u, v, 1)^{\mathsf T}\)는 depth가 smooth한 곳에서 언제나 regular, silhouette = 투영의 fold, footprint \(d^2\cos\alpha/(f_xf_y\abs{\cos\theta})\), grazing에서 불안정한 것과 아닌 것, 평면 ⇔ inverse depth가 affine, second fundamental form = \(-d\inner{\mathbf{N}}{X}\Hess\rho\), smoothness prior가 공짜로 두는 모양, depth Laplacian ≠ mean curvature</p>
       </li>
     </ol>
 
     <section class="handoff">
       <h2>Leads to</h2>
       <ul>
-        <li>Part IV의 다른 장과 깊은 장(<a href="../01-linear-algebra/index.html">Chapter 1</a>부터)으로 이어진다. 각 절의 Go deeper가 해당 정의·정리를 링크한다.</li>
+        <li>regular value의 preimage, implicit function theorem(<a href="30-1-implicit-surfaces-eikonal.html">Section 30.1</a>) → 깊은 장 <a href="../02-calculus-rn/index.html">Chapter 2</a>, <a href="../06-regular-surfaces/index.html">Chapter 6</a>, 일반 차원은 <a href="../14-submanifolds/index.html#toc-14-4">Section 14.4</a></li>
+        <li>shape operator, second fundamental form, \(K\)와 \(H\)의 좌표 공식(<a href="30-2-implicit-curvature.html">Section 30.2</a>, <a href="30-4-depth-maps.html">Section 30.4</a>) → <a href="../08-gauss-map/index.html">Chapter 8</a>. hypersurface의 shape operator는 <a href="../25-submanifold-geometry/index.html#toc-25-3">Section 25.3</a></li>
+        <li>first fundamental form과 넓이, orientation(<a href="30-3-surfels-2dgs.html">Section 30.3</a>, <a href="30-4-depth-maps.html">Section 30.4</a>) → <a href="../07-first-fundamental-form/index.html">Chapter 7</a></li>
+        <li>surface 위의 eikonal equation과 geodesic distance, cut locus(<a href="30-1-implicit-surfaces-eikonal.html#sec-geodesic">Section 30.1</a>) → <a href="../21-riemannian-metrics/index.html#toc-21-5">Section 21.5</a>, <a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a></li>
+        <li>투영의 differential, homography, silhouette = 투영의 fold(<a href="30-3-surfels-2dgs.html#sec-ray-splat">Section 30.3</a>, <a href="30-4-depth-maps.html#sec-backprojection">Section 30.4</a>) → <a href="../27-cameras-rays/index.html#toc-27-1">Section 27.1</a>, <a href="../27-cameras-rays/index.html#toc-27-2">Section 27.2</a></li>
+        <li>marching cubes, TSDF, Poisson으로 얻은 mesh, 그 위의 normal·curvature·Laplacian(<a href="30-1-implicit-surfaces-eikonal.html#sec-tsdf">Section 30.1</a>, <a href="30-2-implicit-curvature.html#sec-marching-cubes">Section 30.2</a>, <a href="30-3-surfels-2dgs.html#sec-sugar">Section 30.3</a>) → <a href="../31-meshes/index.html">Chapter 31</a></li>
+        <li>Open question: 여러 시점의 depth map과 normal prior를 하나의 일관된 surface로 묶을 때, 적분 가능성(normal field가 어떤 surface의 normal인가)을 어떻게 강제하는가? 이 장은 normal consistency와 inverse depth에 대한 linear 조건으로만 다루었다.</li>
       </ul>
     </section>
   </main>
 
   <nav class="pager">
     <a rel="prev" href="../29-gaussian-splatting/index.html">← 29. The Geometry of Gaussian Splatting</a>
-    <a rel="next" href="../01-linear-algebra/index.html">1. Linear Algebra Review →</a>
+    <a rel="next" href="../31-meshes/index.html">31. Meshes: Discrete Differential Geometry →</a>
   </nav>
 </body>
 </html>

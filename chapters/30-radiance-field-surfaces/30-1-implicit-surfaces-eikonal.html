@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>30.1 Implicit Surfaces and the Eikonal Equation — DG Study</title>
+  <meta name="dg-id" content="30.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.3, 0.4, 0.5, 0.8, 29.1">
+  <meta name="dg-refs" content="Gropp20; Crandall83; Wang21; Yariv21; Mildenhall20; Curless96; Newcombe11; Osher88; Huang24">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">30. Surfaces from Radiance Fields</a> ›
+    <span>30.1 Implicit Surfaces and the Eikonal Equation</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>30.1 Implicit Surfaces and the Eikonal Equation</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Gropp20">[Gropp20]</a>,
+        <a class="cite" href="../../references.html#Crandall83">[Crandall83]</a>,
+        <a class="cite" href="../../references.html#Wang21">[Wang21]</a>,
+        <a class="cite" href="../../references.html#Yariv21">[Yariv21]</a>,
+        <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a>,
+        <a class="cite" href="../../references.html#Curless96">[Curless96]</a>,
+        <a class="cite" href="../../references.html#Newcombe11">[Newcombe11]</a>,
+        <a class="cite" href="../../references.html#Osher88">[Osher88]</a>,
+        <a class="cite" href="../../references.html#Huang24">[Huang24]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>zero level set \(S = f^{-1}(0)\)이 regular surface가 되는 조건(\(0\)이 regular value)을 말하고, 그 조건이 깨지는 예를 들며, normal을 \(\grad f/\abs{\grad f}\)로 구할 수 있다.</li>
+        <li>signed distance function(SDF)이 \(\abs{\grad f} = 1\)을 만족하는 이유와 그것이 깨지는 곳(medial axis)을 설명하고, 거꾸로 \(\abs{\grad f} = 1\)과 \(f|_S = 0\)만으로는 SDF가 정해지지 않는다는 것을 반례로 보일 수 있다.</li>
+        <li>eikonal loss가 강제하는 것과 강제하지 못하는 것을 구분하고, IGR의 “implicit geometric regularization”이 정확히 무엇을 주장하는지 말할 수 있다.</li>
+        <li>VolSDF와 NeuS가 SDF를 density로 바꾸는 식을 쓰고, rendering weight의 최댓값이 surface에서 얼마나 벗어나는지 계산할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../00-tour/0-3-surfaces.html#sec-parametrization">Section 0.3</a>: regular surface, \(\grad f \neq 0\)인 \(f = 0\)도 regular surface라는 사실, unit normal vector(<a href="../00-tour/0-3-surfaces.html#i-0-3-3">Definition 0.3.3</a>), PCA normal의 부호 문제(<a href="../00-tour/0-3-surfaces.html#fig-0-3-4">Figure 0.3.4</a>)</li>
+        <li><a href="../00-tour/0-5-intrinsic.html#sec-geodesics">Section 0.5</a>: geodesic과 geodesic distance, fast marching과 heat method. <a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>: cut point</li>
+        <li><a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>: 납작한 Gaussian의 가장 짧은 축이 normal이고, 그 부호는 정해지지 않는다</li>
+        <li>NeRF의 volume rendering <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a>과 neural SDF의 기본 파이프라인</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="../29-gaussian-splatting/index.html">Chapter 29</a>에서 surface는 Gaussian들의 모양 속에 숨어 있었다. 납작한 Gaussian의 가장 짧은 축이 normal 역할을 했지만(<a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>), 그 normal은 부호가 정해지지 않았고 Gaussian이 충분히 납작할 때만 믿을 수 있었다. NeRF <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a>의 density \(\sigma(x)\)에는 그런 단서조차 없다. density는 빛이 얼마나 흡수되는지를 잴 뿐이고, 어디가 surface인지는 말하지 않는다.</p>
+      <p>mesh, normal, 충돌 판정처럼 surface가 필요한 일을 하려면 surface를 명시적으로 표현해야 한다. 가장 흔한 방법은 surface를 함수 하나의 <strong>level set</strong>(등위집합)으로 두는 것이다.</p>
+      <p>\[ S = f^{-1}(0) = \{x \in \R^3 : f(x) = 0\}. \]</p>
+      <p>NeuS, VolSDF, Neuralangelo의 neural SDF, KinectFusion의 TSDF, marching cubes가 모두 이 표현 위에서 움직인다. 이 절은 세 질문에 답한다.</p>
+      <ol>
+        <li>\(f^{-1}(0)\)은 언제 surface이고, 그 normal은 무엇인가?</li>
+        <li>signed distance function은 무엇이고, eikonal loss는 무엇을 강제하는가? 무엇을 강제하지 <em>못하는가</em>?</li>
+        <li>surface 개념이 없는 NeRF의 density와 SDF를 어떻게 이어 붙이는가?</li>
+      </ol>
+      <aside class="box convention">
+        <p class="box-title">Conventions: 이 장의 기호</p>
+        <ul>
+          <li>공간의 점은 Chapter 29처럼 굵게 쓰지 않는다: \(x \in \R^3\). surface는 \(S \subseteq \R^3\), 그 위의 점은 \(p\)다. parametrization과 unit normal vector는 이 study set의 규약대로 굵게 쓴다: \(\mathbf{x}(u, v)\), \(\mathbf{N}\).</li>
+          <li>implicit function은 \(f\colon \R^3 \to \R\)이고 \(S = f^{-1}(0)\)이다. <strong>부호 규약</strong>: 물체 밖에서 \(f \gt 0\), 안에서 \(f \lt 0\)이다. NeuS, VolSDF, IGR, Neuralangelo의 논문과 공식 코드(기본 설정)가 모두 이 부호를 쓴다. 이때 \(\mathbf{N} = \grad f/\abs{\grad f}\)는 바깥쪽을 향한다.</li>
+          <li>curvature의 부호는 이 study set의 규약을 따른다: shape operator \(W_p = -d\mathbf{N}_p\), mean curvature \(H = \tfrac12\tr W_p\)(<a href="../00-tour/0-4-curvature.html#i-0-4-1">Definition 0.4.1</a>, <a href="../00-tour/0-4-curvature.html#i-0-4-5">Definition 0.4.5</a>). 그래서 바깥쪽 \(\mathbf{N}\)에서 반지름 \(r\)인 sphere의 \(H\)는 \(-1/r\)이다. \(\Hess f\)는 Hessian matrix, \(\Delta f = \tr\Hess f = \divg\grad f\)이다.</li>
+          <li>점과 집합 사이의 거리는 \(\operatorname{dist}(x, S) = \min_{y \in S}\abs{x - y}\)로 쓴다.</li>
+          <li>Section 30.3의 2D Gaussian의 scale \(s_u, s_v\)는 이 절의 NeuS 매개변수 \(s\)와 다르다. Section 30.4의 depth는 \(d\), focal length는 \(f_x, f_y\)이고, camera intrinsic matrix는 Gaussian curvature \(K\)와 구별해 \(\mathsf{K}\)로 쓴다. Section 30.4에서는 implicit function \(f\)를 쓰지 않는다.</li>
+          <li>Chapter 29의 기호(\(\Sigma\), \(R\), \(s_i\), \(r_i\), 투영의 Jacobian \(J\))는 그대로 쓴다. 투영 자체 \(\varphi\)는 Section 30.3–30.4에서만 쓰고, 이 절의 \(\varphi_s\)는 NeuS의 logistic density다(이 study set은 φ를 언제나 \(\varphi\)로 쓴다).</li>
+          <li>논문 기호를 살리느라 \(\rho\)는 절마다 뜻이 다르다. 이 절에서는 NeuS의 opaque density, Section 30.2에서는 \(z\)축까지의 거리 \(\sqrt{x^2 + y^2}\), Section 30.4에서는 inverse depth다. \(H\)는 언제나 mean curvature이고, 이 절의 viscosity solution에 나오는 함수는 \(\mathcal{H}\), IGR 정리의 hyperplane은 \(\Pi\)로 쓴다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-level-sets">
+      <h2>Surfaces as Zero Level Sets</h2>
+      <p>함수의 zero set이 언제나 surface인 것은 아니다. 곡선 \(x^2 - y^2 = 0\)은 원점에서 두 직선이 엇갈린다. 조건은 Tour에서 본 것 그대로다(<a href="../00-tour/0-3-surfaces.html#sec-parametrization">Section 0.3</a>). \(f\)의 값이 \(0\)인 모든 점에서 gradient가 \(0\)이 아니면 된다. \(\grad f(p) = 0\)인 점을 \(f\)의 <strong>critical point</strong>(임계점), critical point에서의 값을 critical value라 하고, critical value가 아닌 값을 <strong>regular value</strong>(정칙값)라 한다.</p>
+      <div class="thm proposition" id="i-30-1-1">
+        <p><span class="thm-head">Proposition 30.1.1</span> <span class="thm-name">(zero level set of a regular value)</span>.
+        \(O \subseteq \R^3\)이 open set이고 \(f\colon O \to \R\)이 smooth하며, \(f^{-1}(0)\)의 모든 점에서 \(\grad f \neq 0\)이라 하자(곧 \(0\)이 regular value다). 그러면 \(S = f^{-1}(0)\)은(비어 있지 않다면) regular surface이고, 각 \(p \in S\)에서</p>
+        <div class="equation" id="eq-30-1-1">
+        \[ \begin{aligned} T_pS &amp;= \{\, w \in \R^3 : \inner{\grad f(p)}{w} = 0 \,\}, \\ \mathbf{N}(p) &amp;= \frac{\grad f(p)}{\abs{\grad f(p)}} \end{aligned} \tag{30.1.1} \]
+        </div>
+        <p>이다. \(\mathbf{N}\)은 \(S\) 전체에서 연속인 unit normal field이고, \(f\)가 커지는 쪽을 향한다.</p>
+      </div>
+      <p>정확한 진술과 증명은 <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-3">Theorem 6.5.3</a>과 <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-4">Proposition 6.5.4</a>에 있다. 증명의 핵심은 implicit function theorem(<a href="../02-calculus-rn/2-4-implicit-function-theorem.html#i-2-4-8">Corollary 2.4.8</a>)이다. \(\partial_z f(p) \neq 0\)이면 \(p\) 근처의 \(f = 0\)은 \(z = g(x, y)\)라는 graph로 풀리고, graph는 regular surface다. 둘째 식은 \(S\) 위의 곡선 \(\alpha\)에서 \(f(\alpha(t)) = 0\)을 미분한 \(\inner{\grad f}{\alpha'} = 0\)에서 나온다. 곧 \(\grad f\)는 \(S\)에 수직이다.</p>
+
+      <div class="thm example" id="i-30-1-2">
+        <p><span class="thm-head">Example 30.1.2</span> <span class="thm-name">(one surface, two defining functions)</span>.
+        반지름 \(r\)인 sphere는 \(f_1 = \abs{x}^2 - r^2\)의 zero set이기도 하고 \(f_2 = \abs{x} - r\)의 zero set이기도 하다. \(\grad f_1 = 2x\)는 원점에서만 \(0\)이고 원점은 \(S\) 위에 없으므로 \(0\)은 regular value다. \(\grad f_2 = x/\abs{x}\)도 \(S\) 위에서 \(0\)이 아니다. 두 함수 모두 <a href="#eq-30-1-1">(30.1.1)</a>에서 \(\mathbf{N} = x/\abs{x}\), 곧 바깥쪽 normal을 준다. 이것은 Tour의 <a href="../00-tour/0-3-surfaces.html#i-0-3-4">Example 0.3.4</a>에서 parametrization으로 구한 \(\mathbf{N} = \mathbf{x}/r\)와 같다.</p>
+        <p>일반적으로 \(S\)를 zero set으로 갖는 함수는 무수히 많다. \(\grad f \neq 0\)인 \(f\)에 어디서나 양수인 smooth function \(h\)를 곱한 \(hf\)도 같은 zero set을 갖고, \(S\) 위에서 \(\grad(hf) = h\grad f\)이므로 같은 \(\mathbf{N}\)을 준다. surface와 normal은 \(f\)의 선택에 무관하다. \(f\)의 값 자체(얼마나 빨리 커지는가)는 선택에 따라 다르다. 다음 소절의 SDF는 그 선택을 하나로 고정하는 방법이다.</p>
+        <p class="verified">Verification: <code>verify/v-30-1-implicit-surfaces-eikonal.py</code></p>
+      </div>
+
+      <div class="thm nonexample" id="i-30-1-3">
+        <p><span class="thm-head">Non-example 30.1.3</span> <span class="thm-name">(when 0 is not a regular value)</span>.</p>
+        <ul>
+          <li>(a) <em>cone</em>. \(f = x^2 + y^2 - z^2\)의 zero set은 두 겹 cone이다. \(\grad f = (2x, 2y, -2z)\)는 vertex(원점)에서 \(0\)이고, vertex에서 cone은 regular surface가 아니다(<a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-6">Non-example 6.5.6</a>, <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-2">Non-example 6.2.2</a>). vertex를 빼면 regular surface다.</li>
+          <li>(b) <em>두 surface가 접하는 곳</em>. 두 sphere가 한 점에서 접할 때 각 sphere의 함수를 곱한 \(f = f_1f_2\)의 zero set은 두 sphere의 합집합이다. 접점에서는 \(f_1 = f_2 = 0\)이므로 \(\grad f = f_2\grad f_1 + f_1\grad f_2 = 0\)이다. 접점 근처의 zero set은 하나의 graph로 쓸 수 없다.</li>
+          <li>(c) <em>zero set은 멀쩡한데 gradient가 사라지는 경우</em>. \(g = f^2\)는 \(f\)와 같은 zero set을 갖지만 \(\grad g = 2f\grad f\)는 \(S\) 위의 모든 점에서 \(0\)이다. \(S\)는 surface이지만 <a href="#eq-30-1-1">(30.1.1)</a>로 normal을 구할 수 없다. \(S\)에서 최솟값 \(0\)을 갖는 함수는 모두 이런 문제를 가진다. 미분가능하면 최솟값이므로 \(S\) 위에서 gradient가 \(0\)이고, unsigned distance \(\abs{f}\)처럼 \(S\)에서 꺾이면 gradient가 아예 없다.</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-30-1-implicit-surfaces-eikonal.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-30-1-1">
+        <img src="figures/fig-30-1-1-level-sets.svg" alt="같은 정사각형 영역 [-2, 2]²에 그린 네 패널. (a) f = x² + y² − 1: 검은 굵은 원(zero set) 둘레에 회색 동심원(다른 level set, 안쪽은 점선)이 있고, 원 위의 8개 점에서 주홍 화살표 N = ∇f/|∇f|가 바깥쪽을 향한다. 가운데에 0 is a regular value라고 적혀 있다. (b) f = x² − y²: 검은 두 대각선이 원점에서 엇갈리고, 위아래와 좌우에 회색 hyperbola들이 있다. 원점의 주황 점에 ∇f = 0 on f = 0이라는 주석이 있다. (c) 두 원이 원점에서 접하고, 접점의 주황 점에 ∇f = 0이라는 주석이 있다. (d) g = (x² + y² − 1)²: 검은 원 안팎의 반지름 0.8과 1.2인 원 위에서 파란 화살표 0.18∇g가 원에서 멀어지는 쪽을 가리킨다. 원 안의 화살표에는 inward, 원 밖의 화살표에는 outward라고 적혀 있고, 왼쪽 위의 ∇g = 0 on g = 0이라는 주석의 화살표가 검은 원을 가리킨다. 아래 줄 패널에 x축, 왼쪽 줄 패널에 y축 이름이 있다.">
+        <figcaption><span class="fig-head">Figure 30.1.1.</span>
+        zero set이 regular curve가 되는 경우와 아닌 경우(3차원 상황의 2D cross-section). <em>무엇을</em>: 같은 영역 \([-2, 2]^2\)(가로 \(x\), 세로 \(y\))에 그린 네 함수 (a) \(f = x^2 + y^2 - 1\), (b) \(f = x^2 - y^2\)(cone \(x^2 + y^2 - z^2 = 0\)을 평면 \(y = 0\)으로 자른 cross-section \(x^2 - z^2 = 0\)과 같은 꼴), (c) 원점에서 접하는 두 단위원의 함수를 곱한 \(f = ((x - 1)^2 + y^2 - 1)((x + 1)^2 + y^2 - 1)\), (d) \(g = (x^2 + y^2 - 1)^2\). <em>읽는 법</em>: 검은 굵은 곡선이 zero set, 회색 곡선은 다른 level set(점선은 음수, 실선은 양수인 값)이다. (a)의 주홍 화살표는 <a href="#eq-30-1-1">(30.1.1)</a>의 unit normal \(\mathbf{N}\)이고, (d)의 파란 화살표는 정규화하지 않은 \(\nabla g\)를 0.18배로 그린 것이다. 주황 점은 zero set 위의 critical point다. <em>볼 것</em>: (a)에서는 원 위의 모든 점에서 \(\abs{\grad f} = 2\)이므로 normal이 매끄럽게 돈다. (b)와 (c)에서는 주황 점에서 zero set이 엇갈리거나 접하고, 거기서 \(\grad f = 0\)이다. (d)의 원은 (a)와 같은 원인데도 화살표의 방향이 원을 사이에 두고 뒤집힌다. 원 안(inward)에서는 중심 쪽, 원 밖(outward)에서는 바깥쪽이다. 길이 \(\abs{\grad g} = 4r\abs{r^2 - 1}\)은 반지름 \(0.8\)에서 \(1.15\), \(1.2\)에서 \(2.11\)이고 그 사이의 원 위에서 \(0\)이다. 연속인 \(\grad g\)가 방향을 바꾸려면 \(0\)을 지나야 하므로, 원 위에서는 normal의 방향을 읽을 수 없다. <em>본문과의 연결</em>: (a)는 <a href="#i-30-1-1">Proposition 30.1.1</a>, (b)–(d)는 <a href="#i-30-1-3">Non-example 30.1.3</a>의 (a)–(c)다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-30-1-1">Figure 30.1.1</a>을 (a)부터 보자. (a)의 원은 \(0\)이 regular value인 전형적인 경우다. 원 위의 여덟 점에서 그린 주홍 화살표 \(\mathbf{N} = \grad f/\abs{\grad f}\)가 모두 원에 수직이고 바깥(\(f \gt 0\)인 쪽)을 향한다. 회색 level set들은 원을 감싸는 동심원이어서, zero set 근처의 모양이 이웃 level set으로 매끄럽게 이어진다. (b)로 가면 zero set이 원점에서 X자로 엇갈린다. 원점 근처에서 이것을 하나의 함수의 graph로 쓸 수 없고, 주황 점에서 \(\grad f = 0\)이다. (c)도 같은 일이 접점에서 일어난다. 두 원은 각각 멀쩡하지만, 곱한 함수 하나로 표현하면 접점이 critical point가 된다. 3D vision에서는 얇은 물체의 두 면이 거의 닿는 곳, 두 물체가 맞닿은 곳이 이런 상황이다. (d)는 다른 종류의 실패다. zero set은 (a)와 같은 원이지만 파란 화살표가 원 안에서는 중심을, 원 밖에서는 바깥을 가리킨다. \(g \ge 0\)이고 원 위에서 최솟값 \(0\)을 가지므로 \(g\)는 원에서 멀어지는 쪽으로 커지고, 방향이 뒤집히는 원 위에서 \(\grad g = 0\)이다. 이 함수로는 normal의 방향을 알 수 없다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: implicit surface의 normal은 부호까지 정해진다</p>
+        <p>Tour의 PCA normal(<a href="../00-tour/0-3-surfaces.html#fig-0-3-4">Figure 0.3.4</a>)과 3D Gaussian의 가장 짧은 축(<a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>)은 \(\pm\)의 두 후보 가운데 어느 쪽이 바깥인지 알려 주지 않았다. 이웃끼리 방향을 맞추는 별도의 전파 과정이 필요했다. implicit surface에서는 이 문제가 없다. \(\mathbf{N} = \grad f/\abs{\grad f}\)는 언제나 \(f\)가 커지는 쪽, 이 장의 규약으로는 물체 바깥을 가리키고, \(S\) 전체에서 연속이다. 곧 regular value의 zero set은 저절로 orientable이고, \(f\)의 부호가 orientation을 고른다(<a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-8">Example 7.5.8</a>(b)).</p>
+        <p>실무에서 이것이 뜻하는 바는 두 가지다. 첫째, \(f\)의 부호 자체가 정보다. 안과 밖을 구별할 수 없는 데이터(열린 surface, 얇은 판, unsigned distance)에는 signed function이 맞지 않는다. 둘째, Section 30.3에서 보듯이 Gaussian이나 surfel에서 닫힌 mesh를 얻는 대표적인 방법들(2DGS의 TSDF fusion, SuGaR의 density와 Poisson의 indicator function)은 어떤 implicit function을 거쳐 이 일관된 orientation을 얻는다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-sdf">
+      <h2>Signed Distance Functions</h2>
+      <p><a href="#i-30-1-2">Example 30.1.2</a>에서 본 대로 같은 surface를 주는 \(f\)는 많다. 그 가운데 값에 기하적 뜻이 있는 것을 하나 고르자. 각 점에서 \(f\)의 값이 surface까지의 거리라면, \(f\)는 surface가 어디 있는지뿐 아니라 얼마나 떨어져 있는지도 알려 준다. sphere tracing이나 충돌 판정이 이 값을 그대로 쓴다.</p>
+      <div class="thm definition" id="i-30-1-4">
+        <p><span class="thm-head">Definition 30.1.4</span> <span class="thm-name">(signed distance function)</span>.
+        \(S\)가 bounded open set \(\Omega\)(물체의 안)의 boundary인 compact surface라 하자. 함수</p>
+        <div class="equation" id="eq-30-1-2">
+        \[ f(x) = \begin{cases} \ \ \operatorname{dist}(x, S) &amp; x \notin \Omega \ (\text{outside}), \\ -\operatorname{dist}(x, S) &amp; x \in \Omega \ (\text{inside}) \end{cases} \tag{30.1.2} \]
+        </div>
+        <p>를 \(S\)의 <strong>signed distance function</strong>(부호 거리 함수, SDF)라 한다. \(x\)에서 거리를 실현하는 \(S\)의 점, 곧 \(\abs{x - y} = \operatorname{dist}(x, S)\)인 \(y \in S\)를 \(x\)의 closest point라 한다.</p>
+      </div>
+      <p>\(S\)는 compact이므로 closest point는 언제나 하나 이상 있다(연속함수 \(y \mapsto \abs{x - y}\)의 최솟값). 그러나 하나뿐이라는 보장은 없다. closest point가 둘 이상인 점들의 모임을 \(S\)의 <strong>medial axis</strong>(중심축)라 한다. 원의 medial axis는 중심 한 점이고, sphere의 medial axis도 중심이다.</p>
+      <div class="thm proposition" id="i-30-1-5">
+        <p><span class="thm-head">Proposition 30.1.5</span> <span class="thm-name">(basic properties of the SDF)</span>.
+        \(f\)가 <a href="#i-30-1-4">Definition 30.1.4</a>의 SDF이고 \(S\)가 smooth하다고 하자.</p>
+        <ul>
+          <li>(a) \(\abs{f(x) - f(x')} \le \abs{x - x'}\)이다(1-Lipschitz). 따라서 \(f\)가 미분가능한 점에서는 \(\abs{\grad f} \le 1\)이다.</li>
+          <li>(b) \(p \in S\)이고 \(\mathbf{N}(p)\)가 바깥쪽 unit normal이면 충분히 작은 \(t\)에 대해 \(f(p + t\mathbf{N}(p)) = t\)이다.</li>
+          <li>(c) \(f\)가 미분가능한 점 \(x \notin S\)에서는 closest point \(y\)가 하나뿐이고 \(\grad f(x) = \pm(x - y)/\abs{x - y}\)(바깥에서 \(+\), 안에서 \(-\)), 특히 \(\abs{\grad f(x)} = 1\)이다. \(S\) 위에서는 \(\grad f(p) = \mathbf{N}(p)\)이다.</li>
+          <li>(d) closest point가 둘 이상인 점, 곧 medial axis 위의 점에서는 \(f\)가 미분가능하지 않다.</li>
+        </ul>
+        <p>정리하면 \(f\)는 medial axis의 closure 밖에서 smooth하고 그곳에서 \(\abs{\grad f} = 1\)이다. 특히 \(S\)의 충분히 가는 neighborhood에서 \(f\)는 smooth하다(이 smoothness는 이 study set에서 증명하지 않는다).</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> (a) \(y\)가 \(x'\)의 closest point이면 \(\operatorname{dist}(x, S) \le \abs{x - y} \le \abs{x - x'} + \operatorname{dist}(x', S)\)이고, \(x\)와 \(x'\)을 바꿔도 같다. \(x\)와 \(x'\)이 \(S\)의 서로 다른 쪽에 있으면 둘을 잇는 선분이 \(S\)와 만나는 점을 거쳐 같은 부등식을 얻는다. (b) \(S\)가 smooth하면 \(p\)를 지나는 normal 직선 위의 가까운 점은 \(p\)를 closest point로 가진다(<a href="#i-30-1-6">Example 30.1.6</a>에서 이것이 얼마나 멀리까지 성립하는지 본다). 그러므로 \(f\)는 normal 방향으로 기울기 1로 변한다. (c) 바깥의 점 \(x\)에서 closest point \(y\)를 향해 가는 선분 위에서 \(\operatorname{dist}(\cdot, S)\)는 간 거리만큼 정확히 줄어든다. 곧 unit vector \(e = (y - x)/\abs{y - x}\) 방향의 directional derivative가 \(\inner{\grad f(x)}{e} = -1\)이다. (a)에 의해 \(\abs{\grad f} \le 1\)이므로 Cauchy–Schwarz 부등식의 등호 조건에서 \(\grad f(x) = -e = (x - y)/\abs{x - y}\)이다. 안의 점에서는 \(f = -\operatorname{dist}\)이므로 부호가 바뀌어 \(\grad f(x) = e\), 곧 closest point를 향한다. closest point가 둘(\(y_1 \ne y_2\))이면 같은 논증으로 \(\grad f(x)\)가 서로 다른 두 unit vector \(\mp e_1\)과 \(\mp e_2\)에 동시에 같아야 하므로 모순이다. 이것이 (d)다.</p>
+      </div>
+
+      <div class="thm example" id="i-30-1-6">
+        <p><span class="thm-head">Example 30.1.6</span> <span class="thm-name">(sphere and ellipse)</span>.
+        반지름 \(r\)인 sphere의 SDF는 \(f = \abs{x} - r\)이다. \(\grad f = x/\abs{x}\)이므로 원점을 뺀 모든 곳에서 \(\abs{\grad f} = 1\)이고, \(S\) 위에서 \(\grad f = \mathbf{N}\)(바깥쪽)이다. 원점은 모든 점이 closest point인 점, 곧 medial axis이고 \(f\)는 거기서 cone 모양으로 꺾인다.</p>
+        <p>평면의 ellipse \(x^2/a^2 + y^2/b^2 = 1\) (\(a = 2\), \(b = 1\))의 SDF는 닫힌 식이 없으므로 closest point를 수치로 찾아 계산한다(<a href="#fig-30-1-2">Figure 30.1.2</a>). medial axis는 장축 위의 선분 \(\{\abs{x} \le (a^2 - b^2)/a = 1.5,\ y = 0\}\)이다. 끝점 \((\pm 1.5, 0)\)은 vertex \((\pm 2, 0)\)에서 curvature가 가장 큰 곳의 center of curvature(반지름 \(b^2/a = 0.5\))다. 예를 들어 \(q = (0.8, 0)\)에서는 \((1.067, \pm 0.846)\) 두 점이 똑같이 \(0.887\)만큼 떨어져 있다. 선분 밖의 \((1.7, 0)\)은 closest point가 vertex \((2, 0)\) 하나뿐이고 \(f = -0.3\)이다. 짧은 축 위에서는 \(f(0, y) = \abs{y} - 1\)이어서 \(y = 0\)(medial axis와 만나는 곳)에서 꺾인다.</p>
+        <p class="verified">Verification: <code>verify/v-30-1-implicit-surfaces-eikonal.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-30-1-2">
+        <img src="figures/fig-30-1-2-sdf-medial-axis.svg" alt="위아래 두 패널, 같은 축(x는 -3부터 3, y는 -2부터 2). (a) 배경색이 ellipse의 SDF f로, 안쪽은 파랑(음수), 바깥은 빨강(양수)이고 오른쪽에 색 막대가 있다. 검은 굵은 ellipse가 S이고 회색 level set들이 ellipse 모양으로 겹겹이 있다. 격자 위의 주홍 화살표들이 바깥쪽으로 향하는 ∇f이고, 장축 위의 주황 굵은 선분에 medial axis라는 주석이 있다. 선분 위의 검은 점 q에서 두 점선이 ellipse 위의 위아래 두 흰 점으로 간다. (b) 흰 배경에 파란 ellipse가 있고, 장축을 따라 검은 띠가 가운데에서 가장 진하고 양 끝으로 갈수록 옅어진다. 아래에 |∇_ε f| < 1 near the medial axis라는 주석이 있다.">
+        <figcaption><span class="fig-head">Figure 30.1.2.</span>
+        ellipse의 SDF, 그 gradient field, 그리고 medial axis. <em>무엇을</em>: ellipse \(x^2/4 + y^2 = 1\)의 SDF \(f\)(<a href="#eq-30-1-2">(30.1.2)</a>, 안에서 음수). closest point를 수치로 찾아 정확히 계산했다. <em>읽는 법</em>: (a)의 배경색이 \(f\)이고(파랑 음수, 빨강 양수, 흰색 \(0\)), 회색 곡선은 \(f = \pm 0.25, \pm 0.5, \dots\)인 level set(점선이 음수), 검은 굵은 곡선이 \(S\)다. 주홍 화살표는 \(\grad f\)다. 각 점과 그 closest point를 잇는 직선 방향의 unit vector이고, 바깥에서는 closest point로부터 멀어지는 쪽, 안에서는 closest point를 향하는 쪽, 곧 어디서나 \(f\)가 커지는 바깥 방향을 가리킨다. 주황 선분이 medial axis이고, 그 위의 점 \(q = (0.8, 0)\)에서 두 점선이 두 closest point \((1.067, \pm 0.846)\)로 간다. (b)는 \(\abs{\grad f}\)를 간격 \(\varepsilon = 0.1\)의 central difference로 추정한 값 \(\abs{\nabla_\varepsilon f}\)이다(흰색 1, 검정 0, 파란 곡선이 \(S\)). <em>볼 것</em>: (a)에서 level set들은 \(S\)에서 멀어질수록 둥글어지는 바깥쪽과, 안으로 갈수록 납작해져 medial axis로 접혀 들어가는 안쪽으로 나뉜다. 주홍 화살표는 medial axis를 사이에 두고 정반대 방향을 가리킨다. (b)에서 \(\abs{\nabla_\varepsilon f}\)는 medial axis에서 폭 \(2\varepsilon\)인 띠를 빼면 모든 곳에서 \(1\)과 \(2\%\) 안으로 같다. 띠의 한가운데 \((0, 0)\)에서는 정확히 \(0\)이고, 끝점 \((\pm 1.5, 0)\)으로 갈수록 꺾임이 약해져 옅어진다. <em>본문과의 연결</em>: <a href="#i-30-1-5">Proposition 30.1.5</a>의 (c)와 (d), 그리고 <a href="#i-30-1-6">Example 30.1.6</a>의 수치다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-30-1-2">Figure 30.1.2</a>의 (a)를 보자. 주홍 화살표는 \(S\) 위에서 바깥쪽 normal이고, \(S\)를 떠나서도 각 점의 closest point를 지나는 normal 직선을 따라 바깥 쪽을 가리킨다. 바깥에서는 closest point에서 곧게 뻗어 나오고, 안에서는 closest point를 향해 간다. SDF의 gradient field는 normal field를 공간 전체로 늘인 것이다. 그런데 ellipse 안쪽 장축에서는 위의 점과 아래의 점이 정반대 방향의 화살표를 가진다. 위의 점은 위쪽 boundary를, 아래의 점은 아래쪽 boundary를 향하기 때문이다. 점 \(q\)가 바로 그 경계에 있고, 두 점선이 보여 주듯이 위와 아래에 똑같이 가까운 점이 하나씩 있다. 이 선분 위에서 \(f\)는 지붕처럼 꺾인다. (b)는 이것을 수치로 본다. Neuralangelo처럼 SDF의 gradient를 간격 \(\varepsilon\)의 finite difference로 계산하면(<a href="30-2-implicit-curvature.html">Section 30.2</a>), \(S\) 근처에서는 \(\abs{\nabla_\varepsilon f}\)가 1이지만 medial axis를 가로지르는 띠에서는 양쪽 기울기가 상쇄되어 1보다 작아진다. \(f\)는 거기서 eikonal equation을 만족하지 않는다.</p>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: medial axis와 cut point</p>
+        <p>Tour <a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>에서 sphere의 북극에서 남극으로 가는 최단 geodesic은 방향마다 하나씩 무수히 많았고, 그래서 남극을 cut point라 불렀다. medial axis는 같은 현상을 “점 하나에서 재는 거리” 대신 “surface에서 재는 거리”로 본 것이다. medial axis 위의 점에서는 \(S\)로 가는 최단 선분이 하나로 정해지지 않고, 그래서 distance function이 미분가능하지 않다. distance function이 매끄럽지 않은 곳은 언제나 “최단 path가 갈라지는 곳”이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-eikonal">
+      <h2>The Eikonal Equation Does Not Determine the SDF</h2>
+      <p><a href="#i-30-1-5">Proposition 30.1.5</a>에 의해 SDF는 medial axis 밖에서</p>
+      <div class="equation" id="eq-30-1-3">
+      \[ \abs{\grad f} = 1, \qquad f|_S = 0 \tag{30.1.3} \]
+      </div>
+      <p>을 만족한다. 이 PDE를 <strong>eikonal equation</strong>(아이코날 방정식)이라 한다. 거꾸로, <a href="#eq-30-1-3">(30.1.3)</a>을 만족하면 SDF인가? 그렇지 않다. 이것이 이 절의 가장 중요한 관찰이다.</p>
+
+      <figure class="dg-figure" id="fig-30-1-3">
+        <img src="figures/fig-30-1-3-eikonal-not-sdf.svg" alt="위아래 두 패널. (a) 가로축 x(-2부터 2), 세로축 f(x)인 그래프. -1부터 1까지 하늘색으로 칠해져 있고 x = ±1에 검은 점과 S라는 글자가 있다. 검은 V자 SDF |x| − 1, 파란 점선의 뒤집힌 V(unsigned), 주황 zigzag가 있다. zigzag는 |x| ≥ 0.6에서 SDF와 겹치고 가운데에서 위로 꺾여 x = ±0.2에서 가로축과 만나며, 그 두 점이 주황 점이고 spurious zeros ±0.2라는 주석이 있다. 위에 범례 unsigned, zigzag, SDF. (b) 정사각형 영역에 반지름 방향 함수의 색(빨강 양수, 파랑 음수)이 칠해져 있다. 반지름 1과 0.4인 두 검은 원이 zero set이고, 반지름 0.7인 주황 점선 원에 kink라는 주석이 있다. 바깥 원 위의 주홍 화살표는 바깥을, 안쪽 원 위의 주홍 화살표는 원점을 향한다. 안쪽 원에 spurious zero set r = 0.4라는 주석이 있고, 그 disk 가운데에 f > 0이라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 30.1.3.</span>
+        eikonal equation을 거의 모든 곳에서 만족하고 \(S\)에서 \(0\)이지만 SDF가 아닌 함수들. <em>무엇을</em>: (a) 1차원에서 \(S = \{-1, 1\}\), 물체는 구간 \([-1, 1]\)이다. 세 함수 SDF \(\abs{x} - 1\), zigzag(\(\abs{x} \ge 0.6\)에서 \(\abs{x} - 1\), \(\abs{x} \lt 0.6\)에서 \(0.2 - \abs{x}\)), unsigned distance \(\abs{\abs{x} - 1}\). (b) 2차원 radial 함수 \(f = r - 1\) (\(r \ge 0.7\)), \(f = 0.4 - r\) (\(r \lt 0.7\)). <em>읽는 법</em>: (a)의 하늘색 띠가 물체의 안, 검은 점이 \(S\)다. 검정이 SDF, 주황이 zigzag(\(\abs{x} \ge 0.6\)에서는 SDF와 겹쳐 검정 아래에 가려져 있다), 파란 점선이 unsigned distance다. (b)의 배경색은 \(f\)(빨강 양수, 파랑 음수), 검은 원 두 개가 zero set, 주황 점선 원이 \(f\)가 꺾이는 원 \(r = 0.7\)이다. 주홍 화살표는 두 zero set 위에서 \(\grad f\)이고, 가운데의 \(f \gt 0\)은 그 disk에서 \(f\)의 부호다. <em>볼 것</em>: (a)의 세 함수는 모두 꺾이는 점을 빼면 기울기가 \(\pm 1\)이고 \(x = \pm 1\)에서 \(0\)이다. 곧 <a href="#eq-30-1-3">(30.1.3)</a>을 거의 모든 곳에서 만족하고, eikonal loss(<a href="#eq-30-1-4">(30.1.4)</a>의 \(\lambda\) 항)는 셋 모두 \(0\)이다. 그런데 zigzag는 \(x = \pm 0.2\)에서도 \(0\)이 되어 물체 안에 가짜 surface를 만들고, unsigned distance는 부호가 없어 \(S\)에서 미분가능하지 않다. (b)도 \(r = 0.7\)과 원점을 빼면 \(\abs{\grad f} = 1\)이지만 zero set에 가짜 원 \(r = 0.4\)이 더 있고, 그 위의 \(\grad f\)는 원점을 향한다. 그 안쪽(\(f \gt 0\)이라고 적힌 곳)은 물체 안에 생긴 “밖”, 곧 거품이다. <em>본문과의 연결</em>: eikonal equation과 \(f|_S = 0\)만으로는 SDF가 정해지지 않는다. SDF를 골라내는 것은 아래의 viscosity solution 조건이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-30-1-3">Figure 30.1.3</a>의 (a)에서 세 그래프를 비교해 보자. 셋 다 꺾이는 점을 빼면 기울기가 정확히 \(\pm 1\)이고 \(S = \{\pm 1\}\)에서 \(0\)이다. 주황 zigzag는 물체 안쪽에서 한 번 더 위로 꺾여 \(x = \pm 0.2\)에서 가로축을 지난다. 이 함수의 zero set은 \(S\)보다 크다. (b)는 같은 일을 2차원에서 본 것이다. 바깥 검은 원은 진짜 \(S\)이고 주홍 화살표가 바깥을 향한다. 안쪽 검은 원 \(r = 0.4\)은 가짜 zero set인데, 화살표가 원점을 향하므로 이 원의 안쪽이 “밖”이다. marching cubes(<a href="30-2-implicit-curvature.html">Section 30.2</a>)로 이 함수에서 mesh를 꺼내면 물체 안에 작은 구멍 surface가 하나 더 나온다.</p>
+
+      <p>그러면 SDF를 다른 해들과 구별하는 성질은 무엇인가? 꺾이는 점의 <em>모양</em>이다. SDF는 \(S\)에서 멀어질수록 커지는 거리이므로, 꺾인다면 medial axis에서 꺾이고 꺾이는 방향이 정해져 있다. 이 선택 규칙을 정식화한 것이 Crandall과 Lions의 <strong>viscosity solution</strong>(점성해)이다 <a class="cite" href="../../references.html#Crandall83">[Crandall83]</a>. bounded open set \(\Omega\)에서 boundary까지의 거리 \(u(x) = \operatorname{dist}(x, \partial\Omega)\)는 \(\abs{\grad u} - 1 = 0\) (in \(\Omega\)), \(u|_{\partial\Omega} = 0\)의 <em>유일한</em> viscosity solution이다. 안에서 음수인 SDF는 그 부호를 바꾼 \(-u\)이고, 같은 식을 \(1 - \abs{\grad u} = 0\)으로 쓸 때의 viscosity solution이다. viscosity solution의 정의는 식을 쓰는 부호에 민감하다. 정의를 한 줄로 쓰기는 어렵지만 1차원에서는 직접 확인할 수 있다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(\Omega = (-1, 1)\), \(\mathcal{H}(p) = \abs{p} - 1\)이라 하자. 연속함수 \(u\)가 \(\mathcal{H}(u') = 0\)의 viscosity solution이라는 것은 모든 \(x_0 \in \Omega\)에서 다음 두 조건이 성립한다는 뜻이다. (i) smooth function \(\psi\)가 \(x_0\)에서 \(u\)에 위에서 닿으면(\(x_0\) 근처에서 \(\psi \ge u\)이고 \(\psi(x_0) = u(x_0)\)) \(\mathcal{H}(\psi'(x_0)) \le 0\)이다. (ii) 아래에서 닿으면 \(\mathcal{H}(\psi'(x_0)) \ge 0\)이다. \(u\)가 미분가능한 점에서는 둘 다 \(\mathcal{H}(u') = 0\)이 된다. 꺾이는 점에서만 차이가 생긴다.</p>
+        <p>\(u = 1 - \abs{x}\)는 \(x_0 = 0\)에서 \(\wedge\)로 꺾인다. 위에서 닿는 \(\psi\)의 기울기는 \([-1, 1]\) 안에 있으므로 \(\abs{\psi'(0)} - 1 \le 0\)이고 (i)을 만족한다. 아래에서 닿는 smooth function은 없으므로(왼쪽에서는 \(\psi'(0) \ge 1\), 오른쪽에서는 \(\psi'(0) \le -1\)이어야 한다) (ii)는 확인할 것이 없다. 반대로 \(\abs{x} - 1\)은 \(0\)에서 \(\vee\)로 꺾이고, 상수 \(\psi \equiv -1\)이 아래에서 닿아 \(\mathcal{H}(0) = -1 \lt 0\)이 되므로 (ii)를 어긴다. zigzag는 \(x = \pm 0.6\)에서 \(\vee\)로 꺾이므로 역시 viscosity solution이 아니다. 세 후보 가운데 distance function \(1 - \abs{x}\)만 남는다(모든 연속함수 가운데 유일하다는 것은 <a class="cite" href="../../references.html#Crandall83">[Crandall83]</a>의 정리다). 부호를 바꾼 식 \(1 - \abs{u'} = 0\)에서는 \(\wedge\)와 \(\vee\)의 역할이 바뀌어 SDF \(\abs{x} - 1\)이 해이고, zigzag는 \(x = 0\)의 \(\wedge\) 때문에 여전히 해가 아니다.</p>
+      </div>
+
+      <p>neural SDF는 이 PDE를 풀지 않는다. 대신 IGR <a class="cite" href="../../references.html#Gropp20">[Gropp20]</a>은 점 \(x_i \in S\)(와 있으면 normal \(n_i\))에 맞추는 항 \(\ell_X\)에 벌점을 더한 loss를 network \(f\)의 parameter에 대해 최소화한다.</p>
+      <div class="equation" id="eq-30-1-4">
+      \[ \begin{aligned} \ell &amp;= \ell_X + \lambda\,\mathbb{E}_{x \sim \mathcal{D}}\big(\abs{\grad f(x)} - 1\big)^2, \\ \ell_X &amp;= \frac{1}{\abs{I}}\sum_{i \in I}\Big(\abs{f(x_i)} + \tau\,\abs{\grad f(x_i) - n_i}\Big) \end{aligned} \tag{30.1.4} \]
+      </div>
+      <p>마지막 항이 <strong>eikonal loss</strong>다. 논문은 \(\lambda = 0.1\), \(\tau = 1\)을 쓰고, \(\mathcal{D}\)를 uniform distribution(공식 코드는 cube \([-1.8, 1.8]^3\))과 각 \(x_i\)를 중심으로 한 Gaussian들(표준편차는 \(50\)번째로 가까운 이웃까지의 거리)의 평균으로 둔다. 같은 항이 NeuS(weight \(0.1\), 반지름 \(1.2\)인 공 안의 ray sample에서), VolSDF(weight \(0.1\), bounding sphere에 외접하는 cube의 uniform sample과 ray 위의 sample에서), Neuralangelo(weight \(0.1\), ray sample에서)의 공식 코드에 들어 있다.</p>
+      <p>IGR 논문은 이 문제가 ill-posed라는 것을 스스로 밝힌다. 유한한 점들 \(x_i\)에서만 \(f = 0\)을 요구하므로, 그 점들을 지나는 거의 어떤 closed surface에 대해서도 그 SDF가 loss의 최솟값이다. 논문의 주장(제목의 implicit geometric regularization)은 <em>최적화 과정</em>이 그 많은 해 가운데 그럴듯한 것을 고른다는 관찰이다. 이 주장의 근거가 되는 정리는 linear model \(f(x) = w^{\mathsf T}x\)에 대한 것이다. 점들이 원점을 지나는 hyperplane \(\Pi\) 근처에 있으면(제곱 오차와 \((\abs{w}^2 - 1)^2\) 꼴의 벌점을 쓴 경우), \(\lambda\)가 충분히 크면 loss의 global minimum은 \(\Pi\)의 두 SDF \(\pm\)(근사)뿐이고 나머지 critical point는 saddle 또는 local maximum이며, 작은 step size의 gradient descent는 무작위 초기값에서 확률 1로 그 둘 가운데 하나에 수렴한다. 곧 평면은 정확히 재현된다(plane reproduction). MLP에 대한 것은 실험적 관찰이다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: eikonal loss가 보장하는 것과 보장하지 않는 것</p>
+        <ul>
+          <li><strong>보장하는 것.</strong> sample한 점에서 \(\abs{\grad f} \approx 1\)이다. 그러면 \(S\) 근처에서 \(f\)의 값이 거리처럼 행동하고, normal \(\grad f/\abs{\grad f}\)를 계산할 때 \(\abs{\grad f}\)가 \(0\)에 가까워 불안정해지는 일(<a href="#fig-30-1-1">Figure 30.1.1</a>(d))이 없다.</li>
+          <li><strong>보장하지 않는 것.</strong> zero set이 \(S\) 하나뿐이라는 것, 부호가 안팎과 맞는다는 것, 꺾이는 곳이 medial axis라는 것은 loss에 들어 있지 않다. <a href="#fig-30-1-3">Figure 30.1.3</a>의 zigzag와 가짜 원은 eikonal loss가 정확히 \(0\)이다. 가짜 surface를 막는 것은 data term, rendering loss, geometric initialization(sphere 모양에서 시작), 그리고 최적화의 implicit regularization이다. 마지막 것은 해석이고 정리가 아니다.</li>
+          <li><strong>smooth network는 정확한 SDF가 될 수 없다.</strong> \(f\)가 \(C^1\)이고, bounded open set \(\Omega\)의 boundary \(S\)에서 \(0\), \(\Omega\) 안에서 음수라 하자. 연속함수는 compact set \(\bar\Omega\)에서 최솟값을 가지고, boundary의 값 \(0\)보다 작은 값이 있으므로 최솟값은 \(\Omega\) 안의 점에서 나온다. 거기서 \(\grad f = 0\), 곧 \(\abs{\grad f} - 1 = -1\)이고, 연속성에 의해 그 근처의 open set에서 \(\abs{\grad f} \lt 1/2\)이다. 그러므로 \(\mathcal{D}\)가 그 근처에 양의 확률을 주는 한(bounding box의 uniform sample처럼) eikonal loss는 \(0\)이 될 수 없다. 예를 들어 \(f = (\abs{x}^2 - 1)/2\)는 unit circle 위에서 \(\abs{\grad f} = 1\)이지만 중심에서 \(0\)이고, disk 위의 uniform 평균은 \(\mathbb{E}(\abs{\grad f} - 1)^2 = 1/6\)이다. 다만 loss에 양의 lower bound가 있다는 뜻은 아니다. \(\abs{\grad f} \lt 1\)인 영역을 medial axis 둘레로 얼마든지 좁힐 수 있으므로 infimum은 \(0\)이고, smooth function으로는 그 값에 닿지 못할 뿐이다. 실제 network는 유한한 해상도로 꺾임을 둥글게 펴므로 medial axis 근처에 \(\abs{\grad f} \lt 1\)인 띠가 남는다고 예상할 수 있다(<a href="#fig-30-1-2">Figure 30.1.2</a>(b)의 띠와 같은 모양. 해석이다).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-density">
+      <h2>From Distance to Density: VolSDF and NeuS</h2>
+      <p>NeRF는 surface 대신 density \(\sigma(x) \ge 0\)를 배운다. ray \(x(t) = o + tv\) (\(\abs{v} = 1\)) 위의 transmittance와 weight는</p>
+      <div class="equation" id="eq-30-1-5">
+      \[ \begin{aligned} T(t) &amp;= \exp\!\Big(-\!\int_{t_n}^{t}\sigma(x(u))\,du\Big), \\ w(t) &amp;= T(t)\,\sigma(x(t)) \end{aligned} \tag{30.1.5} \]
+      </div>
+      <p>이고, 색은 \(\int w(t)\,c(t)\,dt\)다 <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a>. 여기에는 surface라는 개념이 없다. density의 어떤 level set을 surface로 볼지 정하는 기준이 없고, 반투명한 구름도 유효한 답이다. VolSDF와 NeuS는 \(\sigma\)를 SDF \(f\)의 함수로 만들어 surface를 \(f = 0\)으로 못 박는다.</p>
+      <p><strong>VolSDF.</strong> Laplace distribution(평균 \(0\), scale \(\beta\))의 CDF \(\Psi_\beta\)로</p>
+      <div class="equation" id="eq-30-1-6">
+      \[ \begin{aligned} \sigma(x) &amp;= \alpha\,\Psi_\beta\big(-f(x)\big), \\ \Psi_\beta(s) &amp;= \begin{cases} \tfrac12 e^{s/\beta} &amp; s \le 0, \\ 1 - \tfrac12 e^{-s/\beta} &amp; s \gt 0 \end{cases} \end{aligned} \tag{30.1.6} \]
+      </div>
+      <p>로 둔다 <a class="cite" href="../../references.html#Yariv21">[Yariv21]</a>. 논문의 SDF는 \(\Omega\)(물체) 안에서 음수이므로 이 장의 부호와 같다. 구현에서는 \(\alpha = 1/\beta\)로 두고 \(\beta\)만 학습한다(공식 코드 <code>code/model/density.py</code>의 <code>LaplaceDensity</code>). \(\beta \to 0\)이면 \(\sigma\)는 물체 안에서 \(\alpha\), 밖에서 \(0\)인 indicator function에 다가간다. 곧 물체는 밀도 \(\alpha\)인 균일한 덩어리이고, 그 가장자리를 \(\beta\)만큼 흐리게 한 것이다.</p>
+      <p><strong>NeuS.</strong> logistic function \(\Phi_s(x) = (1 + e^{-sx})^{-1}\)과 그 도함수 \(\varphi_s = \Phi_s'\)(logistic density)를 쓴다 <a class="cite" href="../../references.html#Wang21">[Wang21]</a>. 논문은 \(1/s\)를 \(\varphi_s\)의 표준편차라 부르지만, 정확히는 \(1/s\)가 scale이고 표준편차는 \(\pi/(\sqrt3\,s) \approx 1.81/s\)다. 이 절의 bias 계산에는 어느 쪽이든 \(1/s\)에 비례한다는 것만 쓰인다. 가장 단순한 선택 \(\sigma = \varphi_s(f)\)는 surface에서 density가 가장 크지만, weight의 최댓값이 surface 앞으로 당겨진다(아래 <a href="#fig-30-1-4">Figure 30.1.4</a>). NeuS는 거꾸로 “평면을 만나는 ray의 weight가 \(\varphi_s(f)\)에 비례해 surface에서 최대가 되도록” density를 정한다. 그 결과가 opaque density</p>
+      <div class="equation" id="eq-30-1-7">
+      \[ \rho(t) = \max\!\left(\frac{-\frac{d}{dt}\Phi_s\big(f(x(t))\big)}{\Phi_s\big(f(x(t))\big)},\ 0\right) \tag{30.1.7} \]
+      </div>
+      <p>이다. 이산화하면 sample 구간의 opacity가 \(\alpha_i = \max\big((\Phi_s(f_i) - \Phi_s(f_{i+1}))/\Phi_s(f_i),\ 0\big)\)이 되고, 공식 코드(<code>models/renderer.py</code>)는 이것을 구간 양 끝의 SDF를 \(\grad f\)와 ray 방향의 cosine으로 추정해 계산한다. \(s\)는 학습되는 값이고(코드에서는 \(s = e^{10\,v}\), \(v\)의 초기값 \(0.3\)이므로 처음에 \(s \approx 20.1\)), 학습이 진행되면 커져 density가 surface에 집중된다.</p>
+      <p>ray가 평면을 각 \(\theta\)(ray와 normal 사이)로 지나는 경우를 계산해 보자. \(f(x(t)) = -\abs{\cos\theta}\,(t - t^*)\)이므로 \(\frac{d}{dt}\Phi_s(f) = -\abs{\cos\theta}\,\varphi_s(f)\)이고, \(\varphi_s = s\,\Phi_s(1 - \Phi_s)\)와 \(1 - \Phi_s(f) = \Phi_s(-f)\)를 쓰면</p>
+      <div class="equation" id="eq-30-1-8">
+      \[ \begin{aligned} \rho &amp;= s\,\abs{\cos\theta}\,\Phi_s(-f), \\ T(t) &amp;= \frac{\Phi_s(f(x(t)))}{\Phi_s(f(x(t_n)))}, \\ w(t) &amp;\propto \abs{\cos\theta}\,\varphi_s\big(f(x(t))\big) \end{aligned} \tag{30.1.8} \]
+      </div>
+      <p>이다. \(T\)는 \(\frac{d}{dt}\log T = -\rho = \frac{d}{dt}\log\Phi_s(f)\)에서 나온다. \(w\)는 \(f = 0\), 곧 \(t = t^*\)에서 정확히 최대다. 이것이 NeuS 논문의 Theorem 1(1차 근사에서 unbiased)이 말하는 것이다.</p>
+
+      <figure class="dg-figure" id="fig-30-1-4">
+        <img src="figures/fig-30-1-4-sdf-to-density.svg" alt="위아래 두 패널. (a) 가로축 signed distance f(-0.5부터 0.5), 세로축 density. 왼쪽 절반(f < 0, inside)이 하늘색이다. 파란 실선(VolSDF)과 주황 실선(NeuS)은 왼쪽에서 10에 붙어 있다가 f = 0에서 5를 지나 오른쪽에서 0으로 떨어지고, 파랑이 주황보다 가파르다. 회색 점선(naive)은 f = 0에서 꼭대기 2.5인 종 모양이다. (b) 가로축 ray parameter t(0.6부터 1.4), 세로축 weight. t = 1에 검은 세로선 surface t*가 있고, 그 오른쪽(물체 안, inside f < 0)이 하늘색이다. 왼쪽 위에 오른쪽을 향한 화살표와 ray from camera라는 글자가 있다. 회색 점선(naive)은 0.952 근처에서 높이 약 1.6의 꼭대기, 주황(NeuS)은 정확히 1에서 높이 약 2.5의 꼭대기, 파랑(VolSDF)은 1.027에서 높이 약 3.2의 꼭대기를 가진다. -0.048과 +0.027이라는 주석이 꼭대기의 어긋남을 가리킨다.">
+        <figcaption><span class="fig-head">Figure 30.1.4.</span>
+        SDF를 density로 바꾸는 두 방법과 그 weight. <em>무엇을</em>: (a) signed distance \(f\)의 함수로 본 density. VolSDF <a href="#eq-30-1-6">(30.1.6)</a>(\(\beta = 0.1\), \(\alpha = 1/\beta\)), 평면을 정면으로(\(\theta = 0\)) 만나는 ray에서의 NeuS opaque density <a href="#eq-30-1-8">(30.1.8)</a>(\(s = 10\)), 단순한 선택 \(\sigma = \varphi_s(f)\)(\(s = 10\)). (b) 평면을 \(t^* = 1\)에서 정면으로 만나는 ray(\(f = t^* - t\)) 위에서 세 density의 weight \(w = T\sigma\) <a href="#eq-30-1-5">(30.1.5)</a>를 수치 적분으로 계산했다. <em>읽는 법</em>: 파랑 VolSDF, 주황 NeuS, 회색 점선 naive \(\varphi_s(f)\)다. 두 패널 모두 하늘색 부분이 물체 안(\(f \lt 0\))이다. 다만 (a)의 가로축은 \(f\)이고 (b)의 가로축은 ray parameter \(t\)이므로 좌우가 반대다. (b)에서 ray는 카메라 쪽(왼쪽, 바깥)에서 출발해 \(t^*\)에서 surface를 지나 물체 안(오른쪽)으로 들어간다. (b)의 검은 세로선이 surface, 각 색의 점선 세로선이 그 weight의 최댓값 위치다. <em>볼 것</em>: (a)에서 VolSDF와 NeuS는 둘 다 안에서 10, \(f = 0\)에서 정확히 절반(5), 밖에서 \(0\)인 “계단을 흐린” 모양이다. 높이를 같게 맞추면 차이는 Laplace CDF와 logistic CDF의 차이뿐이다. naive \(\varphi_s\)는 surface에서 최대인 종 모양이고 물체 안에서 다시 \(0\)이 된다. (b)에서 NeuS의 weight는 정확히 \(t^*\)에서 최대다. naive는 \(t^* - 0.048\)(\(= t^* - \ln\frac{1 + \sqrt5}{2}/s\))로 앞당겨지고, 총 weight가 \(1 - e^{-1} \approx 0.63\)에 그쳐 surface가 반투명하다. VolSDF는 \(t^* + 0.027\)(\(= t^* + 0.2693\,\beta\)), 곧 surface보다 조금 안쪽에서 최대다. <em>본문과의 연결</em>: <a href="#eq-30-1-8">(30.1.8)</a>과 아래 상자의 bias 계산이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-30-1-4">Figure 30.1.4</a>의 (a)에서 파랑과 주황은 거의 같은 모양이다. 둘 다 물체 안쪽(하늘색)에서 일정한 값 10을 갖고, surface에서 정확히 그 절반을 지나 밖에서 \(0\)으로 떨어진다. 회색 점선만 다르다. naive \(\varphi_s(f)\)는 surface 위에서만 큰 얇은 껍질이다. (b)로 내려가 ray 위의 weight를 보면 차이가 드러난다. 여기서는 가로축이 ray를 따라 카메라에서 멀어지는 방향이라 물체 안(하늘색)이 오른쪽에 있다. 회색 점선의 꼭대기는 검은 세로선(surface)보다 왼쪽, 곧 카메라 쪽에 있다. ray가 껍질을 지나는 동안 transmittance \(T\)가 줄어들어 껍질의 뒤쪽 절반이 덜 보이기 때문이다. 주황 NeuS는 이 감소를 정확히 보정하도록 만든 것이라 꼭대기가 surface에 있다. 파랑 VolSDF의 꼭대기는 surface보다 약간 오른쪽, 물체 안쪽에 있다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 두 설계는 같은 꼴이고, 다른 bias를 가진다</p>
+        <ul>
+          <li><strong>같은 꼴.</strong> 평면에서 NeuS의 opaque density는 \(s\abs{\cos\theta}\,\Phi_s(-f)\)이고 VolSDF는 \(\tfrac1\beta\Psi_\beta(-f)\)이다. 둘 다 “\(\tfrac{1}{\text{scale}} \times\) 평균이 \(0\)인 distribution의 CDF를 \(-f\)에서 계산한 것”이다(\(1/s\)와 \(\beta\)가 scale). 차이는 CDF의 종류와 \(\abs{\cos\theta}\) 인수다. NeuS의 density는 ray를 따른 도함수로 정의되므로 ray 방향에 의존하고, VolSDF의 density는 공간의 함수다.</li>
+          <li><strong>bias.</strong> 평면을 정면으로 보면 weight의 최댓값은 NeuS에서 \(t^*\), VolSDF에서 \(t^* + 0.2693\,\beta\), naive에서 \(t^* - 0.481/s\)이다(마지막 둘의 상수는 각각 \(-\ln(3 - \sqrt5)\)와 \(\ln\frac{1 + \sqrt5}{2}\)다. 최댓값에서 \(w'/w = \sigma'/\sigma - \sigma = 0\)이고, 이것이 VolSDF에서는 \(y = \tfrac12 e^{-(t - t^*)/\beta}\)에 대한 \(y^2 - 3y + 1 = 0\), naive에서는 \(\Phi = \Phi_s(f)\)에 대한 \(\Phi^2 + \Phi - 1 = 0\)이 된다). VolSDF의 어긋남은 각에 따라 달라서, \(\abs{\cos\theta} = 0.8\)이면 \(+0.217\,\beta\), \(60^\circ\)(\(\abs{\cos\theta} = 1/2\))에서 정확히 \(0\), 그보다 비스듬하면 음수(\(\abs{\cos\theta} = 0.3\)이면 \(-1.70\,\beta\), 단위는 ray parameter)가 된다. 어느 경우든 \(\beta \to 0\), \(s \to \infty\)이면 bias가 사라진다.</li>
+          <li><strong>무엇에 영향을 주는가.</strong> 두 방법 모두 최종 surface는 \(f = 0\)으로 꺼내므로 bias는 surface의 정의가 아니라 rendering(색과 depth가 어느 깊이에서 오는가)에 들어간다. 학습은 그 차이를 \(f\)를 옮기거나 \(\beta\), \(s\)를 줄여 메우려 할 것이다(해석).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-tsdf">
+      <h2>TSDF Fusion and the Level Set Method</h2>
+      <p>neural SDF 이전에도 SDF는 depth sensor의 표준 표현이었다. Curless와 Levoy <a class="cite" href="../../references.html#Curless96">[Curless96]</a>는 range image마다 sensor의 시선(line of sight)을 따라 잰 signed distance \(d_i(x)\)와 weight \(w_i(x)\)를 voxel grid에 쌓고, 누적값을</p>
+      <div class="equation" id="eq-30-1-9">
+      \[ \begin{aligned} D_{i+1}(x) &amp;= \frac{W_i(x)D_i(x) + w_{i+1}(x)d_{i+1}(x)}{W_i(x) + w_{i+1}(x)}, \\ W_{i+1}(x) &amp;= W_i(x) + w_{i+1}(x) \end{aligned} \tag{30.1.9} \]
+      </div>
+      <p>로 갱신한다. 거리와 weight는 측정된 surface 근처에서만 쓰도록 잘라낸다(truncation). 그래서 TSDF(truncated SDF)라 부른다. surface는 \(D = 0\)인 zero set이고, 논문은 이 zero set이 시선 방향 거리에 대한 최소제곱의 뜻에서 최적이라는 것을 부록에서 스케치로 보이고, marching cubes로 mesh를 꺼낸다(<a href="30-2-implicit-curvature.html">Section 30.2</a>). KinectFusion <a class="cite" href="../../references.html#Newcombe11">[Newcombe11]</a>은 같은 누적을 GPU에서 실시간으로 하면서, TSDF에서 ray casting한 surface에 새 depth를 맞춰 카메라를 추적한다. 2DGS <a class="cite" href="../../references.html#Huang24">[Huang24]</a>도 학습이 끝난 뒤 rendering한 depth map들을 이렇게 fusion해 mesh를 얻는다(<a href="30-3-surfels-2dgs.html">Section 30.3</a>).</p>
+      <p>시선을 따라 잰 거리는 Euclidean distance가 아니다. surface가 시선과 비스듬하면 시선을 따라 잰 거리가 더 길다. 평면을 normal과 각 \(\theta\)를 이루는 시선으로 보면 그 거리는 Euclidean distance의 \(1/\cos\theta\)배이고, 그 gradient의 크기도 \(1/\cos\theta\)다(<a href="#ex-30-1-4">Exercise 30.1.4</a>). TSDF는 eikonal equation을 만족하지 않는다. 그래도 zero set은 같으므로 surface를 꺼내는 데는 문제가 없다. TSDF에서 중요한 것은 값이 아니라 zero crossing이다.</p>
+      <p>마지막으로, surface를 \(f\)의 zero level set으로 두고 \(f\)를 시간에 따라 PDE로 움직여 surface를 움직이는 방법을 <strong>level set method</strong>라 한다 <a class="cite" href="../../references.html#Osher88">[Osher88]</a>. surface가 갈라지거나 합쳐져도 \(f\)는 여전히 함수 하나로 남는다는 것이 장점이다.</p>
+    </section>
+
+    <section id="sec-geodesic">
+      <h2>Distance in Space versus Distance on the Surface</h2>
+      <p>SDF가 재는 거리는 \(\R^3\)의 직선 거리다. 공중을 가로질러 surface까지 잰다. Tour <a href="../00-tour/0-5-intrinsic.html#sec-geodesics">Section 0.5</a>의 geodesic distance는 다르다. surface 위의 두 점 사이를 surface 안에서만 움직여 잰 가장 짧은 길이다. 두 점 \(p, q \in S\)에 대해 \(\abs{p - q}\)는 언제나 geodesic distance 이하이고, 둘은 아주 다를 수 있다. unit sphere의 대척점은 직선으로 \(2\), surface 위로 \(\pi\)만큼 떨어져 있다(<a href="#ex-30-1-5">Exercise 30.1.5</a>).</p>
+      <p>그래도 둘은 같은 PDE의 해다. 한 점 \(p \in S\)에서의 geodesic distance \(u\)는 \(S\) 위에서 \(\abs{\grad_S u} = 1\), \(u(p) = 0\)을 만족한다. 여기서 \(\grad_S\)는 first fundamental form으로 정한 surface 위의 gradient다. Tour에서 본 fast marching과 heat method(<a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>의 In computer vision 상자)가 mesh 위에서 푸는 것이 이 surface 위의 eikonal equation이다. SDF는 같은 식을 \(\R^3\)에서 \(S\) 전체를 출발 집합으로 두고 푼 것이다. 매끄럽지 않은 곳도 대응한다. SDF는 medial axis에서, geodesic distance는 cut locus(최단 geodesic이 갈라지는 점들, 예를 들어 sphere에서 \(p\)의 대척점)에서 꺾인다.</p>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>regular value와 zero level set: <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-1">Definition 6.5.1</a>, <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-3">Theorem 6.5.3</a>, <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-4">Proposition 6.5.4</a>, critical value의 예 <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-6">Non-example 6.5.6</a>, torus of revolution의 implicit equation <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-8">Example 6.5.8</a>. 일반 차원의 regular value theorem: <a href="../14-submanifolds/index.html#toc-14-4">Section 14.4</a>.</li>
+        <li>implicit function theorem: <a href="../02-calculus-rn/2-4-implicit-function-theorem.html#i-2-4-4">Theorem 2.4.4</a>, level set이 국소적으로 graph라는 것 <a href="../02-calculus-rn/2-4-implicit-function-theorem.html#i-2-4-8">Corollary 2.4.8</a>, 매끄럽지 않은 level set <a href="../02-calculus-rn/2-4-implicit-function-theorem.html#i-2-4-3">Non-example 2.4.3</a>.</li>
+        <li>\(\grad f/\abs{\grad f}\)가 orientation을 준다는 것: <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-5">Theorem 7.5.5</a>, <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-8">Example 7.5.8</a>.</li>
+        <li>surface 위의 gradient와 Laplacian(geodesic distance의 eikonal equation, heat method): <a href="../21-riemannian-metrics/index.html#toc-21-5">Section 21.5</a>, <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>. geodesic과 cut point: <a href="../09-intrinsic-geometry/index.html#toc-9-5">Section 9.5</a>, <a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a>.</li>
+        <li>viscosity solution의 정의와 유일성은 이 study set의 범위 밖이다. 원 논문 <a class="cite" href="../../references.html#Crandall83">[Crandall83]</a>을 본다.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(0\)이 regular value이면 \(S = f^{-1}(0)\)은 regular surface이고, \(\mathbf{N} = \grad f/\abs{\grad f}\)는 \(f\)가 커지는 쪽을 향하는 연속인 unit normal field다. cone의 vertex, 두 surface의 접점, \(f^2\) 같은 함수에서는 이것이 깨진다. implicit surface의 normal은 부호까지 정해진다.</li>
+        <li>SDF는 1-Lipschitz이고, closest point가 하나인 곳에서 \(\abs{\grad f} = 1\), \(S\) 위에서 \(\grad f = \mathbf{N}\)이다. closest point가 둘 이상인 medial axis에서는 미분가능하지 않다.</li>
+        <li>eikonal equation \(\abs{\grad f} = 1\), \(f|_S = 0\)은 해가 많다. 부호가 틀린 해, 가짜 zero set을 가진 해가 있다. distance function은 그 가운데 viscosity solution으로 골라진다. eikonal loss는 \(\abs{\grad f} \approx 1\)만 강제하고, smooth한 network는 안쪽에서 반드시 \(\grad f = 0\)인 점을 가진다.</li>
+        <li>VolSDF의 \(\tfrac1\beta\Psi_\beta(-f)\)와 NeuS의 opaque density(평면에서 \(s\abs{\cos\theta}\Phi_s(-f)\))는 같은 꼴이다. 평면을 정면으로 볼 때 weight의 최댓값은 NeuS에서 surface에 있고 VolSDF에서 \(0.27\beta\)만큼 안쪽에 있다.</li>
+        <li>TSDF는 시선을 따라 잰 거리라 eikonal equation을 만족하지 않지만 zero set은 같다. SDF는 공간 속 거리이고, geodesic distance는 같은 eikonal equation을 surface 위에서 푼 것이다.</li>
+      </ul>
+      <p class="next">다음 절에서는 \(f\)의 2차 미분을 본다. \(\mathbf{N} = \grad f/\abs{\grad f}\)를 한 번 더 미분하면 shape operator가 나오고, SDF에서는 Hessian matrix의 eigenvalue가 곧 principal curvature다. 그래서 \(\Delta f\)는 mean curvature를 재고, Neuralangelo의 curvature loss가 무엇을 벌하는지 정확히 말할 수 있다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-30-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 30.1.1</span> <span class="level">★</span>
+        \(f_c(x, y, z) = x^2 + y^2 - z^2 + c\)라 하자. \(0\)이 \(f_c\)의 regular value인 \(c\)를 모두 구하고, \(c \gt 0\), \(c = 0\), \(c \lt 0\)일 때 \(f_c^{-1}(0)\)이 각각 어떤 surface인지 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\grad f_c = (2x, 2y, -2z)\)는 원점에서만 \(0\)이고, 원점에서의 값은 \(f_c(0) = c\)이다. 따라서 원점이 zero set 위에 있는 것은 \(c = 0\)일 때뿐이고, \(0\)이 regular value인 것은 \(c \neq 0\)일 때다. \(c \gt 0\)이면 \(z^2 = x^2 + y^2 + c \ge c\)이므로 \(z \ge \sqrt c\)와 \(z \le -\sqrt c\)의 두 조각, 곧 hyperboloid of two sheets다. \(c \lt 0\)이면 \(x^2 + y^2 = z^2 + \abs{c}\)로 모든 \(z\)에서 반지름 \(\sqrt{z^2 + \abs c}\)인 원이 있는 hyperboloid of one sheet다. \(c = 0\)이면 두 겹 cone이고 vertex에서 regular surface가 아니다(<a href="#i-30-1-3">Non-example 30.1.3</a>(a)). \(c\)를 \(0\)으로 보내면 두 종류의 hyperboloid가 cone을 사이에 두고 만난다. topology가 바뀌는 순간이 critical value다.</p>
+          <p class="verified">Verification: <code>verify/v-30-1-implicit-surfaces-eikonal.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-30-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 30.1.2</span> <span class="level">★</span>
+        \(f\)가 closed surface \(S\)의 SDF이다. \(g = e^{f} - 1\)과 \(k = f^3\)도 \(S\)를 zero set으로 가진다. 각각에 대해 \(0\)이 regular value인지, <a href="#eq-30-1-1">(30.1.1)</a>로 구한 normal이 \(f\)의 것과 같은지, eikonal equation을 \(S\) 위에서 만족하는지 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\grad g = e^f\grad f\)이고 \(S\) 위에서 \(e^0 = 1\)이므로 \(\grad g = \grad f = \mathbf{N}\)이다. \(0\)은 regular value이고, normal이 같으며, \(S\) 위에서는 \(\abs{\grad g} = 1\)이다. 그러나 \(S\)를 벗어나면 \(\abs{\grad g} = e^f \neq 1\)이므로 SDF는 아니다. \(\grad k = 3f^2\grad f\)는 \(S\) 위에서 \(0\)이다. \(0\)은 regular value가 아니고 normal을 구할 수 없다(<a href="#i-30-1-3">Non-example 30.1.3</a>(c)와 같은 경우). 양수인 함수를 곱하거나 단조 증가 함수를 합성하면 zero set과 orientation은 그대로지만, 그 함수의 도함수가 \(0\)에서 \(0\)이면 regular value라는 성질을 잃는다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-30-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 30.1.3</span> <span class="level">★</span>
+        NeuS에서 ray가 평면을 normal과 각 \(\theta\)를 이루며 \(t^*\)에서 지난다. <a href="#eq-30-1-7">(30.1.7)</a>로부터 <a href="#eq-30-1-8">(30.1.8)</a>을 유도하고, weight \(w(t)\)가 \(t^*\)에서 최대임을 보여라. naive \(\sigma = \varphi_s(f)\)를 쓰면 정면(\(\theta = 0\))의 ray에서 총 weight가 \(1 - e^{-1}\)임도 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(f(x(t)) = -\abs{\cos\theta}(t - t^*)\)는 \(t\)에 대해 감소하므로 \(\frac{d}{dt}\Phi_s(f) = \varphi_s(f)\cdot(-\abs{\cos\theta}) \lt 0\)이고 \(\max\)는 필요 없다. \(\rho = \abs{\cos\theta}\,\varphi_s(f)/\Phi_s(f) = \abs{\cos\theta}\,s(1 - \Phi_s(f)) = s\abs{\cos\theta}\,\Phi_s(-f)\)이다. \(\rho = -\frac{d}{dt}\log\Phi_s(f)\)이므로 \(T(t) = \exp(-\int_{t_n}^t\rho) = \Phi_s(f(t))/\Phi_s(f(t_n))\)이고, \(w = T\rho = \abs{\cos\theta}\,\varphi_s(f)/\Phi_s(f(t_n))\)이다. \(\varphi_s\)는 \(0\)에서 최대인 종 모양이므로 \(w\)는 \(f = 0\), 곧 \(t = t^*\)에서 최대다. naive density는 \(\int\varphi_s(f(t))\,dt = \int\varphi_s(u)\,du = 1\)(\(f\)가 기울기 \(-1\)로 \(+\infty\)에서 \(-\infty\)까지 움직임)이므로 ray 끝의 transmittance가 \(e^{-1}\)이고 총 weight는 \(1 - e^{-1} \approx 0.632\)다.</p>
+          <p class="verified">Verification: <code>verify/v-30-1-implicit-surfaces-eikonal.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-30-1-4" data-level="2">
+        <p><span class="thm-head">Exercise 30.1.4</span> <span class="level">★★</span>
+        평면 \(z = 0\)(위가 밖)을, \(-\mathbf{N} = (0, 0, -1)\)과 각 \(\theta\)를 이루는 평행한 시선들로 본다. 점 \(x\)에서 시선을 따라 평면까지 잰 거리를 \(D(x)\)라 하자. \(D\)를 Euclidean SDF \(f(x) = z\)로 쓰고, \(\abs{\grad D}\)를 구하여라. \(\theta = 60^\circ\), \(x = (0.3, 0.2, 0.5)\)이면 \(D\)와 \(f\)는 각각 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>시선 방향은 \(v = (\sin\theta, 0, -\cos\theta)\)다. \(x + tv\)가 평면에 닿는 \(t\)는 \(z - t\cos\theta = 0\), 곧 \(t = z/\cos\theta\)이므로 \(D(x) = f(x)/\cos\theta\)이다. 따라서 \(\grad D = \grad f/\cos\theta\)이고 \(\abs{\grad D} = 1/\cos\theta \ge 1\)이다. 등호는 정면에서 볼 때뿐이다. \(\theta = 60^\circ\), \(x = (0.3, 0.2, 0.5)\)이면 \(f = 0.5\), \(D = 0.5/0.5 = 1.0\)이다. \(D\)와 \(f\)는 같은 zero set을 가지므로 TSDF의 zero crossing은 맞지만, \(D\)는 eikonal equation을 만족하지 않는다. 비스듬한 surface일수록 truncation 띠가 Euclidean 거리로는 얇아진다.</p>
+          <p class="verified">Verification: <code>verify/v-30-1-implicit-surfaces-eikonal.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-30-1-5" data-level="1">
+        <p><span class="thm-head">Exercise 30.1.5</span> <span class="level">★</span>
+        unit sphere 위의 두 점이 중심에서 본 각 \(60^\circ\)만큼 떨어져 있다. 두 점 사이의 직선 거리와 geodesic distance를 구하여라. 대척점이면 어떤가? unit sphere의 SDF \(f = \abs{x} - 1\)의 medial axis와 점 \(p\)에서의 geodesic distance가 꺾이는 곳(cut point)은 각각 어디인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>각이 \(\vartheta\)이면 직선 거리는 \(2\sin(\vartheta/2)\), geodesic distance는 great circle의 호 \(\vartheta\)다. \(60^\circ\)이면 \(1\)과 \(\pi/3 \approx 1.047\), 대척점이면 \(2\)와 \(\pi\)다. SDF의 medial axis는 중심(원점) 한 점이고, 거기서 모든 점이 closest point다. \(p\)에서의 geodesic distance는 대척점 \(-p\)에서 꺾이고, 거기로 가는 최단 geodesic은 방향마다 하나씩 무수히 많다(<a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>). 하나는 \(\R^3\) 안의 점이고 다른 하나는 \(S\) 위의 점이다. 같은 “최단 path가 갈라지는 곳”이 공간에서 재느냐 surface에서 재느냐에 따라 다른 곳에 생긴다.</p>
+          <p class="verified">Verification: <code>verify/v-30-1-implicit-surfaces-eikonal.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 30. Surfaces from Radiance Fields</a>
+    <a rel="next" href="30-2-implicit-curvature.html">30.2 Curvature of Implicit Surfaces →</a>
+  </nav>
+</body>
+</html>

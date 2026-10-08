@@ -473,3 +473,33 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
       - 27장의 투영 기호를 29.3처럼 φ로 맞춘다(27 index는 π).
       - ω_k(아래첨자, 29장)와 Tour의 ω^k가 다르다.
       - 400px에서 그림 글자가 작다. 사이트 전체에 click-to-enlarge CSS를 검토한다.
+  - 2026-10-07: 사용자 지시 "30장부터 써줘".
+    - 30장 작성 agent(opus)를 띄웠다. 30.1–30.4를 차례로 쓴다.
+    - references에 8개를 추가했다: Li23, Barron22, Goldman05, Osher88, Crandall83, Curless96, Newcombe11, Kazhdan06.
+    - 30 index toc-note의 mean curvature 부호를 고쳤다. \(\operatorname{div}\mathbf N = -2H\)(규약 \(W_p = -dN_p\)).
+    - 구현 사실은 작성 단계에서부터 공식 코드와 대조하라고 지시했다.
+  - 2026-10-07: 사용자 "ㅇㅇ"(30장 검토 후 push 허락). 이어서 mesh 장을 승인했다("31장도 작성해줘").
+    - Chapter 31 「Meshes: Discrete Differential Geometry」 6절(31.6 parametrization/texture 포함)
+    - 폴더 `31-meshes`. Part IV의 마지막 장이다. 순서는 30 → 31 → 01이다.
+    - 앞서 뺀 dynamic 장의 번호를 이 장에 다시 썼다.
+    - 반영: GUIDELINES §2.4·§9, 루트 index, Tour 0.8과 00 index, 01 index의 pager prev, references에 14개 추가
+    - **통합 때 할 일**: 30 index의 pager next를 31로 바꾼다. 지금은 30 작성자가 그 파일을 고치는 중이라 미뤘다.
+    - 31장 작성 agent(opus)를 30장과 동시에 띄웠다. 두 장은 서로 독립이다.
+    - push는 30장과 함께 검토 후에 한다.
+  - 2026-10-08: **30장 작성·검토 완료(reviewed).** 사용자: "검토 끝나면 알아서 commit push 해"
+    - 4절, 그림 17개(interactive 3개), verify 4개
+    - 검토 R1(30.1–30.2)이 고친 것
+      - eikonal loss에 "topology가 정하는 하한"이 있다는 오류(infimum은 0)
+      - curvature loss에서 minimal surface의 비용이 0이라는 오류(offset sample에서는 \(H_t \ne 0\))
+      - 안쪽에서 \(\grad f\)의 방향
+      - VolSDF의 eikonal sample 영역(구가 아니라 cube)
+    - 검토 R2(30.3–30.4)가 고친 것
+      - grazing angle에서의 FD normal 오차를 2D에서 3D 분석으로 바로잡았다. depth를 픽셀 중심에서 어긋나게 읽으면 grazing에서 오차가 커진다.
+      - SuGaR loss를 실제 density로 쓴 \(f\)로 고쳤다.
+      - smoothness prior 실험의 λ 단위를 맞췄다.
+      - 2DGS의 normal loss 구현은 \(1 - A\langle\cdot\rangle\)이다.
+    - 통합
+      - 29장의 30.3 링크를 실제 파일로 바꿨다.
+      - terms.tsv 4개, glossary 3개, notation(𝖪, \(d\), \(\rho\), \(K\)/𝖪 충돌)
+      - 부록 E에 Chrome 스크린샷이 잘리는 문제를 적었다.
+    - 31장은 작성 중이다. 공개 사이트에 깨진 링크가 없도록 31 index는 planned 판으로만 commit했다(작업 트리는 그대로 둔다).

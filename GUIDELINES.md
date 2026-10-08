@@ -99,7 +99,7 @@ Chapter 0 「A Guided Tour of Differential Geometry」는 깊은 장(01–26) **
 
 ### 2.4 Part IV (3D Vision)의 원칙 (2026-10-07 사용자 결정)
 
-Part IV 「3D Vision Through Differential Geometry」(27–30장)는 3D vision(SfM, NeRF, 3D Gaussian Splatting)에 쓰이는 기하를 differential geometry로 해석한다. 목차에서 Tour 바로 다음에 두고, 읽는 순서도 Tour → Part IV → Part 0이다. 장 번호(27–30)는 식별자일 뿐이다.
+Part IV 「3D Vision Through Differential Geometry」(27–31장)는 3D vision(SfM, NeRF, 3D Gaussian Splatting)에 쓰이는 기하를 differential geometry로 해석한다. 목차에서 Tour 바로 다음에 두고, 읽는 순서도 Tour → Part IV → Part 0이다. 장 번호(27–31)는 식별자일 뿐이다. 31장(mesh)은 2026-10-07에 추가했다.
 
 - **독자**: 3D vision 전공자. SfM, NeRF, 3DGS의 실제 파이프라인과 논문 수식은 알지만 differential geometry는 Tour 수준이다.
 - **선수**: Tour(0.1–0.8)만 가정한다. 깊은 장은 Go deeper로만 연결한다.
@@ -671,7 +671,7 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 
 대응 교재 번호는 판본에 따라 다를 수 있다. 작성할 때 `refs/`로 다시 확인한다(§4.4). 표의 "(선택)" 장은 핵심 흐름이 끝난 뒤에 작성한다.
 
-**장 제목과 폴더 (정본)**: 모든 페이지의 제목, 링크, breadcrumb는 아래 이름을 그대로 쓴다. 표의 순서가 읽는 순서다. Part IV(27–30)는 Tour 다음, Part 0 앞에 온다(§2.4).
+**장 제목과 폴더 (정본)**: 모든 페이지의 제목, 링크, breadcrumb는 아래 이름을 그대로 쓴다. 표의 순서가 읽는 순서다. Part IV(27–31)는 Tour 다음, Part 0 앞에 온다(§2.4).
 
 | Part | 장 | 제목 (English) | 폴더 |
 |---|---|---|---|
@@ -680,6 +680,7 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 | | 28 | Poses and Motion: Lie Groups for SfM and SLAM | `28-lie-groups-poses` |
 | | 29 | The Geometry of Gaussian Splatting | `29-gaussian-splatting` |
 | | 30 | Surfaces from Radiance Fields | `30-radiance-field-surfaces` |
+| | 31 | Meshes: Discrete Differential Geometry | `31-meshes` |
 | 0. Preliminaries | 01 | Linear Algebra Review | `01-linear-algebra` |
 | | 02 | Calculus on ℝⁿ | `02-calculus-rn` |
 | | 03 | Basic Topology | `03-topology-basics` |
@@ -1653,3 +1654,5 @@ window.MathJax = {
   - `tools/shot.mjs`는 DevTools 프로토콜로 `MathJax.startup.promise`를 기다린 뒤 전체 페이지를 찍는다. MathJax 오류 개수와 **넘치는 디스플레이 수식의 id**도 출력한다.
   - 폰 폭은 `400`으로 확인한다. 네트워크가 필요하다(MathJax CDN).
 - **sympy 양수 가정**: 구면의 sin θ, 원환면의 R + r cos u처럼 양수임을 알려 줘야 sqrt(sin²θ) 같은 식이 남지 않는다. `dgsym.EXAMPLES[…]["positive"]`에 들어 있다.
+
+- `google-chrome --headless=new --screenshot --window-size=W,H`는 창 높이에서 약 87px을 잘라낸다(2026-10-08 검토에서 확인). 그림 아래쪽이 잘린 것처럼 보이므로 높이를 넉넉히 주거나 `tools/shot.mjs`를 쓴다.
