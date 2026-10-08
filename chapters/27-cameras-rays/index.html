@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>27. Cameras, Projections, and Rays — DG Study</title>
   <meta name="dg-id" content="27">
-  <meta name="dg-status" content="planned">
-  <meta name="dg-updated" content="2026-10-07">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-updated" content="2026-10-08">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
@@ -18,7 +18,7 @@
     <header>
       <h1>27. Cameras, Projections, and Rays</h1>
       <p class="meta">Part IV. 3D Vision Through Differential Geometry · Tour 다음에 읽는다</p>
-      <p class="threads">Threads: <strong>T2</strong> Differentials and tangent spaces · <strong>T3</strong> Intrinsic vs. extrinsic</p>
+      <p class="threads">Threads: <strong>T2</strong> Differentials and tangent spaces (rank, submersion, fiber) · <strong>T3</strong> Intrinsic vs. extrinsic (charts of \(S^2\)) · <strong>T6</strong> Duality and tensors (points vs. lines)</p>
     </header>
 
     <section class="questions">
@@ -33,7 +33,10 @@
     <section class="inherits">
       <h2>Builds on</h2>
       <ul>
-        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>(tangent plane), <a href="../00-tour/0-6-manifolds.html">Section 0.6</a>(manifold, differential, ℝP², homogeneous coordinates)</li>
+        <li><a href="../00-tour/0-6-manifolds.html">Section 0.6</a>: smooth map과 differential(<a href="../00-tour/0-6-manifolds.html#i-0-6-5">Definition 0.6.5</a>), chain rule, \(\RP^2\)와 homogeneous coordinates, vanishing point, homography(<a href="../00-tour/0-6-manifolds.html#i-0-6-4">Example 0.6.4</a>), \(\mathrm{SO}(3)\)(<a href="../00-tour/0-6-manifolds.html#i-0-6-7">Example 0.6.7</a>) → 27.1–27.3</li>
+        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>(tangent plane, normal, equirectangular image)과 <a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>(왜곡 없는 지도는 없다, gnomonic projection과 cube map) → 27.1의 silhouette과 lens chart, 27.4의 360° 카메라</li>
+        <li><a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>(covector와 pullback) → 27.2의 점과 직선의 변환 법칙</li>
+        <li><a href="../00-tour/0-8-riemannian.html">Section 0.8</a>(sphere의 logarithm map, manifold 위의 최적화) → 27.1의 equidistant fisheye, 27.3의 essential manifold</li>
         <li>3D vision 쪽(SfM, NeRF, 3DGS의 파이프라인과 논문 수식)은 안다고 가정한다. 엄밀한 증명이 필요하면 각 절의 Go deeper를 따라 깊은 장으로 간다.</li>
       </ul>
     </section>
@@ -41,27 +44,32 @@
     <h2>Sections</h2>
     <ol class="toc">
       <li id="toc-27-1" data-file="27-1-camera-smooth-map.html">
-        <span class="toc-title">27.1 The Camera as a Smooth Map</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: pinhole 투영 \(\pi\)의 differential(2×3 Jacobian), kernel = ray 방향(깊이를 잃는 이유), rank, fiber = ray, lens distortion은 image plane의 diffeomorphism, intrinsics = affine chart</p>
+        <a class="toc-title" href="27-1-camera-smooth-map.html">27.1 The Camera as a Smooth Map</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: pinhole 투영 \(\varphi\)는 submersion, fiber = ray, \(\ker J = \R t\), pose와 intrinsics는 좌표 변경, silhouette = rank가 떨어지는 곳, Brown–Conrady distortion의 fold 반지름, central camera = \(S^2\)의 chart(gnomonic, equidistant = normal coordinates), 3DGS·NeRF의 camera model</p>
       </li>
       <li id="toc-27-2" data-file="27-2-projective-geometry.html">
-        <span class="toc-title">27.2 Projective Geometry for Multi-View Vision</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: \(\RP^2\)·\(\RP^3\), camera matrix, homography = \(\mathrm{PGL}(3)\)(8차원 Lie group), vanishing point와 vanishing line, point at infinity가 주는 compactness</p>
+        <a class="toc-title" href="27-2-projective-geometry.html">27.2 Projective Geometry for Multi-View Vision</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: camera matrix \(P\colon \RP^3 \dashrightarrow \RP^2\), vanishing point와 vanishing line, homography = \(\mathrm{PGL}(3)\)(8차원 Lie group), 4점 대응, 점은 contravariant·직선은 covariant, conic과 \(\Sigma\), Klein의 계층, NeRF의 NDC</p>
       </li>
       <li id="toc-27-3" data-file="27-3-essential-manifold.html">
-        <span class="toc-title">27.3 Epipolar Geometry and the Essential Manifold</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: \(E = [t]_\times R\), essential matrix 전체는 5차원 manifold, \(F\)는 rank 2·7 dof, 5/7/8-point = dimension 세기, 분해의 4가지 모호성, essential manifold 위의 최적화</p>
+        <a class="toc-title" href="27-3-essential-manifold.html">27.3 Epipolar Geometry and the Essential Manifold</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: \(E = [T]_\times R\)와 epipolar plane, essential manifold(5차원, quotient 표현), 네 가지 분해와 cheirality, \(F\)의 7 dof와 5/7/8-point의 dimension 세기, Hartley 정규화, triangulation과 baseline</p>
       </li>
       <li id="toc-27-4" data-file="27-4-space-of-rays.html">
-        <span class="toc-title">27.4 The Space of Rays</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 3차원 공간의 직선 전체 = 4차원 manifold, Plücker 좌표와 Klein quadric, NeRF의 정의역 \(\R^3 \times S^2\), generalized camera, fisheye·360 카메라 = \(S^2\)의 chart</p>
+        <a class="toc-title" href="27-4-space-of-rays.html">27.4 The Space of Rays</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: oriented line 전체 = \(TS^2\)(4차원), Plücker 좌표와 Klein quadric, 두 직선이 만나는 조건, 5D NeRF와 4D light field, generalized camera와 generalized epipolar constraint, pixel = ray의 open set(Mip-NeRF, 3DGS filter), 360° 카메라</p>
       </li>
     </ol>
 
     <section class="handoff">
       <h2>Leads to</h2>
       <ul>
-        <li>Part IV의 다른 장과 깊은 장(<a href="../01-linear-algebra/index.html">Chapter 1</a>부터)으로 이어진다. 각 절의 Go deeper가 해당 정의·정리를 링크한다.</li>
+        <li>투영의 differential \(J\), \(\ker J_t = \R t\), chart마다 다른 \(J\)(<a href="27-1-camera-smooth-map.html">Section 27.1</a>) → <a href="../29-gaussian-splatting/29-3-splatting-linearization.html">Section 29.3</a>(EWA splatting과 그 오차), <a href="../29-gaussian-splatting/29-1-gaussian-metric.html">Section 29.1</a></li>
+        <li>surface 투영의 rank와 silhouette, homography(<a href="27-1-camera-smooth-map.html#sec-silhouette">Section 27.1</a>, <a href="27-2-projective-geometry.html">Section 27.2</a>) → <a href="../30-radiance-field-surfaces/30-4-depth-maps.html">Section 30.4</a>(depth map), <a href="../30-radiance-field-surfaces/30-3-surfels-2dgs.html">Section 30.3</a>(ray–splat intersection)</li>
+        <li>pose \((R, T)\)와 \(\mathrm{SE}(3)\), essential manifold 위의 최적화, 복원의 gauge \(\mathrm{Sim}(3)\)(<a href="27-2-projective-geometry.html#sec-hierarchy">Section 27.2</a>, <a href="27-3-essential-manifold.html">Section 27.3</a>), rolling shutter(<a href="27-4-space-of-rays.html">Section 27.4</a>) → <a href="../28-lie-groups-poses/index.html">Chapter 28</a></li>
+        <li>ray 공간, pixel = ray의 open set, Mip-NeRF와 3DGS의 filter(<a href="27-4-space-of-rays.html">Section 27.4</a>) → <a href="../29-gaussian-splatting/29-3-splatting-linearization.html#sec-filters">Section 29.3</a>, 방향의 sphere 위의 함수 <a href="../29-gaussian-splatting/29-6-spherical-harmonics.html">Section 29.6</a></li>
+        <li>깊은 장: rank theorem과 submersion(<a href="../02-calculus-rn/index.html">Chapter 2</a>, <a href="../14-submanifolds/index.html">Chapter 14</a>), \(\RP^n\)(<a href="../11-smooth-manifolds/index.html">Chapter 11</a>), tangent bundle \(TS^2\)(<a href="../13-tangent-spaces/index.html">Chapter 13</a>), covector(<a href="../16-covectors-tensors/index.html">Chapter 16</a>), Lie group과 quotient(<a href="../20-lie-groups-frobenius/index.html">Chapter 20</a>), normal coordinates(<a href="../23-geodesics/index.html">Chapter 23</a>)</li>
+        <li>Open question: 추정한 pose와 3D 점의 불확실성(covariance)은 투영을 거쳐 어떻게 전파되고, 여러 영상에서 어떻게 합쳐지는가? → <a href="../28-lie-groups-poses/index.html">Chapter 28</a>(bundle adjustment)</li>
       </ul>
     </section>
   </main>

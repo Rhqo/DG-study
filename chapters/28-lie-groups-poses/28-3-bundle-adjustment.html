@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>28.3 Bundle Adjustment on a Manifold — DG Study</title>
+  <meta name="dg-id" content="28.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="28.1, 28.2, 0.8">
+  <meta name="dg-refs" content="Triggs00; Strasdat10; MurArtal15; Dellaert17; Lin21; Schonberger16; Kerbl23; AMS">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">28. Poses and Motion: Lie Groups for SfM and SLAM</a> ›
+    <span>28.3 Bundle Adjustment on a Manifold</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>28.3 Bundle Adjustment on a Manifold</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Triggs00">[Triggs00]</a>,
+        <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>,
+        <a class="cite" href="../../references.html#MurArtal15">[MurArtal15]</a>,
+        <a class="cite" href="../../references.html#Dellaert17">[Dellaert17]</a>,
+        <a class="cite" href="../../references.html#Lin21">[Lin21]</a>,
+        <a class="cite" href="../../references.html#Schonberger16">[Schonberger16]</a>,
+        <a class="cite" href="../../references.html#AMS">[AMS]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>bundle adjustment를 product manifold \(\mathrm{SE}(3)^N \times (\R^3)^M\) 위의 최소제곱으로 쓰고, retraction을 쓰는 Gauss–Newton/LM과 Schur complement의 구조를 설명할 수 있다.</li>
+        <li>monocular BA의 residual이 장면 전체의 similarity에 대해 불변이라는 것(gauge freedom)을 보이고, \(J^{\mathsf T}J\)의 null space가 정확히 7차원이며 그것이 \(\mathrm{Sim}(3)\) orbit의 tangent space라는 것을 수치와 generator로 확인할 수 있다.</li>
+        <li>gauge를 고정하는 방법(COLMAP이 쓰는 방법 포함)과 LM damping이 하는 일을 비교하고, quotient manifold의 관점으로 해석할 수 있다.</li>
+        <li>monocular SLAM의 scale drift를 설명하고, \(\mathrm{Sim}(3)\) pose graph가 loop를 닫는 이유를 시뮬레이션으로 보일 수 있다. BARF와 nerfstudio의 pose 최적화를 이 언어로 읽을 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="28-1-so3-se3-sim3.html">Section 28.1</a>: \(\mathrm{Sim}(3)\) <a href="28-1-so3-se3-sim3.html#eq-28-1-1">(28.1.1)</a>, 장면 전체의 similarity가 사진을 바꾸지 않는다는 <a href="28-1-so3-se3-sim3.html#ex-28-1-1">Exercise 28.1.1</a>, adjoint <a href="28-1-so3-se3-sim3.html#eq-28-1-8">(28.1.8)</a></li>
+        <li><a href="28-2-calculus-on-lie-groups.html">Section 28.2</a>: left perturbation(<a href="28-2-calculus-on-lie-groups.html#i-28-2-1">Definition 28.2.1</a>), reprojection Jacobian <a href="28-2-calculus-on-lie-groups.html#eq-28-2-3">(28.2.3)</a>, retraction, 상자 “과잉 parametrization은 \(J^{\mathsf T}J\)에 null space를 만든다”</li>
+        <li><a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>: Riemannian optimization과 retraction. <a href="../00-tour/0-6-manifolds.html#i-0-6-5">Definition 0.6.5</a>: differential의 kernel</li>
+        <li>3D vision 쪽: SfM의 bundle adjustment, Gauss–Newton과 Levenberg–Marquardt, keyframe 기반 monocular SLAM</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="28-2-calculus-on-lie-groups.html#sec-retractions">Section 28.2</a>의 끝에서, quaternion 4개로 회전을 parametrize하면 \(J^{\mathsf T}J\)에 null space가 생기지만 3-parameter retraction으로 바꾸면 사라진다는 것을 보았다. 그리고 parametrization을 어떻게 바꾸어도 사라지지 않는 null space가 있다고 예고했다. 이 절의 주제가 그것이다.</p>
+      <p>COLMAP으로 같은 사진들을 두 번 복원하면, 두 결과는 대개 회전·이동·크기가 다르다. 둘 다 맞다. 사진은 장면의 절대적인 위치, 방향, 크기를 담고 있지 않기 때문이다 <a class="cite" href="../../references.html#Triggs00">[Triggs00]</a>. 이 사실이 최적화와 SLAM에서 어떤 모습으로 나타나는지가 질문이다.</p>
+      <ol>
+        <li>bundle adjustment는 어떤 manifold 위의 최소제곱이고, Gauss–Newton은 그 위에서 어떻게 움직이는가?</li>
+        <li>“사진이 정하지 못하는 방향”은 몇 개이고, \(J^{\mathsf T}J\)의 어느 null space로 나타나는가? 그 방향들은 기하적으로 무엇인가?</li>
+        <li>그 방향을 고정해야 하는가? monocular SLAM이 긴 궤적에서 크기를 잃는 scale drift는 같은 현상인가?</li>
+        <li>NeRF와 3DGS의 pose 최적화는 이 그림에서 무엇을 하는가?</li>
+      </ol>
+    </section>
+
+    <section id="sec-ba">
+      <h2>Bundle Adjustment as Least Squares on a Product Manifold</h2>
+      <p>카메라 \(N\)대와 점 \(M\)개가 있고, 점 \(j\)가 카메라 \(i\)에 \(u_{ij}\)로 관측되었다고 하자(관측된 쌍의 집합을 \(\mathcal{O}\)로 쓴다). 미지수는 pose \(T_i = T_{cw} \in \mathrm{SE}(3)\)와 점 \(X_j \in \R^3\)이다. intrinsics가 미지수이면 \(\R^k\) 인수가 하나 더 붙을 뿐 아래 논의는 같다. 미지수 전체는 product manifold</p>
+      <div class="equation" id="eq-28-3-1">
+      \[ \begin{aligned} \mathcal{M} &amp;= \mathrm{SE}(3)^N \times (\R^3)^M, \\ \dim\mathcal{M} &amp;= 6N + 3M, \\ E(x) &amp;= \tfrac12\sum_{(i,j) \in \mathcal{O}} \abs{\varphi(T_iX_j) - u_{ij}}^2 \end{aligned} \tag{28.3.1} \]
+      </div>
+      <p>의 점이고, bundle adjustment는 \(E\)를 최소화한다. 실무에서는 \(\abs{\cdot}^2\) 대신 Huber 같은 robust loss를 쓰지만 기하는 같다.</p>
+      <p>Gauss–Newton과 LM은 현재 점 \(x\)에서 local 좌표를 잡는 데서 시작한다. 카메라에는 <a href="28-2-calculus-on-lie-groups.html#i-28-2-1">Definition 28.2.1</a>의 left perturbation(camera frame, g2o와 같은 규약), 점에는 덧셈을 쓰면 retraction은</p>
+      <p>\[ \begin{aligned} \mathrm{retr}_x(\delta) = \big(&amp;\mathrm{Exp}(\xi_1)T_1, \dots, \mathrm{Exp}(\xi_N)T_N, \\ &amp;X_1 + \delta X_1, \dots, X_M + \delta X_M\big) \end{aligned} \]</p>
+      <p>이고 \(\delta = (\xi_1, \dots, \xi_N, \delta X_1, \dots, \delta X_M) \in \R^{6N + 3M}\)이다. residual을 쌓은 \(r(x)\)를 \(r(\mathrm{retr}_x(\delta)) \approx r + J\delta\)로 linearize하면(\(J\)의 각 블록은 <a href="28-2-calculus-on-lie-groups.html#eq-28-2-3">(28.2.3)</a>), 한 step은</p>
+      <div class="equation" id="eq-28-3-2">
+      \[ (J^{\mathsf T}J + \lambda D)\,\delta = -J^{\mathsf T}r, \qquad x \leftarrow \mathrm{retr}_x(\delta) \tag{28.3.2} \]
+      </div>
+      <p>이다. \(\lambda = 0\)이면 Gauss–Newton, \(\lambda \gt 0\)이면 Levenberg–Marquardt이고 \(D\)는 \(I\)나 \(\diag(J^{\mathsf T}J)\)다. 매 step마다 chart를 새로 잡으므로 회전이 singularity 근처에 갈 일이 없다(<a href="28-1-so3-se3-sim3.html#sec-log">Section 28.1</a>의 상자).</p>
+      <p>\(J^{\mathsf T}J\)를 카메라 블록과 점 블록으로 나누면 \(\begin{pmatrix} B &amp; E \\ E^{\mathsf T} &amp; C \end{pmatrix}\)이다. residual 하나는 카메라 하나와 점 하나에만 의존하므로, \(C\)는 \(3 \times 3\) 블록이 \(M\)개 놓인 block-diagonal matrix다. 그래서 점을 먼저 소거한 \((B - EC^{-1}E^{\mathsf T})\,\delta_{\mathrm{cam}} = \cdots\)(Schur complement, reduced camera system)를 풀고 점의 update는 블록마다 따로 구한다 <a class="cite" href="../../references.html#Triggs00">[Triggs00]</a>. 아래 예(\(N = 5\), \(M = 40\))에서는 \(150 \times 150\) 계가 \(30 \times 30\) 계로 줄어든다. factor graph로 쓰면 변수는 manifold 위의 pose와 점, factor는 residual이고, 점 변수를 먼저 소거하는 것이 바로 이 Schur complement다 <a class="cite" href="../../references.html#Dellaert17">[Dellaert17]</a>. GTSAM은 변수마다 <a href="28-2-calculus-on-lie-groups.html#sec-quaternions">Section 28.2</a>의 표에 적은 <code>retract</code>를 쓴다.</p>
+    </section>
+
+    <section id="sec-gauge">
+      <h2>Gauge Freedom: the Sim(3) Orbit</h2>
+      <p>장면 전체에 similarity를 적용해 보자. <a href="28-1-so3-se3-sim3.html#ex-28-1-1">Exercise 28.1.1</a>에서 이미 본 계산을 manifold \(\mathcal{M}\) 위의 <strong>group action</strong>(군작용)으로 쓴 것이다. group의 원소 \(S\)마다 \(\mathcal{M}\)의 diffeomorphism \(x \mapsto S\cdot x\)가 하나씩 있고 \((S_1S_2)\cdot x = S_1\cdot(S_2\cdot x)\)인 것을 말한다. 점 \(x\)를 group 전체로 옮긴 집합 \(\mathrm{Sim}(3)\cdot x\)를 \(x\)의 <strong>orbit</strong>(궤도)이라 한다.</p>
+
+      <div class="thm proposition" id="i-28-3-1">
+        <p><span class="thm-head">Proposition 28.3.1</span> <span class="thm-name">(the Sim(3) gauge action)</span>.
+        \(S = (sQ, u) \in \mathrm{Sim}(3)\)에 대해 \(\mathcal{M}\) 위의 map</p>
+        <div class="equation" id="eq-28-3-3">
+        \[ \begin{aligned} X_j &amp;\mapsto sQX_j + u, \\ T_i = (R_i, t_i) &amp;\mapsto \big(R_iQ^{\mathsf T},\ s\,t_i - R_iQ^{\mathsf T}u\big) \end{aligned} \tag{28.3.3} \]
+        </div>
+        <p>는 \(\mathrm{Sim}(3)\)의 action이고, 모든 camera 좌표를 \(s\)배 한다: \(T_i'X_j' = s\,T_iX_j\). 투영은 \(\varphi(sx) = \varphi(x)\)이므로 모든 residual이 변하지 않는다. 따라서 \(E\)는 각 orbit 위에서 상수이고, orbit의 tangent space는 \(J\)의 kernel에 들어간다. infinitesimal similarity \((\omega, u, \sigma)\)(회전 3, 이동 3, scale 1)가 주는 tangent vector는 위의 local 좌표로</p>
+        <div class="equation" id="eq-28-3-4">
+        \[ \begin{aligned} \delta X_j &amp;= \omega \times X_j + u + \sigma X_j, \\ \omega_i &amp;= -R_i\,\omega, \\ v_i &amp;= \sigma\,t_i - R_i\,u + (R_i\omega) \times t_i \end{aligned} \tag{28.3.4} \]
+        </div>
+        <p>이다(\(\xi_i = (v_i, \omega_i)\)). 이 7개의 generator가 linearly independent이면 orbit은 7차원이고 \(\dim\ker J \ge 7\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(T_i'X_j' = R_iQ^{\mathsf T}(sQX_j + u) + s\,t_i - R_iQ^{\mathsf T}u = s(R_iX_j + t_i)\)이다. action임은 두 similarity를 차례로 적용한 결과가 곱의 적용과 같음을 확인하면 된다(verify). generator는 \(Q = \mathrm{Exp}(\varepsilon\omega)\), \(s = e^{\varepsilon\sigma}\), \(u \to \varepsilon u\)로 두고 \(\varepsilon\)의 1차 항을 읽는다. 회전 부분 \(R_iQ^{\mathsf T} \approx R_i - \varepsilon R_i[\omega]_\times = (I_3 - \varepsilon[R_i\omega]_\times)R_i\)에서 \(\omega_i = -R_i\omega\)이다. translation은 \(t_i' - t_i \approx \varepsilon(\sigma t_i - R_iu)\)이고, left perturbation \(\mathrm{Exp}(\xi_i)T_i\)의 translation이 \(t_i + \omega_i \times t_i + v_i\)이므로 \(v_i = \sigma t_i - R_iu - \omega_i \times t_i\)이다.</p>
+      </div>
+
+      <p>이것은 <a href="../27-cameras-rays/27-2-projective-geometry.html#sec-hierarchy">Section 27.2</a>에서 본 복원의 모호성(calibration을 알면 \(\mathrm{Sim}(3)\), 모르면 \(\mathrm{PGL}(4)\))을 bundle adjustment의 parameter manifold 위에서 본 것이다. 먼저 orbit 위를 유한하게 움직여 보자(<a href="#fig-28-3-1">Figure 28.3.1</a>). 그다음 무한소로, 곧 \(J\)의 singular value로 본다(<a href="#fig-28-3-2">Figure 28.3.2</a>).</p>
+
+      <figure class="dg-figure" id="fig-28-3-1">
+        <img src="figures/fig-28-3-1-gauge-orbit.svg" alt="두 패널. 왼쪽 (a)는 world x-z 평면의 top view다. 회색 점 40개가 (0, 5) 근처에 모여 있고, 그 아래 z ≈ 0 근처에 검은 삼각형 카메라 다섯 개(1, 3, 5 번호)가 위쪽을 향해 놓여 있다. 오른쪽 위 (3.5, 6) 근처에 연한 주황 점 40개가 비스듬히 퍼져 있고, 주황 삼각형 카메라 다섯 개가 그 아래로 돌아가고 커진 배치로 놓여 있다. 왼쪽 위에 s = 1.4, Q: 25° about y, u = (0.6, 0.2, −0.5)라 적혀 있다. 오른쪽 (b) image of camera 3: 검은 점들과 주황 동그라미들이 정확히 겹쳐 있고, 회색 x표들은 왼쪽으로 크게 어긋나 있다. 왼쪽 아래 범례: points X_j, moved points sQX_j + u, cameras (apex = center), moved cameras. 오른쪽 아래 범례: original scene original camera, moved scene moved camera, moved scene original camera.">
+        <figcaption><span class="fig-head">Figure 28.3.1.</span>
+        장면 전체를 \(\mathrm{Sim}(3)\) orbit을 따라 옮겨도 사진은 하나도 바뀌지 않는다. <em>무엇을</em>: <a href="#fig-28-3-2">Figure 28.3.2</a>의 작은 BA(카메라 5대, 점 40개)에 \(s = 1.4\), \(Q\) = world \(y\)축 둘레 \(25^\circ\) 회전, \(u = (0.6, 0.2, -0.5)\)인 similarity를 <a href="#eq-28-3-3">(28.3.3)</a>로 적용했다. (a)는 world \(x\)-\(z\) 평면의 top view(카메라들은 대략 \(+z\)를 본다), (b)는 카메라 3의 image(정규화 좌표, \(y\)가 아래)다. <em>읽는 법</em>: (a)에서 회색 점과 회색으로 채운 검은 삼각형이 원래의 점과 카메라, 연한 주황 점과 연한 주황으로 채운 주황 삼각형이 옮긴 것이다(아래 범례). 삼각형은 apex(작은 동그라미)가 카메라 중심이고 넓은 쪽이 보는 방향(camera \(+z\))이다. 숫자는 카메라 번호이고 1, 3, 5번에만 카메라 뒤쪽에 붙였다. (b)의 검은 점은 원래 장면을 원래 카메라로 본 것, 주황 동그라미는 옮긴 장면을 옮긴 카메라로 본 것, 회색 \(\times\)는 옮긴 장면을 <em>원래</em> 카메라로 본 것이다. <em>볼 것</em>: (a)에서 두 복원은 위치·방향·크기가 모두 다르다. 그러나 (b)에서 검은 점과 주황 동그라미는 정확히 겹친다(다섯 카메라 모두에서 차이 \(10^{-13}\) 미만). 점만 옮기고 카메라를 그대로 두면(회색) image가 크게 바뀐다. <em>본문과의 연결</em>: <a href="#i-28-3-1">Proposition 28.3.1</a>. 점과 카메라를 <em>함께</em> 옮기는 7차원의 방향은 residual로 구별할 수 없다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-3-1">Figure 28.3.1</a>의 (a)에서 두 복원은 누가 봐도 다른 장면이다. 주황 쪽은 25° 돌아갔고, 1.4배 커졌고, 옆으로 옮겨졌다. 그런데 (b)에서 카메라 3이 찍은 사진은 두 경우에 똑같다. 회색 \(\times\)가 보여 주듯 이것은 점과 카메라가 같은 similarity로 함께 움직였기 때문이다. 이제 \(J\)의 singular value를 보자.</p>
+
+      <figure class="dg-figure" id="fig-28-3-2">
+        <img src="figures/fig-28-3-2-ba-singular-values.svg" alt="두 패널이 세로축 singular value of J(log scale, 10⁻¹⁸부터 10)를 공유한다. 왼쪽 (a) all 150 singular values: 가로축 index 0부터 150. 세 곡선이 왼쪽에서 0.1–10 사이에 평평하게 있다가 오른쪽 끝(약 143–145)에서 검은 곡선과 파란 점선은 10⁻¹⁶ 근처로 뚝 떨어지고, 주황 곡선은 143에서 끝난다. 오른쪽 (b) the last 20 (zoom): 가로축 131–150. 검은 곡선은 143까지 0.1 근처에 있다가 144부터 150까지 10⁻¹⁶ 근처(7 zeros, indices 144–150)에 있다. 파란 점선은 144까지 0.4 근처이고 145–150이 10⁻¹⁶ 근처(6 zeros)다. 주황 곡선은 143에서 끝나며 마지막 값이 0.0036이라는 주석(gauge fixed: 143 values, smallest 0.0036)이 있다.">
+        <figcaption><span class="fig-head">Figure 28.3.2.</span>
+        monocular BA의 Jacobian은 정확히 7개의 0 singular value를 가진다. <em>무엇을</em>: 원호 위의 카메라 5대가 \([-1.2, 1.2] \times [-1, 1] \times [4, 6]\)의 점 40개를 보는 작은 BA에서, 참 배치에서 계산한 stacked Jacobian(<a href="28-2-calculus-on-lie-groups.html#eq-28-2-3">(28.2.3)</a>, 열 \(6N + 3M = 150\)개)의 singular value를 큰 것부터 차례로 그렸다. (a)는 전체, (b)는 마지막 20개를 확대한 것이다. <em>읽는 법</em>: 가로축은 순번, 세로축은 singular value(log scale, \(10^{-17}\) 아래는 \(10^{-17}\)에 그렸다). 검정은 reprojection residual만 있는 monocular BA(행 400개), 파랑 점선은 관측마다 metric depth residual \(z_c - d\)를 더한 RGB-D BA(행 600개), 주황은 monocular BA에서 카메라 1의 6개 열과 카메라 2의 translation 열 하나를 지워 gauge를 고정한 것(열 143개)이다. <em>볼 것</em>: 검정은 143번째까지 0.039 이상이다가 144–150번째의 7개가 \(10^{-16}\) 수준(machine precision의 0)이다. 파랑은 0이 6개다. 주황은 0이 없고 가장 작은 값이 0.0036이다. <em>본문과의 연결</em>: 검정의 7차원 null space는 <a href="#eq-28-3-4">(28.3.4)</a>의 generator 7개가 펼치는 공간과 같다(상대 차이 \(10^{-14}\) 이하). depth를 재면 scale 방향 하나가 사라지고 rigid motion의 6개가 남는다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-3-2">Figure 28.3.2</a>의 (a)에서 세 곡선은 대부분의 구간에서 비슷한 높이다. 차이는 오른쪽 끝에 있다. (b)로 확대하면 검은 곡선은 143번째 값 0.039 다음에 \(3 \times 10^{-16}\)으로 떨어지고, 그 높이에 정확히 7개가 있다. 이 7개의 right singular vector가 펼치는 공간을 <a href="#eq-28-3-4">(28.3.4)</a>의 7개 벡터와 비교하면, generator를 null space로 projection했을 때 남는 부분이 generator 크기의 \(10^{-14}\) 이하다. 곧 null space는 정확히 \(\mathrm{Sim}(3)\) orbit의 tangent space다. 파란 곡선(depth를 잰 경우)의 0은 6개다. metric depth는 scale을 정하므로 scale generator \(\sigma\)가 \(J\)의 kernel에서 빠진다. 주황 곡선은 gauge 7개를 지우면 남은 문제가 잘 정해진다는 것을 보인다.</p>
+      <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: BA Hessian의 7차원 null space는 \(\mathrm{Sim}(3)\)의 Lie algebra다</p>
+        <p>\(J^{\mathsf T}J\)는 Gauss–Newton의 Hessian 근사다. 그 null space를 “수치적으로 불안정한 방향” 정도로만 보면 몇 개인지, 어떤 모양인지 알 수 없다. 기하는 답을 정확히 준다. residual이 \(\mathrm{Sim}(3)\) action에 대해 불변이므로(<a href="#i-28-3-1">Proposition 28.3.1</a>), action의 differential \(\mathfrak{sim}(3) \to T_x\mathcal{M}\), \(\zeta \mapsto \frac{d}{d\varepsilon}\big|_0 \mathrm{Exp}(\varepsilon\zeta)\cdot x\)의 image가 \(\ker J\)에 들어간다. 그 image는 orbit \(\mathrm{Sim}(3)\cdot x\)의 tangent space다. 그래서</p>
+        <ul>
+          <li>null space의 차원은 \(\dim\mathfrak{sim}(3) = 7\)이다. 물론 이것은 lower bound다. 배치가 퇴화하면(예: 모든 카메라가 같은 중심에서 돌기만 해서 깊이를 알 수 없는 경우) 더 커진다. 위의 예처럼 일반적인 배치에서는 정확히 7이다.</li>
+          <li>null vector는 7개의 “운동”이다. 회전 3개, 이동 3개, 확대 1개이고, 각각 <a href="#eq-28-3-4">(28.3.4)</a>로 모든 카메라와 점에 동시에 작용한다. 카메라마다 따로 노는 방향이 아니다.</li>
+          <li>센서를 바꾸면 group이 바뀐다. stereo나 RGB-D는 scale을 정하므로 \(\mathrm{SE}(3)\)(6차원), GPS나 중력 방향을 함께 쓰면 더 작은 group이 남는다. null space의 차원으로 “무엇을 관측하지 못하는가”를 읽을 수 있다.</li>
+        </ul>
+        <p><a href="28-2-calculus-on-lie-groups.html#sec-retractions">Section 28.2</a>의 quaternion 과잉 parametrization이 만든 null space와 비교하면 차이가 분명하다. 그쪽은 parametrization을 바꾸면 사라지지만, 이쪽은 문제 자체의 symmetry라 어떤 parametrization으로도 없앨 수 없다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-fixing">
+      <h2>Fixing the Gauge, or Not</h2>
+      <p>\(J^{\mathsf T}J\)가 singular이므로 Gauss–Newton의 <a href="#eq-28-3-2">(28.3.2)</a>를 \(\lambda = 0\)으로 그대로 풀 수는 없다. 해결법은 둘이다.</p>
+      <ul>
+        <li><strong>gauge를 고정한다.</strong> 7개의 자유도를 parameter에서 지운다. 가장 흔한 방법은 첫 카메라의 pose 전체(6)와 둘째 카메라의 translation 성분 하나(1)를 상수로 두는 것이다. COLMAP의 global BA(<code>sfm/incremental_mapper.cc</code>의 global BA와 <code>controllers/bundle_adjustment.cc</code>)는 position prior가 없으면 이 gauge(<code>BundleAdjustmentGauge::TWO_CAMS_FROM_WORLD</code>)를 쓴다. <code>src/colmap/estimators/bundle_adjustment_ceres.cc</code>의 <code>FixGaugeWithTwoCamsFromWorld</code>는 첫 frame의 pose block을 상수로 두고, 둘째 frame의 translation에서 두 frame 사이 baseline의 성분이 가장 큰 좌표 하나를 <code>SubsetManifold</code>로 고정한다. 그런 쌍을 찾지 못하면 linearly independent인 점 세 개를 고정하는 <code>FixGaugeWithThreePoints</code>로 넘어간다. local BA는 처음부터 이 <code>THREE_POINTS</code> gauge를 쓴다. <a href="#fig-28-3-2">Figure 28.3.2</a>의 주황 곡선이 앞의 방법이다(여기서는 left perturbation 좌표의 translation 성분 하나를 지웠다).</li>
+        <li><strong>gauge를 그대로 두고 LM damping에 맡긴다.</strong> \(\lambda \gt 0\)이면 \(J^{\mathsf T}J + \lambda I\)는 invertible이다. 그리고 그 해는 gauge 방향의 성분을 갖지 않는다. \(J^{\mathsf T}r\)은 \(\ker J\)에 orthogonal이고(\(\inner{J^{\mathsf T}r}{n} = \inner{r}{Jn} = 0\)), \(J^{\mathsf T}J + \lambda I\)는 \(\ker J\)와 그 orthogonal complement를 각각 자기 자신으로 보내기 때문이다(<a href="#ex-28-3-3">Exercise 28.3.3</a>). 곧 LM의 step은 local 좌표의 Euclidean inner product로 orbit에 수직이다. Ceres(COLMAP이 쓰는 solver)처럼 \(D = \diag(J^{\mathsf T}J)\)로 damping하면 step은 \(\inner{u}{w}_D = \inner{u}{Dw}\)로 orbit에 수직이고, Euclidean으로는 수직이 아니다(아래 예에서 \(\lambda = 10^{-3}\)이면 step의 Euclidean gauge 성분 비율이 0.41이고, \(D\)-inner product로는 \(10^{-14}\) 이하다). COLMAP 코드에도 gauge를 고정하지 않는 편이 더 빠를 수 있다는 TODO 주석이 있다.</li>
+      </ul>
+      <p>noise를 넣은 같은 예에서 두 방법을 비교했다(관측 noise 0.002, 카메라와 점을 흔든 같은 초기값). gauge를 고정한 Gauss–Newton과 gauge를 둔 LM(\(\lambda = 10^{-3}\), \(D = I\))은 둘 다 RMS reprojection error 0.001557에 수렴한다. LM의 step에서 gauge 방향 성분의 비율은 \(10^{-10}\) 이하였다. 그러나 두 결과의 점들은 같지 않다. 하나를 다른 하나에 similarity로 맞추면 남는 차이가 \(3 \times 10^{-7}\)이고, 그 similarity의 scale이 1.063이다. 같은 orbit 위의 다른 두 점, 곧 같은 해의 다른 두 대표다.</p>
+      <p>이 상황은 <strong>quotient manifold</strong>(몫다양체)의 말로 정리할 수 있다(여기서는 정성적으로만 쓴다). 사진이 정하는 것은 \(\mathcal{M}\)의 점이 아니라 orbit \([x] = \mathrm{Sim}(3)\cdot x\)이고, 그 orbit들의 공간 \(\mathcal{M}/\mathrm{Sim}(3)\)은 action이 자유롭고 적당히 좋은 곳에서 \(6N + 3M - 7\)차원 manifold다. gauge 고정은 orbit마다 대표 하나를 고르는 slice(orbit에 transversal한 submanifold, Triggs 등의 gauge cross-section)를 정하는 것이고, LM의 step은 orbit에 수직인(horizontal) 방향으로 quotient 위의 step을 끌어올린 것으로 볼 수 있다. 여기서 “수직”은 local 좌표와 \(D\)가 정하는 inner product에 대한 말이다. parameter 공간에는 고유한 orthogonality가 없으므로, 어떤 방향이 orbit에 수직인지는 metric을 고르는 순간 정해진다 <a class="cite" href="../../references.html#Triggs00">[Triggs00]</a>. 이것은 해석이지만 실무적인 결론이 있다. 불확실성(covariance)은 orbit 방향으로는 무한대이므로, \(J^{\mathsf T}J\)의 역은 gauge를 고정한 뒤에야 정해지고 그 값은 어떤 gauge를 골랐는지에 달려 있다. 두 복원의 카메라 위치 불확실성을 비교하려면 같은 gauge를 써야 한다 <a class="cite" href="../../references.html#Triggs00">[Triggs00]</a>.</p>
+      <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+    </section>
+
+    <section id="sec-scale-drift">
+      <h2>Scale Drift and Sim(3) Loop Closure</h2>
+      <p>monocular SLAM은 지도 전체를 한 번의 BA로 풀지 않는다. 최근 keyframe 몇 개의 window를 local BA로 다듬으며 나아간다. window마다 gauge가 7차원이므로, 이웃한 window는 회전·이동·scale을 앞의 window에 맞춰 이어 붙인다. 그 이음새에서 오차가 조금씩 쌓인다. 회전과 이동의 오차는 SE(3) odometry에서도 쌓이지만, scale은 monocular에만 있는 자유도라 아무것도 그것을 붙잡지 못한다. 그래서 긴 궤적에서 지도의 크기가 서서히 변한다. 이것이 <strong>scale drift</strong>다 <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>. Strasdat 등은 monocular SLAM의 gauge가 근본적으로 7차원이라는 점에서 출발해, keyframe의 pose를 \(\mathrm{Sim}(3)\)의 원소로 두는 pose graph를 제안했다. ORB-SLAM의 loop closing도 같은 구조다 <a class="cite" href="../../references.html#MurArtal15">[MurArtal15]</a>.</p>
+      <ol>
+        <li>loop가 감지되면 현재 keyframe과 loop keyframe의 지도점을 맞춰 두 keyframe 사이의 similarity를 구한다(ORB-SLAM은 3D-3D 대응에 Horn의 방법). scale까지 포함한 7자유도의 측정이다.</li>
+        <li>keyframe마다 \(\mathrm{Sim}(3)\)의 vertex \(X_k\)를 두고, odometry edge는 지금의 상대 pose에 scale 1을 붙인 similarity로, loop edge는 위에서 구한 similarity로 둔다. edge의 residual은 tangent space의 7-vector다:</li>
+      </ol>
+      <div class="equation" id="eq-28-3-5">
+      \[ e_{ab} = \mathrm{Log}\big(Z_{ab}^{-1}\,X_a^{-1}X_b\big) \in \R^7 \tag{28.3.5} \]
+      </div>
+      <ol start="3">
+        <li>\(\sum e_{ab}^{\mathsf T}\Lambda_{ab}e_{ab}\)를 LM으로 최소화한다. 이 문제에도 7차원 gauge가 있으므로 vertex 하나를 고정한다. ORB-SLAM은 loop keyframe을 고정하고, \(\Lambda_{ab}\)를 identity로 둔다.</li>
+      </ol>
+      <p>Strasdat의 식 (23)과 ORB-SLAM의 식 (8)은 world-to-camera similarity로 같은 꼴을 쓴다. 여기서는 keyframe에서 지도로 가는 방향으로 썼고 구조는 같다. 이것을 SE(3) pose graph와 비교한 시뮬레이션이 <a href="#fig-28-3-3">Figure 28.3.3</a>이다.</p>
+
+      <figure class="dg-figure" id="fig-28-3-3">
+        <img src="figures/fig-28-3-3-scale-drift.svg" alt="두 패널. 왼쪽 (a) top view of the loop: 중심 (0, 10), 반지름 10인 굵은 회색 원(ground truth)이 (0, 0)에서 시작한다. 검은 점선(odometry only)은 같은 곳에서 출발해 점점 작아지는 spiral을 그리며 (0.1, 3.7) 근처에서 끝나고 'odometry end: gap 3.8' 주석이 있다. 파란 곡선(SE(3) pose graph)은 원점으로 돌아와 닫히지만 위쪽이 눌려 세로 지름이 약 17인 찌그러진 원이다. 주황 곡선(Sim(3) pose graph)은 회색 원과 거의 겹친다. 오른쪽 (b) scale along the loop: 가로축 keyframe k(0–60), 세로축 scale. 검은 곡선(true local scale s_k)이 1에서 출발해 들쭉날쭉하게 0.67까지 내려가고, 주황 점선(Sim(3) estimate 1/s̃_k)은 1에서 0.67까지 거의 직선으로 내려가며 검은 곡선을 고르게 따라간다. s₆₀ = 0.67이라는 주석이 있다.">
+        <figcaption><span class="fig-head">Figure 28.3.3.</span>
+        SE(3) pose graph는 scale drift를 고치지 못하고, \(\mathrm{Sim}(3)\) pose graph는 고친다. <em>무엇을</em>: 반지름 10인 원 위의 keyframe 60개(60번이 0번 자리로 돌아온다). keyframe \(k\)와 \(k + 1\) 사이의 odometry는 회전 noise \(0.3^\circ\)(축마다 표준편차)와 함께, translation을 그때의 지도 scale \(s_k\)로 잰다(translation noise는 축마다 표준편차 \(0.02\,s_k\)). \(\log s_k\)는 한 step에 평균 \(-0.006\), 표준편차 0.01인 random walk이고 \(s_{60} = 0.67\)이다. 60번과 0번 사이에 loop closure가 있다. SE(3) pose graph의 loop edge는 rigid motion(같은 곳, 같은 방향)이고, \(\mathrm{Sim}(3)\) pose graph의 loop edge는 두 지도의 scale 비 \(s_0/s_{60}\)까지 담은 similarity다. 둘 다 keyframe 0을 고정하고 information matrix를 identity로 두어 Gauss–Newton으로 풀었다. <em>읽는 법</em>: (a)는 top view다. 굵은 회색이 참 궤적, 검은 점선이 odometry만 이은 것, 파랑이 SE(3) pose graph의 결과, 주황이 \(\mathrm{Sim}(3)\) pose graph의 결과다. (b)의 가로축은 keyframe 번호, 검정은 참 local scale \(s_k\), 주황 점선은 \(\mathrm{Sim}(3)\) vertex의 scale \(\tilde s_k\)로 추정한 \(1/\tilde s_k\)다. <em>볼 것</em>: odometry만으로는 끝점이 출발점에서 3.8 떨어진 안쪽 spiral이다. SE(3) pose graph는 loop를 닫지만 뒤쪽 절반이 작게 눌린 모양이 되고, 위치의 RMS 오차가 2.73으로 odometry만 쓴 것(2.41)보다도 크다. \(\mathrm{Sim}(3)\) pose graph는 참 궤적과 거의 겹치고 RMS 오차가 0.27이다. (b)에서 \(1/\tilde s_k\)는 참 scale의 들쭉날쭉함은 따라가지 못하지만 전체적인 감소를 고르게 나누어 되찾는다. <em>본문과의 연결</em>: <a href="#eq-28-3-5">(28.3.5)</a>와 <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>. SE(3)에는 “이 keyframe의 지도는 0.67배 작다”를 표현할 방향이 없다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-3-3">Figure 28.3.3</a>의 (a)에서 검은 점선부터 보자. odometry의 translation이 점점 짧게 재어지므로 궤적은 안으로 말리는 spiral이 되고 출발점에 돌아오지 못한다. 파란 곡선은 loop edge가 시키는 대로 출발점에 돌아오지만, 짧게 잰 뒤쪽의 odometry edge들을 늘릴 방법이 없어서 그 오차를 모양의 왜곡으로 흡수한다. 아래쪽 출발 구간은 회색 원과 겹치는데 위쪽은 안으로 눌려 있다. 주황 곡선은 회색 원과 거의 겹친다. (b)가 그 이유를 보여 준다. \(\mathrm{Sim}(3)\) vertex의 scale이 loop edge가 알려 준 전체 scale 변화 \(s_0/s_{60}\)를 60개의 edge에 고르게 나누어, 각 구간의 길이를 그 구간의 scale로 되돌린다. 참 scale이 거의 일정하게 줄어드는 이 예에서는 그 고른 분배가 참값에 가깝다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: scale drift는 gauge가 지역마다 따로 정해진 결과다</p>
+        <p>한 번의 전역 BA에서 7차원 gauge는 장면 전체가 함께 움직이는 방향이었다. 지역적으로 이어 붙이는 SLAM에서는 window마다 그 gauge를 따로 고정한다. 이웃한 window의 gauge를 잇는 정보는 겹치는 관측뿐이고, scale을 잇는 정보는 특히 약하다. 그래서 gauge의 scale 성분이 궤적을 따라 random walk처럼 흐른다. 기하적으로 말하면, keyframe마다 지도와의 관계가 \(\mathrm{SE}(3)\)이 아니라 \(\mathrm{Sim}(3)\)의 원소로만 알려져 있다. SE(3) pose graph는 그 사실을 모델에 넣지 않으므로, loop가 알려 준 scale의 불일치를 다른 방향(모양)으로 밀어낸다. \(\mathrm{Sim}(3)\) pose graph는 잃어버린 방향을 vertex마다 하나씩 되돌려 준다. 같은 이유로 IMU나 stereo처럼 scale을 재는 센서가 있으면 문제가 \(\mathrm{SE}(3)\)로 돌아간다.</p>
+      </aside>
+      <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+    </section>
+
+    <section id="sec-nerf-3dgs">
+      <h2>Pose Optimization in NeRF and 3DGS</h2>
+      <p>radiance field도 pose를 함께 최적화할 수 있다. 원 3DGS의 학습 코드(<code>train.py</code>)는 COLMAP pose를 고정된 입력으로 쓰지만 <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>, NeRF 계열에는 pose를 함께 고치는 방법이 많다. 두 예를 이 절의 언어로 읽는다.</p>
+      <ul>
+        <li><strong>BARF</strong> <a class="cite" href="../../references.html#Lin21">[Lin21]</a>. 논문은 카메라 pose \(p\)를 \(\mathfrak{se}(3)\) Lie algebra로 parametrize하고 intrinsics는 안다고 가정한다고 쓴다(논문의 합성 데이터 실험 설정). 공개 코드에서는 world-to-camera pose \(T\)에 학습되는 6-vector \(\xi\)(순서는 rotation 먼저)를 \(T\,\mathrm{Exp}(\xi)\)로 붙인다. world 점에 먼저 작용하므로 <a href="28-2-calculus-on-lie-groups.html#sec-perturbations">Section 28.2</a>의 표에서 world frame의 perturbation이다. BARF의 핵심은 coarse-to-fine positional encoding이다. \(k\)번째 주파수 성분에 가중치 \(w_k(\alpha)\)를 곱하는데, \(\alpha \lt k\)이면 \(0\), \(0 \le \alpha - k \lt 1\)이면 \(\tfrac12\big(1 - \cos((\alpha - k)\pi)\big)\), 그 뒤로는 1이고, \(\alpha\)를 학습 진행에 비례해 \(0\)에서 \(L\)까지 키운다(논문 식 (13)–(14)). \(k\)번째 성분의 \(x\)에 대한 Jacobian에는 \(2^k\pi\)가 곱해지므로(식 (15)), 높은 주파수가 켜져 있으면 pose에 대한 gradient가 장면의 미세한 무늬에 지배된다. 이것을 chain rule로 쓰면 pose gradient는 ray 위의 sample 점 \(x\)(world 좌표)에서의 radiance field의 공간 gradient에 <a href="28-2-calculus-on-lie-groups.html#eq-28-2-2">(28.2.2)</a>의 \((I_3\ \ {-[x]_\times})\) 꼴의 Jacobian을 곱해 모은 것이다(world frame perturbation이 sample 점을 \(\mathrm{Exp}(-\xi)x\)로 옮기므로 부호만 반대다). 그 공간 gradient를 저주파부터 켜는 것이 BARF가 하는 일이라고 읽을 수 있다(chain rule로 읽은 해석이다).</li>
+        <li><strong>nerfstudio의 camera optimizer.</strong> <code>nerfstudio/cameras/camera_optimizers.py</code>의 <code>CameraOptimizerConfig.mode</code>는 <code>"off"</code>, <code>"SO3xR3"</code>, <code>"SE3"</code> 가운데 하나이고, 코드 주석은 <code>SO3xR3</code>를 권한다. 카메라마다 \(0\)으로 초기화한 6-vector(앞 셋이 translation, 뒤 셋이 \(\mathfrak{so}(3)\))를 학습한다. <code>exp_map_SO3xR3</code>는 \((\mathrm{Exp}(\omega), v)\)를, <code>exp_map_SE3</code>(<code>cameras/lie_groups.py</code>)는 <a href="28-1-so3-se3-sim3.html#eq-28-1-4">(28.1.4)</a>의 \((\mathrm{Exp}(\omega), V(\omega)v)\)를 만든다. 그 결과 \((\Delta R, \Delta t)\)는 두 모드 모두 <code>camera_to_worlds</code> \(= T_{wc}\)에 \((\Delta R\,R_{wc},\ t_{wc} + \Delta t)\)로 적용된다(<code>apply_to_camera</code>. ray에 직접 적용하는 <code>apply_to_raybundle</code>도 origin에 \(\Delta t\)를 더하고 direction을 \(\Delta R\)로 돌리는 같은 구조다). 곧 회전은 world 축 둘레로 하되 카메라 중심을 고정하고, translation은 world 좌표로 더한다. group 곱 \(\mathrm{Exp}(\xi)\,T_{wc}\)(world 원점 둘레의 회전)와 다르고, \(\mathrm{SO}(3) \times \R^3\)의 product 구조로 하는 update다. 두 모드의 차이는 6-vector를 \(\Delta t\)로 바꾸는 방법뿐이다. \(V(0) = I_3\)이므로 \(0\)에서의 differential은 같고, 첫 gradient step은 두 모드에서 같다. 차이는 2차부터 나타나며, parameter 공간의 직선이 카메라 중심의 직선으로 가느냐 휜 곡선으로 가느냐의 차이다(<a href="28-4-interpolating-averaging.html">Section 28.4</a>). parameter에는 그 norm에 비례하는 penalty(설정 이름은 L2 penalty, coefficient는 translation 0.01, rotation 0.001)가 붙는다. 이 penalty가 장면과 pose를 함께 옮기는 gauge 방향을 부드럽게 막는 역할도 한다고 볼 수 있다(해석이다). 기본 설정은 모델마다 다르다. <code>nerfacto</code>는 <code>SO3xR3</code>를 켜 두고 ray에 적용하며, 3DGS 구현인 <code>splatfacto</code>는 <code>"off"</code>가 기본이고 켜면 <code>apply_to_camera</code>로 적용한다.</li>
+      </ul>
+      <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>product manifold: <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-11">Definition 11.4.11</a>. Lie group과 Lie algebra, action의 differential(one-parameter subgroup의 velocity): <a href="../20-lie-groups-frobenius/index.html#toc-20-2">Section 20.2</a>, <a href="../20-lie-groups-frobenius/index.html#toc-20-3">Section 20.3</a>. vector field와 flow: <a href="../15-vector-fields-flows/index.html#toc-15-4">Section 15.4</a>(generator <a href="#eq-28-3-4">(28.3.4)</a> 하나하나는 \(\mathcal{M}\) 위의 vector field이고, 그 flow line은 orbit 안에 놓인다. 7개의 flow를 합성하면 orbit 전체를 지난다).</li>
+        <li>differential의 rank와 kernel, rank theorem: <a href="../02-calculus-rn/2-5-rank-theorem.html#i-2-5-3">Theorem 2.5.3</a>, <a href="../14-submanifolds/index.html#toc-14-2">Section 14.2</a>. quotient space와 quotient topology: <a href="../03-topology-basics/index.html">Chapter 3</a>. quotient manifold 위의 최적화: <a class="cite" href="../../references.html#AMS">[AMS]</a>(Riemannian quotient manifold).</li>
+        <li>문헌: gauge freedom과 covariance <a class="cite" href="../../references.html#Triggs00">[Triggs00]</a>, \(\mathrm{Sim}(3)\) pose graph와 scale drift <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>, <a class="cite" href="../../references.html#MurArtal15">[MurArtal15]</a>, factor graph <a class="cite" href="../../references.html#Dellaert17">[Dellaert17]</a>, BARF <a class="cite" href="../../references.html#Lin21">[Lin21]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>bundle adjustment는 product manifold \(\mathrm{SE}(3)^N \times (\R^3)^M\) 위의 최소제곱이다 <a href="#eq-28-3-1">(28.3.1)</a>. GN/LM은 매 step마다 retraction으로 local 좌표를 잡고 normal equation <a href="#eq-28-3-2">(28.3.2)</a>을 풀며, 점 블록이 block-diagonal이라 Schur complement로 줄인다.</li>
+        <li>장면 전체의 similarity <a href="#eq-28-3-3">(28.3.3)</a>는 residual을 바꾸지 않는다. 그래서 \(J^{\mathsf T}J\)의 null space는 \(\mathrm{Sim}(3)\) orbit의 tangent space이고, 일반적인 배치에서 정확히 7차원이며 generator <a href="#eq-28-3-4">(28.3.4)</a>가 펼친다. depth를 재면 6이 된다.</li>
+        <li>gauge는 고정하거나(COLMAP의 global BA: 첫 카메라와 둘째 카메라의 translation 성분 하나. local BA: 점 세 개) LM damping에 맡긴다. LM의 step은 damping matrix \(D\)가 정하는 inner product로 orbit에 수직이고, 두 방법은 같은 orbit의 다른 대표를 준다. 해석하면 진짜 미지수는 quotient \(\mathcal{M}/\mathrm{Sim}(3)\)의 점이다.</li>
+        <li>지역마다 gauge를 고정하며 나아가는 monocular SLAM에서는 scale이 흐른다. \(\mathrm{Sim}(3)\) pose graph <a href="#eq-28-3-5">(28.3.5)</a>는 loop가 알려 준 scale을 나누어 되돌리고, SE(3) pose graph는 그것을 모양의 왜곡으로 흡수한다.</li>
+        <li>BARF는 \(\mathfrak{se}(3)\)로 pose를 고치며 positional encoding의 주파수를 천천히 켜고, nerfstudio는 \(\mathrm{SO}(3) \times \R^3\)와 \(\mathrm{SE}(3)\) 두 방식의 6-vector를 같은 product update로 적용한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 pose 두 개 사이를 잇는 일, 여러 pose의 평균을 내는 일을 본다. \(\mathrm{SO}(3)\)에서는 SLERP가 geodesic이지만, \(\mathrm{SE}(3)\)에는 bi-invariant metric이 없어서 “올바른 보간”이 metric의 선택에 달려 있다. 그리고 rotation의 평균은 거리를 무엇으로 재느냐에 따라 세 가지 답이 나온다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-28-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 28.3.1</span> <span class="level">★</span>
+        카메라 5대와 점 40개의 monocular BA에서 \(\dim\mathcal{M}\)과 quotient의 차원 \(\dim\mathcal{M} - 7\)을 구하여라. 모든 관측에 metric depth가 있으면 gauge group과 quotient의 차원은? 카메라 중심 세 개 이상(일직선 위에 있지 않음)의 GPS 위치를 알면?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\dim\mathcal{M} = 6 \cdot 5 + 3 \cdot 40 = 150\)이고 quotient는 143차원이다(<a href="#fig-28-3-2">Figure 28.3.2</a>의 0이 아닌 singular value 143개). depth가 있으면 scale이 정해져 gauge는 \(\mathrm{SE}(3)\)(6차원)이고 quotient는 144차원이다(파란 곡선의 0이 6개). 일직선 위에 있지 않은 세 점의 world 위치를 알면 그 세 점을 고정하는 similarity는 항등뿐이므로 gauge가 남지 않는다. COLMAP의 <code>FixGaugeWithThreePoints</code>가 같은 원리로 점 세 개를 고정한다.</p>
+          <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 28.3.2</span> <span class="level">★</span>
+        <a href="#eq-28-3-4">(28.3.4)</a>의 scale generator(\(\omega = 0\), \(u = 0\), \(\sigma = 1\))가 residual \(r_{ij}\)의 Jacobian의 kernel에 있음을 <a href="28-2-calculus-on-lie-groups.html#eq-28-2-3">(28.2.3)</a>로 직접 보여라. 힌트: \(D\varphi(x_c)\,x_c\)를 계산한다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>generator는 \(v_i = t_i\), \(\omega_i = 0\), \(\delta X_j = X_j\)이다. <a href="28-2-calculus-on-lie-groups.html#eq-28-2-3">(28.2.3)</a>에서 \(J_{ij}g = D\varphi(x_c)\big(t_i + R_iX_j\big) = D\varphi(x_c)\,x_c\)이다. \(D\varphi(x_c)x_c = \frac1z\big(x - \frac{x}{z}z,\ y - \frac{y}{z}z\big) = 0\)이다. 기하적으로 \(x_c\) 방향은 카메라 중심에서 나가는 ray 방향이고, 투영은 ray 위의 점을 구별하지 못하므로 그 방향이 \(D\varphi\)의 kernel이다(<a href="../27-cameras-rays/27-1-camera-smooth-map.html#eq-27-1-2">(27.1.2)</a>의 \(J_t\,t = 0\), fiber = ray). 모든 camera 좌표를 함께 키우면 모든 점이 자기 ray를 따라 움직이므로 사진이 변하지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-3-3" data-level="2">
+        <p><span class="thm-head">Exercise 28.3.3</span> <span class="level">★★</span>
+        \(\lambda \gt 0\)일 때 LM step \(\delta = -(J^{\mathsf T}J + \lambda I)^{-1}J^{\mathsf T}r\)이 \(\ker J\)에 orthogonal임을 보여라. \(\lambda \to 0\)일 때 \(\delta\)는 무엇으로 가는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(n \in \ker J\)이면 \(\inner{J^{\mathsf T}r}{n} = \inner{r}{Jn} = 0\)이므로 \(J^{\mathsf T}r \in (\ker J)^\perp\)이다. \(J^{\mathsf T}J\)는 symmetric이고 \(\ker(J^{\mathsf T}J) = \ker J\)이므로, \(J^{\mathsf T}J + \lambda I\)는 \(\ker J\) 위에서 \(\lambda I\)이고 \((\ker J)^\perp\)를 자기 자신으로 보낸다. 그 역도 두 subspace를 각각 보존하므로 \(\delta \in (\ker J)^\perp\)이다. \(\lambda \to 0\)이면 \(\delta\)는 \(-J^{+}r\), 곧 Gauss–Newton의 해 가운데 norm이 가장 작은 것(pseudo-inverse 해)으로 간다. gauge 방향의 성분이 0인 해다. damping이 \(\lambda D\)(\(D\)는 positive definite, 예를 들어 \(\diag(J^{\mathsf T}J)\))이면 \((J^{\mathsf T}J + \lambda D)\delta = -J^{\mathsf T}r\)에 \(n\)을 곱해 \(\lambda\inner{n}{D\delta} = -\inner{Jn}{r} - \inner{Jn}{J\delta} = 0\)을 얻는다. 곧 \(\delta\)는 \(\inner{u}{w}_D = \inner{u}{Dw}\)로 \(\ker J\)에 수직이고, Euclidean으로 수직일 필요는 없다.</p>
+          <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-3-4" data-level="1">
+        <p><span class="thm-head">Exercise 28.3.4</span> <span class="level">★</span>
+        <a href="#eq-28-3-2">(28.3.2)</a>의 \(J^{\mathsf T}J\)에서 점 블록 \(C\)가 block-diagonal인 이유를 말하고, \(N = 5\), \(M = 40\)일 때 Schur complement로 푸는 계의 크기를 구하여라. \(M = 10^5\), \(N = 10^3\)이면?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>residual \(r_{ij}\)는 점 \(X_j\) 하나에만 의존하므로 \(\partial r/\partial X_j\)와 \(\partial r/\partial X_k\)(\(j \ne k\))가 같은 행에 0이 아닌 값을 가지지 않는다. 따라서 \((J^{\mathsf T}J)_{X_jX_k} = 0\)이고, \(C\)는 \(3 \times 3\) 블록 \(M\)개의 block-diagonal이다. Schur complement \(B - EC^{-1}E^{\mathsf T}\)는 카메라 parameter의 크기 \(6N\)이므로 \(N = 5\)이면 \(30 \times 30\)(전체 \(150 \times 150\) 대신), \(N = 10^3\), \(M = 10^5\)이면 \(6000 \times 6000\)이다(전체는 \(306000 \times 306000\)). \(C^{-1}\)은 \(3 \times 3\) inverse matrix \(M\)개다.</p>
+          <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-3-5" data-level="2">
+        <p><span class="thm-head">Exercise 28.3.5</span> <span class="level">★★</span>
+        <a href="#fig-28-3-3">Figure 28.3.3</a>에서 SE(3) pose graph의 결과가 loop를 닫는데도 RMS 위치 오차가 odometry만 쓴 것보다 큰 이유를 설명하여라. similarity로 맞춘 뒤의 오차(SE(3) 0.86, odometry 1.12, \(\mathrm{Sim}(3)\) 0.15)는 무엇을 말하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>SE(3) pose graph는 odometry edge의 translation 길이를 바꿀 수 없다(바꾸면 그 edge의 residual이 커진다). loop edge가 끝점을 출발점으로 당기면, 짧게 잰 뒤쪽 edge들을 늘리는 대신 회전과 translation의 방향을 조금씩 바꾸어 닫는다. 그 결과 궤적 전체가 참 궤적보다 작고(크기의 오차) 모양도 찌그러진다(모양의 오차). 맞추지 않은 RMS는 두 오차를 모두 센다. similarity로 맞추면 전체 크기와 위치의 차이가 빠지고 모양의 오차만 남는데, 그것도 SE(3)는 0.86으로 \(\mathrm{Sim}(3)\)의 0.15보다 크다. SE(3) 결과는 odometry보다 모양이 조금 낫지만(1.12 → 0.86), scale의 불일치 자체는 고치지 못한다.</p>
+          <p class="verified">Verification: <code>verify/v-28-3-bundle-adjustment.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="28-2-calculus-on-lie-groups.html">← 28.2 Calculus on Lie Groups</a>
+    <a rel="next" href="28-4-interpolating-averaging.html">28.4 Interpolating and Averaging Poses →</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>28.4 Interpolating and Averaging Poses — DG Study</title>
+  <meta name="dg-id" content="28.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="28.1, 28.2, 28.3, 0.8">
+  <meta name="dg-refs" content="Shoemake85; Kim95; Lovegrove13; Sommer20; Hartley13; Carlone15; Pennec06; Sola18">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">28. Poses and Motion: Lie Groups for SfM and SLAM</a> ›
+    <span>28.4 Interpolating and Averaging Poses</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>28.4 Interpolating and Averaging Poses</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Shoemake85">[Shoemake85]</a>,
+        <a class="cite" href="../../references.html#Kim95">[Kim95]</a>,
+        <a class="cite" href="../../references.html#Lovegrove13">[Lovegrove13]</a>,
+        <a class="cite" href="../../references.html#Sommer20">[Sommer20]</a>,
+        <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>,
+        <a class="cite" href="../../references.html#Carlone15">[Carlone15]</a>,
+        <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>SLERP가 \(S^3\)과 \(\mathrm{SO}(3)\)의 geodesic을 일정한 각속도로 따라가는 보간임을 설명하고, quaternion의 부호를 골라야 하는 이유를 double cover로 말할 수 있다.</li>
+        <li>\(\mathrm{SE}(3)\)의 Lie group 보간(screw)과 \(\mathrm{SO}(3) \times \R^3\) 보간의 카메라 중심의 path를 비교하고, \(\mathrm{SE}(3)\)에 bi-invariant metric이 없다는 사실로 “올바른 보간”이 metric과 규약의 선택에 달렸음을 설명할 수 있다.</li>
+        <li>Lie group 위의 cumulative B-spline을 정의하고 local support와 \(C^2\) 성질, rolling shutter와 IMU에서의 쓰임을 말할 수 있다.</li>
+        <li>chordal \(L_2\), geodesic \(L_2\)(Karcher), geodesic \(L_1\) rotation 평균을 계산하고 outlier에 대한 성질과 유일성 조건을 비교하며, multiple rotation averaging의 cycle consistency를 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../00-tour/0-8-riemannian.html#i-0-8-4">Remark 0.8.4</a>: \(\mathrm{SO}(3)\)의 bi-invariant metric과 geodesic \(R\exp(t[\omega]_\times)\). <a href="../00-tour/0-8-riemannian.html#sec-cv-averaging">Section 0.8</a>의 상자: Fréchet(Karcher) mean과 그 반복</li>
+        <li><a href="28-1-so3-se3-sim3.html">Section 28.1</a>: screw motion(<a href="28-1-so3-se3-sim3.html#i-28-1-4">Example 28.1.4</a>), adjoint <a href="28-1-so3-se3-sim3.html#eq-28-1-8">(28.1.8)</a>, \(T_{cw}\)와 \(T_{wc}\)</li>
+        <li><a href="28-2-calculus-on-lie-groups.html">Section 28.2</a>: double cover와 반각 <a href="28-2-calculus-on-lie-groups.html#eq-28-2-8">(28.2.8)</a>. <a href="28-3-bundle-adjustment.html">Section 28.3</a>: pose graph <a href="28-3-bundle-adjustment.html#eq-28-3-5">(28.3.5)</a>, gauge, nerfstudio의 두 모드(<a href="28-3-bundle-adjustment.html#sec-nerf-3dgs">Section 28.3</a>)</li>
+        <li><a href="../29-gaussian-splatting/29-4-space-of-covariances.html">Section 29.4</a>: metric을 고르면 보간과 평균의 답이 바뀐다는 예(\(\mathrm{SPD}(3)\))</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="28-3-bundle-adjustment.html#sec-nerf-3dgs">Section 28.3</a>의 끝에서 nerfstudio의 두 pose 보정 모드가 \(0\)에서 같은 differential을 가지지만 2차부터 다르다는 것을 보았다. parameter 공간의 직선이 카메라 중심의 직선으로 가느냐, 휜 곡선으로 가느냐의 차이였다. 이 절은 그 질문을 정면으로 다룬다. 두 pose 사이를 “곧게” 잇는다는 것은 무엇인가?</p>
+      <p>3D vision에서 보간과 평균은 흔한 일이다. 새 시점 렌더링을 위한 카메라 궤적, 프레임 사이의 pose(rolling shutter의 행마다 다른 시각), keyframe의 pose를 여러 측정에서 합치는 일, SfM의 초기화에서 상대 회전들로 절대 회전을 구하는 일이 그렇다. <a href="../29-gaussian-splatting/29-4-space-of-covariances.html">Section 29.4</a>에서 covariance의 보간과 평균이 metric의 선택에 따라 달랐듯이, pose에서도 답은 기하가 정한다. 질문은 넷이다.</p>
+      <ol>
+        <li>두 회전 사이의 SLERP는 왜 “올바른” 보간이고, quaternion의 부호는 왜 골라야 하는가?</li>
+        <li>두 pose 사이의 보간은 왜 여러 개이고, 카메라 중심은 각각 어떤 path를 지나는가?</li>
+        <li>여러 pose를 매끄럽게 잇는 연속 시간 궤적은 어떻게 만드는가?</li>
+        <li>여러 회전의 평균은 무엇이고, outlier가 있으면 어떻게 달라지는가?</li>
+      </ol>
+    </section>
+
+    <section id="sec-slerp">
+      <h2>SLERP Is the Geodesic</h2>
+      <p>unit quaternion \(q_0, q_1\) 사이의 각을 \(\psi = \arccos\inner{q_0}{q_1} \in (0, \pi)\)라 하면, Shoemake의 SLERP는</p>
+      <div class="equation" id="eq-28-4-1">
+      \[ \begin{aligned} &amp;\mathrm{SLERP}(q_0, q_1; s) \\ &amp;\quad = \frac{\sin\big((1 - s)\psi\big)}{\sin\psi}\,q_0 + \frac{\sin(s\psi)}{\sin\psi}\,q_1 \end{aligned} \tag{28.4.1} \]
+      </div>
+      <p>이다 <a class="cite" href="../../references.html#Shoemake85">[Shoemake85]</a>. 이것은 \(q_0\)과 \(q_1\)을 지나는 \(S^3\)의 great circle을 일정한 속력으로 따라가는 곡선, 곧 unit sphere의 geodesic이다(<a href="../00-tour/0-8-riemannian.html#eq-0-8-5">(0.8.5)</a>의 \(\exp_p\)를 \(S^3\)에서 쓴 것).</p>
+
+      <div class="thm proposition" id="i-28-4-1">
+        <p><span class="thm-head">Proposition 28.4.1</span> <span class="thm-name">(SLERP is the geodesic of \(\mathrm{SO}(3)\))</span>.
+        \(\inner{q_0}{q_1} \ge 0\)이면 \(R\big(\mathrm{SLERP}(q_0, q_1; s)\big) = R_0\,\mathrm{Exp}\big(s\,\mathrm{Log}(R_0^{\mathsf T}R_1)\big)\)이다. 이것은 bi-invariant metric(<a href="../00-tour/0-8-riemannian.html#i-0-8-4">Remark 0.8.4</a>)의 최단 geodesic이고, 각속도의 크기는 \(d(R_0, R_1)\)로 일정하다. \(\inner{q_0}{q_1} \lt 0\)이면 SLERP는 같은 축 둘레로 반대쪽, 곧 각 \(2\pi - d(R_0, R_1)\)만큼 도는 geodesic을 지난다. 그래서 구현은 \(\inner{q_0}{q_1} \lt 0\)일 때 \(q_1\)을 \(-q_1\)로 바꾼다(Eigen의 <code>Quaternion::slerp</code>가 그렇게 한다).</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(q_0 = (1, 0)\)이라 두어도 된다(왼쪽에서 \(\bar q_0\)를 곱하는 것은 \(S^3\)의 isometry이고 \(\mathrm{SO}(3)\)에서는 \(R_0^{\mathsf T}\)를 곱하는 것이다). 그러면 \(q_1 = (\cos\psi, \sin\psi\,n)\)이고 <a href="#eq-28-4-1">(28.4.1)</a>은 \(\big(\cos(s\psi), \sin(s\psi)\,n\big)\)이다. <a href="28-2-calculus-on-lie-groups.html#eq-28-2-8">(28.2.8)</a>에 의해 이것은 \(\mathrm{Exp}(2s\psi\,n)\)이고, \(\psi \le \pi/2\)(곧 \(\inner{q_0}{q_1} \ge 0\))이면 \(2\psi = d(R_0, R_1) \le \pi\)이므로 \(\mathrm{Exp}\big(s\,\mathrm{Log}(R_1)\big)\)와 같다. \(\psi \gt \pi/2\)이면 회전각 \(2\psi \gt \pi\)를 같은 방향으로 돌게 된다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-28-4-1">
+        <img src="figures/fig-28-4-1-slerp.svg" alt="두 패널, 가로축은 모두 s(0부터 1). 왼쪽 (a) distance along the path: 세로축 angle travelled(도). 파란 직선(SLERP)이 0에서 150까지 곧게 올라가고, 검은 점선(NLERP)은 처음엔 파랑보다 느리게 중간에 빠르게 올라가 같은 150에 닿는다. 주황 직선(SLERP to −q₁, no sign check)은 210까지 곧게 올라간다. 150에 회색 점선과 d(R₀, R₁) = 150°라는 주석이 있다. 오른쪽 (b) speed: 세로축 angular speed. 파랑은 150, 주황은 210의 수평선이고, 검은 점선은 양 끝 111에서 s = 1/2의 176까지 올라갔다 내려오는 언덕 모양이다.">
+        <figcaption><span class="fig-head">Figure 28.4.1.</span>
+        SLERP, NLERP, 부호를 고르지 않은 SLERP. <em>무엇을</em>: \(R_0 = I_3\)과 \(R_1 = \mathrm{Exp}(150^\circ\,n)\) 사이를 세 방법으로 보간했다. \(q_0 = (1, 0, 0, 0)\), \(\inner{q_0}{q_1} = \cos 75^\circ \gt 0\)이다. <em>읽는 법</em>: 가로축은 보간 parameter \(s\)다. (a)의 세로축은 \(s\)까지 실제로 돈 각(각속도를 적분한 path의 길이, 도), (b)의 세로축은 각속도의 크기(\(s\) 한 단위당 도)다. 파랑은 SLERP, 검은 점선은 NLERP(\((1 - s)q_0 + sq_1\)을 정규화), 주황은 \(-q_1\)로 SLERP한 것이다. <em>볼 것</em>: SLERP는 150°를 일정한 속도로 간다. NLERP는 같은 회전들을 지나지만(모두 \(n\)축 둘레의 회전) 속도가 끝에서 110.7°, 가운데서 175.9°로 변한다. 주황은 같은 \(R_1\)에 도착하지만 반대쪽으로 210°를 돈다. <em>본문과의 연결</em>: <a href="#i-28-4-1">Proposition 28.4.1</a>. 주황의 문제는 \(q_1\)과 \(-q_1\)이 같은 회전이라는 double cover(<a href="28-2-calculus-on-lie-groups.html#fig-28-2-4">Figure 28.2.4</a>)에서 온다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-4-1">Figure 28.4.1</a>의 (a)에서 세 곡선은 모두 \(s = 1\)에서 같은 회전 \(R_1\)에 도착한다. 그러나 파랑과 검정은 150°, 주황은 210°를 돌았다. (b)를 보면 차이가 더 분명하다. SLERP의 각속도는 수평선이다. NLERP는 quaternion의 직선을 sphere로 정규화한 것이라 sphere 위에서 가운데가 빠르고, 회전각 150°에서 속도 차이가 1.6배다(\(2\tan 37.5^\circ/\sin 75^\circ\)). 회전각이 작으면 두 방법의 차이는 작아서, 작은 회전 사이의 보간에는 NLERP를 쓰기도 한다. 주황 수평선은 일정한 속도지만 먼 길이다. \(q_1\)과 \(-q_1\) 가운데 \(q_0\)와 같은 hemisphere에 있는 쪽을 골라야 \(\mathrm{SO}(3)\)의 짧은 geodesic이 된다.</p>
+      <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+    </section>
+
+    <section id="sec-se3">
+      <h2>Interpolating Poses: Which Path Is Straight?</h2>
+      <p>pose \(T_0, T_1\)(camera-to-world \(T_{wc}\)) 사이를 잇는 자연스러운 방법은 셋이다. 회전 부분은 셋 모두 SLERP로 같다.</p>
+      <div class="equation" id="eq-28-4-2">
+      \[ \begin{aligned} &amp;\text{(i) Lie group:} \\ &amp;\quad T(s) = T_0\,\mathrm{Exp}\big(s\,\mathrm{Log}(T_0^{-1}T_1)\big), \\ &amp;\text{(ii) } \mathrm{SO}(3) \times \R^3 \text{ on } T_{wc}\text{:} \\ &amp;\quad c(s) = (1 - s)\,c_0 + s\,c_1, \\ &amp;\text{(iii) } \mathrm{SO}(3) \times \R^3 \text{ on } T_{cw}\text{:} \\ &amp;\quad t_{cw}(s) = (1 - s)\,t_{cw,0} + s\,t_{cw,1} \end{aligned} \tag{28.4.2} \]
+      </div>
+      <p>(i)은 <a href="28-1-so3-se3-sim3.html#i-28-1-4">Example 28.1.4</a>의 screw motion을 \(T_0\)에서 출발시킨 것이다. (ii)는 카메라 중심을 직선으로 옮긴다. (iii)은 world-to-camera pose의 translation을 직선으로 옮기는데, 그 translation은 카메라 중심이 아니므로(<a href="28-1-so3-se3-sim3.html#sec-conventions-cv">Section 28.1</a>의 상자) 중심 \(c(s) = -R_{cw}(s)^{\mathsf T}t_{cw}(s)\)는 직선이 아니다.</p>
+
+      <figure class="dg-figure" id="fig-28-4-2">
+        <img src="figures/fig-28-4-2-se3-interpolation.svg" alt="두 패널. 왼쪽 (a) 3D: T₀(왼쪽 아래)에서 T₁(오른쪽 위)까지 세 곡선이 있다. 주황 직선 위에 주황 frustum 다섯 개, 그 아래로 휜 파란 곡선 위에 파란 frustum 다섯 개가 있고, 더 크게 아래로 휜 초록 점선이 있다. 아래 바닥 평면에 세 path의 흐린 그림자가 있고, T₀와 T₁에서 바닥까지 회색 점선이 내려오며, 왼쪽 위에 회색 x, y, z 축 화살표가 있다. 오른쪽 (b) top view: c₀ = (0, 0)에서 c₁ = (4, 2)까지 주황 직선, 아래로 (1.3, −0.4)까지 내려갔다 올라오는 파란 곡선, (1.5, −1.3)까지 더 깊게 내려가는 초록 점선이 있다. 주황 직선과 파란 곡선 위의 다섯 점에서 보는 방향 화살표가 +x에서 120도까지 차례로 돌아간다. 왼쪽 위 범례: Lie group T₀ Exp(sξ), SO(3)×R³ on T_wc, SO(3)×R³ on T_cw.">
+        <figcaption><span class="fig-head">Figure 28.4.2.</span>
+        두 카메라 pose 사이의 세 보간과 카메라 중심의 path. <em>무엇을</em>: \(T_0\)는 \(c_0 = (0, 0, 0)\)에서 \(+x\)를 보고, \(T_1\)은 \(c_1 = (4, 2, 1)\)에서 \(z\)축 둘레로 \(120^\circ\) 돌아간 방향을 본다(world \(z\) 위쪽, OpenCV camera 축). <a href="#eq-28-4-2">(28.4.2)</a>의 세 보간을 \(0 \le s \le 1\)에서 그렸다. (a)는 3D, (b)는 world \(xy\) 평면의 top view다. <em>읽는 법</em>: 파랑은 (i) Lie group 보간, 주황은 (ii) \(T_{wc}\) 위의 \(\mathrm{SO}(3) \times \R^3\) 보간, 초록 점선은 (iii) \(T_{cw}\) 위의 \(\mathrm{SO}(3) \times \R^3\) 보간의 카메라 중심이다. 파랑과 주황에는 \(s = 0, 0.25, 0.5, 0.75, 1\)에서 frustum(apex가 카메라 중심)을(a), 보는 방향(camera \(z\)축)의 화살표를(b) 그렸다. 세 보간의 회전은 같다. (a)의 시점을 읽기 위해 바닥 평면 \(z = -0.6\)에 세 path의 흐린 그림자(곧 (b)와 같은 모양)를 두고, \(c_0\)와 \(c_1\)에서 바닥까지 회색 점선을 내렸으며, 왼쪽 위에 world 축 \(x, y, z\)를 그렸다. <em>볼 것</em>: 주황의 중심은 직선이다. 파랑은 screw axis(수직) 둘레로 휘어 chord에서 최대 1.29 떨어지고, 초록은 2.01 떨어진다. left-invariant metric \(\abs{\omega_{\mathrm{body}}}^2 + \abs{\dot c}^2\)으로 잰 path의 길이는 주황 5.04, 파랑 5.88, 초록 7.19다. <em>본문과의 연결</em>: 주황은 그 metric의 geodesic이고(<a href="#i-28-4-3">Proposition 28.4.3</a>), 파랑은 metric이 아니라 group 구조가 정한 곡선이다. <a href="figures/fig-28-4-2-se3-interpolation-interactive.html">Interactive version</a>.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-4-2">Figure 28.4.2</a>의 (b)에서 세 중심 path를 비교하자. 주황은 \(c_0\)에서 \(c_1\)으로 곧게 간다. 파랑은 먼저 \(-y\) 쪽으로 내려갔다가 돌아 올라온다. 카메라가 \(120^\circ\) 도는 동안 원점이 screw axis 둘레를 도는 helix 조각을 그리기 때문이다(<a href="28-1-so3-se3-sim3.html#fig-28-1-1">Figure 28.1.1</a>). 초록은 더 크게 휜다. 화살표를 보면 파랑과 주황의 보는 방향은 같은 \(s\)에서 같다. (a)의 frustum도 같은 것을 3D로 보여 준다. 같은 \(s\)의 파란 frustum과 주황 frustum은 방향이 같고 위치만 다르며, 바닥의 흐린 그림자가 (b)의 세 path다. 세 방법의 차이는 오직 중심이 어디를 지나느냐다. 그렇다면 어느 것이 “올바른” 보간인가? \(\mathrm{SO}(3)\)에서는 bi-invariant metric의 geodesic이 답이었다. \(\mathrm{SE}(3)\)에는 그런 metric이 없다.</p>
+
+      <div class="thm proposition" id="i-28-4-2">
+        <p><span class="thm-head">Proposition 28.4.2</span> <span class="thm-name">(no bi-invariant metric on SE(3))</span>.
+        \(\mathrm{SE}(3)\)에는 left translation과 right translation 모두에 대해 불변인 Riemannian metric이 없다. \(\mathrm{Sim}(3)\)도 마찬가지다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> bi-invariant metric \(g\)가 있다고 하자. \(X \in \mathfrak{se}(3)\)과 \(T \in \mathrm{SE}(3)\)에 대해 left-invariance로 \(g_T(TX, TX) = g_I(X, X)\)이고, \(TX = (TXT^{-1})T\)이므로 right-invariance로 \(g_T(TX, TX) = g_I(TXT^{-1}, TXT^{-1})\)이다. 따라서 \(g_I\)는 모든 \(\mathrm{Ad}_T\)에 대해 불변인 inner product다. 그런데 \(T = (I_3, t)\)이면 <a href="28-1-so3-se3-sim3.html#eq-28-1-8">(28.1.8)</a>에서 \(\mathrm{Ad}_T(0, \omega) = (t \times \omega, \omega)\)이다. \(\R^6\)의 inner product는 모두 Euclidean norm과 동치이므로 어떤 \(c \gt 0\)에 대해 \(g_I(Y, Y) \ge c\abs{Y}^2\)인데, \(\omega \ne 0\)을 고정하고 \(t \perp \omega\)의 길이를 키우면 \(Y = \mathrm{Ad}_T(0, \omega)\)에 대해 \(g_I(Y, Y) \ge c\abs{t \times \omega}^2 = c\abs{t}^2\abs{\omega}^2 \to \infty\)가 되어, 일정한 값 \(g_I((0, \omega), (0, \omega))\)와 같을 수 없다. \(\mathrm{Sim}(3)\)은 같은 translation을 포함하므로 같은 논증이 된다. \(\mathfrak{se}(3)\)에도 \(\mathrm{Ad}\)-invariant인 symmetric bilinear form은 있다. 그 전체는 \(\big((v, \omega), (v', \omega')\big) \mapsto a\inner{\omega}{\omega'} + b\big(\inner{\omega}{v'} + \inner{v}{\omega'}\big)\)의 2차원이고(verify), 모두 translation끼리의 블록에서 \(0\)이므로 positive definite일 수 없다. 그러나 \(b \ne 0\)이면 nondegenerate이고 signature가 \((3, 3)\)이다(양의 eigenvalue 셋, 음의 eigenvalue 셋). 그래서 \(\mathrm{SE}(3)\)에는 positive definite 대신 nondegenerate만 요구하는 bi-invariant <strong>pseudo-Riemannian metric</strong>(준리만 계량)은 있다. 없는 것은 positive definite인 것, 곧 Riemannian metric이고, 위 논증이 positive definiteness(\(g_I(Y, Y) \ge c\abs{Y}^2\))를 쓴 곳이 바로 그 차이다.</p>
+      </div>
+      <p>bi-invariance가 안 되면 한쪽만 고른다. 가장 흔한 선택은 \(T_{wc}\)에 대한 left-invariant metric, 곧 \(\mathfrak{se}(3)\)의 inner product \(\alpha\abs{\omega}^2 + \beta\abs{v}^2\)을 left translation으로 옮긴 것이다.</p>
+
+      <div class="thm proposition" id="i-28-4-3">
+        <p><span class="thm-head">Proposition 28.4.3</span> <span class="thm-name">(the product metric and its geodesics)</span>.
+        \(T(s) = (R(s), c(s))\)를 \(T_{wc}\)의 곡선이라 하면, 위의 left-invariant metric으로 잰 속력의 제곱은 \(\alpha\abs{R^{\mathsf T}\dot R}^2 + \beta\abs{\dot c}^2\)이다. 곧 \(\mathrm{SO}(3)\)의 bi-invariant metric과 \(\R^3\)의 Euclidean metric의 product metric이다. 그 geodesic은 회전이 SLERP, 중심이 직선인 (ii)이고, \(d(R_0, R_1) \lt \pi\)이면 두 끝점 사이의 가장 짧은 곡선이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(T^{-1}\dot T = \begin{pmatrix} R^{\mathsf T}\dot R &amp; R^{\mathsf T}\dot c \\ 0 &amp; 0 \end{pmatrix}\)이므로 body twist는 \((R^{\mathsf T}\dot c, (R^{\mathsf T}\dot R)^\vee)\)이고 \(\abs{R^{\mathsf T}\dot c} = \abs{\dot c}\)다. 따라서 이 metric은 \(\mathrm{SO}(3) \times \R^3\)의 product metric과 같고, product metric의 geodesic은 각 인수의 geodesic의 쌍이다. \(\mathrm{SO}(3)\)의 geodesic은 SLERP(<a href="#i-28-4-1">Proposition 28.4.1</a>), \(\R^3\)의 geodesic은 직선이다. <a href="#fig-28-4-2">Figure 28.4.2</a>의 수치(\(\alpha = \beta = 1\))에서 주황의 길이 5.04는 \(\sqrt{(2\pi/3)^2 + \abs{c_1 - c_0}^2} = \sqrt{4.386 + 21}\)과 같다.</p>
+      </div>
+
+      <p>그러면 (i)의 Lie group 보간은 무엇인가? 그것은 어떤 metric의 geodesic으로 정의된 곡선이 아니라, group의 곱과 \(\exp\)만으로 정의된 곡선이다. 그래서 규약에 무관하다. <a href="28-1-so3-se3-sim3.html#eq-28-1-8">(28.1.8)</a>로 계산하면 \(T_0\,\mathrm{Exp}(s\,\mathrm{Log}(T_0^{-1}T_1)) = \mathrm{Exp}(s\,\mathrm{Log}(T_1T_0^{-1}))\,T_0\)이고, 모든 \(A, B \in \mathrm{SE}(3)\)에 대해 \((AT_0B, AT_1B)\)의 보간은 \(AT(s)B\)이며, \(T_{cw} = T_{wc}^{-1}\)로 바꿔 보간해도 같은 곡선의 역이 나온다(verify). 대가는 중심의 path가 휜다는 것이고, (ii)의 metric으로 재면 더 길다(5.88 대 5.04). left-invariant metric의 geodesic이 모두 one-parameter subgroup의 translate가 되려면 metric이 bi-invariant여야 하므로, (i)과 (ii)가 늘 같을 수는 없다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: “올바른” pose 보간은 metric과 규약의 선택이다</p>
+        <p>(ii)는 카메라 중심을 곧게 옮기는 가장 짧은 path다(<a href="#i-28-4-3">Proposition 28.4.3</a>). 그러나 그 “짧음”은 두 가지 선택에 기대고 있다.</p>
+        <ul>
+          <li><strong>\(T_{wc}\)냐 \(T_{cw}\)냐.</strong> 같은 product 보간을 \(T_{cw}\)에 하면 (iii)이 되어 중심이 크게 휜다(<a href="#fig-28-4-2">Figure 28.4.2</a>의 초록, chord에서 2.01). \(T_{wc}\)의 left-invariant metric은 \(T_{cw}\)의 right-invariant metric이므로, 둘 중 어느 쪽으로 저장했느냐가 metric을 바꾼다.</li>
+          <li><strong>body의 원점을 어디에 두느냐.</strong> (ii)는 body frame의 원점(여기서는 카메라 중심)을 곧게 옮긴다. IMU를 body로 쓰고 카메라가 IMU에서 \(t_{bc}\)만큼 떨어져 있으면, IMU pose를 (ii)로 보간했을 때 카메라 중심은 \((1 - s)p_0 + sp_1 + R(s)t_{bc}\)로 휜다(<a href="#ex-28-4-3">Exercise 28.4.3</a>). (ii)는 body frame의 회전에는 불변이지만 body 원점의 이동에는 불변이 아니다.</li>
+          <li>(i)은 두 선택 모두에 무관하지만, screw axis 위의 점(axis를 따라 곧게 간다)을 빼면 어떤 점도 곧게 움직이지 않는다.</li>
+        </ul>
+        <p>그래서 문제에 맞춰 고른다. 이것은 정리가 아니라 설계 선택이다. 렌더링할 카메라 궤적이라면 중심이 곧게 가는 (ii)가 자연스럽고, 물체에 고정된 여러 점이 함께 움직이는 강체의 운동 모형이라면 (i)이 규약에 흔들리지 않는다. 연속 시간 궤적의 표현에서도 같은 질문이 있다. Sommer 등은 \(\mathrm{SE}(3)\) spline과 \(\R^3\)·\(\mathrm{SO}(3)\)의 split 표현을 비교한 기존 결과들이 평균적으로 split 쪽이 궤적 표현과 계산 시간 모두에서 낫다는 결론이었다고 정리하고, 자기 실험(camera–IMU calibration)에서도 \(\mathrm{SE}(3)\) spline이 split 표현보다 나은 점 없이 계산만 많다고 보고한다 <a class="cite" href="../../references.html#Sommer20">[Sommer20]</a>. nerfstudio가 <code>SO3xR3</code> 모드를 권하는 것도 같은 방향이다(<a href="28-3-bundle-adjustment.html#sec-nerf-3dgs">Section 28.3</a>).</p>
+      </aside>
+      <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+    </section>
+
+    <section id="sec-bspline">
+      <h2>Cumulative B-Splines on Lie Groups</h2>
+      <p>keyframe 두 개가 아니라 여러 개를 매끄럽게 이어야 할 때가 있다. rolling shutter 카메라는 image의 행마다 다른 시각에 찍히므로 행마다 다른 pose가 필요하고(그래서 image가 한 점을 지나는 ray들의 family가 아니다. <a href="../27-cameras-rays/27-4-space-of-rays.html#sec-generalized">Section 27.4</a>), IMU는 각속도와 가속도를 재므로 궤적의 1차·2차 미분이 연속이어야 그와 비교할 수 있다 <a class="cite" href="../../references.html#Lovegrove13">[Lovegrove13]</a>. 위의 보간을 구간마다 이어 붙이면 각속도가 knot에서 끊어진다. 답은 \(\R^d\)의 B-spline을 Lie group으로 옮긴 cumulative B-spline이다. Lovegrove 등과 Sommer 등의 정리에 따르면 unit quaternion 위에서 처음 제안되었고 <a class="cite" href="../../references.html#Kim95">[Kim95]</a>, \(\mathrm{SE}(3)\)의 연속 시간 SLAM에 쓰인다 <a class="cite" href="../../references.html#Lovegrove13">[Lovegrove13]</a>.</p>
+      <p>\(\R^d\)의 uniform B-spline \(p(t) = \sum_i B_i(t)p_i\)를 차분 \(d_j = p_{i+j} - p_{i+j-1}\)로 다시 쓰면 \(p(u) = p_i + \sum_{j=1}^{k-1}\lambda_j(u)\,d_j\)(cumulative form)이다. 여기서 더하기를 group의 곱으로, 차분과 그 실수배를 \(\mathrm{Log}\)와 \(\mathrm{Exp}\)로 바꾼다 <a class="cite" href="../../references.html#Sommer20">[Sommer20]</a>.</p>
+
+      <div class="thm definition" id="i-28-4-4">
+        <p><span class="thm-head">Definition 28.4.4</span> <span class="thm-name">(cumulative cubic B-spline on a Lie group)</span>.
+        control point \(X_0, \dots, X_n\)이 Lie group \(G\)의 원소이고 knot 간격이 1이라 하자. 시각 \(t \in [i, i + 1)\)에서 \(u = t - i\)로 두고</p>
+        <div class="equation" id="eq-28-4-3">
+        \[ \begin{aligned} X(u) &amp;= X_i\prod_{j=1}^{3}\mathrm{Exp}\big(\lambda_j(u)\,d_j\big), \\ d_j &amp;= \mathrm{Log}\big(X_{i+j-1}^{-1}X_{i+j}\big), \\ \lambda(u) &amp;= \frac16\begin{pmatrix} 6 &amp; 0 &amp; 0 &amp; 0 \\ 5 &amp; 3 &amp; -3 &amp; 1 \\ 1 &amp; 3 &amp; 3 &amp; -2 \\ 0 &amp; 0 &amp; 0 &amp; 1 \end{pmatrix}\begin{pmatrix} 1 \\ u \\ u^2 \\ u^3 \end{pmatrix} \end{aligned} \tag{28.4.3} \]
+        </div>
+        <p>로 정한다(\(\lambda_0 \equiv 1\)). 이것이 order 4(degree 3)의 uniform cumulative B-spline이다 <a class="cite" href="../../references.html#Sommer20">[Sommer20, Definition 5.1]</a>, <a class="cite" href="../../references.html#Lovegrove13">[Lovegrove13]</a>.</p>
+      </div>
+      <p>성질은 \(\R^d\)의 B-spline에서 이어진다.</p>
+      <ul>
+        <li><strong>local support.</strong> 한 구간의 값은 control point 4개 \(X_i, \dots, X_{i+3}\)에만 의존한다. 그래서 최적화에서 Jacobian이 sparse하다.</li>
+        <li><strong>smoothness.</strong> \(\R^d\)에서 order \(k\)(degree \(k - 1\))의 uniform B-spline은 knot에서 \(C^{k-2}\)이다. degree \(k - 1\)의 다항식 조각이 이어지므로 \(k - 1\)차 미분은 knot에서 끊어진다(<a class="cite" href="../../references.html#Sommer20">[Sommer20]</a>은 이것을 \(C^{k-1}\)로 적지만 cubic의 3차 미분은 knot에서 뛴다). cubic(\(k = 4\))이면 \(C^2\)이고, 위의 Lie group 판도 knot에서 값과 1차·2차 미분이 이어진다. 3차 미분은 끊어진다(verify에서 knot의 양쪽 유한차분으로 확인했다).</li>
+        <li><strong>control point를 지나지 않는다.</strong> \(u = 0\)에서 \(\lambda = (1, 5/6, 1/6, 0)\)이므로 \(X(0)\)은 \(X_{i+1}\) 근처이지만 \(X_{i+1}\)은 아니다.</li>
+        <li><strong>미분이 닫힌 꼴이다.</strong> \(\dot X = X\,\omega^\wedge\)의 body velocity \(\omega\)를 구간의 \(\dot\lambda_j\)와 \(\mathrm{Ad}\)로 재귀적으로 계산할 수 있다 <a class="cite" href="../../references.html#Sommer20">[Sommer20, Theorem 5.2]</a>. IMU의 각속도와 가속도 residual이 이것으로 쓰인다.</li>
+      </ul>
+
+      <figure class="dg-figure" id="fig-28-4-3">
+        <img src="figures/fig-28-4-3-bspline.svg" alt="두 패널. 왼쪽 (a) centers (top view): T₀부터 T₇까지 검은 점 여덟 개가 왼쪽 아래 (0, 0)에서 오른쪽 위 (6.3, 4)까지 물결 모양으로 놓여 있고 각 점에 앞쪽(body x축)을 가리키는 작은 화살표가 있다. 회색 polygonal path(piecewise geodesic)이 점들을 차례로 잇고, 파란 smooth 곡선(cumulative cubic B-spline)이 T₁ 근처부터 T₆ 근처까지 점들 가까이를 지나지만 점을 정확히 지나지는 않는다. 오른쪽 (b) angular velocity about z: 가로축 시간 τ(0–7, 정수에 knot), 세로축 yaw rate. 회색 계단 함수가 0.6, 0.8, −0.4, −0.8, −0.6, 0.7, 0.7로 knot마다 뛰고 'jump at a knot' 주석이 있다. 파란 곡선은 τ = 1에서 6까지 0.7 근처에서 −0.73까지 매끄럽게 내려갔다 다시 0.7로 올라온다.">
+        <figcaption><span class="fig-head">Figure 28.4.3.</span>
+        cumulative cubic B-spline과 구간별 geodesic 보간. <em>무엇을</em>: control pose 8개(\(T_0, \dots, T_7\), body-to-world pose이고 body frame은 \(x\)가 앞, \(z\)가 위. 시각 \(\tau = k\)에 둠, knot 간격 1초)를 두 방법으로 이었다. 회색은 \([k, k+1]\)마다 회전은 SLERP, 중심은 직선으로 이은 것, 파랑은 <a href="#eq-28-4-3">(28.4.3)</a>의 \(\mathrm{SE}(3)\) spline이다(\(\tau \in [1, 6]\)에서 \(i = \lfloor\tau\rfloor - 1\), 곧 시각 \(\tau\)를 \(X_{\lfloor\tau\rfloor}\) 근처에 맞췄다. 한 구간에 control pose 4개가 필요하므로 8개로는 5개 구간만 만들 수 있다). <em>읽는 법</em>: (a)는 중심의 top view이고 검은 점과 화살표가 control pose의 중심과 body \(x\)축(앞쪽)이다. (b)의 가로축은 시각, 세로축은 body 각속도의 \(z\) 성분(yaw rate), 점선은 knot이다. <em>볼 것</em>: (a)에서 spline은 control point들 가까이를 매끄럽게 지나지만 그 위를 지나지는 않는다. (b)에서 회색의 각속도는 구간마다 상수이고 knot마다 뛴다(예: \(\tau = 2\)에서 0.8에서 \(-0.4\)로). 파란 각속도는 연속이고 꺾이지 않으며 \(-0.73\)과 0.71 사이에서 매끄럽게 변한다. <em>본문과의 연결</em>: <a href="#i-28-4-4">Definition 28.4.4</a>의 \(C^2\) 성질. IMU의 각속도 측정과 비교하려면 (b)의 파랑처럼 각속도가 연속이어야 한다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-4-3">Figure 28.4.3</a>의 (b)를 왼쪽에서 오른쪽으로 보자. 회색 계단은 knot마다 수직으로 뛴다. 이런 궤적을 IMU와 맞추면 knot에서 각가속도가 무한대가 되어야 하므로 실제 측정과 맞지 않는다. 파란 곡선은 계단의 “평균적인 모양”을 따라가되 꺾이는 곳이 없다. 대신 (a)에서 보듯 control pose를 정확히 지나지 않는다. control pose는 궤적이 지나는 점이 아니라 궤적을 정하는 parameter다. rolling shutter에서는 행 \(y\)의 시각 \(\tau_0 + y\,\Delta\tau\)에서 이 spline의 pose로 투영한다. 점이 어느 행에 떨어질지는 투영해 보기 전에는 모르므로, Lovegrove 등은 시각을 추측해 투영하고 그 행에서 시각을 다시 맞추는 일을 두세 번 반복한다. reprojection error의 Jacobian은 그 시각을 덮는 control pose 4개에만 0이 아닌 값을 가진다 <a class="cite" href="../../references.html#Lovegrove13">[Lovegrove13]</a>.</p>
+      <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+    </section>
+
+    <section id="sec-averaging">
+      <h2>Averaging Rotations</h2>
+      <p>같은 회전을 여러 번 잰 \(R_1, \dots, R_n\)의 평균은 “거리 제곱(또는 거리)의 합을 최소화하는 회전”으로 정한다(<a href="../00-tour/0-8-riemannian.html#sec-cv-averaging">Section 0.8</a>의 Fréchet mean). 거리를 무엇으로 재느냐에 따라 세 가지가 흔히 쓰인다 <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>.</p>
+      <div class="equation" id="eq-28-4-4">
+      \[ \begin{aligned} &amp;\text{chordal } L_2: \\ &amp;\quad \bar R = \operatorname*{arg\,min}_R \sum_i \norm{R - R_i}_F^2 \\ &amp;\quad\phantom{\bar R} = \Pi_{\mathrm{SO}(3)}\Big(\sum_i R_i\Big), \\ &amp;\text{geodesic } L_2: \\ &amp;\quad \bar R = \operatorname*{arg\,min}_R \sum_i d(R, R_i)^2, \\ &amp;\text{geodesic } L_1: \\ &amp;\quad \bar R = \operatorname*{arg\,min}_R \sum_i d(R, R_i) \end{aligned} \tag{28.4.4} \]
+      </div>
+      <p>여기서 \(d(R, S) = \abs{\mathrm{Log}(R^{\mathsf T}S)}\)는 회전각이고, \(\norm{R - S}_F = 2\sqrt2\,\abs{\sin(d/2)}\)는 \(\R^{3 \times 3}\) 안의 직선 거리(chord)다. \(\Pi_{\mathrm{SO}(3)}\)은 SVD \(M = U\Sigma V^{\mathsf T}\)에서 \(U\diag(1, 1, \det UV^{\mathsf T})V^{\mathsf T}\)를 취하는 가장 가까운 회전으로의 projection이다(Sophus의 <code>makeRotationMatrix</code>가 이 식이다).</p>
+      <ul>
+        <li><strong>chordal \(L_2\)</strong>는 닫힌 꼴이다. \(\norm{R - R_i}_F^2 = 6 - 2\tr(R^{\mathsf T}R_i)\)이므로 \(\tr(R^{\mathsf T}\sum_iR_i)\)를 최대화하는 orthogonal Procrustes 문제가 된다. quaternion으로는 \(\sum_i q_iq_i^{\mathsf T}\)의 가장 큰 eigenvalue의 eigenvector이고, 이것은 \(q_i\)의 부호와 무관하다 <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>(\(\sum\cos^2(d_i/2)\)를 최대화하는 것과 같다. verify에서 SVD 방법과 \(10^{-12}\) 이하로 일치).</li>
+        <li><strong>geodesic \(L_2\)</strong>는 Karcher mean이고 Tour의 반복 \(\bar R \leftarrow \bar R\,\mathrm{Exp}\big(\frac1n\sum_i\mathrm{Log}(\bar R^{\mathsf T}R_i)\big)\)으로 구한다 <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>.</li>
+        <li><strong>geodesic \(L_1\)</strong>는 tangent space에서 Weiszfeld 반복으로 구한다. \(v_i = \mathrm{Log}(\bar R^{\mathsf T}R_i)\)일 때</li>
+      </ul>
+      <div class="equation" id="eq-28-4-5">
+      \[ \bar R \leftarrow \bar R\,\mathrm{Exp}\bigg(\frac{\sum_i v_i/\abs{v_i}}{\sum_i 1/\abs{v_i}}\bigg) \tag{28.4.5} \]
+      </div>
+      <p>이다 <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>. 큰 오차를 가진 측정의 영향이 그 거리에 비례하지 않고 방향만 남으므로 robust하다.</p>
+      <p>유일성의 조건도 거리마다 다르다. Hartley 등이 정리한 결과에 따르면, 모든 \(R_i\)가 어떤 회전 \(S\)에서 \(d \lt \pi/2\) 안에 있으면 geodesic \(L_2\)의 비용은 그 ball 위에서 strictly convex이고 최소점이 하나다. chordal \(L_2\)의 같은 성질은 반지름 \(\pi/4\)의 ball에서 보장되지만, 닫힌 꼴의 해는 \(\sum q_iq_i^{\mathsf T}\)의 최대 eigenvalue가 중복되지 않는 한 하나로 정해진다. geodesic \(L_1\)은 데이터가 모두 한 geodesic 위에 있으면 최소점이 하나가 아닐 수 있고, 그렇지 않으면서 convex set 안에 있으면 하나다 <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>. 데이터가 넓게 퍼져 있으면 local minimum이 여럿일 수 있다는 Tour의 경고(<a href="../00-tour/0-8-riemannian.html#sec-cv-averaging">Section 0.8</a>)가 이것이다.</p>
+
+      <figure class="dg-figure" id="fig-28-4-4">
+        <img src="figures/fig-28-4-4-rotation-averaging.svg" alt="두 패널. 왼쪽 (a) one data set (k = 6), pull plane: 가로축 deg, along the Karcher offset, 세로축 deg, perpendicular(−25부터 25)인 평면이다. 원점에 검은 +(truth)가 있고 회색 점 20개(inliers)가 반지름 20도 안에 흩어져 있다. 바깥 고리(반지름 23.5도)에 주홍 화살표 6개가 여러 방향으로 바깥을 가리킨다(outlier 쪽 방향). 원점에서 오른쪽으로 주홍 점선 화살표(net pull of the outliers)가 (13, −2) 근처까지 가고, 그 끝에 파란 마름모(Karcher, 13.7°)가 있다. 원점 바로 위에 주황 사각형(chordal, 4.0°)과 초록 별(L1, 2.4°)이 있다. 반지름 10도인 회색 점선 원이 있다. 오른쪽 (b) error vs. outliers: 가로축 number of outliers k(0–8), 세로축 error(도). 파란 곡선(Karcher)은 3.8에서 17로 크게 올라가고, 주황(chordal)은 3.8에서 7.6으로, 초록(L1)은 4.1에서 5.1로 조금만 오른다. 회색 점선(Karcher of the inliers only)은 3.8에 수평이다.">
+        <figcaption><span class="fig-head">Figure 28.4.4.</span>
+        outlier가 섞인 회전의 세 평균. <em>무엇을</em>: 참 회전 \(R^*\) 둘레에 inlier 20개(\(R^*\mathrm{Exp}(e_i)\), \(e_i\)는 성분마다 표준편차 \(10^\circ\))와 outlier \(k\)개(무작위 축, 각 \(90^\circ\)–\(170^\circ\))를 만들고 <a href="#eq-28-4-4">(28.4.4)</a>의 세 평균을 구했다. (a)는 \(k = 6\)인 데이터 하나, (b)는 \(k = 0, \dots, 8\)에서 30번 반복한 평균 오차다. <em>읽는 법</em>: (a)는 \(R^*\)에서의 chart \(\mathrm{Log}(R^{*\mathsf T}R)\)(단위는 도)를 한 평면에 투영한 것이다. 그 평면은 Karcher mean의 오차 방향(가로축)과 chordal mean의 오차 중 그에 수직인 성분(세로축)이 펼치므로, 이 두 평균과 \(R^*\) 사이의 거리는 줄지 않고 그려진다. 회색 점은 inlier(투영), 검은 +는 \(R^*\), 주황 사각형·파란 마름모·초록 별은 chordal \(L_2\)·geodesic \(L_2\)·geodesic \(L_1\) 평균이고, 옆의 숫자는 각 평균의 실제 오차 \(d(R^*, \bar R)\)다. outlier는 \(90^\circ\) 이상 떨어져 있어 창 밖에 있으므로, 바깥 고리의 주홍 화살표로 그 방향(투영)만 표시했다. 주홍 점선 화살표는 \(R^*\)에서 Karcher 반복 한 번을 할 때 outlier가 기여하는 몫 \(\frac1n\sum_{\text{outliers}}\mathrm{Log}(R^{*\mathsf T}R_i)\)다. 회색 점선 원은 \(10^\circ\)이다. (b)의 세로축은 \(d(R^*, \bar R)\)(도)의 평균, 회색 점선은 inlier만으로 구한 Karcher mean의 오차다. <em>볼 것</em>: (a)에서 Karcher mean은 outlier들의 합력 방향으로 \(13.7^\circ\) 끌려가 점선 화살표 끝에 있다. chordal mean은 \(4.0^\circ\), \(L_1\) mean은 \(2.4^\circ\)로 \(R^*\) 가까이에 남는다(inlier만의 Karcher mean은 \(2.6^\circ\)). (b)에서 outlier가 없으면 세 평균의 오차가 모두 4° 안팎으로 inlier noise의 크기(\(\approx 17^\circ/\sqrt{20}\))다. outlier가 8개이면 Karcher mean의 오차는 17.0°로 커지지만 chordal \(L_2\)는 7.6°, geodesic \(L_1\)은 5.1°에 머문다. <em>본문과의 연결</em>: 아래 상자. 거리의 모양이 outlier의 영향을 정한다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-4-4">Figure 28.4.4</a>의 (a)에서 주홍 점선 화살표부터 보자. Karcher 반복은 tangent space에서 \(\mathrm{Log}\)들을 그대로 평균하므로, \(100^\circ\) 넘게 떨어진 outlier 하나가 \(10^\circ\) 떨어진 inlier 열 개만큼 평균을 끈다. 여섯 outlier의 몫을 더한 것이 점선 화살표이고, 파란 마름모(Karcher)는 거의 그 끝에 있다. 주황 사각형(chordal)과 초록 별(\(L_1\))은 같은 데이터에서 검은 + 가까이 남는다. 숫자를 보면 \(13.7^\circ\) 대 \(4.0^\circ\), \(2.4^\circ\)이다. (b)는 이것이 우연이 아님을 보인다. outlier가 하나 늘 때마다 Karcher mean의 오차는 0.8–2.9°씩 커지고, chordal mean은 그보다 훨씬 덜, \(L_1\) mean은 거의 커지지 않는다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: chord는 포화되고, quaternion 평균에는 부호가 필요하다</p>
+        <ul>
+          <li><strong>세 평균의 robustness 순서.</strong> geodesic \(L_2\)에서 measurement 하나가 평균을 끄는 힘(gradient)은 \(\mathrm{Log}(\bar R^{\mathsf T}R_i)\), 곧 회전각 \(d\)에 비례한다(항 \(d^2\)의 미분 \(2d\)). chordal \(L_2\)의 항 \(8\sin^2(d/2) = 4(1 - \cos d)\)의 미분은 \(4\sin d\)이다. 힘이 \(d = \pi/2\)에서 가장 크고 그 뒤로 줄어 \(d = \pi\)에서 \(0\)이 되므로(chord의 포화), \(90^\circ\)보다 먼 outlier일수록 힘이 약하다. \(L_1\)에서는 모든 measurement의 힘이 크기 1의 방향 벡터다. <a href="#fig-28-4-4">Figure 28.4.4</a>의 (b)에서 outlier가 있을 때의 Karcher &gt; chordal &gt; \(L_1\) 오차 순서가 이것이다. 정확한 robust 추정은 robust loss(Huber 등)로 하지만, 같은 제곱 오차라도 어떤 거리의 제곱이냐가 영향을 바꾼다.</li>
+          <li><strong>quaternion을 성분별로 평균하면 안 된다.</strong> 위의 inlier 20개(\(k = 0\), 30번 반복)의 quaternion에 무작위로 부호를 붙여 성분별로 평균하면 오차가 평균 46°, 최악 177°다. 부호를 첫 quaternion의 hemisphere로 맞추면 3.8°로 eigenvector 방법과 같은 수준이 된다. 흔히 쓰는 규칙 “\(q_0 \ge 0\)으로 맞추기”는 참 회전이 \(180^\circ\) 근처이면 깨진다. \(R^*\)의 회전각이 179.5°인 예에서 이 규칙으로 성분별 평균을 내면 오차가 42.0°이고, eigenvector 방법은 2.9°다. \(q_0 \approx 0\)인 경계가 데이터 한가운데를 지나 데이터가 \(S^3\)의 대척점 두 무리로 갈라지기 때문이다(<a href="28-2-calculus-on-lie-groups.html#fig-28-2-4">Figure 28.2.4</a>). \(\sum q_iq_i^{\mathsf T}\)는 \(q_i \mapsto -q_i\)에 불변이므로 이 문제가 없다. Gaussian의 저장된 quaternion과 scale을 그대로 평균할 때의 문제(<a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#sec-alternatives">Section 29.2</a>의 상자)도 같은 뿌리다.</li>
+        </ul>
+      </aside>
+
+      <h3 id="sec-multiple">Multiple Rotation Averaging and Pose Graphs</h3>
+      <p>SfM의 global 초기화와 SLAM의 pose graph에서는 절대 회전 \(R_1, \dots, R_N\) 대신 상대 회전 \(R_{ij}\)(\(R_j \approx R_{ij}R_i\))들이 주어진다. 이들은 서로 맞물려야 한다. 잡음이 없다면 어떤 cycle을 돌아도 \(R_{ki}R_{jk}R_{ij} = I_3\)이다(<strong>cycle consistency</strong>). 실제 측정에서 이 곱은 \(I_3\)이 아니고, 그 회전각이 cycle의 불일치다. multiple rotation averaging은</p>
+      <div class="equation" id="eq-28-4-6">
+      \[ \min_{R_1, \dots, R_N} \sum_{(i,j)} d\big(R_{ij},\ R_jR_i^{\mathsf T}\big)^p \tag{28.4.6} \]
+      </div>
+      <p>을 푼다(\(p = 1, 2\), \(d\)는 위의 거리들) <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>. 이 문제에도 gauge가 있다. 모든 \(R_i\)를 \(R_iQ\)로 바꾸어도 \(R_jR_i^{\mathsf T}\)가 변하지 않으므로, 3차원의 global rotation이 정해지지 않는다(<a href="28-3-bundle-adjustment.html#sec-gauge">Section 28.3</a>의 7차원 gauge의 회전 부분). pose graph optimization은 nonconvex 문제라 초기값이 중요한데, 회전을 먼저 이런 방법으로 추정해 초기값으로 쓰면 수렴 속도와 robustness가 크게 좋아진다는 것을 Carlone 등이 여러 SLAM 데이터에서 비교했다 <a class="cite" href="../../references.html#Carlone15">[Carlone15]</a>.</p>
+      <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>geodesic, exponential map, 최단성, cut point: <a href="../23-geodesics/index.html#toc-23-1">Section 23.1</a>, <a href="../23-geodesics/index.html#toc-23-2">Section 23.2</a>, <a href="../23-geodesics/index.html#toc-23-4">Section 23.4</a>, <a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a>. sphere의 geodesic(great circle)은 Part I의 <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>에서 처음 나온다.</li>
+        <li>Riemannian metric, isometry, product metric: <a href="../21-riemannian-metrics/index.html#toc-21-1">Section 21.1</a>, <a href="../21-riemannian-metrics/index.html#toc-21-3">Section 21.3</a>. Lie group의 left-invariant 구조: <a href="../20-lie-groups-frobenius/index.html#toc-20-2">Section 20.2</a>.</li>
+        <li>curvature가 평균의 유일성에 미치는 영향: <a href="../24-curvature/index.html#toc-24-3">Section 24.3</a>, <a class="cite" href="../../references.html#Pennec06">[Pennec06]</a>, <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>.</li>
+        <li>문헌: SLERP <a class="cite" href="../../references.html#Shoemake85">[Shoemake85]</a>, quaternion B-spline <a class="cite" href="../../references.html#Kim95">[Kim95]</a>, 연속 시간 SLAM과 rolling shutter <a class="cite" href="../../references.html#Lovegrove13">[Lovegrove13]</a>, Lie group B-spline의 미분 <a class="cite" href="../../references.html#Sommer20">[Sommer20]</a>, rotation averaging의 tutorial <a class="cite" href="../../references.html#Hartley13">[Hartley13]</a>, pose graph 초기화 <a class="cite" href="../../references.html#Carlone15">[Carlone15]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>SLERP <a href="#eq-28-4-1">(28.4.1)</a>는 \(S^3\)의 great circle이고, \(\inner{q_0}{q_1} \ge 0\)이면 \(\mathrm{SO}(3)\)의 최단 geodesic을 일정한 각속도로 지난다. 부호를 고르지 않으면 먼 쪽으로 돈다.</li>
+        <li>\(\mathrm{SE}(3)\)의 보간은 여럿이다 <a href="#eq-28-4-2">(28.4.2)</a>. \(\mathrm{SE}(3)\)에는 bi-invariant metric이 없고, \(T_{wc}\)의 left-invariant product metric의 geodesic은 중심이 직선인 (ii)다. Lie group 보간 (i)은 규약에 무관하지만 중심이 screw를 따라 휜다.</li>
+        <li>cumulative B-spline <a href="#eq-28-4-3">(28.4.3)</a>은 control point 4개의 local support와 \(C^2\) 성질을 가진 연속 시간 궤적이고, rolling shutter와 IMU에 쓰인다. control point를 지나지 않는다.</li>
+        <li>rotation 평균은 chordal \(L_2\)(SVD, quaternion eigenvector), geodesic \(L_2\)(Karcher), geodesic \(L_1\)(Weiszfeld)로 다르다. outlier에는 \(L_1\), chordal, Karcher 순으로 강하고, quaternion을 성분별로 평균하려면 부호가 맞아야 한다.</li>
+        <li>상대 회전들은 cycle consistency를 만족해야 하고, multiple rotation averaging <a href="#eq-28-4-6">(28.4.6)</a>은 3차원 global rotation gauge를 가진 pose graph의 회전 부분이다.</li>
+      </ul>
+      <p class="next">다음 장인 <a href="../29-gaussian-splatting/index.html">Chapter 29</a>에서는 3D Gaussian Splatting의 기하로 간다. 이 장의 \(\mathrm{SO}(3)\)와 quaternion이 Gaussian의 covariance(회전과 축마다의 scale로 만든 행렬)의 회전 부분으로 다시 나오고, 같은 Gaussian을 주는 (quaternion, scale) 쌍이 48개라는 것, 그리고 covariance의 공간 \(\mathrm{SPD}(3)\)에서 보간과 평균이 metric에 따라 달라진다는 것을 이 장과 같은 방식으로 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-28-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 28.4.1</span> <span class="level">★</span>
+        \(R_0 = I_3\), \(R_1 = R_z(150^\circ)\)일 때 \(s = 1/2\)와 \(s = 1/4\)에서 SLERP와 NLERP가 주는 회전각을 구하여라. 어느 \(s\)에서 둘이 같은가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(q_0 = (1, 0)\), \(q_1 = (\cos 75^\circ, \sin 75^\circ\,e_3)\)이다. SLERP는 quaternion의 각을 \(s \cdot 75^\circ\)로 일정하게 나누므로 회전각은 \(s = 1/2\)에서 \(75^\circ\), \(s = 1/4\)에서 \(37.5^\circ\)이다. NLERP의 quaternion 각은 \(\arctan\frac{s\sin 75^\circ}{(1 - s) + s\cos 75^\circ}\)이므로 \(s = 1/2\)에서 \(37.5^\circ\)(회전각 \(75^\circ\), SLERP와 같다), \(s = 1/4\)에서 \(\arctan(0.2415/0.8147) = 16.51^\circ\)(회전각 \(33.0^\circ\))이다. symmetry 때문에 \(s = 0, 1/2, 1\)에서만 같고, 그 사이에서는 NLERP가 처음에 느리고 가운데서 빠르다(<a href="#fig-28-4-1">Figure 28.4.1</a>).</p>
+          <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-4-2" data-level="1">
+        <p><span class="thm-head">Exercise 28.4.2</span> <span class="level">★</span>
+        \(q_0 = (1, 0, 0, 0)\), \(q_1 = (\cos 120^\circ, \sin 120^\circ\,e_3)\)이다. \(q_1\)이 나타내는 회전과, 부호 확인 없이 \(q_0\)에서 \(q_1\)으로 SLERP할 때 도는 각을 구하여라. 부호를 바꾸면?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="28-2-calculus-on-lie-groups.html#eq-28-2-8">(28.2.8)</a>에서 \(q_1\)은 \(z\)축 둘레 \(240^\circ\), 곧 \(-120^\circ\) 회전이다. \(\inner{q_0}{q_1} = \cos 120^\circ = -0.5 \lt 0\)이므로 그대로 SLERP하면 quaternion 각 \(120^\circ\)를 따라가 회전각 \(240^\circ\)를 돈다. \(-q_1 = (0.5, -\sin 120^\circ\,e_3)\)로 바꾸면 \(\inner{q_0}{-q_1} = 0.5\)이고 quaternion 각 \(60^\circ\), 곧 반대 방향으로 \(120^\circ\)만 돈다. 이것이 최단 geodesic이다(<a href="#i-28-4-1">Proposition 28.4.1</a>).</p>
+          <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-4-3" data-level="2">
+        <p><span class="thm-head">Exercise 28.4.3</span> <span class="level">★★</span>
+        IMU frame \(b\)의 pose \(T_{wb}(s) = (R(s), p(s))\)를 \(\mathrm{SO}(3) \times \R^3\)으로 보간하고(\(p\)는 직선), 카메라는 IMU에 고정되어 \(T_{bc} = (R_{bc}, t_{bc})\)라 하자. 카메라 중심의 path를 쓰고, 언제 직선인지 말하여라. Lie group 보간 (i)이면 무엇이 달라지는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(T_{wc}(s) = T_{wb}(s)T_{bc}\)의 translation이 카메라 중심이므로 \(c(s) = p(s) + R(s)t_{bc} = (1 - s)p_0 + sp_1 + R(s)t_{bc}\)이다. \(R(s)t_{bc}\)는 \(t_{bc} = 0\)이거나 회전축이 \(t_{bc}\)와 평행할 때만 \(s\)에 대해 일정하거나 직선이고, 일반적으로는 원호를 그린다. 그래서 IMU를 곧게 보간하면 카메라는 휜다. Lie group 보간에서는 \(T_{wb}(s)T_{bc} = T_{wc,0}\,\mathrm{Exp}\big(s\,\mathrm{Log}(T_{wc,0}^{-1}T_{wc,1})\big)\)가 성립하므로(오른쪽에서 고정된 원소를 곱해도 같은 보간), IMU를 보간하든 카메라를 보간하든 같은 강체 운동이 나온다. 대신 screw axis 위의 점이 아니면 곧게 가지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-4-4" data-level="1">
+        <p><span class="thm-head">Exercise 28.4.4</span> <span class="level">★</span>
+        \(\norm{I_3 - R}_F = 2\sqrt2\,\abs{\sin(\theta/2)}\)(\(\theta\)는 \(R\)의 회전각)임을 보이고, \(\theta = 10^\circ, 90^\circ, 180^\circ\)에서 값을 구하여라. chordal 거리의 제곱과 회전각의 제곱의 비는 \(\theta\)에 따라 어떻게 변하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\norm{I_3 - R}_F^2 = \tr\big((I_3 - R)^{\mathsf T}(I_3 - R)\big) = 6 - 2\tr R = 6 - 2(1 + 2\cos\theta) = 4(1 - \cos\theta) = 8\sin^2(\theta/2)\)이다(<a href="28-1-so3-se3-sim3.html#i-28-1-6">Proposition 28.1.6</a>의 \(\tr R = 1 + 2\cos\theta\)). 값은 \(0.2465\), \(2\), \(2\sqrt2 = 2.828\)이다. 비 \(8\sin^2(\theta/2)/\theta^2\)는 \(\theta \to 0\)에서 2이고 \(\theta = \pi\)에서 \(8/\pi^2 = 0.81\)로 줄어든다. 큰 오차일수록 chordal 비용이 상대적으로 덜 커지므로 outlier의 영향이 작다(<a href="#fig-28-4-4">Figure 28.4.4</a>).</p>
+          <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-4-5" data-level="2">
+        <p><span class="thm-head">Exercise 28.4.5</span> <span class="level">★★</span>
+        상대 회전의 측정이 \(R_{12} = R_z(30^\circ)\), \(R_{23} = R_z(40^\circ)\), \(R_{31} = R_x(2^\circ)R_z(-70^\circ)\)이다. cycle \(1 \to 2 \to 3 \to 1\)의 불일치(회전각)를 구하여라. 절대 회전 \(R_1, R_2, R_3\)을 모두 오른쪽에서 같은 \(Q\)로 바꾸어도 <a href="#eq-28-4-6">(28.4.6)</a>의 비용이 같은 이유와, 그래서 몇 차원의 gauge가 있는지 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(R_{31}R_{23}R_{12} = R_x(2^\circ)R_z(-70^\circ)R_z(70^\circ) = R_x(2^\circ)\)이므로 불일치는 \(2^\circ\)이다. 잡음 없는 측정이라면 \(R_{ij} = R_jR_i^{\mathsf T}\)이고 cycle의 곱은 \(R_1R_3^{\mathsf T}R_3R_2^{\mathsf T}R_2R_1^{\mathsf T} = I_3\)이다. \(R_i \mapsto R_iQ\)이면 \(R_jQ(R_iQ)^{\mathsf T} = R_jQQ^{\mathsf T}R_i^{\mathsf T} = R_jR_i^{\mathsf T}\)이므로 모든 항이 변하지 않는다. \(Q \in \mathrm{SO}(3)\)이 3차원이므로 gauge는 3차원이고, 보통 \(R_1 = I_3\)으로 고정한다.</p>
+          <p class="verified">Verification: <code>verify/v-28-4-interpolating-averaging.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="28-3-bundle-adjustment.html">← 28.3 Bundle Adjustment on a Manifold</a>
+    <a rel="next" href="../29-gaussian-splatting/index.html">29. The Geometry of Gaussian Splatting →</a>
+  </nav>
+</body>
+</html>

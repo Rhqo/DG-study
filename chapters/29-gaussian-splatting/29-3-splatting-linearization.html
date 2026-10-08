@@ -98,7 +98,7 @@
       \[ \begin{aligned} u_0 &amp;= \varphi(t_0), \\ \Sigma_{2D} &amp;= J\,\Sigma_c\,J^{\mathsf T} = JW\Sigma W^{\mathsf T}J^{\mathsf T} \end{aligned} \tag{29.3.4} \]
       </div>
       <p>를 얻는다. 이것이 화면 위의 2D Gaussian이다. 한 문장으로 하면 <strong>splatting은 differential에 의한 pushforward</strong>다. tangent vector가 \(d\varphi\)로 밀려 가듯이(<a href="../00-tour/0-6-manifolds.html#eq-0-6-5">(0.6.5)</a>), contravariant 2-tensor인 \(\Sigma_c\)도 \(J\)로 밀려 간다. 정확한 \(\varphi\)는 Gaussian을 Gaussian이 아닌 것으로 보내지만, 그 differential은 Gaussian을 Gaussian으로 보낸다.</p>
-      <p>\(J\)의 kernel을 보자. <a href="#eq-29-3-3">(29.3.3)</a>에서 \(Jt_0 = 0\)이다. 곧 \(\ker J\)는 중심을 지나는 ray의 방향 \(t_0\)이다. 깊이 방향으로 움직이면 픽셀이 변하지 않는다는 말이고, 이것이 \(\varphi\)의 fiber가 ray라는 사실의 무한소판이다(<a href="../27-cameras-rays/index.html#toc-27-1">Section 27.1</a>). 이 사실에서 1차 근사의 기하가 나온다.</p>
+      <p>\(J\)의 kernel을 보자. <a href="#eq-29-3-3">(29.3.3)</a>에서 \(Jt_0 = 0\)이다. 곧 \(\ker J\)는 중심을 지나는 ray의 방향 \(t_0\)이다. 깊이 방향으로 움직이면 픽셀이 변하지 않는다는 말이고, 이것이 \(\varphi\)의 fiber가 ray라는 사실의 무한소판이다(<a href="../27-cameras-rays/27-1-camera-smooth-map.html#i-27-1-1">Section 27.1</a>). 이 사실에서 1차 근사의 기하가 나온다.</p>
 
       <div class="thm proposition" id="i-29-3-2">
         <p><span class="thm-head">Proposition 29.3.2</span> <span class="thm-name">(what the linearization does)</span>.
@@ -185,7 +185,7 @@
     <section id="sec-other-cameras">
       <h2>Other Camera Models</h2>
       <p>위의 논리는 pinhole에만 쓰이는 것이 아니다. 카메라 모델이 어떤 smooth map \(\varphi\)이든, Gaussian의 중심에서 그 differential \(J = D\varphi(t_0)\)을 계산해 <a href="#eq-29-3-4">(29.3.4)</a>에 넣으면 같은 1차 근사가 된다. 예를 들어 fisheye lens의 equidistant model \(u = f\,\vartheta\,(t_x, t_y)/\sqrt{t_x^2 + t_y^2}\) (\(\vartheta\)는 optical axis와 ray가 이루는 각)을 쓰면 \(J\)는 이 식의 Jacobian matrix로 바뀐다. 근사의 질은 그 모델의 Hessian이 정한다.</p>
-      <p>pinhole은 넓은 각에서 특히 나쁘다. <a href="#eq-29-3-3">(29.3.3)</a>의 \(J\)는 \(\theta\)가 커질수록 화면을 늘인다. 카메라에서 같은 거리에 있는 Gaussian이라도 off-axis 각이 \(\theta\)이면 반지름 방향(principal point에서 멀어지는 방향)으로 on-axis일 때의 \(1/\cos^2\theta\)배로 늘어나고, \(\theta \to 90^\circ\)에서 발산한다. 같은 Gaussian이라도 화각의 가장자리에서는 footprint가 커지고 2차 항도 커진다(<a href="#i-29-3-4">Example 29.3.4</a>의 \(60^\circ\) 줄). 공식 구현은 \(J\)를 계산할 때 \(t_x/t_z\)를 \(\pm 1.3\tan(\mathrm{FoV}_x/2)\) 안으로(\(t_y/t_z\)도 같은 방식으로) 자르는데, 화면 밖 멀리 있는 Gaussian에서 \(J\)가 지나치게 커지는 것을 막는 장치로 볼 수 있다. 화면 전체가 넓은 각을 덮는 fisheye·360 카메라에서는 pinhole의 \(J\)를 그대로 쓸 수 없고, 그 모델의 \(J\)를 써야 한다. 카메라를 \(S^2\)의 chart로 보는 관점은 <a href="../27-cameras-rays/index.html#toc-27-4">Section 27.4</a>에서 다룬다.</p>
+      <p>pinhole은 넓은 각에서 특히 나쁘다. <a href="#eq-29-3-3">(29.3.3)</a>의 \(J\)는 \(\theta\)가 커질수록 화면을 늘인다. 카메라에서 같은 거리에 있는 Gaussian이라도 off-axis 각이 \(\theta\)이면 반지름 방향(principal point에서 멀어지는 방향)으로 on-axis일 때의 \(1/\cos^2\theta\)배로 늘어나고, \(\theta \to 90^\circ\)에서 발산한다. 같은 Gaussian이라도 화각의 가장자리에서는 footprint가 커지고 2차 항도 커진다(<a href="#i-29-3-4">Example 29.3.4</a>의 \(60^\circ\) 줄). 공식 구현은 \(J\)를 계산할 때 \(t_x/t_z\)를 \(\pm 1.3\tan(\mathrm{FoV}_x/2)\) 안으로(\(t_y/t_z\)도 같은 방식으로) 자르는데, 화면 밖 멀리 있는 Gaussian에서 \(J\)가 지나치게 커지는 것을 막는 장치로 볼 수 있다. 화면 전체가 넓은 각을 덮는 fisheye·360 카메라에서는 pinhole의 \(J\)를 그대로 쓸 수 없고, 그 모델의 \(J\)를 써야 한다. 카메라를 \(S^2\)의 chart로 보는 관점은 <a href="../27-cameras-rays/27-4-space-of-rays.html#sec-omni">Section 27.4</a>에서 다룬다.</p>
     </section>
 
     <section id="sec-filters">
@@ -227,7 +227,7 @@
         <li>total derivative, Jacobian matrix, chain rule: <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-1">Definition 2.1.1</a>, <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-10">Definition 2.1.10</a>, <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-11">Theorem 2.1.11</a>, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-1">Theorem 2.2.1</a>. 2차 항과 나머지: <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-17">Theorem 2.2.17 (Taylor's theorem)</a>.</li>
         <li>pushforward density와 변수변환: <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-9">Theorem 2.6.9</a>, linear map이 부피를 \(\abs{\det A}\)배 한다는 사실 <a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-8">Proposition 2.6.8</a>(\(\det\)가 정규화 인수 <a href="#eq-29-3-5">(29.3.5)</a>에 나타나는 이유).</li>
         <li>manifold 사이 map의 differential과 pushforward: <a href="../13-tangent-spaces/index.html#toc-13-3">Section 13.3</a>. fiber가 ray인 submersion: <a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>.</li>
-        <li>카메라를 smooth map으로 보기(kernel = ray, lens distortion), ray의 공간과 fisheye: <a href="../27-cameras-rays/index.html#toc-27-1">Section 27.1</a>, <a href="../27-cameras-rays/index.html#toc-27-4">Section 27.4</a>.</li>
+        <li>카메라를 smooth map으로 보기(kernel = ray, lens distortion), ray의 공간과 fisheye: <a href="../27-cameras-rays/27-1-camera-smooth-map.html#sec-distortion">Section 27.1</a>, <a href="../27-cameras-rays/27-4-space-of-rays.html">Section 27.4</a>.</li>
       </ul>
     </aside>
 

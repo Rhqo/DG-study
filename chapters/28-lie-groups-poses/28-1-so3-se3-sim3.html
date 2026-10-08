@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>28.1 SO(3), SE(3), and Sim(3) — DG Study</title>
+  <meta name="dg-id" content="28.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.6, 0.8, 29.2">
+  <meta name="dg-refs" content="Sola18; Barfoot; Ma04; Strasdat10; Grassia98; Schonberger16; Kerbl23; Mildenhall20">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">28. Poses and Motion: Lie Groups for SfM and SLAM</a> ›
+    <span>28.1 SO(3), SE(3), and Sim(3)</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>28.1 SO(3), SE(3), and Sim(3)</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Sola18">[Sola18]</a>,
+        <a class="cite" href="../../references.html#Barfoot">[Barfoot]</a>,
+        <a class="cite" href="../../references.html#Ma04">[Ma04, Ch. 2]</a>,
+        <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>,
+        <a class="cite" href="../../references.html#Grassia98">[Grassia98]</a>,
+        <a class="cite" href="../../references.html#Schonberger16">[Schonberger16]</a>,
+        <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>,
+        <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>\(\mathrm{SO}(3)\), \(\mathrm{SE}(3)\), \(\mathrm{Sim}(3)\)을 \(3 \times 3\) 또는 \(4 \times 4\) 행렬의 Lie group으로 쓰고, 차원 3, 6, 7과 Lie algebra의 hat/vee 표기를 설명할 수 있다.</li>
+        <li>\(\mathrm{SE}(3)\)의 \(\exp\)를 \(V\) 행렬로 계산하고, twist의 \(v\)가 translation이 아니라 원점의 처음 속도라는 것(screw motion)을 그림으로 설명할 수 있다. \(\mathrm{Sim}(3)\)의 \(\exp\)도 닫힌 꼴로 쓸 수 있다.</li>
+        <li>\(\log\)의 진짜 singularity(\(\theta = \pi\))과 공식의 겉보기 singularity(\(\theta = 0\))을 구별하고, 수치적으로 안전한 계산법을 고를 수 있다.</li>
+        <li>adjoint \(\mathrm{Ad}_T\)로 twist를 다른 frame의 좌표로 옮기고, COLMAP·3DGS·NeRF가 pose를 \(T_{cw}\)와 \(T_{wc}\) 가운데 무엇으로 저장하는지 구별할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../00-tour/0-6-manifolds.html#sec-lie-groups">Section 0.6</a>: Lie group, \(\mathrm{SO}(3)\)와 \([\omega]_\times\) <a href="../00-tour/0-6-manifolds.html#eq-0-6-6">(0.6.6)</a>, Rodrigues formula <a href="../00-tour/0-6-manifolds.html#eq-0-6-7">(0.6.7)</a>(<a href="../00-tour/0-6-manifolds.html#i-0-6-7">Example 0.6.7</a>), 상자 <a href="../00-tour/0-6-manifolds.html#sec-cv-pose">In computer vision: 카메라 자세</a>(\(\mathrm{SE}(3)\), gimbal lock, unit quaternion)</li>
+        <li><a href="../00-tour/0-8-riemannian.html#i-0-8-4">Remark 0.8.4</a>: \(\mathrm{SO}(3)\)의 bi-invariant metric과 \(d(R_1, R_2) = \abs{\log(R_1^{\mathsf T}R_2)}\), cut point(<a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>)</li>
+        <li><a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#eq-29-2-5">(29.2.5)</a>: unit quaternion에서 rotation matrix를 만드는 식</li>
+        <li>3D vision 쪽: SfM과 SLAM의 camera pose, COLMAP의 <code>images.txt</code> <a class="cite" href="../../references.html#Schonberger16">[Schonberger16]</a>, NeRF의 <code>transforms.json</code> <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="../27-cameras-rays/index.html">Chapter 27</a>은 pose를 고정된 것으로 두고 카메라를 smooth map으로 보았다. world의 점을 rigid motion \(g(x) = Rx + T\)로 camera 좌표로 옮긴 뒤 투영하는 \(\varphi \circ g\)였다(<a href="../27-cameras-rays/27-1-camera-smooth-map.html#eq-27-1-3">(27.1.3)</a>). 그 장의 마지막 문장이 예고했듯이, 이 장은 고정해 두었던 pose 자체를 다룬다. SfM과 SLAM에서는 바로 그 rigid motion이 미지수다. 카메라가 움직일 때마다 다른 rigid motion이 생기고, bundle adjustment는 수백 개의 rigid motion을 한꺼번에 고친다.</p>
+      <p>rigid motion 하나는 회전 \(R\)과 translation \(t\)의 쌍이므로 수 12개(\(R\)의 9개와 \(t\)의 3개)로 저장하지만, 자유도는 6이다. <a href="../00-tour/0-6-manifolds.html#sec-cv-pose">Section 0.6</a>에서 본 대로 이런 쌍 전체는 6차원 manifold이자 group인 \(\mathrm{SE}(3)\)다. 이 절은 그 group을 계산의 도구로 다룬다. 질문은 넷이다.</p>
+      <ol>
+        <li>\(\mathrm{SE}(3)\)와, monocular SLAM에서 쓰는 \(\mathrm{Sim}(3)\)은 어떤 행렬 group이고, tangent space(Lie algebra)는 무엇인가?</li>
+        <li>Lie algebra의 원소(twist)에서 group의 원소로 가는 \(\exp\)는 어떻게 계산하는가? twist의 숫자들은 무엇을 뜻하는가?</li>
+        <li>거꾸로 가는 \(\log\)는 어디서 깨지고, 수치적으로는 어떻게 계산해야 안전한가?</li>
+        <li>같은 움직임을 world frame과 camera frame에서 쓰면 twist가 어떻게 바뀌는가? 그리고 COLMAP, 3DGS, NeRF는 pose를 어느 방향으로 저장하는가?</li>
+      </ol>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: 이 장의 기호</p>
+        <ul>
+          <li>rigid motion은 \(T = (R, t)\), 곧 \(x \mapsto Rx + t\)이고 \(4 \times 4\) 행렬 \(\begin{pmatrix} R &amp; t \\ 0 &amp; 1 \end{pmatrix}\)로 쓴다. 점과 벡터는 굵게 쓰지 않는다(Chapter 29와 같다).</li>
+          <li>frame 첨자: \(T_{ab}\)는 frame \(b\)의 좌표를 frame \(a\)의 좌표로 바꾼다. 따라서 \(T_{ab}T_{bc} = T_{ac}\)이다. \(T_{cw}\)는 world에서 camera로(\(x_c = R_{cw}x_w + t_{cw}\)), \(T_{wc} = T_{cw}^{-1}\)은 camera에서 world로 간다. 첨자 없이 camera pose \(T_i\)라고 하면 \(T_{cw}\)이다. 카메라 중심은 \(c = t_{wc} = -R_{cw}^{\mathsf T}t_{cw}\)이다.</li>
+          <li>hat \(\wedge\)와 vee \(\vee\): rotation vector \(\omega \in \R^3\)에 대해 \(\omega^\wedge = [\omega]_\times\)(Tour <a href="../00-tour/0-6-manifolds.html#eq-0-6-6">(0.6.6)</a>). twist \(\xi = (v, \omega) \in \R^6\)과 \(\mathrm{sim}(3)\)의 \(\zeta = (v, \omega, \sigma) \in \R^7\)의 hat은 <a href="#eq-28-1-2">(28.1.2)</a>이다. translation 쪽을 먼저 쓴다(Sophus, <a class="cite" href="../../references.html#Sola18">[Sola18]</a>와 같은 순서). GTSAM, g2o, BARF와 <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>의 논문은 rotation 쪽을 먼저 쓴다(논문은 \((\omega, \upsilon)\), \((\omega, \sigma, \upsilon)\). <a href="28-2-calculus-on-lie-groups.html">Section 28.2</a>의 표).</li>
+          <li>Chapter 27과의 대응: 그 장은 camera 좌표를 \(t\), translation을 \(T\)로 쓴다(<a href="../27-cameras-rays/27-1-camera-smooth-map.html#sec-motivation">Section 27.1</a>의 Conventions). 그 장의 \((R, T)\)는 이 장의 \((R_{cw}, t_{cw})\)이고, 그 장의 \(t\)는 이 장의 \(x_c\), 그 장의 \(J_t = D\varphi(t)\)는 이 장의 \(D\varphi(x_c)\)다.</li>
+          <li>\(\omega\)는 rotation 부분, \(v\)는 twist의 linear 부분, \(\theta = \abs{\omega}\)는 회전각이다. 성분은 Tour처럼 \(\omega^1, \omega^2, \omega^3\)으로 쓴다. Chapter 29의 \(\omega_k\)(아래첨자)는 \(R\) 자신의 축 \(r_k\)에 대한 성분, 곧 이 장의 right perturbation \(R\exp([\omega]_\times)\)의 성분과 같다(<a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#sec-rank">Section 29.2</a>).</li>
+          <li>\(\mathrm{Exp}(\xi) = \exp(\xi^\wedge)\)(matrix exponential), \(\mathrm{Log}(T) = \log(T)^\vee\)로 줄여 쓴다. \(\mathrm{Ad}_T\)는 adjoint(<a href="#i-28-1-7">Definition 28.1.7</a>), \(J_l, J_r\)는 \(\mathrm{Exp}\)의 left/right Jacobian이다(<a href="28-2-calculus-on-lie-groups.html">Section 28.2</a>). 투영 \(\varphi\)의 Jacobian matrix는 이 장에서 \(D\varphi\)로 쓰고(<a href="../29-gaussian-splatting/29-3-splatting-linearization.html#eq-29-3-3">(29.3.3)</a>의 \(J\)), \(J_l, J_r\)와 구별한다.</li>
+          <li>unit quaternion은 Hamilton 규약, scalar 먼저 \(q = (q_0, q_1, q_2, q_3)\)로 쓴다. \(\mathrm{Sim}(3)\)의 scale은 \(s = e^\sigma \gt 0\)이다(Chapter 29의 Gaussian scale \(s\)와 다른 장에서만 쓴다). <a href="28-4-interpolating-averaging.html">Section 28.4</a>에서는 \(s\)를 보간 parameter(\(0 \le s \le 1\))로만 쓴다. 그 절에는 \(\mathrm{Sim}(3)\)의 scale이 나오지 않는다. \(\mathrm{Sim}(3)\)의 \(\exp\)에 나오는 행렬 \(W\)(<a href="#eq-28-1-5">(28.1.5)</a>)는 Chapter 29의 view rotation \(W\)(<a href="../29-gaussian-splatting/29-3-splatting-linearization.html#eq-29-3-1">(29.3.1)</a>)와 관계없다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-groups">
+      <h2>Three Matrix Groups</h2>
+      <p>\(\mathrm{SO}(3) = \{R : R^{\mathsf T}R = I_3,\ \det R = 1\}\)은 3차원 compact Lie group이었다(<a href="../00-tour/0-6-manifolds.html#i-0-6-7">Example 0.6.7</a>). rigid motion과 similarity transformation도 같은 방식으로 행렬 group이 된다. 점 \(x\)를 \((x, 1) \in \R^4\)으로 쓰면 \(x \mapsto Rx + t\)가 \(4 \times 4\) 행렬의 곱이 되기 때문이다.</p>
+
+      <div class="thm definition" id="i-28-1-1">
+        <p><span class="thm-head">Definition 28.1.1</span> <span class="thm-name">(\(\mathrm{SE}(3)\) and \(\mathrm{Sim}(3)\))</span>.</p>
+        <div class="equation" id="eq-28-1-1">
+        \[ \begin{aligned} \mathrm{SE}(3) &amp;= \Big\{ T = \begin{pmatrix} R &amp; t \\ 0 &amp; 1 \end{pmatrix} \Big\}, \\ \mathrm{Sim}(3) &amp;= \Big\{ S = \begin{pmatrix} sR &amp; t \\ 0 &amp; 1 \end{pmatrix} \Big\}. \end{aligned} \tag{28.1.1} \]
+        </div>
+        <p>여기서 \(R \in \mathrm{SO}(3)\), \(t \in \R^3\), \(s \gt 0\)이다. 둘 다 행렬 곱으로 group이 되고, \(\GL(4, \R)\)의 곱과 역이 smooth이므로 Lie group이다. \(\mathrm{SE}(3)\)을 <strong>special Euclidean group</strong>(특수 유클리드 군)이라 하고, 원소는 rigid motion \(x \mapsto Rx + t\)이다. \(\mathrm{Sim}(3)\)의 원소는 <strong>similarity transformation</strong>(닮음변환) \(x \mapsto sRx + t\)이다.</p>
+      </div>
+
+      <p>곱과 역을 성분으로 쓰면</p>
+      <p>\[ \begin{aligned} (R_1, t_1)(R_2, t_2) &amp;= (R_1R_2,\ R_1t_2 + t_1), \\ (R, t)^{-1} &amp;= (R^{\mathsf T},\ -R^{\mathsf T}t) \end{aligned} \]</p>
+      <p>이다. 차원은 parameter를 세면 된다. \(\mathrm{SE}(3)\)은 \(\mathrm{SO}(3)\)의 3과 \(t\)의 3을 합해 6차원, \(\mathrm{Sim}(3)\)은 scale 하나를 더해 7차원이다. manifold로서 \((R, t) \mapsto T\)는 \(\mathrm{SO}(3) \times \R^3\)에서 \(\mathrm{SE}(3)\)으로 가는 diffeomorphism이다. 그러나 group으로서는 곱이 아니다. 첫 식에서 \(t_2\)가 \(R_1\)에 의해 돌아간 뒤 더해지기 때문이다. 이런 구조를 <strong>semidirect product</strong>(반직접곱) \(\mathrm{SO}(3) \ltimes \R^3\)이라 한다. manifold로는 같고 group으로는 다르다는 이 차이가 <a href="28-4-interpolating-averaging.html">Section 28.4</a>에서 두 가지 pose 보간의 차이로 나타난다.</p>
+      <p>frame 첨자 규약(Conventions)으로 쓰면 곱은 좌표 변환의 연쇄다. COLMAP처럼 world에서 camera로 가는 \(T_{cw}\)를 저장하면 두 카메라 사이의 상대 pose는 \(T_{c_1c_2} = T_{c_1w}T_{c_2w}^{-1}\)이다. 첨자가 맞물리지 않는 곱(\(T_{c_1w}T_{c_2w}\))은 기하적 의미가 없다. 실무에서 가장 흔한 pose 버그가 이 첨자를 놓친 데서 생긴다(아래 <a href="#sec-conventions-cv">Pose Conventions</a>).</p>
+    </section>
+
+    <section id="sec-lie-algebras">
+      <h2>Lie Algebras, Hat, and Vee</h2>
+      <p>\(I_4\)를 지나는 곡선 \(T(\tau) = \big(R(\tau), t(\tau)\big)\)를 \(\tau = 0\)에서 미분하면 \(\begin{pmatrix} R'(0) &amp; t'(0) \\ 0 &amp; 0 \end{pmatrix}\)이고, \(R'(0)\)은 skew-symmetric matrix다(<a href="../00-tour/0-6-manifolds.html#i-0-6-7">Example 0.6.7</a>). 따라서 \(\mathrm{SE}(3)\)의 tangent space at identity, 곧 <strong>Lie algebra</strong>(리 대수) \(\mathfrak{se}(3)\)은 이런 행렬 전체이고 6차원 vector space다. \(\mathrm{Sim}(3)\)에서는 \(s(\tau)R(\tau)\)를 미분하므로 왼쪽 위 블록에 \(s'(0)I_3\)이 더해진다. 좌표를 다음과 같이 정한다.</p>
+
+      <div class="thm remark" id="i-28-1-2">
+        <p><span class="thm-head">Remark 28.1.2</span> <span class="thm-name">(hat and vee convention)</span>.
+        이 장에서 \(\mathfrak{so}(3)\), \(\mathfrak{se}(3)\), \(\mathfrak{sim}(3)\)의 원소는 다음 hat으로 \(\R^3\), \(\R^6\), \(\R^7\)과 동일시한다. vee \(\vee\)는 그 역이다.</p>
+        <div class="equation" id="eq-28-1-2">
+        \[ \begin{aligned} \omega^\wedge &amp;= [\omega]_\times, \\ \xi^\wedge &amp;= \begin{pmatrix} [\omega]_\times &amp; v \\ 0 &amp; 0 \end{pmatrix} &amp;&amp; \xi = (v, \omega), \\ \zeta^\wedge &amp;= \begin{pmatrix} [\omega]_\times + \sigma I_3 &amp; v \\ 0 &amp; 0 \end{pmatrix} &amp;&amp; \zeta = (v, \omega, \sigma). \end{aligned} \tag{28.1.2} \]
+        </div>
+        <p>\(\xi \in \R^6\)을 <strong>twist</strong>라 부른다. 이 순서(translation 쪽 먼저)는 Sophus와 <a class="cite" href="../../references.html#Sola18">[Sola18]</a>를 따른 것이다. 라이브러리마다 순서가 다르므로 코드를 옮길 때 가장 먼저 확인할 것이다.</p>
+      </div>
+
+      <p>twist는 “속도”로 읽으면 뜻이 분명해진다. 곡선 \(T(\tau)\)가 \(T(0) = I_4\), \(T'(0) = \xi^\wedge\)이면, 시각 \(0\)에 점 \(x\)는 속도</p>
+      <div class="equation" id="eq-28-1-3">
+      \[ \frac{d}{d\tau}\Big|_{\tau = 0} T(\tau)x = \omega \times x + v \tag{28.1.3} \]
+      </div>
+      <p>로 움직인다. 각속도 \(\omega\)로 돌면서, <em>원점에 있는 점</em>이 속도 \(v\)로 움직이는 rigid motion의 순간 속도장이다. \(v\)는 원점의 속도이므로, 원점을 어디에 두느냐에 따라 같은 움직임의 \(v\)가 달라진다. 이것이 아래 adjoint의 출발점이다.</p>
+    </section>
+
+    <section id="sec-exp">
+      <h2>Closed Forms of exp</h2>
+      <p>\(\mathrm{SO}(3)\)의 \(\exp\)는 Rodrigues formula <a href="../00-tour/0-6-manifolds.html#eq-0-6-7">(0.6.7)</a>였다. 증명의 핵심은 \(\Omega = [\omega]_\times\)가 \(\Omega^3 = -\theta^2\Omega\)를 만족해 급수가 \(I_3, \Omega, \Omega^2\)의 세 항으로 줄어든다는 것이다. \(\mathrm{SE}(3)\)에서도 같은 일이 일어난다.</p>
+
+      <div class="thm proposition" id="i-28-1-3">
+        <p><span class="thm-head">Proposition 28.1.3</span> <span class="thm-name">(exp on \(\mathrm{SE}(3)\))</span>.
+        \(\xi = (v, \omega)\), \(\theta = \abs{\omega}\), \(\Omega = [\omega]_\times\)이면</p>
+        <div class="equation" id="eq-28-1-4">
+        \[ \begin{aligned} \mathrm{Exp}(\xi) &amp;= \begin{pmatrix} \exp(\Omega) &amp; Vv \\ 0 &amp; 1 \end{pmatrix}, \\ V &amp;= I_3 + \frac{1 - \cos\theta}{\theta^2}\,\Omega \\ &amp;\quad + \frac{\theta - \sin\theta}{\theta^3}\,\Omega^2 \end{aligned} \tag{28.1.4} \]
+        </div>
+        <p>이다(\(\theta = 0\)이면 \(V = I_3\)). 곧 rotation 부분은 Rodrigues formula 그대로이고, translation 부분은 \(v\)가 아니라 \(Vv\)이다 <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>, <a class="cite" href="../../references.html#Sola18">[Sola18]</a>.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(\xi^\wedge\)의 거듭제곱은 \((\xi^\wedge)^k = \begin{pmatrix} \Omega^k &amp; \Omega^{k-1}v \\ 0 &amp; 0 \end{pmatrix}\) (\(k \ge 1\))이므로 \(\exp(\xi^\wedge)\)의 오른쪽 위 블록은 \(\sum_{k \ge 1}\Omega^{k-1}v/k! = \big(\sum_{m \ge 0}\Omega^m/(m+1)!\big)v\)이다. \(\Omega^3 = -\theta^2\Omega\)로 \(\Omega^{2j+1} = (-\theta^2)^j\Omega\), \(\Omega^{2j+2} = (-\theta^2)^j\Omega^2\)이므로 \(\Omega\)의 coefficient는 \(\sum_j (-1)^j\theta^{2j}/(2j+2)! = (1 - \cos\theta)/\theta^2\), \(\Omega^2\)의 coefficient는 \(\sum_j (-1)^j\theta^{2j}/(2j+3)! = (\theta - \sin\theta)/\theta^3\)이다. 같은 계산을 적분으로 쓰면 \(V = \int_0^1 \exp(u\Omega)\,du\)이다. \(V\)는 “회전을 \(0\)에서 \(\theta\)까지 고르게 평균한 것”이다.</p>
+      </div>
+
+      <p>\(V\)가 무엇을 하는지는 <strong>screw motion</strong>(나사 운동)으로 보면 보인다. \(\omega \ne 0\)이면 one-parameter subgroup \(\tau \mapsto \mathrm{Exp}(\tau\xi)\)는 한 직선(screw axis) 둘레로 돌면서 그 직선을 따라 미끄러지는 운동이다. 축은 점 \(q = \omega \times v/\theta^2\)를 지나고 방향이 \(\omega\)이며, 한 radian 돌 때 축 방향으로 \(h = \inner{\omega}{v}/\theta^2\)만큼 간다(pitch). 실제로 \(v = q \times \omega + h\,\omega\)로 분해되고, <a href="#eq-28-1-3">(28.1.3)</a>에서 축 위의 점 \(q\)의 속도는 \(\omega \times q + v = h\,\omega\)로 축 방향뿐이다. 모든 rigid motion(\(R \ne I_3\))이 이런 screw motion이라는 고전적 사실을 Chasles's theorem이라 한다. twist와 그 exponential coordinates는 <a class="cite" href="../../references.html#Ma04">[Ma04, Ch. 2]</a>가 자세히 다룬다. 원점은 축에서 떨어져 있으므로 helix를 그린다.</p>
+
+      <div class="thm example" id="i-28-1-4">
+        <p><span class="thm-head">Example 28.1.4</span> <span class="thm-name">(screw motion and the running-example helix)</span>.
+        \(\omega = e_3\), \(v = (0, a, b)\)(\(a = 1\), \(b = 0.3\))인 twist를 생각하자. \(q = e_3 \times (0, a, b) = (-a, 0, 0)\), \(h = b\)이므로 screw axis는 직선 \(x = -a,\ y = 0\)이고 pitch는 \(b\)다. <a href="#eq-28-1-4">(28.1.4)</a>로 계산하면 원점의 궤적은</p>
+        <p>\[ c(\tau) = \mathrm{Exp}(\tau\xi)\,0 = V(\tau\omega)(\tau v) = (a\cos\tau - a,\ a\sin\tau,\ b\tau) \]</p>
+        <p>이고, 이것은 running example의 helix \(\gamma(\tau) = (a\cos\tau, a\sin\tau, b\tau)\)를 \((-a, 0, 0)\)만큼 옮긴 것이다. \(c'(0) = (0, a, b) = v\)이므로 \(v\)는 원점의 처음 속도다. 반 바퀴 뒤의 translation은 \(c(\pi) = (-2a, 0, \pi b) = (-2, 0, 0.942)\)이고, “\(v\)를 translation으로 착각한” 값 \(\pi v = (0, \pi a, \pi b) = (0, 3.14, 0.942)\)과 전혀 다르다(<a href="#fig-28-1-1">Figure 28.1.1</a>).</p>
+        <p class="verified">Verification: <code>verify/v-28-1-so3-se3-sim3.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-28-1-1">
+        <img src="figures/fig-28-1-1-screw-motion.svg" alt="두 패널. 왼쪽 (a)는 3D 그림으로, 원점(τ = 0)에서 출발한 검은 곡선이 오른쪽 아래에서 왼쪽 위(τ = π)로 반 바퀴 휘어 올라가는 helix 조각이다. 곡선 위 다섯 곳에 파랑·초록·주홍 세 화살표로 된 좌표틀이 있고, 주홍 화살표는 늘 위를 향하며 파랑과 초록 화살표는 점점 돌아간다. τ = 0의 좌표틀에는 x, y, z라고 적혀 있다. 곡선 안쪽에 회색 세로 점선(screw axis)이 있다. 곡선의 그림자가 바닥(z = 0)에 옅은 회색 점선 반원으로 그려져 있고, 끝점에서 바닥으로 내린 회색 점선 옆에 'rise bπ ≈ 0.94'라고 적혀 있다. 원점에서 굵은 파란 화살표 v = c'(0)가 곡선에 접하게 나가고, 주황 화살표 t = V(πω)πv가 원점에서 곡선의 끝점까지 직선으로 간다. 오른쪽 (b)는 같은 것을 위에서 본 xy 평면 그림이다. 검은 반원이 (0, 0)에서 (−2, 0)까지 위쪽으로 돌고, 중심 (−1, 0)에 screw axis 표시가 있다. 원점에서 파란 화살표 v가 위(+y)로 짧게, 주황 화살표 t가 왼쪽으로 (−2, 0)까지, 회색 점선 화살표 πv가 위로 (0, 3.14)까지 길게 뻗는다.">
+        <figcaption><span class="fig-head">Figure 28.1.1.</span>
+        twist \(\xi = (v, \omega)\)는 screw motion을 만들고, \(v\)는 translation이 아니라 원점의 처음 속도다. <em>무엇을</em>: <a href="#i-28-1-4">Example 28.1.4</a>의 \(\xi = \big((0, 1, 0.3), (0, 0, 1)\big)\)로 \(\mathrm{Exp}(\tau\xi)\) (\(0 \le \tau \le \pi\))를 world frame에서 출발한 좌표틀에 적용했다. (a)는 3D, (b)는 같은 것을 \(xy\) 평면에 투영한 top view다. <em>읽는 법</em>: 검은 곡선은 좌표틀의 원점 \(c(\tau)\), 작은 세 화살표는 \(\tau = 0, \pi/4, \dots, \pi\)에서의 좌표틀의 \(x\)(파랑)·\(y\)(초록)·\(z\)(주홍) 축(길이 0.45)이다. \(\tau = 0\)의 좌표틀은 world frame 자신이므로 \(x, y, z\)라고 적었다. 회색 세로 점선은 screw axis다. (a)의 옅은 회색 점선은 높이를 읽기 위한 보조선으로, 곡선을 바닥 \(z = 0\)에 내린 그림자와 끝점에서 바닥까지 내린 수직선이다. 굵은 파란 화살표가 \(v\), 주황 화살표가 \(\mathrm{Exp}(\pi\xi)\)의 translation \(t = V(\pi\omega)(\pi v)\), (b)의 회색 점선 화살표가 \(\pi v\)다. <em>볼 것</em>: \(v\)는 곡선의 시작점에서 곡선에 접한다. 끝점의 translation은 \(t = (-2, 0, 0.942)\)인데 \(\pi v = (0, 3.14, 0.942)\)는 엉뚱한 곳을 가리킨다. 좌표틀은 \(z\)축 둘레로 \(180^\circ\) 돌았고, 원점은 반지름 1인 반원을 따라 축 둘레를 돌면서 \(0.3\pi \approx 0.94\)만큼 올라갔다. <em>본문과의 연결</em>: <a href="#eq-28-1-4">(28.1.4)</a>의 \(V\)가 \(v\)를 휘어진 궤적의 끝점으로 바꾸는 행렬이다. <a href="figures/fig-28-1-1-screw-motion-interactive.html">Interactive version</a>.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-1-1">Figure 28.1.1</a>의 (b)를 먼저 보자. 원점은 \((0, 0)\)에서 출발해 \((-1, 0)\)을 중심으로 하는 반원을 따라 \((-2, 0)\)에 도착한다. 출발할 때의 방향은 파란 \(v\), 곧 \(+y\) 방향이다. 그러나 반 바퀴 뒤의 변위는 주황 화살표처럼 \(-x\) 방향이다. 회색 점선 \(\pi v\)는 “속도 \(v\)로 시간 \(\pi\)만큼 직진했다면” 도착했을 곳이다. (a)에서는 같은 원점이 반원을 따라 돌면서 위로 올라가는 helix 조각을 그린다. 바닥의 회색 그림자가 (b)의 반원이고, 끝점에서 내린 수직선의 길이 \(0.3\pi \approx 0.94\)가 그동안 축 방향으로 올라간 양이다. 좌표틀의 파랑·초록 축이 곡선을 따라 함께 돌아가고, 주홍 \(z\)축은 screw axis와 평행하게 그대로 위를 향한다. 회전 \(R(\tau)\)와 원점의 위치가 묶여서 움직이는 것, 이것이 \(\mathrm{SE}(3)\)의 one-parameter subgroup이다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: twist의 \(v\)는 이동량이 아니다</p>
+        <p>pose를 6-vector \((v, \omega)\)로 학습하거나 출력하는 코드는 많다. 그 6-vector가 \(\mathfrak{se}(3)\)의 twist라면, 최종 pose의 translation은 \(v\)가 아니라 \(V(\omega)v\)이다. 두 값의 차이는 회전이 클수록 크다. <a href="#i-28-1-4">Example 28.1.4</a>의 반 바퀴에서는 \(xy\) 평면에서 본 방향이 \(90^\circ\) 다르고, 회전이 작아도 1차 근사로 \(V \approx I_3 + \tfrac12[\omega]_\times\)이므로 \(\tfrac12\omega \times v\)만큼 어긋난다. 반대로 \(\mathrm{SO}(3) \times \R^3\)처럼 회전과 translation을 따로 두는 parametrization에서는 그 6-vector의 뒤 셋이 그대로 translation이다. 같은 “6개의 수”라도 어느 manifold의 좌표인지에 따라 뜻이 다르다. nerfstudio의 camera optimizer가 두 모드(<code>SO3xR3</code>, <code>SE3</code>)를 따로 두는 것이 이 차이다(<a href="28-3-bundle-adjustment.html">Section 28.3</a>, <a href="28-4-interpolating-averaging.html">Section 28.4</a>).</p>
+      </aside>
+
+      <p>\(\mathrm{Sim}(3)\)에서도 급수는 닫힌 꼴이 된다. 왼쪽 위 블록이 \(\Omega + \sigma I_3\)이고 \(\sigma I_3\)은 \(\Omega\)와 교환하므로 rotation·scale 부분은 \(e^\sigma\exp(\Omega)\)이다. translation 부분은 \(W = \sum_{m \ge 0}(\Omega + \sigma I_3)^m/(m+1)! = \int_0^1 e^{\sigma u}\exp(u\Omega)\,du\)를 \(v\)에 곱한 것이다.</p>
+
+      <div class="thm proposition" id="i-28-1-5">
+        <p><span class="thm-head">Proposition 28.1.5</span> <span class="thm-name">(exp on \(\mathrm{Sim}(3)\))</span>.
+        \(\zeta = (v, \omega, \sigma)\), \(\theta = \abs{\omega} \ne 0\), \(\sigma \ne 0\)이면 \(\mathrm{Exp}(\zeta) = \begin{pmatrix} e^\sigma\exp(\Omega) &amp; Wv \\ 0 &amp; 1 \end{pmatrix}\)이고</p>
+        <div class="equation" id="eq-28-1-5">
+        \[ \begin{aligned} W &amp;= \frac{a\sigma + (1 - b)\theta}{\theta(\sigma^2 + \theta^2)}\,\Omega + c\,I_3 \\ &amp;\quad + \Big(c - \frac{(b - 1)\sigma + a\theta}{\sigma^2 + \theta^2}\Big)\frac{\Omega^2}{\theta^2}, \\ a &amp;= e^\sigma\sin\theta, \quad b = e^\sigma\cos\theta, \\ c &amp;= \frac{e^\sigma - 1}{\sigma} \end{aligned} \tag{28.1.5} \]
+        </div>
+        <p>이다 <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>. \(\sigma \to 0\)이면 \(W \to V\)이고, \(\theta \to 0\)이나 \(\sigma \to 0\)에서는 극한값(Taylor 전개)을 쓴다.</p>
+      </div>
+      <p>이 식은 Strasdat의 논문(식 (22))과 Sophus의 구현(<code>sophus/sim_details.hpp</code>의 <code>calcW</code>)이 같은 꼴로 쓴다. 다만 논문의 7-vector는 \((\omega, \sigma, \upsilon)\) 순서이고, Sophus는 이 장과 같은 \((v, \omega, \sigma)\) 순서다. 여기서는 그 식을 행렬 지수의 급수와 수치로 대조했다(일반적인 \(\theta, \sigma\)에서 차이 \(10^{-12}\) 이하). 작은 \(\theta\)나 \(\sigma\)에서는 <a href="#eq-28-1-5">(28.1.5)</a>를 그대로 계산하면 뺄셈에서 자릿수를 잃는다. 예를 들어 \(\sigma = 10^{-9}\)에서 \(e^\sigma - 1\)을 그대로 계산하면 상대오차가 약 \(10^{-7}\)이다. 이때는 \(\mathrm{expm1}\)과 급수로 계산하면 된다. \(W\)는 \(\omega\) 방향에서 \((e^\sigma - 1)/\sigma\)를, \(\omega\)에 수직인 평면에서 복소수 \((e^{\sigma + i\theta} - 1)/(\sigma + i\theta)\)를 곱하는 행렬이기 때문이다(<a href="#ex-28-1-5">Exercise 28.1.5</a>의 계산과 같은 생각). verify는 이 방법으로 \(\theta, \sigma = 10^{-9}\)까지 확인했다.</p>
+      <p class="verified">Verification: <code>verify/v-28-1-so3-se3-sim3.py</code></p>
+    </section>
+
+    <section id="sec-log">
+      <h2>log and Its Singularities</h2>
+      <p>\(\exp\)의 역이 \(\log\)이다. \(\mathrm{SO}(3)\)에서 회전각과 축은 trace와 skew-symmetric 부분으로 읽는다.</p>
+
+      <div class="thm proposition" id="i-28-1-6">
+        <p><span class="thm-head">Proposition 28.1.6</span> <span class="thm-name">(log on \(\mathrm{SO}(3)\))</span>.
+        \(R \in \mathrm{SO}(3)\)의 회전각 \(\theta \in [0, \pi]\)는 \(\cos\theta = (\tr R - 1)/2\)로 정해진다.</p>
+        <ul>
+          <li>\(0 \lt \theta \lt \pi\)이면 \(\mathrm{Log}(R)\)은 하나로 정해지고 \(\abs{\omega} \lt \pi\)이다:</li>
+        </ul>
+        <div class="equation" id="eq-28-1-6">
+        \[ [\omega]_\times = \frac{\theta}{2\sin\theta}\,\big(R - R^{\mathsf T}\big). \tag{28.1.6} \]
+        </div>
+        <ul>
+          <li>\(\theta = \pi\)이면 \(R = 2nn^{\mathsf T} - I_3\)(\(n\)은 unit 축)이고, \(\omega = \pm\pi n\) 둘 다 같은 \(R\)을 준다. \(n\)은 \((R + I_3)/2 = nn^{\mathsf T}\)의 0이 아닌 열에서 부호를 빼고 정해진다.</li>
+          <li>\(\theta = 0\)이면 \(\omega = 0\)이다.</li>
+        </ul>
+        <p>\(\mathrm{SE}(3)\)에서는 \(\omega = \mathrm{Log}(R)\)을 먼저 구하고 \(v = V(\omega)^{-1}t\)로 둔다. 여기서</p>
+        <div class="equation" id="eq-28-1-7">
+        \[ \begin{aligned} V^{-1} &amp;= I_3 - \tfrac12\Omega \\ &amp;\quad + \frac{1}{\theta^2}\Big(1 - \frac{\theta}{2}\cot\frac{\theta}{2}\Big)\Omega^2, \\ \det V &amp;= \frac{2(1 - \cos\theta)}{\theta^2} \end{aligned} \tag{28.1.7} \]
+        </div>
+        <p>이고, \(0 \le \theta \lt 2\pi\)에서 \(\det V \gt 0\)이다(<a href="#ex-28-1-5">Exercise 28.1.5</a>). 따라서 \(\mathrm{SE}(3)\)의 \(\log\)는 rotation 부분과 같은 곳(\(\theta = \pi\))에서만 깨진다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> Rodrigues formula에서 \(\tr\Omega = 0\), \(\tr\Omega^2 = -2\theta^2\)이므로 \(\tr R = 3 - 2(1 - \cos\theta) = 1 + 2\cos\theta\)이다. \(R - R^{\mathsf T}\)에서는 symmetric인 \(I_3\)과 \(\Omega^2\) 항이 지워지고 \(2\frac{\sin\theta}{\theta}\Omega\)만 남으므로 <a href="#eq-28-1-6">(28.1.6)</a>이다. \(\theta = \pi\)이면 \(\sin\theta = 0\)이어서 이 정보가 사라지고, \(R = I_3 + 2[n]_\times^2 = 2nn^{\mathsf T} - I_3\)는 \(n\)과 \(-n\)에 대해 같다. \(V^{-1}\)은 <a href="#eq-28-1-4">(28.1.4)</a>의 \(V\)와 곱해 \(I_3\)이 되는지 확인하면 된다(verify).</p>
+      </div>
+
+      <p><a href="#fig-28-1-2">Figure 28.1.2</a>는 이 singularity를 Tour의 ball 그림(<a href="../00-tour/0-6-manifolds.html#fig-0-6-4">Figure 0.6.4</a>) 위에서 보인다.</p>
+
+      <figure class="dg-figure" id="fig-28-1-2">
+        <img src="figures/fig-28-1-2-exp-log-ball.svg" alt="두 패널. 왼쪽 (a)는 반지름 π인 하늘색 disk(가로축 ω¹, 세로축 ω³)이고, 원점에서 오른쪽 위 35도 방향으로 파란 실선이 경계의 주황 사각형 πn까지 간다. 반대쪽 경계의 주황 사각형 −πn에서 주황 점선이 원점으로 돌아온다. 두 사각형을 가리키는 'same rotation' 주석이 있고, 반지름 π/2인 회색 점선 원이 있다. 오른쪽 (b)는 가로축 t(0부터 2π), 세로축 값인 그래프다. 파란 실선 ⟨Log, n⟩이 0에서 π까지 대각선으로 올라가 t = π에서 π에 닿고, 같은 t에서 −π로 뚝 떨어진 뒤 주황 점선으로 2π에서 0까지 다시 올라간다. 회색 점선(angle |Log|)은 0에서 π까지 올랐다가 2π에서 0으로 내려오는 삼각형이다. t = π에 'jump: +π → −π' 주석이 있다.">
+        <figcaption><span class="fig-head">Figure 28.1.2.</span>
+        \(\exp\)는 \(\R^3\)에서 일대일이 아니고, \(\log\)는 \(\theta = \pi\)에서 끊어진다. <em>무엇을</em>: 직선 \(t \mapsto tn\) (\(n\)은 \(\omega^1\)축과 \(35^\circ\)인 unit vector, \(0 \le t \le 2\pi\))을 \(\mathrm{Exp}\)로 보낸 뒤 \(\mathrm{Log}\)로 되돌린 \(\mathrm{Log}(\mathrm{Exp}(tn))\). (a)는 rotation vector의 ball \(\{\abs{\omega} \le \pi\}\)을 평면 \(\omega^2 = 0\)으로 자른 그림이고, (b)는 \(t\)의 함수로 그린 그래프다. <em>읽는 법</em>: (a)의 파란 실선은 \(0 \le t \le \pi\), 주황 점선은 \(\pi \lt t \le 2\pi\)의 부분이다. 두 주황 사각형은 경계의 두 점 \(\pm\pi n\)이다. 회색 점선 원은 각 \(\pi/2\)인 회전들이다. (b)의 파랑·주황 곡선은 \(n\) 방향 성분 \(\inner{\mathrm{Log}}{n}\), 회색 점선은 회전각 \(\abs{\mathrm{Log}}\)이다. <em>볼 것</em>: \(t\)가 \(\pi\)를 지나는 순간 \(\mathrm{Log}\)는 \(+\pi n\)에서 \(-\pi n\)으로 건너뛰고, 그 뒤로 원점을 향해 되돌아온다. \(\mathrm{Exp}(tn) = \mathrm{Exp}\big((t - 2\pi)n\big)\)이기 때문이다. 회전각(회색)은 연속이고 \(\pi\)에서 최대다. 끊어지는 것은 회전이 아니라 \(\log\)라는 좌표다. <em>본문과의 연결</em>: <a href="#i-28-1-6">Proposition 28.1.6</a>의 \(\theta = \pi\) 경우. \(\pm\pi n\)이 같은 회전이라는 것은 Tour의 <a href="../00-tour/0-6-manifolds.html#fig-0-6-4">Figure 0.6.4</a>와 같다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-1-2">Figure 28.1.2</a>의 (a)에서 파란 선은 원점에서 경계의 \(\pi n\)까지 곧게 나간다. 그 점을 넘으면 같은 회전이 반대편 \(-\pi n\)으로 표시되므로, 주황 점선은 반대편 경계에서 다시 나타나 원점으로 돌아온다. (b)는 같은 것을 수로 본다. \(n\) 방향 성분이 \(t = \pi\)에서 \(+\pi\)에서 \(-\pi\)로 뛴다. 그러나 회색 회전각은 그 점에서 꺾일 뿐 끊어지지 않는다. Tour의 말로 하면, \(\theta = \pi\)인 회전 전체(경계 sphere에서 대척점을 같게 본 것, 곧 \(\RP^2\))는 \(I_3\)의 <strong>cut point</strong>(절단점)들이다(<a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>). \(I_3\)에서 그 회전으로 가는 최단 geodesic이 두 개(\(\pm\pi n\) 방향)이므로 \(\log\)가 하나로 정해지지 않는다.</p>
+
+      <p>수치 계산에서는 문제가 하나 더 있다. <a href="#eq-28-1-6">(28.1.6)</a>은 \(\theta = 0\)에서 \(0/0\)이고, \(\arccos\)는 \(\pm 1\) 근처에서 기울기가 무한대다. \(\theta = 0\)은 기하적으로 아무 문제가 없는 점이므로 이것은 <em>공식</em>의 singularity다. <a href="#fig-28-1-3">Figure 28.1.3</a>은 float64에서 이 차이를 잰다.</p>
+
+      <figure class="dg-figure" id="fig-28-1-3">
+        <img src="figures/fig-28-1-3-log-accuracy.svg" alt="두 log-log 패널이 세로축 relative error(10⁻¹⁸부터 10⁹)를 공유한다. 왼쪽 (a)의 가로축은 θ(10⁻¹²부터 1)이다. 검은 실선(textbook)은 θ가 약 10⁻⁸보다 작은 곳에서 오차 1에 평평하게 머물다가 10⁻⁸ 근처에서 10⁻¹⁶ 수준으로 뚝 떨어진다. 'arccos(1) = 0: returns ω̂ = 0 for θ ≲ 10⁻⁸' 주석이 있다. 파란 점선(robust)은 처음부터 끝까지 10⁻¹⁶ 근처에 있다. 오른쪽 (b)의 가로축은 π − θ(10⁻¹²부터 1)이다. 검은 실선은 오른쪽 끝 10⁻¹⁶에서 왼쪽으로 갈수록 올라가 π − θ = 10⁻⁷에서 약 10⁻², 10⁻⁸ 아래에서는 10⁴부터 10⁸까지 치솟는다. 파란 점선은 계속 10⁻¹⁶ 근처다. machine ε ≈ 2.2 × 10⁻¹⁶에 회색 점선이 있다.">
+        <figcaption><span class="fig-head">Figure 28.1.3.</span>
+        \(\log\)를 계산하는 두 방법의 float64 정확도. <em>무엇을</em>: 고정된 축 \(n\)과 각 \(\theta\)로 \(\mathrm{Exp}(\theta n)\)을 50자리 정밀도로 계산해 float64로 반올림한 행렬 \(R\)을 만들고, 그 \(R\)의 정확한 \(\log\)(다시 50자리로 계산)와 두 float64 구현의 결과를 비교했다. (a)는 \(\theta\)가 \(0\) 근처, (b)는 \(\pi\) 근처다. <em>읽는 법</em>: 세로축은 상대오차 \(\abs{\hat\omega - \omega}/\abs{\omega}\)(log scale, \(10^{-17}\) 아래는 \(10^{-17}\)에 그렸다). 검은 실선은 교과서 공식(\(\arccos\)와 <a href="#eq-28-1-6">(28.1.6)</a>), 파란 점선은 quaternion을 거쳐 \(2\,\mathrm{atan2}(\abs{q_{1:3}}, q_0)\)로 각을 구하고 \(0\) 근처에서는 Taylor 전개를 쓰는 방법(Sophus의 방식)이다. 회색 점선은 machine \(\varepsilon\)이다. <em>볼 것</em>: (a)에서 교과서 공식은 \(\theta \lesssim 10^{-8}\)이면 \(\cos\theta = 1\)로 반올림되어 \(\arccos\)가 정확히 \(0\)을 주므로 \(\hat\omega = 0\), 상대오차 1이 된다. (b)에서는 \(\pi - \theta = 10^{-6}\)에서 오차가 \(4 \times 10^{-5}\), \(10^{-7}\)에서 \(10^{-2}\)이고, \(10^{-8}\) 아래에서는 \(\arccos(-1) = \pi\)가 되어 \(\sin\hat\theta \approx 10^{-16}\)으로 나누므로 \(10^{3}\)배 이상 틀린다. 파란 방법은 두 구간 모두 \(10^{-16}\) 수준이다. <em>본문과의 연결</em>: 공식의 \(0/0\)(\(\theta = 0\))은 계산법을 바꾸면 사라지고, \(\theta = \pi\)의 모호성(<a href="#fig-28-1-2">Figure 28.1.2</a>)은 부호의 선택으로만 처리할 수 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-1-3">Figure 28.1.3</a>의 (a)를 왼쪽에서 오른쪽으로 보자. 검은 선은 \(\theta \approx 10^{-8}\)까지 오차 1에 붙어 있다가 갑자기 machine \(\varepsilon\) 수준으로 떨어진다. 이 경계는 \((\tr R - 1)/2 = \cos\theta = 1 - \theta^2/2 + \cdots\)가 float64에서 정확히 \(1\)로 반올림되는 곳이다. \(1\) 바로 아래의 float64 간격은 \(\varepsilon/2\)이므로, \(\cos\theta\)만 보면 \(\theta^2/2 \lt \varepsilon/4\), 곧 \(\theta \lt \sqrt{\varepsilon/2} \approx 1.05 \times 10^{-8}\)에서 \(\arccos\)가 \(0\)을 돌려준다(행렬 성분과 trace의 반올림에 따라 경계는 조금 달라진다). 그 경계를 넘으면 \(\hat\theta\) 자체는 여전히 부정확하지만 \(\hat\theta/(2\sin\hat\theta) \approx \tfrac12\)이 거의 변하지 않으므로 \(\hat\omega\)는 정확하다. 인접한 두 프레임의 상대 회전, 수렴 직전의 update처럼 아주 작은 회전은 실제로 흔하다. (b)에서는 반대로 \(\pi\)에 가까워질수록 검은 선이 꾸준히 올라간다. 파란 점선은 양쪽 모두 바닥에 있다. 안전한 계산의 처방은 둘이다.</p>
+      <ul>
+        <li><strong>작은 각에서는 Taylor 전개.</strong> \(\theta/(2\sin\theta) = \tfrac12 + \theta^2/12 + O(\theta^4)\), quaternion을 만들 때의 \(\sin(\theta/2)/\theta = \tfrac12 - \theta^2/48 + \theta^4/3840 + O(\theta^6)\)처럼 coefficient를 급수로 계산한다(Sophus <code>SO3::expAndTheta</code>는 \(\theta^2 \lt \varepsilon^2\)에서 바로 이 급수를 쓴다). exponential map parametrization의 실용적 계산을 정리한 <a class="cite" href="../../references.html#Grassia98">[Grassia98]</a>도 작은 각의 Taylor 전개와, \(\abs{\omega}\)가 \(2\pi\)의 배수(\(\exp\)의 differential이 퇴화하는 곳)에 가까워지지 않도록 \(\abs{\omega} \le \pi\)인 대표로 바꾸는 reparametrization을 쓴다.</li>
+        <li><strong>각은 \(\mathrm{atan2}\)로.</strong> \(\sin\)과 \(\cos\)를 함께 쓰면 \(\arccos\)나 \(\arcsin\) 하나만 쓸 때의 ill-conditioning이 없다. Sophus <code>SO3::logAndTheta</code>는 quaternion \((q_0, q_{1:3})\)에서 \(2\,\mathrm{atan2}(\abs{q_{1:3}}, q_0)\)를 쓰고, \(q_0 \lt 0\)이면 두 인자의 부호를 바꾼 \(\mathrm{atan2}(-\abs{q_{1:3}}, -q_0)\)를 써서(\(-q\)를 쓰는 것과 같다) \(\abs{\theta} \le \pi\)로 맞춘다.</li>
+      </ul>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 두 종류의 singularity</p>
+        <p>\(\log\)의 문제는 둘이고 성질이 다르다. \(\theta = 0\)의 \(0/0\)은 공식의 결함이다. \(\mathrm{SO}(3)\)은 \(I_3\) 근처에서 아무 문제가 없고, \(\log\)는 그 근처에서 smooth하다. 그래서 계산 순서를 바꾸면(Taylor, atan2) 완전히 사라진다. \(\theta = \pi\)는 manifold 자체의 성질이다. \(\exp\colon \R^3 \to \mathrm{SO}(3)\)은 ball의 경계에서 대척점을 같게 붙이므로, 어떤 공식을 쓰더라도 \(\log\)는 그곳에서 연속일 수 없다. compact인 \(\mathrm{SO}(3)\)을 chart 하나로 덮을 수 없다는 사실(<a href="../00-tour/0-6-manifolds.html#ex-0-6-3">Exercise 0.6.3</a>)의 한 모습이다. 실무의 결론도 둘로 나뉜다.</p>
+        <ul>
+          <li>최적화의 update는 현재 추정 근처의 작은 회전이므로 \(\theta = \pi\)를 만날 일이 거의 없다. 이것이 <a href="28-2-calculus-on-lie-groups.html">Section 28.2</a>의 “현재 점에서 local 좌표를 잡는” 방법이 \(\log\)를 전역 좌표로 쓰는 것보다 안전한 이유다.</li>
+          <li>반대로 큰 상대 회전의 \(\log\)를 residual로 쓰는 곳(pose graph의 loop closure, rotation averaging)에서는 \(\pi\) 근처의 residual이 부호를 바꾸며 튈 수 있다. 측정이 \(180^\circ\) 가까이 틀린 outlier가 그런 경우다(<a href="28-4-interpolating-averaging.html">Section 28.4</a>).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-adjoint">
+      <h2>The Adjoint</h2>
+      <p><a href="#eq-28-1-3">(28.1.3)</a>에서 twist는 속도장 \(x \mapsto \omega \times x + v\)였다. 같은 물리적 움직임을 다른 frame의 좌표로 쓰면 \(\omega\)는 회전되고, \(v\)는 “새 원점의 속도”로 바뀐다. 이 좌표 변환을 행렬 하나로 쓴 것이 adjoint다.</p>
+
+      <div class="thm definition" id="i-28-1-7">
+        <p><span class="thm-head">Definition 28.1.7</span> <span class="thm-name">(adjoint)</span>.
+        \(T = (R, t) \in \mathrm{SE}(3)\)에 대해 \(T\xi^\wedge T^{-1} = (\mathrm{Ad}_T\,\xi)^\wedge\)를 만족하는 linear map \(\mathrm{Ad}_T\colon \R^6 \to \R^6\)을 \(T\)의 <strong>adjoint representation</strong>(딸림표현) 행렬이라 한다. 순서 \(\xi = (v, \omega)\)에서</p>
+        <div class="equation" id="eq-28-1-8">
+        \[ \begin{aligned} \mathrm{Ad}_T &amp;= \begin{pmatrix} R &amp; [t]_\times R \\ 0 &amp; R \end{pmatrix}, \\ T\,\mathrm{Exp}(\xi)\,T^{-1} &amp;= \mathrm{Exp}(\mathrm{Ad}_T\,\xi) \end{aligned} \tag{28.1.8} \]
+        </div>
+        <p>이다. \(\mathrm{SO}(3)\)에서는 \(R[\omega]_\times R^{\mathsf T} = [R\omega]_\times\)이므로 \(\mathrm{Ad}_R = R\)이다. \(\mathrm{Ad}_{T_1T_2} = \mathrm{Ad}_{T_1}\mathrm{Ad}_{T_2}\), \(\mathrm{Ad}_{T^{-1}} = (\mathrm{Ad}_T)^{-1}\)이 성립한다 <a class="cite" href="../../references.html#Sola18">[Sola18]</a>.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(T\xi^\wedge T^{-1} = \begin{pmatrix} R\Omega R^{\mathsf T} &amp; Rv - R\Omega R^{\mathsf T}t \\ 0 &amp; 0 \end{pmatrix}\)이고 \(R\Omega R^{\mathsf T} = [R\omega]_\times\), \(-[R\omega]_\times t = t \times R\omega = [t]_\times R\omega\)이므로 새 twist는 \((Rv + [t]_\times R\omega,\ R\omega)\)이다. 둘째 식은 \(T\exp(X)T^{-1} = \exp(TXT^{-1})\)(급수의 각 항에서 \(T^{-1}T\)가 지워진다)에서 나온다. 곱의 성질은 \(T_1T_2\,\xi^\wedge\,(T_1T_2)^{-1} = T_1(T_2\xi^\wedge T_2^{-1})T_1^{-1}\)에서 나온다.</p>
+      </div>
+
+      <p>\(T = T_{wb}\)라 하자. frame \(b\)의 좌표로 쓴 twist \(\xi_b\)는 world 좌표로 \(\xi_w = \mathrm{Ad}_{T_{wb}}\xi_b\)가 된다. 특히 frame \(b\)의 원점을 지나는 축 둘레의 순수한 회전 \(\xi_b = (0, \omega_b)\)는 world 좌표로 \(\xi_w = (c \times \omega_w,\ \omega_w)\)이다(\(c = t_{wb}\), \(\omega_w = R\omega_b\)). 회전뿐인 움직임인데 world twist에는 \(v_w \ne 0\)이 있다.</p>
+
+      <figure class="dg-figure" id="fig-28-1-4">
+        <img src="figures/fig-28-1-4-adjoint.svg" alt="두 패널이 같은 축척으로 놓여 있다. 왼쪽 (a) world coordinates: 회색 작은 화살표들이 점 c = (2, 1) 둘레로 반시계 방향으로 도는 소용돌이를 이룬다. c에 검은 점과 30도 돌아간 파란 x_b, 초록 y_b 축이 있고 'c: velocity 0'이라 적혀 있다. 원점 O에서 주황 화살표 v_w = c × ω_w가 오른쪽 아래로 뻗는다. 오른쪽 (b) body coordinates: 같은 소용돌이가 이번에는 원점(body origin) 둘레로 돌고, 원점에 파란 x_b, 초록 y_b 축이 똑바로 놓여 있다. 왼쪽의 점 O(약 (−2.2, 0.1))에서 주황 화살표 Rᵀv_w가 아래로 뻗는다. 아래에 ξ_w = ((0.5, −1, 0), (0, 0, 0.5)), ξ_b = ((0, 0, 0), (0, 0, 0.5)), ξ_w = Ad ξ_b가 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 28.1.4.</span>
+        하나의 속도장, 두 twist 좌표. <em>무엇을</em>: frame \(b\)가 world의 \(c = (2, 1, 0)\)에 \(z\)축 둘레로 \(30^\circ\) 돌아가 놓여 있고(\(T_{wb} = (R, c)\)), 자기 \(z\)축 둘레로 각속도 0.5 rad/s로 돈다. (a)는 world 좌표 \((x, y)\), (b)는 body 좌표 \((x_b, y_b)\)로 그린 같은 움직임이다. <em>읽는 법</em>: 회색 화살표는 격자점의 속도 \(\omega \times x + v\)(실제 길이의 0.6배), 검은 점은 frame \(b\)의 원점, 파랑·초록 화살표는 \(x_b, y_b\)축, 주황 점과 화살표는 world 원점 \(O\)와 그 속도(실제 길이)다. 두 패널의 축척은 같다. <em>볼 것</em>: 두 패널의 소용돌이는 같은 움직임이므로 모양이 같고 중심만 다르다. (b)에서는 원점이 중심이라 \(v_b = 0\)이고 \(\xi_b = \big((0, 0, 0), (0, 0, 0.5)\big)\)이다. (a)에서는 world 원점이 중심에서 떨어져 있어 속도 \(v_w = c \times \omega_w = (0.5, -1, 0)\)을 가지므로 \(\xi_w = \big((0.5, -1, 0), (0, 0, 0.5)\big)\)이다. (b)의 주황 화살표 \(R^{\mathsf T}v_w\)는 같은 점 \(O\)의 같은 속도를 body 좌표로 쓴 것이다. <em>본문과의 연결</em>: <a href="#eq-28-1-8">(28.1.8)</a>로 \(\xi_w = \mathrm{Ad}_{T_{wb}}\xi_b\)이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-1-4">Figure 28.1.4</a>의 두 패널을 나란히 보자. 회색 소용돌이는 똑같고, (a)에서는 \(c\) 둘레, (b)에서는 원점 둘레로 돈다. 소용돌이의 중심에 있는 점은 속도가 \(0\)이다. 그래서 frame \(b\)의 좌표로는 \(v_b = 0\)이지만, world 원점 \(O\)는 중심에서 \(\abs{c} = \sqrt5\)만큼 떨어져 있으므로 속력 \(0.5\sqrt5 \approx 1.12\)로 움직이고, 이것이 \(v_w\)다. \(\omega\)는 두 좌표에서 같은 축(여기서는 \(z\))을 가리킨다. adjoint가 하는 일은 이 “원점을 바꾸는 계산”과 축을 돌리는 계산을 한 행렬에 담는 것이다.</p>
+      <p>adjoint가 필요한 곳은 세 군데다.</p>
+      <ul>
+        <li><strong>local과 global perturbation 사이.</strong> <a href="#eq-28-1-8">(28.1.8)</a>을 다시 쓰면 \(\mathrm{Exp}(\xi)\,T = T\,\mathrm{Exp}(\mathrm{Ad}_{T^{-1}}\xi)\)이다. 왼쪽에서 곱한 perturbation과 오른쪽에서 곱한 perturbation은 \(\mathrm{Ad}\)만큼 다른 좌표다. 이것이 <a href="28-2-calculus-on-lie-groups.html">Section 28.2</a>의 주제다.</li>
+        <li><strong>불확실성의 이동.</strong> body frame에서 쓴 pose의 covariance \(\Sigma_b\)는 world frame에서 \(\mathrm{Ad}\,\Sigma_b\,\mathrm{Ad}^{\mathsf T}\)이다. COLMAP의 <code>Rigid3d::Adjoint()</code>가 이 용도의 행렬이다(주석에 “to propagate uncertainty”). 단 COLMAP의 이 행렬은 rotation을 먼저 쓰는 순서 \((\omega, v)\)에 맞춰 \(\begin{pmatrix} R &amp; 0 \\ [t]_\times R &amp; R \end{pmatrix}\)로 되어 있다. <a href="#eq-28-1-8">(28.1.8)</a>과 같은 행렬의 블록 순서만 바꾼 것이다.</li>
+        <li><strong>속도의 이동.</strong> IMU가 재는 각속도는 body frame의 값이고, 궤적을 world에서 다룰 때는 \(\mathrm{Ad}\)로 옮긴다.</li>
+      </ul>
+      <p>\(\mathrm{Sim}(3)\)의 adjoint도 같은 정의로 계산된다. 순서 \((v, \omega, \sigma)\)에서 \(S = (sR, t)\)의 adjoint는 \(\begin{pmatrix} sR &amp; [t]_\times R &amp; -t \\ 0 &amp; R &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{pmatrix}\)이다(Sophus <code>Sim3::Adj</code>와 같고, verify에서 정의와 대조했다). 셋째 열의 \(-t\)는 이렇게 읽는다. body 좌표의 \(\zeta = (0, 0, \sigma)\)는 body 원점(world 좌표로 \(t\))을 중심으로 늘어나는 움직임 \(\dot x = \sigma(x - t)\)이고, world 원점은 그 중심에서 멀어지는 속도 \(-\sigma t\)를 가진다.</p>
+      <p class="verified">Verification: <code>verify/v-28-1-so3-se3-sim3.py</code></p>
+    </section>
+
+    <section id="sec-conventions-cv">
+      <h2>Pose Conventions in COLMAP, 3DGS, and NeRF</h2>
+      <p>pose를 \(T_{cw}\)로 저장할지 \(T_{wc}\)로 저장할지, camera 축을 어느 방향으로 둘지는 수학이 아니라 규약의 문제다. 그러나 섞어 쓰면 곧바로 틀린 결과가 나온다. 공개 코드와 문서로 확인한 규약은 다음과 같다(2026-10-08 기준 각 저장소의 기본 branch).</p>
+      <table>
+        <thead>
+          <tr><th>system</th><th>저장하는 것</th><th>camera 축</th><th>확인한 곳</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>COLMAP <code>images.txt</code></td><td>\(T_{cw}\): <code>QW QX QY QZ TX TY TZ</code>(Hamilton, scalar 먼저). 중심은 \(-R^{\mathsf T}t\)</td><td>\(x\) 오른쪽, \(y\) 아래, \(z\) 앞</td><td><code>doc/format.rst</code></td></tr>
+          <tr><td>COLMAP 코드</td><td><code>Image::CamFromWorld()</code>가 주는 <code>Rigid3d</code> \(= T_{cw}\)(rig이 있으면 <code>sensor_from_rig</code>와 <code>rig_from_world</code>의 곱). <code>Rigid3d::params</code>는 \((q_x, q_y, q_z, q_w, t_x, t_y, t_z)\), 곧 quaternion이 Eigen 배치(scalar 마지막)</td><td>위와 같음</td><td><code>src/colmap/geometry/rigid3.h</code>, <code>scene/image.h</code></td></tr>
+          <tr><td>g2o (ORB-SLAM이 씀)</td><td><code>VertexSE3Expmap</code>의 추정값 \(= T_{cw}\)(edge가 이것으로 world 점을 camera로 옮긴다)</td><td>OpenCV(위와 같음)</td><td><code>g2o/types/sba/edge_project_xyz.cpp</code></td></tr>
+          <tr><td>3DGS</td><td><code>Camera.R</code> \(= R_{cw}^{\mathsf T}\)(“glm 때문에 transpose해 저장”), <code>Camera.T</code> \(= t_{cw}\). <code>world_view_transform</code> \(= T_{cw}^{\mathsf T}\)(행 벡터 규약), 중심은 그 inverse의 넷째 행</td><td>COLMAP과 같음. Blender 데이터는 \(T_{wc}\)의 둘째·셋째 열 부호를 바꿔 맞춘다</td><td><code>scene/cameras.py</code>, <code>utils/graphics_utils.py</code>, <code>scene/dataset_readers.py</code></td></tr>
+          <tr><td>NeRF (원 코드)</td><td>\(T_{wc}\)(<code>c2w</code>, 3×4). Blender 데이터의 <code>transform_matrix</code>도 \(T_{wc}\)</td><td>OpenGL: \(x\) 오른쪽, \(y\) 위, \(z\) 뒤(ray 방향 \((x, -y, -1)\)). LLFF 파일의 [아래, 오른쪽, 뒤]를 [오른쪽, 위, 뒤]로 바꾼다</td><td><code>run_nerf_helpers.py</code>(<code>get_rays</code>), <code>load_llff.py</code></td></tr>
+          <tr><td>nerfstudio</td><td><code>camera_to_worlds</code> \(= T_{wc}\)(3×4)</td><td>OpenGL. COLMAP에서 읽을 때 \(T_{wc}\)의 둘째·셋째 열 부호를 바꾼다. 기본값(<code>keep_original_world_coordinate=False</code>)에서는 world 축도 바꾼다(행을 \((x, z, y)\) 순서로 바꾸고 셋째 행의 부호를 바꾼다. 곧 world 좌표 \((x, y, z) \mapsto (x, z, -y)\))</td><td><code>cameras/cameras.py</code>, <code>process_data/colmap_utils.py</code>(<code>colmap_to_json</code>)</td></tr>
+          <tr><td>BARF</td><td>world-to-camera pose(\(T_{cw}\), 3×4)</td><td>OpenCV</td><td><code>camera.py</code>(<code>world2cam</code>)</td></tr>
+        </tbody>
+      </table>
+      <p>camera 축의 규약을 바꾸는 것은 camera 쪽에 고정된 회전 \(D = \diag(1, -1, -1)\)(\(x\)축 둘레 \(180^\circ\))을 곱하는 것이다. \(T_{wc}^{\mathrm{GL}} = T_{wc}^{\mathrm{CV}}\begin{pmatrix} D &amp; 0 \\ 0 &amp; 1 \end{pmatrix}\)이고, 열로 보면 \(T_{wc}\)의 둘째·셋째 열 부호를 바꾸는 것이다. 3DGS와 nerfstudio의 변환 코드(<code>c2w[:3, 1:3] *= -1</code>)가 정확히 이것이다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: \(t_{cw}\)는 카메라의 위치가 아니다</p>
+        <p>COLMAP 문서의 예 \((q_0, q_1, q_2, q_3) = (0.851773, 0.0165051, 0.503764, -0.142941)\), \(t = (-0.737, 1.030, 3.744)\)를 보자. \(R\)은 각 \(63.2^\circ\)의 회전이고, 카메라 중심은 \(c = -R^{\mathsf T}t = (3.797, -0.361, -1.035)\)이다. \(\abs{t} = \abs{c} = 3.952\)로 길이는 늘 같지만(\(R^{\mathsf T}\)는 길이를 보존한다) 두 벡터 사이의 각은 \(116.8^\circ\)이다(<a href="#ex-28-1-2">Exercise 28.1.2</a>). \(t_{cw}\)는 “camera 좌표에서 본 world 원점의 위치”이기 때문이다. 이 둘을 혼동하면 궤적 그림, 카메라 중심의 평균(scene extent), 두 카메라 사이의 baseline이 모두 틀린다. 3DGS가 scene extent를 학습 카메라 중심들로 잴 때 inverse를 거쳐 중심을 구하는 이유다(<a href="../29-gaussian-splatting/29-5-optimizing-gaussians.html#sec-preconditioners">Section 29.5</a>의 scene extent). 기하적으로는 \(T_{cw}\)와 \(T_{wc}\)가 같은 group의 서로 역인 원소이므로, “translation을 따로 평균·보간한다”는 연산의 결과가 어느 쪽을 쓰느냐에 따라 달라진다. <a href="28-4-interpolating-averaging.html">Section 28.4</a>에서 이것을 그림으로 본다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>Lie group, Lie algebra, one-parameter subgroup과 exponential map의 일반론: <a href="../20-lie-groups-frobenius/index.html#toc-20-1">Section 20.1</a>, <a href="../20-lie-groups-frobenius/index.html#toc-20-2">Section 20.2</a>, <a href="../20-lie-groups-frobenius/index.html#toc-20-3">Section 20.3</a>. \(\GL(n, \R)\)이 manifold인 이유는 <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-8">Example 11.4.8</a>, 곱과 역이 smooth인 이유는 <a href="../12-smooth-maps/12-1-smooth-maps.html#i-12-1-10">Example 12.1.10</a>.</li>
+        <li>\(\mathrm{SO}(3)\)이 manifold인 이유(regular value theorem): <a href="../14-submanifolds/index.html#toc-14-4">Section 14.4</a>. \(\mathrm{SE}(3) \cong \mathrm{SO}(3) \times \R^3\)(manifold로서)은 product manifold: <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-11">Definition 11.4.11</a>, diffeomorphism: <a href="../12-smooth-maps/12-2-diffeomorphisms.html#i-12-2-1">Definition 12.2.1</a>.</li>
+        <li>rigid motion과 helix: <a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-3">Definition 5.4.3</a>(rigid motion of \(\R^3\)), <a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-5">Example 5.4.5</a>(screw motion으로 helix가 자기 위를 미끄러진다. <a href="#i-28-1-4">Example 28.1.4</a>는 그 screw motion을 twist로 쓴 것이다).</li>
+        <li>tangent space와 곡선의 velocity: <a href="../13-tangent-spaces/index.html#toc-13-2">Section 13.2</a>, <a href="../13-tangent-spaces/index.html#toc-13-5">Section 13.5</a>. cut point와 \(\exp\)가 diffeomorphism인 범위: <a href="../23-geodesics/index.html#toc-23-2">Section 23.2</a>, <a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a>.</li>
+        <li>문헌: \(\mathrm{SO}(3)\)·\(\mathrm{SE}(3)\)의 exp/log와 adjoint를 한곳에 정리한 <a class="cite" href="../../references.html#Sola18">[Sola18]</a>, 상태 추정의 관점 <a class="cite" href="../../references.html#Barfoot">[Barfoot]</a>, twist와 screw motion <a class="cite" href="../../references.html#Ma04">[Ma04, Ch. 2]</a>, \(\mathrm{Sim}(3)\) <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(\mathrm{SO}(3)\), \(\mathrm{SE}(3)\), \(\mathrm{Sim}(3)\)은 차원 3, 6, 7의 행렬 Lie group이다. \(\mathrm{SE}(3)\)은 manifold로서 \(\mathrm{SO}(3) \times \R^3\)이지만 group으로서는 semidirect product다.</li>
+        <li>Lie algebra는 hat <a href="#eq-28-1-2">(28.1.2)</a>으로 \(\R^3, \R^6, \R^7\)과 동일시하고, twist \(\xi = (v, \omega)\)는 속도장 \(\omega \times x + v\)이다.</li>
+        <li>\(\mathrm{Exp}(\xi)\)의 translation은 \(Vv\) <a href="#eq-28-1-4">(28.1.4)</a>이고, one-parameter subgroup은 screw motion이다. \(\mathrm{Sim}(3)\)의 \(\exp\)는 \(W\) <a href="#eq-28-1-5">(28.1.5)</a>로 닫힌 꼴이다.</li>
+        <li>\(\log\)는 \(\theta = \pi\)(cut point)에서 진짜로 모호하고, \(\theta = 0\)의 \(0/0\)은 Taylor 전개와 atan2로 없앨 수 있는 공식의 문제다.</li>
+        <li>\(\mathrm{Ad}_T\) <a href="#eq-28-1-8">(28.1.8)</a>은 twist를 다른 frame의 좌표로 옮긴다. COLMAP·3DGS·g2o는 \(T_{cw}\), NeRF·nerfstudio는 \(T_{wc}\)를 저장하고, camera 축도 OpenCV와 OpenGL로 다르다.</li>
+      </ul>
+      <p class="next">다음 절에서는 이 group 위에서 미분한다. pose를 조금 바꾸는 방법은 왼쪽에서 곱하기와 오른쪽에서 곱하기 둘이고, 두 방법의 Jacobian은 \(\mathrm{Ad}\)만큼 다르다. 섞어 쓰면 무엇이 깨지는지, 그리고 quaternion으로 update하는 여러 방법이 기하적으로 무엇인지 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-28-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 28.1.1</span> <span class="level">★</span>
+        \(S_i = (s_i R_i, t_i) \in \mathrm{Sim}(3)\)일 때 \(S_1S_2\)와 \(S_1^{-1}\)을 \((sR, t)\) 꼴로 쓰고, 둘 다 \(\mathrm{Sim}(3)\)에 있음을 확인하여라. monocular SfM에서 장면 전체를 \(S\)로 바꿔도 사진이 같다는 사실과 \(\dim\mathrm{Sim}(3) = 7\)은 어떤 관계가 있는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>행렬을 곱하면 \(S_1S_2 = (s_1s_2R_1R_2,\ s_1R_1t_2 + t_1)\)이고, \(s_1s_2 \gt 0\), \(R_1R_2 \in \mathrm{SO}(3)\)이므로 \(\mathrm{Sim}(3)\)의 원소다. \(S_1^{-1} = \big(s_1^{-1}R_1^{\mathsf T},\ -s_1^{-1}R_1^{\mathsf T}t_1\big)\)이고 \(S_1S_1^{-1} = (I_3, s_1R_1(-s_1^{-1}R_1^{\mathsf T}t_1) + t_1) = (I_3, 0)\)이다. 장면 전체(모든 점과 모든 카메라)에 같은 similarity를 적용하면 camera 좌표의 점이 모두 \(s\)배가 될 뿐이므로 투영은 변하지 않는다. 그래서 사진에서 정할 수 없는 자유도가 적어도 \(\mathrm{Sim}(3)\)의 차원 7만큼 있다(카메라와 점의 배치가 퇴화하지 않으면 정확히 7이다). 이것이 <a href="28-3-bundle-adjustment.html">Section 28.3</a>의 gauge freedom이다.</p>
+          <p class="verified">Verification: <code>verify/v-28-1-so3-se3-sim3.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 28.1.2</span> <span class="level">★</span>
+        COLMAP 문서의 예 \(q = (0.851773, 0.0165051, 0.503764, -0.142941)\), \(t = (-0.737434, 1.02973, 3.74354)\)에서 카메라 중심 \(c\)와 world 좌표의 viewing direction(camera의 \(+z\)축)을 구하여라. \(\abs{t} = \abs{c}\)인 이유는 무엇인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#eq-29-2-5">(29.2.5)</a>로 \(R = R_{cw}\)를 만들면 \(R \approx \begin{pmatrix} 0.452 &amp; 0.260 &amp; 0.853 \\ -0.227 &amp; 0.959 &amp; -0.172 \\ -0.863 &amp; -0.116 &amp; 0.492 \end{pmatrix}\)이다. 중심은 \(c = -R^{\mathsf T}t \approx (3.797, -0.361, -1.035)\)이고, camera의 \(+z\)축은 world 좌표로 \(R^{\mathsf T}e_3\), 곧 \(R\)의 셋째 행 \((-0.863, -0.116, 0.492)\)이다. \(R^{\mathsf T}\)는 orthogonal matrix이므로 길이를 보존한다. 따라서 \(\abs{c} = \abs{R^{\mathsf T}t} = \abs{t} \approx 3.952\)이다. 방향은 \(116.8^\circ\) 다르다.</p>
+          <p class="verified">Verification: <code>verify/v-28-1-so3-se3-sim3.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 28.1.3</span> <span class="level">★</span>
+        \(T = (I_3, t)\), \(t = (1, 2, 3)\)인 순수 translation에 대해 \(\mathrm{Ad}_T\)를 쓰고, \(\xi = (0, e_3)\)(원점을 지나는 \(z\)축 둘레의 단위 회전)를 옮긴 \(\mathrm{Ad}_T\xi\)를 구하여라. 결과의 \(v\)는 어떤 점의 속도인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-28-1-8">(28.1.8)</a>에서 \(\mathrm{Ad}_T = \begin{pmatrix} I_3 &amp; [t]_\times \\ 0 &amp; I_3 \end{pmatrix}\)이므로 \(\mathrm{Ad}_T\xi = (t \times e_3,\ e_3) = \big((2, -1, 0), (0, 0, 1)\big)\)이다. 옮긴 twist는 점 \(t\)를 지나는 수직축 둘레의 회전이다. 실제로 <a href="#eq-28-1-3">(28.1.3)</a>에서 점 \(t\)의 속도는 \(e_3 \times t + (2, -1, 0) = (-2, 1, 0) + (2, -1, 0) = 0\)이다. \(v = (2, -1, 0)\)은 원점의 속도이고, 원점은 축에서 \(\sqrt5\)만큼 떨어져 있어 그 속력으로 돈다.</p>
+          <p class="verified">Verification: <code>verify/v-28-1-so3-se3-sim3.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-1-4" data-level="1">
+        <p><span class="thm-head">Exercise 28.1.4</span> <span class="level">★</span>
+        \(v\)가 \(\omega\)와 평행하면(\(v = h\omega\)) \(\mathrm{Exp}(\xi)\)의 translation이 \(v\) 자신임을 보여라. 이것으로 \(z\)축 둘레로 돌며 올라가는 \(\psi_\tau(p) = R_z(\tau)p + (0, 0, b\tau)\)를 \(\mathrm{Exp}(\tau\xi)\)로 쓸 때의 \(\xi\)를 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\Omega\omega = \omega \times \omega = 0\)이므로 \(\Omega v = 0\), \(\Omega^2 v = 0\)이고, <a href="#eq-28-1-4">(28.1.4)</a>에서 \(Vv = v\)이다. screw axis는 \(q = \omega \times v/\theta^2 = 0\), 곧 원점을 지난다. \(\xi = \big((0, 0, b), (0, 0, 1)\big)\)이면 \(\mathrm{Exp}(\tau\xi) = \big(R_z(\tau),\ V(\tau e_3)(0, 0, b\tau)\big) = \big(R_z(\tau), (0, 0, b\tau)\big)\)이므로 \(\psi_\tau\)와 같다. 원점을 지나는 축의 screw motion에서만 \(v\)가 translation의 방향과 같다.</p>
+          <p class="verified">Verification: <code>verify/v-28-1-so3-se3-sim3.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-1-5" data-level="2">
+        <p><span class="thm-head">Exercise 28.1.5</span> <span class="level">★★</span>
+        \(\det V = 2(1 - \cos\theta)/\theta^2\)임을 보이고(<a href="#eq-28-1-7">(28.1.7)</a>), \(V\)가 invertible이 아닌 \(\theta\)를 모두 구하여라. 힌트: \(V = \int_0^1 \exp(u\Omega)\,du\)의 eigenvalue를 생각한다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\omega\) 방향에서 \(\exp(u\Omega)\)는 항등이므로 그 방향의 eigenvalue는 \(\int_0^1 1\,du = 1\)이다. \(\omega\)에 수직인 평면에서 \(\exp(u\Omega)\)는 각 \(u\theta\)의 회전이고, 복소수로 쓰면 \(e^{iu\theta}\)를 곱하는 것이다. 따라서 그 평면의 두 eigenvalue는 \(\int_0^1 e^{\pm iu\theta}du = (e^{\pm i\theta} - 1)/(\pm i\theta)\)이고, 곱은 \(\abs{e^{i\theta} - 1}^2/\theta^2 = (2 - 2\cos\theta)/\theta^2\)이다. 그러므로 \(\det V = 2(1 - \cos\theta)/\theta^2\)이고, \(\theta \gt 0\)에서 이것이 \(0\)인 것은 \(\theta = 2\pi, 4\pi, \dots\)뿐이다. \(\log\)가 쓰는 범위 \(\theta \le \pi\)에서는 \(V\)가 늘 invertible이다.</p>
+          <p class="verified">Verification: <code>verify/v-28-1-so3-se3-sim3.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 28. Poses and Motion: Lie Groups for SfM and SLAM</a>
+    <a rel="next" href="28-2-calculus-on-lie-groups.html">28.2 Calculus on Lie Groups →</a>
+  </nav>
+</body>
+</html>

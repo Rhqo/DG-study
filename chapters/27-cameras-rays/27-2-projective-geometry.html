@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>27.2 Projective Geometry for Multi-View Vision — DG Study</title>
+  <meta name="dg-id" content="27.2">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="27.1, 0.6, 0.7">
+  <meta name="dg-refs" content="HZ; Mildenhall20; Barron22; Kerbl23; Strasdat10">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">27. Cameras, Projections, and Rays</a> ›
+    <span>27.2 Projective Geometry for Multi-View Vision</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>27.2 Projective Geometry for Multi-View Vision</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#HZ">[HZ]</a>,
+        <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a>,
+        <a class="cite" href="../../references.html#Barron22">[Barron22]</a>,
+        <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>,
+        <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>camera matrix \(P = \mathsf K[R \mid T]\)를 \(\RP^3\)에서 \(\RP^2\)로 가는 map으로 보고, 그것이 카메라 중심에서만 정의되지 않으며 앞과 뒤를 구별하지 못한다는 것을 설명할 수 있다.</li>
+        <li>vanishing point \(\mathsf KRd\)와 vanishing line \(\mathsf K^{-\mathsf T}Rn\)을 plane at infinity의 image로 유도할 수 있다.</li>
+        <li>homography가 8차원 Lie group \(\mathrm{PGL}(3)\)의 원소라는 것과 4점 대응이 필요한 이유를 dimension으로 설명하고, 점은 \(H\)로, 직선은 \(H^{-\mathsf T}\)로 변하는 이유를 vector와 covector의 차이로 말할 수 있다.</li>
+        <li>Euclidean ⊂ similarity ⊂ affine ⊂ projective의 계층이 각각 무엇을 보존하는지 말하고, NeRF의 NDC가 직선을 직선으로 보내는 projective transformation이라는 것을 보일 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="27-1-camera-smooth-map.html">Section 27.1</a>: 투영 \(\varphi\), fiber = ray, pinhole은 \(\RP^2\)의 chart라는 것(<a href="27-1-camera-smooth-map.html#sec-sphere">Every Central Camera Is a Chart of the Sphere</a>)</li>
+        <li><a href="../00-tour/0-6-manifolds.html#i-0-6-4">Example 0.6.4</a>와 그 뒤의 In computer vision 상자: \(\RP^2\), homogeneous coordinates, point at infinity, vanishing point, homography의 자유도 8</li>
+        <li><a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>: covector와 pullback <a href="../00-tour/0-7-forms.html#eq-0-7-2">(0.7.2)</a>, contravariant와 covariant</li>
+        <li><a href="../00-tour/0-6-manifolds.html#sec-lie-groups">Section 0.6</a>: Lie group, \(\GL(n, \R)\)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="27-1-camera-smooth-map.html">Section 27.1</a>은 pinhole이 \(S^2\)가 아니라 \(\RP^2\)의 chart라는 사실로 끝났다. 투영 \((t_x/t_z,\ t_y/t_z)\)는 \(t\)와 \(\lambda t\)(\(\lambda \ne 0\))에서 같은 값을 주므로, pinhole이 기록하는 것은 카메라 중심을 지나는 <em>직선</em>이다. 이 관점을 끝까지 밀고 가면 multi-view geometry의 많은 부분이 \(\R^4\)와 \(\R^3\) 사이의 linear algebra가 된다. SfM 교과서 <a class="cite" href="../../references.html#HZ">[HZ]</a>의 첫 부분이 바로 이것이다.</p>
+      <p>이 절은 그 linear algebra를 differential geometry의 말로 정리한다. 답할 질문은 다음과 같다.</p>
+      <ol>
+        <li>\(3 \times 4\) 행렬 \(P\)는 어떤 map인가? 왜 하나의 행렬로 모든 점을 투영할 수 있고, 어디서 그것이 실패하는가?</li>
+        <li>평행한 직선들은 왜 영상에서 한 점에서 만나고, 땅의 평행선들이 만나는 점들은 왜 한 직선(지평선) 위에 있는가?</li>
+        <li>homography를 추정하려면 왜 정확히 4점이 필요한가? 영상의 직선은 왜 \(H\)가 아니라 \(H^{-\mathsf T}\)로 변하는가?</li>
+        <li>NeRF의 NDC는 어떤 map이고, 왜 forward-facing 장면에서만 쓰는가?</li>
+      </ol>
+    </section>
+
+    <section id="sec-camera-matrix">
+      <h2>The Camera Matrix as a Map \(\RP^3 \dashrightarrow \RP^2\)</h2>
+      <p>world 점 \(x \in \R^3\)를 homogeneous coordinates \(X = (x, 1) \in \R^4\)로 쓰면 \(\R^3\)은 <strong>real projective space</strong>(실사영공간) \(\RP^3\)의 chart \(\{w \ne 0\}\)이다(\(\RP^n\)의 정의는 Tour <a href="../00-tour/0-6-manifolds.html#i-0-6-4">Example 0.6.4</a>의 \(\RP^2\)와 같다). camera matrix는</p>
+      <div class="equation" id="eq-27-2-1">
+      \[ \begin{aligned} P &amp;= \mathsf K\,[R \mid T] \in \R^{3 \times 4}, \\ PX &amp;= \mathsf K(Rx + T) = \mathsf K\,t, \\ \ker P &amp;= \R\,(c, 1), \qquad c = -R^{\mathsf T}T \end{aligned} \tag{27.2.1} \]
+      </div>
+      <p>이다. 둘째 식의 마지막 성분으로 나누면 \(t_z \gt 0\)인 점에서 <a href="27-1-camera-smooth-map.html#eq-27-1-1">(27.1.1)</a>의 \(\varphi(t)\)다(distortion이 없는 경우). \(P\)는 rank 3이고(\(\mathsf K\)와 \(R\)이 invertible), kernel은 카메라 중심 \(c\)의 homogeneous coordinates가 span한다.</p>
+
+      <div class="thm proposition" id="i-27-2-1">
+        <p><span class="thm-head">Proposition 27.2.1</span> <span class="thm-name">(the camera as a map of projective spaces)</span>.
+        \([X] \mapsto [PX]\)는 \(\RP^3 \setminus \{[c : 1]\}\)에서 \(\RP^2\)로 가는 잘 정의된 smooth map이고 submersion이다. 그 fiber는 카메라 중심을 지나는 projective line에서 중심을 뺀 것이다. 특히 \(x\)와 중심에 대해 point reflection한 점 \(2c - x\)는 같은 image를 가진다. homogeneous 좌표로는 \(P(2c - x, 1) = -P(x, 1)\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(\lambda \ne 0\)이면 \(P(\lambda X) = \lambda PX\)이므로 \([PX]\)는 대표의 선택에 무관하고, \(PX = 0\)인 것은 \(X \in \ker P\), 곧 \([X] = [c : 1]\)일 때뿐이다. smooth이고 submersion이라는 것은 다음 관찰에서 나온다. \(P\colon \R^4 \setminus \ker P \to \R^3 \setminus \{0\}\)는 surjective linear map의 제한이므로 submersion이고, 두 quotient map \(\R^4 \setminus \{0\} \to \RP^3\), \(\R^3 \setminus \{0\} \to \RP^2\)도 submersion이다(<a href="../12-smooth-maps/12-1-smooth-maps.html#i-12-1-9">Example 12.1.9</a>에서 coordinate representation이 dehomogenization \(x \mapsto (x^j/x^i)_{j \ne i}\)이었고, 이것은 \(x^i = 1\)인 평면 위에서 항등이므로 rank가 full이다). 위 \(P\)와 두 quotient map이 가환하므로 그 사이에 유도된 map도 smooth이고 submersion이다. chart \(\{w \ne 0\}\)와 \(\{t_z \ne 0\}\)에서 보면 \(x \mapsto \mathsf K t\)의 dehomogenization이고, <a href="27-1-camera-smooth-map.html#eq-27-1-3">(27.1.3)</a>처럼 rank가 2다. \([PX] = [PX']\)이면 \(P(X - \mu X') = 0\)인 \(\mu\)가 있어 \(X - \mu X' \in \R(c, 1)\)이므로, \([X], [X'], [c : 1]\)은 한 projective line 위에 있다. 마지막 주장은 \(R(2c - x) + T = -(Rx + T) = -t\)에서 나온다. 곧 \(P(2c - x, 1) = \mathsf K(-t) = -P(x, 1)\)이고, 두 homogeneous 벡터는 부호만 달라 \(\RP^2\)의 같은 점이다(dehomogenize한 pixel 좌표도 같다). 다른 것은 셋째 성분 \(t_z\)의 부호, 곧 그 점이 카메라 앞에 있는지 뒤에 있는지다.</p>
+      </div>
+      <p>기호 \(\dashrightarrow\)는 “어떤 점에서 정의되지 않는 map”이라는 뜻이다. 정의되지 않는 점은 중심 하나뿐이고, 이것은 실제 카메라에서도 마찬가지다. 카메라 중심에 있는 점은 어느 pixel에도 대응하지 않는다. 대신 projective map은 <a href="27-1-camera-smooth-map.html#i-27-1-1">Proposition 27.1.1</a>의 \(\varphi\)보다 넓은 곳에서 정의된다. 카메라 뒤의 점(\(t_z \lt 0\))도, 카메라 평면 위의 점(\(t_z = 0\), image는 point at infinity)도, 무한히 먼 점 \([d : 0]\)도 image를 가진다. 그 대가로 앞과 뒤를 구별하지 못한다. \(t\)와 \(-t\)가 같은 image를 가지기 때문이다. \(PX\)의 대표에는 \(t_z\)의 부호가 남아 있지만 \([PX]\)로 가면서 사라진다. 이 정보, 곧 cheirality는 projective geometry 밖에서 따로 다뤄야 한다(<a href="27-3-essential-manifold.html">Section 27.3</a>).</p>
+    </section>
+
+    <section id="sec-infinity">
+      <h2>Points at Infinity, Vanishing Points, and Vanishing Lines</h2>
+      <p>\(\RP^3\)에서 \(w = 0\)인 점 \([d : 0]\) 전체를 <strong>plane at infinity</strong>(무한원평면)라 한다. \(d\)와 \(\lambda d\)가 같은 점이므로, 이것은 \(\R^3\)의 방향(부호 없이)들의 공간 \(\RP^2\)다. 방향이 \(d\)인 직선 \(x_0 + sd\)의 homogeneous coordinates \((x_0 + sd, 1) \sim (x_0/s + d, 1/s)\)는 \(s \to \infty\)에서 \([d : 0]\)으로 간다. 평행한 직선들은 모두 같은 point at infinity를 지난다. 그 image가</p>
+      <div class="equation" id="eq-27-2-2">
+      \[ \begin{aligned} v(d) &amp;= P\,(d, 0) = \mathsf K R\,d, \\ l_n &amp;= \mathsf K^{-\mathsf T}R\,n \end{aligned} \tag{27.2.2} \]
+      </div>
+      <p>이다. 첫째 식이 방향 \(d\)의 <strong>vanishing point</strong>(소실점), 둘째 식이 normal이 \(n\)인 평면들의 vanishing line이다. 첫째 식은 Tour의 In computer vision 상자에서 본 \(\mathsf KR\mathbf d\)이고, \(P(d, 0)\)에서 넷째 열 \(\mathsf KT\)가 \(w = 0\)에 곱해져 사라지기 때문에 위치 \(T\)와 무관하다. 둘째 식은 다음과 같이 확인한다. normal이 \(n\)인 평면에 놓인 방향은 \(\inner{n}{d} = 0\)을 만족하고, 그런 \(d\)의 vanishing point는 모두 \(l_n^{\mathsf T}v(d) = n^{\mathsf T}R^{\mathsf T}\mathsf K^{-1}\mathsf KRd = \inner{n}{d} = 0\)을 만족한다. 곧 한 평면 위의 모든 방향의 vanishing point는 한 직선 \(l_n\) 위에 있다. 땅(normal = 위쪽)의 vanishing line이 지평선이다.</p>
+      <p>\(P\)를 plane at infinity에 제한하면 \([d : 0] \mapsto [\mathsf KRd]\), 곧 invertible \(3 \times 3\) 행렬 \(\mathsf KR\)이 정하는 \(\RP^2\)에서 \(\RP^2\)로의 diffeomorphism이다. 그러므로 영상의 <em>모든</em> 점은 정확히 하나의 방향(부호 없이)의 vanishing point다. 카메라 중심을 지나는 ray의 방향이 그것이다. vanishing point가 calibration에 쓰이는 것도 이 식 때문이다. 서로 수직인 두 방향 \(d_i \perp d_j\)의 vanishing point는 \(v_i^{\mathsf T}(\mathsf K\mathsf K^{\mathsf T})^{-1}v_j = d_i^{\mathsf T}R^{\mathsf T}R\,d_j = 0\)을 만족하므로, 장면의 서로 orthogonal한 세 방향을 보면 \(\mathsf K\)에 대한 방정식을 얻는다 <a class="cite" href="../../references.html#HZ">[HZ]</a>.</p>
+
+      <figure class="dg-figure" id="fig-27-2-1">
+        <img src="figures/fig-27-2-1-vanishing.svg" alt="두 패널. 왼쪽 (a)는 땅을 위에서 본 그림으로, 가로축 x_w, 세로축 z_w다. 파란 가로선(family A)과 초록 세로선(family B)이 격자를 이룬다. 아래쪽 원점에 검은 점 'camera c'와 오른쪽 위로 기운 검은 화살표(보는 방향)가 있고, 회색 점선 두 개가 시야를 나타낸다. 오른쪽 (b)는 영상 평면으로 가로축 u_x(-700부터 1900), 세로축 u_y(아래가 양)다. 회색 직사각형이 640 x 480 frame이다. 높이 152 px에 검은 가로선(vanishing line l = K^{-T}Rn)이 있다. 파란 선들은 frame 오른쪽 밖의 파란 점 v_A = KRe_1(약 1199, 152)에서 왼쪽 아래로 부채꼴로 퍼지고, 초록 선들은 frame 왼쪽 가장자리 근처의 초록 점 v_B = KRe_3(약 27, 152)에서 아래로 부채꼴로 퍼진다. 두 점 모두 검은 가로선 위에 있다.">
+        <figcaption><span class="fig-head">Figure 27.2.1.</span>
+        평행선은 vanishing point에서 만나고, 한 평면의 vanishing point들은 vanishing line 위에 있다. <em>무엇을</em>: 땅 \(y_w = 0\) 위의 두 직선 가족과 그것을 찍은 영상. world 좌표는 camera 좌표처럼 \(y_w\)가 아래를 향하는 right-handed 좌표이고, 카메라 중심은 \(c = (0, -1.5, 0)\)(높이 \(1.5\))이다. 카메라는 \(+z_w\)에서 \(+x_w\) 쪽으로 \(30^\circ\) 돌아 \(10^\circ\) 아래를 보고, \(\mathsf K\)는 \(f = 500\) px, principal point \((320, 240)\)(\(640 \times 480\) 영상)이다. family A(파랑)는 world \(x\)축에 평행한 직선 \(z_w = 3, \dots, 12\), family B(초록)는 \(z\)축에 평행한 직선 \(x_w = -3, \dots, 3\)이다. <em>읽는 법</em>: (a)는 땅을 위에서 내려다본 것이고(\(y_w\)가 아래를 향하므로 \(x_w\) 오른쪽, \(z_w\) 위로 그리면 위에서 본 그림이 된다), 검은 점과 화살표가 카메라의 위치와 보는 방향, 회색 점선이 수평 화각(\(\pm 32.6^\circ\))이다. (b)는 영상 평면을 \(640 \times 480\) frame(회색) 밖까지 넓혀 그렸다. 세로축은 아래쪽이 \(+u_y\)다. 파란 점과 초록 점이 <a href="#eq-27-2-2">(27.2.2)</a>의 \(v_A = \mathsf KRe_1\), \(v_B = \mathsf KRe_3\)이고, 검은 가로선이 땅의 vanishing line \(l = \mathsf K^{-\mathsf T}Rn\)(\(n = (0, -1, 0)\)은 위쪽)이다. <em>볼 것</em>: (a)에서 평행했던 파란 선들이 (b)에서는 모두 \(v_A \approx (1199, 152)\)로, 초록 선들은 \(v_B \approx (27, 152)\)로 모인다. \(+x_w\) 방향은 보는 방향에서 오른쪽으로 \(60^\circ\)라 화각 밖이므로 \(v_A\)는 frame 오른쪽 밖에 있지만, projective plane에서는 보통 점이다. \(+z_w\) 방향은 왼쪽으로 \(30^\circ\)라 \(v_B\)는 frame 왼쪽 가장자리 안에 있다. 두 점은 모두 높이 \(u_y = 152\)의 검은 직선 위에 있고, 카메라가 \(10^\circ\) 아래를 보므로 지평선이 영상 중심(\(u_y = 240\))보다 \(500\tan 10^\circ = 88\) px 위에 있다. <em>본문과의 연결</em>: <a href="#eq-27-2-2">(27.2.2)</a>, 곧 plane at infinity의 image가 vanishing point와 vanishing line이라는 것이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-27-2-1">Figure 27.2.1</a>의 (a)에서 시작하자. 땅 위의 파란 선들은 서로 평행하고 초록 선들도 서로 평행하다. (b)에서 파란 선을 왼쪽 아래(카메라 가까이)에서 오른쪽 위로 따라가면 모두 frame 오른쪽 밖의 파란 점 \(v_A\)로 모인다. 초록 선들은 frame 왼쪽 가장자리의 초록 점 \(v_B\)로 모인다. (a)에서 \(+x_w\)가 보는 방향의 오른쪽, \(+z_w\)가 왼쪽에 있는 것과 같은 배치다. 두 점을 이으면 검은 직선이 되는데, 땅 위의 다른 어떤 방향(예를 들어 대각선 방향)의 평행선도 이 직선 위의 한 점에서 만난다. 이 직선 아래가 땅이고 위가 하늘이다. 카메라의 pitch를 바꾸면 이 직선이 위아래로, roll을 바꾸면 기울어진다. 이것은 \(R\)만으로 정해지고 카메라의 위치 \(T\)와는 무관하다.</p>
+    </section>
+
+    <section id="sec-homography">
+      <h2>Homographies and the Lie Group \(\mathrm{PGL}(3)\)</h2>
+      <p>invertible \(3 \times 3\) 행렬 \(H\)는 \([p] \mapsto [Hp]\)로 \(\RP^2\)의 diffeomorphism을 정하고, \(H\)와 \(\lambda H\)는 같은 map이다(Tour <a href="../00-tour/0-6-manifolds.html#i-0-6-4">Example 0.6.4</a> 뒤의 상자). 이런 map 전체가 <strong>projective general linear group</strong> \(\mathrm{PGL}(3) = \GL(3, \R)/\R^{\times}\)이고, 그 원소가 homography다. \(\GL(3, \R)\)은 9차원 Lie group이고 scalar 행렬 \(\R^{\times}I_3\)는 1차원 subgroup이므로 \(\mathrm{PGL}(3)\)은 8차원이다. 실제로 \(\mathrm{PGL}(3)\)은 \(\mathrm{SL}(3) = \{\det = 1\}\)과 같은 group이다. \(3\)이 홀수라서 \(\det(\lambda H) = \lambda^3\det H = 1\)인 실수 \(\lambda\)가 하나뿐이므로, 각 class에서 \(H/\sqrt[3]{\det H}\)라는 대표가 하나씩 정해지고, 이 대표를 고르는 map은 곱을 보존한다(\(\det\)이 곱을 보존하므로). 짝수 차원에서는 \(-I\)의 determinant가 \(1\)이라 이렇게 되지 않는다(\(\mathrm{PGL}(2, \R) \not\cong \mathrm{SL}(2, \R)\)). \(\mathrm{SL}(3)\)은 \(\det\)의 regular level set이므로 8차원 Lie group이다.</p>
+      <p>\(\mathrm{PGL}(3)\)은 \(\RP^2\)에 smooth하게 <strong>group action</strong>(군작용)한다. 곧 \((H, [p]) \mapsto [Hp]\)가 smooth이고 \(H_1(H_2[p]) = (H_1H_2)[p]\)이다. 3D vision에서 homography가 나오는 대표적인 두 경우는 다음과 같다. camera 1의 좌표로 \(\inner{n}{t_1} = \delta\)인 평면(\(n\)은 unit normal, \(\delta \gt 0\)는 camera 1에서 평면까지의 거리) 위의 점은 \(\inner{n}{t_1}/\delta = 1\)이므로 \(t_2 = Rt_1 + T = (R + Tn^{\mathsf T}/\delta)\,t_1\)이고, 카메라가 회전만 하면(\(T = 0\)) 모든 점이 \(t_2 = Rt_1\)이므로</p>
+      <div class="equation" id="eq-27-2-3">
+      \[ \begin{aligned} H_{\text{plane}} &amp;= \mathsf K_2\Big(R + \frac{T\,n^{\mathsf T}}{\delta}\Big)\mathsf K_1^{-1}, \\ H_{\text{rot}} &amp;= \mathsf K_2\,R\,\mathsf K_1^{-1} \end{aligned} \tag{27.2.3} \]
+      </div>
+      <p>이다. 앞의 것이 평면(바닥, 벽, 문서)을 찍은 두 영상, 뒤의 것이 panorama stitching의 경우다. 두 영상 사이에서 plane at infinity가 유도하는 homography도 \(H_{\text{rot}}\)이다(\(\delta \to \infty\)). 아주 먼 배경이 카메라가 회전만 한 것처럼 움직이는 이유다. Chapter 30의 2DGS가 splat 평면에서 영상으로 가는 정확한 map으로 쓰는 것도 homography다(<a href="../30-radiance-field-surfaces/30-3-surfels-2dgs.html#sec-ray-splat">Section 30.3</a>).</p>
+
+      <div class="thm proposition" id="i-27-2-2">
+        <p><span class="thm-head">Proposition 27.2.2</span> <span class="thm-name">(four points determine a homography)</span>.
+        \(\RP^2\)의 네 점 \([p_1], \dots, [p_4]\) 가운데 어느 세 점도 한 직선 위에 있지 않고 \([q_1], \dots, [q_4]\)도 그렇다면, \([Hp_i] = [q_i]\)인 \(H \in \mathrm{PGL}(3)\)이 정확히 하나 있다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> 어느 세 점도 collinear하지 않으므로 \(p_1, p_2, p_3\)은 \(\R^3\)의 basis이고 \(p_4 = \sum_i a_ip_i\)에서 모든 \(a_i \ne 0\)이다. \(A = (a_1p_1\ a_2p_2\ a_3p_3)\)는 \(e_1, e_2, e_3, (1,1,1)\)을 \(p_1, \dots, p_4\)로(scale까지) 보낸다. \(q_i\)에 대해서도 같은 \(B\)를 만들면 \(H = BA^{-1}\)이 원하는 map이다. 유일성: \(e_1, e_2, e_3\)을 고정하는 \(H\)는 대각행렬이고, \((1,1,1)\)도 고정하면 scalar 행렬이다. dimension으로 세면, 대응 하나 \([Hp] = [q]\)는 \(q \times Hp = 0\)이라는 \(H\)의 성분 9개에 대한 linear equation 두 개를 주고, 4점이면 8개의 방정식이 9차원 공간에 1차원의 해(곧 \(\mathrm{PGL}(3)\)의 한 점)를 남긴다. 이것이 DLT다 <a class="cite" href="../../references.html#HZ">[HZ]</a>.</p>
+      </div>
+      <p>세 점이 한 직선 위에 있으면 이 방정식들이 독립이 아니어서 해가 하나로 정해지지 않는다(verify 스크립트에서 null space의 dimension이 1보다 큼을 확인했다). RANSAC으로 homography를 추정할 때 퇴화한 sample을 버리는 이유다.</p>
+    </section>
+
+    <section id="sec-duality">
+      <h2>Points and Lines Transform Differently</h2>
+      <p>\(\RP^2\)의 직선은 \(\R^3\)에서 원점을 지나는 평면이고, 평면은 linear functional의 kernel이다. 그래서 직선은 \(l \in \R^3 \setminus \{0\}\)(scale은 무시)로 쓰고 점 \([p]\)가 그 위에 있다는 조건은 \(l^{\mathsf T}p = 0\)이다. 두 점을 잇는 직선과 두 직선의 교점은 모두 cross product다.</p>
+      <div class="equation" id="eq-27-2-4">
+      \[ \begin{aligned} l &amp;= p_1 \times p_2, \qquad q = l_1 \times l_2, \\ p &amp;\mapsto Hp, \qquad l \mapsto H^{-\mathsf T}l, \\ C &amp;\mapsto H^{-\mathsf T}CH^{-1}, \qquad C^* \mapsto HC^*H^{\mathsf T} \end{aligned} \tag{27.2.4} \]
+      </div>
+      <p>셋째 줄의 \(C\)는 <strong>conic</strong>(원뿔곡선) \(\{p : p^{\mathsf T}Cp = 0\}\)의 symmetric matrix이고, \(C^* = C^{-1}\)(scale은 무시)은 그 <strong>dual conic</strong>(쌍대 원뿔곡선), 곧 conic에 접하는 직선들의 집합 \(\{l : l^{\mathsf T}C^*l = 0\}\)의 행렬이다. Chapter 30의 ray–splat intersection이 두 직선의 교점을 cross product로 구한 것(<a href="../30-radiance-field-surfaces/30-3-surfels-2dgs.html#eq-30-3-3">(30.3.3)</a>)이 첫 줄의 둘째 식이다.</p>
+
+      <div class="thm proposition" id="i-27-2-3">
+        <p><span class="thm-head">Proposition 27.2.3</span> <span class="thm-name">(points are contravariant, lines are covariant)</span>.
+        homography가 점을 \(p \mapsto Hp\)로 보내면, incidence \(l^{\mathsf T}p = 0\)을 보존하는 직선의 변환은 \(l \mapsto H^{-\mathsf T}l\)뿐이다(scale까지). conic과 dual conic은 <a href="#eq-27-2-4">(27.2.4)</a>의 셋째 줄로 변한다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \((H^{-\mathsf T}l)^{\mathsf T}(Hp) = l^{\mathsf T}H^{-1}Hp = l^{\mathsf T}p\)이므로 incidence가 보존된다. 역으로 \(l\) 위의 모든 \(Hp\)를 지나는 직선은 하나뿐이다. conic은 \((Hp)^{\mathsf T}(H^{-\mathsf T}CH^{-1})(Hp) = p^{\mathsf T}Cp\)이고, dual conic은 접선이 직선처럼 변하므로 \((H^{-\mathsf T}l)^{\mathsf T}(HC^*H^{\mathsf T})(H^{-\mathsf T}l) = l^{\mathsf T}C^*l\)이다.</p>
+      </div>
+      <p>이것은 Tour <a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>의 vector와 covector의 관계 그대로다. 점 \(p\)는 \(\R^3\)의 vector이므로 \(H\)로 앞으로 밀려 간다(contravariant). 직선 \(l\)은 \(\R^3\)의 linear functional \(p \mapsto l^{\mathsf T}p\), 곧 covector이므로 \(H^{-1}\)로 당겨진다. \(l' = l \circ H^{-1}\)이고 행렬로는 \(l'^{\mathsf T} = l^{\mathsf T}H^{-1}\)이다(<a href="../00-tour/0-7-forms.html#eq-0-7-2">(0.7.2)</a>). 두 변환이 반대이기 때문에 짝 \(l^{\mathsf T}p\), 곧 incidence가 보존된다.</p>
+
+      <figure class="dg-figure" id="fig-27-2-2">
+        <img src="figures/fig-27-2-2-point-line.svg" alt="같은 축 범위의 두 패널. 왼쪽 (a)에 오른쪽 위로 올라가는 파란 직선 l과 그 위의 검은 점 p_1, p_3, p_2, 그리고 조금 더 완만한 초록 직선 l'이 있다. 두 직선은 오른쪽 위의 주황 점 q에서 만난다. 오른쪽 (b)에는 검은 점 Hp_1, Hp_3, Hp_2가 파란 직선 위에 놓여 있고, 초록 직선과 파란 직선이 주황 점 Hq에서 만난다. 주홍 점선 직선 하나가 파란 직선을 비스듬히 가로지르며 검은 점들을 지나지 않는다. 왼쪽 위에 'blue: H^{-T}l (correct)', 'green: H^{-T}l'', 'dashed: Hl (wrong)'이라는 설명이 있다.">
+        <figcaption><span class="fig-head">Figure 27.2.2.</span>
+        homography는 점을 \(H\)로, 직선을 \(H^{-\mathsf T}\)로 보낸다. <em>무엇을</em>: \(H = \begin{pmatrix} 1.2 &amp; 0.3 &amp; -0.4 \\ 0.1 &amp; 0.8 &amp; 0.5 \\ 0.3 &amp; -0.2 &amp; 1.0 \end{pmatrix}\). 점 \(p_1 = (0.2, 0.1)\), \(p_2 = (1.1, 0.7)\), \(p_3 = 0.3p_1 + 0.7p_2\)(homogeneous로)과 그들을 지나는 직선 \(l = p_1 \times p_2\), 그리고 다른 직선 \(l' = (1, -2, 0.5)\)와 교점 \(q = l \times l'\). <em>읽는 법</em>: 두 패널은 같은 축(chart \(w = 1\))이다. (a)가 변환 전, (b)가 변환 후다. 검은 점이 점, 파란 선과 초록 선이 직선, 주황 점이 교점이다. (b)의 주홍 점선은 직선의 coefficient vector를 점처럼 \(H\)로 바꾼 \(Hl\)이 나타내는 직선이다. <em>볼 것</em>: (b)에서 세 점 \(Hp_i\)는 파란 직선 \(H^{-\mathsf T}l\) 위에 정확히 놓이고, 교점 \(Hq\)는 \(H^{-\mathsf T}l\)과 \(H^{-\mathsf T}l'\)의 교점과 같다. 주홍 점선 \(Hl\)은 세 점 가운데 어느 것도 지나지 않는다. <em>본문과의 연결</em>: <a href="#i-27-2-3">Proposition 27.2.3</a>, 곧 직선이 covector라는 것이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-27-2-2">Figure 27.2.2</a>의 (a)에서 세 검은 점은 한 파란 직선 위에 있다. (b)에서 변환된 점들은 여전히 한 직선 위에 있고(homography는 collinearity를 보존한다), 그 직선의 coefficient는 \(H^{-\mathsf T}l\)이다. 직선의 coefficient \(l\)을 점처럼 \(H\)로 바꾸면 주홍 점선이 되어 점들을 놓친다. 영상을 warp한 뒤 line feature(예를 들어 epipolar line)를 함께 옮길 때 흔히 하는 실수다.</p>
+
+      <div class="thm example" id="i-27-2-4">
+        <p><span class="thm-head">Example 27.2.4</span> <span class="thm-name">(a Gaussian's ellipse is a conic, and \(\Sigma\) sits in the dual conic)</span>.
+        2D Gaussian의 \(1\sigma\) ellipse \(\{(x - \mu)^{\mathsf T}\Sigma^{-1}(x - \mu) = 1\}\)를 homogeneous coordinates로 쓰면 conic</p>
+        <p>\[ \begin{aligned} C &amp;= \begin{pmatrix} \Sigma^{-1} &amp; -\Sigma^{-1}\mu \\ -\mu^{\mathsf T}\Sigma^{-1} &amp; \mu^{\mathsf T}\Sigma^{-1}\mu - 1 \end{pmatrix}, \\ C^* &amp;\propto \begin{pmatrix} \Sigma - \mu\mu^{\mathsf T} &amp; -\mu \\ -\mu^{\mathsf T} &amp; -1 \end{pmatrix} \end{aligned} \]</p>
+        <p>이다. affine map \(H = \begin{pmatrix} A &amp; b \\ 0 &amp; 1 \end{pmatrix}\)에 대해 \(HC^*H^{\mathsf T}\)를 계산하면 같은 꼴에서 \(\mu' = A\mu + b\), \(\Sigma' = A\Sigma A^{\mathsf T}\)가 나오고, \(H^{-\mathsf T}CH^{-1}\)의 왼쪽 위 블록은 \(A^{-\mathsf T}\Sigma^{-1}A^{-1}\)이다. 곧 <a href="../29-gaussian-splatting/29-1-gaussian-metric.html#eq-29-1-5">(29.1.5)</a>와 <a href="../29-gaussian-splatting/29-1-gaussian-metric.html#eq-29-1-6">(29.1.6)</a>은 dual conic과 conic의 변환 법칙 <a href="#eq-27-2-4">(27.2.4)</a>을 affine map에 쓴 것이다. Chapter 29에서 \(\Sigma\)는 contravariant, \(\Sigma^{-1}\)은 covariant라고 한 것이 여기서는 “\(\Sigma^{-1}\)은 conic \(C\)의 왼쪽 위 블록, \(\Sigma\)는 dual conic \(C^*\)에 들어 있다”로 나타난다. 정확히는 \(C^*\)의 왼쪽 위 블록은 \(\Sigma - \mu\mu^{\mathsf T}\)이고(\(\mu = 0\)이면 \(\Sigma\) 자신), \(\Sigma\)는 \(C^*\)를 \((3,3)\) 성분 \(-1\)로 정규화했을 때의 Schur complement \(C^*_{11} - C^*_{12}C^*_{21}/C^*_{22}\)다(아래 <a href="#sec-push-pull">What geometry explains</a> 상자).</p>
+        <p class="verified">Verification: <code>verify/v-27-2-projective-geometry.py</code></p>
+      </div>
+
+      <p>카메라 \(P\)는 invertible이 아니지만 같은 원리가 그대로 작동한다. contravariant한 것은 \(P\)로 앞으로 밀 수 있고, covariant한 것은 \(P^{\mathsf T}\)로 뒤로 당길 수 있다.</p>
+      <div class="equation" id="eq-27-2-5">
+      \[ \begin{aligned} X &amp;\mapsto PX, \\ l &amp;\mapsto \Pi = P^{\mathsf T}l, \\ Q^* &amp;\mapsto C^* = PQ^*P^{\mathsf T} \end{aligned} \tag{27.2.5} \]
+      </div>
+      <p>첫째 줄은 점을 앞으로 미는 것, 둘째 줄은 영상의 직선을 3D의 평면으로 당기는 것, 셋째 줄은 dual quadric을 영상의 dual conic으로 미는 것이다. 둘째 줄의 평면 \(\Pi\)는 영상의 직선 \(l\)로 투영되는 점 전체이고 \(\Pi^{\mathsf T}(c, 1) = l^{\mathsf T}P(c, 1) = 0\)이므로 카메라 중심을 지난다. 셋째 줄은 ellipsoid(quadric \(Q\))의 윤곽선, 곧 occluding contour(<a href="27-1-camera-smooth-map.html#i-27-1-2">Proposition 27.1.2</a>)의 image가 dual quadric을 밀어 보낸 dual conic이라는 뜻이다 <a class="cite" href="../../references.html#HZ">[HZ]</a>. verify 스크립트에서 ellipsoid의 contour 점들을 직접 투영해 이 conic 위에 있음을 확인했다. <a href="../29-gaussian-splatting/29-3-splatting-linearization.html#fig-29-3-2">Figure 29.3.2</a>의 “정확한 윤곽”이 이 식으로 그린 것이다.</p>
+
+      <aside class="box insight" id="sec-push-pull">
+        <p class="box-title">What geometry explains: 3DGS는 왜 \(\Sigma^{-1}\)이 아니라 \(\Sigma\)를 투영하는가 (projective판)</p>
+        <p>투영 \(P\)에는 inverse가 없으므로 3D의 covariant한 대상(평면, quadric \(Q\), \(\Sigma^{-1}\))을 화면으로 밀어 보낼 방법이 없다. 방향이 거꾸로다. 화면의 covariant한 대상(직선, conic)은 \(P^{\mathsf T}\)로 3D로 <em>당겨질</em> 뿐이고, 당기면 카메라 중심을 지나는 평면(직선에서)이나 cone \(P^{\mathsf T}CP\)(conic에서)가 된다. 화면으로 <em>밀어</em> 보낼 수 있는 것은 contravariant한 대상, 곧 점과 dual quadric(\(\Sigma\)가 들어 있는 \(Q^*\))뿐이다. 3DGS가 \(\Sigma_{2D} = J\Sigma_cJ^{\mathsf T}\)를 계산한 뒤 화면에서 inverse matrix(공식 코드의 conic)를 구하는 순서(<a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-transformation">Section 29.1</a>)와, ellipsoid의 정확한 윤곽이 \(PQ^*P^{\mathsf T}\)라는 사실 <a href="#eq-27-2-5">(27.2.5)</a>은 같은 원리의 두 모습이다. 차이는 하나다. 3DGS는 \(P\)를 그 differential \(J\)로 바꾸어 affine map으로 밀고(<a href="../29-gaussian-splatting/29-3-splatting-linearization.html#sec-ewa">Section 29.3</a>), \(PQ^*P^{\mathsf T}\)는 projective map으로 정확히 민다. 같은 \(k\sigma\) ellipsoid를 두 방식으로 민 윤곽의 차이가 <a href="../29-gaussian-splatting/29-3-splatting-linearization.html#fig-29-3-2">Figure 29.3.2</a>에서 본 EWA 윤곽의 오차다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-hierarchy">
+      <h2>The Hierarchy: Projective ⊃ Affine ⊃ Similarity ⊃ Euclidean</h2>
+      <p>Klein의 관점(Erlangen program)에서 하나의 기하는 하나의 group action과 그것이 보존하는 양으로 정해진다. 평면의 변환 group은 다음 계층을 이룬다. 각 group은 아래 group을 포함하고, 커질수록 보존하는 것이 줄어든다.</p>
+      <table>
+        <thead>
+          <tr><th>group</th><th>matrix (chart \(w = 1\))</th><th>dof</th><th>preserves</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Euclidean</td><td>\(\begin{pmatrix} R &amp; b \\ 0 &amp; 1 \end{pmatrix}\), \(R \in \mathrm{SO}(2)\)</td><td>3</td><td>length, angle, area</td></tr>
+          <tr><td>similarity</td><td>\(\begin{pmatrix} \lambda R &amp; b \\ 0 &amp; 1 \end{pmatrix}\), \(\lambda \gt 0\)</td><td>4</td><td>angle, ratio of lengths</td></tr>
+          <tr><td>affine</td><td>\(\begin{pmatrix} A &amp; b \\ 0 &amp; 1 \end{pmatrix}\), \(A \in \GL(2)\)</td><td>6</td><td>parallelism, ratio of lengths on a line, ratio of areas, the line at infinity</td></tr>
+          <tr><td>projective</td><td>\(H \in \mathrm{PGL}(3)\)</td><td>8</td><td>lines, incidence, cross-ratio</td></tr>
+        </tbody>
+      </table>
+      <p>affine group은 정확히 <strong>line at infinity</strong>(무한원직선) \(l_\infty = (0, 0, 1)\)을 보존하는 homography들이다. \(H^{-\mathsf T}l_\infty \propto l_\infty\)는 \(H\)의 마지막 행이 \((0, 0, \lambda)\)라는 것과 같기 때문이다. 그래서 평면을 찍은 영상에서 그 평면의 vanishing line \(l\)을 찾으면, \(l\)을 다시 \(l_\infty\)로 보내는 homography(마지막 행이 \(l^{\mathsf T}\))로 영상을 affine하게 바로잡을 수 있다(affine rectification) <a class="cite" href="../../references.html#HZ">[HZ]</a>. 평행선이 다시 평행해진다. 각과 길이의 비까지 되찾으려면 similarity를 정하는 정보가 더 필요하다.</p>
+
+      <figure class="dg-figure" id="fig-27-2-3">
+        <img src="figures/fig-27-2-3-hierarchy.svg" alt="2행 2열의 네 패널이 같은 축 범위를 쓴다. 각 패널에 연회색으로 원래의 단위 정사각형 격자와 내접원이 있고, 파란 격자와 주홍 곡선이 변환된 모습이다. (a) Euclidean(3 dof): 격자가 같은 크기로 기울어져 옮겨졌고 원도 같은 크기의 원이다. 'keeps: lengths, angles, areas'. (b) similarity(4 dof): 격자가 1.5배 커져 기울어졌고 원은 더 큰 원이다. 'keeps: angles, length ratios'. (c) affine(6 dof): 격자가 평행사변형으로 기울어졌고 원은 ellipse가 되었다. 'keeps: parallelism, area ratios'. (d) projective(8 dof): 격자가 사다리꼴처럼 한쪽이 좁아져 격자선들이 더 이상 평행하지 않고, 원은 한쪽으로 치우친 ellipse가 되었다. 'keeps: lines, incidence, cross-ratio'.">
+        <figcaption><span class="fig-head">Figure 27.2.3.</span>
+        네 group이 같은 그림에 하는 일. <em>무엇을</em>: 단위 정사각형 \([0, 1]^2\)의 격자(가로·세로 각 5개의 선, 간격 \(0.25\))와 내접원(중심 \((0.5, 0.5)\), 반지름 \(0.5\))에 (a) \(25^\circ\) 회전과 translation, (b) 같은 회전에 배율 \(1.5\), (c) \(A = \begin{pmatrix} 1.2 &amp; 0.6 \\ -0.2 &amp; 0.8 \end{pmatrix}\)인 affine map, (d) \(H = \begin{pmatrix} 1.0 &amp; 0.2 &amp; 0.1 \\ 0 &amp; 1.1 &amp; 0 \\ 0.6 &amp; 0.3 &amp; 1.0 \end{pmatrix}\)인 homography를 적용했다. <em>읽는 법</em>: 네 패널은 같은 축이다. 연회색이 원래 그림, 파란 격자와 주홍 곡선이 변환 결과이고, 패널 안의 “keeps”가 그 group이 보존하는 양이다. <em>볼 것</em>: (a)에서 (b)로 가면 크기가 바뀌지만 원은 원이고 격자의 직각도 그대로다. (c)에서 원이 ellipse가 되고 직각이 깨지지만, 격자선은 여전히 서로 평행하고 칸들의 넓이는 모두 같다. (d)에서는 평행이 깨져 격자선들이 화면 밖의 한 점을 향해 모이고 칸의 크기가 다르다. 그래도 직선은 직선이고 원은 conic(여기서는 ellipse)이다. 한 격자선 위의 네 점의 cross-ratio는 변환 전과 같다(그림 스크립트의 self-check에서 확인). <em>본문과의 연결</em>: 위 표의 계층과, homography가 affine map이 되는 조건(line at infinity의 보존)이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-27-2-3">Figure 27.2.3</a>을 (a)에서 (d)로 읽으면 group이 커지면서 무엇이 차례로 사라지는지 보인다. 길이(a에서 b로), 각(b에서 c로), 평행(c에서 d로)이다. (d)의 격자는 <a href="#fig-27-2-1">Figure 27.2.1</a>의 땅 격자와 같은 일을 겪었다. 평면을 찍는 것 자체가 homography이기 때문이다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: SfM이 되찾을 수 있는 것은 group 하나만큼 모자란다</p>
+        <p>같은 계층이 3D 복원의 모호성을 정한다. calibration을 모르는 카메라들로 찍은 영상만으로는 장면을 \(\mathrm{PGL}(4)\)(15차원)의 원소만큼만 정할 수 있고(projective reconstruction), \(\mathsf K\)를 알면 similarity만큼, 곧 \(\mathrm{Sim}(3)\)(회전 3, translation 3, 배율 1의 7차원)만큼 정할 수 있다 <a class="cite" href="../../references.html#HZ">[HZ]</a>. 장면과 카메라 전체를 같은 group의 원소로 함께 옮기면 모든 영상이 그대로이기 때문이다. bundle adjustment의 gauge freedom이 이 7차원이다(<a href="../28-lie-groups-poses/28-3-bundle-adjustment.html#sec-gauge">Section 28.3</a>). monocular SLAM에서 scale이 흘러가는 것(scale drift)도 같은 이유이고, 그래서 monocular SLAM의 loop closure는 \(\mathrm{SE}(3)\)이 아니라 \(\mathrm{Sim}(3)\)의 원소로 drift를 고친다 <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>.</p>
+      </aside>
+    </section>
+
+    <section id="sec-ndc">
+      <h2>NeRF's NDC Is a Projective Transformation</h2>
+      <p>forward-facing 장면(LLFF 데이터)에서 NeRF는 ray를 normalized device coordinates(NDC)로 바꿔 sample한다 <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a>. 카메라는 OpenGL 규약으로 \(-z\)를 보고, near plane은 \(z = -n\), far plane은 무한대로 둔다. 이 소절에서는 논문의 기호를 따라 \(n \gt 0\)을 near plane의 깊이로 쓴다(앞 소절들의 normal \(n\)과 다르다). 영상의 가로·세로 pixel 수는 homography \(H\)와 헷갈리지 않게 \(w_{\mathrm{px}}, h_{\mathrm{px}}\)로 쓰고(논문과 코드의 \(W, H\)), ray의 매개변수는 camera 좌표 \(t\)와 헷갈리지 않게 \(s\)로 쓴다(논문의 \(t\)). 논문의 부록 C와 공식 코드 <code>run_nerf_helpers.py</code>의 <code>ndc_rays</code>가 쓰는 map은 \(a_x = -f/(w_{\mathrm{px}}/2)\), \(a_y = -f/(h_{\mathrm{px}}/2)\)에 대해</p>
+      <div class="equation" id="eq-27-2-6">
+      \[ \begin{aligned} \pi(x, y, z) &amp;= \Big(a_x\frac{x}{z},\ a_y\frac{y}{z},\ 1 + \frac{2n}{z}\Big), \\ M &amp;= \begin{pmatrix} -a_x &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; -a_y &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; -1 &amp; -2n \\ 0 &amp; 0 &amp; -1 &amp; 0 \end{pmatrix} \end{aligned} \tag{27.2.6} \]
+      </div>
+      <p>이다. 둘째 식은 \(\pi\)를 homogeneous coordinates로 쓴 것이다. \(M(x, y, z, 1)\)의 마지막 성분 \(-z\)로 나누면 \(\pi(x, y, z)\)가 된다.</p>
+
+      <div class="thm proposition" id="i-27-2-5">
+        <p><span class="thm-head">Proposition 27.2.5</span> <span class="thm-name">(NDC is a projective transformation)</span>.
+        \(\det M = -2n\,a_xa_y \ne 0\)이므로 \(M\)은 \(\mathrm{PGL}(4)\)의 원소이고 \(\RP^3\)의 diffeomorphism을 정한다. 따라서 직선을 직선으로 보낸다. 또 (i) 카메라 중심 \((0,0,0,1)\)은 point at infinity \((0, 0, -2n, 0)\)으로 가므로 중심을 지나는 ray들은 \(z'\)축에 평행한 직선이 되고, (ii) plane at infinity는 평면 \(z' = 1\)로, near plane \(z = -n\)은 \(z' = -1\)로 간다. (iii) near plane 위의 점 \(o\)에서 출발한 ray \(o + sd\)의 image는 NDC에서 직선 \(o' + s'd'\)이고, 그 매개변수는 \(s' = 1 - o_z/(o_z + sd_z) = 1 + n/z\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(M\)은 블록 대각이고 아래 블록 \(\begin{pmatrix} -1 &amp; -2n \\ -1 &amp; 0 \end{pmatrix}\)의 determinant가 \(-2n\)이다. (i)과 (ii)는 \(M\)을 해당 점에 곱하면 나온다(plane at infinity의 점 \((x, y, z, 0)\)은 \((-a_xx, -a_yy, -z, -z)\), 곧 \(z' = 1\)). (iii)은 논문 부록 C의 식 (15)(논문의 \(t' = 1 - o_z/(o_z + td_z)\))이고, \(o_z = -n\)을 넣으면 \(s' = 1 + n/z = 1 - n/\abs{z}\)이다. 그러므로 \(s'\)을 \([0, 1]\)에서 고르게 sample하는 것은 disparity \(1/\abs{z}\)를 \(1/n\)에서 \(0\)까지 고르게 sample하는 것이다. 또 \(z' = 2s' - 1\)이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-27-2-4">
+        <img src="figures/fig-27-2-4-ndc.svg" alt="두 패널. 왼쪽 (a) camera space: a fan of rays는 가로축 depth |z|(0부터 14), 세로축 y다. 원점(카메라 중심)에서 회색 ray 7개가 부채꼴로 퍼지고 바깥 두 개는 검은 frustum 경계다. |z| = 1에 주홍 점선(near plane)이 있다. 각 ray 위의 파란 점들은 near plane 근처에서 촘촘하고 멀어질수록 듬성듬성해진다(|z| = 1, 1.11, 1.25, ..., 10). 주황 직선 하나가 (1.5, -0.3)에서 (12, 2.2)로 비스듬히 지나며 'line not through the center'라고 적혀 있다. 오른쪽 (b) NDC: parallel lines는 가로축 z'(-1부터 1), 세로축 y'다. 같은 7개 ray가 수평한 평행선이 되었고(바깥 두 개는 검정), 파란 점들이 z' = -1부터 0.8까지 같은 간격 0.2로 놓여 있다. z' = -1에 주홍 점선(|z| = 1), z' = 1에 회색 점선(|z| = ∞)이 있다. 주황 직선은 (b)에서도 곧은 선분이다.">
+        <figcaption><span class="fig-head">Figure 27.2.4.</span>
+        NDC는 ray의 부채꼴을 평행선으로 펴는 projective transformation이다. <em>무엇을</em>: NeRF 규약(카메라가 \(-z\)를 봄)에서 영상 높이 \(h_{\mathrm{px}} = 378\) px, \(f = 400\) px, \(n = 1\)인 카메라의 cross-section \(x = 0\). <em>읽는 법</em>: (a)는 camera space의 \((\abs{z}, y)\) 평면이다. 회색 직선은 pixel 7줄을 지나는 ray(바깥 두 개의 검은 직선은 frustum의 경계), 주홍 점선은 near plane \(\abs{z} = 1\)이다. 파란 점은 각 ray에서 NDC 매개변수 \(s' = 0, 0.1, \dots, 0.9\)인 sample이고, 주황 선분은 중심을 지나지 않는 직선이다. (b)는 같은 대상을 <a href="#eq-27-2-6">(27.2.6)</a>의 \(\pi\)로 보낸 NDC의 \((z', y')\) 평면이다. 주홍 점선 \(z' = -1\)이 near plane, 회색 점선 \(z' = 1\)이 무한히 먼 곳이다. <em>볼 것</em>: (a)에서 한 점(중심)에서 퍼지던 ray들이 (b)에서는 서로 평행한 수평선이 된다. 중심이 point at infinity로 갔기 때문이다. sample들은 (b)에서 간격 \(0.2\)로 고르게 놓이지만, (a)에서는 \(\abs{z} = 1, 1.11, 1.25, 1.43, 1.67, 2, 2.5, 3.33, 5, 10\)으로 near plane 근처에 몰려 있다. 고른 disparity 간격이다. 주황 선분은 두 패널 모두에서 곧다. <em>본문과의 연결</em>: <a href="#i-27-2-5">Proposition 27.2.5</a>의 (i)–(iii)이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-27-2-4">Figure 27.2.4</a>의 (a)에서 (b)로 가면서 무엇이 변하고 무엇이 남는지 보자. 변하는 것은 부채꼴이 평행선이 된다는 것과 깊이 축의 눈금이다. (a)의 무한히 긴 깊이 범위가 (b)의 유한한 구간 \([-1, 1]\)로 들어가고, 고른 \(s'\) 간격은 가까운 곳을 촘촘히 본다. 남는 것은 직선이다. 주황 선분처럼 중심을 지나지 않는 직선도 직선으로 남으므로, NDC로 바꾼 ray는 여전히 ray이고 \(o' + s'd'\)로 쓸 수 있다. NeRF가 NDC 안에서도 같은 volume rendering 코드를 쓸 수 있는 이유다. 논문은 이 공간을 “parallel lines를 보존하는” 공간이라고 쓰지만 <a class="cite" href="../../references.html#Mildenhall20">[Mildenhall20]</a>, 정확히 말해 projective transformation이 보존하는 것은 직선이고, 평행성은 보존하지 않는다. 카메라 중심을 지나던 직선들은 오히려 평행해지고, 평행했던 직선들은 그 방향의 point at infinity \([d : 0]\)가 평면 \(z' = 1\)의 보통 점으로 가므로 거기서 만난다(verify에서 무작위 평행선 쌍이 하나도 평행하게 남지 않음을 확인했다. image plane에 평행한 방향, 곧 \(d_z = 0\)인 직선들만 평행하게 남는다).</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: NDC는 forward-facing에서만 쓸 수 있다</p>
+        <p>\(M\)은 \(\RP^3\) 전체의 diffeomorphism이지만, 카메라 평면 \(z = 0\)을 plane at infinity로 보낸다. 그러므로 \(z \ge 0\)인 점(카메라 옆이나 뒤)은 NDC의 cube \([-1, 1]^3\)에 들어오지 않는다. 공식 코드도 NDC를 LLFF처럼 앞을 보는 데이터에만 켠다(<code>run_nerf.py</code>에서 <code>dataset_type != 'llff'</code>이면 끈다). 모든 방향에 내용이 있는 360° 장면을 유한한 영역에 담으려면 다른 map이 필요하다. Mip-NeRF 360의 contraction \(x \mapsto (2 - 1/\abs{x})\,x/\abs{x}\)(\(\abs{x} \gt 1\)) <a class="cite" href="../../references.html#Barron22">[Barron22]</a>는 모든 방향을 다루지만 projective가 아니어서 직선을 휘게 한다(verify에서 확인). 그래서 contraction 뒤의 “ray”는 더 이상 직선이 아니고, sample의 위치는 원래 공간의 ray에서 정해야 한다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>\(\RP^n\)의 정의와 chart, smooth structure: <a href="../03-topology-basics/3-4-quotient-spaces.html#i-3-4-11">Definition 3.4.11</a>, <a href="../03-topology-basics/3-4-quotient-spaces.html#i-3-4-15">Proposition 3.4.15</a>, <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-1">Proposition 11.4.1</a>, transition map <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-2">Example 11.4.2</a>. homography가 smooth라는 것: <a href="../12-smooth-maps/12-1-smooth-maps.html#ex-12-1-5">Exercise 12.1.5</a>.</li>
+        <li>dual space와 dual map(직선의 변환 \(H^{-\mathsf T}\)의 linear algebra): <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-1">Definition 1.3.1</a>, <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-10">Definition 1.3.10</a>. manifold 위의 covector와 pullback: <a href="../16-covectors-tensors/index.html#toc-16-1">Section 16.1</a>, <a href="../16-covectors-tensors/index.html#toc-16-2">Section 16.2</a>.</li>
+        <li>Lie group \(\GL(n, \R)\)과 그 subgroup, group action: <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-8">Example 11.4.8</a>, <a href="../20-lie-groups-frobenius/index.html#toc-20-1">Section 20.1</a>. submersion과 fiber: <a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>.</li>
+        <li>projective geometry의 계층, conic과 quadric의 변환, 복원의 모호성: <a class="cite" href="../../references.html#HZ">[HZ]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>camera matrix \(P = \mathsf K[R \mid T]\)는 \(\RP^3 \setminus \{[c : 1]\}\)에서 \(\RP^2\)로 가는 submersion을 정한다. fiber는 중심을 지나는 projective line이고, 그래서 앞과 뒤(\(t\)와 \(-t\))를 구별하지 못한다.</li>
+        <li>plane at infinity의 image가 vanishing point \(\mathsf KRd\)와 vanishing line \(\mathsf K^{-\mathsf T}Rn\)이다. 영상의 모든 점은 한 방향의 vanishing point다.</li>
+        <li>homography는 8차원 Lie group \(\mathrm{PGL}(3) \cong \mathrm{SL}(3)\)의 원소이고, 대응 하나가 방정식 2개를 주므로 일반 위치의 4점이 \(H\)를 정한다.</li>
+        <li>점은 contravariant(\(p \mapsto Hp\)), 직선은 covariant(\(l \mapsto H^{-\mathsf T}l\))다. conic은 \(H^{-\mathsf T}CH^{-1}\), dual conic은 \(HC^*H^{\mathsf T}\)로 변하고, Gaussian의 \(\Sigma^{-1}\)은 conic의 블록, \(\Sigma\)는 dual conic의 블록(중심이 원점일 때. 일반적으로는 Schur complement)이다. 투영 \(P\)로는 contravariant한 것만 밀어 보낼 수 있다(\(PQ^*P^{\mathsf T}\)).</li>
+        <li>Euclidean ⊂ similarity ⊂ affine ⊂ projective는 각각 길이, 각, 평행, 직선을 보존하는 마지막 group이다. NeRF의 NDC는 \(\mathrm{PGL}(4)\)의 원소로, 중심을 point at infinity로 보내 ray를 평행선으로 펴고 깊이를 disparity로 바꾼다.</li>
+      </ul>
+      <p class="next">다음 절에서는 카메라를 두 대로 늘린다. 두 영상의 대응점이 만족하는 epipolar constraint는 하나의 행렬 \(E\)로 쓰이고, 그런 행렬 전체는 5차원 manifold를 이룬다. 5-point, 7-point, 8-point algorithm의 숫자가 이 manifold의 dimension에서 나온다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-27-2-1" data-level="1">
+        <p><span class="thm-head">Exercise 27.2.1</span> <span class="level">★</span>
+        \(\mathsf K = \begin{pmatrix} 500 &amp; 0 &amp; 320 \\ 0 &amp; 500 &amp; 240 \\ 0 &amp; 0 &amp; 1 \end{pmatrix}\), \(R = I_3\)이다. 방향 \(d = (1, 0, 1)\)과 \(d = (1, 0, 0)\)의 vanishing point를 구하고, normal이 \(n = (0, 1, 0)\)인 평면들의 vanishing line을 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-27-2-2">(27.2.2)</a>에서 \(\mathsf K(1, 0, 1) = (820, 240, 1)\)이므로 vanishing point는 pixel \((820, 240)\)이다. \(\mathsf K(1, 0, 0) = (500, 0, 0)\)은 마지막 성분이 \(0\)이므로 영상의 point at infinity다. image plane에 평행한 방향의 직선들은 영상에서도 평행하게 남는다. vanishing line은 \(\mathsf K^{-\mathsf T}(0, 1, 0) \propto (0, 1, -240)\), 곧 직선 \(u_y = 240\)(principal point를 지나는 수평선)이다. 카메라가 수평을 보면 지평선이 영상 한가운데를 지난다.</p>
+          <p class="verified">Verification: <code>verify/v-27-2-projective-geometry.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-27-2-2" data-level="1">
+        <p><span class="thm-head">Exercise 27.2.2</span> <span class="level">★</span>
+        \(H = \diag(2, 1, 1)\)(가로로 2배 늘이기)가 직선 \(u_x = 1\), 곧 \(l = (1, 0, -1)\)을 어디로 보내는가? \(Hl\)은 어떤 직선인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>점 \((1, s)\)는 \((2, s)\)로 가므로 직선 \(u_x = 1\)은 \(u_x = 2\)로 가야 한다. 실제로 \(H^{-\mathsf T}l = (1/2, 0, -1) \propto (1, 0, -2)\), 곧 \(u_x = 2\)이다. 반면 \(Hl = (2, 0, -1)\)은 \(u_x = 1/2\)이라는 엉뚱한 직선이다. 늘이는 map에서 직선의 coefficient는 반대로 줄어든다(<a href="#i-27-2-3">Proposition 27.2.3</a>).</p>
+          <p class="verified">Verification: <code>verify/v-27-2-projective-geometry.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-27-2-3" data-level="1">
+        <p><span class="thm-head">Exercise 27.2.3</span> <span class="level">★</span>
+        평면의 Euclidean map, similarity, affine map, homography를 대응점으로 추정하려면 각각 최소 몇 쌍이 필요한가? <a href="#i-27-2-2">Proposition 27.2.2</a>와 같은 dimension 세기로 답하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>대응점 한 쌍은 방정식 2개를 준다. dof가 각각 3, 4, 6, 8이므로 \(\lceil 3/2 \rceil = 2\), \(4/2 = 2\), \(6/2 = 3\), \(8/2 = 4\)쌍이다. Euclidean map은 2쌍이면 방정식이 하나 남는다(두 점 사이의 거리가 같아야 한다는 조건). 이 숫자들이 RANSAC의 minimal sample 크기다.</p>
+          <p class="verified">Verification: <code>verify/v-27-2-projective-geometry.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-27-2-4" data-level="2">
+        <p><span class="thm-head">Exercise 27.2.4</span> <span class="level">★★</span>
+        \(n = 1\)인 NDC에서 optical axis 위의 점 \(z = -1, -2, -4\)와 무한히 먼 점의 \(z'\)을 구하여라. 깊이를 두 배씩 늘릴 때 \(z'\)의 간격은 어떻게 되는가? 이것을 disparity로 설명하고, NDC에서 고른 sample이 먼 배경에 sample을 적게 둔다는 것이 장점인지 단점인지 생각해 보아라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(z' = 1 + 2n/z\)이므로 \(-1, 0, 0.5, 1\)이다. 깊이를 두 배씩 늘리면 \(z'\)의 간격이 \(1, 0.5, 0.25, \dots\)로 반씩 줄어든다. \(z' = 1 - 2/\abs{z}\)는 disparity \(1/\abs{z}\)의 affine function이기 때문이다(<a href="#i-27-2-5">Proposition 27.2.5</a>). pixel 하나가 덮는 깊이의 폭은 깊이의 제곱에 비례하므로(<a href="27-3-essential-manifold.html">Section 27.3</a>에서 triangulation의 불확실성으로 다시 본다), 먼 곳에 sample을 적게 두는 것은 영상이 구별할 수 있는 만큼만 sample하는 셈이다. 다만 배경이 정말 멀지 않은 장면에서는 뒤쪽이 덜 sample된다.</p>
+          <p class="verified">Verification: <code>verify/v-27-2-projective-geometry.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-27-2-5" data-level="2">
+        <p><span class="thm-head">Exercise 27.2.5</span> <span class="level">★★</span>
+        <a href="#i-27-2-4">Example 27.2.4</a>의 \(C^*\)에 \(H = \begin{pmatrix} A &amp; b \\ 0 &amp; 1 \end{pmatrix}\)를 적용해 \(HC^*H^{\mathsf T}\)의 왼쪽 위 블록과 오른쪽 열을 계산하고, 그것이 \(\mu' = A\mu + b\), \(\Sigma' = A\Sigma A^{\mathsf T}\)인 Gaussian의 dual conic임을 보여라. \(H\)가 affine이 아니면(마지막 행이 \((0, 0, 1)\)이 아니면) 무엇이 달라지는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(C^* = \begin{pmatrix} S &amp; -\mu \\ -\mu^{\mathsf T} &amp; -1 \end{pmatrix}\), \(S = \Sigma - \mu\mu^{\mathsf T}\)라 하면 \(HC^* = \begin{pmatrix} AS - b\mu^{\mathsf T} &amp; -A\mu - b \\ -\mu^{\mathsf T} &amp; -1 \end{pmatrix}\)이고, 오른쪽에 \(H^{\mathsf T} = \begin{pmatrix} A^{\mathsf T} &amp; 0 \\ b^{\mathsf T} &amp; 1 \end{pmatrix}\)를 곱하면 오른쪽 열은 \((-(A\mu + b),\ -1) = (-\mu', -1)\), 왼쪽 위 블록은 \(ASA^{\mathsf T} - b\mu^{\mathsf T}A^{\mathsf T} - A\mu b^{\mathsf T} - bb^{\mathsf T} = A\Sigma A^{\mathsf T} - \mu'\mu'^{\mathsf T}\)이다. 따라서 \(\Sigma' = A\Sigma A^{\mathsf T}\)다. 마지막 행이 \((h_1, h_2, h_3)\)이면 결과의 \((3,3)\) 성분이 \(-1\)이 아니게 되고, 정규화하면 \(\Sigma'\)이 \(\mu\)와 \(\Sigma\)에 nonlinear하게 의존한다. ellipse는 여전히 ellipse(또는 다른 conic)로 가지만 중심이 중심으로 가지 않는다. perspective 투영에서 Gaussian의 image가 Gaussian이 아닌 것(<a href="../29-gaussian-splatting/29-3-splatting-linearization.html#sec-perspective">Section 29.3</a>)과 같은 현상이다.</p>
+          <p class="verified">Verification: <code>verify/v-27-2-projective-geometry.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="27-1-camera-smooth-map.html">← 27.1 The Camera as a Smooth Map</a>
+    <a rel="next" href="27-3-essential-manifold.html">27.3 Epipolar Geometry and the Essential Manifold →</a>
+  </nav>
+</body>
+</html>

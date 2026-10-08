@@ -527,3 +527,46 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
       - dgmesh.py를 tools/로 옮길지 검토한다.
       - plotly Mesh3d의 facenormalsepsilon 문제가 다른 장 interactive 그림에도 있는지 확인한다.
       - 27·28장은 아직 planned다. 29–31장의 27·28 링크는 toc 앵커를 가리킨다.
+  - 2026-10-08: 사용자 "계속 진행해줘". 27장과 28장 작성 agent(opus)를 동시에 띄웠다. 두 장은 서로 독립이다.
+    - references에 21개를 추가했다(Ma04, Nister04, Hartley97, Kannala06, Plücker, Lie group spline, BARF 등).
+    - 27 index의 투영 기호를 π에서 φ로 바꿨다(29.3과 맞춤).
+    - 다음: 장마다 검토 agent 2명 → 통합(29–31장의 27·28 앵커 링크를 실제 파일로) → commit, push. 사용자가 검토 후 자동 commit·push를 계속 허락하고 있다.
+  - 2026-10-08: **27장·28장 작성·검토 완료(reviewed). Part IV(27–31장) 전체가 reviewed다.**
+    - 27장: 4절, 그림 18개, verify 4개
+      - R1(27.1–27.2)이 고친 것
+        - Figure 27.2.1의 거울상 오류(vanishing point 좌우)
+        - Prop 27.2.1의 전역 논증
+        - \(\Sigma\)가 dual conic의 블록이라는 서술을 \(\mu=0\)으로 한정
+        - NDC 평행성
+        - 장 내부 기호 충돌 다수
+      - R2(27.3–27.4)가 고친 것
+        - Tron17의 quotient는 \(\mathcal E/\{\pm1\}\)이다.
+        - (σ,σ,0) 유도의 일반화
+        - Pless03 부호 설명
+        - light field가 4D인 조건(장면을 떠난 뒤의 구간)
+        - Ma04 용어("essential space")
+        - COLMAP 초기화 기준(median angle, forward motion)
+    - 28장: 4절, 그림 15개, verify 4개, lib/dglie.py·dgba.py
+      - R1(28.1–28.2)이 고친 것
+        - Exercise 28.2.1 풀이
+        - Ceres 축의 frame과 공분산 4배
+        - log 문턱값 산술
+        - retraction의 회전각 닫힌 꼴
+        - COLMAP `CamFromWorld`
+        - nerfstudio world 축 변경
+        - Strasdat 벡터 순서
+      - R2(28.3–28.4)가 고친 것
+        - B-spline order k는 \(C^{k-2}\)다(Sommer20의 \(C^{k-1}\)은 오류).
+        - LM step이 orbit에 수직인 것은 D = I일 때뿐이다(Ceres는 diag(JᵀJ)).
+        - BARF Jacobian의 점
+        - bi-invariant pseudo-metric 언급
+        - COLMAP gauge 적용 범위(global BA)
+    - 통합
+      - 29–31장의 27·28 앵커 링크 23개를 실제 절로 바꿨다.
+      - references 28개를 추가했다.
+      - terms.tsv에 13개를 추가했다.
+      - notation: 27·28장 행과 T/t, J, W/s 충돌
+      - glossary: 11개를 추가했다.
+    - 남은 것
+      - 400px에서 2–3패널 그림 글자가 작다(검토자 여럿이 지적). 사이트 전체에 확대 CSS를 검토한다.
+      - lib/*.py를 tools/로 옮길지 검토한다.

@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>28.2 Calculus on Lie Groups — DG Study</title>
+  <meta name="dg-id" content="28.2">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="28.1, 0.6, 0.8, 29.2, 29.5">
+  <meta name="dg-refs" content="Sola18; Barfoot; Forster17; Strasdat10; Grassia98; AMS; Boumal">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">28. Poses and Motion: Lie Groups for SfM and SLAM</a> ›
+    <span>28.2 Calculus on Lie Groups</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>28.2 Calculus on Lie Groups</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Sola18">[Sola18]</a>,
+        <a class="cite" href="../../references.html#Barfoot">[Barfoot]</a>,
+        <a class="cite" href="../../references.html#Forster17">[Forster17]</a>,
+        <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>,
+        <a class="cite" href="../../references.html#Grassia98">[Grassia98]</a>,
+        <a class="cite" href="../../references.html#AMS">[AMS]</a>,
+        <a class="cite" href="../../references.html#Boumal">[Boumal]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>pose를 오른쪽에서 곱하는 perturbation과 왼쪽에서 곱하는 perturbation을 구별하고, 각각이 어느 frame의 축으로 돌리는지와 둘이 \(\mathrm{Ad}\)로 바뀐다는 것을 설명할 수 있다. 둘을 섞으면 Gauss–Newton이 무너지는 이유를 말할 수 있다.</li>
+        <li>\(Rp\)와 \(Tx\)의 기본 Jacobian을 유도하고, reprojection residual의 Jacobian을 투영의 differential \(D\varphi\)와 합성해 쓸 수 있다.</li>
+        <li>\(\mathrm{Exp}\)의 right/left Jacobian \(J_r, J_l\)의 닫힌 꼴과 BCH 공식의 1차 항을 쓰고, rotation vector에 더하기와 회전을 합성하기의 차이를 잴 수 있다.</li>
+        <li>unit quaternion의 double cover \(S^3 \to \mathrm{SO}(3)\)를 설명하고, 4-parameter 정규화, 3-parameter retraction, 전역 rotation vector라는 세 update 방식을 비교하며, Ceres·GTSAM·Sophus가 무엇을 쓰는지 정확히 말할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="28-1-so3-se3-sim3.html">Section 28.1</a>: hat과 twist <a href="28-1-so3-se3-sim3.html#eq-28-1-2">(28.1.2)</a>, \(\mathrm{SE}(3)\)의 \(\exp\)와 \(V\) <a href="28-1-so3-se3-sim3.html#eq-28-1-4">(28.1.4)</a>, adjoint <a href="28-1-so3-se3-sim3.html#eq-28-1-8">(28.1.8)</a>, frame 첨자 규약(Conventions)</li>
+        <li><a href="../00-tour/0-6-manifolds.html#i-0-6-5">Definition 0.6.5</a>: differential은 chart에서 Jacobian matrix이고 chain rule로 합성된다. <a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>의 상자 “Riemannian optimization”: retraction</li>
+        <li><a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#eq-29-2-5">(29.2.5)</a>: quaternion에서 rotation matrix. <a href="../29-gaussian-splatting/29-5-optimizing-gaussians.html#i-29-5-2">Proposition 29.5.2</a>: \(q/\abs{q}\)를 통과한 gradient, <a href="../29-gaussian-splatting/29-5-optimizing-gaussians.html#eq-29-5-6">(29.5.6)</a>: \(\mathrm{SO}(3)\) 위의 retraction update</li>
+        <li>투영 \(\varphi\)와 그 Jacobian matrix: <a href="../29-gaussian-splatting/29-3-splatting-linearization.html#eq-29-3-3">(29.3.3)</a>. 그 rank와 kernel(fiber = ray), 일반 카메라 모델은 <a href="../27-cameras-rays/27-1-camera-smooth-map.html#sec-differential">Section 27.1</a>의 <a href="../27-cameras-rays/27-1-camera-smooth-map.html#eq-27-1-2">(27.1.2)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="28-1-so3-se3-sim3.html#sec-adjoint">Section 28.1</a>의 끝에서 \(\mathrm{Exp}(\xi)T = T\,\mathrm{Exp}(\mathrm{Ad}_{T^{-1}}\xi)\)를 보았다. pose \(T\)를 조금 바꾸는 방법이 왼쪽에서 곱하기와 오른쪽에서 곱하기 둘이라는 뜻이다. 이 절은 그 두 방법 위에서 미분한다.</p>
+      <p>bundle adjustment나 PnP의 Gauss–Newton은 residual \(r(T)\)의 Jacobian “\(\partial r/\partial T\)”를 요구한다. 그러나 \(T\)는 \(\R^6\)의 점이 아니다. 행렬 성분 12개로 미분하면 \(R^{\mathsf T}R = I_3\)이라는 제약을 벗어나는 방향까지 섞인다. manifold 위의 미분은 chart에서 한다는 것이 <a href="../00-tour/0-6-manifolds.html#i-0-6-5">Definition 0.6.5</a>의 생각이었고, 최적화에서는 현재 추정 근처의 chart를 매번 새로 잡는다(<a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>의 retraction). 질문은 넷이다.</p>
+      <ol>
+        <li>현재 pose \(T\) 근처의 chart로 \(\delta \mapsto T\,\mathrm{Exp}(\delta)\)와 \(\delta \mapsto \mathrm{Exp}(\delta)\,T\) 가운데 무엇을 쓰는가? 둘은 어떻게 다르고, 섞으면 무엇이 깨지는가?</li>
+        <li>회전된 점, 변환된 점, 투영된 점의 Jacobian은 무엇인가?</li>
+        <li>rotation vector \(\omega\) 자체를 parameter로 두고 더하면(\(\omega \leftarrow \omega + \delta\)) chart로 update하는 것과 무엇이 다른가?</li>
+        <li>quaternion으로 회전을 저장할 때 update하는 방법들은 기하적으로 무엇이고, 라이브러리들은 실제로 무엇을 하는가?</li>
+      </ol>
+    </section>
+
+    <section id="sec-perturbations">
+      <h2>Left and Right Perturbations</h2>
+      <div class="thm definition" id="i-28-2-1">
+        <p><span class="thm-head">Definition 28.2.1</span> <span class="thm-name">(right and left perturbation)</span>.
+        \(G\)가 \(\mathrm{SO}(3)\), \(\mathrm{SE}(3)\), \(\mathrm{Sim}(3)\) 가운데 하나이고 \(X \in G\)라 하자. \(\delta \in \R^n\)(\(n = \dim G\))에 대해</p>
+        <ul>
+          <li><strong>right perturbation</strong>: \(\delta \mapsto X\,\mathrm{Exp}(\delta)\)</li>
+          <li><strong>left perturbation</strong>: \(\delta \mapsto \mathrm{Exp}(\delta)\,X\)</li>
+        </ul>
+        <p>둘 다 \(\delta = 0\) 근처에서 \(X\)의 neighborhood로 가는 diffeomorphism이고, 따라서 \(X\) 둘레의 chart(의 역)이다. map \(f\colon G \to \R^m\)의 \(X\)에서의 right Jacobian과 left Jacobian을 각각 \(\partial f(X\,\mathrm{Exp}(\delta))/\partial\delta\), \(\partial f(\mathrm{Exp}(\delta)X)/\partial\delta\)(\(\delta = 0\))로 정한다 <a class="cite" href="../../references.html#Sola18">[Sola18]</a>.</p>
+      </div>
+      <p>\(\mathrm{Exp}\)는 \(0\) 근처에서 diffeomorphism이고(<a href="28-1-so3-se3-sim3.html#i-28-1-6">Proposition 28.1.6</a>의 \(\log\)가 그 역), \(X\)를 곱하는 map은 group 위의 diffeomorphism이므로 두 map 모두 chart의 역이 된다. 두 좌표 사이의 관계는 <a href="28-1-so3-se3-sim3.html#eq-28-1-8">(28.1.8)</a>에서 바로 나온다.</p>
+      <div class="equation" id="eq-28-2-1">
+      \[ \begin{aligned} \mathrm{Exp}(\delta_l)\,X &amp;= X\,\mathrm{Exp}(\delta_r) \\ &amp;\iff \delta_l = \mathrm{Ad}_X\,\delta_r, \\ \frac{\partial f(X\,\mathrm{Exp}(\delta))}{\partial\delta} &amp;= \frac{\partial f(\mathrm{Exp}(\delta)\,X)}{\partial\delta} \\ &amp;\quad \cdot \mathrm{Ad}_X. \end{aligned} \tag{28.2.1} \]
+      </div>
+      <p>\(\mathrm{SO}(3)\)에서는 \(\mathrm{Ad}_R = R\)이므로 \(\delta_l = R\delta_r\)이다 <a class="cite" href="../../references.html#Forster17">[Forster17]</a>. 기하적으로는 이렇다. \(X = T_{ab}\)가 frame \(b\)의 좌표를 frame \(a\)의 좌표로 바꾼다면, 오른쪽의 \(\mathrm{Exp}(\delta)\)는 \(T_{ab}\)보다 먼저 작용하므로 frame \(b\)의 좌표로 쓴 움직임이고, 왼쪽의 \(\mathrm{Exp}(\delta)\)는 frame \(a\)의 좌표로 쓴 움직임이다. 흔히 앞의 것을 local(또는 body) perturbation, 뒤의 것을 global perturbation이라 부른다. 그런데 어느 쪽이 <em>camera</em> frame인지는 pose를 어느 방향으로 저장했느냐에 달려 있다.</p>
+      <table>
+        <thead>
+          <tr><th>저장한 pose</th><th>right: \(T\,\mathrm{Exp}(\xi)\)</th><th>left: \(\mathrm{Exp}(\xi)\,T\)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>\(T_{wc}\) (NeRF, nerfstudio)</td><td>camera frame의 축과 원점으로</td><td>world frame의 축과 원점으로</td></tr>
+          <tr><td>\(T_{cw}\) (COLMAP, g2o, 3DGS)</td><td>world frame의 축과 원점으로</td><td>camera frame의 축과 원점으로</td></tr>
+        </tbody>
+      </table>
+
+      <figure class="dg-figure" id="fig-28-2-1">
+        <img src="figures/fig-28-2-1-left-right.svg" alt="두 패널. 왼쪽 (a) view along the optical axis는 원래 카메라의 뒤에서 광축을 따라 본 2D 그림이다. 가로축은 원래 카메라의 x_c(오른쪽), 세로축은 −y_c(위쪽)다. 검은 직사각형(원래 카메라의 image)과, 같은 중심 둘레로 시계 방향으로 0.6 rad 돌아간 파란 직사각형이 겹쳐 있다. 각 직사각형의 위쪽 변에 작은 삼각형이 있다. 가운데의 ⊗ 표시는 지면 안쪽으로 향하는 광축 z_c이고, 그곳에서 검정과 파랑의 x_c, y_c 화살표가 나온다. 위쪽에 'roll 0.6 rad about z_c'라는 파란 곡선 화살표가 있다. 오른쪽 (b)는 world xy 평면의 top view다. 원점 O에 검은 점이 있고, (3, 0)에 검정·파랑 frustum이 거의 겹쳐 원점 쪽을 향한다. 반지름 3인 회색 점선 원 위의 (2.48, 1.69)에 주황 frustum이 있고, (3, 0)에서 그곳으로 '0.6 rad'라 적힌 주황 곡선 화살표가 있다. 범례: original, right T_wc Exp(ξ), left Exp(ξ) T_wc.">
+        <figcaption><span class="fig-head">Figure 28.2.1.</span>
+        같은 \(\xi\)를 오른쪽에 곱하면 카메라가 제자리에서 돌고, 왼쪽에 곱하면 world 원점 둘레를 돈다. <em>무엇을</em>: \(c = (3, 0, 1.2)\)에서 world 원점을 바라보는 카메라(OpenCV 축)의 pose \(T_{wc}\)에 \(\xi = (0, 0, 0, 0, 0, 0.6)\)(셋째 축 둘레 0.6 rad 회전)을 오른쪽과 왼쪽에 곱했다. (a)는 원래 카메라의 뒤에서 광축을 따라 본 그림(원래 camera의 \(x_c\)와 \(-y_c\)가 이루는 평면으로의 정사영), (b)는 world \(xy\) 평면으로의 top view다. <em>읽는 법</em>: 검정은 원래 카메라, 파랑은 \(T_{wc}\,\mathrm{Exp}(\xi)\), 주황은 \(\mathrm{Exp}(\xi)\,T_{wc}\)이다. (a)의 직사각형은 깊이 0.8에 놓은 image 평면이고, 위쪽 변(camera \(-y\) 쪽)에 작은 삼각형을 달았다. 가운데의 \(\otimes\)는 지면 안쪽을 향하는 광축 \(z_c\)이고, 짧은 화살표는 각 카메라의 \(x_c\), \(y_c\)축(\(y_c\)는 아래쪽)이다. (a)에는 주황 카메라를 그리지 않았다. 중심이 \(2 \cdot 3\sin 0.3 \approx 1.77\)만큼 옮겨 가서 이 시야 밖으로 나가기 때문이다. (b)에서 각 카메라는 apex가 카메라 중심인 frustum이고, 주황 곡선 화살표는 왼쪽 perturbation에서 카메라 중심이 지나가는 호다. <em>볼 것</em>: (a)에서 파랑은 검정과 중심과 광축이 같고, image만 광축 둘레로 0.6 rad 돌았다(뒤에서 보면 시계 방향). camera frame의 셋째 축이 광축이기 때문이다. (b)에서 파랑은 검정과 거의 겹치지만, 주황은 world \(z\)축 둘레로 0.6 rad 돌아 중심이 \((3, 0)\)에서 \((2.48, 1.69)\)로 옮겨 갔다. 같은 여섯 개의 수가 전혀 다른 움직임이다. <em>본문과의 연결</em>: <a href="#i-28-2-1">Definition 28.2.1</a>과 <a href="#eq-28-2-1">(28.2.1)</a>. 주황을 파랑과 같게 만들려면 왼쪽에 \(\mathrm{Ad}_{T_{wc}}\xi\)를 곱해야 한다(<a href="#ex-28-2-2">Exercise 28.2.2</a>). 세 카메라를 3D로 돌려 볼 수 있는 <a href="figures/fig-28-2-1-left-right-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-2-1">Figure 28.2.1</a>의 (a)에서 검은 직사각형과 파란 직사각형을 비교하자. 두 직사각형은 중심 \(\otimes\)가 같고, 파란 쪽이 그 중심 둘레로 0.6 rad 돌아 있다. 위쪽을 표시한 삼각형과 \(x_c\), \(y_c\) 화살표가 함께 돈 것이 보인다. 오른쪽 perturbation은 camera frame의 셋째 축, 곧 광축 둘레로 돌리기 때문이다. 광축 자체는 움직이지 않으므로 카메라가 보는 방향과 위치는 그대로이고, image만 roll한다. (b)의 top view에서는 파랑이 검정과 거의 겹친다. 반면 주황 카메라는 (b)에서 반지름 3인 원을 따라 0.6 rad 옮겨 갔다. 왼쪽 perturbation의 셋째 축은 world \(z\)축이고, 그 축은 world 원점을 지나기 때문이다(<a href="28-1-so3-se3-sim3.html#fig-28-1-4">Figure 28.1.4</a>와 같은 이유로, 회전의 중심이 어디냐에 따라 같은 \(\omega\)가 다른 움직임이 된다).</p>
+    </section>
+
+    <section id="sec-basic-jacobians">
+      <h2>Basic Jacobians</h2>
+      <div class="thm proposition" id="i-28-2-2">
+        <p><span class="thm-head">Proposition 28.2.2</span> <span class="thm-name">(Jacobians of a transformed point)</span>.
+        \(R \in \mathrm{SO}(3)\), \(T = (R, t) \in \mathrm{SE}(3)\), \(p, x \in \R^3\)에 대해(미분은 모두 \(\delta = 0\), \(\xi = 0\)에서)</p>
+        <div class="equation" id="eq-28-2-2">
+        \[ \begin{aligned} \frac{\partial\,(R\,\mathrm{Exp}(\delta)\,p)}{\partial\delta} &amp;= -R\,[p]_\times, \\ \frac{\partial\,(\mathrm{Exp}(\delta)\,R\,p)}{\partial\delta} &amp;= -[Rp]_\times, \\ \frac{\partial\,(T\,\mathrm{Exp}(\xi)\,x)}{\partial\xi} &amp;= R\,\big(I_3 \ \ {-[x]_\times}\big), \\ \frac{\partial\,(\mathrm{Exp}(\xi)\,T\,x)}{\partial\xi} &amp;= \big(I_3 \ \ {-[Tx]_\times}\big) \end{aligned} \tag{28.2.2} \]
+        </div>
+        <p>이고 \(\partial(Tx)/\partial x = R\)이다. 여기서 \(Tx = Rx + t\)이고, \(\xi = (v, \omega)\)의 순서로 \(3 \times 6\) 행렬을 썼다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> Rodrigues formula에서 \(\mathrm{Exp}(\delta) = I_3 + [\delta]_\times + O(\abs{\delta}^2)\)이므로 \(\mathrm{Exp}(\delta)p = p + \delta \times p + O(\abs{\delta}^2) = p - [p]_\times\delta + O(\abs{\delta}^2)\)이다. 앞에 \(R\)을 곱하면 첫째 식, \(p\) 대신 \(Rp\)를 넣으면 둘째 식이다. \(\mathrm{SE}(3)\)에서는 <a href="28-1-so3-se3-sim3.html#eq-28-1-3">(28.1.3)</a>에 의해 \(\mathrm{Exp}(\xi)x = x + \omega \times x + v + O(\abs{\xi}^2)\)이므로 \(\partial(\mathrm{Exp}(\xi)x)/\partial\xi = (I_3\ \ {-[x]_\times})\)이고, 같은 방식으로 나머지 둘이 나온다. 두 줄의 결과는 <a href="#eq-28-2-1">(28.2.1)</a>로 이어진다: \(R(I_3\ \ {-[x]_\times}) = (I_3\ \ {-[Tx]_\times})\,\mathrm{Ad}_T\)(verify).</p>
+      </div>
+
+      <p>reprojection residual은 이것과 투영의 differential을 chain rule(<a href="../00-tour/0-6-manifolds.html#eq-0-6-5">(0.6.5)</a>)로 합성한 것이다. camera \(i\)의 pose를 \(T_i = T_{cw}\)로 두고, 점 \(X_j\)의 camera 좌표를 \(x_c = T_iX_j = (x, y, z)\)라 하자. residual \(r_{ij} = \varphi(T_iX_j) - u_{ij}\)에서, camera frame의 perturbation(\(T_{cw}\)의 왼쪽, g2o와 <a class="cite" href="../../references.html#Strasdat10">[Strasdat10]</a>의 규약)을 쓰면</p>
+      <div class="equation" id="eq-28-2-3">
+      \[ \begin{aligned} \frac{\partial r_{ij}}{\partial\xi_i} &amp;= D\varphi(x_c)\,\big(I_3 \ \ {-[x_c]_\times}\big), \\ \frac{\partial r_{ij}}{\partial X_j} &amp;= D\varphi(x_c)\,R_i \end{aligned} \tag{28.2.3} \]
+      </div>
+      <p>이다. 정규화 좌표의 pinhole \(\varphi(x, y, z) = (x/z, y/z)\)에서는 \(D\varphi = \frac1z\begin{pmatrix} 1 &amp; 0 &amp; -x/z \\ 0 &amp; 1 &amp; -y/z \end{pmatrix}\)(<a href="../29-gaussian-splatting/29-3-splatting-linearization.html#eq-29-3-3">(29.3.3)</a>에서 \(f_x = f_y = 1\))이고, 곱을 풀어 쓰면</p>
+      <div class="equation" id="eq-28-2-4">
+      \[ \begin{aligned} \frac{\partial r_{ij}}{\partial v_i} &amp;= \begin{pmatrix} \frac1z &amp; 0 &amp; -\frac{x}{z^2} \\ 0 &amp; \frac1z &amp; -\frac{y}{z^2} \end{pmatrix}, \\ \frac{\partial r_{ij}}{\partial \omega_i} &amp;= \begin{pmatrix} -\frac{xy}{z^2} &amp; 1 + \frac{x^2}{z^2} &amp; -\frac{y}{z} \\ -\big(1 + \frac{y^2}{z^2}\big) &amp; \frac{xy}{z^2} &amp; \frac{x}{z} \end{pmatrix} \end{aligned} \tag{28.2.4} \]
+      </div>
+      <p>이다. 두 블록을 이어 붙인 것이 \(2 \times 6\) 행렬 \(\partial r_{ij}/\partial\xi_i\)이고, g2o의 <code>EdgeSE3ProjectXYZ::linearizeOplus()</code>에 적힌 \(2 \times 6\) 행렬과 같다. 다만 g2o는 residual을 “관측 \(-\) 예측”으로 정의해 부호가 반대이고, 열의 순서가 \((\omega, v)\)이며, 초점거리 \(f_x, f_y\)가 행에 곱해져 있다(verify에서 열을 바꿔 대조했다). 일반 카메라 모델(fisheye, distortion)에서는 \(D\varphi\) 자리에 그 모델의 differential이 들어갈 뿐 \((I_3\ \ {-[x_c]_\times})\)는 그대로다. 투영 쪽의 기하는 <a href="../27-cameras-rays/27-1-camera-smooth-map.html">Section 27.1</a>이 다룬다. world 좌표의 점에 대한 Jacobian \(D\varphi(x_c)R_i\)는 <a href="../27-cameras-rays/27-1-camera-smooth-map.html#eq-27-1-3">(27.1.3)</a>의 \(J_{g(x)}R\)와 같은 것이다.</p>
+      <p class="verified">Verification: <code>verify/v-28-2-calculus-on-lie-groups.py</code></p>
+
+      <p>right와 left는 같은 tangent space의 두 좌표일 뿐이므로, 일관되게 쓰기만 하면 결과가 같다. 실제로 이 두 chart로 구한 Gauss–Newton step은 정확히 같은 점을 준다. \(J_R = J_L\,\mathrm{Ad}_T\)이면 \(J_R\delta_R = -r\)의 최소제곱해는 \(\delta_R = \mathrm{Ad}_T^{-1}\delta_L\)이고, <a href="#eq-28-2-1">(28.2.1)</a>에 의해 \(T\,\mathrm{Exp}(\delta_R) = \mathrm{Exp}(\delta_L)\,T\)이다(<a href="#ex-28-2-5">Exercise 28.2.5</a>). 문제는 섞을 때 생긴다.</p>
+
+      <figure class="dg-figure" id="fig-28-2-2">
+        <img src="figures/fig-28-2-2-mixed-perturbation.svg" alt="세로축(log scale)이 RMS reprojection error, 가로축이 Gauss–Newton iteration(0부터 20)인 두 패널. 왼쪽 (a) camera 3° from world, at origin: 검은 실선과 파란 점선이 겹쳐 4번 만에 10⁻¹⁵ 아래로 떨어지고, 주황 실선과 주홍 점선(mixed)은 직선으로 천천히 내려가 11번째 무렵 바닥에 닿는다. 오른쪽 (b) camera 120°, at (4, −2, 3): 검정과 파랑은 (a)와 똑같이 4번 만에 떨어진다. 주황과 주홍은 처음부터 올라가 4–5번째에 10 근처에서 × 표시로 끝나고 'points fell behind the camera'라는 주석이 있다. 범례: left Jacobian left update, right Jacobian right update, right Jacobian left update (mixed), left Jacobian right update (mixed).">
+        <figcaption><span class="fig-head">Figure 28.2.2.</span>
+        Jacobian과 update의 perturbation을 섞은 Gauss–Newton. <em>무엇을</em>: 위치를 아는 world 점 40개를 noise 없이 관측한 카메라의 pose \(T_{cw}\)를 Gauss–Newton으로 구했다(PnP). 시작점은 참값의 왼쪽에 \(\mathrm{Exp}\big((0.15, -0.1, 0.2), 10^\circ \text{ 회전}\big)\)을 곱한 것이고, 매 step에 \(J\delta = -r\)을 최소제곱으로 풀었다. (a)는 참 카메라가 world에서 \(3^\circ\)만 돌아 있고 world 원점에 있는 경우, (b)는 \(120^\circ\) 돌아 \((4, -2, 3)\)에 있는 경우다. <em>읽는 법</em>: 세로축은 정규화 좌표의 RMS reprojection error(log scale, \(10^{-16}\) 아래는 \(10^{-16}\)에 그렸다), 가로축은 iteration이다. 검정은 left Jacobian과 left update, 파랑 점선은 right Jacobian과 right update(둘 다 일관됨), 주황은 right Jacobian으로 구한 step을 왼쪽에 곱한 것, 주홍 점선은 그 반대(둘 다 섞임)다. \(\times\)는 어떤 점이 카메라 뒤로 가서(\(z \le 0\)) 계산을 멈춘 곳이다. <em>볼 것</em>: 일관된 두 방법은 두 경우 모두 똑같은 곡선이고 4번 만에 \(10^{-14}\) 아래로 간다(quadratic convergence). 섞은 방법은 (a)에서도 11번이 걸리고(linear convergence), (b)에서는 첫 step부터 오차가 커져 RMS 13.7까지 올라간 뒤 점이 카메라 뒤로 간다. <em>본문과의 연결</em>: 섞으면 step에 \(\mathrm{Ad}_T\)만큼의 오차가 곱해진다(<a href="#eq-28-2-1">(28.2.1)</a>). \(T \approx I_4\)이면 \(\mathrm{Ad}_T \approx I_6\)이라 거의 맞는 방향이 되지만, 회전이 크거나 카메라가 원점에서 멀면 틀린 방향이 된다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-2-2">Figure 28.2.2</a>의 (a)부터 보자. 검정과 파랑은 한 곡선처럼 겹쳐서 2, 3, 4번째 step마다 오차의 지수가 두 배씩 내려간다. 주황과 주홍은 한 step에 대략 20분의 1씩만 줄어드는 직선이다(11 step에 14자리). 그래도 수렴은 한다. 이제 (b)를 보면 같은 코드가 첫 step부터 오차를 키우고, 네다섯 번째 step에 점을 카메라 뒤로 보낸다. 두 패널의 차이는 참 pose뿐이다. 섞인 step은 올바른 step에 \(\mathrm{Ad}_T\) 또는 그 역을 잘못 곱한 것이므로, \(\mathrm{Ad}_T\)가 \(I_6\)에 가까운 (a)에서는 오차가 작다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: perturbation을 섞은 버그는 identity 근처에서 숨는다</p>
+        <p>Jacobian을 한 규약(예: 논문의 right perturbation 식)으로 유도하고 update는 다른 규약(예: 라이브러리의 <code>oplus</code>가 쓰는 left multiplication)으로 하면, <a href="#eq-28-2-1">(28.2.1)</a>의 \(\mathrm{Ad}_T\)만큼 다른 좌표의 step을 적용하게 된다. 이 오차는 \(\mathrm{Ad}_T - I_6\)에 비례한다. 그래서</p>
+        <ul>
+          <li>카메라를 world 원점에 두고 회전도 거의 없는 단위 테스트(첫 프레임, 합성 데이터의 기본 설정)는 통과한다. <a href="#fig-28-2-2">Figure 28.2.2</a>의 (a)처럼 조금 느릴 뿐이다.</li>
+          <li>회전이 크거나 world 원점이 장면에서 먼 실제 데이터(\(\mathrm{Ad}_T\)의 \([t]_\times R\) 블록이 크다)에서는 (b)처럼 발산한다. GPS 좌표처럼 원점이 수 km 밖에 있는 world frame에서는 회전이 작아도 \([t]_\times R\) 블록이 커서 같은 일이 생길 수 있다.</li>
+          <li>확인하는 방법은 단순하다. 임의의 \(T\)(identity가 아닌 것)에서 \(r(T \oplus \delta)\)의 수치 미분을 해석적 Jacobian과 비교한다. 이때 \(\oplus\)는 실제 update 코드가 쓰는 바로 그 연산이어야 한다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-exp-jacobians">
+      <h2>The Jacobians of Exp</h2>
+      <p>지금까지는 현재 점 \(X\) 둘레의 chart \(\delta \mapsto X\,\mathrm{Exp}(\delta)\)를 매번 새로 잡았다. 많은 코드는 그 대신 rotation vector \(\omega\) 하나를 전역 parameter로 저장하고 \(\omega \leftarrow \omega + \delta\)로 더한다. Ceres의 <code>bundle_adjuster</code> 예제의 기본 설정(카메라마다 angle-axis 3개를 그대로 최적화한다), Grassia의 exponential map parametrization <a class="cite" href="../../references.html#Grassia98">[Grassia98]</a>, nerfstudio의 pose 보정 6-vector(<a href="28-3-bundle-adjustment.html#sec-nerf-3dgs">Section 28.3</a>)가 그렇다. 더하기와 합성의 차이를 재는 것이 \(\mathrm{Exp}\)의 Jacobian이다.</p>
+
+      <div class="thm definition" id="i-28-2-3">
+        <p><span class="thm-head">Definition 28.2.3</span> <span class="thm-name">(right and left Jacobian of Exp)</span>.
+        \(\omega \in \R^3\)에서 \(\mathrm{Exp}\)의 <strong>right Jacobian</strong> \(J_r(\omega)\)와 <strong>left Jacobian</strong> \(J_l(\omega)\)는 모든 \(\delta\)에 대해</p>
+        <div class="equation" id="eq-28-2-5">
+        \[ \begin{aligned} \mathrm{Exp}(\omega + \delta) &amp;= \mathrm{Exp}(\omega)\,\mathrm{Exp}\big(J_r(\omega)\delta\big) \\ &amp;\quad + O(\abs{\delta}^2) \\ &amp;= \mathrm{Exp}\big(J_l(\omega)\delta\big)\,\mathrm{Exp}(\omega) \\ &amp;\quad + O(\abs{\delta}^2) \end{aligned} \tag{28.2.5} \]
+        </div>
+        <p>를 만족하는 \(3 \times 3\) 행렬이다. 곧 \(J_r(\omega)\)는 \(\mathrm{Exp}\)의 differential을 <a href="#i-28-2-1">Definition 28.2.1</a>의 right perturbation 좌표로 쓴 것이다 <a class="cite" href="../../references.html#Sola18">[Sola18]</a>, <a class="cite" href="../../references.html#Forster17">[Forster17]</a>.</p>
+      </div>
+
+      <div class="thm proposition" id="i-28-2-4">
+        <p><span class="thm-head">Proposition 28.2.4</span> <span class="thm-name">(closed forms and first-order BCH)</span>.
+        \(\theta = \abs{\omega}\), \(\Omega = [\omega]_\times\)일 때</p>
+        <div class="equation" id="eq-28-2-6">
+        \[ \begin{aligned} J_r(\omega) &amp;= I_3 - \frac{1 - \cos\theta}{\theta^2}\,\Omega \\ &amp;\quad + \frac{\theta - \sin\theta}{\theta^3}\,\Omega^2, \\ J_r(\omega)^{-1} &amp;= I_3 + \tfrac12\Omega \\ &amp;\quad + \Big(\frac{1}{\theta^2} - \frac{1 + \cos\theta}{2\theta\sin\theta}\Big)\Omega^2, \\ J_l(\omega) &amp;= J_r(-\omega) = J_r(\omega)^{\mathsf T} = V(\omega) \end{aligned} \tag{28.2.6} \]
+        </div>
+        <p>이고(\(V\)는 <a href="28-1-so3-se3-sim3.html#eq-28-1-4">(28.1.4)</a>), \(J_l(\omega) = \mathrm{Exp}(\omega)\,J_r(\omega)\)이다. 또 Baker–Campbell–Hausdorff(BCH) 공식의 1차 항으로</p>
+        <div class="equation" id="eq-28-2-7">
+        \[ \begin{aligned} \mathrm{Log}\big(\mathrm{Exp}(\omega)\,\mathrm{Exp}(\delta)\big) &amp;= \omega + J_r(\omega)^{-1}\delta \\ &amp;\quad + O(\abs{\delta}^2), \\ \mathrm{Log}\big(\mathrm{Exp}(\delta)\,\mathrm{Exp}(\omega)\big) &amp;= \omega + J_l(\omega)^{-1}\delta \\ &amp;\quad + O(\abs{\delta}^2) \end{aligned} \tag{28.2.7} \]
+        </div>
+        <p>이다(\(\abs{\omega} \lt \pi\)) <a class="cite" href="../../references.html#Forster17">[Forster17, (7)–(9)]</a>, <a class="cite" href="../../references.html#Sola18">[Sola18]</a>.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> 행렬 지수의 differential에 대한 표준 공식 \(\frac{d}{d\varepsilon}\big|_0 \exp(A + \varepsilon B) = \exp(A)\int_0^1 \exp(-uA)\,B\,\exp(uA)\,du\)에 \(A = \Omega\), \(B = [\delta]_\times\)를 넣는다. <a href="28-1-so3-se3-sim3.html#eq-28-1-8">(28.1.8)</a>의 \(\mathrm{SO}(3)\)판에 의해 \(\exp(-u\Omega)[\delta]_\times\exp(u\Omega) = [\mathrm{Exp}(-u\omega)\delta]_\times\)이므로 \(J_r(\omega) = \int_0^1 \exp(-u\Omega)\,du\)이다. 이것은 <a href="28-1-so3-se3-sim3.html#i-28-1-3">Proposition 28.1.3</a>의 \(V = \int_0^1\exp(u\Omega)\,du\)에서 \(\Omega\)를 \(-\Omega\)로 바꾼 것이므로 첫 식이 나오고, \(J_l = J_r(-\omega) = V\)이다. \(\Omega^{\mathsf T} = -\Omega\)이므로 \(J_r^{\mathsf T} = J_r(-\omega)\)이다. <a href="#eq-28-2-5">(28.2.5)</a>의 두 꼴을 <a href="#eq-28-2-1">(28.2.1)</a>의 \(\mathrm{SO}(3)\)판 \(\mathrm{Exp}(\omega)\mathrm{Exp}(\delta_r) = \mathrm{Exp}(\mathrm{Exp}(\omega)\delta_r)\mathrm{Exp}(\omega)\)와 비교하면 \(J_l = \mathrm{Exp}(\omega)J_r\)이다. BCH 식은 <a href="#eq-28-2-5">(28.2.5)</a>의 양변에 \(\mathrm{Log}\)를 취해 \(\delta\)를 \(J_r^{-1}\delta\)로 바꾼 것이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-28-2-3">
+        <img src="figures/fig-28-2-3-exp-jacobian.svg" alt="두 패널. 왼쪽 (a)는 log-log 그래프로 가로축 |δ|(10⁻⁶부터 0.3), 세로축 error vs Log(Exp(ω)Exp(δ))이다. 초록·파랑·주황 실선 세 개(θ = 0.5, 1.5, 2.5, naive ω + δ)가 기울기 1로 위쪽에 있고 θ가 클수록 위에 있다. 같은 색 점선 세 개(ω + J_r⁻¹δ)는 기울기 2로 훨씬 아래에 있다. 'slope 1', 'slope 2' 주석이 있다. 오른쪽 (b)는 가로축 θ = |ω|(0부터 2π), 세로축 singular value of J_r(ω)이다. 회색 수평선 1(along the axis)과, 1에서 출발해 θ = π에서 2/π ≈ 0.64를 지나 θ = 2π에서 0이 되는 파란 곡선(⊥ axis: 2|sin(θ/2)|/θ, twice)이 있다.">
+        <figcaption><span class="fig-head">Figure 28.2.3.</span>
+        rotation vector에 더하는 것과 회전을 합성하는 것의 차이. <em>무엇을</em>: (a) \(\omega = \theta n\)(\(\theta = 0.5, 1.5, 2.5\))와 작은 \(\delta = \varepsilon m\)(\(m\)은 고정한 unit vector)에 대해, 참값 \(\mathrm{Log}(\mathrm{Exp}(\omega)\mathrm{Exp}(\delta))\)와 두 근사의 차이를 \(\abs{\delta}\)의 함수로 그렸다. (b) \(J_r(\theta n)\)의 singular value를 \(\theta\)의 함수로 그렸다. <em>읽는 법</em>: (a)는 log-log 그래프이고, 실선은 순진한 근사 \(\omega + \delta\), 점선은 BCH 1차 근사 \(\omega + J_r^{-1}\delta\)다. 색은 \(\theta\)다. (b)의 회색 선은 축 방향의 singular value, 파란 곡선은 축에 수직인 평면의 두 singular value \(2\abs{\sin(\theta/2)}/\theta\)(같은 값 둘)이다. <em>볼 것</em>: (a)에서 실선은 기울기 1(오차가 \(\abs{\delta}\)에 비례), 점선은 기울기 2(\(\abs{\delta}^2\)에 비례)다. 실선의 높이는 \(\theta\)가 클수록 높다. (b)에서 \(J_r\)는 \(\theta = 0\)에서 \(I_3\)이고, \(\theta = \pi\)에서 최소 singular value가 \(2/\pi \approx 0.64\), \(\theta = 2\pi\)에서 \(0\)이 된다. <em>본문과의 연결</em>: <a href="#eq-28-2-6">(28.2.6)</a>, <a href="#eq-28-2-7">(28.2.7)</a>. (b)의 \(0\)은 \(\abs{\omega} = 2\pi\)에서 \(\mathrm{Exp}\)의 differential이 퇴화한다는 뜻이고, Grassia가 \(\abs{\omega} \le \pi\)인 대표로 reparametrization하는 이유다(<a href="28-1-so3-se3-sim3.html#sec-log">Section 28.1</a>).</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-2-3">Figure 28.2.3</a>의 (a)에서 실선과 점선의 기울기를 비교하자. \(\omega + \delta\)는 1차에서 이미 틀리고, 그 크기는 \((J_r^{-1} - I_3)\delta\), 곧 대략 \(\tfrac12\omega \times \delta\)이다. 그래서 \(\theta\)가 큰 주황 실선이 가장 높다. \(J_r^{-1}\)을 곱한 점선은 1차 오차가 사라져 기울기가 2다. (b)는 그 차이의 크기를 전체 범위에서 보인다. \(\abs{\omega} \le \pi\)에서는 \(J_r\)의 singular value가 \([0.64, 1]\)에 있어 잘 조건화되어 있고, \(2\pi\)에 가까워지면 \(0\)으로 간다.</p>
+      <p>gradient로 옮기면 이렇다. loss \(L\)을 전역 \(\omega\)로 미분한 것과 right perturbation \(\delta\)로 미분한 것은 \(\partial L/\partial\omega = J_r(\omega)^{\mathsf T}\,\partial L/\partial\delta\)의 관계다(chain rule과 <a href="#eq-28-2-5">(28.2.5)</a>). 전역 \(\omega\)를 쓰는 optimizer는 그 \(J_r^{\mathsf T}\)를 알든 모르든 품고 있다. \(\omega\)가 작은 동안(초기값 \(0\)에서 출발한 pose 보정)은 \(J_r \approx I_3\)이어서 거의 차이가 없지만, 큰 회전을 전역 \(\omega\)로 오래 최적화하면 \(\abs{\omega}\)가 \(2\pi\)에 가까워질 때 조건수가 나빠진다. 같은 \(J_r^{-1}\)은 pose graph의 residual \(\mathrm{Log}(Z^{-1}X)\)를 미분할 때도 나오고, IMU preintegration은 이 Jacobian 위에 세워져 있다 <a class="cite" href="../../references.html#Forster17">[Forster17]</a>.</p>
+      <p class="verified">Verification: <code>verify/v-28-2-calculus-on-lie-groups.py</code></p>
+    </section>
+
+    <section id="sec-quaternions">
+      <h2>Unit Quaternions and the Double Cover</h2>
+      <p>quaternion은 회전을 수 4개로 저장한다. COLMAP, 3DGS, Ceres, Eigen이 모두 쓴다. 그 기하는 \(S^3\)과 \(\mathrm{SO}(3)\) 사이의 map 하나로 요약된다.</p>
+
+      <div class="thm proposition" id="i-28-2-5">
+        <p><span class="thm-head">Proposition 28.2.5</span> <span class="thm-name">(the double cover \(S^3 \to \mathrm{SO}(3)\))</span>.
+        unit quaternion \(q\)에 <a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#eq-29-2-5">(29.2.5)</a>의 \(R(q)\)를 대응시키는 map \(S^3 \to \mathrm{SO}(3)\)는 smooth하고 surjective이며, \(R(q) = R(q')\)일 필요충분조건은 \(q' = \pm q\)이다. 회전각 \(\theta\), 축 \(n\)의 회전에는</p>
+        <div class="equation" id="eq-28-2-8">
+        \[ \begin{aligned} q = \big(\cos\tfrac{\theta}{2},\ \sin\tfrac{\theta}{2}\,n\big) &amp;\mapsto \mathrm{Exp}(\theta n), \\ \arccos\abs{\inner{q_1}{q_2}} &amp;= \tfrac12\,d(R_1, R_2) \end{aligned} \tag{28.2.8} \]
+        </div>
+        <p>이 대응한다. 둘째 식의 \(d\)는 <a href="../00-tour/0-8-riemannian.html#i-0-8-4">Remark 0.8.4</a>의 거리(\(R_1^{\mathsf T}R_2\)의 회전각)다. 이 map은 2대1 local diffeomorphism이고, 그래서 \(\mathrm{SO}(3) \cong S^3/\{\pm 1\} = \RP^3\)이다(<a href="../00-tour/0-6-manifolds.html#sec-cv-pose">Section 0.6</a>).</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> <a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#eq-29-2-5">(29.2.5)</a>는 \(q\)의 이차식이므로 \(R(-q) = R(q)\)이고, \(q = (\cos\frac\theta2, \sin\frac\theta2 n)\)을 넣으면 \(2\cos\frac\theta2\sin\frac\theta2 = \sin\theta\), \(2\sin^2\frac\theta2 = 1 - \cos\theta\)이므로 Rodrigues formula가 된다. 모든 회전은 어떤 \(\theta, n\)의 \(\mathrm{Exp}(\theta n)\)이므로 surjective다. \(R(q_1)^{\mathsf T}R(q_2) = R(\bar q_1 q_2)\)이고 \(\bar q_1q_2\)의 scalar 부분이 \(\inner{q_1}{q_2} = \cos\frac{\theta_{12}}{2}\)이므로(부호는 \(\pm\)의 선택) 둘째 식이 나온다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-28-2-4">
+        <img src="figures/fig-28-2-4-double-cover.svg" alt="두 패널 사이에 '2:1' 화살표가 있다. 왼쪽 (a)는 가로축 q₀, 세로축 ⟨q_{1:3}, n⟩인 단위원이다. 위쪽 반원이 파란 실선, 아래쪽 반원이 주황 점선이다. (1, 0)에 θ = 0, (0, 1)에 θ = π, (−1, 0)에 θ = 2π, (0, −1)에 θ = 3π라 적힌 회색 점이 있다. 오른쪽 위 (0.77, 0.64)에 검은 점 q, 대척점 (−0.77, −0.64)에 검은 점 −q가 있고 둘이 점선으로 이어진다. 'blue: first turn, orange: second turn' 주석이 있다. 오른쪽 (b)는 가로축 ⟨Ru, u⟩, 세로축 ⟨Ru, n×u⟩인 단위원(파랑 실선)과 그 바깥의 조금 큰 주황 점선 원이다. 80° 위치에 검은 점 하나가 있고 'R(q) = R(−q)'라 적혀 있다. 원점에서 (1, 0)으로 회색 화살표 u가 있고 θ = 0 ≡ 2π라 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 28.2.4.</span>
+        double cover를 한 축 둘레의 회전으로 제한해 본 그림. <em>무엇을</em>: 축 \(n\) 둘레로 각 \(\theta\)만큼의 회전과 그 quaternion \(q(\theta) = (\cos\frac\theta2, \sin\frac\theta2 n)\)을 \(0 \le \theta \lt 4\pi\)에서 그렸다. (a)는 \(S^3\)의 great circle \(\{(\cos a, \sin a\,n)\}\)을 그 평면에 그린 것(가로축 \(q_0\), 세로축 \(\inner{q_{1:3}}{n}\)), (b)는 회전 자체, 곧 \(n\)에 수직인 unit vector \(u\)가 \(R(\theta)\)로 가는 곳을 \(n\)에 수직인 평면에 그린 것이다. <em>읽는 법</em>: 파랑은 첫 바퀴 \(0 \le \theta \lt 2\pi\), 주황 점선은 둘째 바퀴 \(2\pi \le \theta \lt 4\pi\)이다. (b)의 주황 원은 보이도록 반지름 1.08에 그렸을 뿐 파란 원과 같은 회전들이다. 검은 점은 \(\theta = 80^\circ\)의 \(q\)와 \(-q\)(\(\theta = 440^\circ\)), 그리고 둘이 주는 하나의 회전이다. <em>볼 것</em>: (a)에서 회전을 한 바퀴(\(2\pi\)) 돌리면 \(q\)는 반 바퀴만 돌아 \(1\)에서 \(-1\)에 닿는다. \(q\)가 제자리로 오려면 회전을 두 바퀴(\(4\pi\)) 돌려야 한다. \(q\)와 \(-q\)는 (a)의 대척점이지만 (b)에서는 한 점이다. <em>본문과의 연결</em>: <a href="#i-28-2-5">Proposition 28.2.5</a>. quaternion의 각은 회전각의 절반이고(<a href="#eq-28-2-8">(28.2.8)</a>), 이것이 아래 Ceres의 \(\delta\)가 “반각”인 이유다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-28-2-4">Figure 28.2.4</a>의 (a)에서 파란 반원을 따라가 보자. \(\theta = 0\)에서 출발해 \(\theta = \pi\)(\(180^\circ\) 회전)에서 꼭대기 \((0, 1)\)에 닿고, \(\theta = 2\pi\)에서 \(q = -1\)에 도착한다. 그동안 (b)의 점은 원을 한 바퀴 다 돌아 출발점으로 돌아왔다. quaternion의 세계에서는 아직 반 바퀴다. 그래서 \(S^3\)에서 두 quaternion 사이의 각은 회전각의 절반이고, “가까운” 회전도 부호를 잘못 고르면 \(S^3\)에서는 멀리 떨어진 두 점으로 보인다. 보간과 평균에서 이것이 문제가 된다(<a href="28-4-interpolating-averaging.html">Section 28.4</a>).</p>
+
+      <h3 id="sec-quaternion-updates">Three Ways to Update a Rotation</h3>
+      <p>회전 parameter를 update하는 방법은 크게 셋이다. Ceres의 <code>bundle_adjuster</code> 예제는 세 방법을 모두 옵션으로 두고 있어 비교하기 좋다.</p>
+      <ul>
+        <li><strong>(a) quaternion 4개를 그대로, 정규화해서 쓰기.</strong> 3DGS가 이렇게 한다(<a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#eq-29-2-4">(29.2.4)</a>). Ceres 예제의 <code>--use_quaternions</code>(manifold 없이)도 같다. 이때 cost는 <code>QuaternionRotatePoint</code>로 점을 돌리는데, 이 함수는 \(q\)를 먼저 \(\abs{q}\)로 나눈다(예제 코드의 주석이 바로 이 경우를 위해서라고 적는다). 4차원 parameter가 3차원 manifold로 가는 submersion을 거치므로, loss는 반직선 방향 \(q\)를 보지 못한다. 따라서 residual의 Jacobian은 rank가 많아야 3이고 \(J^{\mathsf T}J\)는 singular다(<a href="#ex-28-2-4">Exercise 28.2.4</a>). Gauss–Newton의 normal equation을 그대로 풀 수 없고, LM의 damping이나 pseudo-inverse가 그 방향을 막아 준다. gradient descent에서는 \(\abs{q}\)가 저절로 커진다(<a href="../29-gaussian-splatting/29-5-optimizing-gaussians.html#i-29-5-2">Proposition 29.5.2</a>).</li>
+        <li><strong>(b) 3개의 tangent 좌표와 retraction.</strong> Ceres 예제의 <code>--use_quaternions --use_manifolds</code>는 <code>QuaternionManifold</code>를 쓴다. 공식 코드(<code>internal/ceres/manifold.cc</code>)의 <code>Plus</code>는
+        \[ x \boxplus \delta = \big(\cos\abs{\delta},\ \sin\abs{\delta}\,\tfrac{\delta}{\abs{\delta}}\big) \otimes x \]
+        이다. quaternion을 <em>왼쪽</em>에서 곱하고(global frame), 그 quaternion의 반각이 \(\abs{\delta}\)이므로 회전각은 \(2\abs{\delta}\)다. \(S^3\)의 말로 하면 이것은 \(x\)에서 출발하는 great circle을 길이 \(\abs{\delta}\)만큼 따라가는 정확한 Riemannian \(\exp\)이다. <code>EigenQuaternionManifold</code>는 메모리 배치만 \((x, y, z, w)\)이고 기하는 같다. 최소 parametrization이라 gauge 방향이 없다.</li>
+        <li><strong>(c) 전역 rotation vector에 더하기.</strong> Ceres 예제의 기본값은 angle-axis 3개를 manifold 없이 더한다. chart \(\mathrm{Log}\)의 역 \(\mathrm{Exp}\)를 전역 좌표로 쓰는 것과 같다. iterate가 \(\abs{\omega} \gt \pi\)로 넘어가면 같은 회전을 더 짧은 \(\omega - 2\pi\hat\omega\)로도 쓸 수 있어 parameter가 주 ball \(\abs{\omega} \le \pi\)를 벗어나고, \(\abs{\omega} = 2\pi\)에서는 \(\mathrm{Exp}\)의 differential이 퇴화한다(<a href="#fig-28-2-3">Figure 28.2.3</a>의 (b)). update와 tangent step의 차이는 \(J_r\)이다.</li>
+      </ul>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 같은 이름의 Plus가 서로 다른 map이다</p>
+        <p>“manifold 위의 update”라는 같은 말 아래 라이브러리마다 다른 map이 숨어 있다. 공식 코드에서 확인한 것은 다음 표와 같다(2026-10-08 기준 각 저장소의 기본 branch).</p>
+        <table>
+          <thead>
+            <tr><th>library</th><th>update</th><th>frame</th><th>tangent 순서, 각의 단위</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Ceres <code>QuaternionManifold</code></td><td>\(q(\delta) \otimes x\), \(q(\delta) = (\cos\abs\delta, \sin\abs\delta\,\hat\delta)\)</td><td>left (global)</td><td>\(\abs{\delta}\) = 회전각의 절반. ambient 순서 \((w, x, y, z)\)</td></tr>
+            <tr><td>Ceres <code>EigenQuaternionManifold</code></td><td>위와 같음</td><td>left</td><td>ambient 순서 \((x, y, z, w)\)</td></tr>
+            <tr><td>GTSAM <code>Rot3</code>, <code>Pose3</code></td><td><code>retract(v) = compose(ChartAtOrigin::Retract(v))</code></td><td>right (local)</td><td><code>Pose3</code>는 \((\omega, v)\). 기본(<code>GTSAM_ROT3_EXPMAP</code>, <code>GTSAM_POSE3_EXPMAP</code> ON)은 \(\mathrm{Exp}\), 끄면 Cayley(<code>Rot3</code>)와 \((R\,\mathrm{Retract}(\omega), t + Rv)\)(<code>Pose3</code>)</td></tr>
+            <tr><td>Sophus</td><td><code>exp</code>/<code>log</code>만 주고 곱하는 쪽은 사용자가 정한다. Jacobian helper는 <code>Dx_this_mul_exp_x_at_0</code>(right)</td><td>사용자</td><td><code>SE3</code>는 \((v, \omega)\), 각은 그대로</td></tr>
+            <tr><td>g2o <code>VertexSE3Expmap</code></td><td><code>SE3Quat::exp(update) * estimate</code>, estimate \(= T_{cw}\)</td><td>left (camera frame)</td><td>\((\omega, v)\)</td></tr>
+            <tr><td>COLMAP BA (Ceres)</td><td><code>rig_from_world</code>(rig이 없으면 \(T_{cw}\))에 <code>EigenQuaternionManifold</code> \(\times\) \(\R^3\): \((q(\delta_\omega) \otimes q_{cw},\ t_{cw} + \delta_t)\)</td><td>회전 left (camera), translation은 덧셈</td><td>\(\abs{\delta_\omega}\) = 회전각의 절반</td></tr>
+          </tbody>
+        </table>
+        <p>그래서 tangent 좌표에 직접 숫자를 넣는 곳에서 틀리기 쉽다. Ceres의 <code>QuaternionManifold</code>에서 “회전 1도”의 prior나 regularization을 주려면 \(\abs{\delta}\)는 0.5도여야 한다. 축은 왼쪽 frame의 좌표다. 곧 quaternion이 \(R_{ab}\)를 나타내면 frame \(a\)의 좌표이고, COLMAP처럼 \(R_{cw}\)를 저장하면 camera frame, \(R_{wc}\)를 저장하면 world frame이다(앞의 frame 표). <code>Covariance::GetCovarianceBlockInTangentSpace</code>로 얻은 회전 공분산 \(\Sigma\)도 같은 좌표(반각, 왼쪽)이다. right perturbation의 radian 단위로 바꾸려면 벡터는 \(\delta_r = 2R^{\mathsf T}\delta\)이므로 공분산은 \(\Sigma_r = 4R^{\mathsf T}\Sigma R\)이다(<a href="#eq-28-2-1">(28.2.1)</a>, \(R\)은 그 quaternion의 회전). 같은 이유로 Ceres의 <code>Minus</code>는 \(S^3\) 위의 연산이다. \(y\)와 \(-y\)는 같은 회전이지만 \(S^3\)에서는 다른 점이고, \(y \otimes x^{-1}\)의 scalar 부분이 음수이면 \(\abs{\delta} \gt \pi/2\), 곧 \(\pi\)보다 큰 회전각의 tangent vector를 돌려준다(verify에서 재현했다). <code>Plus(x, Minus(y, x)) = y</code>라는 manifold의 성질은 지켜지지만, 그 \(\delta\)를 “두 회전의 차이”로 읽으면 긴 쪽으로 돈 값일 수 있다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-retractions">
+      <h2>Retractions and Minimal Parametrizations</h2>
+      <p>세 방법을 한 원리로 정리하자. manifold \(M\) 위의 <strong>retraction</strong>은 각 점 \(x\)에서 smooth map \(\mathrm{retr}_x\colon T_xM \to M\)으로, \(\mathrm{retr}_x(0) = x\)이고 \(0\)에서의 differential이 항등인 것이다 <a class="cite" href="../../references.html#AMS">[AMS]</a>, <a class="cite" href="../../references.html#Boumal">[Boumal]</a>. Tour의 정의(<a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>)를 그대로 쓴 것이다. 최적화는 매 step마다 \(f \circ \mathrm{retr}_x\)라는 \(\R^n\) 위의 함수를 \(0\)에서 linearization하고, 그 해 \(\delta\)를 \(\mathrm{retr}_x(\delta)\)로 manifold에 돌려 놓는다.</p>
+      <p>\(\mathrm{SO}(3)\)의 retraction은 여럿이다. \(R\,\mathrm{Exp}(\delta)\)와 \(\mathrm{Exp}(\delta)R\)(이 절의 두 perturbation), GTSAM이 옵션으로 두는 Cayley 변환 \(R\,(I_3 - \tfrac12[\delta]_\times)^{-1}(I_3 + \tfrac12[\delta]_\times)\), \(R(I_3 + [\delta]_\times)\)를 SVD로 가장 가까운 회전에 projection하는 것, quaternion \(q + \tfrac12 q \otimes (0, \delta)\)를 정규화하는 것이 모두 그렇다. 정의상 1차까지는 같고, 이 예들은 실제로 2차까지 같다. \(R\,\mathrm{Exp}(\delta)\)와 뒤의 세 retraction은 모두 \(R\)의 오른쪽에 \(\delta\) 축 둘레의 회전을 곱하고, 회전각만 다르다. \(\mathrm{Exp}\)는 \(\abs{\delta}\), Cayley와 quaternion 정규화는 \(2\arctan(\abs{\delta}/2)\), SVD projection은 \(\arctan\abs{\delta}\)만큼 돌린다(\(I_3 + [\delta]_\times\)가 축에 수직인 평면에서 복소수 \(1 + i\abs{\delta}\)를 곱하는 것과 같기 때문이다). 그래서 \(\abs{\delta} = 0.1\)에서 \(R\,\mathrm{Exp}(\delta)\)와의 각 차이는 Cayley와 quaternion 정규화가 \(\abs{\delta}^3/12 \approx 8.3 \times 10^{-5}\), SVD projection이 \(\abs{\delta}^3/3 \approx 3.3 \times 10^{-4}\)이고, \(\abs{\delta}\)를 10배 줄이면 1000배 줄어든다.</p>
+      <p>retraction의 선택은 iterate의 궤적을 바꾸지만 답은 바꾸지 않는다. \(f\)의 critical point는 \(d(f \circ \mathrm{retr}_x)_0 = df_x \circ d(\mathrm{retr}_x)_0 = df_x\)이므로 어느 retraction으로 보아도 같은 점이다. essential matrix를 추정할 때 essential manifold 위에서 update하는 것도 같은 원리다(<a href="../27-cameras-rays/27-3-essential-manifold.html#sec-optimization">Section 27.3</a>). 라이브러리는 계산이 싼 retraction을 고른다(GTSAM의 Cayley 옵션, <a class="cite" href="../../references.html#Forster17">[Forster17]</a>가 \(\mathrm{SE}(3)\)의 \(\exp\) 대신 쓰는 \((R, p) \mapsto (R\,\mathrm{Exp}(\delta_\omega),\ p + R\,\delta_p)\). 논문 식 (21)을 이 장의 기호로 쓴 것이다). 이 절의 결론은 둘이다. 첫째, retraction은 마음대로 골라도 되지만 Jacobian은 그 retraction의 Jacobian이어야 한다(<a href="#fig-28-2-2">Figure 28.2.2</a>). 둘째, 최소 parametrization(3개)은 gauge 방향이 없고, 과잉 parametrization(quaternion 4개)은 \(J^{\mathsf T}J\)에 null space를 만든다. 다음 절에서는 이 null space가 장면 전체의 규모에서 다시 나타난다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 과잉 parametrization은 \(J^{\mathsf T}J\)에 null space를 만든다</p>
+        <p>quaternion 4개를 정규화해서 쓰면 각 회전마다 loss가 보지 못하는 방향(반직선 \(\{cq\}\))이 하나씩 생긴다. 이것은 \(\R^4 \setminus \{0\} \to S^3\)라는 submersion의 fiber 방향이고(<a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#sec-activations">Section 29.2</a>), Jacobian의 kernel에 정확히 들어간다. 그래서 카메라 \(N\)개를 이렇게 parametrize한 bundle adjustment의 \(J^{\mathsf T}J\)는 그것만으로 rank가 \(N\) 줄어든다. 이 null space는 해의 모양과 무관한 parametrization의 산물이고, 3-parameter retraction으로 바꾸면 사라진다. 반면 <a href="28-3-bundle-adjustment.html">Section 28.3</a>의 gauge freedom은 parametrization을 어떻게 바꾸어도 사라지지 않는다. 문제 자체가 장면 전체의 similarity를 보지 못하기 때문이다. 둘 다 “loss가 변하지 않는 방향”이지만 원인이 다르다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>differential, chain rule, 좌표 계산: <a href="../13-tangent-spaces/index.html#toc-13-3">Section 13.3</a>, <a href="../13-tangent-spaces/index.html#toc-13-4">Section 13.4</a>. Lie group의 \(\exp\)와 one-parameter subgroup: <a href="../20-lie-groups-frobenius/index.html#toc-20-3">Section 20.3</a>.</li>
+        <li>local diffeomorphism과 2대1 cover: <a href="../12-smooth-maps/12-2-diffeomorphisms.html#i-12-2-9">Definition 12.2.9</a>, \(S^n \to \RP^n\)이 2대1 local diffeomorphism이라는 <a href="../12-smooth-maps/12-2-diffeomorphisms.html#i-12-2-11">Example 12.2.11</a>(\(n = 3\)이 \(S^3 \to \mathrm{SO}(3) \cong \RP^3\)). \(\RP^n\)의 smooth structure: <a href="../11-smooth-manifolds/11-4-more-examples.html#i-11-4-1">Proposition 11.4.1</a>.</li>
+        <li>submersion과 fiber(\(q \mapsto q/\abs{q}\)): <a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>. Riemannian \(\exp\)와 retraction: <a href="../23-geodesics/index.html#toc-23-2">Section 23.2</a>, <a class="cite" href="../../references.html#AMS">[AMS]</a>, <a class="cite" href="../../references.html#Boumal">[Boumal]</a>.</li>
+        <li>문헌: perturbation과 Jacobian의 목록 <a class="cite" href="../../references.html#Sola18">[Sola18]</a>, left perturbation으로 일관되게 쓴 교재 <a class="cite" href="../../references.html#Barfoot">[Barfoot]</a>(식 (7.175)의 \(C = \exp(\psi^\wedge)C_{\mathrm{op}}\)), right perturbation과 IMU preintegration <a class="cite" href="../../references.html#Forster17">[Forster17]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>pose 근처의 chart는 right perturbation \(X\,\mathrm{Exp}(\delta)\)와 left perturbation \(\mathrm{Exp}(\delta)X\) 둘이고, \(\delta_l = \mathrm{Ad}_X\delta_r\)이다 <a href="#eq-28-2-1">(28.2.1)</a>. 어느 쪽이 camera frame인지는 \(T_{cw}\)와 \(T_{wc}\) 가운데 무엇을 저장했느냐에 달렸다.</li>
+        <li>기본 Jacobian은 \(-R[p]_\times\), \(-[Rp]_\times\), \(R(I_3\ \ {-[x]_\times})\), \((I_3\ \ {-[Tx]_\times})\)이고 <a href="#eq-28-2-2">(28.2.2)</a>, reprojection Jacobian은 \(D\varphi\)와의 합성이다 <a href="#eq-28-2-4">(28.2.4)</a>. 일관된 left와 right는 같은 GN iterate를 주고, 섞으면 \(\mathrm{Ad}_T\)만큼 틀려 큰 회전에서 발산한다.</li>
+        <li>\(J_r, J_l\)은 \(\mathrm{Exp}\)의 differential을 perturbation 좌표로 쓴 것이고 \(J_l = J_r^{\mathsf T} = V\)이다 <a href="#eq-28-2-6">(28.2.6)</a>. 전역 rotation vector에 더하면 \(J_r\)만큼 tangent step과 다르고, \(\abs{\omega} = 2\pi\)에서 퇴화한다.</li>
+        <li>\(S^3 \to \mathrm{SO}(3)\)는 2대1이고 quaternion의 각은 회전각의 절반이다. Ceres의 <code>QuaternionManifold</code>는 반각을 왼쪽에서, GTSAM은 전각을 오른쪽에서 곱한다.</li>
+        <li>retraction은 1차까지 \(\exp\)와 같은 아무 map이어도 되고 critical point를 바꾸지 않는다. 과잉 parametrization은 \(J^{\mathsf T}J\)에 null space를 만든다.</li>
+      </ul>
+      <p class="next">다음 절에서는 이 도구로 bundle adjustment를 manifold 위의 최소제곱으로 쓴다. 카메라 pose와 점 전체가 이루는 product manifold에서, monocular 사진이 끝내 정하지 못하는 7개의 방향이 \(J^{\mathsf T}J\)의 null space로 나타난다. 그 7이 왜 \(\dim\mathrm{Sim}(3)\)인지가 주제다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-28-2-1" data-level="1">
+        <p><span class="thm-head">Exercise 28.2.1</span> <span class="level">★</span>
+        \(R = R_z(90^\circ)\), \(p = (1, 0, 0)\)일 때 \(\partial(R\,\mathrm{Exp}(\delta)p)/\partial\delta\)와 \(\partial(\mathrm{Exp}(\delta)Rp)/\partial\delta\)를 구하여라. 각 행렬의 열은 “\(\delta\)의 각 성분으로 돌렸을 때 점이 움직이는 속도”다. 둘째 행렬의 셋째 열을 그림으로 해석하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(Rp = (0, 1, 0)\), \([p]_\times = \begin{pmatrix} 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; -1 \\ 0 &amp; 1 &amp; 0 \end{pmatrix}\)이고 \(R = \begin{pmatrix} 0 &amp; -1 &amp; 0 \\ 1 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{pmatrix}\)이므로 \(-R[p]_\times = \begin{pmatrix} 0 &amp; 0 &amp; -1 \\ 0 &amp; 0 &amp; 0 \\ 0 &amp; -1 &amp; 0 \end{pmatrix}\)이다. \(-[Rp]_\times = -[e_2]_\times = \begin{pmatrix} 0 &amp; 0 &amp; -1 \\ 0 &amp; 0 &amp; 0 \\ 1 &amp; 0 &amp; 0 \end{pmatrix}\)이다. 둘째 행렬의 셋째 열 \((-1, 0, 0)\)은 world \(z\)축 둘레로 돌릴 때 점 \((0, 1, 0)\)이 \(-x\) 방향으로 움직인다는 뜻이다(\(e_3 \times e_2 = -e_1\)). 두 행렬은 첫째 열과 둘째 열이 다르고 셋째 열은 같다. right perturbation의 \(k\)번째 축은 body 축 \(Re_k\)이고 \(-R[p]_\times = -[Rp]_\times R\)이기 때문이다. 여기서는 \(R\)이 \(z\)축 둘레의 회전이라 \(Re_3 = e_3\)이므로 셋째 열만 같다.</p>
+          <p class="verified">Verification: <code>verify/v-28-2-calculus-on-lie-groups.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-2-2" data-level="1">
+        <p><span class="thm-head">Exercise 28.2.2</span> <span class="level">★</span>
+        <a href="#fig-28-2-1">Figure 28.2.1</a>의 카메라에서 \(\xi_r = (0, 0, 0, 0, 0, 0.6)\)을 오른쪽에 곱한 것과 같은 움직임을 왼쪽 perturbation \(\xi_l\)로 쓰면 무엇인가? \(\xi_l\)의 \(v\)가 \(0\)인 이유는 무엇인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-28-2-1">(28.2.1)</a>에서 \(\xi_l = \mathrm{Ad}_{T_{wc}}\xi_r = \big(c \times R\omega_r,\ R\omega_r\big)\)이고 \(R\omega_r = 0.6\,Re_3 = 0.6\,f\)(\(f\)는 광축 방향)이다. \(c = (3, 0, 1.2)\)에서 \(f = -c/\abs{c} = (-0.928, 0, -0.371)\)이므로 \(\omega_l = (-0.557, 0, -0.223)\)이다. 카메라가 world 원점을 바라보므로 \(c\)와 \(f\)가 평행하고 \(c \times \omega_l = 0\)이다. 광축은 world 원점을 지나는 직선이고, 그 직선 둘레의 회전은 world 좌표에서도 원점을 고정한다. 그래서 \(v_l = 0\)이고, 회전축만 world \(z\)가 아니라 광축 방향이다.</p>
+          <p class="verified">Verification: <code>verify/v-28-2-calculus-on-lie-groups.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-2-3" data-level="1">
+        <p><span class="thm-head">Exercise 28.2.3</span> <span class="level">★</span>
+        \(J_r(\omega)\omega = \omega\)임을 보이고 뜻을 말하여라. \(\omega = (0, 0, 2)\), \(\delta = (0, 0, 0.1)\)이면 \(\mathrm{Exp}(\omega + \delta)\)와 \(\mathrm{Exp}(\omega)\mathrm{Exp}(\delta)\)는 같은가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\Omega\omega = \omega \times \omega = 0\)이므로 <a href="#eq-28-2-6">(28.2.6)</a>의 \(\Omega\), \(\Omega^2\) 항이 사라져 \(J_r(\omega)\omega = \omega\)이다. 축 방향으로 더하는 것은 같은 축 둘레의 회전각을 늘리는 것이고, 같은 축의 회전은 교환하므로 더하기와 합성이 정확히 같다. 실제로 \(\omega\)와 \(\delta\)가 평행하면 \([\omega]_\times\)와 \([\delta]_\times\)가 교환하므로 \(\mathrm{Exp}(\omega + \delta) = \mathrm{Exp}(\omega)\mathrm{Exp}(\delta)\)이다. 둘 다 \(z\)축 둘레 2.1 rad 회전이다. 차이는 축에 수직인 성분에서만 생긴다(<a href="#fig-28-2-3">Figure 28.2.3</a>의 (b)에서 축 방향 singular value는 늘 1이다).</p>
+          <p class="verified">Verification: <code>verify/v-28-2-calculus-on-lie-groups.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-2-4" data-level="2">
+        <p><span class="thm-head">Exercise 28.2.4</span> <span class="level">★★</span>
+        \(g(q) = R(q/\abs{q})\,p\)(\(q \in \R^4 \setminus \{0\}\))의 \(3 \times 4\) Jacobian matrix의 kernel에 \(q\)가 있음을 보여라. 방향이 다른 두 점 \(p_1, p_2\)에 대한 Jacobian을 쌓은 \(6 \times 4\) 행렬의 rank가 3인 이유를 설명하여라. 이것을 써서 quaternion 4개로 parametrize한 camera \(N\)개의 bundle adjustment에서 \(J^{\mathsf T}J\)의 rank가 적어도 \(N\)만큼 모자란 이유를 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(g(cq) = g(q)\)(\(c \gt 0\))이므로 \(c\)로 미분하면 \(Dg(q)\,q = 0\)이다. 한편 \(g\)는 submersion \(q \mapsto q/\abs{q}\)(rank 3), local diffeomorphism \(S^3 \to \mathrm{SO}(3)\)(<a href="#i-28-2-5">Proposition 28.2.5</a>), \(R \mapsto Rp\)의 합성이다. 마지막 map의 differential \(\delta \mapsto -R[p]_\times\delta\)는 \(p \ne 0\)이면 rank 2이므로(축이 \(p\)와 평행한 회전은 \(p\)를 움직이지 않는다) 점 하나에 대한 \(Dg\)의 rank는 2이고, 서로 다른 방향의 점이 둘 이상이면 rank가 3이 된다. 어느 경우든 \(q\) 방향은 모든 residual의 Jacobian의 kernel에 있으므로, 카메라마다 \(J\)의 kernel에 독립인 벡터가 하나씩 생겨 \(J^{\mathsf T}J\)의 rank가 적어도 \(N\) 모자란다. 3-parameter <code>QuaternionManifold</code>로 바꾸면 이 결손은 사라진다(verify에서 \(N = 4\)로 확인).</p>
+          <p class="verified">Verification: <code>verify/v-28-2-calculus-on-lie-groups.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-28-2-5" data-level="2">
+        <p><span class="thm-head">Exercise 28.2.5</span> <span class="level">★★</span>
+        residual \(r(T)\)의 left Jacobian \(J_L\)과 right Jacobian \(J_R\)로 각각 Gauss–Newton step \(\delta_L = -J_L^{+}r\), \(\delta_R = -J_R^{+}r\)를 구하면(\(J^+\)는 full column rank일 때의 pseudo-inverse \((J^{\mathsf T}J)^{-1}J^{\mathsf T}\)), \(\mathrm{Exp}(\delta_L)T = T\,\mathrm{Exp}(\delta_R)\)임을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-28-2-1">(28.2.1)</a>에서 \(J_R = J_L A\), \(A = \mathrm{Ad}_T\)(invertible)이다. 그러면 \(J_R^{\mathsf T}J_R = A^{\mathsf T}J_L^{\mathsf T}J_LA\)이므로 \(\delta_R = -(A^{\mathsf T}J_L^{\mathsf T}J_LA)^{-1}A^{\mathsf T}J_L^{\mathsf T}r = -A^{-1}(J_L^{\mathsf T}J_L)^{-1}J_L^{\mathsf T}r = A^{-1}\delta_L\)이다. 다시 <a href="#eq-28-2-1">(28.2.1)</a>에 의해 \(T\,\mathrm{Exp}(A^{-1}\delta_L) = \mathrm{Exp}(\delta_L)\,T\)이다. Gauss–Newton step은 linear reparametrization에 대해 equivariant이므로, 일관되게만 쓰면 left와 right는 같은 iterate를 준다(<a href="#fig-28-2-2">Figure 28.2.2</a>에서 검정과 파랑이 겹치는 이유). LM의 damping \(\lambda I\)는 \(A^{\mathsf T}A \ne I\)이면 이 equivariance를 깨므로, LM에서는 두 iterate가 조금 다를 수 있다.</p>
+          <p class="verified">Verification: <code>verify/v-28-2-calculus-on-lie-groups.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="28-1-so3-se3-sim3.html">← 28.1 SO(3), SE(3), and Sim(3)</a>
+    <a rel="next" href="28-3-bundle-adjustment.html">28.3 Bundle Adjustment on a Manifold →</a>
+  </nav>
+</body>
+</html>
