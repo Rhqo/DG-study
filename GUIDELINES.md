@@ -1656,3 +1656,4 @@ window.MathJax = {
 - **sympy 양수 가정**: 구면의 sin θ, 원환면의 R + r cos u처럼 양수임을 알려 줘야 sqrt(sin²θ) 같은 식이 남지 않는다. `dgsym.EXAMPLES[…]["positive"]`에 들어 있다.
 
 - `google-chrome --headless=new --screenshot --window-size=W,H`는 창 높이에서 약 87px을 잘라낸다(2026-10-08 검토에서 확인). 그림 아래쪽이 잘린 것처럼 보이므로 높이를 넉넉히 주거나 `tools/shot.mjs`를 쓴다.
+- `tools/check_all.sh`는 `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS`, `MKL_NUM_THREADS`를 4로 제한한다(2026-10-08). 제한이 없으면 큰 Monte Carlo verify가 가끔 segfault(exit 139)를 냈다. 스크립트를 따로 돌릴 때도 같은 값을 쓴다.

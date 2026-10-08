@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>31.1 What Makes a Mesh a Surface — DG Study</title>
+  <meta name="dg-id" content="31.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.3, 0.5, 0.6, 29.1">
+  <meta name="dg-refs" content="Cr; PMP; Lorensen87; Kazhdan06; Curless96; Huang24; Guedon24; Ravi20; Wang18">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">31. Meshes: Discrete Differential Geometry</a> ›
+    <span>31.1 What Makes a Mesh a Surface</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>31.1 What Makes a Mesh a Surface</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr]</a>,
+        <a class="cite" href="../../references.html#PMP">[PMP]</a>,
+        <a class="cite" href="../../references.html#Lorensen87">[Lorensen87]</a>,
+        <a class="cite" href="../../references.html#Kazhdan06">[Kazhdan06]</a>,
+        <a class="cite" href="../../references.html#Curless96">[Curless96]</a>,
+        <a class="cite" href="../../references.html#Huang24">[Huang24]</a>,
+        <a class="cite" href="../../references.html#Guedon24">[Guedon24]</a>,
+        <a class="cite" href="../../references.html#Ravi20">[Ravi20]</a>,
+        <a class="cite" href="../../references.html#Wang18">[Wang18]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>triangle mesh를 vertex 위치와 연결 정보로 이루어진 piecewise-linear surface로 보고, tangent plane이 있는 곳(face 안)과 없는 곳(edge, vertex)을 구분할 수 있다.</li>
+        <li>edge에 붙은 face의 수와 vertex의 link로 manifold 조건을 판정하고, non-manifold edge와 non-manifold vertex를 찾을 수 있다.</li>
+        <li>일관된 orientation이 무엇인지 설명하고, Möbius strip mesh에서 그것이 불가능한 이유를 말할 수 있다.</li>
+        <li>\(\chi = n_0 - n_1 + n_2\)로 genus와 boundary의 수를 계산해 복원한 mesh의 topology를 점검하고, smooth surface의 curvature가 mesh에서는 edge와 vertex에 모인다는 것을 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>: regular surface(<a href="../00-tour/0-3-surfaces.html#i-0-3-1">Definition 0.3.1</a>), tangent plane과 unit normal vector(<a href="../00-tour/0-3-surfaces.html#i-0-3-3">Definition 0.3.3</a>)</li>
+        <li><a href="../00-tour/0-5-intrinsic.html#sec-gauss-bonnet">Section 0.5</a>: Euler characteristic과 Gauss–Bonnet theorem(<a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>), mesh의 angle defect <a href="../00-tour/0-5-intrinsic.html#eq-0-5-4">(0.5.4)</a></li>
+        <li><a href="../00-tour/0-6-manifolds.html#sec-charts">Section 0.6</a>: manifold는 모든 점 근처가 \(\R^n\)의 조각처럼 보이는 공간이다(<a href="../00-tour/0-6-manifolds.html#i-0-6-1">Definition 0.6.1</a>).</li>
+        <li><a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>: 납작한 Gaussian과 PCA의 normal은 부호가 정해지지 않는다.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="../30-radiance-field-surfaces/index.html">Chapter 30</a>은 radiance field, SDF, Gaussian에서 surface를 정의하는 방법을 다룬다. 그 결과를 렌더러, 물리 시뮬레이터, 편집 도구로 넘길 때는 거의 언제나 triangle mesh로 바꾼다. 2DGS는 rendered depth를 TSDF로 합친 뒤 mesh를 꺼내고 <a class="cite" href="../../references.html#Huang24">[Huang24]</a>, SuGaR는 Poisson reconstruction으로 mesh를 만든다 <a class="cite" href="../../references.html#Guedon24">[Guedon24]</a>. mesh는 3D vision 파이프라인의 공용어다.</p>
+      <p>그런데 mesh는 regular surface가 아니다(<a href="../00-tour/0-3-surfaces.html#i-0-3-1">Definition 0.3.1</a>). 평평한 삼각형을 이어 붙였을 뿐이라 이계도함수가 없고, 따라서 Tour에서 본 curvature, Laplacian, Gauss–Bonnet theorem을 그대로 쓸 수 없다. 이 장은 그것들을 mesh 위에서 다시 세운다. 첫 절은 출발점이 되는 세 질문에 답한다.</p>
+      <ol>
+        <li>삼각형들의 모임은 언제 “하나의 surface”인가? (manifold)</li>
+        <li>앞면과 뒷면, 곧 normal의 방향을 전체에서 일관되게 고를 수 있는가? (orientation)</li>
+        <li>face 안은 평평한데, smooth surface의 curvature는 mesh의 어디로 갔는가?</li>
+      </ol>
+      <aside class="box convention">
+        <p class="box-title">Conventions: 이 장의 기호</p>
+        <ul>
+          <li>vertex는 번호 \(i, j, k\)로 부르고 그 위치를 \(x_i \in \R^3\)으로 쓴다. Chapter 29처럼 점과 벡터는 굵게 쓰지 않는다. unit normal만 이 study set의 관례대로 \(\mathbf N\)으로 굵게 쓴다. vertex, edge, face의 개수는 \(n_0, n_1, n_2\)다.</li>
+          <li>face \(f = ijk\)는 순서가 있는 세 vertex이고, 그 unit normal은 \(\mathbf N_f = (x_j - x_i) \times (x_k - x_i)/\abs{(x_j - x_i) \times (x_k - x_i)}\)이다. edge \(ij\)는 순서 없는 두 vertex다.</li>
+          <li>각: face \(f\)에서 vertex \(i\)의 내각은 \(\theta_i^f\), edge \(e\)에서 이웃한 두 face가 꺾인 각(bending angle)은 \(\theta_e\), edge \(ij\)의 맞은편에 있는 두 각은 \(\alpha_{ij}, \beta_{ij}\)다. angle defect는 \(\delta_i = 2\pi - \sum_f \theta_i^f\)이다(<a href="31-2-discrete-curvature.html">Section 31.2</a>).</li>
+          <li>vertex마다 넓이 몫 \(A_i\)를 두고 mass matrix를 \(M = \diag(A_1, \dots, A_{n_0})\)로 쓴다. Laplacian 행렬 \(L\)은 \(L_{ij} = \tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})\) (edge \(ij\)), \(L_{ii} = -\sum_{j} L_{ij}\)인 cotan matrix다(<a href="31-3-cotangent-laplacian.html">Section 31.3</a>). 부호는 이 study set의 \(\Delta = \divg\grad\)를 따르므로 \(M^{-1}L \approx \Delta\)이고 \(-L\)이 positive semidefinite다. 많은 코드와 문헌은 부호가 반대인 \(-L\)을 Laplacian이라 부른다. 이 \(L\)과 \(M\)은 Part I의 second fundamental form의 coefficient \(L, M\)과 관계없다. 이 장에는 그 coefficient가 나오지 않는다.</li>
+          <li>Euler characteristic은 \(\chi = n_0 - n_1 + n_2\)로 쓴다. 흔히 \(V - E + F\)로 쓰지만 \(E, F\)는 first fundamental form의 coefficient와 겹치므로 쓰지 않는다.</li>
+          <li>mean curvature \(H\)의 부호는 \(W_p = -d\mathbf N_p\)를 따른다. 바깥쪽 \(\mathbf N\)을 고른 반지름 \(r\)인 sphere에서 \(H = -1/r\)이다(<a href="../00-tour/0-4-curvature.html#i-0-4-6">Example 0.4.6</a>).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-pl-surface">
+      <h2>A Mesh Is a Piecewise-Linear Surface</h2>
+      <div class="thm definition" id="i-31-1-1">
+        <p><span class="thm-head">Definition 31.1.1</span> <span class="thm-name">(triangle mesh)</span>.
+        <strong>triangle mesh</strong>는 두 가지 자료로 이루어진다. 하나는 vertex의 위치 \(x_1, \dots, x_{n_0} \in \R^3\)이고, 다른 하나는 face의 목록이다. face는 서로 다른 세 vertex 번호의 순서쌍 \(ijk\)이고, face에 나타나는 두 vertex의 쌍 \(ij\)를 <strong>edge</strong>(모서리)라 한다. 이 장에서는 다음 두 가지를 가정한다.</p>
+        <ul>
+          <li>(1) 모든 face의 세 점 \(x_i, x_j, x_k\)는 한 직선 위에 있지 않다(퇴화한 삼각형이 없다).</li>
+          <li>(2) 두 삼각형은 공통의 edge나 공통의 vertex에서만 만나거나 만나지 않는다(자기교차가 없다).</li>
+        </ul>
+        <p>삼각형 \(\{\lambda_i x_i + \lambda_j x_j + \lambda_k x_k : \lambda_i, \lambda_j, \lambda_k \ge 0,\ \lambda_i + \lambda_j + \lambda_k = 1\}\)들의 합집합을 mesh가 나타내는 surface라 한다. face마다 barycentric 좌표 \((\lambda_i, \lambda_j, \lambda_k)\)에 대해 linear인 map으로 덮이므로 이것을 <strong>piecewise-linear surface</strong>(조각별 선형 곡면)라 한다.</p>
+      </div>
+      <p>정의에서 위치(기하)와 face 목록(연결, combinatorics)은 따로 주어진다. 같은 face 목록에 다른 위치를 주면 다른 모양이 되고, 위치는 그대로 두고 face를 바꾸면 다른 surface가 된다. mesh 최적화에서 vertex 위치만 gradient로 움직이는 것은 연결을 고정하고 기하만 바꾸는 일이다.</p>
+      <div class="thm example" id="i-31-1-2">
+        <p><span class="thm-head">Example 31.1.2</span> <span class="thm-name">(icosphere and cube)</span>.
+        정이십면체는 \(n_0 = 12\), \(n_1 = 30\), \(n_2 = 20\)이다. 모든 face를 edge의 중점으로 네 조각 내고 새 vertex를 반지름 \(r\)인 sphere로 밀어내는 일을 \(\ell\)번 반복한 mesh를 icosphere라 한다. vertex는 \(10 \cdot 4^\ell + 2\)개다(\(\ell = 1, 2, 3, 4\)에서 42, 162, 642, 2562). icosphere의 vertex는 running example \(S^2(r)\) 위에 있지만 삼각형 안의 점은 sphere 안쪽에 있다. 정육면체 겉면의 정사각형마다 대각선을 하나 그으면 \(n_0 = 8\), \(n_1 = 18\), \(n_2 = 12\)인 triangle mesh가 된다. 이 두 mesh를 이 절 내내 쓴다.</p>
+        <p class="verified">Verification: <code>verify/v-31-1-mesh-as-surface.py</code></p>
+      </div>
+      <p>piecewise-linear surface의 점은 세 종류다. face 안에 있는 점 근처는 평면 조각이므로 tangent plane이 있고 그것이 삼각형의 평면이며, unit normal은 \(\mathbf N_f\)이다. edge 위의 점 근처는 두 평면 조각이 꺾여 만나므로, 꺾인 각이 \(0\)이 아니면 tangent plane이 없다. vertex 근처는 여러 삼각형이 모인 뿔(cone)이다. cone의 vertex에 tangent plane이 없다는 것은 <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-2">Non-example 6.2.2</a>에서 본 그대로다. 그래서 vertex normal은 “정의”해야 하는 양이고, 정의하는 방법이 여럿 있다(<a href="31-2-discrete-curvature.html">Section 31.2</a>).</p>
+    </section>
+
+    <section id="sec-manifold">
+      <h2>When Is a Mesh a Surface?</h2>
+      <p>surface(2차원 manifold)는 모든 점 근처가 평면의 열린 disk처럼 보이는 공간이고, boundary를 허락하면 boundary 위의 점 근처는 반쪽 disk처럼 보인다(<a href="../00-tour/0-6-manifolds.html#i-0-6-1">Definition 0.6.1</a>). face 안의 점은 언제나 이 조건을 만족하므로, mesh에서는 edge와 vertex만 확인하면 된다. 그 도구가 link다.</p>
+      <div class="thm definition" id="i-31-1-3">
+        <p><span class="thm-head">Definition 31.1.3</span> <span class="thm-name">(link and manifold mesh)</span>.
+        vertex \(i\)의 <strong>link</strong>는 \(i\)를 포함하는 face \(ijk\)마다 맞은편 edge \(jk\)를 모은 것이다. edge \(ij\)의 link는 \(ijk\)가 face인 vertex \(k\)들이다. 다음 두 조건을 만족하는 mesh를 <strong>manifold mesh</strong>라 한다.</p>
+        <ul>
+          <li>(1) 모든 edge는 face 하나 또는 둘에 속한다. 곧 edge의 link는 점 하나나 둘이다.</li>
+          <li>(2) 모든 vertex의 link는 닫힌 다각형(cycle) 하나이거나 열린 polygonal path 하나다.</li>
+        </ul>
+        <p>face 하나에만 속하는 edge를 boundary edge, link가 path인 vertex를 boundary vertex라 한다. boundary edge가 없으면 closed mesh라 한다. 그래픽스에서는 흔히 watertight라 부른다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-31-1-1">
+        <img src="figures/fig-31-1-1-manifold-stars.svg" alt="네 패널. (a) interior vertex: 가운데 검은 점 i 둘레에 회색 삼각형 여섯 개가 빙 둘러 있고, 바깥 테두리의 육각형이 주황 굵은 선(link)으로 그려져 있다. 아래에 link = one closed loop. (b) boundary vertex: 검은 점 i에 삼각형 세 개가 부채꼴로 붙어 있고, 바깥쪽 polygonal path가 주황(link), i에서 나가는 두 edge가 파란 점선(boundary)이다. 아래에 link = one path. (c) non-manifold edge: 검은 굵은 수직 edge e에 회색 삼각형 세 장이 책장처럼 붙어 있고, 세 삼각형의 끝 vertex가 주황 점이다. 아래에 3 faces share edge e. (d) non-manifold vertex: 위아래 두 개의 cone 모양 부채가 vertex i 한 점에서만 맞닿아 있고, 위와 아래의 오각형 두 개가 주황(link)이다. 아래에 link = two loops.">
+        <figcaption><span class="fig-head">Figure 31.1.1.</span>
+        manifold인 이웃과 non-manifold인 이웃. <em>무엇을</em>: 한 vertex 또는 한 edge 둘레의 face들(실제 3D 좌표를 한 방향에서 본 그림, schematic). <em>읽는 법</em>: 회색 삼각형이 face, 검은 점 \(i\)가 살펴보는 vertex, 주황 굵은 선이 그 vertex의 link다. (b)의 파란 점선은 boundary edge, (c)의 검은 굵은 선은 살펴보는 edge \(e\)이고 주황 점은 \(e\)의 link(맞은편 vertex)다. <em>볼 것</em>: (a)의 link는 닫힌 육각형 하나라서 \(i\) 근처가 disk이고, (b)의 link는 path 하나라서 반쪽 disk다. (c)의 edge에는 face가 세 개 붙어 link가 점 세 개다. (d)는 모든 edge에 face가 둘 이하이지만 \(i\)의 link가 오각형 두 개로 끊어져 있어서, \(i\) 근처는 disk 두 개를 한 점에서 붙인 모양이다. <em>본문과의 연결</em>: (a)(b)는 <a href="#i-31-1-3">Definition 31.1.3</a>의 조건을 만족하고, (c)는 조건 (1)을, (d)는 조건 (2)를 어긴다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-1-1">Figure 31.1.1</a>을 (a)부터 보자. (a)의 vertex \(i\)에 모인 삼각형들은 \(i\)를 vertex로 하고 주황 육각형을 밑면으로 하는 뿔을 이룬다. 그 뿔은 밑면을 평평하게 누르면 그대로 disk가 되므로, \(i\) 근처는 평면의 disk와 같은 모양(homeomorphic)이다. (b)에서는 밑면이 path라서 뿔이 반쪽 disk가 되고, \(i\)는 boundary 위의 점이다. (c)는 세 장짜리 책이다. edge \(e\)의 한가운데 점 근처는 반쪽 disk 세 장을 한 선분에서 붙인 모양이어서 어떤 disk와도 같지 않다. (d)는 더 미묘하다. edge만 보면 아무 문제가 없지만, \(i\)를 빼면 이웃이 위아래 두 조각으로 갈라진다. disk에서 한 점을 빼도 연결되어 있으므로 이 이웃은 disk가 아니다.</p>
+
+      <div class="thm proposition" id="i-31-1-4">
+        <p><span class="thm-head">Proposition 31.1.4</span> <span class="thm-name">(a manifold mesh is a surface)</span>.
+        manifold mesh가 나타내는 surface의 모든 점은 평면의 열린 disk나 반쪽 disk \(\{(u, v) : u^2 + v^2 \lt 1,\ v \ge 0\}\)와 homeomorphic한 이웃을 가진다. boundary edge들의 합집합은 서로 만나지 않는 닫힌 다각형 몇 개로 나뉜다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> face 안의 점은 분명하다. edge 위의 점(끝점 제외) 근처는 그 edge를 공유하는 삼각형 둘(또는 하나)을 이어 붙인 것이므로 disk(또는 반쪽 disk)다. vertex \(i\) 근처는 \(i\)를 vertex로 하고 link를 밑면으로 하는 뿔이다. 조건 (2)에 의해 밑면이 원 하나와 같은 다각형이면 뿔은 disk와, 선분 하나와 같은 path이면 반쪽 disk와 homeomorphic하다. boundary vertex \(i\)의 link가 path이면 그 두 끝점 \(j, k\)가 boundary edge \(ij, ik\)를 주므로, boundary vertex마다 boundary edge가 정확히 두 개 붙는다. 그래서 boundary edge를 따라가면 언젠가 출발점으로 돌아오고, boundary는 닫힌 다각형들이다.</p>
+      </div>
+      <p>두 조건이 왜 모두 필요한지는 <a href="#fig-31-1-1">Figure 31.1.1</a>의 (c)와 (d)가 보여 준다. 조건 (1)만 있으면 (d) 같은 “한 점에서 맞닿은” vertex를 막지 못한다. 실제 데이터에서 (c)는 벽에 얇은 판이 붙어 있거나 서로 다른 두 mesh를 합칠 때, (d)는 두 부분이 한 점에서 스칠 때 생긴다. 이런 곳에서는 “edge마다 이웃 face가 둘”이라는 가정 위에 세운 계산(<a href="31-3-cotangent-laplacian.html">Section 31.3</a>의 cotan weight, normal consistency loss, half-edge 자료구조)이 깨진다. PyTorch3D의 normal consistency 구현은 “잘 만든 mesh에서는 edge마다 face가 정확히 둘이지만 많은 mesh에서 이 가정이 언제나 성립하지는 않는다”는 주석과 함께, 한 edge에 붙은 face를 개수에 제한 없이 모두 찾아 가능한 모든 쌍에 대해 계산한다 <a class="cite" href="../../references.html#Ravi20">[Ravi20]</a>.</p>
+    </section>
+
+    <section id="sec-orientation">
+      <h2>Orientation</h2>
+      <p>face \(ijk\)의 vertex 순서는 삼각형의 테두리를 도는 방향을 정하고, 오른손 법칙으로 normal \(\mathbf N_f\)의 방향을 정한다. 순서를 \(ikj\)로 바꾸면 \(\mathbf N_f\)가 \(-\mathbf N_f\)가 된다. 이웃한 face의 normal이 같은 쪽을 가리키게 하려면 순서를 맞춰 골라야 한다.</p>
+      <div class="thm definition" id="i-31-1-5">
+        <p><span class="thm-head">Definition 31.1.5</span> <span class="thm-name">(consistent orientation)</span>.
+        manifold mesh의 모든 face에 순환 순서를 하나씩 정한 것이 <strong>consistent</strong>하다는 것은, face 두 개가 공유하는 모든 edge \(ij\)를 두 face가 서로 반대 방향으로 지나간다는 뜻이다. 곧 한 face가 \(i \to j\)로 지나가면 다른 face는 \(j \to i\)로 지나간다. 이런 선택이 있는 mesh를 orientable하다고 하고, 그 선택을 <strong>orientation</strong>(방향)이라 한다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-31-1-2">
+        <img src="figures/fig-31-1-2-orientation.svg" alt="세 패널. (a) 두 쌍의 삼각형. 왼쪽 쌍(consistent)은 대각선 edge ij를 공유하고, 아래 삼각형은 파란 화살표로, 위 삼각형은 초록 화살표로 테두리를 돈다. 공유 edge 위에서 파란 화살표와 초록 화살표가 서로 반대 방향이다(shared edge: opposite). 오른쪽 쌍(inconsistent)에서는 두 화살표가 공유 edge 위에서 같은 방향이다(shared edge: same direction, 주홍 글씨). (b) 회색 Möbius 띠 mesh를 비스듬히 본 그림으로, 삼각형 네 개마다 주홍 화살표(normal)가 하나씩 서 있다. 띠의 이음매에서 start라고 적힌 굵은 화살표는 아래로, 바로 옆의 end라고 적힌 굵은 화살표는 위로 향한다. (c) 가로로 긴 직사각형 띠를 정사각형 여섯 개, 삼각형 열두 개로 나눈 그림이다. 각 삼각형 안에 파란 반시계 방향 작은 원형 화살표가 있다. 왼쪽 끝 세로 edge의 위가 P, 아래가 Q이고, 오른쪽 끝 세로 edge의 위가 Q, 아래가 P다. 왼쪽 끝에는 아래로 향하는 주황 화살표, 오른쪽 끝에는 위로 향하는 주황 화살표가 있다. 아래에 glue the ends with a twist: (6, y) ~ (0, 1−y)와 both orange arrows run from P to Q: the glued edge is traversed the same way라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 31.1.2.</span>
+        orientation과 Möbius strip. <em>무엇을</em>: (a) edge \(ij\)를 공유하는 두 삼각형, (b) 정사각형 24개(삼각형 48개)로 만든 Möbius strip mesh(띠의 폭 \(1\), 중심원의 반지름 \(1\)), (c) 같은 띠를 한 번 잘라 펼친 직사각형(정사각형 6개만 그렸다). <em>읽는 법</em>: (a)에서 파란 화살표와 초록 화살표는 각 삼각형의 vertex 순서가 정하는 테두리 방향이다. (b)의 주홍 화살표는 한 삼각형(start)에서 시작해 이웃 삼각형으로 순서를 하나씩 맞춰 가며 정한 face normal이다(삼각형 네 개마다 하나, 그리고 마지막 삼각형 end는 굵게). (c)의 작은 원형 화살표는 각 삼각형의 테두리 방향이고, 양 끝의 \(P, Q\)는 \((6, y)\)와 \((0, 1 - y)\)를 붙인다는 표시다. <em>볼 것</em>: (a)의 왼쪽 쌍은 공유 edge를 반대 방향으로 지나가고(consistent), 오른쪽 쌍은 같은 방향으로 지나간다. (c)의 직사각형 안에서는 모든 삼각형이 반시계 방향으로 일관되지만, 띠를 꼬아 붙이는 edge에서는 양 끝의 두 삼각형이 둘 다 \(P\)에서 \(Q\)로 지나간다(주황 화살표). (b)에서 같은 일이 normal로 보인다. 띠를 따라 한 바퀴 돌아온 normal(end)이 출발한 normal(start)과 반대쪽을 가리킨다. <em>본문과의 연결</em>: <a href="#i-31-1-5">Definition 31.1.5</a>의 조건과 <a href="#i-31-1-6">Example 31.1.6</a>. (b)를 돌려 볼 수 있는 <a href="figures/fig-31-1-2-orientation-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-1-2">Figure 31.1.2</a>의 (a)에서 두 삼각형의 공유 edge를 보자. 왼쪽 쌍에서 파란 화살표는 \(j\)에서 \(i\)로, 초록 화살표는 \(i\)에서 \(j\)로 간다. 이렇게 반대로 지나가면 두 normal이 같은 쪽을 가리킨다. 연결된 mesh에서 face 하나의 순서를 정하면, consistency 조건이 이웃 face의 순서를 하나로 정하고, 그 이웃이 또 그 이웃을 정한다. 그래서 연결된 orientable mesh의 orientation은 정확히 두 가지다(처음 face를 어느 쪽으로 정했는가). smooth surface에서 연결된 orientable surface의 orientation이 두 가지였던 것(<a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-7">Corollary 7.5.7</a>)과 같은 이야기다.</p>
+
+      <div class="thm example" id="i-31-1-6">
+        <p><span class="thm-head">Example 31.1.6</span> <span class="thm-name">(the Möbius strip mesh is not orientable)</span>.
+        <a href="#fig-31-1-2">Figure 31.1.2</a>(c)처럼 직사각형 띠를 정사각형 \(n\)개로 나누고 각각을 삼각형 둘로 자른 뒤, 양 끝을 꼬아 붙인다. vertex는 \(2n\)개, edge는 \(4n\)개, face는 \(2n\)개이고 \(\chi = 2n - 4n + 2n = 0\)이다. 모든 edge에 face가 하나 또는 둘이고 모든 vertex의 link가 path 하나이므로 manifold mesh이며, boundary는 \(2n\)개의 edge로 된 닫힌 다각형 <em>하나</em>다(띠의 두 가장자리가 꼬임 때문에 하나로 이어진다). 한 삼각형에서 순서를 정해 띠를 따라 consistency를 퍼뜨리면 직사각형 안에서는 막힘없이 퍼지지만, 꼬아 붙인 edge에서 양쪽 삼각형이 같은 방향을 요구한다. 처음 선택을 뒤집어도 모든 face가 함께 뒤집힐 뿐 충돌은 남으므로, consistent orientation은 없다. <a href="#fig-31-1-2">Figure 31.1.2</a>(b)에서 normal이 한 바퀴 돌아와 뒤집히는 것이 이 충돌이다. smooth Möbius strip이 orientable이 아니라는 <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-10">Proposition 7.5.10</a>의 이산판이다.</p>
+        <p class="verified">Verification: <code>verify/v-31-1-mesh-as-surface.py</code></p>
+      </div>
+      <p>closed mesh에서는 두 orientation 가운데 어느 쪽이 바깥인지도 계산할 수 있다. divergence theorem에 의해 mesh가 둘러싼 부피는</p>
+      <div class="equation" id="eq-31-1-1">
+      \[ \operatorname{Vol} = \frac16 \sum_{f = ijk} \inner{x_i}{x_j \times x_k} \tag{31.1.1} \]
+      </div>
+      <p>이고(원점과 face \(f\)가 이루는 사면체의 부호 있는 부피의 합), face normal이 모두 바깥을 향할 때 양수, 모두 안을 향할 때 음수다. 이것이 <a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>의 문제와 대조되는 점이다. Gaussian의 가장 짧은 축이나 PCA로 얻은 normal은 점마다 \(\pm\)가 정해지지 않았다. consistent하게 orientation된 closed mesh에서는 연결이 normal의 부호를 이웃끼리 묶고 <a href="#eq-31-1-1">(31.1.1)</a>이 전체의 부호를 정한다. 점마다의 부호를 연결로 묶는 일은 <a href="31-5-fields-to-meshes.html#sec-poisson">Section 31.5</a>의 Poisson reconstruction에서 다시 중요해진다.</p>
+    </section>
+
+    <section id="sec-euler">
+      <h2>Counting: The Euler Characteristic</h2>
+      <p><a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>에서 surface를 삼각형으로 나눈 triangulation의 \(\chi = n_0 - n_1 + n_2\)가 나누는 방법에 무관하다는 것을 보았다. manifold mesh는 그 자체로 triangulation이므로 \(\chi\)를 바로 셀 수 있다. closed mesh에서는 개수 사이에 관계가 하나 더 있다.</p>
+      <div class="thm proposition" id="i-31-1-7">
+        <p><span class="thm-head">Proposition 31.1.7</span> <span class="thm-name">(counting identities for a closed mesh)</span>.
+        closed manifold mesh에서 \(3n_2 = 2n_1\)이고, 따라서</p>
+        <div class="equation" id="eq-31-1-2">
+        \[ \begin{aligned} & n_1 = 3(n_0 - \chi), \qquad n_2 = 2(n_0 - \chi), \\ & \frac{1}{n_0}\sum_i d_i = 6 - \frac{6\chi}{n_0} \end{aligned} \tag{31.1.2} \]
+        </div>
+        <p>이다. 여기서 \(d_i\)는 vertex \(i\)에 붙은 edge의 수(valence)다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> face마다 edge가 셋이고 edge마다 face가 둘이므로, (face, 그 face의 edge) 쌍을 두 방법으로 세면 \(3n_2 = 2n_1\)이다. 이것을 \(\chi = n_0 - n_1 + n_2\)에 넣어 \(n_1, n_2\)를 풀면 앞의 두 식이 나온다. edge마다 끝점이 둘이므로 \(\sum_i d_i = 2n_1 = 6(n_0 - \chi)\)이다.</p>
+      </div>
+      <p>closed mesh의 vertex는 평균적으로 edge 6개에 붙고, 그 평균에서 벗어난 총량이 \(\chi\)로 정해진다. 실제로 \(\sum_i (6 - d_i) = 6\chi\)이다(<a href="#ex-31-1-4">Exercise 31.1.4</a>). icosphere는 valence 5인 vertex 12개와 valence 6인 vertex들로 되어 있어 \(\sum_i(6 - d_i) = 12 = 6 \cdot 2\)이다.</p>
+      <p>\(\chi\)는 surface의 모양을 거의 다 알려 준다. 연결된 compact orientable surface는 sphere에 손잡이(handle)를 \(g\)개 붙이고 disk \(b\)개를 도려낸 것과 homeomorphic하다는 classification theorem이 있고(여기서는 증명하지 않는다, <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>), 이때 \(g\)를 <strong>genus</strong>(종수)라 하며</p>
+      <div class="equation" id="eq-31-1-3">
+      \[ \chi = 2 - 2g - b \tag{31.1.3} \]
+      </div>
+      <p>이다. \(b\)는 boundary를 이루는 닫힌 다각형의 수다(closed mesh면 \(b = 0\)). face 하나를 지우면 \(n_2\)만 1 줄고 구멍(boundary loop)이 하나 생기므로 \(\chi\)도 1 준다.</p>
+
+      <figure class="dg-figure" id="fig-31-1-3">
+        <img src="figures/fig-31-1-3-euler.svg" alt="세 개의 회색 mesh가 나란히 있다. (a) sphere: 정이십면체를 한 번 나눈 공 모양 mesh, 아래에 42 − 120 + 80 = 2와 파란 글씨 g = 0. (b) torus: 도넛 모양 mesh, 아래에 128 − 384 + 256 = 0과 g = 1. (c) genus 2: 구멍 두 개가 뚫린 납작한 8자 모양의 매끈한 mesh(삼각형 선은 그리지 않음), 아래에 4032 − 12102 + 8068 = −2와 g = 2.">
+        <figcaption><span class="fig-head">Figure 31.1.3.</span>
+        세 closed mesh의 \(n_0 - n_1 + n_2\). <em>무엇을</em>: (a) icosphere(정이십면체를 한 번 나눈 것), (b) running example torus of revolution \(T_{R,r}\) (\(R = 2\), \(r = 0.8\))를 \((u, v)\) 격자 \(8 \times 16\)으로 나눈 mesh, (c) 두 torus를 매끄럽게 합친 genus 2 surface를 격자 간격 \(0.16\)인 level set mesh로 만든 것(삼각형 8068개라 선은 그리지 않았다). <em>읽는 법</em>: 아래 첫 줄은 mesh에서 실제로 센 \(n_0 - n_1 + n_2\), 둘째 줄은 손잡이의 수 \(g\)다. <em>볼 것</em>: 셋 모두 \(3n_2 = 2n_1\)이고, \(\chi = 2, 0, -2\)가 <a href="#eq-31-1-3">(31.1.3)</a>의 \(2 - 2g\)와 맞는다. (c)는 vertex가 4032개나 되지만 \(\chi\)는 손잡이 수만 알려 준다. <em>본문과의 연결</em>: <a href="#i-31-1-7">Proposition 31.1.7</a>과 <a href="#eq-31-1-3">(31.1.3)</a>. 세 mesh를 돌려 볼 수 있는 <a href="figures/fig-31-1-3-euler-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-1-3">Figure 31.1.3</a>을 왼쪽부터 보자. (a)의 icosphere는 \(42 - 120 + 80 = 2\), (b)의 torus mesh는 격자의 칸마다 vertex 하나, edge 셋, face 둘이 대응하여 \(128 - 384 + 256 = 0\)이다. (c)는 숫자가 크지만 결과는 \(-2\)다. 세 경우 모두 vertex 수는 해상도에 따라 얼마든지 바뀌지만 \(\chi\)는 바뀌지 않는다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: \(\chi\)는 가장 싼 topology 검사다</p>
+        <p>복원한 mesh의 topology는 눈으로 보아서는 알기 어렵다. 작은 터널 하나, 한 점에서 스친 두 조각은 렌더링에서 거의 보이지 않는다. 대신 다음 세 수는 face 목록만으로 몇 초 안에 센다: connected component의 수, boundary loop의 수 \(b\), component마다의 \(\chi\). 그러면 <a href="#eq-31-1-3">(31.1.3)</a>에서 \(g = (2 - b - \chi)/2\)가 나온다. 예를 들어 머그컵을 스캔해 얻은 closed component 하나가 \(\chi = -6\)이면 \(g = 4\)이다. 손잡이 하나짜리 컵에 손잡이가 셋 더 붙어 있다는 뜻이고, 잡음이 만든 작은 터널이 그런 손잡이가 될 수 있다. 반대로 \(g\)가 정수가 아니면(곧 \(\chi + b\)가 홀수이면) 그 component는 orientable manifold mesh가 아니라는 신호다. 이 검사는 위치(기하)를 전혀 쓰지 않는다. 연결 정보만으로 정해지는 양이기 때문이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-concentration">
+      <h2>Where Did the Curvature Go?</h2>
+      <p>face 안은 평면이므로 \(K = H = 0\)이다. 그런데 icosphere는 분명히 둥글고, Gauss–Bonnet theorem은 sphere 모양의 surface에서 \(\iint K\,dA = 4\pi\)를 요구한다. curvature가 어디에 있는지 보려면 다면체의 edge를 아주 조금 둥글게 깎아 smooth surface로 만든 뒤, 깎은 반지름을 \(0\)으로 보내 보면 된다.</p>
+
+      <figure class="dg-figure" id="fig-31-1-4">
+        <img src="figures/fig-31-1-4-concentration.svg" alt="두 패널. (a) 가로축 arc length s from the start of the corner(−0.3에서 0.8), 세로축 curvature κ(0에서 35)인 그래프. 세 개의 직사각형 펄스가 s = 0에서 시작한다. 파랑(ρ = 0.3)은 높이 약 3.3, 폭 약 0.47, 초록(ρ = 0.1)은 높이 10, 폭 약 0.16이고 하늘색으로 칠해져 area = π/2라는 주석이 붙어 있다. 주황(ρ = 0.03)은 높이 약 33, 폭 약 0.05로 가늘고 높다. 오른쪽에 κ = 1/ρ on an arc of length πρ/2라고 적혀 있다. (b) edge를 둥글게 깎은 정육면체: 회색 평평한 면(K = H = 0), 열두 edge를 따라 하늘색 cylinder 조각, 여덟 vertex에 주황 구 조각이 있다. 주황 vertex을 가리키는 화살표에 corner: ∬K dA = π/2, 하늘색 edge를 가리키는 화살표에 edge: ∬H dA = −(π/4)ℓ라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 31.1.4.</span>
+        edge를 둥글게 깎은 반지름 \(\rho\)를 \(0\)으로 보내면 curvature가 vertex와 edge에 모인다. <em>무엇을</em>: (a) 정사각형 \([-1, 1]^2\)에서 거리가 \(\rho\)인 점들이 이루는 둥근 정사각형의 테두리 곡선에서, 한 모퉁이 근처의 curvature \(\kappa\)를 arc length \(s\)에 대해 그렸다(\(\rho = 0.3, 0.1, 0.03\)). (b) 정육면체 \([-1, 1]^3\)에서 거리가 \(\rho = 0.25\)인 점들이 이루는 둥근 정육면체. <em>읽는 법</em>: (a)의 가로축은 모퉁이의 원호가 시작하는 곳에서 잰 arc length, 세로축은 \(\kappa\)이고, 색이 \(\rho\)를 구분한다. (b)의 회색은 평면 조각, 하늘색은 edge를 따라 붙은 1/4 cylinder(반지름 \(\rho\)), 주황은 vertex의 1/8 구(반지름 \(\rho\))이다. <em>볼 것</em>: (a)의 펄스는 높이가 \(1/\rho\), 폭이 \(\pi\rho/2\)이므로 \(\rho\)가 작아질수록 가늘고 높아지지만, 넓이(curvature의 적분)는 언제나 \(\pi/2\)이다(초록 영역). (b)에서는 주황 조각만 \(K = 1/\rho^2 \gt 0\)이고 넓이가 \(\pi\rho^2/2\)라서 vertex마다 \(\iint K\,dA = \pi/2\)이다. 하늘색 조각은 \(K = 0\)이지만 바깥쪽 \(\mathbf N\)에 대해 \(H = -1/(2\rho)\)이고 넓이가 \((\pi\rho/2)\ell\)이라서 \(\iint H\,dA = -(\pi/4)\ell\)이다(\(\ell = 2\)는 edge 길이). 두 적분 모두 \(\rho\)에 무관하다. <em>본문과의 연결</em>: \(\rho \to 0\)이면 \(K\)는 vertex에, \(H\)는 edge에 모인다. vertex의 \(\pi/2\)는 정육면체의 angle defect, edge의 \(\pi/2\)는 두 면이 꺾인 각이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-1-4">Figure 31.1.4</a>의 (a)는 곡선에서 일어나는 일이다. 모퉁이의 원호는 반지름이 \(\rho\)라서 curvature가 \(1/\rho\)이고 길이가 \(\pi\rho/2\)이다. \(\rho\)를 줄이면 펄스가 높고 가늘어지지만 그 넓이 \(\int\kappa\,ds = \pi/2\)는 모퉁이에서 접선이 도는 각 그대로다. \(\rho \to 0\)인 극한에서 curvature는 모퉁이 한 점에 몰린 “크기 \(\pi/2\)의 점”이 된다.</p>
+      <p>(b)는 같은 일을 surface에서 본다. 둥근 정육면체는 smooth surface이므로 Tour의 정의가 그대로 적용된다. 평면 조각에서는 \(K = H = 0\)이고, edge의 cylinder 조각에서는 \(K = 0\)이지만 \(H \ne 0\)이며, vertex의 구 조각에서만 \(K \gt 0\)이다. 적분하면</p>
+      <ul>
+        <li>vertex 하나에 \(\iint K\,dA = \pi/2\), 여덟 개를 합하면 \(4\pi = 2\pi\chi\)이다(Gauss–Bonnet).</li>
+        <li>edge 하나에 \(\iint H\,dA = -\tfrac{\pi}{4}\ell = -\tfrac12\theta_e\ell\)이다. 여기서 \(\theta_e = \pi/2\)는 그 edge에서 두 면의 normal이 이루는 각이다.</li>
+      </ul>
+      <p>이고, 넓이는 \(24 + 12\pi\rho + 4\pi\rho^2\)이다. \(\rho\)의 일차항 \(12\pi\rho\)는 edge들에서, 이차항 \(4\pi\rho^2\)은 vertex들에서 온다. \(\rho \to 0\)으로 보내도 적분값은 그대로이므로, 다면체의 Gaussian curvature는 vertex에 놓인 점 질량, mean curvature는 edge를 따라 놓인 선 질량이라고 생각할 수 있다. 정육면체에서 vertex의 질량 \(\pi/2\)는 \(2\pi\)에서 세 면의 각 \(3 \cdot \pi/2\)를 뺀 angle defect(<a href="../00-tour/0-5-intrinsic.html#eq-0-5-4">(0.5.4)</a>)와 같다. 이 관찰을 일반 mesh로 옮겨 vertex마다, edge마다 curvature를 정의하는 것이 다음 절의 일이다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 복원한 mesh가 manifold가 아닌 이유</p>
+        <p>smooth surface의 level set이나 point cloud에서 mesh를 꺼내는 알고리즘은 보통 국소적인 규칙만 쓴다. 그래서 <a href="#i-31-1-3">Definition 31.1.3</a>의 조건이나 orientation, 원래 물체의 genus를 전체적으로 보장하지 않는다. 대표적인 원인은 다음과 같다.</p>
+        <ul>
+          <li><strong>Grid와 sample</strong>: marching cubes <a class="cite" href="../../references.html#Lorensen87">[Lorensen87]</a>는 grid point의 부호만 보고 cube마다 삼각형을 만든다. grid의 바깥 경계에서 surface가 잘리면 boundary가 생기고, 잡음은 작은 component(floater)와 작은 터널(handle)을 만든다. 값이 iso value와 거의 같은 grid point 근처에서는 넓이가 거의 \(0\)인 삼각형이 생긴다. cube 안의 부호 배치가 모호한 경우를 이웃 cube끼리 일관되게 처리하지 않으면 구멍이 난다(<a href="../30-radiance-field-surfaces/30-2-implicit-curvature.html#sec-marching-cubes">Section 30.2</a>, <a href="31-5-fields-to-meshes.html#sec-level-set-mesh">Section 31.5</a>).</li>
+          <li><strong>보지 못한 곳</strong>: TSDF fusion <a class="cite" href="../../references.html#Curless96">[Curless96]</a>은 카메라가 본 depth만 합치므로 관측이 없는 영역에 구멍이 남는다. 2DGS의 공식 코드는 TSDF로 얻은 mesh에서 connected component를 세어 가장 큰 것 50개(기본값)만 남기는 후처리를 따로 둔다 <a class="cite" href="../../references.html#Huang24">[Huang24]</a>.</li>
+          <li><strong>닫혀 있지만 지어낸 곳</strong>: Poisson reconstruction은 indicator function의 level set을 꺼내므로 결과가 watertight하다 <a class="cite" href="../../references.html#Kazhdan06">[Kazhdan06]</a>. 대신 데이터가 없는 곳에도 surface를 만든다. SuGaR의 공식 코드는 Poisson 결과에서 density가 하위 10%인 vertex를 지우고(그 자리에 boundary가 생긴다), decimation 뒤에 중복 vertex·퇴화 삼각형·non-manifold edge를 지우는 정리 단계를 거친다 <a class="cite" href="../../references.html#Guedon24">[Guedon24]</a>.</li>
+          <li><strong>자기교차</strong>: vertex 위치를 gradient로 움직이는 mesh 변형은 삼각형끼리 뚫고 지나가는 것을 막지 않는다. Pixel2Mesh는 Laplacian 항을 빼면 서로 교차하는 기하가 생긴다고 보고한다 <a class="cite" href="../../references.html#Wang18">[Wang18]</a>. 이것은 <a href="#i-31-1-1">Definition 31.1.1</a>의 가정 (2)가 깨진 것이고, face 목록만 보는 manifold 검사로는 찾을 수 없다.</li>
+        </ul>
+        <p>그러므로 복원한 mesh에 이 장의 연산(curvature, cotan Laplacian, parametrization)을 쓰기 전에는 non-manifold edge·vertex, boundary loop, component, \(\chi\)를 먼저 확인하는 것이 안전하다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>manifold와 boundary의 정확한 정의: <a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-3">Definition 11.1.3</a>(topological manifold), 십자 모양이 manifold가 아닌 이유 <a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-11">Non-example 11.1.11</a>(non-manifold edge와 같은 현상), <a href="../11-smooth-manifolds/11-5-manifolds-with-boundary.html#i-11-5-1">Definition 11.5.1</a>과 <a href="../11-smooth-manifolds/11-5-manifolds-with-boundary.html#i-11-5-4">Definition 11.5.4</a>(boundary point).</li>
+        <li>cone의 vertex에는 tangent plane이 없다: <a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-2">Non-example 6.2.2</a>. regular surface: <a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>.</li>
+        <li>orientation: <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-4">Definition 7.5.4</a>, <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-7">Corollary 7.5.7</a>, Möbius strip <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-9">Example 7.5.9</a>와 <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-10">Proposition 7.5.10</a>. manifold의 orientation: <a href="../18-integration-stokes/index.html#toc-18-1">Section 18.1</a>.</li>
+        <li>붙여서 만드는 공간(띠를 꼬아 붙이기, 정사각형으로 torus 만들기): <a href="../03-topology-basics/3-4-quotient-spaces.html#i-3-4-4">Definition 3.4.4</a>, <a href="../03-topology-basics/3-4-quotient-spaces.html#i-3-4-10">Example 3.4.10</a>. homeomorphism: <a href="../03-topology-basics/3-2-continuity-homeomorphism.html#i-3-2-12">Definition 3.2.12</a>.</li>
+        <li>triangulation, \(\chi\)의 불변성, classification theorem: <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>. Gauss–Bonnet theorem: <a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>.</li>
+        <li>이산 미분기하 전반과 mesh 자료구조: <a class="cite" href="../../references.html#Cr">[Cr]</a>, <a class="cite" href="../../references.html#PMP">[PMP]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>triangle mesh는 vertex 위치와 face 목록으로 정해지는 piecewise-linear surface다. face 안에는 tangent plane과 normal \(\mathbf N_f\)가 있고, edge와 vertex에는 일반적으로 없다.</li>
+        <li>모든 edge에 face가 하나나 둘이고 모든 vertex의 link가 cycle 하나나 path 하나이면 manifold mesh이고, 그 surface의 모든 점 근처가 disk나 반쪽 disk다. 세 face가 붙은 edge와 두 fan이 한 점에서 만나는 vertex가 전형적인 non-manifold다.</li>
+        <li>orientation은 공유 edge를 반대 방향으로 지나가도록 face의 순서를 고르는 것이다. Möbius strip mesh는 그럴 수 없다. closed mesh에서는 부호 있는 부피 <a href="#eq-31-1-1">(31.1.1)</a>가 바깥쪽을 정한다.</li>
+        <li>\(\chi = n_0 - n_1 + n_2 = 2 - 2g - b\)이고, closed mesh에서는 \(n_1 = 3(n_0 - \chi)\), \(n_2 = 2(n_0 - \chi)\)이다. 연결 정보만으로 genus와 구멍을 점검할 수 있다.</li>
+        <li>mesh의 Gaussian curvature는 vertex에, mean curvature는 edge에 모여 있다. edge를 반지름 \(\rho\)로 깎은 다면체에서 그 적분은 \(\rho\)에 무관하다.</li>
+      </ul>
+      <p class="next">다음 절에서는 vertex와 edge에 모인 curvature를 수로 만든다. vertex normal을 정하는 여러 방법, angle defect와 정확한 discrete Gauss–Bonnet, dihedral angle로 쓴 mean curvature를 보고, 정의를 고르는 기준을 묻는다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-31-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 31.1.1</span> <span class="level">★</span>
+        연결된 closed orientable mesh의 genus가 3이고 vertex가 1000개다. edge와 face는 몇 개인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-31-1-3">(31.1.3)</a>에서 \(\chi = 2 - 2 \cdot 3 = -4\)이다. <a href="#eq-31-1-2">(31.1.2)</a>에서 \(n_1 = 3(1000 + 4) = 3012\), \(n_2 = 2(1000 + 4) = 2008\)이다. 확인: \(1000 - 3012 + 2008 = -4\)이고 \(3 \cdot 2008 = 2 \cdot 3012\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-31-1-mesh-as-surface.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 31.1.2</span> <span class="level">★</span>
+        정사면체 겉면(삼각형 4개) 두 개를 (a) vertex 하나만 공유하도록, (b) edge 하나를 공유하도록 붙였다. 각각 manifold mesh인가? 아니라면 <a href="#i-31-1-3">Definition 31.1.3</a>의 어느 조건이 깨지는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 모든 edge에는 face가 둘씩 붙어 조건 (1)은 만족한다. 그러나 공유한 vertex의 link는 두 정사면체에서 온 삼각형 두 개(cycle 두 개)라서 조건 (2)가 깨진다. <a href="#fig-31-1-1">Figure 31.1.1</a>(d)와 같은 non-manifold vertex다. (b) 공유한 edge에는 face가 네 개 붙어 조건 (1)이 깨진다. 그 edge의 두 끝 vertex의 link도 cycle 하나가 아니다.</p>
+          <p class="verified">Verification: <code>verify/v-31-1-mesh-as-surface.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 31.1.3</span> <span class="level">★</span>
+        (a) <a href="#i-31-1-2">Example 31.1.2</a>의 42-vertex icosphere에서 face 하나를 지우면 \(\chi\)와 boundary loop의 수는? (b) cylinder의 옆면만 있는 mesh(위아래 뚜껑 없음)의 \(\chi\)는? 두 경우를 <a href="#eq-31-1-3">(31.1.3)</a>과 맞춰 보아라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) vertex와 edge는 그대로이고 face만 하나 줄어 \(42 - 120 + 79 = 1\)이다. 지운 삼각형의 세 edge가 boundary loop 하나를 이루므로 \(b = 1\), \(g = 0\)이고 \(2 - 0 - 1 = 1\)이다(disk와 같은 topology). (b) 둘레를 \(m\)칸, 높이를 \(k\)칸으로 나누고 각 칸을 삼각형 둘로 자르면 \(n_0 = m(k + 1)\), \(n_1 = m(k + 1) + mk + mk\)(가로, 세로, 대각), \(n_2 = 2mk\)이므로 \(\chi = 0\)이다. boundary loop가 위아래 둘이므로 \(2 - 0 - 2 = 0\)과 맞는다.</p>
+          <p class="verified">Verification: <code>verify/v-31-1-mesh-as-surface.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-1-4" data-level="2">
+        <p><span class="thm-head">Exercise 31.1.4</span> <span class="level">★★</span>
+        closed manifold mesh에서 \(\sum_i (6 - d_i) = 6\chi\)임을 보여라. 이로부터 sphere와 같은 topology의 closed mesh에는 valence가 5 이하인 vertex가 반드시 있고, torus mesh는 모든 vertex의 valence가 6일 수 있음을 설명하여라. 모든 삼각형이 정삼각형이면 이 식이 discrete Gauss–Bonnet과 어떻게 같은가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-31-1-2">(31.1.2)</a>에서 \(\sum_i d_i = 6n_0 - 6\chi\)이므로 \(\sum_i (6 - d_i) = 6n_0 - (6n_0 - 6\chi) = 6\chi\)이다. sphere면 우변이 12 \(\gt 0\)이므로 어떤 \(i\)에서 \(6 - d_i \gt 0\), 곧 \(d_i \le 5\)이다. torus면 우변이 0이므로 모든 \(d_i = 6\)이 가능하고, <a href="#fig-31-1-3">Figure 31.1.3</a>(b)의 격자 mesh가 그 예다. 모든 삼각형이 정삼각형이면 vertex \(i\)의 내각 합이 \(d_i \cdot \pi/3\)이므로 angle defect가 \(2\pi - d_i\pi/3 = (6 - d_i)\pi/3\)이다. 위의 식에 \(\pi/3\)을 곱하면 \(\sum_i \delta_i = 2\pi\chi\), 곧 <a href="../00-tour/0-5-intrinsic.html#eq-0-5-4">(0.5.4)</a>가 된다. icosphere의 valence 5인 vertex 12개는 angle defect \(\pi/3\)씩, 합 \(4\pi\)를 나누어 가진다.</p>
+          <p class="verified">Verification: <code>verify/v-31-1-mesh-as-surface.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-1-5" data-level="1">
+        <p><span class="thm-head">Exercise 31.1.5</span> <span class="level">★</span>
+        손잡이가 하나인 머그컵을 TSDF와 marching cubes로 복원했더니 connected component가 3개 나왔다. 가장 큰 component는 boundary가 없고 \(\chi = -6\)이며, 나머지 둘은 각각 \(n_0 - n_1 + n_2 = 2\)인 작은 closed mesh다. 무엇이 잘못되었는지 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>가장 큰 component는 \(g = (2 - 0 - (-6))/2 = 4\)이므로, 컵의 손잡이 하나 말고 손잡이(터널)가 셋 더 있다. 잡음이나 얇은 부분 때문에 생긴 가짜 터널일 가능성이 크다. 나머지 둘은 sphere와 같은 topology의 작은 조각, 곧 물체와 떨어진 floater다. 2DGS의 공식 코드가 큰 component만 남기는 후처리를 하는 것은 floater를 없애기 위해서다. 가짜 터널은 component 수로는 보이지 않고 \(\chi\)로만 드러난다.</p>
+          <p class="verified">Verification: <code>verify/v-31-1-mesh-as-surface.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 31. Meshes: Discrete Differential Geometry</a>
+    <a rel="next" href="31-2-discrete-curvature.html">31.2 Discrete Curvature →</a>
+  </nav>
+</body>
+</html>

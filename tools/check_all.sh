@@ -15,6 +15,9 @@ set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 export PYTHONPATH="$ROOT/tools${PYTHONPATH:+:$PYTHONPATH}"
+# numpy/BLAS 쓰레드 수를 제한한다. 제한하지 않으면 큰 Monte Carlo에서 가끔 segfault(exit 139)가 나고,
+# 이 컴퓨터는 모든 코어를 오래 쓰면 멈춘다(2026-10-08).
+export OMP_NUM_THREADS="${OMP_NUM_THREADS:-4}" OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-4}" MKL_NUM_THREADS="${MKL_NUM_THREADS:-4}"
 
 CHAPTER=""
 if [ "${1:-}" = "--chapter" ]; then

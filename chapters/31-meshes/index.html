@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>31. Meshes: Discrete Differential Geometry — DG Study</title>
   <meta name="dg-id" content="31">
-  <meta name="dg-status" content="planned">
-  <meta name="dg-updated" content="2026-10-07">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-updated" content="2026-10-08">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
@@ -24,7 +24,7 @@
     <section class="questions">
       <h2>Questions</h2>
       <ul>
-        <li>삼각형 mesh는 언제 surface이고, 매끄러운 surface의 curvature·Laplacian·Gauss–Bonnet은 mesh 위에서 어떻게 다시 정의되는가? 정의가 여러 가지라면 무엇을 기준으로 고르는가?</li>
+        <li>삼각형 mesh는 언제 surface이고, smooth surface의 curvature·Laplacian·Gauss–Bonnet은 mesh 위에서 어떻게 다시 정의되는가? 정의가 여러 가지라면 무엇을 기준으로 고르는가?</li>
         <li>mesh 복원과 처리에서 쓰는 loss와 알고리즘(Laplacian smoothing, normal consistency, Poisson reconstruction, heat method, UV parametrization)은 기하적으로 무엇을 하는가?</li>
       </ul>
     </section>
@@ -32,7 +32,8 @@
     <section class="inherits">
       <h2>Builds on</h2>
       <ul>
-        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>(parametrization, first fundamental form, UV unwrapping), <a href="../00-tour/0-4-curvature.html">Section 0.4</a>(curvature, cotangent formula, angle defect), <a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>(Gauss–Bonnet, heat method), <a href="../00-tour/0-7-forms.html">Section 0.7</a>(DEC, Hodge decomposition), <a href="../29-gaussian-splatting/index.html">Chapter 29</a>(Gaussian), <a href="../30-radiance-field-surfaces/index.html">Chapter 30</a>(implicit surface, SDF).</li>
+        <li><a href="../00-tour/0-3-surfaces.html">Section 0.3</a>(parametrization, first fundamental form, UV unwrapping), <a href="../00-tour/0-4-curvature.html">Section 0.4</a>(curvature, cotangent formula, angle defect), <a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>(Theorema Egregium, Gauss–Bonnet, heat method), <a href="../00-tour/0-7-forms.html">Section 0.7</a>(DEC, Hodge decomposition), <a href="../00-tour/0-8-riemannian.html">Section 0.8</a>(Laplace–Beltrami operator).</li>
+        <li><a href="../29-gaussian-splatting/index.html">Chapter 29</a>(Gaussian의 affine 변환 <a href="../29-gaussian-splatting/29-1-gaussian-metric.html#i-29-1-3">Proposition 29.1.3</a>, spherical harmonics <a href="../29-gaussian-splatting/29-6-spherical-harmonics.html">Section 29.6</a>), <a href="../30-radiance-field-surfaces/index.html">Chapter 30</a>(TSDF <a href="../30-radiance-field-surfaces/30-1-implicit-surfaces-eikonal.html#sec-tsdf">Section 30.1</a>, marching cubes <a href="../30-radiance-field-surfaces/30-2-implicit-curvature.html#sec-marching-cubes">Section 30.2</a>, SuGaR와 Poisson reconstruction <a href="../30-radiance-field-surfaces/30-3-surfels-2dgs.html#sec-sugar">Section 30.3</a>).</li>
         <li>3D vision 쪽(mesh 복원, differentiable rendering, 3DGS 파이프라인)은 안다고 가정한다. 엄밀한 증명이 필요하면 각 절의 Go deeper를 따라 깊은 장으로 간다.</li>
       </ul>
     </section>
@@ -40,35 +41,36 @@
     <h2>Sections</h2>
     <ol class="toc">
       <li id="toc-31-1" data-file="31-1-mesh-as-surface.html">
-        <span class="toc-title">31.1 What Makes a Mesh a Surface</span> <span class="status planned">Planned</span>
+        <a class="toc-title" href="31-1-mesh-as-surface.html">31.1 What Makes a Mesh a Surface</a> <span class="status reviewed">Reviewed</span>
         <p class="toc-note">Topics: piecewise-linear surface로서의 mesh, manifold 조건(edge당 face 두 개 이하, vertex 주변이 disk), orientation의 일관성, boundary와 watertight, Euler characteristic \(n_0 - n_1 + n_2 = 2 - 2g - b\), curvature가 edge와 vertex에 집중된다는 관점, 복원 mesh가 non-manifold·구멍·자기교차를 갖는 이유</p>
       </li>
       <li id="toc-31-2" data-file="31-2-discrete-curvature.html">
-        <span class="toc-title">31.2 Discrete Curvature</span> <span class="status planned">Planned</span>
+        <a class="toc-title" href="31-2-discrete-curvature.html">31.2 Discrete Curvature</a> <span class="status reviewed">Reviewed</span>
         <p class="toc-note">Topics: vertex normal의 여러 정의(면적·각도 가중치), angle defect와 정확한 discrete Gauss–Bonnet, dihedral angle과 mean curvature, 정의를 고르는 기준(무엇을 보존하는가), 불규칙한 mesh에서의 수렴 문제</p>
       </li>
       <li id="toc-31-3" data-file="31-3-cotangent-laplacian.html">
-        <span class="toc-title">31.3 The Cotangent Laplacian</span> <span class="status planned">Planned</span>
+        <a class="toc-title" href="31-3-cotangent-laplacian.html">31.3 The Cotangent Laplacian</a> <span class="status reviewed">Reviewed</span>
         <p class="toc-note">Topics: piecewise-linear 함수의 Dirichlet energy에서 cotangent 가중치 유도, \(\Delta x = 2H\mathbf N\)의 이산판, symmetric·positive semidefinite·kernel·non-Delaunay의 음수 가중치, uniform과 cotangent Laplacian의 차이, mesh 복원 loss(Laplacian smoothing, normal consistency, edge length)의 해석</p>
       </li>
       <li id="toc-31-4" data-file="31-4-spectral-geometry.html">
-        <span class="toc-title">31.4 Spectral Geometry on Meshes</span> <span class="status planned">Planned</span>
+        <a class="toc-title" href="31-4-spectral-geometry.html">31.4 Spectral Geometry on Meshes</a> <span class="status reviewed">Reviewed</span>
         <p class="toc-note">Topics: Laplacian eigenfunction = surface 위의 Fourier basis(manifold harmonics), sphere에서는 spherical harmonics(Section 29.6), heat kernel과 heat method, heat kernel signature, functional map</p>
       </li>
       <li id="toc-31-5" data-file="31-5-fields-to-meshes.html">
-        <span class="toc-title">31.5 From Fields to Meshes and Back</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: marching cubes(SDF·TSDF·density), Poisson reconstruction(normal field의 divergence와 Poisson equation), 3DGS·2DGS에서 TSDF fusion으로 mesh 얻기, mesh face에 Gaussian 붙이기(barycentric 좌표, face의 tangent frame), differentiable mesh rendering</p>
+        <a class="toc-title" href="31-5-fields-to-meshes.html">31.5 From Fields to Meshes and Back</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: level-set mesh가 보장하는 것(manifold, orientation, 닫힘)과 보장하지 않는 것(grid보다 가는 구조, sliver, 점마다의 curvature), TSDF truncation과 얇은 벽, Poisson reconstruction = gradient의 최소제곱(\(-Lu = G^{\mathsf T}AV\)), mesh face에 Gaussian 묶기(affine과 similarity), differentiable mesh rendering에서 silhouette gradient(coverage의 미분)</p>
       </li>
       <li id="toc-31-6" data-file="31-6-parametrization-texture.html">
-        <span class="toc-title">31.6 Parametrization and Texture Mapping</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: UV map의 왜곡을 first fundamental form으로 재기, conformal(LSCM)과 equal-area, Tutte embedding, seam과 cut, 복원한 mesh의 texture atlas</p>
+        <a class="toc-title" href="31-6-parametrization-texture.html">31.6 Parametrization and Texture Mapping</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: UV map의 왜곡을 triangle마다 Jacobian의 singular value로 재기, LSCM과 conformal energy \(E_C = E_D - A\), angle defect와 Gauss–Bonnet으로 본 “잘라야 펼 수 있다”, Tutte embedding과 뒤집힌 triangle(cotan, LSCM의 반례), chart·seam·texture atlas의 trade-off</p>
       </li>
     </ol>
 
     <section class="handoff">
       <h2>Leads to</h2>
       <ul>
-        <li>Part IV의 마지막 장이다. 매끄러운 이론은 깊은 장(<a href="../06-regular-surfaces/index.html">Chapter 6</a>–<a href="../10-gauss-bonnet/index.html">Chapter 10</a>, <a href="../17-differential-forms/index.html">Chapter 17</a>–<a href="../19-de-rham/index.html">Chapter 19</a>, <a href="../21-riemannian-metrics/index.html">Chapter 21</a>)에서 엄밀하게 다룬다.</li>
+        <li>Part IV의 마지막 장이다. 이 장에서 이산판으로 다룬 개념의 smooth한 이론은 깊은 장에서 엄밀하게 다룬다. regular surface와 level set: <a href="../06-regular-surfaces/index.html">Chapter 6</a>, <a href="../14-submanifolds/index.html">Chapter 14</a>. first fundamental form, isometry, conformal map: <a href="../07-first-fundamental-form/index.html">Chapter 7</a>. curvature: <a href="../08-gauss-map/index.html">Chapter 8</a>, <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>. Gauss–Bonnet과 Euler characteristic: <a href="../10-gauss-bonnet/index.html">Chapter 10</a>.</li>
+        <li>discrete exterior calculus, divergence theorem, Hodge decomposition의 배경: <a href="../17-differential-forms/index.html">Chapter 17</a>–<a href="../19-de-rham/index.html">Chapter 19</a>. Laplace–Beltrami operator와 heat kernel: <a href="../21-riemannian-metrics/index.html">Chapter 21</a>, geodesic distance: <a href="../23-geodesics/index.html">Chapter 23</a>.</li>
       </ul>
     </section>
   </main>

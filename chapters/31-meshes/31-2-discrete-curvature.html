@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>31.2 Discrete Curvature — DG Study</title>
+  <meta name="dg-id" content="31.2">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="31.1, 0.4, 0.5">
+  <meta name="dg-refs" content="Meyer03; Hildebrandt06; Cr; Ravi20">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">31. Meshes: Discrete Differential Geometry</a> ›
+    <span>31.2 Discrete Curvature</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>31.2 Discrete Curvature</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>,
+        <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr]</a>,
+        <a class="cite" href="../../references.html#Ravi20">[Ravi20]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>vertex normal을 정의하는 세 방법(uniform, area-weighted, angle-weighted)을 계산하고, 같은 mesh에서 서로 다른 값을 주는 이유와 각각이 무엇에 무관한지 말할 수 있다.</li>
+        <li>angle defect의 합이 정확히 \(2\pi\chi\)라는 discrete Gauss–Bonnet theorem을 개수 세기로 유도하고, angle defect의 부호를 펼친 그림으로 읽을 수 있다.</li>
+        <li>edge의 bending angle \(\theta_e\)와 길이 \(\ell_e\)로 mean curvature를 쓰고, surface를 바깥으로 밀어낼 때 넓이가 늘어나는 비율(Steiner formula)로 그 상수와 부호를 확인할 수 있다.</li>
+        <li>불규칙한 mesh에서 점마다의 curvature는 수렴하지 않아도 적분한 curvature는 수렴한다는 것을 수치로 보이고, 정의를 고르는 기준을 말할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="31-1-mesh-as-surface.html">Section 31.1</a>: triangle mesh(<a href="31-1-mesh-as-surface.html#i-31-1-1">Definition 31.1.1</a>), orientation과 face normal \(\mathbf N_f\), curvature가 vertex와 edge에 모인다는 관찰(<a href="31-1-mesh-as-surface.html#fig-31-1-4">Figure 31.1.4</a>)</li>
+        <li><a href="../00-tour/0-4-curvature.html#sec-k-h">Section 0.4</a>: shape operator \(W_p = -d\mathbf N_p\), Gaussian curvature \(K\)와 mean curvature \(H\)(<a href="../00-tour/0-4-curvature.html#i-0-4-5">Definition 0.4.5</a>), running example의 값(<a href="../00-tour/0-4-curvature.html#i-0-4-6">Example 0.4.6</a>)</li>
+        <li><a href="../00-tour/0-5-intrinsic.html#sec-gauss-bonnet">Section 0.5</a>: Gauss–Bonnet theorem(<a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>)과 angle defect <a href="../00-tour/0-5-intrinsic.html#eq-0-5-4">(0.5.4)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="31-1-mesh-as-surface.html#sec-concentration">Section 31.1</a>의 끝에서, 모서리를 둥글게 깎은 정육면체의 Gaussian curvature는 vertex마다 \(\pi/2\)씩, mean curvature는 edge를 따라 \(-\tfrac12\theta_e\ell_e\)씩 모여 있었다. 일반 mesh에서도 curvature는 face 안이 아니라 vertex와 edge에 있다. 이 절은 그것을 vertex마다의 수로 만든다.</p>
+      <p>3D vision에서 이 수들은 곳곳에 쓰인다. vertex normal은 shading과 normal consistency loss, Poisson reconstruction의 입력이다. curvature는 feature line 검출, curvature 기반 regularization, 복원 품질의 평가에 쓰인다. 그런데 mesh에는 이계도함수가 없으므로 “vertex \(i\)의 normal”이나 “vertex \(i\)의 \(H\)”는 정의해야 하는 양이고, 그럴듯한 정의가 여럿이다. 이 절의 질문은 둘이다. 같은 양의 여러 정의는 무엇이 다른가? 그 가운데 무엇을 골라야 하는가?</p>
+    </section>
+
+    <section id="sec-normals">
+      <h2>Face Normals and Vertex Normals</h2>
+      <p>face의 normal은 분명하다. orientation이 정해진 face \(f = ijk\)의 \(\mathbf N_f\)는 그 평면의 unit normal이다(<a href="31-1-mesh-as-surface.html#sec-orientation">Section 31.1</a>). vertex에서는 여러 face가 꺾여 만나므로 하나의 평면이 없다. 자연스러운 방법은 \(i\)에 모인 face normal들의 가중 평균이다.</p>
+      <div class="thm definition" id="i-31-2-1">
+        <p><span class="thm-head">Definition 31.2.1</span> <span class="thm-name">(vertex normals)</span>.
+        vertex \(i\)를 포함하는 face \(f\)마다 가중치 \(w_f \gt 0\)을 주고</p>
+        <div class="equation" id="eq-31-2-1">
+        \[ \mathbf N_i = \frac{\sum_{f \ni i} w_f\,\mathbf N_f}{\abs{\sum_{f \ni i} w_f\,\mathbf N_f}} \tag{31.2.1} \]
+        </div>
+        <p>로 정하고, 이것을 vertex \(i\)의 <strong>vertex normal</strong>이라 한다. 흔히 쓰는 가중치는 셋이다. \(w_f = 1\)(uniform), \(w_f = \operatorname{Area}(f)\)(area-weighted), \(w_f = \theta_i^f\)(angle-weighted, \(f\)에서 \(i\)의 내각).</p>
+      </div>
+      <p>area-weighted는 계산이 가장 싸다. \(\operatorname{Area}(f)\,\mathbf N_f = \tfrac12 (x_j - x_i) \times (x_k - x_i)\)이므로 cross product를 정규화하지 않고 더하기만 하면 된다. PyTorch3D의 <code>Meshes</code>가 vertex normal을 이렇게 계산한다 <a class="cite" href="../../references.html#Ravi20">[Ravi20]</a>.</p>
+
+      <figure class="dg-figure" id="fig-31-2-1">
+        <img src="figures/fig-31-2-1-vertex-normals.svg" alt="두 패널. (a) 위에서 내려다본 vertex 하나와 그 둘레의 회색 삼각형 일곱 개. 오른쪽 위에는 좁은 삼각형 세 개, 왼쪽과 아래에는 큰 삼각형 네 개가 있다. 가운데 검은 점 옆에 exact normal (0, 0, 1)이라고 적혀 있고, 거기서 세 화살표가 나간다. 파란 화살표(uniform)는 아주 짧고, 초록 화살표(area-weighted)는 가장 길게 왼쪽 아래로, 주황 화살표(angle-weighted)는 그 중간 길이로 왼쪽으로 향한다. 아래 범례에 uniform 1.2°, area-weighted 6.5°, angle-weighted 4.2°라고 적혀 있다. (b) log-log 그래프. 가로축 mean edge length h(0.05에서 0.5), 세로축 mean normal error (degrees)(0.2에서 5). 세 직선이 모두 오른쪽 위로 올라간다. 초록(area-weighted)이 가장 위, 파랑(uniform)이 중간, 주황(angle-weighted)이 가장 아래에 있고, 회색 점선 slope 1과 나란하다.">
+        <figcaption><span class="fig-head">Figure 31.2.1.</span>
+        같은 mesh, 세 가지 vertex normal. <em>무엇을</em>: (a) unit sphere의 북극에 있는 vertex와 그 이웃 일곱 개(모두 sphere 위, 경도 \(0^\circ, 25^\circ, 50^\circ, 75^\circ, 160^\circ, 235^\circ, 300^\circ\), colatitude 0.30–0.62)를 위에서 본 그림. 정확한 normal은 \((0, 0, 1)\)이다. (b) icosphere(level 1–5)의 vertex를 평균 edge 길이 \(h\)의 10%만큼 무작위로 옮긴 뒤 sphere로 되돌린 mesh(접힌 삼각형 없음)에서 세 normal의 평균 각 오차. <em>읽는 법</em>: (a)의 화살표는 각 vertex normal이 \((0, 0, 1)\)에서 기운 방향(수평 성분)이고 길이는 기운 각에 비례하게 키웠다(\(1^\circ\) = 0.065). 파랑은 uniform, 초록은 area-weighted, 주황은 angle-weighted다. (b)는 log-log 눈금이고, 회색 점선이 기울기 1이다. <em>볼 것</em>: (a)의 한 vertex에서 세 normal은 \(1.2^\circ\), \(6.5^\circ\), \(4.2^\circ\) 기울어 서로 다르다. 큰 삼각형이 몰린 쪽으로 area-weighted가 가장 많이 끌려간다. (b)에서는 세 오차가 모두 \(h\)에 비례해 줄어 극한은 같지만, 한 mesh에서는 셋이 다르다(level 4에서 \(0.26^\circ\), \(0.41^\circ\), \(0.64^\circ\)). <em>본문과의 연결</em>: <a href="#i-31-2-1">Definition 31.2.1</a>과 <a href="#i-31-2-2">Example 31.2.2</a>.</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-31-2-2">
+        <p><span class="thm-head">Example 31.2.2</span> <span class="thm-name">(one vertex, three normals)</span>.
+        <a href="#fig-31-2-1">Figure 31.2.1</a>(a)의 vertex를 보자. 오른쪽 위의 세 삼각형은 좁아서 넓이가 0.024–0.025이고 북극에서의 내각이 약 \(25^\circ\)이다. 나머지 네 삼각형은 넓이가 0.09–0.14이고 내각이 \(58^\circ\)–\(83^\circ\)이다. uniform은 face마다 같은 표를 주어 좁은 삼각형 셋이 큰 삼각형 넷과 거의 맞서므로 \(1.2^\circ\)만 기운다. area-weighted는 큰 삼각형 쪽으로 \(6.5^\circ\), angle-weighted는 \(4.2^\circ\) 기운다. 셋 다 “그럴듯한” 평균이지만 같은 vertex에서 \(5^\circ\) 이상 다르다. 이 vertex의 angle defect는 \(10.6^\circ\)로, 이 정도로 휜 곳에서는 normal의 정의가 차이를 만든다.</p>
+        <p>이제 같은 surface를 다르게 삼각형으로 나누어 보자. 이웃 face 하나를 북극에서 맞은편 edge의 중점으로 잘라 둘로 나누면, 같은 평면 조각이 face 두 개가 되므로 uniform normal이 \(2.61^\circ\) 움직인다. area-weighted와 angle-weighted는 변하지 않는다. 대신 북극에 붙은 두 edge의 중점을 잇는 선으로 모퉁이를 잘라 내면(이웃 face도 함께 잘라 mesh를 유지한다), 북극에 붙은 조각의 넓이가 줄어 area-weighted normal이 \(5.91^\circ\) 움직이고, uniform과 angle-weighted는 그대로다.</p>
+        <p class="verified">Verification: <code>verify/v-31-2-discrete-curvature.py</code></p>
+      </div>
+      <div class="thm proposition" id="i-31-2-3">
+        <p><span class="thm-head">Proposition 31.2.3</span> <span class="thm-name">(angle weights see only the surface)</span>.
+        같은 piecewise-linear surface를 다르게 삼각형으로 나누어도 vertex \(i\)가 vertex로 남는 한, angle-weighted normal \(\mathbf N_i\)는 변하지 않는다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(i\) 근처의 surface는 평면 조각 몇 개로 이루어진 뿔이다. 삼각형 분할을 바꾸면 한 평면 조각이 \(i\)에서 여러 삼각형으로 나뉠 수 있지만, 그 삼각형들의 normal은 모두 그 평면의 normal이고 \(i\)에서의 내각을 더하면 그 평면 조각이 \(i\)에서 차지하는 각이 된다. 따라서 \(\sum_f \theta_i^f\mathbf N_f\)는 “평면 조각마다 (그 조각의 normal) × (그 조각이 \(i\)에서 차지하는 각)”의 합으로, 분할에 무관하다. uniform은 조각이 몇 개로 나뉘었는지에, area-weighted는 조각이 어떻게 잘렸는지에 의존한다.</p>
+      </div>
+      <p><a href="#fig-31-2-1">Figure 31.2.1</a>(b)로 넘어가자. 세 선은 기울기 1인 점선과 나란하다. vertex가 sphere 위에 있고 삼각형이 고르게 작아지면 세 normal의 오차는 모두 \(h\)에 비례해 \(0\)으로 간다. smooth surface에서의 극한은 셋 다 \(\mathbf N\)이다. 그러나 주어진 한 mesh에서는 세 값이 다르고, 어느 것이 더 정확한지는 mesh에 달려 있다. 이 실험에서는 angle-weighted가 가장 작았다.</p>
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 어떤 vertex normal을 쓸 것인가</p>
+        <ul>
+          <li><strong>분할에 무관해야 하면 angle-weighted.</strong> 같은 평면을 몇 조각으로 나누었는지, 어떤 모양으로 잘랐는지에 영향을 받지 않는 것은 angle-weighted뿐이다(<a href="#i-31-2-3">Proposition 31.2.3</a>). remeshing 전후로 shading이 바뀌지 않기를 원하면 이것이 맞다.</li>
+          <li><strong>접힌 삼각형이 있으면 area-weighted.</strong> 같은 실험에서 vertex를 \(0.2h\)만큼 흔들면 level 4 mesh에서 삼각형 10개가 뒤집힌다(normal이 안쪽을 향한다). 이때 최대 오차는 area-weighted \(4.2^\circ\), uniform \(8.1^\circ\), angle-weighted \(92.9^\circ\)이다. 뒤집힌 가는 삼각형은 넓이는 거의 \(0\)이지만 내각은 클 수 있어서, angle weight가 잘못된 normal에 큰 표를 준다. 잡음이 많은 복원 mesh에서는 area weighting이 더 안전할 수 있다.</li>
+          <li><strong>vertex normal은 법선의 “측정값”이 아니라 “정의”다.</strong> mesh에서 normal consistency나 normal 기반 loss를 쓸 때, 어떤 가중치로 normal을 만들었는지가 loss의 값과 gradient를 바꾼다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-gauss-bonnet">
+      <h2>Angle Defect and the Discrete Gauss–Bonnet Theorem</h2>
+      <p>Gaussian curvature는 vertex에 있다. <a href="../00-tour/0-5-intrinsic.html#i-0-5-9">Example 0.5.9</a>의 angle defect를 상기하자. vertex \(i\)에 모인 내각의 합을 \(2\pi\)에서 뺀 것</p>
+      <div class="equation" id="eq-31-2-2">
+      \[ \delta_i = 2\pi - \sum_{f \ni i} \theta_i^f \tag{31.2.2} \]
+      </div>
+      <p>이다. boundary vertex에서는 \(2\pi\) 대신 \(\pi\)를 쓴다. 평평한 곳에서는 내각이 한 바퀴 \(2\pi\)를 채우므로 \(\delta_i = 0\)이다.</p>
+
+      <figure class="dg-figure" id="fig-31-2-2">
+        <img src="figures/fig-31-2-2-defect-unfold.svg" alt="3열 2행의 그림. 윗줄은 옆에서 본 vertex 하나와 삼각형 여섯 개로, (a) cone은 vertex가 솟은 낮은 뿔, (b) flat은 평평한 육각형, (c) saddle은 가장자리가 위아래로 번갈아 접힌 주름 모양이다. 아랫줄은 같은 여섯 삼각형을 평면에 차례로 펼친 그림이다. (a)는 오른쪽 아래에 주황 부채꼴 틈이 남고 아래에 gap: δ = +0.84라고 적혀 있다. (b)는 육각형이 정확히 닫히고 closes: δ = 0. (c)는 마지막 삼각형이 첫 삼각형 위로 겹쳐 파란 부채꼴이 생기고 overlap: δ = −0.93이라고 적혀 있다. 각 그림에서 첫째 삼각형과 마지막 삼각형의 바깥 edge가 검은 굵은 선이다.">
+        <figcaption><span class="fig-head">Figure 31.2.2.</span>
+        angle defect의 부호를 펼쳐서 보기. <em>무엇을</em>: 연결(vertex 하나와 이웃 여섯)은 같고 기하만 다른 세 star. 이웃은 \(p_k = (\cos t_k, \sin t_k, z_k)\), \(t_k = 2\pi k/6\)이고, (a) \(z_k = -0.55\)(cone), (b) \(z_k = 0\)(flat), (c) \(z_k = 0.32\,(-1)^k\)(saddle, 셋은 올라가고 셋은 내려간다). <em>읽는 법</em>: 윗줄은 옆에서 본 3D star, 아랫줄은 그 여섯 삼각형을 각과 edge 길이를 보존한 채 평면에 차례로 펼친 것이다. 검은 굵은 선 두 개는 처음 자른 edge의 두 상(첫 삼각형의 시작 변과 마지막 삼각형의 끝 변)이다. 주황 부채꼴은 내각의 합이 \(2\pi\)에 못 미쳐 남은 틈, 파란 부채꼴은 \(2\pi\)를 넘어서 겹친 부분이다. <em>볼 것</em>: cone은 \(\delta = +0.84\)(약 \(48^\circ\))만큼 틈이 남고, flat은 정확히 닫히며, saddle은 \(\delta = -0.93\)(약 \(-53^\circ\))만큼 겹친다. 부채꼴의 각이 곧 \(\delta\)다. <em>본문과의 연결</em>: <a href="#eq-31-2-2">(31.2.2)</a>의 부호는 \(K\)의 부호와 같다. Tour의 <a href="../00-tour/0-5-intrinsic.html#fig-0-5-3">Figure 0.5.3</a>(b)는 양수인 경우만 보였다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-2-2">Figure 31.2.2</a>의 아랫줄을 왼쪽부터 보자. 종이로 만든 cone을 한 edge에서 잘라 펴면 부채꼴 틈이 남는다(a). 틈의 각이 \(\delta\)이고 양수다. 평평한 star는 남는 것도 겹치는 것도 없다(b). 주름진 saddle을 펴면 삼각형이 한 바퀴보다 더 돌아 겹친다(c). 이때 \(\delta \lt 0\)이다. smooth surface에서 elliptic point(\(K \gt 0\))와 hyperbolic point(\(K \lt 0\))의 구분이 그대로 보인다. 세 star의 연결이 같다는 점이 중요하다. angle defect는 연결이 아니라 기하(각)에서 나온다.</p>
+
+      <div class="thm theorem" id="i-31-2-4">
+        <p><span class="thm-head">Theorem 31.2.4</span> <span class="thm-name">(discrete Gauss–Bonnet theorem)</span>.
+        closed manifold mesh에서</p>
+        <div class="equation" id="eq-31-2-3">
+        \[ \sum_i \delta_i = 2\pi\chi \tag{31.2.3} \]
+        </div>
+        <p>이다. boundary가 있으면 boundary vertex의 항을 \(\pi - \sum_f \theta_i^f\)(boundary 다각형이 그 vertex에서 꺾이는 각)로 바꾸어 같은 식이 성립한다. vertex의 위치를 어떻게 움직여도(삼각형이 퇴화하지 않는 한) 좌변은 변하지 않는다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> closed mesh에서 모든 내각을 vertex별로 모으든 face별로 모으든 합은 같다. face별로 모으면 삼각형마다 \(\pi\)이므로 전체 합은 \(\pi n_2\)다. 따라서</p>
+        <p>\[ \sum_i \delta_i = 2\pi n_0 - \pi n_2. \]</p>
+        <p><a href="31-1-mesh-as-surface.html#i-31-1-7">Proposition 31.1.7</a>의 \(3n_2 = 2n_1\)에서 \(\pi n_2 = 2\pi n_1 - 2\pi n_2\)이므로 \(\sum_i\delta_i = 2\pi n_0 - 2\pi n_1 + 2\pi n_2 = 2\pi\chi\)이다. boundary가 있으면 boundary edge가 face 하나에만 속하므로 \(3n_2 = 2n_1 - n_1^{\partial}\)(\(n_1^\partial\)는 boundary edge의 수)이고, boundary 다각형에서는 vertex 수와 edge 수가 같다. 이것을 써서 같은 계산을 하면 boundary vertex의 기준이 \(\pi\)로 바뀐다(<a href="#ex-31-2-4">Exercise 31.2.4</a>).</p>
+      </div>
+      <p>이것은 근사가 아니라 정확한 항등식이다. 증명에 쓴 것은 “삼각형의 내각의 합은 \(\pi\)”와 개수 세기뿐이다. smooth surface의 Gauss–Bonnet theorem(<a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>)은 \(K\)를 적분해야 하지만, mesh에서는 curvature가 처음부터 vertex의 점 질량 \(\delta_i\)로 주어져 있어서 적분이 합이 된다. smooth surface에서 \(\delta_i\)는 vertex \(i\)가 맡은 작은 영역 위의 \(\iint K\,dA\)에 해당한다. 그래서 점마다의 Gaussian curvature는 \(\delta_i\)를 그 영역의 넓이 \(A_i\)로 나누어 추정한다. \(A_i\)로는 둘레 삼각형 넓이의 \(1/3\)씩을 모은 barycentric area나, Meyer 등의 mixed Voronoi area를 쓴다 <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>.</p>
+
+      <figure class="dg-figure" id="fig-31-2-3">
+        <img src="figures/fig-31-2-3-torus-defect.svg" alt="두 패널. (a) 위에서 비스듬히 본 torus mesh. 바깥쪽 둘레가 빨강, 안쪽 구멍 둘레가 파랑, 위와 아래의 경계 부분이 흰색이다. 아래에 파랑(−0.02)에서 빨강(0.02)까지의 가로 색 막대와 angle defect δ_i; Σδ_i = −4×10^−13이라는 글자가 있다. (b) 가로축 u(0에서 2π, u = 0 outside), 세로축 Gaussian curvature(−1에서 0.75)인 그래프. 검은 곡선 exact K(u)가 u = 0에서 약 0.45, u = π에서 약 −1.04인 골짜기 모양이고, 그 위에 파란 빈 원(12 × 24)과 주황 점(24 × 48)이 곡선을 따라 놓여 있다.">
+        <figcaption><span class="fig-head">Figure 31.2.3.</span>
+        torus의 angle defect와 discrete Gauss–Bonnet. <em>무엇을</em>: running example torus of revolution \(T_{R,r}\) (\(R = 2\), \(r = 0.8\))의 \((u, v)\) 격자 mesh. (a)는 \(24 \times 48\) 격자에서 face를 세 vertex의 \(\delta_i\) 평균으로 칠했다. (b)는 \(K_i = \delta_i/A_i\)(\(A_i\)는 barycentric area)를 \(u\)에 대해 그리고, 정확한 \(K(u) = \cos u/\big(r(R + r\cos u)\big)\)와 비교했다. <em>읽는 법</em>: (a)의 색은 빨강이 \(\delta_i \gt 0\), 파랑이 \(\delta_i \lt 0\), 흰색이 \(0\)이다. (b)의 가로축 \(u\)는 관을 도는 각이고 \(u = 0\)이 바깥쪽 적도, \(u = \pi\)가 안쪽 적도다. 같은 \(u\)의 vertex는 값이 모두 같아 한 점씩만 그렸다. 빈 원은 \(12 \times 24\), 점은 \(24 \times 48\) 격자다. <em>볼 것</em>: 바깥쪽은 \(\delta_i \gt 0\), 안쪽은 \(\delta_i \lt 0\)이고, 1152개를 모두 더하면 \(-4 \times 10^{-13}\), 곧 반올림 오차 안에서 \(0 = 2\pi\chi\)이다. (b)의 점들은 곡선 위에 있고, 최대 오차는 0.029(\(12 \times 24\))에서 0.0078(\(24 \times 48\))로 약 1/4이 된다. <em>본문과의 연결</em>: <a href="#i-31-2-4">Theorem 31.2.4</a>와 \(K_i = \delta_i/A_i\). 점마다 값을 볼 수 있는 <a href="figures/fig-31-2-3-torus-defect-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-2-3">Figure 31.2.3</a>의 (a)에서 빨간 바깥쪽과 파란 안쪽이 정확히 상쇄된다. 이 상쇄는 격자의 해상도나 vertex 위치와 무관하다. vertex를 아무렇게나 움직여도 합은 \(0\)으로 남는다. (b)에서는 정해진 격자에서 \(K_i\)가 smooth surface의 \(K(u)\)를 잘 따라간다. 이 mesh는 아주 규칙적이다. 규칙이 깨지면 무슨 일이 생기는지는 이 절의 마지막에서 본다.</p>
+    </section>
+
+    <section id="sec-mean-curvature">
+      <h2>Mean Curvature Lives on Edges</h2>
+      <p>Gaussian curvature가 vertex에 있었다면 mean curvature는 edge에 있다. 그 크기를 재는 양은 edge에서 두 face가 꺾인 각이다.</p>
+      <div class="thm definition" id="i-31-2-5">
+        <p><span class="thm-head">Definition 31.2.5</span> <span class="thm-name">(bending angle)</span>.
+        consistently oriented mesh에서 interior edge \(e\)를 공유하는 두 face \(f, g\)의 unit normal이 이루는 각을 <strong>bending angle</strong> \(\theta_e \in (-\pi, \pi)\)라 한다. 부호는 surface가 normal의 반대쪽으로 꺾이면(바깥쪽 normal을 고른 convex polyhedron의 모든 edge처럼) 양수, normal 쪽으로 꺾이면 음수로 정한다. edge \(e\)의 길이를 \(\ell_e\)라 쓴다.</p>
+      </div>
+      <p>두 face 사이의 안쪽 각을 <strong>dihedral angle</strong>(이면각)이라 하면 \(\theta_e = \pi - (\text{dihedral angle})\)이다. 평평하면 \(\theta_e = 0\)이다. \(\mathbf N\)을 뒤집으면 \(\theta_e\)의 부호가 바뀐다. \(H\)의 부호가 \(\mathbf N\)에 따라 바뀌는 것과 같다(<a href="../00-tour/0-4-curvature.html#i-0-4-5">Definition 0.4.5</a> 뒤의 설명).</p>
+      <p>상수와 부호를 정하는 가장 깔끔한 방법은 surface를 바깥쪽으로 \(\varepsilon\)만큼 밀어내 보는 것이다.</p>
+      <div class="thm proposition" id="i-31-2-6">
+        <p><span class="thm-head">Proposition 31.2.6</span> <span class="thm-name">(Steiner formula)</span>.
+        (a) unit normal \(\mathbf N\)이 정해진 compact smooth surface \(S\)를 \(x \mapsto x + \varepsilon\mathbf N(x)\)로 밀어낸 surface의 넓이는, \(\varepsilon\)이 작을 때</p>
+        <div class="equation" id="eq-31-2-4">
+        \[ A(\varepsilon) = A - 2\varepsilon \iint_S H\,dA + \varepsilon^2 \iint_S K\,dA \tag{31.2.4} \]
+        </div>
+        <p>이다. (b) 바깥쪽 normal을 고른 convex polyhedron \(P\)에서 거리가 \(\varepsilon\)인 점들의 surface(<a href="31-1-mesh-as-surface.html#fig-31-1-4">Figure 31.1.4</a>(b)처럼 모서리가 둥근 \(P\))의 넓이는 모든 \(\varepsilon \gt 0\)에서 정확히</p>
+        <div class="equation" id="eq-31-2-5">
+        \[ A(\varepsilon) = A + \varepsilon \sum_e \theta_e \ell_e + \varepsilon^2 \sum_i \delta_i \tag{31.2.5} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> (a) \(d(x + \varepsilon\mathbf N) = \mathrm{id} + \varepsilon\,d\mathbf N = \mathrm{id} - \varepsilon W_p\)이므로 넓이 요소는 \(\det(\mathrm{id} - \varepsilon W_p) = 1 - \varepsilon\tr W_p + \varepsilon^2\det W_p = 1 - 2H\varepsilon + K\varepsilon^2\)배가 된다. 적분하면 <a href="#eq-31-2-4">(31.2.4)</a>다. 바깥쪽 \(\mathbf N\)을 고른 반지름 \(r\)인 sphere에서는 \(H = -1/r\), \(K = 1/r^2\)이므로 \(4\pi r^2 + 8\pi r\varepsilon + 4\pi\varepsilon^2 = 4\pi(r + \varepsilon)^2\)으로 맞는다.<br>
+        (b) 밀어낸 surface는 세 종류의 조각으로 나뉜다. face는 normal 방향으로 옮겨질 뿐이라 넓이가 그대로다. edge \(e\)를 따라서는 반지름 \(\varepsilon\), 중심각 \(\theta_e\)인 cylinder 조각이 생겨 넓이 \(\varepsilon\theta_e\ell_e\)를 더한다(<a href="#fig-31-2-4">Figure 31.2.4</a>(a)). vertex \(i\)에는 반지름 \(\varepsilon\)인 구의 조각이 생기는데, 그 모양은 \(i\)에 모인 face normal들을 vertex로 하는 spherical polygon을 \(\varepsilon\)배한 것이다. 그 spherical polygon은 face normal \(\mathbf N_f\)에서의 각이 \(\pi - \theta_i^f\)이므로, spherical polygon의 넓이 공식(각의 합에서 \((d - 2)\pi\)를 뺀 값, \(d\)는 vertex 수)에 의해 넓이가 \(\sum_f(\pi - \theta_i^f) - (d - 2)\pi = 2\pi - \sum_f\theta_i^f = \delta_i\)이다.</p>
+      </div>
+      <p>두 식의 \(\varepsilon\)의 coefficient를 맞대면 mesh의 mean curvature가 정해진다. <a href="#eq-31-2-4">(31.2.4)</a>의 \(-2\iint H\,dA\) 자리에 <a href="#eq-31-2-5">(31.2.5)</a>의 \(\sum_e\theta_e\ell_e\)가 있으므로</p>
+      <div class="equation" id="eq-31-2-6">
+      \[ \begin{aligned} & \iint H\,dA \;\longleftrightarrow\; -\frac12\sum_e \theta_e\ell_e, \\ & H_i = -\frac{1}{4A_i}\sum_{j \sim i}\theta_{ij}\,\ell_{ij} \end{aligned} \tag{31.2.6} \]
+      </div>
+      <p>로 둔다. 둘째 식은 edge마다의 몫 \(-\tfrac12\theta_e\ell_e\)를 두 끝 vertex에 반씩 나누고 vertex의 넓이 몫 \(A_i\)로 나눈 것이다. 부호를 확인하자. 바깥쪽 normal을 고른 convex mesh에서는 \(\theta_e \gt 0\)이므로 \(H_i \lt 0\)이고, 이것은 바깥쪽 \(\mathbf N\)의 sphere에서 \(H = -1/r\)인 것(<a href="../00-tour/0-4-curvature.html#i-0-4-6">Example 0.4.6</a>)과 맞는다. 같은 비교에서 \(\varepsilon^2\)의 coefficient가 \(\iint K\,dA \leftrightarrow \sum_i\delta_i\)로, angle defect가 Gaussian curvature의 이산판이라는 것을 한 번 더 확인해 준다.</p>
+      <div class="thm example" id="i-31-2-7">
+        <p><span class="thm-head">Example 31.2.7</span> <span class="thm-name">(cube and icosphere)</span>.
+        한 변이 2인 정육면체에서는 실제 모서리 12개가 \(\theta_e = \pi/2\), \(\ell_e = 2\)이고 면의 대각선 6개는 \(\theta_e = 0\)이다. 따라서 \(-\tfrac12\sum_e\theta_e\ell_e = -6\pi\)이고, <a href="31-1-mesh-as-surface.html#fig-31-1-4">Figure 31.1.4</a>의 둥근 정육면체에서 모서리 조각 열두 개의 \(\iint H\,dA = 12 \cdot (-\tfrac{\pi}{4} \cdot 2) = -6\pi\)와 정확히 같다. <a href="#eq-31-2-5">(31.2.5)</a>는 \(24 + 12\pi\varepsilon + 4\pi\varepsilon^2\)으로, Section 31.1에서 조각별로 구한 넓이와 같다. unit sphere를 근사하는 icosphere에서 \(\tfrac12\sum_e\theta_e\ell_e\)는 level 0–5에서 11.51, 12.26, 12.49, 12.55, 12.56, 12.57로 \(-\iint H\,dA = 4\pi \approx 12.566\)에 다가가고, level 4에서 \(H_i\)는 \([-1.146, -0.998]\) 안에 있다(정확한 값 \(-1\)).</p>
+        <p class="verified">Verification: <code>verify/v-31-2-discrete-curvature.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-31-2-4">
+        <img src="figures/fig-31-2-4-dihedral.svg" alt="두 패널. (a) 지붕 모양으로 꺾인 두 검은 선분(face f와 face g)이 점 O에서 만난다. 각 선분에서 주홍 화살표 N_f, N_g가 바깥(위쪽 바깥)으로 나와 있고, 두 선분을 그 방향으로 ε만큼 옮긴 파란 점선이 있다. 두 점선 사이의 틈을 O를 중심으로 하는 주황 원호가 메우며, 그 위에 arc: εθ_e라고 적혀 있다. O에서 두 normal 방향으로 회색 점선이 나가고 그 사이에 각 θ_e가 표시되어 있다. 파란 양방향 화살표가 face g와 그 점선 사이의 거리 ε를 나타낸다. (b) 가로축 u(0에서 2π), 세로축 mean curvature (outward N)(−1.1에서 0)인 그래프. 검은 곡선 exact H(u)가 u = 0에서 약 −0.8, u = π에서 약 −0.21로 올라가는 언덕 모양이고, 파란 빈 원(12 × 24)과 주황 점(24 × 48)이 곡선 위에 놓여 있다.">
+        <figcaption><span class="fig-head">Figure 31.2.4.</span>
+        mean curvature는 edge에 있다. <em>무엇을</em>: (a) convex edge에 수직인 cross-section(정확한 기하로 그린 schematic). 두 face가 점 \(O\)(edge의 cross-section)에서 bending angle \(\theta_e = 50^\circ\)로 만나고, 각 face를 normal 방향으로 \(\varepsilon\)만큼 밀어냈다. (b) torus \(T_{R,r}\) (\(R = 2\), \(r = 0.8\), 바깥쪽 normal)에서 <a href="#eq-31-2-6">(31.2.6)</a>의 \(H_i\)를 \(u\)에 대해 그리고 정확한 \(H(u) = -\dfrac{R + 2r\cos u}{2r(R + r\cos u)}\)와 비교했다. <em>읽는 법</em>: (a)의 검은 선은 두 face, 주홍 화살표는 unit normal \(\mathbf N_f, \mathbf N_g\), 파란 점선은 밀어낸 face, 주황 원호는 그 사이의 틈을 메우는 cylinder 조각의 cross-section이다. (b)의 빈 원은 \(12 \times 24\), 점은 \(24 \times 48\) 격자다. <em>볼 것</em>: (a)에서 주황 arc의 길이는 \(\varepsilon\theta_e\)이고, 길이 \(\ell_e\)인 edge를 따라 넓이 \(\varepsilon\theta_e\ell_e\)가 생긴다. face 자체는 넓이가 변하지 않으므로 넓이의 증가는 모두 edge에서 온다. (b)의 \(H_i\)는 곡선을 따라가며, 최대 오차는 0.018에서 0.0046으로 약 1/4이 된다. <em>본문과의 연결</em>: <a href="#i-31-2-6">Proposition 31.2.6</a>(b)와 <a href="#eq-31-2-6">(31.2.6)</a>.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-2-4">Figure 31.2.4</a>의 (a)에서 파란 점선 두 개는 서로 만나지 않고 \(O\) 위에서 벌어진다. 그 틈을 메우는 주황 원호가 edge가 기여하는 넓이다. 두 face가 더 많이 꺾일수록(\(\theta_e\)가 클수록) 원호가 길어진다. smooth surface에서 넓이의 증가율이 \(-2\iint H\,dA\)였으므로, \(\iint H\,dA\)는 edge마다 \(-\tfrac12\theta_e\ell_e\)씩 모여 있다. (b)는 이것을 running example에서 확인한다. 바깥쪽 적도(\(u = 0\))에서 \(H \approx -0.80\), 안쪽 적도에서 \(H \approx -0.21\)이고, 격자를 두 배로 늘리면 오차가 약 1/4로 준다.</p>
+      <p>mean curvature는 크기뿐 아니라 방향을 가진 양 \(2H\mathbf N\)으로 쓰는 일이 많다(Tour의 <a href="../00-tour/0-4-curvature.html#eq-0-4-3">(0.4.3)</a>). 그 벡터판은 넓이의 gradient에서 나오며, 다음 절의 cotan Laplacian이 그것이다. <a href="#eq-31-2-6">(31.2.6)</a>은 그 벡터의 크기를 edge의 각으로 읽은 것이라고 볼 수 있다.</p>
+    </section>
+
+    <section id="sec-choosing">
+      <h2>Choosing a Definition: What Is Preserved?</h2>
+      <p>지금까지 같은 양의 정의가 여럿 나왔다. 고르는 기준은 대략 셋이다.</p>
+      <ol>
+        <li><strong>정확한 구조를 보존하는가.</strong> angle defect는 discrete Gauss–Bonnet을 정확히 만족하고, \(\sum_e\theta_e\ell_e\)는 convex polyhedron의 Steiner formula를 정확히 만족한다. 이런 정의는 topology나 넓이와 관련된 양을 계산할 때 오차가 쌓이지 않는다.</li>
+        <li><strong>변분 성질을 보존하는가.</strong> smooth surface에서 \(2H\mathbf N\)은 넓이를 줄이는 가장 빠른 방향이었다(<a href="../00-tour/0-4-curvature.html#eq-0-4-3">Section 0.4</a>의 mean curvature flow). 이산판에서도 mesh 넓이의 gradient를 mean curvature normal로 삼을 수 있고, 그것이 cotan 공식이다(<a href="31-3-cotangent-laplacian.html">Section 31.3</a>).</li>
+        <li><strong>수렴하는가.</strong> mesh를 촘촘하게 하면 smooth surface의 값에 다가가는가. 여기에는 함정이 있다.</li>
+      </ol>
+      <p>Hildebrandt, Polthier, Wardetzky는 polyhedral surface의 열 \(M_n\)이 smooth surface \(M\)에 Hausdorff distance로 수렴할 때, normal의 수렴, metric의 수렴, 넓이의 수렴, Laplace–Beltrami operator의 수렴이 서로 동치임을 보였다 <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>. 점만 가까워지고 normal이 가까워지지 않으면 넓이조차 수렴하지 않는다(Schwarz lantern이 그 예다). 같은 논문은 normal까지 수렴하는 경우 mean curvature vector가 적분한 뜻(distribution의 뜻)으로 수렴함을 보이고, 그래도 점마다의 값은 일반적으로 수렴하지 않으며 \(L^2\)에서조차 수렴하지 않는 예를 준다. 그 예가 다음의 4-8 cylinder다.</p>
+      <div class="thm example" id="i-31-2-8">
+        <p><span class="thm-head">Example 31.2.8</span> <span class="thm-name">(the 4-8 cylinder)</span>.
+        반지름 1인 cylinder를 둘레 \(m\)칸, 높이 방향으로 같은 간격 \(h = 2\sin(\pi/m)\)의 격자로 나누고, 정사각형 칸마다 대각선을 바둑판처럼 번갈아 긋는다. 그러면 valence 4인 vertex와 valence 8인 vertex가 번갈아 나온다. cylinder의 \(\abs{H}\)는 어디서나 \(1/2\)이다. cotan 공식(<a href="../00-tour/0-4-curvature.html#eq-0-4-3">(0.4.3)</a>의 이산판)에 barycentric area를 쓰면 valence 4 vertex에서 \(\abs{H_i} = 0.75\), valence 8 vertex에서 \(0.375\)가 나오고, \(m = 16\)이든 \(m = 64\)이든 이 값은 바뀌지 않는다. <a href="#eq-31-2-6">(31.2.6)</a>도 같은 값으로 간다. mesh를 아무리 촘촘하게 해도 점마다의 값은 정답의 1.5배와 0.75배를 오간다. 논문의 계산은 조금 다르다. vertex마다 넓이 몫 하나로 나누는 대신 finite element의 consistent mass matrix(<a href="31-3-cotangent-laplacian.html#sec-pl-functions">Section 31.3</a>의 hat function \(\varphi_i\)로 만든 \(\int\varphi_i\varphi_j\,dA\))를 풀어서, valence 4에서 정답의 3배, valence 8에서 0으로 가는 것을 보였다 <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>. 넓이를 어떻게 넣느냐에 따라 틀리는 정도가 다를 뿐, 둘 다 수렴하지 않는다. 이 mesh에서는 mixed Voronoi area를 쓰면 두 종류 모두 정확히 \(0.5\)가 된다(<a href="#ex-31-2-5">Exercise 31.2.5</a>). 그러나 이것은 직각이등변삼각형으로 된 이 규칙적인 mesh의 성질이다. 아래 <a href="#fig-31-2-5">Figure 31.2.5</a>의 불규칙한 mesh에서는 넓이를 어떻게 골라도 점마다의 오차가 남는다.</p>
+        <p class="verified">Verification: <code>verify/v-31-2-discrete-curvature.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-31-2-5">
+        <img src="figures/fig-31-2-5-convergence.svg" alt="두 패널. (a) 가로축 u(0에서 2π), 세로축 δ_i/A_i − K(x_i)(−0.4에서 0.4)인 산점도. 파란 작은 점(jittered 96 × 192)과 주황 큰 점(jittered 24 × 48)이 0을 중심으로 띠를 이루는데, 두 띠의 폭이 거의 같고 u = π 근처에서 조금 더 넓다. (b) log-log 그래프로 가로축 mean edge length h(0.05에서 0.5), 세로축 error. 주홍 사각형 점선(pointwise, jittered)은 0.2 근처에서 거의 수평이고 오히려 왼쪽으로 갈수록 조금 올라간다. 초록 실선(pointwise, regular), 파랑 실선(integrated, regular), 주황 점선(integrated, jittered)은 모두 왼쪽 아래로 가파르게 떨어진다.">
+        <figcaption><span class="fig-head">Figure 31.2.5.</span>
+        점마다의 curvature는 수렴하지 않아도, 적분한 curvature는 수렴한다. <em>무엇을</em>: torus \(T_{R,r}\) (\(R = 2\), \(r = 0.8\))의 두 종류 mesh. regular는 \((u, v)\) 격자 그대로, jittered는 연결은 같고 vertex마다 \((u, v)\)를 격자 간격의 최대 20%만큼 무작위로 바꾼 것이다(seed 0). 모든 vertex는 여전히 정확히 torus 위에 있다. <em>읽는 법</em>: (a)는 jittered mesh의 점마다 오차 \(\delta_i/A_i - K(x_i)\)를 \(u\)에 대해 그린 것으로, 주황은 \(24 \times 48\), 파랑은 \(96 \times 192\)이다. (b)의 가로축은 평균 edge 길이 \(h\)(log), 세로축은 오차(log)다. pointwise는 \(\max_i\abs{\delta_i/A_i - K(x_i)}\), integrated는 \(\abs{\sum_i \delta_i\cos u_i - \iint K\cos u\,dA}\)(정확한 값 \(2\pi^2\))이다. <em>볼 것</em>: (a)에서 vertex 수를 16배로 늘려도 띠의 폭이 줄지 않는다(오차 절댓값의 95% 분위수가 둘 다 약 0.09). (b)에서 jittered의 pointwise 오차는 0.20에서 0.30으로 오히려 커지지만, 같은 mesh의 integrated 오차는 regular와 똑같이 refinement마다 약 1/4로 준다. regular mesh에서는 pointwise 오차도 1/4씩 준다. mean curvature \(H_i\)(<a href="#eq-31-2-6">(31.2.6)</a>)도 같은 모양이다(pointwise 0.18 → 0.27, integrated는 1/4씩). <em>본문과의 연결</em>: <a href="#i-31-2-8">Example 31.2.8</a>과 <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>의 “적분한 뜻의 수렴”.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-2-5">Figure 31.2.5</a>의 (a)부터 보자. jittered mesh에서 vertex들은 모두 정확히 torus 위에 있는데도, \(\delta_i/A_i\)는 정답 주위에 폭이 약 \(\pm 0.1\)인 띠로 흩어진다. vertex 수를 16배로 늘린(edge 길이는 1/4) 파란 띠도 주황 띠와 폭이 같다. 이유는 이렇게 볼 수 있다. curvature는 이계도함수이고, vertex 하나의 값은 이웃 몇 개의 위치로 이계 차분을 하는 셈이다. 삼각형 모양이 \(O(1)\)만큼 불규칙하면 그 차분의 오차도 \(h\)에 무관하게 \(O(1)\)로 남는다. (b)에서 같은 값에 \(\cos u_i\)를 곱해 더하면, 곧 smooth function과 짝지어 적분하면, 흩어진 오차가 이웃끼리 상쇄되어 regular mesh와 같은 속도로 수렴한다. 이것이 “적분한 뜻의 수렴”이다.</p>
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 점마다의 curvature를 믿지 말고 적분하라</p>
+        <p>복원한 mesh(marching cubes, Poisson, TSDF)의 삼각형은 대개 불규칙하다. 그 위에서 계산한 vertex마다의 \(K_i\), \(H_i\)는 mesh를 촘촘하게 해도 정답에 다가가지 않는 잡음을 품는다. 반면 영역에 걸친 합, smooth function을 곱해 더한 값, 이웃 평균 같은 “적분한 양”은 수렴한다. 실무에서 이것은 다음을 뜻한다.</p>
+        <ul>
+          <li>curvature로 feature를 찾거나 threshold를 정할 때는 vertex 하나의 값보다 이웃에 걸쳐 평균하거나 적분한 값을 쓴다.</li>
+          <li>curvature를 loss나 regularizer로 쓸 때, \(\sum_i A_i\,g(H_i)\) 같은 적분 형태는 \(\max_i\)나 점마다의 목표값 맞추기보다 해상도에 덜 민감하다.</li>
+          <li>topology와 관련된 양(\(\sum\delta_i = 2\pi\chi\))은 어떤 mesh에서도 정확하므로, 국소 curvature가 시끄러워도 전체 합은 믿어도 된다.</li>
+        </ul>
+        <p>이것은 <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>의 수렴 이론과 위 실험이 함께 말해 주는 해석이며, 특정 알고리즘의 보장은 아니다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>shape operator와 \(K, H\)의 정의: <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-12">Definition 8.1.12</a>, <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-1">Definition 8.4.1</a>, \(\mathbf N\)을 뒤집으면 \(H\)의 부호가 바뀐다 <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-2">Proposition 8.4.2</a>, running example <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-3">Example 8.4.3</a>와 torus <a href="../08-gauss-map/8-5-local-coordinates.html#i-8-5-9">Example 8.5.9</a>.</li>
+        <li>\(K\)는 Gauss map이 넓이를 바꾸는 비율이다: <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-11">Proposition 8.4.11</a>. vertex의 normal들이 이루는 spherical polygon의 넓이가 \(\delta_i\)라는 <a href="#i-31-2-6">Proposition 31.2.6</a>의 계산이 이것의 이산판이다.</li>
+        <li>Gauss–Bonnet theorem의 국소형과 전역형, 삼각형 분할: <a href="../10-gauss-bonnet/index.html#toc-10-1">Section 10.1</a>, <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>, <a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>.</li>
+        <li>mesh 위의 curvature 추정과 mixed Voronoi area: <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>. 수렴 이론: <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>. 이산 curvature의 여러 정의와 Steiner formula의 관점: <a class="cite" href="../../references.html#Cr">[Cr]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>vertex normal은 face normal의 가중 평균으로 정의하고, 가중치(uniform, area, angle)에 따라 같은 mesh에서 값이 다르다. 극한은 같지만, angle-weighted만 삼각형 분할에 무관하고 area-weighted는 접힌 가는 삼각형에 강하다.</li>
+        <li>angle defect \(\delta_i = 2\pi - \sum\theta_i^f\)의 합은 개수 세기만으로 정확히 \(2\pi\chi\)가 된다. \(\delta_i\)의 부호는 펼쳤을 때 틈(\(+\))이 남는지 겹치는지(\(-\))로 보인다.</li>
+        <li>mean curvature는 edge에 있다. 밀어낸 surface의 넓이에서 \(\iint H\,dA \leftrightarrow -\tfrac12\sum_e\theta_e\ell_e\)이고, 바깥쪽 normal의 convex mesh에서 \(H_i \lt 0\)이다.</li>
+        <li>불규칙한 mesh에서는 점마다의 \(K_i\), \(H_i\)가 수렴하지 않을 수 있지만(4-8 cylinder, jittered torus), 적분한 양은 수렴한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 mean curvature의 벡터판을 넓이의 gradient로 얻는다. piecewise-linear 함수의 Dirichlet energy에서 cotan 가중치가 나오고, 그것으로 만든 cotan Laplacian이 \(2H\mathbf N\)을 주며, mesh 복원 loss들의 정체를 드러낸다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-31-2-1" data-level="1">
+        <p><span class="thm-head">Exercise 31.2.1</span> <span class="level">★</span>
+        한 변이 \(a\)인 정육면체 겉면을 face마다 대각선 하나로 나눈 mesh(바깥쪽 normal)에서 vertex마다의 \(\delta_i\)와 \(\sum_e\theta_e\ell_e\)를 구하여라. <a href="#eq-31-2-6">(31.2.6)</a>의 \(\iint H\,dA\)는 얼마이고, 대각선 edge는 기여하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>vertex마다 직각 세 개가 모이므로(대각선이 있는 face에서는 직각이 \(\pi/4\) 두 개로 나뉠 뿐이다) \(\delta_i = 2\pi - 3\pi/2 = \pi/2\)이고, 8개의 합은 \(4\pi = 2\pi \cdot 2\)이다. 실제 모서리 12개는 \(\theta_e = \pi/2\), 대각선 6개는 평면 안에 있어 \(\theta_e = 0\)이므로 기여하지 않는다. \(\sum_e\theta_e\ell_e = 12 \cdot \tfrac{\pi}{2} \cdot a = 6\pi a\)이고 \(\iint H\,dA \leftrightarrow -3\pi a\)이다. \(a = 2\)이면 \(-6\pi\)로 <a href="#i-31-2-7">Example 31.2.7</a>과 같다.</p>
+          <p class="verified">Verification: <code>verify/v-31-2-discrete-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-2-2" data-level="1">
+        <p><span class="thm-head">Exercise 31.2.2</span> <span class="level">★</span>
+        vertex가 \((\pm1, 0, 0), (0, \pm1, 0), (0, 0, \pm1)\)인 정팔면체에서 \(\delta_i\)와 \(\theta_e\)를 구하고, <a href="#i-31-2-4">Theorem 31.2.4</a>와 \(-\tfrac12\sum_e\theta_e\ell_e\)를 계산하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>vertex마다 정삼각형 네 개가 모이므로 \(\delta_i = 2\pi - 4\pi/3 = 2\pi/3\)이고, 6개의 합은 \(4\pi\)이다. 이웃한 두 face의 normal은 예를 들어 \((1, 1, 1)/\sqrt3\)과 \((-1, 1, 1)/\sqrt3\)이고 inner product가 \(1/3\)이므로 \(\theta_e = \arccos(1/3) \approx 70.53^\circ\)(convex이므로 양수)다. edge는 12개, 길이 \(\sqrt2\)이므로 \(-\tfrac12\sum_e\theta_e\ell_e = -6\sqrt2\arccos(1/3) \approx -10.45\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-31-2-discrete-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-2-3" data-level="1">
+        <p><span class="thm-head">Exercise 31.2.3</span> <span class="level">★</span>
+        참인지 거짓인지 판별하여라. “mesh의 평평한 영역에서 vertex \(i\)에 붙은 face 하나를 \(i\)를 지나는 선으로 둘로 나누면, area-weighted vertex normal이 바뀐다.”</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>거짓이다. 나뉜 두 삼각형의 normal은 원래 face의 normal과 같고 넓이의 합도 같으므로 \(\sum_f\operatorname{Area}(f)\mathbf N_f\)가 변하지 않는다. 내각의 합도 같으므로 angle-weighted도 변하지 않는다. 바뀌는 것은 uniform이다(<a href="#i-31-2-2">Example 31.2.2</a>에서 \(2.61^\circ\)). area-weighted가 바뀌는 것은 \(i\)를 지나지 않는 선으로 잘라 \(i\)에 붙은 조각의 넓이가 달라질 때다.</p>
+          <p class="verified">Verification: <code>verify/v-31-2-discrete-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-2-4" data-level="2">
+        <p><span class="thm-head">Exercise 31.2.4</span> <span class="level">★★</span>
+        boundary가 있는 manifold mesh에서 \(\sum_{i \notin \partial}\delta_i + \sum_{i \in \partial}\big(\pi - \sum_f\theta_i^f\big) = 2\pi\chi\)임을 보여라. 삼각형 하나짜리 mesh로 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>boundary vertex의 수를 \(n_0^\partial\), boundary edge의 수를 \(n_1^\partial\)라 하자. boundary는 닫힌 다각형들이므로 \(n_0^\partial = n_1^\partial\)이다. face마다 edge가 셋이고 interior edge는 face 둘에, boundary edge는 face 하나에 속하므로 \(3n_2 = 2n_1 - n_1^\partial\)이다. 모든 내각의 합은 \(\pi n_2\)이므로 좌변은 \(2\pi n_0 - \pi n_0^\partial - \pi n_2\)이다. 여기에 \(-\pi n_2 = 2\pi n_2 - 3\pi n_2 = 2\pi n_2 - 2\pi n_1 + \pi n_1^\partial\)을 넣으면 좌변은 \(2\pi n_0 - 2\pi n_1 + 2\pi n_2 + \pi(n_1^\partial - n_0^\partial) = 2\pi\chi\)이다. 삼각형 하나면 vertex 셋이 모두 boundary이고 \(\sum(\pi - \theta) = 3\pi - \pi = 2\pi = 2\pi \cdot 1\)이다. Möbius strip mesh에서도 \(0\)이 나온다(orientability는 쓰지 않았다).</p>
+          <p class="verified">Verification: <code>verify/v-31-2-discrete-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-2-5" data-level="2">
+        <p><span class="thm-head">Exercise 31.2.5</span> <span class="level">★★</span>
+        <a href="#i-31-2-8">Example 31.2.8</a>의 4-8 cylinder에서 삼각형은 다리 길이가 \(h\)인 직각이등변삼각형(에 가까운 것)이다. valence 4와 valence 8인 vertex의 barycentric area를 구하고, 0.75와 0.375가 나오는 이유를 설명하여라. 두 vertex의 mixed Voronoi area는 어떤가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>삼각형 하나의 넓이는 \(h^2/2\)이다. valence 4 vertex에는 삼각형 4개가 붙어 barycentric area가 \(4 \cdot \tfrac13 \cdot \tfrac{h^2}{2} = \tfrac23h^2\), valence 8 vertex에는 8개가 붙어 \(\tfrac43h^2\)이다. 그런데 vertex 하나가 평균적으로 맡는 넓이는 정사각형 칸 하나, 곧 \(h^2\)이다. cotan 공식의 분자 \(\sum_j(\cot\alpha_{ij} + \cot\beta_{ij})(x_j - x_i)\)는 두 종류 모두 \(2 \cdot 2H\mathbf N \cdot h^2\)에 가깝게 나오므로(Voronoi area로 나누면 정확히 \(\abs{H} = 1/2\)이 나온다), barycentric area로 나누면 \(\abs{H}\)가 \(h^2/(\tfrac23h^2) = 1.5\)배와 \(h^2/(\tfrac43h^2) = 0.75\)배가 된다. 곧 \(0.75\)와 \(0.375\)다. mixed Voronoi area는 직각 모퉁이(valence 4)에서 삼각형마다 \(h^2/4\), 45° 모퉁이(valence 8)에서 \(h^2/8\)이라 둘 다 \(h^2\)이다. 넓이 몫이 실제로 vertex가 맡는 영역과 맞지 않으면 refinement로 고쳐지지 않는 오차가 남는다.</p>
+          <p class="verified">Verification: <code>verify/v-31-2-discrete-curvature.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="31-1-mesh-as-surface.html">← 31.1 What Makes a Mesh a Surface</a>
+    <a rel="next" href="31-3-cotangent-laplacian.html">31.3 The Cotangent Laplacian →</a>
+  </nav>
+</body>
+</html>

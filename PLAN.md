@@ -503,3 +503,27 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
       - terms.tsv 4개, glossary 3개, notation(𝖪, \(d\), \(\rho\), \(K\)/𝖪 충돌)
       - 부록 E에 Chrome 스크린샷이 잘리는 문제를 적었다.
     - 31장은 작성 중이다. 공개 사이트에 깨진 링크가 없도록 31 index는 planned 판으로만 commit했다(작업 트리는 그대로 둔다).
+  - 2026-10-08: **31장 작성·검토 완료(reviewed).**
+    - 6절, 그림 26개(interactive 9개), verify 6개, 공용 helper `chapters/31-meshes/lib/dgmesh.py`
+    - 검토 R1(31.1–31.3)이 고친 것
+      - Hildebrandt06 예의 수치(consistent mass)
+      - Figure 31.3.3의 원인 설명(둔각삼각형의 mixed area)
+      - uniform loss 결과 서술
+      - \(\iint H\)의 상수 \(-\tfrac12\theta_e\ell_e\)
+      - SVG gouraud shading이 만든 가짜 색
+    - 검토 R2(31.4–31.6)가 고친 것
+      - Prop 31.5.4(평균이 face 평면 밖이면 두 binding이 다름)
+      - Prop 31.6.4의 가정(국소 one-to-one)
+      - similarity binding이 "가장 가까운 conformal"이라는 오류
+      - 직사각형 eigenvalue 중복
+      - PyTorch3D의 `dists`는 거리의 제곱이다.
+      - LSCM flip 반례를 독립 구현으로 재확인했다(극단적 mesh에서만 생기며 드물다는 것을 함께 밝힘).
+    - 통합
+      - 용어 10개, references 6개
+      - notation(mesh 기호, \(L\)·\(M\)·\(\chi\) 충돌)
+      - glossary 9개
+      - check_all에 BLAS 쓰레드 제한 추가. v-29-3이 가끔 segfault를 냈다.
+    - 남은 것
+      - dgmesh.py를 tools/로 옮길지 검토한다.
+      - plotly Mesh3d의 facenormalsepsilon 문제가 다른 장 interactive 그림에도 있는지 확인한다.
+      - 27·28장은 아직 planned다. 29–31장의 27·28 링크는 toc 앵커를 가리킨다.

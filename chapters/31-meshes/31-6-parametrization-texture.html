@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>31.6 Parametrization and Texture Mapping — DG Study</title>
+  <meta name="dg-id" content="31.6">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="31.2, 31.3, 31.5, 0.3, 0.5">
+  <meta name="dg-refs" content="Floater05; Tutte63; Levy02; Desbrun02; PMP">
+  <meta name="dg-updated" content="2026-10-08">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">31. Meshes: Discrete Differential Geometry</a> ›
+    <span>31.6 Parametrization and Texture Mapping</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>31.6 Parametrization and Texture Mapping</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Floater05">[Floater05]</a>,
+        <a class="cite" href="../../references.html#Tutte63">[Tutte63]</a>,
+        <a class="cite" href="../../references.html#Levy02">[Levy02]</a>,
+        <a class="cite" href="../../references.html#Desbrun02">[Desbrun02]</a>,
+        <a class="cite" href="../../references.html#PMP">[PMP]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>piecewise-linear UV map의 triangle마다 Jacobian과 singular value를 계산하고, 그것으로 각·넓이·texel density의 왜곡을 읽을 수 있다.</li>
+        <li>LSCM의 conformal energy를 singular value로 쓰고, vertex 두 개를 고정해야 하는 이유를 설명할 수 있다.</li>
+        <li>angle defect와 Gauss–Bonnet으로 휜 surface를 왜곡 없이 펼 수 없는 이유와, 그 대가가 chart의 크기와 함께 어떻게 커지는지 말할 수 있다.</li>
+        <li>Tutte embedding이 뒤집힌 triangle을 만들지 않는 이유와, cotan 가중치나 LSCM에서는 그 보장이 없다는 것을 예로 보일 수 있다.</li>
+        <li>seam과 chart의 수를 늘리면 왜곡이 줄어드는 trade-off를 수치로 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../00-tour/0-3-surfaces.html#sec-isometry">Section 0.3</a>: first fundamental form, UV unwrapping과 texture distortion(In computer vision 상자)</li>
+        <li><a href="../00-tour/0-5-intrinsic.html#sec-egregium">Section 0.5</a>: Theorema Egregium과 sphere의 왜곡 없는 지도가 없다는 것(<a href="../00-tour/0-5-intrinsic.html#i-0-5-3">Corollary 0.5.3</a>), Gauss–Bonnet</li>
+        <li><a href="31-2-discrete-curvature.html#sec-gauss-bonnet">Section 31.2</a>: angle defect \(\delta_i\)와 discrete Gauss–Bonnet(<a href="31-2-discrete-curvature.html#i-31-2-4">Theorem 31.2.4</a>)</li>
+        <li><a href="31-3-cotangent-laplacian.html">Section 31.3</a>: cotan 가중치, 음수 가중치와 maximum principle(<a href="31-3-cotangent-laplacian.html#sec-non-delaunay">non-Delaunay edge</a>)</li>
+        <li><a href="31-5-fields-to-meshes.html#sec-gaussians-on-mesh">Section 31.5</a>: face의 affine map과 similarity</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>복원한 mesh에 색을 입히는 가장 흔한 방법은 texture image다. vertex마다 image 안의 좌표 \((u, v)\)를 붙이고, triangle 안은 linear하게 보간한다. 그러면 image의 한 pixel(texel)이 surface의 어느 조각을 덮는지가 정해진다. <a href="../00-tour/0-3-surfaces.html#sec-isometry">Section 0.3</a>의 In computer vision 상자는 이 map의 왜곡을 first fundamental form의 singular value로 읽는 법과 LSCM의 생각을 소개했다. <a href="31-5-fields-to-meshes.html#sec-gaussians-on-mesh">Section 31.5</a>에서는 face의 affine map이 similarity에서 얼마나 벗어나는지가 Gaussian binding의 차이를 정했다. 같은 양이 UV map의 품질을 정한다.</p>
+      <p>이 절은 mesh 위에서 그 생각을 끝까지 따라간다. triangle 하나의 왜곡을 어떻게 계산하는가, 왜 휜 surface는 잘라야 펼 수 있는가, 어떤 방법이 뒤집힌 triangle 없는 UV map을 보장하는가, 그리고 seam을 얼마나 두어야 하는가.</p>
+    </section>
+
+    <section id="sec-jacobian">
+      <h2>The Distortion of a Piecewise-Linear UV Map</h2>
+      <div class="thm definition" id="i-31-6-1">
+        <p><span class="thm-head">Definition 31.6.1</span> <span class="thm-name">(UV map of a mesh and its Jacobian)</span>.
+        disk와 같은 topology를 가진 mesh(연결된 orientable manifold mesh로 \(\chi = 1\), boundary loop 하나)의 vertex마다 \(u_i \in \R^2\)를 정한 것을 <strong>UV map</strong>(또는 parametrization)이라 한다. face \(f = (i, j, k)\)에서 UV triangle을 surface triangle로 보내는 affine map의 Jacobian은</p>
+        <div class="equation" id="eq-31-6-1">
+        \[ \begin{aligned} J_f &= \big[\,x_j - x_i \ \ x_k - x_i\,\big] \\ &\quad \cdot \big[\,u_j - u_i \ \ u_k - u_i\,\big]^{-1} \end{aligned} \tag{31.6.1} \]
+        </div>
+        <p>인 \(3 \times 2\) 행렬이다. \(J_f^{\mathsf T}J_f\)가 face 위의 first fundamental form이고, \(J_f\)의 singular value \(\sigma_1 \ge \sigma_2 \gt 0\)를 face의 왜곡이라 한다. \(\det\big[\,u_j - u_i \ \ u_k - u_i\,\big] \lt 0\)이면, 곧 UV triangle의 방향이 face의 orientation과 반대이면 그 face를 <strong>flipped</strong> face(뒤집힌 face)라 한다.</p>
+      </div>
+      <p>\(J_f\)는 UV에서 surface로 가는 방향이고 <a href="../00-tour/0-3-surfaces.html#sec-isometry">Section 0.3</a>의 \(J\)와 같다. UV의 반지름 \(\varepsilon\)인 원은 surface에서 반축이 \(\sigma_1\varepsilon, \sigma_2\varepsilon\)인 ellipse가 된다. 다음 판정은 Tour와 Floater–Hormann의 survey <a class="cite" href="../../references.html#Floater05">[Floater05]</a>에 있는 것을 face마다 쓴 것이다.</p>
+      <div class="thm proposition" id="i-31-6-2">
+        <p><span class="thm-head">Proposition 31.6.2</span> <span class="thm-name">(reading the distortion)</span>.
+        face \(f\)에서</p>
+        <ul>
+          <li>(a) isometric(길이를 보존) \(\iff \sigma_1 = \sigma_2 = 1\), conformal(각을 보존) \(\iff \sigma_1 = \sigma_2\), equiareal(넓이를 보존) \(\iff \sigma_1\sigma_2 = 1\)이다.</li>
+          <li>(b) \(\sigma_1\sigma_2 = (\text{surface triangle의 넓이})/(\text{UV triangle의 넓이})\)이다. UV 한 변의 길이 1에 texel이 \(R\)개인 texture는 surface의 단위 길이에 texel을 singular 방향으로 \(R/\sigma_1\)개, \(R/\sigma_2\)개 놓는다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> (a) \(J_f = U\Sigma W^{\mathsf T}\)(singular value decomposition)이면 UV의 orthonormal 방향 \(w_1, w_2\)가 surface의 orthonormal 방향으로 가며 길이가 \(\sigma_1, \sigma_2\)배 된다. 모든 방향의 길이가 보존되려면 둘 다 1, 모든 각이 보존되려면 두 배율이 같아야 하고, 넓이 배율은 \(\sigma_1\sigma_2 = \sqrt{\det J_f^{\mathsf T}J_f}\)다. (b)의 첫 식은 이 넓이 배율이 face 위에서 상수라는 것이고, 둘째 식은 길이 \(1/R\)인 texel 변이 surface에서 \(\sigma_i/R\)가 된다는 것이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-31-6-1">
+        <img src="figures/fig-31-6-1-triangle-jacobian.svg" alt="두 패널. (a) 가로세로 0에서 1인 UV 정사각형에 8 × 8 회색 격자(texel)가 있고, 그 안에 vertex가 u_0, u_1, u_2인 하늘색 triangle과, 그 무게중심에 주홍 원 하나(ε-circle)가 있다. (b) vertex가 x_0, x_1, x_2인 회색 surface triangle. 그 안의 회색 선들은 (a)의 texel 격자를 옮긴 것으로, 기울어진 평행사변형들을 이룬다. 가운데의 주홍 ellipse는 (a)의 원을 옮긴 것이고, 중심에서 긴 축 방향의 화살표 σ_1ε와 짧은 축 방향의 화살표 σ_2ε가 그려져 있다. 제목은 surface triangle: σ_1 = 3.85, σ_2 = 1.88.">
+        <figcaption><span class="fig-head">Figure 31.6.1.</span>
+        UV map이 triangle 하나에 하는 일. <em>무엇을</em>: surface triangle(자기 평면의 좌표로) \(x_0 = (0, 0)\), \(x_1 = (2, 0)\), \(x_2 = (0.6, 1.4)\)와 UV triangle \(u_0 = (0.1, 0.1)\), \(u_1 = (0.6, 0.35)\), \(u_2 = (0.15, 0.9)\). <a href="#eq-31-6-1">(31.6.1)</a>의 \(J_f\)로 UV를 surface에 옮겼다. <em>읽는 법</em>: (a)의 회색 격자는 \(8 \times 8\) texel, 주홍 원은 UV triangle의 무게중심을 중심으로 한 반지름 \(\varepsilon = 0.06\)인 원이다. (b)는 그 격자선(triangle 안의 부분)과 원을 \(J_f\)로 옮긴 것이고, 두 화살표는 ellipse의 반축 \(\sigma_1\varepsilon, \sigma_2\varepsilon\)이다. <em>볼 것</em>: 정사각형 texel이 기울어진 평행사변형이 되고, 원이 ellipse가 된다. \(\sigma_1 = 3.85\), \(\sigma_2 = 1.88\)이므로 각의 왜곡 \(\sigma_1/\sigma_2 = 2.05\)이고, 넓이 배율 \(\sigma_1\sigma_2 = 7.23\)은 두 triangle의 넓이 비와 같다. texel은 긴 축 방향으로 단위 길이에 \(8/\sigma_1 = 2.08\)개, 짧은 축 방향으로 \(4.26\)개 놓인다. <em>본문과의 연결</em>: <a href="#i-31-6-1">Definition 31.6.1</a>과 <a href="#i-31-6-2">Proposition 31.6.2</a>.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-6-1">Figure 31.6.1</a>에서 texture가 surface에서 어떻게 보일지 그대로 읽을 수 있다. 원래 정사각형이던 무늬는 한쪽으로 늘어난 평행사변형이 되고(각의 왜곡), texel 하나가 덮는 surface의 넓이는 \(\sigma_1\sigma_2\)배다(넓이의 왜곡). 좋은 UV map은 모든 face에서 \(\sigma_1 = \sigma_2 = c\)(같은 상수)인 map이다. 그러면 texture가 어디서나 같은 해상도로 찌그러짐 없이 놓인다. <a href="31-5-fields-to-meshes.html#i-31-5-4">Proposition 31.5.4</a>의 similarity binding이 face의 변형에서 버린 부분도 바로 \(\sigma_1 \ne \sigma_2\)인 부분이었다.</p>
+    </section>
+
+    <section id="sec-lscm">
+      <h2>Conformal Flattening: Least Squares Conformal Maps</h2>
+      <p>Tour의 상자(<a href="../00-tour/0-3-surfaces.html#sec-isometry">Section 0.3</a>)는 LSCM의 energy와 vertex 두 개를 고정하는 이유를 말로 소개했다. 여기서는 그것을 singular value로 정확히 쓴다. 모든 face에서 \(\sigma_1 = \sigma_2\)를 요구하면 조건이 너무 많아 대개 해가 없다. LSCM <a class="cite" href="../../references.html#Levy02">[Levy02]</a>은 그 조건의 위반을 최소제곱으로 줄인다. surface에서 UV로 가는 map \(f = (u, v)\)를 face마다 그 face의 평면 좌표 \((x, y)\)(orientation과 맞춘 orthonormal frame)로 미분하면, conformal 조건은 Cauchy–Riemann equations \(u_x = v_y\), \(u_y = -v_x\)다.</p>
+      <div class="thm proposition" id="i-31-6-3">
+        <p><span class="thm-head">Proposition 31.6.3</span> <span class="thm-name">(conformal energy)</span>.
+        piecewise-linear \(f\)에 대해</p>
+        <div class="equation" id="eq-31-6-2">
+        \[ \begin{aligned} E_C(f) &= \sum_f A_f\,\tfrac12\big((u_x - v_y)^2 \\ &\qquad + (u_y + v_x)^2\big) \end{aligned} \tag{31.6.2} \]
+        </div>
+        <p>라 하자(\(A_f\)는 face의 넓이). 그러면</p>
+        <ul>
+          <li>(a) orientation을 보존하는 face에서 integrand는 \(\tfrac12(1/\sigma_2 - 1/\sigma_1)^2\)이다. 곧 \(\sigma_1 = \sigma_2\)인 face는 배율이 얼마이든 \(0\)이다. \(E_C\)는 넓이의 배율 자체를 벌하지 않고 각의 왜곡만 벌한다. 다만 같은 각의 왜곡이라도 벌의 크기는 배율에 따라 달라진다.</li>
+          <li>(b) \(E_C(f) = E_D(f) - A(f)\)이다. 여기서 \(E_D(f) = \tfrac12\sum_f A_f\big(\abs{\nabla u}^2 + \abs{\nabla v}^2\big)\)는 Dirichlet energy, \(A(f)\)는 UV triangle들의 signed area의 합이다. 따라서 \(E_C\)는 UV 좌표의 이차식이고, 최솟값은 linear system 하나로 구한다.</li>
+          <li>(c) \(E_C\)는 상수 map에서 \(0\)이고, UV 전체에 similarity \(z \mapsto az + b\)(복소수 \(a \ne 0\), \(b\))를 해도 \(\abs a^2\)배가 될 뿐이다. 그래서 해를 하나로 정하려면 vertex 두 개의 UV를 고정한다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> face 위의 \(f\)의 Jacobian을 \(D = \left(\begin{smallmatrix} u_x & u_y \\ v_x & v_y \end{smallmatrix}\right)\)라 하면 전개해서 \(\tfrac12\big((u_x - v_y)^2 + (u_y + v_x)^2\big) = \tfrac12\abs{D}_F^2 - \det D\)이다. \(D\)의 singular value를 \(t_1 \ge t_2\)라 하면 \(\abs{D}_F^2 = t_1^2 + t_2^2\), \(\det D = t_1t_2\)(orientation 보존)이므로 integrand는 \(\tfrac12(t_1 - t_2)^2\)다. \(D\)는 \(J_f\)의 역이므로 \(t_1 = 1/\sigma_2\), \(t_2 = 1/\sigma_1\)이고 (a)가 나온다. \(A_f\det D\)는 UV triangle의 signed area이므로 넓이를 곱해 더하면 (b)다. (c)에서 \(az + b\)의 Jacobian은 \(\abs a\)배 회전이므로 Cauchy–Riemann의 위반도 \(\abs a\)배가 된다. similarity의 실수 parameter는 4개이고, 고정한 점 하나가 2개씩 정한다.</p>
+      </div>
+      <p>(a)와 (b)는 Floater와 Hormann이 정리한 관계다 <a class="cite" href="../../references.html#Floater05">[Floater05]</a>. survey는 (a)의 integrand를 \(\tfrac12(\sigma_1 - \sigma_2)^2\)이라고 쓰는데, 거기서 \(\sigma_i\)는 surface에서 UV로 가는 map \(f\)의 Jacobian의 singular value다. 이 절의 \(\sigma_i\)는 반대 방향인 \(J_f\)의 것이므로 \(1/\sigma_2, 1/\sigma_1\)로 바뀐다. 같은 양이다. Desbrun 등은 Dirichlet energy에서 출발해 boundary에 “자연스러운”(Neumann) 조건을 주는 방법을 독립적으로 만들었다 <a class="cite" href="../../references.html#Desbrun02">[Desbrun02]</a>. Floater와 Hormann은 그 조건이 \(\nabla E_D = \nabla A\), 곧 \(E_C\)의 최소 조건이어서 두 방법이 같은 linear system을 준다고 정리한다 <a class="cite" href="../../references.html#Floater05">[Floater05]</a>. Lévy 등은 고정한 vertex가 두 개 이상이면 행렬이 full rank이고 해가 유일하며, 두 개일 때 developable surface(평면에 펼 수 있는 surface)에서 완전한 conformal map이 나온다고 보인다 <a class="cite" href="../../references.html#Levy02">[Levy02]</a>. verify에서 평면 mesh는 그대로, 접은 평면(developable)은 펼친 평면으로, 고정한 vertex를 similarity로 옮기면 해 전체가 같은 similarity로 옮겨지는 것을 확인했다. 다만 해는 어느 두 vertex를 고정하는지에 따라 similarity 이상으로 달라진다 <a class="cite" href="../../references.html#Floater05">[Floater05]</a>.</p>
+    </section>
+
+    <section id="sec-why-cut">
+      <h2>Why Curved Surfaces Must Be Cut</h2>
+      <p>(a)가 말하듯 LSCM은 각의 왜곡만 줄인다. 그런데 휜 surface에서는 각과 넓이를 동시에 지킬 수 없다(<a href="../00-tour/0-5-intrinsic.html#i-0-5-3">Corollary 0.5.3</a>). mesh에서는 그 이유가 angle defect로 아주 간단히 보인다.</p>
+      <div class="thm proposition" id="i-31-6-4">
+        <p><span class="thm-head">Proposition 31.6.4</span> <span class="thm-name">(angle sums in the plane)</span>.
+        UV map이 vertex \(i\)(chart의 boundary가 아닌 vertex) 근처에서 one-to-one이면, 곧 둘레에 뒤집힌 face가 없고 둘레의 UV triangle이 \(u_i\)를 한 바퀴만 감싸면, \(i\)를 둘러싼 UV angle의 합은 \(2\pi\)이다. mesh에서의 합은 \(2\pi - \delta_i\)이므로, vertex \(i\) 주위의 angle들이 받는 변화의 합은 정확히 \(\delta_i\)다. 따라서 angle을 하나도 바꾸지 않는 one-to-one UV map(face마다 similarity인 map)이 있으려면 boundary가 아닌 모든 vertex에서 \(\delta_i = 0\)이어야 한다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> 둘레 UV triangle들의 oriented angle의 합은 이웃들의 고리가 \(u_i\)를 감는 횟수의 \(2\pi\)배다. one-to-one이면 한 바퀴이므로 합이 \(2\pi\)다. 뒤집힌 face가 없다는 것만으로는 부족하다. 이웃 여덟 개가 \(u_i\)를 두 바퀴 감으면 모든 triangle이 positively oriented인데도 합이 \(4\pi\)다(verify). mesh에서의 합은 angle defect의 정의 <a href="31-2-discrete-curvature.html#eq-31-2-2">(31.2.2)</a>에서 \(2\pi - \delta_i\)다. 두 합을 빼면 된다. face마다 similarity이면 face의 세 angle이 그대로이므로 변화의 합이 \(0\)이어야 한다.</p>
+      </div>
+      <p>예를 들어 정육면체의 vertex는 \(\delta_i = \pi/2\)이므로(<a href="31-2-discrete-curvature.html#fig-31-2-2">Figure 31.2.2</a>처럼 펴면 \(90^\circ\)의 틈이 생긴다) 정육면체의 전개도는 여덟 vertex를 모두 잘라 boundary로 만든다(<a href="#ex-31-6-2">Exercise 31.6.2</a>). 반대로 \(\delta_i = 0\)인 vertex만 남긴 chart, 예를 들어 cylinder나 cone을 직선을 따라 자른 것은 triangle을 하나씩 이어 붙여 왜곡 없이 펼 수 있다. chart 전체로 보면 discrete Gauss–Bonnet(<a href="31-2-discrete-curvature.html#i-31-2-4">Theorem 31.2.4</a>)에 따라 chart 안의 curvature \(\sum_{\text{interior}}\delta_i\)가 boundary의 꺾임과 맞바뀐다. 자르는 것은 curvature를 boundary로 내보내는 일이다.</p>
+      <p>chart 안에 curvature가 많을수록 대가가 크다. 다음 그림은 sphere에서 크기가 다른 cap을 LSCM으로 펴서 그 대가를 잰다.</p>
+
+      <figure class="dg-figure" id="fig-31-6-2">
+        <img src="figures/fig-31-6-2-cap-distortion.svg" alt="위 (a)에 disk 모양의 UV 그림 세 개가 있다. 제목은 Θ = 60°: ratio 1.9, Θ = 90°: ratio 4.6, Θ = 120°: ratio 20.4. 모두 가운데가 옅은 빨강, 가장자리로 갈수록 파랑이고, 오른쪽으로 갈수록 가운데의 빨강과 가장자리의 짙은 파랑이 뚜렷하다. 가장자리는 삼각형 때문에 톱니 모양이다. 그 아래에 −2(짙은 파랑)에서 2(짙은 빨강)까지의 색 막대와 log_2(σ_1σ_2/median): red = a texel covers more surface라는 설명. 아래 (b)는 가로축 cap size Θ(0에서 180도), 세로축 area ratio(log, 1에서 10^5)인 그래프. 검은 곡선 sec^4(Θ/2)는 1에서 시작해 180도 가까이에서 수직으로 솟고, 주홍 점들(LSCM)이 그 곡선 위나 바로 옆에 놓인다. 위쪽 축은 total curvature ∫K dA = 2π(1 − cos Θ)로 0, π, 2π, 3π, 4π의 눈금이 있다.">
+        <figcaption><span class="fig-head">Figure 31.6.2.</span>
+        cap이 클수록 conformal하게 펴는 대가(넓이의 왜곡)가 급격히 커진다. <em>무엇을</em>: unit sphere의 cap \(\{\text{polar angle} \lt \Theta\}\)(level 4 icosphere에서 무게중심이 그 안에 있는 face들)을 boundary의 가장 먼 두 vertex를 고정한 LSCM으로 편 결과. face마다 \(\sigma_1\sigma_2\)는 UV 넓이 1이 덮는 surface의 넓이다. <em>읽는 법</em>: (a)는 \(\Theta = 60^\circ, 90^\circ, 120^\circ\)의 UV(같은 크기로 맞췄다)를 \(\log_2(\sigma_1\sigma_2/\text{median})\)으로 칠한 것이다. 빨강은 texel 하나가 surface를 더 많이 덮는 곳(texture가 성긴 곳), 파랑은 더 적게 덮는 곳이다. (b)의 주홍 점은 face들의 \(\max\sigma_1\sigma_2/\min\sigma_1\sigma_2\), 검은 곡선은 \(\sec^4(\Theta/2)\)이고 둘 다 log 눈금이다. 위쪽 축은 cap 안의 total curvature \(2\pi(1 - \cos\Theta)\)다. <em>볼 것</em>: 각의 왜곡은 거의 없다(\(\sigma_1/\sigma_2\)의 중앙값이 모든 \(\Theta\)에서 1.08 이하). 대신 넓이의 비는 \(\Theta = 60^\circ\)에서 1.9, \(90^\circ\)에서 4.6, \(120^\circ\)에서 20.4, \(170^\circ\)에서 14470으로 커진다. 점들은 곡선 \(\sec^4(\Theta/2)\)를 1.5배 안에서 따라간다(boundary가 톱니 모양이라 정확히 같지는 않다). (a)에서 texture는 가운데에서 성기고 가장자리에서 촘촘하다. <em>본문과의 연결</em>: <a href="#i-31-6-3">Proposition 31.6.3</a>(a)와 <a href="#i-31-6-4">Proposition 31.6.4</a>.</figcaption>
+      </figure>
+
+      <p>곡선 \(\sec^4(\Theta/2)\)는 smooth한 비교 대상이다. 남극에서 하는 stereographic projection \(\theta \mapsto r = \tan(\theta/2)\)는 conformal이고(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-9">Example 7.4.9</a>는 북극에서 한 것이다. 남극에서 해도 마찬가지다), 넓이 배율이 \(\tfrac14\sec^4(\theta/2)\)이므로 cap의 가장자리와 중심의 넓이 배율의 비가 \(\sec^4(\Theta/2)\)다. LSCM의 결과가 이 값을 따라가는 것은 관찰이다. LSCM은 boundary를 자유롭게 두므로 symmetric한 cap에서 stereographic projection과 비슷한 map을 고른 것으로 보인다(해석). 핵심은 숫자의 크기다. hemisphere(total curvature \(2\pi\))만 되어도 넓이당 texel 수가 4배쯤 차이 나고, sphere 거의 전체(\(\Theta = 170^\circ\))를 chart 하나에 담으면 만 배가 넘는다.</p>
+    </section>
+
+    <section id="sec-guarantees">
+      <h2>Fixed Boundaries, Tutte Embeddings, and Fold-Overs</h2>
+      <p>뒤집힌 face는 넓이 왜곡보다 나쁘다. UV에서 triangle이 겹치므로 texture의 같은 texel이 surface의 두 곳에 나타난다. boundary를 고정하는 오래된 방법에는 이것을 막는 정리가 있다.</p>
+      <div class="thm theorem" id="i-31-6-5">
+        <p><span class="thm-head">Theorem 31.6.5</span> <span class="thm-name">(Tutte; convex combination maps)</span>.
+        disk 모양 mesh의 boundary vertex를 convex polygon의 boundary에 순서대로 놓고, 나머지 vertex마다 양수 \(\lambda_{ij}\)(\(\sum_j\lambda_{ij} = 1\))로</p>
+        <div class="equation" id="eq-31-6-3">
+        \[ u_i = \sum_{j \in N(i)}\lambda_{ij}\,u_j \tag{31.6.3} \]
+        </div>
+        <p>를 풀면 UV map은 one-to-one이고 뒤집힌 face가 없다. \(\lambda_{ij} = 1/\deg(i)\)인 경우가 Tutte의 barycentric map이다 <a class="cite" href="../../references.html#Tutte63">[Tutte63]</a>. 일반적인 양수 가중치로의 확장은 Floater–Hormann survey의 Theorem 7이다 <a class="cite" href="../../references.html#Floater05">[Floater05]</a>. (boundary의 세 vertex가 한 직선 위에 놓이면 그 셋을 잇는 triangle이 퇴화할 수 있으므로, 여기서는 boundary vertex를 원 위처럼 strictly convex한 위치에 놓는다고 하자.)</p>
+      </div>
+      <p>증명은 길어서 생략한다(Go deeper). 왜 양수가 중요한지는 vertex 하나에서 보인다. <a href="#eq-31-6-3">(31.6.3)</a>은 \(u_i\)가 이웃의 convex combination, 곧 이웃들의 convex hull 안에 있다는 뜻이다. 반대로 \(u_i\)가 이웃들이 이루는 고리 밖으로 나가면 그 고리는 \(u_i\)를 감싸지 않으므로 \(u_i\) 주위의 oriented angle의 합이 \(2\pi\)가 아니라 \(0\)이 되고, 둘레의 triangle 가운데 적어도 하나는 뒤집힌다(<a href="#i-31-6-4">Proposition 31.6.4</a>의 증명과 같은 셈이다). convex hull 안에 있다고 고리 안에 있는 것은 아니므로 이것은 증명이 아니라 직관이다. 증명은 boundary가 convex라는 조건을 전체에서 함께 쓴다.</p>
+      <p>cotan 가중치(discrete harmonic map)는 <a href="31-3-cotangent-laplacian.html#sec-non-delaunay">Section 31.3</a>에서 본 것처럼 음수가 될 수 있다. survey는 모든 edge에서 마주 보는 두 angle의 합이 \(\pi\)보다 작으면(가중치가 모두 양수이면) harmonic map도 one-to-one이고, 그 조건이 깨지면 triangle이 뒤집히는 반례가 있다고 정리한다 <a class="cite" href="../../references.html#Floater05">[Floater05]</a>. LSCM에 대해서는 기록이 엇갈린다. Lévy 등은 고정한 vertex를 boundary에서 고르면 모든 triangle이 일관된 방향을 가져 triangle flip이 생기지 않는다는 성질을 증명의 sketch와 함께 제시한다 <a class="cite" href="../../references.html#Levy02">[Levy02]</a>. 그 sketch는 triangulation을 triangle을 하나씩 붙이는 glue와 이미 있는 두 vertex를 잇는 join으로 쌓아 가며 귀납하는데, glue 단계만 계산하고 join 단계는 자명하다고 넘긴다. 뒤의 survey에서 Floater와 Hormann은 이 방법이 접힌 triangle을 만들 수 있고 one-to-one을 보장하는 충분조건은 알려져 있지 않다고 쓴다 <a class="cite" href="../../references.html#Floater05">[Floater05]</a>. 다음 그림은 작은 mesh에서 세 방법을 비교하고, boundary 위의 vertex를 고정한 LSCM이 실제로 face를 뒤집는 예를 준다.</p>
+
+      <figure class="dg-figure" id="fig-31-6-3">
+        <img src="figures/fig-31-6-3-bijectivity.svg" alt="2행 2열의 그림. (a) crumpled patch (18 faces): 크게 구겨진 회색 삼각형 조각을 비스듬히 본 것. 위쪽의 x_9에서 아래쪽의 x_13까지 주홍 굵은 선이 있고, 왼쪽에 x_0, 오른쪽에 x_15라는 글자가 있다. (b) Tutte (uniform): no flip: 점선 원 안에 꽉 찬 다각형 모양의 UV mesh. 모든 triangle이 회색이고, 주홍 점(x_9)이 위쪽 가운데, 검은 점(x_13)이 왼쪽 위 원 위에 있다. (c) cotan (harmonic): 2 flipped: 같은 원 안의 UV mesh에서 오른쪽 가운데에 가늘고 긴 주홍 triangle 두 개가 서로 겹쳐 있고, 주홍 점 x_9가 그 끝에 있다. (d) LSCM, pins x_0, x_15: 1 flipped: 원이 없는 자유로운 모양의 UV mesh. 왼쪽 끝과 오른쪽 끝에 파란 사각형(고정한 vertex)가 있고, 위쪽 가운데에 작은 주홍 triangle 하나가 있다.">
+        <figcaption><span class="fig-head">Figure 31.6.3.</span>
+        boundary를 고정한 Tutte map만 뒤집힘이 없다고 보장된다. <em>무엇을</em>: \(4 \times 4\) grid(대각선을 번갈아 그은 18개 triangle)의 안쪽 vertex 넷을 무작위로(seed 8921, 최대 0.45칸) 옮기고, 모든 vertex를 \(z = 1.09\sin(4.14x)\sin(2.66y)\)로 들어 올린 구겨진 조각(가장 작은 angle \(9^\circ\), 이웃 face의 normal이 최대 \(154^\circ\) 꺾이고, \(x_9\)는 둘레 angle의 합이 \(116^\circ\)뿐인 뾰족한 vertex다. 곧 \(\delta_9 = 244^\circ\)). 자기교차는 없다. 이것을 (b) uniform 가중치(Tutte), (c) cotan 가중치(boundary는 둘 다 arc length에 비례해 unit circle에 놓았다), (d) LSCM(마주 보는 두 corner \(x_0, x_{15}\)를 고정)으로 폈다. <em>읽는 법</em>: (a)는 surface이고, 주홍 선은 cotan 가중치가 \(-1.75\)인 edge \(x_9x_{13}\)이다. (b)–(d)는 UV이고 주홍 face가 뒤집힌 face, 주홍 점이 \(x_9\), 검은 점이 \(x_{13}\), 파란 사각형이 LSCM에서 고정한 vertex다. <em>볼 것</em>: (b)에는 뒤집힌 face가 없다. (c)에서는 \(x_9\)가 큰 음수 가중치 때문에 \(x_{13}\)의 반대쪽으로 밀려 이웃들의 고리 밖으로 나가고, \((x_8, x_9, x_5)\)와 \((x_5, x_9, x_{10})\)이 뒤집힌다. 이때 \(x_9\) 주위의 oriented angle의 합은 \(0\)이다. (d)의 LSCM도 boundary 위의 두 corner를 고정했는데 face 하나(\((x_5, x_9, x_{10})\))를 뒤집는다. 고정할 vertex를 boundary vertex 12개 가운데 어느 두 개로 바꾸어도(66가지) 1개(37가지) 또는 2개(29가지)가 뒤집혔다. 뒤집힌 face는 모두 \(x_9\)의 둘레에 있다. one-to-one이려면 \(x_9\) 둘레의 angle을 모두 합해 \(244^\circ\)나 벌려야 하는데(<a href="#i-31-6-4">Proposition 31.6.4</a>), 각을 지키려는 energy가 그만큼 벌리지 못한 것으로 읽을 수 있다(해석). <em>본문과의 연결</em>: <a href="#i-31-6-5">Theorem 31.6.5</a>와 그 뒤의 설명. (a)를 돌려 볼 수 있는 <a href="figures/fig-31-6-3-bijectivity-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-6-3">Figure 31.6.3</a>은 일부러 극단적으로 만든 예다. 진폭이 1을 넘는 구겨짐에 가장 작은 angle이 \(9^\circ\)이고, \(x_9\)는 angle defect가 \(244^\circ\)인 뾰족한 cone이므로 실제 복원 mesh보다 훨씬 나쁘다. 그래도 Lévy 등의 성질이 아무 조건 없이 성립하지는 않는다는 것을 보이기에는 충분하다. 이 반례는 verify에서 Lévy 등의 복소수 형태의 식으로 따로 구현한 LSCM으로도 같은 결과(같은 face, 66가지 pin 쌍에서 같은 개수)를 냈다. 반대로 이런 뒤집힘이 드물다는 것도 확인할 수 있다. \(4 \times 4\)에서 \(6 \times 6\)까지의 grid를 무작위로 흔들고 덜 구긴 patch 가운데 \(xy\) 평면 위의 graph이고 가장 작은 angle이 \(15^\circ\) 이상인 5892개에서, 마주 보는 corner 두 개를 고정한 LSCM이 face를 뒤집은 것은 1개뿐이었고, 그 patch에도 angle defect가 \(-149^\circ\)인 saddle vertex가 있었다(verify). 뒤집힘은 curvature가 한 vertex에 크게 몰린 곳(\(\abs{\delta_i}\)가 큰 곳)에서 생긴다고 볼 수 있다(해석). cotan map도 실제에 가까운 mesh에서는 잘 뒤집히지 않는다. <a href="31-5-fields-to-meshes.html#fig-31-5-2">Figure 31.5.2</a>의 marching tetrahedra sphere에서 \(z \gt 0.3\)인 cap을 떼어 내면(\(h = 0.2\)과 \(0.1\)에서 face 1014개와 3956개) 음수 cotan 가중치가 각각 175개, 632개나 있지만 Tutte map과 cotan map 모두 뒤집힌 face가 없었다. convex boundary에서는 가중치가 모두 양수이면 뒤집힘이 없으므로 음수 가중치는 뒤집힘의 필요조건이지만, 충분조건은 아니다. 그래도 보장이 없다는 것은 실무에서 중요하다. 그래서 뒤집힘을 원천적으로 막아야 하는 곳에서는 convex boundary의 Tutte map에서 출발하거나, 결과를 검사해 뒤집힌 face가 있으면 chart를 더 나누는 방식을 쓴다. Lévy 등도 boundary가 스스로 교차해 생기는 겹침은 chart를 나누어 없앤다고 쓴다 <a class="cite" href="../../references.html#Levy02">[Levy02]</a>.</p>
+      <p>Tutte map의 대가는 각의 왜곡이다. boundary를 원에 억지로 놓고 가중치가 모양을 보지 않으므로 triangle이 찌그러진다. hemisphere(level 3 icosphere의 \(z \gt 0\) 부분)에서 \(\sigma_1/\sigma_2\)의 95번째 백분위수는 Tutte 1.72, cotan 1.60, LSCM 1.09였다. boundary를 고정하는 방법(Tutte, harmonic)은 안전하지만 모양을 덜 지키고, boundary를 자유롭게 두는 방법(LSCM)은 모양을 지키지만 보장이 약하다.</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: UV map의 세 가지 실패는 서로 다른 양이다</p>
+        <p>UV map의 문제를 한 가지 “왜곡”으로 뭉뚱그리면 원인을 놓친다. 이 절의 세 양은 서로 다른 기하에서 나온다.</p>
+        <ul>
+          <li><strong>각의 왜곡</strong> \(\sigma_1/\sigma_2\): texture 무늬가 한쪽으로 늘어난다. LSCM이 줄이는 양이다(<a href="#i-31-6-3">Proposition 31.6.3</a>(a)).</li>
+          <li><strong>넓이의 왜곡</strong> \(\sigma_1\sigma_2\)의 변화: texel density가 곳마다 다르다. chart 안의 total curvature가 크면 피할 수 없다(<a href="#fig-31-6-2">Figure 31.6.2</a>). texture를 굽는(baking) 과정에서는 \(\sigma_1\sigma_2\)가 큰 곳이 흐리게 보일 것이다(해석).</li>
+          <li><strong>뒤집힘</strong> \(\det \lt 0\): 각이나 넓이의 크기가 아니라 map이 one-to-one인지의 문제다. 한 texel이 두 곳에 쓰인다. 양수 가중치와 convex boundary라는 조건이 막는다(<a href="#i-31-6-5">Theorem 31.6.5</a>).</li>
+        </ul>
+        <p>휜 chart에서는 세 가지를 동시에 0으로 만들 수 없다. 첫째와 둘째를 함께 없애려면 chart 안의 \(\delta_i\)가 모두 0이어야 하고(<a href="#i-31-6-4">Proposition 31.6.4</a>), 셋째를 보장하는 Tutte map은 첫째를 희생한다. 남은 자유는 어디를 자를지, 곧 seam이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-seams">
+      <h2>Charts, Seams, and Texture Atlases</h2>
+      <p>sphere처럼 닫힌 surface는 chart 하나로 펼 수 없다. 펴려면 적어도 boundary가 있어야 하고(\(\chi = 1\)인 disk가 되어야 한다), <a href="#fig-31-6-2">Figure 31.6.2</a>는 chart 하나가 curvature를 많이 품을수록 넓이의 왜곡이 폭발한다는 것을 보였다. 그래서 surface를 여러 chart로 자르고, 각 chart를 펴서 한 장의 image에 모아 담는다. 이것을 <strong>texture atlas</strong>라 하고, chart의 boundary가 서로 붙는 곳을 <strong>seam</strong>이라 한다 <a class="cite" href="../../references.html#Levy02">[Levy02]</a>.</p>
+
+      <figure class="dg-figure" id="fig-31-6-4">
+        <img src="figures/fig-31-6-4-charts-seams.svg" alt="두 패널. (a) 6 charts (cube), seams in black: 파랑, 분홍, 하늘색, 초록, 주황 등으로 칠한 구. 각 색 영역의 경계가 검은 선(seam)이고 삼각형을 따라 자라 톱니 모양이다. (b) more seams, less area distortion: 가로축 total seam length(0에서 40), 세로축 worst max σ_1σ_2 / min σ_1σ_2(log, 1에서 10^5)인 그래프. 주홍 점 네 개가 회색 선으로 이어져 있다. 1 chart (hole of 10°)는 왼쪽 위 1.5, 14470 근처, 2 charts는 7, 4.8 근처, 6 charts는 18, 1.5 근처, 20 charts는 33, 1.1 근처에 있다.">
+        <figcaption><span class="fig-head">Figure 31.6.4.</span>
+        seam을 늘리면 왜곡이 줄어든다. <em>무엇을</em>: unit sphere(level 4 icosphere, face 5120개)를 네 방식으로 잘라 chart마다 LSCM으로 편 결과. 1 chart는 남극 둘레 반경 \(10^\circ\)의 작은 cap을 뺀 나머지, 2 charts는 두 hemisphere, 6 charts는 정육면체의 face 방향, 20 charts는 정이십면체의 face 방향으로 나눈 것이다(face의 무게중심으로 배정). <em>읽는 법</em>: (a)는 6 charts의 경우를 chart마다 다른 색으로 칠하고 seam을 검게 그린 것이다. (b)의 가로축은 seam의 총 길이(1 chart는 구멍의 둘레), 세로축은 가장 나쁜 chart의 \(\max\sigma_1\sigma_2/\min\sigma_1\sigma_2\)(log 눈금)다. <em>볼 것</em>: chart 수가 1, 2, 6, 20으로 늘면 넓이의 비는 14470, 4.84, 1.47, 1.10으로 줄고, seam의 길이는 1.52, 7.06, 17.74, 33.21로 늘어난다. 모든 chart가 disk(\(\chi = 1\))이고 뒤집힌 face는 없다. seam은 triangle의 edge를 따라가므로 톱니 모양이다(적도의 길이는 \(2\pi = 6.28\)인데 2 charts의 seam은 7.06이다). <em>본문과의 연결</em>: <a href="#i-31-6-4">Proposition 31.6.4</a>와 <a href="#fig-31-6-2">Figure 31.6.2</a>. 자르는 방식을 바꿔 가며 돌려 볼 수 있는 <a href="figures/fig-31-6-4-charts-seams-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-31-6-4">Figure 31.6.4</a>의 1 chart는 <a href="#fig-31-6-2">Figure 31.6.2</a>의 \(\Theta = 170^\circ\) cap과 같은 것이다(\(\sec^4 85^\circ \approx 17331\)). chart를 반으로 나누면 각 chart의 total curvature가 \(2\pi\)로 줄고 넓이의 비가 4.84로 떨어진다. 6개, 20개로 나누면 chart마다 curvature가 \(4\pi/6\), \(4\pi/20\)이 되어 거의 평평해진다. 대신 seam이 길어진다. seam은 공짜가 아니다.</p>
+      <ul>
+        <li>seam의 양쪽 texel은 image에서 서로 떨어져 있으므로, 보간이나 mip-mapping이 seam 근처에서 옆 chart의 색이나 빈 공간을 섞을 수 있다. 그래서 chart를 image에 배치할 때 둘레에 여백을 둔다 <a class="cite" href="../../references.html#Levy02">[Levy02]</a>. 여백과 chart 사이의 빈틈은 texture 해상도의 손실이다.</li>
+        <li>seam을 따라 vertex가 둘로 갈라지므로(chart마다 다른 UV) mesh의 vertex 수가 늘고, seam 위에서는 색이 미세하게 어긋날 수 있다.</li>
+      </ul>
+      <p>이 기하에서 seam을 고르는 원칙이 나온다. curvature가 큰 곳(angle defect가 큰 vertex)을 지나도록 자르면 chart 안의 curvature가 줄고, 눈에 잘 띄지 않는 곳으로 자르면 seam의 비용이 덜 보인다(해석). Lévy 등의 atlas는 chart의 경계가 특징선(feature curve)에서 만나도록 chart를 키우고, 겹침이 생긴 chart는 다시 나눈다 <a class="cite" href="../../references.html#Levy02">[Levy02]</a>. 이 장의 언어로 말하면 seam은 curvature를 boundary로 내보내는 출구이고, chart 분할은 Gauss–Bonnet의 \(4\pi\)를 여러 chart에 나누어 맡기는 일이다(해석).</p>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: 복원한 mesh의 texture가 고르지 않은 이유</p>
+        <p>3DGS나 neural SDF에서 mesh를 꺼내 texture를 굽는 파이프라인을 생각하자. texture image의 해상도는 정해져 있고, 각 texel이 surface에서 덮는 넓이는 \(\sigma_1\sigma_2\)다(<a href="#i-31-6-2">Proposition 31.6.2</a>(b)). 따라서 같은 사진에서 구운 texture라도 \(\sigma_1\sigma_2\)가 큰 chart의 가운데(<a href="#fig-31-6-2">Figure 31.6.2</a>의 빨강)는 흐리고, 가장자리는 선명할 것이다(해석). 이 차이는 chart 안의 curvature가 정한다. 복원 mesh는 잡음이 있어 angle defect가 곳곳에 흩어져 있으므로(<a href="31-5-fields-to-meshes.html#fig-31-5-2">Figure 31.5.2</a>의 sliver), atlas를 만들기 전에 mesh를 정리(remeshing, smoothing)하면 seam과 왜곡을 함께 줄일 수 있다(해석). 같은 이유로, texture 대신 vertex마다 색을 두는 방법은 seam이 없지만 해상도가 mesh의 vertex 수에 묶인다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>first fundamental form, isometry, conformal map: <a href="../07-first-fundamental-form/7-2-isometries.html#i-7-2-1">Definition 7.2.1</a>, <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-1">Definition 7.4.1</a>, <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-6">Theorem 7.4.6</a>, stereographic projection <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-9">Example 7.4.9</a>, 넓이를 보존하지만 conformal이 아닌 예 <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-11">Non-example 7.4.11</a>.</li>
+        <li>휜 surface를 왜곡 없이 펼 수 없는 이유: Tour <a href="../00-tour/0-5-intrinsic.html#i-0-5-1">Theorem 0.5.1</a>, <a href="../00-tour/0-5-intrinsic.html#i-0-5-3">Corollary 0.5.3</a>, <a href="../09-intrinsic-geometry/index.html#toc-9-3">Section 9.3</a>(Theorema Egregium).</li>
+        <li>Gauss–Bonnet와 boundary의 꺾임: Tour <a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>, <a href="../10-gauss-bonnet/index.html#toc-10-1">Section 10.1</a>, <a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>.</li>
+        <li>원 논문과 정리: Tutte embedding <a class="cite" href="../../references.html#Tutte63">[Tutte63]</a>, parametrization survey(Theorem 7, Proposition 2, LSCM와 DCP의 관계) <a class="cite" href="../../references.html#Floater05">[Floater05]</a>, LSCM과 texture atlas <a class="cite" href="../../references.html#Levy02">[Levy02]</a>, natural conformal map <a class="cite" href="../../references.html#Desbrun02">[Desbrun02]</a>, 교과서 <a class="cite" href="../../references.html#PMP">[PMP]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>UV map의 왜곡은 face마다 Jacobian \(J_f\)의 singular value \(\sigma_1 \ge \sigma_2\)로 읽는다. \(\sigma_1/\sigma_2\)는 각의 왜곡, \(\sigma_1\sigma_2\)는 texel 하나가 덮는 넓이다. \(\det \lt 0\)이면 face가 뒤집혔다.</li>
+        <li>LSCM의 conformal energy는 face마다 \(\tfrac12(1/\sigma_2 - 1/\sigma_1)^2\)를 넓이로 더한 것이고, \(E_C = E_D - A\)인 이차식이다. 상수 map과 similarity 때문에 vertex 두 개를 고정한다.</li>
+        <li>뒤집힘 없는 UV에서 vertex 둘레의 angle 합은 \(2\pi\)이므로, angle defect \(\delta_i \ne 0\)인 vertex가 chart 안에 있으면 각이나 넓이의 왜곡을 피할 수 없다. chart 안의 curvature가 클수록 넓이의 왜곡이 급격히 커진다(cap에서 대략 \(\sec^4(\Theta/2)\)).</li>
+        <li>convex boundary와 양수 가중치의 Tutte map은 뒤집힘이 없다. cotan 가중치와 LSCM에는 그런 보장이 없고, 작은 반례에서 실제로 뒤집힌다. 다만 LSCM의 반례는 curvature가 한 vertex에 크게 몰린 극단적인 mesh였다.</li>
+        <li>닫힌 surface는 chart로 잘라야 한다. seam을 늘리면 chart마다 curvature가 줄어 왜곡이 줄지만, seam에는 여백과 불연속이라는 비용이 있다.</li>
+      </ul>
+      <p class="next">이것으로 Chapter 31과 Part IV를 마친다. 이 장에서 이산판으로 다룬 smooth한 개념, 곧 first fundamental form과 conformal map, curvature, Laplace–Beltrami operator, Gauss–Bonnet은 깊은 장에서 정의와 증명부터 다시 쌓는다. 다음 장(<a href="../01-linear-algebra/index.html">Chapter 1</a>)부터가 그 깊은 장이고, 바탕인 linear algebra에서 시작한다. 차례대로 읽어도 되고, 각 절의 Go deeper나 Tour <a href="../00-tour/0-8-riemannian.html#sec-next">Section 0.8</a>의 Where to Go Next에서 필요한 장을 골라 들어가도 된다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-31-6-1" data-level="1">
+        <p><span class="thm-head">Exercise 31.6.1</span> <span class="level">★</span>
+        어떤 face에서 \(\sigma_1 = 2\), \(\sigma_2 = 0.5\)이다. 이 face의 map은 isometric인가, conformal인가, equiareal인가? \(1024 \times 1024\) texture를 \([0, 1]^2\)에 둘 때, 이 face에서 단위 길이에 놓이는 texel의 수는 방향에 따라 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\sigma_1\sigma_2 = 1\)이므로 equiareal이지만 \(\sigma_1 \ne \sigma_2\)이므로 conformal도 isometric도 아니다(<a href="#i-31-6-2">Proposition 31.6.2</a>). texel은 긴 축 방향으로 \(1024/2 = 512\)개, 짧은 축 방향으로 \(1024/0.5 = 2048\)개 놓인다. 넓이로는 평균과 같지만, 무늬는 한 방향으로 4배 늘어나 보인다.</p>
+          <p class="verified">Verification: <code>verify/v-31-6-parametrization-texture.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-6-2" data-level="1">
+        <p><span class="thm-head">Exercise 31.6.2</span> <span class="level">★</span>
+        정육면체의 전개도(정사각형 6개를 잇는 평면 그림)는 왜곡이 없는 UV map이다. <a href="#i-31-6-4">Proposition 31.6.4</a>를 써서, 전개도를 만들 때 여덟 vertex가 모두 자르는 선 위에 있어야 하는 이유를 설명하여라. 자르는 선이 edge 7개로 이루어지면 전개도의 boundary는 edge 몇 개인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>정육면체의 vertex는 세 정사각형의 angle \(\pi/2\)가 모여 \(\delta_i = 2\pi - 3\pi/2 = \pi/2 \ne 0\)이다(여덟 개의 합 \(4\pi = 2\pi\chi\)). 왜곡 없는 map은 face마다 similarity(여기서는 isometry)이므로 chart의 boundary가 아닌 vertex에서는 \(\delta_i = 0\)이어야 한다. 따라서 여덟 vertex는 모두 boundary, 곧 자르는 선 위에 있어야 한다. 자르는 선이 여덟 vertex를 잇는 tree(edge 7개)이면, 자른 edge 하나가 boundary edge 두 개가 되므로 boundary는 \(2 \times 7 = 14\)개의 edge다.</p>
+          <p class="verified">Verification: <code>verify/v-31-6-parametrization-texture.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-6-3" data-level="1">
+        <p><span class="thm-head">Exercise 31.6.3</span> <span class="level">★</span>
+        LSCM에서 vertex 하나만 고정하면 어떤 일이 생기는가? 세 개 이상을 고정하면 어떤 문제가 생길 수 있는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>하나만 고정하면 그 점을 중심으로 UV 전체를 \(a \to 0\)으로 줄이는 similarity \(z \mapsto a(z - z_0) + z_0\)가 \(E_C\)를 \(\abs a^2\)배로 줄이므로, 최솟값은 모든 vertex가 한 점에 모인 퇴화한 map(\(E_C = 0\))이다(<a href="#i-31-6-3">Proposition 31.6.3</a>(c)). 두 점을 고정하면 similarity의 4개 parameter가 정해져 해가 유일하다. 세 개 이상을 고정하면 그 점들의 상대적 위치를 사용자가 정하는 셈이므로, 그 위치가 surface의 모양과 맞지 않으면 developable surface에서도 conformal map을 얻지 못한다. Lévy 등이 고정하는 vertex의 수로 2를 권하는 이유다 <a class="cite" href="../../references.html#Levy02">[Levy02]</a>.</p>
+          <p class="verified">Verification: <code>verify/v-31-6-parametrization-texture.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-6-4" data-level="2">
+        <p><span class="thm-head">Exercise 31.6.4</span> <span class="level">★★</span>
+        unit sphere의 hemisphere를 stereographic projection으로 펴면 가장자리와 중심의 넓이 배율의 비는 얼마인가? hemisphere의 total curvature는 얼마인가? <a href="#fig-31-6-2">Figure 31.6.2</a>의 LSCM 값 4.6과 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(r = \tan(\theta/2)\)에서 반지름 방향의 배율은 \(dr/d\theta = \tfrac12\sec^2(\theta/2)\), 원주 방향의 배율은 \(r/\sin\theta = \tfrac12\sec^2(\theta/2)\)로 같으므로 conformal이고, 넓이 배율은 \(\tfrac14\sec^4(\theta/2)\)다. \(\theta = 0\)에서 \(\tfrac14\), \(\theta = \pi/2\)에서 \(1\)이므로 비는 \(\sec^4 45^\circ = 4\)다. total curvature는 \(2\pi(1 - \cos 90^\circ) = 2\pi\)다. LSCM의 4.6이 조금 큰 것은 mesh의 cap boundary가 톱니 모양이고 discrete map이 정확히 stereographic이 아니기 때문으로 보인다. 같은 total curvature를 conformal하게 펴면 넓이에서 대략 이만큼의 대가를 치른다는 뜻이다.</p>
+          <p class="verified">Verification: <code>verify/v-31-6-parametrization-texture.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-31-6-5" data-level="2">
+        <p><span class="thm-head">Exercise 31.6.5</span> <span class="level">★★</span>
+        <a href="#eq-31-6-3">(31.6.3)</a>의 가중치가 모두 양수이면 \(u_i\)는 이웃들의 convex hull 안에 있음을 보여라. <a href="#fig-31-6-3">Figure 31.6.3</a>(c)에서 \(x_9\)의 cotan 가중치를 정규화하면 음수가 있다. 이때 \(x_9\) 둘레의 triangle 가운데 적어도 하나가 뒤집히는 이유를 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\lambda_{ij} \gt 0\), \(\sum_j\lambda_{ij} = 1\)이면 \(u_i = \sum_j\lambda_{ij}u_j\)는 정의상 convex combination이므로 convex hull 안에 있다. 정규화한 가중치에 음수가 있으면 \(u_i\)는 affine combination일 뿐이라 hull 밖으로 나갈 수 있고, 그림 (c)에서 실제로 \(x_9\)는 이웃들의 고리 밖으로 나갔다. 둘레 triangle들의 oriented angle의 합은 고리가 \(u_9\)를 감는 횟수의 \(2\pi\)배인데, 고리 밖의 점에 대해서는 감는 횟수가 0이다. verify에서 이 합은 반올림 오차 안에서 \(0\)이었다(Tutte map에서는 \(2\pi\)). 모든 triangle이 positively oriented이면 angle이 모두 양수라 합이 0이 될 수 없으므로, 적어도 하나는 뒤집혀 있다.</p>
+          <p class="verified">Verification: <code>verify/v-31-6-parametrization-texture.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="31-5-fields-to-meshes.html">← 31.5 From Fields to Meshes and Back</a>
+    <a rel="next" href="../01-linear-algebra/index.html">1. Linear Algebra Review →</a>
+  </nav>
+</body>
+</html>
