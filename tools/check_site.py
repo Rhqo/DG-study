@@ -40,6 +40,7 @@ THM_WORD = {
 }
 EXERCISE_WORD = "Exercise"
 FIGURE_WORD = "Figure"
+ANIMATION_WORD = "Animation"  # §12.8: figure.dg-figure.animation, id anim-N-M-K, 그림과 따로 센다
 REQUIRED_META = {
     "section": ("dg-id", "dg-status", "dg-prereq", "dg-refs", "dg-updated"),
     "chapter": ("dg-id", "dg-status", "dg-updated"),
@@ -74,7 +75,7 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _EQ_NUM = r"\(\d{1,2}\.\d{1,2}\.\d{1,3}\)"
 UNLINKED_REF_RE = re.compile(
     r"(?<![A-Za-z-])(?:(?:Definition|Theorem|Proposition|Lemma|Corollary|Example|Non-example|Remark"
-    r"|Exercise|Figure)\s+\d+\.\d+\.\d+"
+    r"|Exercise|Figure|Animation)\s+\d+\.\d+\.\d+"
     r"|(?:Equation\s+)?" + _EQ_NUM + r")")
 
 # 남은 한국어 라벨 (§8.2). (한국어, 영어) — 긴 것부터 맞춘다.
@@ -91,7 +92,7 @@ KOREAN_LABELS = [
     ("기호표", "Notation and Conventions"),
     ("정의", "Definition"), ("정리", "Theorem"), ("명제", "Proposition"), ("비예", "Non-example"),
     ("비고", "Remark"), ("연습", "Exercise"), ("그림", "Figure"), ("증명", "Proof"), ("힌트", "Hint"),
-    ("풀이", "Solution"), ("직관", "Intuition"), ("주의", "Warning"), ("역사", "History"),
+    ("풀이", "Solution"), ("애니메이션", "Animation"), ("직관", "Intuition"), ("주의", "Warning"), ("역사", "History"),
     ("목표", "Goals"), ("동기", "Motivation"), ("요약", "Summary"), ("줄기", "Threads"),
     ("목차", "Contents"), ("계획", "Planned"), ("초안", "Draft"), ("확정", "Final"),
     ("검증", "Verification"), ("내용", "Topics"), ("예", "Example"), ("식", "Equation"),
@@ -712,9 +713,9 @@ class SiteChecker:
     def check_links(self, page):
         rep, rel = self.rep, page.rel
         for n in page.dom.iter():
-            for attr in ("href", "src"):
+            for attr in ("href", "src", "poster"):
                 url = n.get(attr)
-                if url is None or n.tag not in ("a", "img", "iframe", "link", "script", "source"):
+                if url is None or n.tag not in ("a", "img", "iframe", "link", "script", "source", "video"):
                     continue
                 if url.strip() == "":
                     rep.error(rel, n.line, f"empty {attr} on <{n.tag}>")
@@ -970,7 +971,7 @@ class SiteChecker:
 
     def check_numbering(self, page, n, m):
         rep, rel = self.rep, page.rel
-        k_item = k_eq = k_fig = k_ex = 0
+        k_item = k_eq = k_fig = k_ex = k_anim = 0
         figures = []
         for node in page.dom.iter():
             if node.tag == "#document":
@@ -1008,6 +1009,13 @@ class SiteChecker:
             elif node.tag == "figure":
                 if not node.has_class("dg-figure"):
                     rep.error(rel, node.line, "<figure> must have class dg-figure")
+                    continue
+                if node.has_class("animation"):
+                    k_anim += 1
+                    want = f"anim-{n}-{m}-{k_anim}"
+                    if node.id != want:
+                        rep.error(rel, node.line, f"animation {k_anim} must have id '{want}' (got '{node.id}')")
+                    self.check_animation(page, node, f"{ANIMATION_WORD} {n}.{m}.{k_anim}.", want)
                     continue
                 k_fig += 1
                 want = f"fig-{n}-{m}-{k_fig}"
@@ -1049,6 +1057,48 @@ class SiteChecker:
         for fig in figures:
             if fig.id and f"#{fig.id}" not in refs:
                 rep.error(rel, fig.line, f"figure '{fig.id}' is never referenced in the text (<a href=\"#{fig.id}\">, §12.6)")
+
+    def check_animation(self, page, fig, want_head, want_id):
+        """§12.8: <figure class="dg-figure animation" id="anim-N-M-K"> 안에 poster·controls·aria-label이 있는
+        <video>와 anim/anim-N-M-K-slug.mp4를 가리키는 <source>가 있고, 같은 이름의 .py와 -poster.png가 있어야 한다."""
+        rep, rel = self.rep, page.rel
+        cap = fig.find("figcaption")
+        head = cap.find(cls="fig-head") if cap else None
+        if head is None:
+            rep.error(rel, fig.line, f"animation needs <figcaption><span class=\"fig-head\">{ANIMATION_WORD} N.M.K.</span> …")
+        elif head.text() != want_head:
+            rep.error(rel, head.line, f"fig-head must read '{want_head}' (got '{head.text()}')")
+        vids = fig.find_all("video")
+        if len(vids) != 1:
+            rep.error(rel, fig.line, "animation figure needs exactly one <video>")
+            return
+        v = vids[0]
+        for attr in ("poster", "aria-label"):
+            if not (v.get(attr) or "").strip():
+                rep.error(rel, v.line, f"<video> needs a non-empty {attr} (§12.8)")
+        if v.get("controls") is None:
+            rep.error(rel, v.line, "<video> needs controls (§12.8)")
+        if v.get("autoplay") is not None:
+            rep.error(rel, v.line, "<video> must not autoplay (§12.8)")
+        srcs = [x for x in v.find_all("source") if x.get("src")]
+        if not srcs:
+            rep.error(rel, v.line, "<video> needs <source src=\"anim/anim-N-M-K-slug.mp4\" type=\"video/mp4\">")
+            return
+        res = self.resolve(page, srcs[0].get("src"))
+        if res is None:
+            return
+        target = res[0]
+        base, ext = os.path.splitext(target)
+        stem = os.path.basename(base)
+        if os.path.basename(os.path.dirname(target)) != "anim" or ext.lower() != ".mp4":
+            rep.error(rel, v.line, "animation source must be anim/anim-N-M-K-slug.mp4 (§12.8)")
+        if not (stem == want_id or stem.startswith(want_id + "-")):
+            rep.error(rel, v.line, f"animation file '{stem}' must start with '{want_id}-'")
+        if not os.path.exists(base + ".py"):
+            rep.error(rel, v.line, f"animation source {os.path.relpath(base, self.root)}.py is missing (§12.8)")
+        pres = self.resolve(page, v.get("poster") or "")
+        if pres is not None and os.path.abspath(pres[0]) != os.path.abspath(base + "-poster.png"):
+            rep.error(rel, v.line, f"poster must be {stem}-poster.png next to the video (§12.8)")
 
     def check_figure(self, page, fig, want_head, want_id):
         rep, rel = self.rep, page.rel

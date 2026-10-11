@@ -570,3 +570,61 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - 남은 것
       - 400px에서 2–3패널 그림 글자가 작다(검토자 여럿이 지적). 사이트 전체에 확대 CSS를 검토한다.
       - lib/*.py를 tools/로 옮길지 검토한다.
+
+## 12. 애니메이션: manim (2026-10-11, 사용자 지시)
+
+- 사용자 요청: "Chapter 0과 Chapter 31에 대해서 manim으로 잘 표현할 수 있는 애니메이션이나 중요한 부분, 직관을 잘 표현하는 부분 전부 애니메이션 만들어줘. commit push해서 공개 사이트에 올라가도록. 애니메이션 규칙도 작성하고." 이어서 "애니메이션 작업이 끝나면 알아서 commit push 해줘"라고 했다.
+- **기반**(완료)
+  - `tools/setup_manim.sh`: `.manim/`(git 제외)에 manim 0.19.1을 설치한다.
+    - 우회한 것: python3 -S, pyzed 권한 문제, manimpango·srt 직접 빌드, 시스템 pycairo
+    - 실행은 `python3 -S`로 한다. `-S`가 없으면 scipy가 /usr/local의 cython.py에서 PermissionError를 낸다.
+  - `tools/dganim.py`: 흰 배경, dgfig 색, `label`, `mtex`(matplotlib mathtext, 크기 보정), `mesh_group`(Lambert 음영), `main`(faststart mp4, poster, 4 MB 상한)
+  - `tools/render_anims.sh`: taskset -c 0-7, `--check`
+  - check_site: `figure.dg-figure.animation`, id `anim-N-M-K`, "Animation N.M.K."(그림과 따로 센다), video poster·controls·aria-label·source, .py 존재 확인
+  - style.css: video 스타일
+  - GUIDELINES §12.8(애니메이션 규칙), §10, §11.5, 부록 E
+- **진행**: 작성 agent 4명(opus)을 동시에 띄웠다. A는 Tour 0.1–0.4, B는 Tour 0.5–0.8, C는 31.1–31.3, D는 31.4–31.6을 맡는다.
+  - B 완료: 21개(0.5.1–0.5.5, 0.6.1–0.6.6, 0.7.1–0.7.4, 0.8.1–0.8.6). 검토 agent 2명(0.5–0.6, 0.7–0.8)을 띄웠다.
+  - B의 요청 처리
+    - dganim.mtex: `$…$` 밖의 공백 글리프(d 없는 `<path>`) 때문에 svgelements가 TypeError를 냈다. `_fix_empty_paths`로 고쳤다.
+    - docstring: 바뀌는 숫자는 label, Unicode minus, Text의 `_`는 첨자가 아님을 적었다.
+    - cross-section은 terms.tsv에 넣지 않았다. 수학 용어가 아닌 일반 낱말이다.
+  - C 완료: 12개(31.1.1–31.1.4, 31.2.1–31.2.4, 31.3.1–31.3.4). 검토 agent 2명(31.1–31.2, 31.3)을 띄웠다.
+  - C의 요청 처리
+    - mesh_group: face마다 shade_in_3d를 켜서 Scene3D가 깊이 정렬한다. `_Camera3D`가 이 face에 음영을 다시 넣지 않는다. torus로 시험했다.
+    - dganim docstring: frozen-frame updater
+    - §12.8: 가장자리 여백, 멈춘 상태의 control bar(아래 약 12%), face 중심 정렬의 한계, 용량
+  - D 완료: 15개(31.4.1–31.4.5, 31.5.1–31.5.6, 31.6.1–31.6.4). 검토 agent 2명(31.4, 31.5–31.6)을 띄웠다. mtex docstring에 `\lt`/`\gt` 없음, label 폭 어림을 적었다.
+  - 검토 0.5–0.6 완료: 7개를 고쳤다. 수치 오류는 없었고 진술 3건을 고쳤다(0.6.5 건너뛴 뒤의 회전각 2π − |ω|, 0.5.5 땅콩 모양, 0.5.1 Mercator 자르는 위도).
+    - 이어서 poster 아래 띠(90 px)와 가장자리 여백을 점검했다. 0.5.1, 0.5.4, 0.6.1, 0.6.3, 0.6.5의 숫자 줄을 옮겨 다시 렌더했다. 0.5–0.6 검토 완료.
+  - 사용량 한도로 멈춤(2026-10-11). 이후 7명 모두 SendMessage로 재개했다.
+  - 검토 0.7–0.8 완료: 수학 오류 없음. 9개를 고치고 10개 모두 다시 렌더했다(0.7.4 본문의 γ₂ 누적값 +0.28 → −0.28 → 0, 0.8.1 "straight" → "horizontal", 0.7.3 edge당 1.5초 등). poster 띠는 모두 비었다.
+  - 검토 31.1–31.2 완료: 수학 오류 없음. 7개를 고치고 다시 렌더했다. 가장 큰 결함은 31.1.3 tube가 U자 구간에서 접혀 보이는 면의 약 25%가 안쪽이던 것이다. rotation-minimizing frame으로 다시 만들고 바깥 normal assert를 넣었다. 나머지는 poster 띠, 31.2.4 "A(ε) = …", Fig 31.1.4 alt 색.
+  - 검토 31.4 완료: 5개 모두 고쳐 다시 렌더했다. 수치 오류 1건: HKS 교차 시각 0.58 → 0.60(격자점 대신 보간, 본문 1곳·캡션 2곳). 나머지는 poster 띠, 겹침, 캡션 시간 구간, |H − 1| 범위 문구.
+  - A 완료(재개 후): 14개(0.1.1–0.1.2, 0.2.1–0.2.4, 0.3.1–0.3.4, 0.4.1–0.4.4, 0.4는 문서 순서로 다시 매김). 검토 agent 2명(0.1–0.2, 0.3–0.4)을 띄웠다.
+    - A의 요청: terms.tsv와 glossary에 "평행원 (회전면의) → parallel (of a surface of revolution)"을 넣었다. §12.8에 좁은 화면에서는 control bar 음영이 약 20%라는 점과 "되도록 아래 15% 위"를 적었다.
+  - 검토 31.5–31.6 완료: 수치 오류 없음. 10개 모두 고쳐 다시 렌더했다.
+    - 31.6.1: SVD 부호 때문에 W와 U가 거의 반 바퀴씩 돌던 것을 회전각이 작은 (−U, −W)로 바꿨다.
+    - 31.5.6: √2는 normal 방향으로 밀 때의 값이라고 밝혔다.
+    - 31.5.2: "충분조건일 뿐"
+    - 31.6.4: 시점을 바꿔 seam이 보이게 했고, 1 chart는 cap과 "거의 같다"로 고쳤다.
+    - 그 밖에 poster 띠
+  - 검토 0.3–0.4 완료: 수치 오류 없음. 5개를 다시 렌더했다.
+    - 0.4.2: torus가 안팎이 뒤집혀 그려졌다(cull이 x_u × x_v 쪽을 앞면으로 본다). 격자 방향을 뒤집고, 바깥 normal assert를 넣었다.
+    - 0.4.3: 위아래 축척 차이를 점선으로 보였다.
+    - 0.3.4: "ellipse가 납작해지며"가 틀렸다(비는 0.008 → 0.016).
+    - 그 밖에 0.3.2 경로, poster 띠
+    - GUIDELINES §12.8 예시의 파일 이름을 anim-0-4-3-gauss-map으로 고쳤다.
+  - 검토 31.3 완료: 수학 오류 없음. 4개 모두 아래 띠의 글자를 올려 다시 렌더했다. 캡션 3곳을 고쳤다(31.3.4의 Laplacian은 거칠기 0.62를 남기며 줄어든다; d/dt Σ|x−c|² = −2k𝓛의 근거). 그때 아직 돌고 있던 것: A(Tour 0.1–0.4 작성, 0-4 페이지의 anim 번호를 바꾸는 중이라 check_all --chapter 0이 FAIL), 검토 0.7–0.8, 31.1–31.2, 31.3, 31.4, 31.5–31.6
+  - 검토 0.1–0.2 완료: 수학 오류 없음. 6개 모두 다시 렌더했다(poster 띠, 겹침, 0.2.3 γ(u) → γ(t), 0.1.1 "정확히 같아진다" → "가까워진다").
+- **통합**(2026-10-11)
+  - mtime이 낡은 3개(0.2.3, 0.3.1, 0.4.2)를 다시 렌더했다.
+  - `_helpers_a.py` docstring에 cull 방향 경고를 넣었다. §12.8의 마지막 상태 유지를 1–3초로 고쳤다.
+  - `render_anims --check` 62/62, `check_all` OK, test_checkers 통과
+- **결과**: 애니메이션 62개, 약 81 MB
+  - Tour 35개: 0.1 2, 0.2 4, 0.3 4, 0.4 4, 0.5 5, 0.6 6, 0.7 4, 0.8 6
+  - Chapter 31 27개: 31.1 4, 31.2 4, 31.3 4, 31.4 5, 31.5 6, 31.6 4
+  - 모두 작성, 독립 검토, 통합을 거쳐 commit하고 push했다.
+- **남은 것(선택)**
+  - `_helpers_a.Painter`, `_helpers_c/d.MeshView`, `_helpers_b.View`를 tools/dganim으로 옮긴다.
+  - Sun09 원문에서 HKS의 a₁ 서술(“scalar curvature … Gaussian curvature”)을 확인한다(31.4 본문, 이번 작업 이전부터 있던 문장).

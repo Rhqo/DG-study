@@ -779,6 +779,9 @@ DG-study/
 │   └── mathjax-config.js      ← 유일한 MathJax 설정 (부록 C)
 ├── tools/
 │   ├── dgfig.py               ← 그림 공용 스타일·헬퍼
+│   ├── dganim.py              ← 애니메이션(manim) 공용 스타일·헬퍼 (§12.8)
+│   ├── setup_manim.sh         ← manim 환경을 .manim/ 에 설치 (git 제외)
+│   ├── render_anims.sh        ← 애니메이션 렌더 (check_all에는 들어 있지 않다)
 │   ├── dgsym.py               ← §6 규약을 구현한 기호계산
 │   ├── dgnum.py               ← 수치 헬퍼 (RK4 등)
 │   ├── dgcheck.py             ← verify 스크립트용 check/sym_equal/close/summary
@@ -800,6 +803,10 @@ DG-study/
         ├── figures/
         │   ├── fig-6-2-1-tangent-plane.py
         │   └── fig-6-2-1-tangent-plane.svg
+        ├── anim/                           ← (선택) 애니메이션, §12.8
+        │   ├── anim-6-2-1-moving-plane.py
+        │   ├── anim-6-2-1-moving-plane.mp4
+        │   └── anim-6-2-1-moving-plane-poster.png
         └── verify/
             └── v-6-2-tangent-plane.py
 ```
@@ -809,6 +816,7 @@ DG-study/
 - 그림
   - 스크립트는 `figures/fig-N-M-K-slug.py`로 짓고, 출력은 같은 이름의 `.svg`로 한다.
   - 필요하면 `.png`도 만든다. 인터랙티브 그림은 `-interactive.html`을 붙인다.
+- 애니메이션은 `anim/anim-N-M-K-slug.py`로 짓고, 출력은 같은 이름의 `.mp4`와 `-poster.png`다(§12.8).
 - 검증 스크립트는 `verify/v-N-M-slug.py`로 짓는다. 절마다 하나다.
 - 모든 파일명은 영문 소문자, 숫자, 하이픈만 쓴다.
 
@@ -939,8 +947,8 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 
 - **번호는 절 단위로 매긴다.**
   - 정의·정리·예 등은 한 카운터를 공유한다: Definition 6.2.1, Example 6.2.2, Theorem 6.2.3 …
-  - 식 `(N.M.K)`, 그림 `Figure N.M.K`, 연습 `Exercise N.M.K`는 각각 따로 센다.
-- **id 규칙**: 항목 `i-N-M-K`, 식 `eq-N-M-K`, 그림 `fig-N-M-K`, 연습 `ex-N-M-K`, 절 안의 소제목 `sec-slug`.
+  - 식 `(N.M.K)`, 그림 `Figure N.M.K`, 애니메이션 `Animation N.M.K`, 연습 `Exercise N.M.K`는 각각 따로 센다.
+- **id 규칙**: 항목 `i-N-M-K`, 식 `eq-N-M-K`, 그림 `fig-N-M-K`, 애니메이션 `anim-N-M-K`, 연습 `ex-N-M-K`, 절 안의 소제목 `sec-slug`.
 - **참조는 항상 링크로 건다.**
   - 같은 파일: `<a href="#i-6-2-3">Theorem 6.2.3</a>`
   - 같은 장의 다른 절: `<a href="6-1-definition.html#i-6-1-4">Definition 6.1.4</a>`
@@ -1081,6 +1089,59 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
 - 3D 회전이나 매개변수 슬라이더가 이해에 결정적일 때만 만든다. 정적 SVG는 **항상** 함께 둔다.
 - 도구는 plotly 또는 JSXGraph(jsDelivr)를 쓴다. plotly는 Python에서 `include_plotlyjs="cdn"`으로 별도 HTML 파일을 만든다.
 - 정적 그림과 같은 공식, 같은 매개변수를 쓴다. 본문에서는 링크나 `<iframe class="interactive">`로 연결한다.
+
+### 12.8 애니메이션 (manim, 2026-10-11 사용자 요청)
+
+사용자가 Chapter 0과 Chapter 31에 "manim으로 잘 표현할 수 있는 애니메이션, 중요한 부분, 직관을 잘 표현하는 부분 전부"를 요청했다. 다른 장에도 같은 규칙을 쓴다.
+
+- **언제 만드는가**: **시간에 따른 변화가 메시지일 때**만 만든다.
+  - 예: 흐름과 반복(smoothing, gradient descent, heat flow), 매개변수 sweep, 펼치기·접기, 극한으로 가는 과정, 합이 쌓이는 과정, 변환 전후의 대응.
+  - 정지 그림 한 장으로 충분한 내용은 그림(§12.1–12.6)으로 둔다. 3D를 돌려 보기만 하면 되는 것은 인터랙티브 그림(§12.7)으로 둔다.
+- **도구**: manim Community 0.19.1을 쓴다.
+  - 설치는 `bash tools/setup_manim.sh`(`.manim/`, git 제외), 렌더는 `bash tools/render_anims.sh [--chapter NN]`로 한다.
+  - LaTeX가 없으므로 MathTex/Tex를 쓰지 않는다. 수식은 `dganim.mtex()`(matplotlib mathtext), 글자는 `dganim.label()`로 만든다.
+  - 그림처럼 애니메이션 안에도 한글을 쓰지 않는다(§12.3).
+- **엄밀성**: §12.1과 같다.
+  - 정량적인 내용은 실제 수식과 데이터로 계산한다. 예: 곡선, 곡면, mesh, flow의 매 단계, 수치. tools/dg*.py나 장의 lib/를 쓴다.
+  - 스크립트의 모듈 수준 계산에 자기검사 assert를 넣는다. `--check`가 이것만 돌린다.
+  - 본문·정적 그림과 같은 기호와 같은 매개변수를 쓴다. 개념도는 캡션에 "(schematic)"을 붙인다.
+- **파일과 번호**
+  - `anim/anim-N-M-K-slug.py` → `anim-N-M-K-slug.mp4`, `anim-N-M-K-slug-poster.png`(`dganim.main`이 만든다)
+  - 번호는 그림과 따로 센다: `Animation N.M.K`, id `anim-N-M-K`. 기존 그림 번호는 바꾸지 않는다.
+- **HTML**(check_site가 검사한다)
+
+  ```html
+  <figure class="dg-figure animation" id="anim-0-4-3">
+    <video controls loop muted playsinline preload="metadata"
+           poster="anim/anim-0-4-3-gauss-map-poster.png"
+           aria-label="(한국어로 영상 내용 요약)">
+      <source src="anim/anim-0-4-3-gauss-map.mp4" type="video/mp4">
+    </video>
+    <figcaption><span class="fig-head">Animation 0.4.3.</span> … </figcaption>
+  </figure>
+  ```
+
+  autoplay는 쓰지 않는다. poster는 핵심 상태가 보이는 프레임으로 고른다(`main(..., poster_t=…)`).
+- **스타일**
+  - 흰 배경, dgfig와 같은 색 역할(`dganim.C`: 파랑 tangent, 주홍 normal, 주황 accent …), 글꼴 DejaVu Serif
+  - 글자 크기는 1280×720에서 `MIN_FONT` = 30 이상이다(400px 폭에서도 읽히도록). 화면에 한 번에 쓰는 글은 짧게(영어 한두 줄).
+  - 화면 밖으로 나가는 글자가 없어야 한다(가장자리 여백 0.2 이상). 영상을 멈춘 상태에서는 브라우저 control bar가 아래쪽 약 12%(720p 기준 약 90px)를 덮는다(Chromium에서 확인). bar의 높이가 고정이라, 영상이 좁게 보이면 그 음영이 더 넓다(900px 페이지에서 약 20%). poster에서 꼭 읽혀야 하는 글자는 아래 12% 밖에 두고, 되도록 아래 15% 위에 둔다.
+  - 1280×720, 30 fps, 소리 없음. 길이는 8–40초, 파일은 4 MB 이하(`dganim.main`이 검사한다).
+  - 한 애니메이션에 한 메시지만 담는다. 단계마다 1.5초 이상 머문다. 마지막 상태는 1–3초 유지한다(loop로 다시 시작하므로). 마지막 화면에 읽을 글이 있으면 3초 쪽으로 둔다.
+  - 3D mesh는 `dganim.mesh_group`(face 음영)으로 그린다. 카메라는 천천히 움직이고, 시점이 바뀌는 장면에는 기준이 되는 축이나 바닥을 둔다.
+    - `da.Scene3D`의 깊이 정렬은 face 중심 기준이다. 숨은면이 정확해야 하면 2D 장면에서 직접 투영하고 painter 정렬을 한다(예: `chapters/31-meshes/anim/_helpers_c.py`의 MeshView).
+    - mesh가 매 프레임 크게 바뀌면 파일이 커진다. 해상도나 갱신 간격을 줄여 4 MB 안에 맞춘다.
+- **캡션과 본문**: 그림 설명 규칙(§12.6)을 그대로 따르고 **시간 구간**을 더한다.
+  - 캡션의 네 부분: 무엇을 / 읽는 법 / 볼 것 / 본문 연결
+  - 시간 구간 예: "0–4초: …, 4–9초: …"
+  - 본문의 참조 문단은 영상에서 무엇을 지켜볼지 미리 말한다.
+  - `aria-label`에 한국어 요약을 둔다.
+- **정지 대안**: 영상을 보지 않아도 poster와 캡션으로 핵심을 알 수 있어야 한다. 같은 내용의 정적 그림이 있으면 서로 링크한다.
+- **검사**
+  - `bash tools/render_anims.sh --chapter NN`: 렌더와 assert
+  - `bash tools/check_all.sh --chapter NN`: HTML, 파일 존재. 렌더는 하지 않는다.
+  - 검토자는 `ffmpeg -ss T -i X.mp4 -frames:v 1 x.png`로 여러 시점의 프레임을 뽑아 보고, 캡션의 시간 구간과 맞는지 확인한다.
+- **이 컴퓨터**: 렌더는 `render_anims.sh`가 CPU 0–7에 묶는다(모든 코어를 오래 쓰면 멈춘다). 여러 agent가 동시에 렌더해도 이 제한을 지킨다.
 
 ---
 
@@ -1657,3 +1718,4 @@ window.MathJax = {
 
 - `google-chrome --headless=new --screenshot --window-size=W,H`는 창 높이에서 약 87px을 잘라낸다(2026-10-08 검토에서 확인). 그림 아래쪽이 잘린 것처럼 보이므로 높이를 넉넉히 주거나 `tools/shot.mjs`를 쓴다.
 - `tools/check_all.sh`는 `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS`, `MKL_NUM_THREADS`를 4로 제한한다(2026-10-08). 제한이 없으면 큰 Monte Carlo verify가 가끔 segfault(exit 139)를 냈다. 스크립트를 따로 돌릴 때도 같은 값을 쓴다.
+- **manim**: `bash tools/setup_manim.sh`로 `.manim/`에 설치한다(표준 pip·venv가 안 되는 이유는 스크립트 주석). 실행은 반드시 `python3 -S`로 한다. `-S` 없이 scipy를 import하면 `/usr/local`의 읽을 수 없는 `cython.py` 때문에 PermissionError가 난다. 이것이 "scipy 사용 불가"의 원인이다.
