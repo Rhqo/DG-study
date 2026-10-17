@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>33.4 Simplicial Manifolds — DG Study</title>
+  <meta name="dg-id" content="33.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="33.2, 33.3, 31.1">
+  <meta name="dg-refs" content="Cr §2.3; CMU-DDG L2B">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">33. Combinatorial Surfaces</a> ›
+    <span>33.4 Simplicial Manifolds</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>33.4 Simplicial Manifolds</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#Cr">[Cr §2.3]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>vertex link가 cycle(또는 path)이라는 조건으로 simplicial surface를 정의하고, 그것이 “edge마다 triangle 둘(또는 하나)과 vertex 둘레의 fan 하나”와 같은 조건임을 증명할 수 있다.</li>
+        <li>simplicial surface의 boundary가 서로 만나지 않는 loop들임을 증명하고, simplicial manifold를 일반 dimension에서 정의할 수 있다.</li>
+        <li>\(n_0, n_1, n_2\) 사이의 관계 \(3n_2 = 2n_1\)과 \(\sum_i(6 - \deg i) = 6\chi\)를 증명하고, 평균 valence가 6으로 가는 이유를 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="33-2-star-closure-link.html#i-33-2-13">Proposition 33.2.13</a>과 <a href="33-2-star-closure-link.html#i-33-2-14">Proposition 33.2.14</a>: link의 공식, vertex의 star는 link 위의 cone</li>
+        <li><a href="33-2-star-closure-link.html#i-33-2-18">Definition 33.2.18</a>: pure subcomplex의 boundary</li>
+        <li><a href="33-3-orientation.html#i-33-3-13">Definition 33.3.13</a>: consistent orientation, <a href="33-3-orientation.html#i-33-3-18">Proposition 33.3.18</a>: orientation propagation</li>
+        <li>(비교용) <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-3">Definition 31.1.3</a>, <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-7">Proposition 31.1.7</a>: Track 1의 manifold mesh와 개수 공식</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="33-3-orientation.html#i-33-3-18">Proposition 33.3.18</a>은 “edge마다 triangle이 둘 이하”라는 가정을 두었다. edge에 triangle이 셋 붙으면 orientation이 불가능했다(<a href="33-3-orientation.html#i-33-3-15">Non-example 33.3.15</a>). 이런 가정을 하나씩 따로 두는 대신, “complex가 surface처럼 생겼다”는 조건 하나로 묶고 싶다.</p>
+      <p>smooth surface는 모든 점 근처가 평면의 disk처럼 보이는 공간이다(<a href="../00-tour/0-6-manifolds.html#i-0-6-1">Definition 0.6.1</a>). <a href="33-2-star-closure-link.html#i-33-2-22">Proposition 33.2.22</a>에서 vertex의 closed star가 disk 모양이면 그 테두리가 link라는 것을 보았다. 거꾸로 link가 원 하나(cycle)이면 closed star는 그 원 위에 세운 cone, 곧 disk다. 그래서 surface의 조건을 “모든 vertex의 link가 cycle”이라는 유한한 조합적 조건으로 쓸 수 있다. 이 절은 그 정의에서 출발해 boundary, orientation, 개수의 관계를 차례로 증명한다.</p>
+    </section>
+
+    <section id="sec-graphs">
+      <h2>Cycles and Paths</h2>
+      <p>vertex link는 triangle이 없는 1-dimensional complex, 곧 graph다(<a href="33-2-star-closure-link.html#i-33-2-22">Proposition 33.2.22</a>의 증명). graph의 두 가지 모양에 이름을 붙이자. 서로 다른 vertex \(j_1, \dots, j_m\) (\(m \ge 3\))과 edge \(\{j_1, j_2\}, \dots, \{j_{m-1}, j_m\}, \{j_m, j_1\}\)만으로 된 graph를 길이 \(m\)의 <strong>cycle</strong>(고리)이라 하고, 서로 다른 vertex \(j_0, \dots, j_m\) (\(m \ge 1\))과 edge \(\{j_{r}, j_{r+1}\}\) (\(0 \le r \lt m\))만으로 된 graph를 길이 \(m\)의 <strong>path</strong>(경로)라 한다. simplicial complex 안에서는 두 vertex 사이에 edge가 하나뿐이므로 cycle의 길이는 3 이상이다. graph의 vertex \(j\)에 붙은 edge의 수를 \(j\)의 degree라 한다.</p>
+      <div class="thm lemma" id="i-33-4-1">
+        <p><span class="thm-head">Lemma 33.4.1</span> <span class="thm-name">(graphs of maximal degree two)</span>.
+        \(G\)가 isolated vertex가 없는 유한 graph라 하자. (a) 모든 vertex의 degree가 2이면 \(G\)는 서로 만나지 않는 cycle들의 합집합이다. (b) \(G\)가 connected이고(edge를 따라 어느 vertex에서나 다른 vertex로 갈 수 있고) 모든 degree가 2 이하이면, \(G\)는 cycle 하나이거나(degree 1인 vertex가 없을 때) path 하나다(그렇지 않을 때). path이면 degree 1인 vertex는 정확히 둘, 곧 양 끝이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: degree가 2 이하이면 “방금 지나온 edge가 아닌 edge로 나가기”가 한 가지로 정해진다. 그렇게 걸으면 처음 vertex로 돌아오거나 막다른 끝에 닿는다.</p>
+        <p><span class="proof-head">Proof.</span> vertex \(w_0\)에서 출발해, 매번 방금 지나온 edge가 아닌 edge로 나가는 걸음 \(w_0, w_1, w_2, \dots\)를 생각하자. <em>처음 반복되는 vertex는 \(w_0\)이다</em>: \(w_s = w_r\) (\(r \lt s\))인 첫 \(s\)를 잡고 \(r \ge 1\)이라 하자. 그러면 \(w_r\)에는 edge \(\{w_{r-1}, w_r\}\), \(\{w_r, w_{r+1}\}\), \(\{w_{s-1}, w_s\}\)가 붙어 있다. 셋째가 첫째와 같다면 \(w_{s-1} = w_{r-1}\)이 더 이른 반복이고, 둘째와 같다면 \(w_{s-1} = w_{r+1}\)인데 \(s - 1 \gt r + 1\)이면 더 이른 반복, \(s - 1 = r + 1\)이면 방금 지나온 edge로 되돌아간 것이다. 어느 경우도 불가능하므로 세 edge는 서로 다르고, degree가 3 이상이 되어 가정에 어긋난다.</p>
+        <p>(a) 모든 degree가 2이면 걸음은 끝나지 않고, 유한하므로 반복이 생기며, 위에서 처음 반복은 \(w_s = w_0\)이다. \(s = 1\)은 자기 자신과의 edge라 불가능하고 \(s = 2\)는 지나온 edge로 되돌아간 것이라 불가능하므로 \(s \ge 3\)이고, \(w_0, \dots, w_{s-1}\)은 cycle을 이룬다. 그 vertex들의 edge 둘은 모두 이 cycle에 쓰였으므로 cycle은 \(G\)의 나머지와 만나지 않는다. cycle을 떼어 내고 남은 graph(여전히 모든 degree가 2)에 같은 논증을 되풀이한다.</p>
+        <p>(b) degree 1인 vertex가 없으면 모든 degree가 2이고, (a)와 connected라는 가정에서 cycle 하나다. degree 1인 vertex \(w_0\)이 있으면 거기서 걸음을 시작한다. \(w_0\)으로 돌아오는 것은 \(w_0\)의 degree가 1이라 불가능하므로 위의 사실에 의해 반복이 없고, 유한하므로 더 나갈 edge가 없는 vertex, 곧 degree 1인 vertex에서 멈춘다. 지나온 vertex들은 path를 이루고, 그 vertex들의 edge는 모두 path에 쓰였다. connected이므로 path가 \(G\) 전체다. degree 1인 vertex는 path의 양 끝 둘뿐이다.</p>
+      </div>
+    </section>
+
+    <section id="sec-surface">
+      <h2>Simplicial Surfaces</h2>
+      <div class="thm definition" id="i-33-4-2">
+        <p><span class="thm-head">Definition 33.4.2</span> <span class="thm-name">(simplicial surface)</span>.
+        모든 vertex의 link가 cycle 하나인 pure 2-complex를 <dfn>simplicial surface</dfn>(단체 곡면)라 한다. boundary가 없다는 것을 강조할 때는 closed simplicial surface라 한다.</p>
+      </div>
+      <div class="thm definition" id="i-33-4-3">
+        <p><span class="thm-head">Definition 33.4.3</span> <span class="thm-name">(simplicial surface with boundary)</span>.
+        모든 vertex의 link가 cycle 하나이거나 path 하나인 pure 2-complex를 <dfn>simplicial surface with boundary</dfn>(경계를 갖는 단체 곡면)라 한다. link가 cycle인 vertex를 interior vertex, path인 vertex를 boundary vertex라 한다.</p>
+      </div>
+      <p>두 정의는 Crane의 정의와 같다 <a class="cite" href="../../references.html#Cr">[Cr §2.3]</a>. 이 장에서 “simplicial surface”라고만 쓰면 boundary가 없는 것을 뜻하고, boundary를 허락할 때는 그렇게 밝힌다. link 조건은 vertex에 대한 조건이지만 edge에 대한 정보도 담고 있다. <a href="33-2-star-closure-link.html#i-33-2-14">Proposition 33.2.14</a>에서 link의 vertex \(j\)는 edge \(\{i, j\}\)에, link의 edge \(\{j, k\}\)는 triangle \(\{i, j, k\}\)에 대응했기 때문이다.</p>
+
+      <figure class="dg-figure" id="fig-33-4-1">
+        <img src="figures/fig-33-4-1-link-degrees.svg" alt="2×2 패널. 각 패널 가운데에 검은 vertex i가 있고, 둘레의 회색 triangle들의 바깥 edge가 주황 굵은 선(link)이다. link의 vertex 옆 상자 안의 숫자가 degree다. (a) cycle: 정육각형 fan, 여섯 숫자가 모두 2. (b) path: 반원 모양의 triangle 세 개, 양 끝 1이고 가운데 둘은 2. (c) a vertex of degree 3: 오른쪽 vertex j를 공유하는 triangle 세 개(하나는 빗금), link는 j에서 세 갈래로 갈라지고 j에 3, 세 끝에 1. (d) two components: 위아래 두 fan이 i에서만 만나고, link는 위와 아래의 path 두 개로 끊어져 있다. 숫자는 각 path의 끝이 1, 가운데가 2.">
+        <figcaption><span class="fig-head">Figure 33.4.1.</span>
+        vertex link를 graph로 읽는다. <em>무엇을</em>: vertex \(i\)(원점) 둘레의 pure 2-complex 네 개. (a) triangle 여섯 개가 \(i\)를 한 바퀴 둘러싼 것, (b) triangle 세 개가 반원을 이룬 것, (c) triangle 세 개가 모두 edge \(\{i, j\}\)를 공유하는 것(빗금 친 triangle은 평면 위로 들린 날개), (d) triangle 세 개짜리 fan 둘이 \(i\)에서만 만나는 것. link는 <code>dgdec.link</code>로 계산했다. <em>읽는 법</em>: 주황 굵은 선과 점이 \(\operatorname{Lk}(i)\)이고, 상자 안의 숫자가 link라는 graph에서 그 vertex의 degree다. <em>볼 것</em>: link vertex \(j\)의 degree는 edge \(\{i, j\}\)를 포함하는 triangle의 수와 같다. (a)는 모든 수가 2인 connected graph라서 cycle, (b)는 양 끝이 1인 path다. (c)에서 \(j\)의 수 3은 edge \(\{i, j\}\)에 triangle이 셋 붙었다는 뜻이다. (d)는 모든 수가 2 이하이지만 link가 두 조각이다. <em>본문과의 연결</em>: <a href="#i-33-4-4">Proposition 33.4.4</a>. 같은 네 경우를 vertex 근처의 모양(disk인가)으로 본 그림은 <a href="../31-meshes/31-1-mesh-as-surface.html#fig-31-1-1">Figure 31.1.1</a>이다.</figcaption>
+      </figure>
+
+      <p><a href="#fig-33-4-1">Figure 33.4.1</a>의 숫자를 따라가 보자. (a)에서는 모든 link vertex에 2가 적혀 있다. \(i\)에서 나가는 edge마다 triangle이 정확히 둘 붙어 있다는 뜻이다. (b)의 양 끝 1은 \(i\)에서 나가는 edge 가운데 둘이 triangle 하나에만 붙어 있다는 뜻이고, 이 두 edge가 boundary edge다. (c)의 3은 edge \(\{i, j\}\)가 non-manifold edge라는 뜻이다. (d)는 수만 보아서는 문제가 없다. 그러나 link가 끊어져 있어, \(i\)를 둘러싼 triangle들을 \(i\)를 포함하는 edge를 건너며 한 번에 돌 수 없다. 이 관찰을 정리한 것이 다음 명제다.</p>
+
+      <div class="thm proposition" id="i-33-4-4">
+        <p><span class="thm-head">Proposition 33.4.4</span> <span class="thm-name">(the link condition in terms of edges and fans)</span>.
+        \(\mathcal{K}\)가 pure 2-complex이고 \(i\)가 vertex라 하자. \(i\)를 포함하는 두 triangle이 “\(i\) 둘레로 이어져 있다”는 것은, \(i\)를 포함하는 triangle의 열로 하나에서 다른 하나로 갈 수 있고 이웃한 두 triangle이 \(i\)를 포함하는 edge를 공유한다는 뜻이다.</p>
+        <ul>
+          <li>(a) \(\operatorname{Lk}(i)\)는 triangle도 isolated vertex도 없는 graph이고, link vertex \(j\)의 degree는 edge \(\{i, j\}\)를 포함하는 triangle의 수다.</li>
+          <li>(b) \(\operatorname{Lk}(i)\)가 cycle일 필요충분조건은 \(i\)를 포함하는 모든 edge가 triangle 정확히 둘에 속하고, \(i\)를 포함하는 triangle들이 모두 \(i\) 둘레로 이어져 있는 것이다.</li>
+          <li>(c) \(\operatorname{Lk}(i)\)가 path일 필요충분조건은 \(i\)를 포함하는 모든 edge가 triangle 하나 또는 둘에 속하고, 그중 하나에만 속하는 것이 정확히 둘이며, \(i\)를 포함하는 triangle들이 모두 \(i\) 둘레로 이어져 있는 것이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \(\operatorname{Lk}(i)\)에 triangle \(\{a, b, c\}\)가 있다면 \(\{i, a, b, c\} \in \mathcal{K}\)인데 \(\mathcal{K}\)는 2-dimensional이다. link vertex \(j\)에 대해 \(\{i, j\} \in \mathcal{K}\)이고, pure이므로 \(\{i, j\}\)를 포함하는 triangle \(\{i, j, k\}\)가 있어 \(\{j, k\}\)가 \(j\)에 붙은 link edge다. <a href="33-2-star-closure-link.html#i-33-2-14">Proposition 33.2.14</a>의 bijection \(\{j, k\} \leftrightarrow \{i, j, k\}\)에서, \(j\)에 붙은 link edge는 \(\{i, j\}\)를 포함하는 triangle과 일대일로 대응한다.</p>
+        <p>(b), (c) 같은 bijection에서 \(i\)를 포함하는 두 triangle \(\{i, j, k\}\), \(\{i, j, l\}\)이 edge \(\{i, j\}\)를 공유하는 것은 link edge \(\{j, k\}\), \(\{j, l\}\)이 vertex \(j\)를 공유하는 것과 같다. 그러므로 “triangle들이 \(i\) 둘레로 이어져 있다”는 “link graph의 edge들이 vertex를 공유하며 이어져 있다”, 곧 (isolated vertex가 없으므로) link가 connected라는 것과 같다. 이제 (a)와 <a href="#i-33-4-1">Lemma 33.4.1</a>(b)를 쓴다. cycle은 connected이고 모든 degree가 2이며, 거꾸로 connected이고 모든 degree가 2인 graph는 cycle이다. path는 connected이고 degree가 1 또는 2이며 1이 정확히 둘이고, 거꾸로 connected이고 degree가 2 이하이며 1이 있는 graph는 path다. degree를 triangle의 수로 바꿔 읽으면 (b), (c)다.</p>
+      </div>
+
+      <div class="thm corollary" id="i-33-4-5">
+        <p><span class="thm-head">Corollary 33.4.5</span> <span class="thm-name">(surfaces in terms of edges and fans)</span>.
+        pure 2-complex \(\mathcal{K}\)가 simplicial surface with boundary일 필요충분조건은 다음 둘이다.</p>
+        <ul>
+          <li>(E) 모든 edge가 triangle 하나 또는 둘에 속한다.</li>
+          <li>(V) 모든 vertex에서, 그 vertex를 포함하는 triangle들이 모두 그 vertex 둘레로 이어져 있다.</li>
+        </ul>
+        <p>boundary가 없는 simplicial surface일 필요충분조건은 (E) 대신 “모든 edge가 triangle 정확히 둘에 속한다”는 것과 (V)다. 특히 link 조건은 edge 조건 (E)를 함의한다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> link가 cycle이나 path이면 <a href="#i-33-4-4">Proposition 33.4.4</a>(b), (c)에서 (V)와, 각 vertex를 포함하는 edge에 대한 (E)가 나온다. 모든 edge는 어떤 vertex를 포함하므로 (E)가 성립한다. 거꾸로 (E)와 (V)를 가정하자. vertex \(i\)는 pure이므로 어떤 triangle에 속하고, <a href="#i-33-4-4">Proposition 33.4.4</a>(a)에 의해 \(\operatorname{Lk}(i)\)는 edge가 있고 isolated vertex가 없으며 모든 degree가 1 또는 2인 graph다. (V)에 의해 connected이므로 <a href="#i-33-4-1">Lemma 33.4.1</a>(b)에 의해 cycle이나 path다. 둘째 문장도 같다. 모든 edge에 triangle이 둘이면 모든 degree가 2라서 path가 될 수 없다.</p>
+      </div>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: the manifold mesh of Chapter 31</p>
+        <p><a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-3">Definition 31.1.3</a>은 manifold mesh에 두 조건, (1) 모든 edge가 face 하나 또는 둘에 속한다, (2) 모든 vertex의 link가 cycle 하나나 path 하나다를 두었다. face list가 생성하는 complex는 pure이므로(<a href="33-2-star-closure-link.html#i-33-2-16">Example 33.2.16</a>) manifold mesh는 정확히 simplicial surface with boundary이고, <a href="#i-33-4-5">Corollary 33.4.5</a>에 의해 조건 (1)은 (2)에서 따라 나온다. 새로워진 것은 이 함의와, link가 cycle이라는 것이 “vertex 둘레의 triangle이 edge를 건너 한 바퀴를 이룬다”와 같다는 증명이다. 그 realization의 모든 점 근처가 disk나 반쪽 disk라는 topology의 진술은 <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-4">Proposition 31.1.4</a>의 Derivation으로 두고 여기서 다시 증명하지 않는다.</p>
+      </aside>
+
+      <div class="thm example" id="i-33-4-6">
+        <p><span class="thm-head">Example 33.4.6</span> <span class="thm-name">(simplicial surfaces)</span>.
+        boundary가 없는 것: tetrahedron의 boundary(link는 모두 3-cycle), 정팔면체(4-cycle), 정이십면체(5-cycle), <code>dgmesh.icosphere(level)</code>(5-cycle과 6-cycle), <code>dgmesh.torus_mesh(2, 0.8, nu, nv)</code>(모두 6-cycle, \(nu, nv \ge 3\)). boundary가 있는 것: <code>dgmesh.grid_mesh</code>, 꼬임 없는 band와 Möbius band(<a href="33-3-orientation.html#i-33-3-17">Proposition 33.3.17</a>). Möbius band도 simplicial surface with boundary다. surface인지는 orientability와 무관하다.</p>
+        <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-33-4-7">
+        <p><span class="thm-head">Non-example 33.4.7</span>.
+        (a) triangle 셋이 한 edge를 공유하는 “책”(<a href="#fig-33-4-1">Figure 33.4.1</a>(c)): 그 edge의 끝점의 link에 degree 3인 vertex가 있다. (b) 두 fan이 한 vertex에서만 만나는 “나비”(<a href="#fig-33-4-1">Figure 33.4.1</a>(d)): link가 두 조각이다. 모든 edge가 triangle 둘 이하에 속하므로 (E)는 성립하고 (V)가 깨진다. (c) <a href="33-1-simplicial-complexes.html#fig-33-1-2">Figure 33.1.2</a>(a)처럼 pure가 아닌 complex. dangling edge의 끝점에서 link에 isolated vertex가 생긴다.</p>
+        <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-boundary">
+      <h2>The Boundary of a Simplicial Surface</h2>
+      <div class="thm proposition" id="i-33-4-8">
+        <p><span class="thm-head">Proposition 33.4.8</span> <span class="thm-name">(the boundary is a union of loops)</span>.
+        \(\mathcal{K}\)가 simplicial surface with boundary이면 \(\operatorname{bd}(\mathcal{K})\)(<a href="33-2-star-closure-link.html#i-33-2-18">Definition 33.2.18</a>)의 vertex는 정확히 boundary vertex이고, 각각 boundary edge 정확히 둘에 속한다. 따라서 \(\operatorname{bd}(\mathcal{K})\)는 서로 만나지 않는 cycle들의 합집합이고, \(\operatorname{bd}(\operatorname{bd}(\mathcal{K})) = \varnothing\)이다. \(\mathcal{K}\)가 boundary가 없는 simplicial surface이면 \(\operatorname{bd}(\mathcal{K}) = \varnothing\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> boundary edge는 triangle 하나에만 속하는 edge다. vertex \(i\)에서 <a href="#i-33-4-4">Proposition 33.4.4</a>(a)에 의해 boundary edge \(\{i, j\}\)는 link에서 degree 1인 vertex \(j\)와 대응한다. link가 cycle이면 그런 \(j\)가 없고, path이면 양 끝의 정확히 둘이다(<a href="#i-33-4-1">Lemma 33.4.1</a>(b)). 그러므로 \(\operatorname{bd}(\mathcal{K})\)의 vertex(어떤 boundary edge의 끝점)는 boundary vertex이고, 거꾸로 boundary vertex는 boundary edge 둘의 끝점이다. \(\operatorname{bd}(\mathcal{K})\)는 isolated vertex가 없고 모든 degree가 2인 graph이므로 <a href="#i-33-4-1">Lemma 33.4.1</a>(a)에 의해 cycle들의 합집합이다. 1-dimensional pure complex로서 \(\operatorname{bd}(\mathcal{K})\)의 boundary는 edge 하나에만 속하는 vertex의 closure인데, 그런 vertex가 없으므로 공집합이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-33-4-2">
+        <img src="figures/fig-33-4-2-boundary-loops.svg" alt="두 패널. (a) band: 2 boundary loops: 세로로 선 원통 모양의 회색 띠. 위쪽 테두리가 파란 고리, 아래쪽 테두리가 주황 고리다. (b) Möbius band: 1 boundary loop: 한 번 꼬인 회색 띠. 바깥 테두리와 안쪽 테두리가 모두 주황이고 하나의 고리로 이어져 있다.">
+        <figcaption><span class="fig-head">Figure 33.4.2.</span>
+        boundary는 loop들로 나뉜다. <em>무엇을</em>: (a) 꼬임 없는 band(<code>lib/ch33.py</code>의 <code>cylinder_band(24)</code>), (b) Möbius band(<code>dgmesh.mobius_mesh(24)</code>). 둘 다 중심원의 반지름 1, 반폭 0.35, triangle 48개이고, 한 방향에서 본 그림이다. <em>읽는 법</em>: 회색이 triangle, 굵은 색 선이 boundary edge(triangle 하나에만 속하는 edge)다. 색은 <a href="#i-33-4-8">Proposition 33.4.8</a>의 loop 하나하나를 구별한다. <em>볼 것</em>: (a)의 boundary는 edge 24개짜리 loop 둘(파랑, 주황)이다. (b)의 boundary는 바깥 테두리와 안쪽 테두리가 꼬임에서 이어져 edge 48개짜리 loop <em>하나</em>다. 두 띠는 \(n_0, n_1, n_2\)가 \((48, 96, 48)\)으로 같고 \(\chi = 0\)도 같다. 그런데 boundary loop의 수가 다르다. <em>본문과의 연결</em>: <a href="#i-33-4-8">Proposition 33.4.8</a>과 <a href="#i-33-4-9">Example 33.4.9</a>. 두 띠를 돌려 볼 수 있는 <a href="figures/fig-33-4-2-boundary-loops-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+      <p><a href="#fig-33-4-2">Figure 33.4.2</a>에서 주황 선을 손가락으로 따라가 보자. (a)에서는 아래 테두리를 한 바퀴 돌면 출발점으로 돌아오고, 위 테두리는 따로 남는다. (b)에서는 바깥 테두리를 따라가다 꼬인 곳을 지나면 안쪽 테두리로 넘어가고, 한 바퀴를 더 돌아야 출발점에 온다. 어느 경우든 boundary vertex마다 boundary edge가 둘이라서 걸음이 막히거나 갈라지지 않는다. 이것이 <a href="#i-33-4-8">Proposition 33.4.8</a>의 내용이다.</p>
+      <div class="thm example" id="i-33-4-9">
+        <p><span class="thm-head">Example 33.4.9</span> <span class="thm-name">(boundary loops)</span>.
+        vertex가 \(5 \times 5\)인 <code>dgmesh.grid_mesh</code>는 boundary edge 16개가 loop 하나를 이룬다. 꼬임 없는 band(정사각형 \(n\)개)는 \(n\)개짜리 loop 둘, Möbius band는 \(2n\)개짜리 loop 하나다. 닫힌 icosphere와 torus mesh는 boundary edge가 없다.</p>
+        <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-manifold">
+      <h2>Simplicial Manifolds in Any Dimension</h2>
+      <p>link가 cycle이라는 조건은 “link가 원 \(S^1\)”이라는 말로 읽을 수 있다. 이렇게 읽으면 다른 dimension으로 바로 넓어진다. \(\abs{\mathcal{S}}\)가 \(S^{m}\)과 homeomorphic한 complex \(\mathcal{S}\)를 <strong>simplicial \(m\)-sphere</strong>라 하자. \(m = 0\)이면 vertex 두 개(edge 없음)이고, \(m = 1\)이면 cycle이다. 1-dimensional complex의 realization이 원과 homeomorphic한 것이 cycle일 때뿐이라는 사실은 여기서 증명하지 않고 받아들인다(<a href="../03-topology-basics/index.html">Chapter 3</a>).</p>
+      <div class="thm definition" id="i-33-4-10">
+        <p><span class="thm-head">Definition 33.4.10</span> <span class="thm-name">(simplicial manifold)</span>.
+        모든 vertex의 link가 simplicial \((n-1)\)-sphere인 pure \(n\)-complex를 simplicial \(n\)-manifold, 또는 <dfn>simplicial manifold</dfn>(단체 다양체)라 한다. boundary를 허락할 때는 link가 simplicial \((n-1)\)-sphere이거나, realization이 \((n-1)\)-dimensional closed ball과 homeomorphic인 complex이기를 요구한다.</p>
+      </div>
+      <p>\(n = 2\)이면 이것은 <a href="#i-33-4-2">Definition 33.4.2</a>다. \(n = 1\)이면 link가 vertex 두 개, 곧 모든 vertex의 degree가 2인 graph다. \(n = 3\)이면 tetrahedron mesh의 vertex마다 둘레의 triangle들이 sphere 모양의 껍질을 이룬다는 조건이다. dimension이 커지면 link가 sphere인지 판정하는 것 자체가 어려운 문제가 되므로, 이 장은 \(n \le 2\)에서만 계산에 쓴다.</p>
+      <div class="thm example" id="i-33-4-11">
+        <p><span class="thm-head">Example 33.4.11</span>.
+        (a) 길이 \(m \ge 3\)인 cycle은 simplicial 1-manifold다. 각 vertex의 link는 양옆의 두 vertex다. (b) \(\{0, \dots, 4\}\)의 공집합이 아니고 자신이 아닌 부분집합 전체(4-simplex의 boundary, <a href="33-1-simplicial-complexes.html#ex-33-1-2">Exercise 33.1.2</a>)는 simplicial 3-manifold다. <a href="33-2-star-closure-link.html#i-33-2-14">Proposition 33.2.14</a>에 의해 \(\operatorname{Lk}(v)\)는 \(v \notin \tau\)이고 \(\tau \cup \{v\} \ne \{0, \dots, 4\}\)인 \(\tau\), 곧 나머지 네 vertex의 공집합이 아니고 자신이 아닌 부분집합 전체다. 이것은 tetrahedron의 boundary와 같은 complex이고, 그 realization은 \(S^2\)와 homeomorphic하다(<a href="33-1-simplicial-complexes.html#fig-33-1-3">Figure 33.1.3</a>(a)의 겉면).</p>
+        <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-33-4-12">
+        <p><span class="thm-head">Non-example 33.4.12</span>.
+        (a) degree 3인 vertex가 있는 graph(예: 가운데 vertex에 edge 셋이 붙은 “Y”)는 simplicial 1-manifold가 아니다. 그 vertex의 link가 vertex 셋이다. (b) 두 tetrahedron \(\{0,1,2,3\}\)과 \(\{0,4,5,6\}\)을 vertex \(0\)에서만 붙인 pure 3-complex는 simplicial 3-manifold가 아니다. \(\operatorname{Lk}(0)\)이 서로 만나지 않는 두 triangle(각각 realization이 disk)이라서 sphere가 아니다. dimension 2의 “나비”(<a href="#i-33-4-7">Non-example 33.4.7</a>(b))가 한 단계 올라간 것이다.</p>
+      </div>
+      <div class="thm proposition" id="i-33-4-13">
+        <p><span class="thm-head">Proposition 33.4.13</span> <span class="thm-name">(simplicial 1-manifolds)</span>.
+        simplicial 1-manifold는 서로 만나지 않는 cycle들의 합집합이다. 모든 vertex의 link가 vertex 하나 또는 둘인 pure 1-complex는 서로 만나지 않는 cycle과 path들의 합집합이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> pure 1-complex는 isolated vertex가 없는 graph이고, <a href="33-2-star-closure-link.html#i-33-2-14">Proposition 33.2.14</a>에 의해 vertex \(v\)의 link의 vertex 수는 \(v\)의 degree다. 첫 문장은 <a href="#i-33-4-1">Lemma 33.4.1</a>(a)다. 둘째 문장: graph를 connected component(edge로 이어진 최대 부분)로 나누면, 각 component는 connected이고 모든 degree가 1 또는 2이므로 <a href="#i-33-4-1">Lemma 33.4.1</a>(b)에 의해 cycle이나 path다.</p>
+      </div>
+    </section>
+
+    <section id="sec-orientable">
+      <h2>Orientable Simplicial Surfaces</h2>
+      <div class="thm definition" id="i-33-4-14">
+        <p><span class="thm-head">Definition 33.4.14</span> <span class="thm-name">(orientable simplicial surface)</span>.
+        consistent orientation(<a href="33-3-orientation.html#i-33-3-13">Definition 33.3.13</a>)을 갖는 simplicial surface(boundary가 있어도 된다)를 <dfn>orientable simplicial surface</dfn>(가향 단체 곡면)라 한다.</p>
+      </div>
+      <p>simplicial surface에서는 <a href="#i-33-4-5">Corollary 33.4.5</a>에 의해 모든 edge에 triangle이 둘 이하이므로, <a href="33-3-orientation.html#i-33-3-18">Proposition 33.3.18</a>의 가정 가운데 edge에 관한 것이 저절로 성립한다. 남은 가정인 edge-connected도 1-skeleton의 연결로 바꿀 수 있다.</p>
+      <div class="thm lemma" id="i-33-4-15">
+        <p><span class="thm-head">Lemma 33.4.15</span> <span class="thm-name">(connected surfaces are edge-connected)</span>.
+        simplicial surface with boundary \(\mathcal{K}\)의 1-skeleton이 connected이면, \(\mathcal{K}\)의 임의의 두 triangle은 edge를 공유하는 triangle의 열로 이어진다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> triangle \(f \ni i\)와 \(g \ni j\)를 잡고, 1-skeleton에서 \(i = v_0, v_1, \dots, v_m = j\)인 path를 잡자. edge \(\{v_r, v_{r+1}\}\)은 pure이므로 어떤 triangle \(h_r\)에 속한다. \(f\)와 \(h_0\)은 둘 다 \(v_0\)을 포함하므로 <a href="#i-33-4-5">Corollary 33.4.5</a>의 (V)에 의해 \(v_0\) 둘레로 이어진다. \(h_{r-1}\)과 \(h_r\)은 둘 다 \(v_r\)을 포함하므로 같은 이유로 이어지고, \(h_{m-1}\)과 \(g\)는 \(v_m\)을 포함하므로 이어진다. 이 열들을 이으면 된다. \(m = 0\)(곧 \(i = j\))이면 \(f\)와 \(g\)가 둘 다 \(i\)를 포함하므로 (V)에서 바로 이어진다.</p>
+      </div>
+      <div class="thm corollary" id="i-33-4-16">
+        <p><span class="thm-head">Corollary 33.4.16</span> <span class="thm-name">(orientations of a connected surface)</span>.
+        1-skeleton이 connected인 simplicial surface with boundary는 orientable이 아니거나, consistent orientation을 정확히 두 개 가진다. orientable인지는 <a href="33-3-orientation.html#i-33-3-18">Proposition 33.3.18</a>(b)의 algorithm이 정확히 판정한다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="#i-33-4-5">Corollary 33.4.5</a>에서 edge마다 triangle이 둘 이하이고, <a href="#i-33-4-15">Lemma 33.4.15</a>에서 edge-connected이므로 <a href="33-3-orientation.html#i-33-3-18">Proposition 33.3.18</a>을 그대로 쓸 수 있다.</p>
+      </div>
+      <div class="thm example" id="i-33-4-17">
+        <p><span class="thm-head">Example 33.4.17</span>.
+        icosphere, torus mesh, grid mesh, 꼬임 없는 band는 orientable simplicial surface다. 각각의 face list 자체가 consistent orientation이다(<a href="33-3-orientation.html#i-33-3-14">Example 33.3.14</a>, band는 <a href="33-3-orientation.html#i-33-3-17">Proposition 33.3.17</a>).</p>
+      </div>
+      <div class="thm nonexample" id="i-33-4-18">
+        <p><span class="thm-head">Non-example 33.4.18</span>.
+        Möbius band(<a href="33-3-orientation.html#i-33-3-17">Proposition 33.3.17</a>)와 Klein bottle(<a href="33-3-orientation.html#ex-33-3-6">Exercise 33.3.6</a>)은 simplicial surface이지만 orientable이 아니다. Klein bottle은 boundary가 없는 simplicial surface이고 torus mesh와 \(n_0, n_1, n_2\)가 같을 수 있으므로, 개수만으로는 orientability를 알 수 없다.</p>
+      </div>
+      <p>manifold 조건이 왜 필요한지 정리해 두자. <a href="33-5-mesh-data-structures.html">Section 33.5</a>의 halfedge mesh는 edge마다 양쪽에 face가 하나씩 있고 vertex 둘레를 한 바퀴 돌 수 있다는 것을 자료구조에 박아 넣는다. 이것이 <a href="#i-33-4-5">Corollary 33.4.5</a>의 (E)와 (V)다. Chapter 38의 discrete immersion은 vertex star마다 disk 모양을 요구하고(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-4">Section 38.4</a>), Chapter 40의 angle defect는 vertex 둘레를 한 바퀴 도는 각의 합으로 정의된다(<a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>). 셋 모두 link가 cycle이어야 뜻을 가진다.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: the link condition from a face list</p>
+        <p>vertex \(i\)의 link edge는 \(i\)를 포함하는 triangle마다 남은 두 vertex다(<a href="33-2-star-closure-link.html#i-33-2-14">Proposition 33.2.14</a>). 그 graph의 degree와 연결을 보면 <a href="#i-33-4-1">Lemma 33.4.1</a>에 의해 모양이 정해진다. <code>dgdec.vertex_link_type</code>과 <code>dgmesh.link_type</code>이 같은 판정을 한다.</p>
+        <pre id="code-33-4-1"><code>from collections import defaultdict
+
+def link_edges(F, i):                 # the edge opposite i in every triangle containing i
+    return [tuple(v for v in f if v != i) for f in F if i in f]
+
+def link_shape(edges):                # 'cycle', 'path' or 'other' (Lemma 33.4.1)
+    deg, nbr = defaultdict(int), defaultdict(set)
+    for j, k in edges:
+        deg[j] += 1; deg[k] += 1
+        nbr[j].add(k); nbr[k].add(j)
+    if not edges or max(deg.values()) > 2:
+        return "other"
+    seen, stack = set(), [edges[0][0]]
+    while stack:                      # is the link connected?
+        v = stack.pop()
+        if v not in seen:
+            seen.add(v); stack.extend(nbr[v])
+    if len(seen) &lt; len(deg):
+        return "other"
+    return "cycle" if min(deg.values()) == 2 else "path"
+
+def surface_report(F):
+    shapes = [link_shape(link_edges(F, i)) for i in sorted({v for f in F for v in f})]
+    return {s: shapes.count(s) for s in ("cycle", "path", "other")}
+
+octahedron = [(a, b, c) for a in (0, 1) for b in (2, 3) for c in (4, 5)]
+book, bowtie = [(0, 1, 2), (0, 1, 3), (0, 1, 4)], [(0, 1, 2), (0, 3, 4)]
+for name, F in [("octahedron", octahedron), ("book", book), ("bowtie", bowtie)]:
+    print(name, surface_report(F))</code></pre>
+        <p>정팔면체는 모든 link가 cycle이다. 책에서는 공유 edge의 두 끝점이, 나비에서는 가운데 vertex가 <code>'other'</code>다. 나머지 vertex는 triangle 하나에만 속해 link가 edge 하나짜리 path다.</p>
+        <pre id="out-33-4-1"><code>octahedron {'cycle': 6, 'path': 0, 'other': 0}
+book {'cycle': 0, 'path': 3, 'other': 2}
+bowtie {'cycle': 0, 'path': 4, 'other': 1}</code></pre>
+      </aside>
+    </section>
+
+    <section id="sec-counting">
+      <h2>Counting: \(n_0\), \(n_1\), \(n_2\), and \(\chi\)</h2>
+      <p>simplicial surface에서는 개수 사이에 관계가 생긴다. 근거는 “edge에 triangle이 몇 개 붙는가”를 정한 (E)다.</p>
+      <div class="thm proposition" id="i-33-4-19">
+        <p><span class="thm-head">Proposition 33.4.19</span> <span class="thm-name">(edge–triangle incidences)</span>.
+        simplicial surface with boundary에서 boundary edge의 수를 \(n_1^\partial\)이라 하면 \(3n_2 = 2n_1 - n_1^\partial\)이다. 특히 boundary가 없는 simplicial surface에서는 \(3n_2 = 2n_1\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (edge, 그 edge를 포함하는 triangle)의 쌍을 두 가지로 센다. triangle마다 edge가 3개이므로 쌍은 \(3n_2\)개다. <a href="#i-33-4-5">Corollary 33.4.5</a>(E)에 의해 edge마다 triangle이 1개(boundary edge) 또는 2개이므로 쌍은 \(n_1^\partial + 2(n_1 - n_1^\partial) = 2n_1 - n_1^\partial\)개다.</p>
+      </div>
+      <p>세 개수를 번갈아 더한 \(\chi = n_0 - n_1 + n_2\)를 \(\mathcal{K}\)의 <strong>Euler characteristic</strong>(오일러 지표)이라 한다. 이 수가 같은 surface를 어떻게 삼각분할해도 같다는 topological invariance는 <a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>이 진술과 Proof sketch로 다루고(일반 증명은 <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>), 이 장은 \(\chi\)를 개수로만 쓴다. 다음 사실도 증명 없이 진술만 해 둔다. connected이고 boundary가 없는 orientable surface는 손잡이(handle)를 \(g\)개 붙인 sphere와 homeomorphic하고(classification theorem), 이때 \(g\)를 <strong>genus</strong>(종수)라 하며</p>
+      <div class="equation" id="eq-33-4-1">
+      \[ \chi = 2 - 2g \tag{33.4.1} \]
+      </div>
+      <p>이다(Euler–Poincaré formula). boundary loop가 \(b\)개 있으면 \(\chi = 2 - 2g - b\)이고, 이것이 Chapter 31의 <a href="../31-meshes/31-1-mesh-as-surface.html#eq-31-1-3">(31.1.3)</a>이다.</p>
+      <aside class="box convention">
+        <p class="box-title">Conventions: \(n_0 - n_1 + n_2\) and \(V - E + F\)</p>
+        <p>Crane은 Euler characteristic을 \(V - E + F\)로 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §2.6]</a>. 이 study set은 \(\chi = n_0 - n_1 + n_2\)로 쓴다(§6.3). \(E, F\)가 first fundamental form의 coefficient와 겹치기 때문이다. 같은 이유로 vertex, edge, triangle의 <em>집합</em>도 \(V, E, F\)로 부르지 않고, \(n_k\)는 개수, \(\mathcal{K}\)는 complex를 뜻한다. 코드의 <code>V, F</code>는 vertex 위치와 face list 배열이다.</p>
+      </aside>
+
+      <table>
+        <thead>
+          <tr><th>complex</th><th>\(n_0\)</th><th>\(n_1\)</th><th>\(n_2\)</th><th>\(\chi\)</th><th>boundary loops</th><th>orientable</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>tetrahedron boundary</td><td>4</td><td>6</td><td>4</td><td>2</td><td>0</td><td>yes</td></tr>
+          <tr><td>octahedron</td><td>6</td><td>12</td><td>8</td><td>2</td><td>0</td><td>yes</td></tr>
+          <tr><td>icosahedron, <code>icosphere(0)</code></td><td>12</td><td>30</td><td>20</td><td>2</td><td>0</td><td>yes</td></tr>
+          <tr><td><code>icosphere(2)</code></td><td>162</td><td>480</td><td>320</td><td>2</td><td>0</td><td>yes</td></tr>
+          <tr><td><code>torus_mesh(2, 0.8, 8, 16)</code></td><td>128</td><td>384</td><td>256</td><td>0</td><td>0</td><td>yes</td></tr>
+          <tr><td><code>grid_mesh</code>, \(5 \times 5\) vertices</td><td>25</td><td>56</td><td>32</td><td>1</td><td>1</td><td>yes</td></tr>
+          <tr><td>band, 12 squares</td><td>24</td><td>48</td><td>24</td><td>0</td><td>2</td><td>yes</td></tr>
+          <tr><td><code>mobius_mesh(12)</code></td><td>24</td><td>48</td><td>24</td><td>0</td><td>1</td><td>no</td></tr>
+          <tr><td><code>genus2_mesh(h=0.16)</code></td><td>4032</td><td>12102</td><td>8068</td><td>\(-2\)</td><td>0</td><td>yes</td></tr>
+        </tbody>
+      </table>
+      <p>표의 boundary가 없는 orientable surface는 <a href="#eq-33-4-1">(33.4.1)</a>의 \(g = 0, 1, 2\)와 맞고, 모두 \(3n_2 = 2n_1\)이다. grid와 band는 \(3n_2 = 2n_1 - n_1^\partial\)(\(96 = 112 - 16\), \(72 = 96 - 24\))다. band와 Möbius band는 개수와 \(\chi\)가 같고 boundary loop의 수와 orientability만 다르다(<a href="#fig-33-4-2">Figure 33.4.2</a>).</p>
+      <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+
+      <div class="thm definition" id="i-33-4-20">
+        <p><span class="thm-head">Definition 33.4.20</span> <span class="thm-name">(valence)</span>.
+        vertex \(i\)를 포함하는 edge의 수를 \(i\)의 <dfn>valence</dfn>(차수)라 하고 \(\deg i\)로 쓴다. <a href="33-2-star-closure-link.html#i-33-2-14">Proposition 33.2.14</a>에 의해 이것은 \(\operatorname{Lk}(i)\)의 vertex 수다. valence가 6인 interior vertex를 regular vertex라 한다.</p>
+      </div>
+      <p>simplicial surface의 interior vertex에서는 link가 cycle이라 vertex 수와 edge 수가 같으므로, valence는 \(i\)를 포함하는 triangle의 수와 같다. boundary vertex에서는 link가 path라서 triangle의 수가 valence보다 1 작다.</p>
+      <div class="thm example" id="i-33-4-21">
+        <p><span class="thm-head">Example 33.4.21</span>.
+        tetrahedron의 boundary는 모든 vertex의 valence가 3, 정팔면체는 4, 정이십면체는 5다. <code>icosphere(level)</code>은 정이십면체에서 온 12개의 vertex가 valence 5이고, 나머지(나누면서 생긴 vertex)는 모두 6이다. <code>torus_mesh</code>는 모든 vertex가 regular다. triangulated cube(정사각형마다 대각선 하나)는 대각선을 어떻게 긋느냐에 따라 valence가 달라지고, <code>lib/ch33.py</code>의 것은 6이 둘, 4가 여섯이다.</p>
+        <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-33-4-22">
+        <p><span class="thm-head">Non-example 33.4.22</span> <span class="thm-name">(no interior vertex of valence 2)</span>.
+        simplicial surface의 interior vertex는 valence가 3 이상이다. valence가 2이면 link가 vertex 둘로 된 cycle이어야 하는데, simplicial complex에서는 두 vertex 사이에 edge가 하나뿐이라 그런 cycle이 없다. 두 triangle을 같은 세 vertex로 겹쳐 붙인 “베개”(<a href="33-1-simplicial-complexes.html#i-33-1-21">Non-example 33.1.21</a>(b))가 바로 이런 vertex를 가지려 하고, 그래서 simplicial complex로 쓸 수 없다. <a href="33-5-mesh-data-structures.html">Section 33.5</a>의 halfedge mesh는 이런 대상도 쓸 수 있다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-33-4-23">
+        <p><span class="thm-head">Proposition 33.4.23</span> <span class="thm-name">(mean valence)</span>.
+        모든 simplicial complex에서 \(\sum_i \deg i = 2n_1\)이다. boundary가 없는 simplicial surface에서는</p>
+        <div class="equation" id="eq-33-4-2">
+        \[ \begin{aligned} \frac{1}{n_0}\sum_i \deg i &= 6 - \frac{6\chi}{n_0}, \\ \sum_i\,(6 - \deg i) &= 6\chi \end{aligned} \tag{33.4.2} \]
+        </div>
+        <p>이다. 따라서 \(\chi\)(곧 genus)를 고정하고 \(n_0 \to \infty\)로 보내면 평균 valence는 6으로 가고, \(n_0 : n_1 : n_2 \to 1 : 3 : 2\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (vertex, 그 vertex를 포함하는 edge)의 쌍을 세면, vertex 쪽에서 \(\sum_i\deg i\)개, edge 쪽에서 끝점이 둘씩이라 \(2n_1\)개다. boundary가 없으면 <a href="#i-33-4-19">Proposition 33.4.19</a>에서 \(n_2 = \tfrac23 n_1\)이므로 \(\chi = n_0 - n_1 + \tfrac23n_1 = n_0 - \tfrac13n_1\), 곧 \(n_1 = 3(n_0 - \chi)\)이고 \(n_2 = 2(n_0 - \chi)\)이다. 그러면 \(\sum_i\deg i = 2n_1 = 6n_0 - 6\chi\)이고, \(n_0\)으로 나누면 첫 식, \(6n_0\)에서 빼면 둘째 식이다. \(\chi\)가 고정이면 \(6\chi/n_0 \to 0\)이고 \(n_1/n_0 = 3(1 - \chi/n_0) \to 3\), \(n_2/n_0 \to 2\)이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-33-4-3">
+        <img src="figures/fig-33-4-3-mean-valence.svg" alt="두 그래프. (a) mean valence: 가로축 n0(로그 눈금, 4에서 약 10000), 세로축 평균 valence(3에서 6). 파란 원(χ = 2)이 3, 4, 4.5, 5에서 출발해 파란 곡선 6 − 12/n0을 따라 6으로 올라간다. 초록 사각형(χ = 0)은 모두 6에 있고, 주홍 삼각형(χ = −2)은 n0이 수천인 곳에서 6 바로 위에 있다. 회색 점선은 6이다. (b) 가로축 n0(로그), 세로축 Σ(6 − deg i). 파란 원은 모두 12, 초록 사각형은 모두 0, 주홍 삼각형은 모두 −12의 수평선 위에 있다.">
+        <figcaption><span class="fig-head">Figure 33.4.3.</span>
+        평균 valence는 6으로 가고, 6에서 벗어난 총량은 \(\chi\)로 정해진다. <em>무엇을</em>: boundary가 없는 simplicial surface 19개. \(\chi = 2\): tetrahedron, 정팔면체, triangulated cube, <code>icosphere(level)</code> (\(level = 0, \dots, 5\)). \(\chi = 0\): <code>torus_mesh(2, 0.8, nu, nv)</code> (\((nu, nv) = (3,3)\), \((4,6)\), \((8,16)\), \((16,32)\), \((32,64)\), \((64,128)\)). \(\chi = -2\): <code>genus2_mesh(h)</code> (\(h = 0.2, 0.16, 0.12, 0.1\)). <em>읽는 법</em>: 가로축은 vertex 수 \(n_0\)(로그 눈금)이다. (a)의 세로축은 평균 valence \(2n_1/n_0\), 곡선은 <a href="#eq-33-4-2">(33.4.2)</a>의 \(6 - 6\chi/n_0\)이다. (b)의 세로축은 \(\sum_i(6 - \deg i)\)이고 수평선은 \(6\chi\)다. <em>볼 것</em>: (a)에서 \(\chi = 2\)인 점은 \(n_0 = 4\)일 때 3에서 출발해 \(n_0 = 10242\)일 때 \(5.9988\)이 된다. torus는 언제나 정확히 6이고, genus 2는 6보다 조금 크다(\(n_0 = 2524\)에서 \(6.0048\)). (b)에서는 모든 점이 \(12\), \(0\), \(-12\)에 정확히 놓인다. vertex를 아무리 늘려도 이 합은 바뀌지 않는다. <em>본문과의 연결</em>: <a href="#i-33-4-23">Proposition 33.4.23</a>. sphere 모양의 mesh에는 valence가 6보다 작은 vertex가 반드시 있다.</figcaption>
+      </figure>
+      <p><a href="#fig-33-4-3">Figure 33.4.3</a>의 (a)는 “거의 모든 vertex가 valence 6”이라는 경험칙이 어디서 오는지 보여 준다. vertex를 늘릴수록 평균이 6에 붙는다. (b)는 더 정확한 말을 한다. 6에서 벗어난 양의 <em>합</em>은 해상도와 무관하게 \(6\chi\)다. icosphere에서는 valence 5인 vertex 12개가 그 \(12\)를 나눠 가진다. 이 합이 Chapter 40의 discrete Gauss–Bonnet theorem과 같은 모양이라는 것은 우연이 아니다. 모든 triangle이 정삼각형이면 vertex \(i\)의 angle defect가 \((6 - \deg i)\pi/3\)이기 때문이다(<a href="../31-meshes/31-1-mesh-as-surface.html#ex-31-1-4">Exercise 31.1.4</a>, <a href="../40-discrete-curvature-integral/index.html#toc-40-2">Section 40.2</a>).</p>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: counting identities in Chapter 31</p>
+        <p><a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-7">Proposition 31.1.7</a>은 같은 식 \(3n_2 = 2n_1\), \(n_1 = 3(n_0 - \chi)\), 평균 valence \(6 - 6\chi/n_0\)을 closed manifold mesh에서 Derivation으로 보였다. 이 절은 그 가정을 정확히 했다. “edge마다 face가 둘”은 link 조건에서 증명되는 성질이고(<a href="#i-33-4-5">Corollary 33.4.5</a>), boundary가 있으면 \(n_1^\partial\)만큼 고쳐진다(<a href="#i-33-4-19">Proposition 33.4.19</a>).</p>
+      </aside>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: what makes a space a surface</p>
+        <p><strong>Smooth.</strong> topological surface는 모든 점이 평면의 open disk와 homeomorphic한 이웃을 가지는 Hausdorff, second countable space다(<a href="../11-smooth-manifolds/11-1-topological-manifolds.html#i-11-1-3">Definition 11.1.3</a>). 이 조건은 무한히 많은 점과 이웃에 대한 진술이다. <strong>Discrete.</strong> simplicial surface의 조건은 vertex마다 link graph 하나를 보는 유한한 검사다. edge 위의 점에 필요한 조건(edge마다 triangle 하나나 둘)은 vertex link 조건에 이미 들어 있으므로(<a href="#i-33-4-5">Corollary 33.4.5</a>) vertex만 보면 된다. triangle 안의 점은 언제나 disk 모양의 이웃을 가진다.</p>
+        <p><strong>정확히 보존하는 것.</strong> dimension 2에서는 link 조건이 정확한 판정이다. link가 cycle이면 closed star가 disk이다(<a href="33-2-star-closure-link.html#i-33-2-22">Proposition 33.2.22</a>, <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-4">Proposition 31.1.4</a>). 거꾸로 pure 2-complex의 realization이 boundary 없는 surface이면 모든 vertex link가 cycle이다. 이 방향은 topology의 표준적인 결과이고 여기서는 증명하지 않는다. 아이디어만 적으면 이렇다. edge 위의 점 근처가 disk이려면 그 edge에 triangle이 정확히 둘 붙어야 하므로 link의 모든 degree가 2이고, link는 cycle들의 합집합이다(<a href="#i-33-4-1">Lemma 33.4.1</a>(a)). 또 disk에서 중심을 빼도 끊어지지 않으므로, vertex를 뺀 이웃이 두 조각으로 갈라지는 경우(link가 cycle 둘 이상)는 생길 수 없다. 앞의 edge 쪽 논증을 엄밀하게 하려면 local homology 같은 도구가 필요하다 <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>. boundary가 loop라는 것, orientation이 둘이라는 것, \(\sum(6 - \deg i) = 6\chi\)는 모두 정확한 조합적 정리다. <strong>잃는 것.</strong> 높은 dimension에서는 “link가 sphere인가”를 판정하기가 어려워져 유한 검사의 장점이 줄어든다. 그리고 여전히 기하가 없다. valence 5인 vertex에 curvature가 모인다는 해석은 vertex 위치를 준 뒤에야 뜻을 가진다(Chapter 40).</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>Track 1: <a href="../31-meshes/31-1-mesh-as-surface.html#sec-manifold">Section 31.1</a>(<a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-4">Proposition 31.1.4</a>), <a href="../31-meshes/31-1-mesh-as-surface.html#sec-euler">Section 31.1</a>의 \(\chi\)로 topology 점검하기.</li>
+        <li>topological manifold와 boundary: <a href="../11-smooth-manifolds/11-1-topological-manifolds.html">Section 11.1</a>, <a href="../11-smooth-manifolds/11-5-manifolds-with-boundary.html#i-11-5-4">Definition 11.5.4</a>. manifold의 직관: <a href="../00-tour/0-6-manifolds.html#sec-charts">Section 0.6</a>.</li>
+        <li>triangulation, classification theorem, \(\chi\)의 불변성: <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>, discrete 판의 proof sketch는 <a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>.</li>
+        <li>combinatorial manifold와 PL topology: <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>simplicial surface는 모든 vertex link가 cycle인 pure 2-complex이고, boundary를 허락하면 path도 된다. link vertex \(j\)의 degree가 edge \(\{i,j\}\)의 triangle 수이므로, 이 조건은 “edge마다 triangle 하나나 둘”과 “vertex 둘레의 triangle이 한 덩어리”를 합친 것과 같다.</li>
+        <li>simplicial surface의 boundary는 서로 만나지 않는 loop들이고, 그 boundary는 비어 있다. 모든 dimension에서 simplicial manifold는 vertex link가 sphere인 pure complex이고, 1-manifold는 cycle들이다.</li>
+        <li>orientable simplicial surface는 consistent orientation을 가진 것이고, 1-skeleton이 connected이면 orientation은 없거나 정확히 둘이다.</li>
+        <li>\(3n_2 = 2n_1 - n_1^\partial\)이고, boundary가 없으면 \(\sum_i(6 - \deg i) = 6\chi\), 평균 valence \(6 - 6\chi/n_0 \to 6\)이다.</li>
+      </ul>
+      <p class="next">다음 절에서는 이 조합적 정보를 컴퓨터에 저장하는 방법을 다룬다. face list, incidence matrix와 그 부호 판, 그리고 vertex 둘레를 상수 시간에 도는 halfedge mesh를 보고, halfedge 구조가 surface와 그 \(\chi\)를 정확히 담는다는 것을 증명한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-33-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 33.4.1</span> <span class="level">★</span>
+        vertex가 \(5\times5\)인 <code>dgmesh.grid_mesh</code>와 <code>dgmesh.mobius_mesh(12)</code>에서 \(n_1^\partial\)을 세고 <a href="#i-33-4-19">Proposition 33.4.19</a>를 확인하여라. grid에서 \(\chi = 2 - 2g - b\)도 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>grid: 바깥 테두리 \(4 \times 4 = 16\)개가 boundary edge이고 \((n_0, n_1, n_2) = (25, 56, 32)\)이다. \(3 \cdot 32 = 96 = 2 \cdot 56 - 16\)이다. grid는 disk 모양(\(g = 0\), \(b = 1\))이고 \(25 - 56 + 32 = 1 = 2 - 0 - 1\)이다. Möbius band: 정사각형 12개의 위아래 테두리 \(24\)개가 boundary edge이고 \((24, 48, 24)\)에서 \(72 = 96 - 24\)이다. Möbius band는 orientable이 아니므로 \(2 - 2g - b\)(orientable surface의 식)는 쓰지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-4-2" data-level="1">
+        <p><span class="thm-head">Exercise 33.4.2</span> <span class="level">★</span>
+        정팔면체 두 개를 (a) vertex 하나에서, (b) edge 하나에서 붙여 만든 pure 2-complex는 simplicial surface인가? 깨지는 조건을 <a href="#i-33-4-5">Corollary 33.4.5</a>의 (E), (V)로 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 아니다. 모든 edge는 triangle 둘에 속하므로 (E)는 성립하지만, 붙인 vertex의 link가 서로 만나지 않는 4-cycle 둘이라 (V)가 깨진다. (b) 아니다. 붙인 edge가 triangle 넷에 속해 (E)가 깨진다. 그 끝점의 link에서 맞은편 끝점의 degree가 4다(<a href="#i-33-4-4">Proposition 33.4.4</a>(a)).</p>
+          <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-4-3" data-level="2">
+        <p><span class="thm-head">Exercise 33.4.3</span> <span class="level">★★</span>
+        boundary가 없는 simplicial surface에서 \(n_0 \ge 4\), \(n_1 \ge 6\), \(n_2 \ge 4\)임을 보이고, \(n_0 = 4\)이면 tetrahedron의 boundary뿐임을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>vertex \(i\) 하나의 link는 길이 3 이상의 cycle이므로 \(i\) 말고 vertex가 3개 이상 있어 \(n_0 \ge 4\)이다. 모든 vertex의 valence가 3 이상(<a href="#i-33-4-22">Non-example 33.4.22</a>)이므로 <a href="#i-33-4-23">Proposition 33.4.23</a>에서 \(2n_1 = \sum_i\deg i \ge 3n_0 \ge 12\), 곧 \(n_1 \ge 6\)이고, \(3n_2 = 2n_1 \ge 12\)에서 \(n_2 \ge 4\)이다. \(n_0 = 4\)이고 vertex가 \(i, a, b, c\)라 하자. \(\operatorname{Lk}(i)\)는 \(\{a, b, c\}\) 위의 길이 3 이상의 cycle이므로 3-cycle \(a\)–\(b\)–\(c\)이고, triangle \(\{i,a,b\}, \{i,b,c\}, \{i,a,c\}\)가 있다. 같은 논증을 \(a\)에 쓰면 \(\{a, b, c\}\)도 있다. 네 vertex에서 만들 수 있는 triangle은 이 4개뿐이므로 \(\mathcal{K}\)는 tetrahedron의 boundary다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-4-4" data-level="2">
+        <p><span class="thm-head">Exercise 33.4.4</span> <span class="level">★★</span>
+        [Cr §2.6 변형] (a) boundary가 없는 연결된 orientable simplicial surface의 genus가 2이고 vertex의 valence가 5와 7뿐이다. valence 7인 vertex는 valence 5인 vertex보다 몇 개 많은가? (b) 모든 vertex의 valence가 7 이상인 boundary 없는 simplicial surface에서 \(\chi \lt 0\)이고 \(n_0 \le -6\chi\)임을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) <a href="#eq-33-4-2">(33.4.2)</a>에서 \(\sum_i(6 - \deg i) = 6\chi = 6(2 - 2\cdot2) = -12\)이다. valence 5인 vertex는 \(+1\), 7인 vertex는 \(-1\)을 더하므로 \(n_5 - n_7 = -12\), 곧 valence 7인 vertex가 정확히 12개 더 많다. 해상도와 무관하다. (b) 모든 항 \(6 - \deg i \le -1\)이므로 \(6\chi = \sum_i(6 - \deg i) \le -n_0 \lt 0\)이다. 정리하면 \(n_0 \le -6\chi\)이다. connected이고 orientable이면 \(g = 1 - \chi/2 \ge 2\)이다. 거꾸로 sphere나 torus를 valence 7 이상으로만 삼각분할할 수는 없다.</p>
+          <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code>(<code>genus2_mesh</code>에서 \(\sum_i(6 - \deg i) = -12\) 확인)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-4-5" data-level="1">
+        <p><span class="thm-head">Exercise 33.4.5</span> <span class="level">★</span>
+        simplicial surface with boundary에서 edge \(e = \{i, j\}\)의 link는 vertex 두 개(interior edge)이거나 하나(boundary edge)임을 보여라. 이것이 edge가 1-dimensional인 곳에서의 “manifold 조건”, 곧 link가 \(S^0\) 또는 점 하나라는 것과 어떻게 맞는지 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="33-2-star-closure-link.html#i-33-2-13">Proposition 33.2.13</a>(c)에서 \(\operatorname{Lk}(e) = \{\tau : \tau \cap e = \varnothing,\ \tau \cup e \in \mathcal{K}\}\)이다. 2-complex에서 \(\tau\cup e\)가 simplex이려면 \(\tau = \{k\}\)이고 \(\{i, j, k\}\)가 triangle이어야 한다. 따라서 \(\operatorname{Lk}(e)\)는 \(e\)를 포함하는 triangle의 맞은편 vertex들이고, <a href="#i-33-4-5">Corollary 33.4.5</a>(E)에 의해 하나 또는 둘이다. vertex 둘은 \(S^0\)이고, 그 위에 \(e\)를 축으로 한 cone을 세우면 \(e\) 근처가 disk가 된다. 하나이면 반쪽 disk다.</p>
+          <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-4-6" data-level="1">
+        <p><span class="thm-head">Exercise 33.4.6</span> <span class="level">★</span>
+        <strong>Coding.</strong> 정사각형 \(n\)개로 된 band의 face list를 꼬임 없이, 그리고 Möbius band로 만드는 함수를 쓰고(마지막 정사각형만 다르다), \(n = 12\)에서 두 mesh의 \((n_0, n_1, n_2)\), \(\chi\), \(n_1^\partial\), boundary loop의 수, orientability(<code>dgmesh.orient</code>)를 출력하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-33-4-6"><code>import numpy as np
+import dgmesh as dm
+
+def band(n, twist):
+    F = []
+    for k in range(n):
+        a, b = k, n + k
+        c, d = (n, 0) if (twist and k == n - 1) else ((k + 1) % n, n + (k + 1) % n)
+        F += [[a, c, b], [b, c, d]]
+    return np.array(F)
+
+def boundary_loops(F):                # connected components of the boundary edges
+    nbr = {}
+    for a, b in dm.boundary_edges(F):
+        nbr.setdefault(a, []).append(b); nbr.setdefault(b, []).append(a)
+    seen, loops = set(), 0
+    for s in nbr:
+        if s not in seen:
+            loops, stack = loops + 1, [s]
+            while stack:
+                v = stack.pop()
+                if v not in seen:
+                    seen.add(v); stack += nbr[v]
+    return loops
+
+for twist in (False, True):
+    F = band(12, twist)
+    print("Moebius" if twist else "band", dm.counts(F), dm.euler_characteristic(F),
+          len(dm.boundary_edges(F)), boundary_loops(F), dm.orient(F)[1])</code></pre>
+          <pre id="out-ex-33-4-6"><code>band (24, 48, 24) 0 24 2 True
+Moebius (24, 48, 24) 0 24 1 False</code></pre>
+          <p>두 face list는 마지막 두 행만 다르다. 개수, \(\chi\), boundary edge의 수는 같고, boundary loop의 수(2와 1)와 orientability가 다르다. <a href="#i-33-4-8">Proposition 33.4.8</a>에 의해 boundary loop은 boundary edge graph의 connected component이므로, 위처럼 component를 세면 된다. 꼬임 없는 band는 orientable이고 \(\chi = 0 = 2 - 0 - 2\)로 <a href="#eq-33-4-1">(33.4.1)</a>의 boundary 판과 맞는다.</p>
+          <p class="verified">Verification: <code>verify/v-33-4-simplicial-manifolds.py</code>(위 코드를 그대로 실행해 출력을 비교하고, <code>band(12, True)</code>가 <code>dgmesh.mobius_mesh(12)</code>와 같은지 확인한다)</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="33-3-orientation.html">← 33.3 Orientation</a>
+    <a rel="next" href="33-5-mesh-data-structures.html">33.5 Mesh Data Structures →</a>
+  </nav>
+</body>
+</html>

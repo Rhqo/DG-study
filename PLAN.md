@@ -774,3 +774,16 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
   - orthogonal complement는 Chapter 1에 정의가 없다. 34.2가 정의하기로 하고 §2.5 목록에 넣었다. 검토자가 dfn으로 바꾼다.
   - 35장에 넘길 것(극좌표·구면의 Hodge star, 단체 위 상수 형식의 적분 (1/k!)ω(…))은 35장 작성 프롬프트에 넣었다.
   - terms 15개. 35장 작성 agent를 띄웠다. 34장 검토는 동시 agent 수 때문에 다음 빈자리에 띄운다.
+- 2026-10-18: **32장 reviewed.** 검토가 10개 항목을 고쳤다.
+  - 32.4의 B 흐름 설명이 거꾸로였다(긴 edge 옆 vertex가 가장 많이 움직인다). 고치고 verify를 더했다.
+  - 로드맵 그림 32.1.2의 edge가 상자 뒤로 지나가 없는 의존을 보였다. 다시 그리고 assert를 넣었다.
+  - Prop 32.3.10의 가정(arc-length sampling)과 그림의 t-uniform sampling 차이를 문단으로 설명했다(jitter를 주면 1차).
+  - "강의는"을 "강의 슬라이드는"으로 고쳤고, 슬라이드에 없는 인용을 바로잡았다.
+  - Prop 5.6.12 인용, "counterclockwise" 가정 제거, 400px 수식 9개
+  - 남은 제안: 32.3은 길다(분할은 작성 단계의 결정이라 그대로 둔다). 37.4는 Σθ = 2πk를 다시 증명하지 말고 32.3.4를 인용한다.
+  - 통합: §2.5 목록에 curve shortening flow, terms 5개, `tools/ddg_glossary.py`(glossary `#sec-glossary-ddg` 자동 생성. 통합 때마다 실행한다), root index 상태
+  - commit efc1635(branch push)
+  - 34장 검토 agent를 띄웠다. 지금 도는 것: 33 검토 2명, 34 검토, 35·37 작성
+- 2026-10-18: 33장 R1(33.1–33.3) 완료. 수학 오류는 없었다.
+  - 저작권 문제: Crane의 예제와 문장에 너무 가까운 곳이 4곳 있었다(Example 33.3.9, 33.3 Motivation, Non-example 33.2.3(a), Def 33.3.11). 모두 새로 썼다. §2.5에 "예제도 그대로 쓰지 않는다"를 추가했다. 앞으로 작성 프롬프트에 강조한다.
+  - orientation 코드 box의 잘못된 진술, Warning 2곳, 400px 수식을 고쳤다. 코드 블록은 id 방식으로 바꿨다(`out-N-M-K` 추가).

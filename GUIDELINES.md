@@ -143,6 +143,7 @@ Track 2 「Discrete Differential Geometry」(32–45장)는 CMU 15-458/858 강�
   - **저작권**: 노트와 슬라이드는 저자가 all rights reserved로 밝혔다.
     - 문장 번역, 그림 재현, 연습문제 전재를 하지 않는다. 구성과 주제만 참고하고, 설명·그림·예·연습은 새로 만든다(§4.4).
     - 노트의 문제와 비슷한 문제를 쓰려면 실질적으로 변형하고 "[Cr §x.y 변형]"을 단다.
+    - 노트·슬라이드의 **예제도 그대로 쓰지 않는다**. 같은 꼭짓점 이름과 같은 배치의 예, 문장을 번역한 비유도 피한다(33장 검토에서 4곳을 고쳤다). 새 예를 만들거나 기준 예제(아래)를 쓴다.
 - **엄밀성**: Tour보다 깊고 Track 3보다 가볍다.
   - **discrete 대상**의 정의와 정리는 가정을 빠짐없이 진술하고 **완전한 증명**을 쓴다. 대개 유한한 조합론과 선형대수라 짧다. 예: d∘d = 0, discrete Stokes, discrete Gauss–Bonnet, cotan formula, 기하량의 gradient
   - **smooth 대상**(curve, surface, differential form, curvature, geodesic)은 ℝⁿ 안에서 필요한 만큼 정확히 정의한다.
@@ -168,7 +169,7 @@ Track 2 「Discrete Differential Geometry」(32–45장)는 CMU 15-458/858 강�
     - verify 스크립트가 같은 코드를 실행해 확인한다.
     - scipy는 쓰지 않는다(부록 E).
     - 공용 함수는 `tools/dgmesh.py`(mesh)와 `tools/dgdec.py`(DEC, 곡선, 기하량의 미분)에 있다.
-    - 코드 블록에는 id를 단다: Implementation은 `<pre id="code-N-M-K">`, 연습 풀이는 `<pre id="code-ex-N-M-K">`, 출력은 `<pre id="out-ex-N-M-K">`. verify는 `tools/dgcode.py`의 `run_block(page, id)`로 그 글자를 그대로 실행하고 출력과 비교한다(Chapter 32에서 시작).
+    - 코드 블록에는 id를 단다: Implementation은 `<pre id="code-N-M-K">`, 연습 풀이는 `<pre id="code-ex-N-M-K">`, 출력은 `<pre id="out-N-M-K">`(Implementation)과 `<pre id="out-ex-N-M-K">`(연습). verify는 `tools/dgcode.py`의 `run_block(page, id)`로 그 글자를 그대로 실행하고 출력과 비교한다(Chapter 32에서 시작).
   - In computer vision 상자(`application`)는 선택이다. 3D vision·graphics와의 연결이 정확할 때만 1–2개 둔다. Part IV, 특히 Chapter 31과 잇는다.
   - **Go deeper 상자**(`deeper`)는 Track 3의 해당 장, Tour 절, Chapter 31의 해당 절을 링크한다.
   - **Exercises**: 4–6개를 둔다.

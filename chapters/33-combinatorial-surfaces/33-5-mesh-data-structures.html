@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>33.5 Mesh Data Structures — DG Study</title>
+  <meta name="dg-id" content="33.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="33.2, 33.3, 33.4, 31.1">
+  <meta name="dg-refs" content="Cr §2.4–2.5; CMU-DDG L2B; PMP">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">33. Combinatorial Surfaces</a> ›
+    <span>33.5 Mesh Data Structures</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>33.5 Mesh Data Structures</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#Cr">[Cr §2.4–2.5]</a>,
+        <a class="cite" href="../../references.html#PMP">[PMP]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>face list에서 incidence matrix \(A_0, A_1\)과 signed incidence matrix \(A_0^{\pm}, A_1^{\pm}\)을 만들고, star와 closure를 행렬 곱으로 계산할 수 있다.</li>
+        <li>signed incidence matrix의 열로 consistent orientation을 판정하고, orientation을 바꿀 때 행렬이 어떻게 바뀌는지 말할 수 있다.</li>
+        <li>halfedge mesh를 두 permutation(twin, next)으로 정의하고, 그것이 닫힌 oriented simplicial surface와 그 \(\chi\)를 정확히 담는다는 것을 증명할 수 있다.</li>
+        <li>face list에서 halfedge 구조를 만들고 vertex 둘레를 차례로 도는 코드를 쓸 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="33-2-star-closure-link.html#i-33-2-4">Definition 33.2.4</a>, <a href="33-2-star-closure-link.html#i-33-2-6">Definition 33.2.6</a>, <a href="33-2-star-closure-link.html#i-33-2-10">Definition 33.2.10</a>: star, simplicial closure, link</li>
+        <li><a href="33-3-orientation.html#i-33-3-6">Definition 33.3.6</a>: relative orientation, <a href="33-3-orientation.html#i-33-3-8">Corollary 33.3.8</a>, <a href="33-3-orientation.html#i-33-3-12">Example 33.3.12</a>: face list의 orientation 규약</li>
+        <li><a href="33-4-simplicial-manifolds.html#i-33-4-5">Corollary 33.4.5</a>: simplicial surface의 edge와 fan 조건</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="33-4-simplicial-manifolds.html">Section 33.4</a>에서 surface의 조건을 vertex마다의 link 검사로 정리했다. 이제 이 조합적 정보를 컴퓨터에 저장하고 쓰는 방법이 문제다. <a href="33-2-star-closure-link.html">Section 33.2</a>의 집합 algorithm은 정의를 그대로 옮겼지만, vertex 하나의 star를 찾을 때마다 complex 전체를 훑는다. vertex가 수십만 개인 mesh에서 모든 vertex의 이웃을 차례로 보려면 이것으로는 부족하다.</p>
+      <p>mesh 자료구조가 답해야 할 질문은 몇 가지로 정해져 있다. 이 face의 vertex는? 이 vertex에 붙은 face를 차례로? 이 edge의 양쪽 face는? boundary loop는? 이 절은 세 가지 답을 본다. 가장 간단한 face list, 선형대수로 계산하는 incidence matrix, 그리고 surface의 구조를 그대로 담아 이웃을 상수 시간에 찾는 halfedge mesh다. incidence matrix의 부호 판은 Chapter 36에서 discrete exterior derivative가 된다.</p>
+
+      <figure class="dg-figure" id="fig-33-5-1">
+        <img src="figures/fig-33-5-1-incidence.svg" alt="두 패널. (a) mesh: 가운데 vertex 0과 둘레의 vertex 1부터 5로 된 정오각형 fan. 다섯 triangle에 회색 f0부터 f4, 열 개의 edge에 파란 e0부터 e9가 적혀 있다. 안쪽 spoke가 e0부터 e4, 바깥 테두리가 e5부터 e9다. (b) incidence matrices: 열 개의 열(e0부터 e9)을 공유하는 두 격자. 위는 A1으로 행이 f0부터 f4이고 각 행에 검은 칸이 세 개, 아래는 A0의 전치로 행이 vertex 0부터 5이고 각 열에 검은 칸이 두 개다. vertex 0의 행은 왼쪽 다섯 칸이 검다.">
+        <figcaption><span class="fig-head">Figure 33.5.1.</span>
+        작은 mesh 하나와 그 incidence matrix. <em>무엇을</em>: vertex 0이 원점, vertex 1–5가 단위원 위(각 \(90^\circ + 72^\circ(k-1)\))에 있고 triangle \(f_t = (0, t{+}1, t{+}2)\)(5 다음은 1)로 된 닫힌 fan. edge 번호는 <code>dgdec.edge_list</code>의 사전식 순서다(\(e_0 = 01, \dots, e_4 = 05\)가 spoke, \(e_5 = 12, \dots, e_9 = 45\)가 테두리). <em>읽는 법</em>: (a)의 검은 수는 vertex, 파란 \(e\)는 edge, 회색 \(f\)는 triangle의 번호다. (b)는 위에 \(A_1\)(triangle × edge), 아래에 \(A_0^{\mathsf T}\)(vertex × edge)을 같은 edge 열에 맞춰 그렸다. 검은 칸이 1이다. <em>볼 것</em>: \(A_1\)의 행마다 검은 칸이 셋(triangle의 세 edge), \(A_0^{\mathsf T}\)의 열마다 둘(edge의 두 끝점)이다. \(A_1\)의 열을 세로로 보면 spoke \(e_0\)–\(e_4\)는 검은 칸이 둘(안쪽 edge), 테두리 \(e_5\)–\(e_9\)는 하나(boundary edge)다. \(A_0^{\mathsf T}\)의 행 0은 검은 칸이 다섯이고, 이것이 vertex 0의 valence다. <em>본문과의 연결</em>: <a href="#i-33-5-1">Definition 33.5.1</a>, <a href="#i-33-5-4">Proposition 33.5.4</a>. 같은 mesh를 halfedge로 저장한 것은 <a href="#fig-33-5-2">Figure 33.5.2</a>다.</figcaption>
+      </figure>
+      <p><a href="#fig-33-5-1">Figure 33.5.1</a>의 (b)를 세로로 읽어 보자. edge \(e_0 = \{0, 1\}\)의 열에서 위쪽 \(A_1\)에는 \(f_0\)과 \(f_4\)에 검은 칸이 있고, 아래쪽 \(A_0^{\mathsf T}\)에는 vertex 0과 1에 있다. 곧 한 열이 “이 edge의 양쪽 triangle과 양 끝 vertex”를 모두 알려 준다. 가로로 읽으면 \(A_1\)의 행은 triangle의 세 edge, \(A_0^{\mathsf T}\)의 행은 vertex에 붙은 edge다. 이웃을 찾는 질문이 행렬의 행과 열을 읽는 일로 바뀌는 것이 incidence matrix의 요점이다.</p>
+    </section>
+
+    <section id="sec-face-list">
+      <h2>Face Lists</h2>
+      <p>mesh 파일과 대부분의 코드는 triangle의 vertex 번호를 행으로 늘어놓은 배열 \(F \in \Z^{n_2 \times 3}\)을 쓴다. Crane과 강의 슬라이드는 이것을 adjacency list라 부른다 <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a>. 이 배열은 top simplex만 저장하고, 나머지 simplex는 <a href="33-1-simplicial-complexes.html#i-33-1-20">Example 33.1.20</a>처럼 필요할 때 생성한다. 정수 \(3n_2\)개로 저장이 작고, 행의 순서가 triangle의 orientation을 함께 담는다(<a href="33-3-orientation.html#i-33-3-12">Example 33.3.12</a>). 대신 “vertex \(i\)를 포함하는 face”를 찾으려면 \(F\) 전체를 훑어야 한다. 비용은 \(n_2\)에 비례한다.</p>
+    </section>
+
+    <section id="sec-incidence">
+      <h2>Incidence Matrices</h2>
+      <p>이웃 관계를 행렬로 쓰면 선형대수의 도구를 쓸 수 있다. 먼저 simplex에 번호를 붙인다. vertex는 \(0, \dots, n_0 - 1\), triangle은 \(F\)의 행 번호, edge는 \(\{i, j\}\) (\(i \lt j\))의 사전식 순서(<code>dgdec.edge_list</code>, §2.5)다.</p>
+      <div class="thm definition" id="i-33-5-1">
+        <p><span class="thm-head">Definition 33.5.1</span> <span class="thm-name">(incidence matrix)</span>.
+        pure 2-complex \(\mathcal{K}\)의 <dfn>incidence matrix</dfn>(접속 행렬)는 두 행렬 \(A_0 \in \{0, 1\}^{n_1 \times n_0}\), \(A_1 \in \{0, 1\}^{n_2 \times n_1}\)</p>
+        <div class="equation" id="eq-33-5-1">
+        \[ \begin{aligned} (A_0)_{e v} &= 1 \text{ if } v \in e, \text{ else } 0, \\ (A_1)_{f e} &= 1 \text{ if } e \subseteq f, \text{ else } 0 \end{aligned} \tag{33.5.1} \]
+        </div>
+        <p>이다. 행은 한 단계 높은 simplex, 열은 그 face가 될 수 있는 simplex다.</p>
+      </div>
+      <div class="thm example" id="i-33-5-2">
+        <p><span class="thm-head">Example 33.5.2</span> <span class="thm-name">(the tetrahedron)</span>.
+        <code>lib/ch33.py</code>의 tetrahedron은 face list가 \(F = (0,1,2), (0,3,1), (0,2,3), (1,3,2)\)이다. edge는 \(01, 02, 03, 12, 13, 23\)의 순서다. 그러면</p>
+        \[ A_0 = \begin{pmatrix} 1&1&0&0\\ 1&0&1&0\\ 1&0&0&1\\ 0&1&1&0\\ 0&1&0&1\\ 0&0&1&1 \end{pmatrix}, \]
+        \[ A_1 = \begin{pmatrix} 1&1&0&1&0&0\\ 1&0&1&0&1&0\\ 0&1&1&0&0&1\\ 0&0&0&1&1&1 \end{pmatrix} \]
+        <p>이다. 예를 들어 \(A_1\)의 둘째 행은 triangle \((0, 3, 1)\)의 edge \(01, 03, 13\)에 1을 둔다. 부호 없는 행렬은 triangle의 vertex 순서와 무관하므로, 같은 tetrahedron에 같은 사전식 번호를 쓴 <a class="cite" href="../../references.html#Cr">[Cr §2.4]</a>의 예와 같은 행렬이다.</p>
+        <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+      </div>
+      <aside class="box warning">
+        <p class="box-title">Common misconception: incidence matrix와 adjacency matrix</p>
+        <p>graph 이론의 adjacency matrix는 vertex와 vertex 사이의 \(n_0 \times n_0\) 행렬(이웃이면 1)이다. incidence matrix는 서로 다른 dimension의 simplex 사이의 행렬이다. Crane의 노트는 \(A_0, A_1\)을 “adjacency matrices”라고 부르고 <a class="cite" href="../../references.html#Cr">[Cr §2.4]</a> 강의 슬라이드는 “incidence matrix”라고 부르는데 <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a>, 이 study set은 후자를 쓴다. 둘은 다음 명제로 이어진다.</p>
+      </aside>
+      <div class="thm proposition" id="i-33-5-3">
+        <p><span class="thm-head">Proposition 33.5.3</span> <span class="thm-name">(vertex adjacency from incidence)</span>.
+        \(A_0^{\mathsf T}A_0 = D + W\)이다. 여기서 \(D = \diag(\deg 0, \dots, \deg(n_0 - 1))\)는 valence의 대각행렬이고, \(W\)는 vertex adjacency matrix(\(\{u, v\}\)가 edge이면 \(W_{uv} = 1\), 아니면 0)다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \((A_0^{\mathsf T}A_0)_{uv} = \sum_e (A_0)_{eu}(A_0)_{ev}\)는 \(u\)와 \(v\)를 모두 포함하는 edge의 수다. \(u = v\)이면 \(u\)를 포함하는 edge의 수, 곧 \(\deg u\)이다. \(u \ne v\)이면 그런 edge는 \(\{u, v\}\) 하나뿐이므로 \(\{u, v\} \in \mathcal{K}\)일 때 1, 아니면 0이다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-33-5-4">
+        <p><span class="thm-head">Proposition 33.5.4</span> <span class="thm-name">(what the incidence matrices know)</span>.
+        pure 2-complex에서 (a) \(A_0\)의 모든 행의 합은 2, \(A_1\)의 모든 행의 합은 3이다. (b) \(A_0\)의 열 \(v\)의 합은 \(\deg v\)이고, \(A_1\)의 열 \(e\)의 합은 \(e\)를 포함하는 triangle의 수다. 따라서 edge 조건 (E)(<a href="33-4-simplicial-manifolds.html#i-33-4-5">Corollary 33.4.5</a>)는 \(A_1\)의 열의 합이 모두 1 또는 2라는 것이고, boundary edge는 합이 1인 열이다. (c) \((A_1A_0)_{fv}\)는 \(v \in f\)이면 2, 아니면 0이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) edge는 vertex가 둘, triangle은 edge가 셋이다. (b) 정의를 열로 읽은 것이다. (c) \((A_1A_0)_{fv} = \sum_e (A_1)_{fe}(A_0)_{ev}\)는 \(f\)의 edge 가운데 \(v\)를 포함하는 것의 수다. \(v \in f\)이면 \(f\)의 세 edge 중 \(v\)를 포함하는 것은 정확히 둘이고, \(v \notin f\)이면 없다.</p>
+      </div>
+      <p>(c)의 2가 \(0\)이 되게 하는 것이 아래의 부호다.</p>
+
+      <h3 id="sec-sparse">Sparse storage</h3>
+      <p>incidence matrix는 거의 모든 성분이 0이다. <code>icosphere(3)</code>의 \(A_0\)는 \(1920 \times 642 = 1{,}232{,}640\)개의 성분 가운데 \(2n_1 = 3840\)개(약 0.3%)만 1이다. 그래서 0이 아닌 성분만 저장하는 sparse matrix를 쓴다. 가장 단순한 것은 COO(coordinate) 형식으로, 0이 아닌 성분마다 (행, 열, 값)의 세 수를 저장한다. 행렬과 벡터의 곱을 빠르게 하려면 CSR(compressed sparse row) 형식을 쓴다. 성분을 행 순서로 정렬해 열 번호와 값의 배열에 넣고, 행 \(r\)의 성분이 그 배열의 어디서 시작하는지를 길이가 (행의 수) \(+ 1\)인 배열 <code>indptr</code>에 적는다. 행 \(r\)의 성분은 위치 <code>indptr[r]</code>부터 <code>indptr[r+1] - 1</code>까지다. 곱 \(Ax\)는 0이 아닌 성분 수에 비례하는 시간이 걸린다. 이 장의 코드는 scipy 없이 numpy로 쓴다(<a href="#ex-33-5-6">Exercise 33.5.6</a>).</p>
+
+      <h3 id="sec-star-by-matrices">Star and closure by matrix products</h3>
+      <p>simplex의 집합 \(S\)를 세 indicator vector \(s_0 \in \{0,1\}^{n_0}\), \(s_1 \in \{0,1\}^{n_1}\), \(s_2 \in \{0,1\}^{n_2}\)로 쓰자(\(S\)에 속하는 simplex 자리가 1). 아래에서 벡터의 “\(\gt 0\)”은 성분마다 판정해 0/1 벡터를 만드는 것이고, \(\lor\)는 성분마다의 “또는”이다.</p>
+      <div class="thm proposition" id="i-33-5-5">
+        <p><span class="thm-head">Proposition 33.5.5</span> <span class="thm-name">(star and closure as matrix products)</span>.
+        face list가 생성하는 pure 2-complex에서</p>
+        <div class="equation" id="eq-33-5-2">
+        \[ \begin{aligned} \operatorname{St}(S)_0 &= s_0, \\ \operatorname{St}(S)_1 &= t_1 := s_1 \lor (A_0s_0 \gt 0), \\ \operatorname{St}(S)_2 &= s_2 \lor (A_1t_1 \gt 0), \\ \operatorname{Cl}(S)_2 &= s_2, \\ \operatorname{Cl}(S)_1 &= c_1 := s_1 \lor (A_1^{\mathsf T}s_2 \gt 0), \\ \operatorname{Cl}(S)_0 &= s_0 \lor (A_0^{\mathsf T}c_1 \gt 0) \end{aligned} \tag{33.5.2} \]
+        </div>
+        <p>이다. 여기서 \(\operatorname{St}(S)_k\)는 \(\operatorname{St}(S)\)의 \(k\)-simplex의 indicator vector다. \(\operatorname{Lk}(S)\)는 이 둘을 <a href="33-2-star-closure-link.html#eq-33-2-2">(33.2.2)</a>대로 조합해 얻는다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \((A_0s_0)_e\)는 \(e\)의 vertex 가운데 \(S\)에 속하는 것의 수이므로, \(\gt 0\)은 \(e\)가 \(S\)의 vertex를 포함한다는 뜻이다. 따라서 \(t_1\)은 \(S\)의 simplex를 face로 갖는 edge, 곧 \(\operatorname{St}(S)\)의 edge다. triangle \(f\)가 \(\operatorname{St}(S)\)에 속할 조건은 \(f \in S\)이거나 \(f\)가 \(S\)의 edge나 vertex를 포함하는 것이다. \(f\)가 \(S\)의 vertex \(v\)를 포함하면 \(v\)를 포함하는 \(f\)의 edge가 \(t_1\)에 속하므로, 이 조건은 “\(f \in S\)이거나 \(f\)의 edge 중 \(t_1\)에 속하는 것이 있다”와 같고, 이것이 \(s_2 \lor (A_1t_1 \gt 0)\)이다. vertex는 자기 자신만 face로 가지므로 \(\operatorname{St}(S)\)의 vertex는 \(S\)의 vertex뿐이다. closure는 <a href="33-2-star-closure-link.html#i-33-2-7">Proposition 33.2.7</a>대로 face를 모으는 것이다. \((A_1^{\mathsf T}s_2)_e \gt 0\)은 \(e\)가 \(S\)의 어떤 triangle의 edge라는 뜻이고, triangle의 vertex는 그 edge들의 vertex이므로 vertex는 \(c_1\)의 edge의 vertex와 \(S\)의 vertex를 모으면 된다.</p>
+      </div>
+      <p>집합 algorithm(<a href="33-2-star-closure-link.html">Section 33.2</a>)과 비교하면, 같은 일을 sparse 행렬 곱 몇 번으로 한다. 행렬은 한 번 만들어 두고, 많은 \(S\)에 대해 반복해 쓸 수 있다. Crane의 coding 과제도 star, closure, link를 이 행렬로 구현하게 한다 <a class="cite" href="../../references.html#Cr">[Cr §2.7]</a>.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: incidence matrices, star, closure, and link</p>
+        <p>dense numpy 배열로 쓴 판이다. 큰 mesh에서는 같은 식을 sparse 행렬로 계산한다. <code>star</code>와 <code>closure</code>는 <a href="#eq-33-5-2">(33.5.2)</a>를 그대로 옮겼다. 마지막 부분은 <a href="33-2-star-closure-link.html#i-33-2-11">Example 33.2.11</a>의 정팔면체 vertex 4의 link를 다시 계산한다.</p>
+        <pre id="code-33-5-1"><code>import numpy as np
+import dgdec as dd
+
+def incidence(F):                      # unsigned A0 (n1 x n0) and A1 (n2 x n1)
+    E, index = dd.edge_list(F)
+    A0 = np.zeros((len(E), np.max(F) + 1), int)
+    A0[np.arange(len(E)), E[:, 0]] = A0[np.arange(len(E)), E[:, 1]] = 1
+    A1 = np.zeros((len(F), len(E)), int)
+    for f, tri in enumerate(F):
+        for a, b in zip(tri, np.roll(tri, -1)):
+            A1[f, index[(min(a, b), max(a, b))]] = 1
+    return A0, A1
+
+def star(A0, A1, s0, s1, s2):          # indicator vectors of S -> those of St(S)
+    t1 = s1 | (A0 @ s0 > 0)
+    return s0, t1, s2 | (A1 @ t1 > 0)
+def closure(A0, A1, s0, s1, s2):       # indicator vectors of S -> those of Cl(S)
+    c1 = s1 | (A1.T @ s2 > 0)
+    return s0 | (A0.T @ c1 > 0), c1, s2
+def link(A0, A1, S):
+    a = closure(A0, A1, *star(A0, A1, *S))
+    b = star(A0, A1, *closure(A0, A1, *S))
+    return tuple(x &amp; ~y for x, y in zip(a, b))
+
+F = np.array([(a, b, c) for a in (0, 1) for b in (2, 3) for c in (4, 5)])   # octahedron
+A0, A1 = incidence(F)
+s0, s1, s2 = np.arange(6) == 4, np.zeros(len(A0), bool), np.zeros(len(F), bool)
+L0, L1, L2 = link(A0, A1, (s0, s1, s2))
+print(np.flatnonzero(L0), [tuple(e) for e in dd.edge_list(F)[0][L1].tolist()], L2.sum())</code></pre>
+        <pre id="out-33-5-1"><code>[0 1 2 3] [(0, 2), (0, 3), (1, 2), (1, 3)] 0</code></pre>
+      </aside>
+    </section>
+
+    <section id="sec-signed">
+      <h2>Signed Incidence Matrices</h2>
+      <p>oriented complex(<a href="33-3-orientation.html#i-33-3-11">Definition 33.3.11</a>)에서는 incidence에 relative orientation의 부호를 붙일 수 있다. orientation은 §2.5의 규약, 곧 edge \(\{i,j\}\) (\(i \lt j\))는 \([i, j]\), triangle은 \(F\)의 행의 순서, vertex는 \(+\)를 쓴다(<a href="33-3-orientation.html#i-33-3-12">Example 33.3.12</a>).</p>
+      <div class="thm definition" id="i-33-5-6">
+        <p><span class="thm-head">Definition 33.5.6</span> <span class="thm-name">(signed incidence matrix)</span>.
+        oriented pure 2-complex의 <dfn>signed incidence matrix</dfn>(부호 접속 행렬)는</p>
+        <div class="equation" id="eq-33-5-3">
+        \[ \begin{aligned} (A_0^{\pm})_{e v} &= o(e, v) \text{ if } v \in e, \text{ else } 0, \\ (A_1^{\pm})_{f e} &= o(f, e) \text{ if } e \subseteq f, \text{ else } 0 \end{aligned} \tag{33.5.3} \]
+        </div>
+        <p>이다. \(o\)는 <a href="33-3-orientation.html#i-33-3-6">Definition 33.3.6</a>(a)의 relative orientation이다. §2.5의 규약에서는 edge \([i, j]\)의 행이 \(i\) 자리에 \(-1\), \(j\) 자리에 \(+1\)이고(<a href="33-3-orientation.html#i-33-3-7">Proposition 33.3.7</a>), triangle의 행은 그 triangle이 edge를 \(i \to j\)로 지나면 \(+1\), \(j \to i\)로 지나면 \(-1\)이다(<a href="33-3-orientation.html#i-33-3-8">Corollary 33.3.8</a>).</p>
+      </div>
+      <div class="thm example" id="i-33-5-7">
+        <p><span class="thm-head">Example 33.5.7</span> <span class="thm-name">(the tetrahedron, signed)</span>.
+        <a href="#i-33-5-2">Example 33.5.2</a>의 tetrahedron에서</p>
+        \[ A_0^{\pm} = \begin{pmatrix} -1&1&0&0\\ -1&0&1&0\\ -1&0&0&1\\ 0&-1&1&0\\ 0&-1&0&1\\ 0&0&-1&1 \end{pmatrix}, \]
+        \[ A_1^{\pm} = \begin{pmatrix} 1&-1&0&1&0&0\\ -1&0&1&0&-1&0\\ 0&1&-1&0&0&1\\ 0&0&0&-1&1&-1 \end{pmatrix} \]
+        <p>이다. 둘째 행 \((0, 3, 1)\)은 edge를 \(0 \to 3\)(\(+\), 열 03), \(3 \to 1\)(\(-\), 열 13), \(1 \to 0\)(\(-\), 열 01)으로 지난다. 곱을 계산하면 \(A_1^{\pm}A_0^{\pm} = 0\)이다. 부호 없는 \(A_1A_0\)의 성분 2(<a href="#i-33-5-4">Proposition 33.5.4</a>(c))가 부호 때문에 \(+1 - 1\)로 상쇄된다. 이 사실의 일반적인 증명은 Chapter 36의 일이다(아래 Looking ahead). 또 \(A_1^{\pm}\)의 열의 합은 모두 0이다.</p>
+        <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code>(icosphere, torus, grid에서도 \(A_1^{\pm}A_0^{\pm} = 0\)을 수치로 확인한다)</p>
+      </div>
+      <aside class="box warning">
+        <p class="box-title">Common misconception: the signed matrix belongs to the complex</p>
+        <p>\(A_0, A_1\)은 complex만으로 정해지지만, \(A_0^{\pm}, A_1^{\pm}\)은 orientation의 선택에 따라 달라진다. 같은 mesh라도 edge의 orientation 규약이나 행의 순서를 바꾸면 다른 행렬이 된다. 어떻게 바뀌는지가 다음 명제다.</p>
+      </aside>
+      <div class="thm proposition" id="i-33-5-8">
+        <p><span class="thm-head">Proposition 33.5.8</span> <span class="thm-name">(changing orientations)</span>.
+        edge의 orientation을 바꾸는 것을 대각성분이 \(\pm1\)인 대각행렬 \(P_1\)(뒤집은 edge 자리가 \(-1\))로, triangle의 orientation을 바꾸는 것을 \(P_2\)로 나타내면, 새 signed incidence matrix는 \(P_1A_0^{\pm}\)와 \(P_2A_1^{\pm}P_1\)이다. 따라서 곱 \(A_1^{\pm}A_0^{\pm}\)는 \(P_2A_1^{\pm}A_0^{\pm}\)로 바뀌고, 특히 0인지 아닌지는 orientation의 선택에 무관하다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="33-3-orientation.html#i-33-3-6">Definition 33.3.6</a> 뒤의 관찰에서 \(o(-\sigma, \tau) = -o(\sigma, \tau)\)이고 \(o(\sigma, -\tau) = -o(\sigma, \tau)\)이다. edge \(e\)를 뒤집으면 \(A_0^{\pm}\)의 행 \(e\)와 \(A_1^{\pm}\)의 열 \(e\)에 \(-1\)이 곱해지고, triangle \(f\)를 뒤집으면 \(A_1^{\pm}\)의 행 \(f\)에 \(-1\)이 곱해진다. 행에 곱하는 것은 왼쪽에서, 열에 곱하는 것은 오른쪽에서 대각행렬을 곱하는 것이다. \(P_1^2 = I\)이므로 \((P_2A_1^{\pm}P_1)(P_1A_0^{\pm}) = P_2A_1^{\pm}A_0^{\pm}\)이다.</p>
+      </div>
+      <div class="thm proposition" id="i-33-5-9">
+        <p><span class="thm-head">Proposition 33.5.9</span> <span class="thm-name">(consistency read off the columns)</span>.
+        edge마다 triangle이 둘 이하인 pure 2-complex에서, 행의 orientation이 consistent(<a href="33-3-orientation.html#i-33-3-13">Definition 33.3.13</a>)일 필요충분조건은 0이 아닌 성분이 둘인 \(A_1^{\pm}\)의 모든 열에서 두 성분의 부호가 반대인 것, 곧 그 열의 합이 0인 것이다. 특히 consistently oriented이고 boundary가 없는 simplicial surface에서는 \(\mathbf{1}^{\mathsf T}A_1^{\pm} = 0\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> edge \(e = [i, j]\)에 triangle \(f, g\)가 붙어 있으면 열 \(e\)의 성분은 \(o(f, e)\)와 \(o(g, e)\)이고, <a href="33-3-orientation.html#eq-33-3-2">(33.3.2)</a>에 의해 \(o(f, g) = -o(f, e)o(g, e)\)이다. 따라서 \(o(f, g) = +1\)일 필요충분조건은 두 성분의 부호가 반대인 것이다. boundary가 없으면 모든 열이 이런 열이므로(<a href="33-4-simplicial-manifolds.html#i-33-4-5">Corollary 33.4.5</a>) 모든 열의 합이 0이다.</p>
+      </div>
+
+      <aside class="box forward">
+        <p class="box-title">Looking ahead: \(d_0\), \(d_1\), and \(\partial\)</p>
+        <p><a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>에서 \(A_0^{\pm}\)와 \(A_1^{\pm}\)은 discrete exterior derivative \(d_0\), \(d_1\)이 된다. vertex 값 \(u\)에 \(A_0^{\pm}\)를 곱하면 edge \([i,j]\)마다 \(u_j - u_i\)가 나오는데, 이것이 함수의 차이를 edge 위에 적은 discrete 1-form이다. 전치행렬은 boundary operator \(\partial\)가 되고(<a href="../36-discrete-exterior-calculus/index.html#toc-36-2">Section 36.2</a>), <a href="#i-33-5-7">Example 33.5.7</a>에서 수치로 본 \(A_1^{\pm}A_0^{\pm} = 0\)은 <a href="../36-discrete-exterior-calculus/index.html#toc-36-4">Section 36.4</a>에서 \(d_1d_0 = 0\)으로 증명된다. \(\mathbf{1}^{\mathsf T}A_1^{\pm} = 0\)은 “닫힌 surface의 oriented triangle을 모두 더한 것의 boundary가 0”이라는 진술로 다시 읽힌다. 이 절에서는 이 해석을 정의나 증명에 쓰지 않는다. 구현과 부호의 정본은 <code>dgdec.d0</code>, <code>dgdec.d1</code>이고, 이 절의 \(A_0^{\pm}, A_1^{\pm}\)과 같은 행렬이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-halfedge">
+      <h2>The Halfedge Mesh</h2>
+      <p>incidence matrix는 어떤 complex에도 쓰이지만, surface의 특별한 구조를 쓰지 않는다. 특히 “vertex 둘레의 face를 <em>차례로</em>”라는 질문에는 순서가 필요하다. oriented simplicial surface에는 이 순서가 있다. edge마다 양쪽에 face가 하나씩 있고(<a href="33-4-simplicial-manifolds.html#i-33-4-5">Corollary 33.4.5</a>), vertex 둘레의 face들은 한 바퀴를 이루며, orientation이 그 바퀴의 방향을 정한다. halfedge mesh는 이 구조를 permutation 두 개로 저장한다. 각 edge \(\{i,j\}\)를 방향이 반대인 두 halfedge \(i \to j\), \(j \to i\)로 쪼개고, 각 halfedge가 자기 face 안에서 다음에 오는 halfedge와 반대쪽 짝을 기억한다.</p>
+
+      <div class="thm definition" id="i-33-5-10">
+        <p><span class="thm-head">Definition 33.5.10</span> <span class="thm-name">(halfedge mesh)</span>.
+        원소의 수가 짝수인 유한집합 \(H\)(이 \(H\)는 mean curvature와 무관하다. 아래 Conventions 상자)와 \(H\)의 두 permutation \(\eta\)(twin), \(\rho\)(next)의 쌍을 <dfn>halfedge mesh</dfn>(하프에지 mesh)라 한다. 단 \(\eta\)는 fixed point가 없는 involution이다: 모든 \(h\)에서 \(\eta(\eta(h)) = h\), \(\eta(h) \ne h\). \(H\)의 원소를 halfedge라 하고,</p>
+        <ul>
+          <li>face는 \(\rho\)의 orbit(cycle),</li>
+          <li>edge는 \(\eta\)의 orbit(halfedge 두 개의 쌍),</li>
+          <li>vertex는 \(\rho\circ\eta\)의 orbit</li>
+        </ul>
+        <p>로 정의한다. 각각의 수를 \(n_2^H\), \(n_1^H = \abs{H}/2\), \(n_0^H\)로 쓰고 \(\chi^H = n_0^H - n_1^H + n_2^H\)라 한다.</p>
+      </div>
+      <p>vertex의 정의를 이해하려면 halfedge \(h = (i \to j)\)를 “\(i\)에서 나가는 화살표”로 보면 된다. \(\eta(h) = (j \to i)\)이고, 그 face에서 다음 halfedge \(\rho(\eta(h))\)는 \(i\)에서 나간다. 그러니 \(\rho\circ\eta\)는 \(i\)에서 나가는 halfedge를 \(i\)에서 나가는 다른 halfedge로 보낸다. 같은 vertex에서 나가는 halfedge들이 한 orbit을 이룬다.</p>
+
+      <figure class="dg-figure" id="fig-33-5-2">
+        <img src="figures/fig-33-5-2-halfedges.svg" alt="두 패널. (a) halfedges: Figure 33.5.1의 정오각형 fan에서 각 triangle 안쪽으로 조금 밀어 넣은 파란 화살표 세 개가 triangle을 반시계 방향으로 돈다. 테두리 바깥에는 회색 점선 화살표가 시계 방향으로 돈다. spoke 0-1의 왼쪽에 위로 가는 주황 화살표 h, 오른쪽에 아래로 가는 주홍 화살표 η(h), 1에서 2로 가는 초록 화살표 ρ(h)가 강조되어 있다. (b) around vertex 0: vertex 0에서 다섯 vertex로 나가는 파란 화살표에 0부터 4까지 번호가 반시계 방향으로 붙어 있다. 가운데에 반시계 방향의 주황 원호와 시계 방향의 주홍 점선 원호가 있고, 아래에 η∘ρ⁻¹: counterclockwise, ρ∘η: clockwise라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 33.5.2.</span>
+        halfedge, twin, next, 그리고 vertex 둘레의 두 회전. <em>무엇을</em>: <a href="#fig-33-5-1">Figure 33.5.1</a>의 fan을 <code>dgdec.HalfedgeMesh</code>로 저장한 것. 안쪽 halfedge 15개와 테두리의 boundary halfedge 5개가 있다. <em>읽는 법</em>: (a)의 파란 화살표는 안쪽 halfedge를 그 triangle 쪽으로 밀어 그린 것이고, triangle마다 세 화살표가 \(\rho\)(next)의 cycle을 이룬다. 회색 점선은 boundary halfedge다. 주황 \(h = 0 \to 1\), 주홍 \(\eta(h) = 1 \to 0\), 초록 \(\rho(h) = 1 \to 2\)가 강조되어 있다. (b)의 파란 화살표는 vertex 0에서 나가는 halfedge이고, 번호는 \(h\)에서 시작해 \(\eta\circ\rho^{-1}\)(twin∘prev)을 되풀이한 순서다. 주황 원호가 \(\eta\circ\rho^{-1}\)의 방향, 주홍 점선 원호가 \(\rho\circ\eta\)(next∘twin)의 방향이다. <em>볼 것</em>: (a)에서 \(h\)와 \(\eta(h)\)는 같은 edge의 양쪽에서 반대로 달린다. 이것이 consistent orientation이다. (b)에서 \(\eta\circ\rho^{-1}\)은 vertex 1, 2, 3, 4, 5의 순서(반시계 방향)로, \(\rho\circ\eta\)는 1, 5, 4, 3, 2의 순서(시계 방향)로 돈다. 두 orbit은 같은 다섯 halfedge다. <em>본문과의 연결</em>: <a href="#i-33-5-10">Definition 33.5.10</a>, <a href="#i-33-5-11">Proposition 33.5.11</a>, Conventions 상자.</figcaption>
+      </figure>
+      <p><a href="#fig-33-5-2">Figure 33.5.2</a>의 (a)에서 주황 \(h = 0 \to 1\)부터 따라가 보자. \(h\)는 \(f_0\)에 속하고, 그 다음 halfedge \(\rho(h)\)는 \(f_0\)의 다음 변 \(1 \to 2\)(초록)다. \(h\)의 twin \(\eta(h)\)(주홍)는 같은 edge를 반대로 달리는 \(f_4\)의 halfedge다. 이제 \(\eta(h) = 1 \to 0\)에서 \(f_4\) 안의 다음 halfedge로 가면 \(0 \to 5\)가 나온다. 이것이 \(\rho(\eta(h))\)이고, (b)에서 \(h\) 다음에 시계 방향으로 오는 화살표다. 반대 방향으로 가려면 \(h\)의 이전 halfedge \(\rho^{-1}(h) = 2 \to 0\)으로 갔다가 twin을 취해 \(0 \to 2\)로 간다. (b)의 번호 0, 1, 2, …가 이 반시계 순서다.</p>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: which way around a vertex</p>
+        <p>Crane은 노트에서 vertex를 \(\rho\circ\eta\)(next∘twin)의 orbit으로 정의한다 <a class="cite" href="../../references.html#Cr">[Cr §2.5]</a>. 그 orbit은 한 vertex에서 <em>나가는</em> halfedge들이다. 강의 슬라이드는 \(\eta\circ\rho\)의 orbit을 쓴다 <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a>. \(\eta\circ\rho = \eta\circ(\rho\circ\eta)\circ\eta\)이므로 그 orbit은 \(\rho\circ\eta\)의 orbit을 \(\eta\)로 옮긴 것, 곧 한 vertex로 <em>들어오는</em> halfedge들이고, vertex와의 대응은 같다. \(\rho\circ\eta\)는 normal 쪽에서 보았을 때 vertex 둘레를 <em>시계 방향</em>으로 돈다. triangle \((i, j, k)\)가 반시계 방향이면 vertex \(i\)에서 \(j\) 쪽 방향을 반시계로 돌려야 \(k\) 쪽 방향이 나온다. 그러니 \(\{i, j\}\)의 반대쪽 triangle \((j, i, l)\)은 \(j\) 쪽 방향의 시계 방향 쪽에 있고, \(\rho(\eta(i \to j)) = i \to l\)이 그쪽으로 한 칸 돈 것이다. Crane의 노트처럼 triangle을 화면에서 시계 방향으로 그리면(<a class="cite" href="../../references.html#Cr">[Cr §2.3]</a>, normal이 화면 안쪽을 향한다) 같은 map이 화면에서는 반시계로 보인다. 이 study set의 코드 <code>dgdec.HalfedgeMesh.outgoing</code>은 그 역 \(\eta\circ\rho^{-1}\)(twin∘prev)로 <em>반시계 방향</em>으로 돈다. 두 map은 서로의 역이므로(<a href="#i-33-5-11">Proposition 33.5.11</a>) 같은 orbit, 곧 같은 vertex를 주고 도는 방향만 다르다. <code>dgdec</code>의 halfedge 번호는 \(h = 3f + c\)(face \(f\)의 \(c\)번째 corner에서 나가는 것)이고, halfedge의 vertex는 그 꼬리(tail)다. halfedge의 집합 \(H\)와 \(\eta, \rho\)는 Crane의 기호이고, 이 \(H\)는 mean curvature \(H\)와 관계없다.</p>
+      </aside>
+
+      <div class="thm proposition" id="i-33-5-11">
+        <p><span class="thm-head">Proposition 33.5.11</span> <span class="thm-name">(the two vertex rotations)</span>.
+        \(\eta\circ\rho^{-1} = (\rho\circ\eta)^{-1}\)이다. 따라서 둘의 orbit은 같은 집합들이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \((\rho\circ\eta)^{-1} = \eta^{-1}\circ\rho^{-1} = \eta\circ\rho^{-1}\)이다(\(\eta\)는 involution이므로 \(\eta^{-1} = \eta\)). permutation과 그 역은 같은 cycle을 반대 방향으로 돈다.</p>
+      </div>
+
+      <div class="thm example" id="i-33-5-12">
+        <p><span class="thm-head">Example 33.5.12</span> <span class="thm-name">(the halfedge mesh of an oriented surface)</span>.
+        consistently oriented이고 boundary가 없는 simplicial surface의 face list \(F\)에서 halfedge mesh를 만든다. \(H\)는 행 \((i, j, k)\)마다의 세 방향 edge \(i \to j\), \(j \to k\), \(k \to i\)의 모임이다. \(\rho(i \to j) = j \to k\)는 같은 행의 다음 방향 edge, \(\eta(i \to j) = j \to i\)다. <a href="#i-33-5-2">Example 33.5.2</a>의 tetrahedron은 halfedge가 12개다. \(\rho\)의 orbit은 길이 3의 4개(triangle), \(\eta\)의 orbit은 6개(edge), \(\rho\circ\eta\)의 orbit은 길이 3의 4개(vertex마다 valence 3)이고 \(\chi^H = 4 - 6 + 4 = 2\)다.</p>
+        <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+      </div>
+
+      <p>이 구성이 정말 halfedge mesh가 되고 원래 surface를 정확히 담는다는 것이 이 절의 중심 명제다. 증명의 각 단계가 halfedge 코드가 기대는 불변식(invariant)이다.</p>
+      <div class="thm proposition" id="i-33-5-13">
+        <p><span class="thm-head">Proposition 33.5.13</span> <span class="thm-name">(halfedge invariants)</span>.
+        \(F\)가 consistently oriented이고 boundary가 없는 simplicial surface의 face list이고 \((H, \eta, \rho)\)가 <a href="#i-33-5-12">Example 33.5.12</a>의 구성이라 하자. halfedge \(h = i \to j\)의 tail을 \(i\), head를 \(j\), face를 그것이 속한 행이라 하면</p>
+        <ul>
+          <li>(a) 모든 방향 edge \(i \to j \in H\)는 정확히 한 행에 속한다. 따라서 \(\rho\)와 face가 잘 정의된다.</li>
+          <li>(b) \(\eta\)는 잘 정의된 fixed point 없는 involution이고, \(\operatorname{tail}(\eta h) = \operatorname{head}(h)\)이다.</li>
+          <li>(c) \(\rho\)는 permutation이고 \(\rho^3 = \id\), \(\operatorname{tail}(\rho h) = \operatorname{head}(h)\), \(\operatorname{face}(\rho h) = \operatorname{face}(h)\)이며, \(\rho\)의 orbit은 triangle과 일대일로 대응한다.</li>
+          <li>(d) \(\eta\)의 orbit은 edge와 일대일로 대응한다.</li>
+          <li>(e) \(\rho\circ\eta\)의 orbit은 vertex와 일대일로 대응한다. vertex \(i\)의 orbit은 \(i\)에서 나가는 halfedge \(\deg i\)개 전체이고, 그 순서는 \(\operatorname{Lk}(i)\)의 cycle을 한 방향으로 도는 순서다.</li>
+        </ul>
+        <p>따라서 \(n_k^H = n_k\) (\(k = 0, 1, 2\))이고 \(\chi^H = \chi\)이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: consistency가 “방향 edge 하나에 행 하나”를, edge마다 triangle 둘이 “twin의 존재”를, link가 cycle이라는 것이 “vertex 둘레의 orbit이 하나”를 보장한다.</p>
+        <p><span class="proof-head">Proof.</span> (a) \(\{i, j\}\)는 triangle 정확히 둘에 속하고(<a href="33-4-simplicial-manifolds.html#i-33-4-5">Corollary 33.4.5</a>), consistent이므로 둘은 이 edge를 서로 반대 방향으로 지난다(<a href="33-3-orientation.html#i-33-3-8">Corollary 33.3.8</a>). 따라서 \(i \to j\)를 지나는 행은 정확히 하나다. 한 행 안에서 같은 방향 edge가 두 번 나오지 않는 것은 세 vertex가 서로 다르기 때문이다.</p>
+        <p>(b) \(i \to j \in H\)이면 (a)의 다른 triangle이 \(j \to i\)로 지나므로 \(j \to i \in H\)이다. \(\eta\eta = \id\)이고 \(i \ne j\)이므로 fixed point가 없다. tail에 대한 식은 정의 그대로다.</p>
+        <p>(c) 각 행의 세 방향 edge를 \(\rho\)는 cycle \(i \to j \mapsto j \to k \mapsto k \to i \mapsto i \to j\)로 보낸다. (a)에 의해 \(H\)는 행마다의 이 세 원소로 겹침 없이 나뉘므로 \(\rho\)는 permutation이고 orbit이 행, 곧 triangle이다. 나머지 식은 같은 행 안에서 이어지는 방향 edge라는 것에서 나온다.</p>
+        <p>(d) \(\{i, j\} \in \mathcal{K}\)이면 (b)에 의해 \(i \to j\)와 \(j \to i\)가 모두 \(H\)에 있고, 둘이 하나의 \(\eta\)-orbit이다. 거꾸로 orbit은 언제나 이런 쌍이다.</p>
+        <p>(e) \(h = i \to j\)이고 \(j \to i\)가 행 \((j, i, l)\)(cyclic 순서)에 있다고 하자. 그러면 \(\rho(\eta(h)) = i \to l\)이다. \(\{i, j, l\}\)은 \(i\)를 포함하는 triangle이므로 \(\{j, l\}\)은 \(\operatorname{Lk}(i)\)의 edge이고, 이 단계는 link에서 \(j\)의 이웃 \(l\)로 가는 한 걸음이다. 사용한 triangle은 \(j \to i\)를 지나는 것, 곧 \(h\)가 속한 triangle이 아닌 쪽이다. 다음 단계는 \(i \to l\)에서 출발하는데, \(i \to l\)은 행 \((j, i, l)\)에 속하므로 다음에 쓰는 triangle은 \(\{i, j, l\}\)이 아닌 쪽이고, 그래서 link에서 \(j\)로 되돌아가지 않고 \(l\)의 다른 이웃으로 간다. \(\operatorname{Lk}(i)\)가 cycle이므로(<a href="33-4-simplicial-manifolds.html#i-33-4-2">Definition 33.4.2</a>) 이 걸음은 link의 모든 vertex를 한 번씩 지나 처음으로 돌아온다. 각 link vertex \(j\)에 대해 \(i \to j \in H\)이므로(\(\{i, j\}\)의 두 triangle 중 하나가 \(i \to j\)로 지난다) orbit은 \(i\)에서 나가는 halfedge \(\deg i\)개 전체다. 그러므로 vertex마다 orbit이 정확히 하나다. (c), (d), (e)에서 개수가 같고 \(\chi^H = \chi\)이다.</p>
+      </div>
+
+      <p>거꾸로, 아무 halfedge mesh나 surface를 하나 정한다. 다음 명제의 증명은 topology를 쓰므로 스케치로 둔다.</p>
+      <div class="thm proposition" id="i-33-5-14">
+        <p><span class="thm-head">Proposition 33.5.14</span> <span class="thm-name">(every halfedge mesh is a closed oriented surface)</span>.
+        halfedge mesh \((H, \eta, \rho)\)에서 \(\rho\)의 orbit마다 그 길이만큼 변을 가진 polygon을 하나씩 두고(변 하나가 halfedge 하나), \(\eta\)로 짝지은 두 변을 서로 반대 방향으로 붙이면 boundary가 없는 oriented surface가 나온다. 그 Euler characteristic은 \(\chi^H\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof sketch.</span> 각 polygon은 disk이고, 변을 둘씩 붙이므로 변 위의 점 근처는 반쪽 disk 두 장을 붙인 disk다. polygon의 꼭짓점은 붙인 뒤 \(\rho\circ\eta\)의 orbit마다 하나의 점이 되고, 그 점에 모이는 polygon의 모퉁이들이 orbit의 순서대로 한 바퀴를 이루므로 그 근처도 disk다. 모든 polygon을 \(\rho\)의 방향으로 돌게 orient하면 붙인 변에서 방향이 반대라서 orientation이 맞는다. 이 cell 분할의 vertex, edge, face의 수가 \(n_0^H, n_1^H, n_2^H\)이므로 그것으로 센 Euler characteristic은 \(\chi^H\)이다. polygon을 붙인 공간이 surface라는 것의 엄밀한 증명은 cell complex의 topology에 속한다 <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>.</p>
+      </div>
+
+      <div class="thm example" id="i-33-5-15">
+        <p><span class="thm-head">Example 33.5.15</span> <span class="thm-name">(two halfedges)</span>.
+        \(H = \{h_0, h_1\}\), \(\eta = (h_0\ h_1)\)이라 하자. (a) \(\rho = \id\)이면 face는 \(\{h_0\}\), \(\{h_1\}\)의 둘(변이 하나인 polygon, 곧 원판 둘), edge는 하나, \(\rho\circ\eta = \eta\)의 orbit은 \(\{h_0, h_1\}\) 하나라서 vertex가 하나다. \(\chi^H = 1 - 1 + 2 = 2\)이다. 원판 두 장의 테두리를 한 점을 맞춰 붙인 sphere다. (b) \(\rho = \eta\)이면 face는 하나(변이 둘인 polygon), \(\rho\circ\eta = \id\)라서 vertex가 둘이고 \(\chi^H = 2 - 1 + 1 = 2\)이다. 변이 둘인 polygon의 두 변을 지퍼처럼 붙인 sphere다. 둘 다 simplicial complex로는 쓸 수 없다. triangle이 아닌 face가 있고, (a)는 edge의 두 끝이 같은 vertex다. halfedge가 둘이면 \(\rho\)는 이 두 가지뿐이고, 강의 슬라이드도 이 둘을 가장 작은 예로 든다 <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a>.</p>
+        <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-33-5-16">
+        <p><span class="thm-head">Non-example 33.5.16</span>.
+        (a) triangle 셋이 한 edge를 공유하는 책은 halfedge mesh로 쓸 수 없다. 그 edge의 방향 edge가 셋 생겨야 하는데 \(\eta\)의 orbit은 언제나 둘이다. (b) Möbius band의 face list에서는 이음매의 두 triangle이 같은 방향 edge \(n \to 0\)을 지나므로(<a href="33-3-orientation.html#i-33-3-17">Proposition 33.3.17</a>) 그 halfedge가 두 face에 속해야 한다. Möbius band에는 consistent orientation이 없으므로 어떤 행을 뒤집어도 어딘가에 이런 충돌이 남는다. halfedge mesh는 정의상 oriented surface만 담는다. <code>dgdec.HalfedgeMesh</code>는 두 경우 모두 <code>ValueError</code>를 낸다.</p>
+        <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+      </div>
+
+      <h3 id="sec-boundary-halfedges">Boundary</h3>
+      <p>boundary가 있는 surface에서는 boundary edge의 한쪽에 face가 없어 \(\eta\)를 정할 수 없다. 흔한 해법은 구멍마다 polygon 하나를 채운 것처럼 다루는 것이다 <a class="cite" href="../../references.html#Cr">[Cr §2.5]</a>. boundary edge마다 반대 방향의 boundary halfedge를 하나 더하고 그 face를 “없음”으로 표시한 뒤, boundary halfedge의 \(\rho\)는 boundary를 따라 다음 boundary halfedge로 둔다. 그러면 \(\rho\)의 orbit은 진짜 face와 boundary loop(<a href="33-4-simplicial-manifolds.html#i-33-4-8">Proposition 33.4.8</a>)로 나뉘고, \(\chi\)를 셀 때는 진짜 face만 센다. <code>dgdec.HalfedgeMesh</code>가 이 방식이다. 예를 들어 vertex가 \(4 \times 4\)인 <code>grid_mesh</code>는 halfedge가 \(3 \cdot 18 + 12 = 66\)개이고, boundary halfedge 12개가 loop 하나를 이루며, \(\chi = 16 - 33 + 18 = 1\)이다.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: building and walking a halfedge mesh</p>
+        <p>boundary가 없고 consistently oriented인 face list에서 <code>dgdec</code>와 같은 번호(\(h = 3f + c\))로 tail, twin, next 배열을 만든다. twin은 방향 edge의 사전으로 찾는다(<a href="#i-33-5-13">Proposition 33.5.13</a>(a), (b)). 이어 세 permutation의 cycle을 세어 \(\chi\)를 구하고, vertex 0에서 나가는 halfedge를 twin∘prev로 따라가 반시계 방향의 이웃 순서를 출력한다.</p>
+        <pre id="code-33-5-2"><code>import numpy as np
+import dgmesh as dm
+def halfedges(F):                      # halfedge h = 3 f + c runs F[f, c] -> F[f, c+1]
+    tail, head = F.ravel(), np.roll(F, -1, axis=1).ravel()
+    where = {(a, b): h for h, (a, b) in enumerate(zip(tail.tolist(), head.tolist()))}
+    twin = np.array([where[(b, a)] for a, b in zip(tail.tolist(), head.tolist())])
+    nxt = 3 * (np.arange(len(tail)) // 3) + (np.arange(len(tail)) + 1) % 3
+    return tail, twin, nxt
+def cycles(perm):                      # the cycles of a permutation array
+    seen, out = set(), []
+    for h in range(len(perm)):
+        if h not in seen:
+            c = [h]
+            while perm[c[-1]] != h:
+                c.append(int(perm[c[-1]]))
+            seen.update(c); out.append(c)
+    return out
+
+V, F = dm.icosphere(0)
+tail, twin, nxt = halfedges(F)
+prev = np.argsort(nxt)                 # the inverse permutation of next
+faces, edges, verts = cycles(nxt), cycles(twin), cycles(nxt[twin])   # verts: next o twin
+print(len(verts) - len(edges) + len(faces), sorted({len(c) for c in verts}))
+h, ring = 0, []                        # halfedge 0 starts at vertex 0
+for _ in range(len(verts[0])):
+    ring.append(int(tail[nxt[h]]))     # head of h
+    h = twin[prev[h]]                  # twin o prev: next outgoing halfedge, counterclockwise
+print(ring)</code></pre>
+        <p>정이십면체에서 \(\chi = 2\)이고 모든 vertex orbit의 길이가 5(valence)다. vertex 0의 이웃은 반시계 방향으로 \(11, 5, 1, 7, 10\)이고, <code>dgdec.HalfedgeMesh(F).vertex_one_ring(0)</code>과 같다.</p>
+        <pre id="out-33-5-2"><code>2 [5]
+[11, 5, 1, 7, 10]</code></pre>
+      </aside>
+
+      <p>halfedge와 가까운 자료구조로 Guibas와 Stolfi의 quad-edge가 있다 <a class="cite" href="../../references.html#Guibas85">[Guibas85]</a>. edge마다 primal의 두 방향과 함께, 그 edge를 가로지르는 dual edge의 두 방향을 저장하고, 이 넷을 90°씩 돌리는 연산으로 primal mesh와 dual mesh를 동시에 다룬다. dual mesh가 무엇인지가 다음 절의 주제다.</p>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: when the mesh is not a manifold</p>
+        <p>halfedge mesh는 edge마다 face가 정확히 둘(boundary에서는 하나)이고 vertex 둘레가 한 바퀴라는 가정을 자료구조 자체에 박아 둔다. 그래서 non-manifold edge나 vertex가 있는 face list(<a href="../31-meshes/31-1-mesh-as-surface.html#sec-concentration">Section 31.1</a>의 What geometry explains 상자가 든 복원 mesh의 결함)는 halfedge로 바꾸는 단계에서 실패하거나, vertex를 복제해 mesh를 바꿔야 한다. 이 장의 <code>dgdec.HalfedgeMesh</code>도 그런 입력에 <code>ValueError</code>를 낸다. 반대로 face list와 incidence matrix는 어떤 complex에도 쓸 수 있다. 예를 들어 PyTorch3D의 normal consistency loss는 face list 위에서 계산하고, edge를 공유하는 face가 셋 이상이면 모든 쌍을 쓴다(<a href="../31-meshes/31-3-cotangent-laplacian.html#sec-losses">Section 31.3</a>, <a class="cite" href="../../references.html#Ravi20">[Ravi20]</a>). 복원한 mesh를 halfedge 기반 처리(remeshing, parametrization)에 넘기기 전에 <a href="33-4-simplicial-manifolds.html#i-33-4-5">Corollary 33.4.5</a>의 (E), (V)를 검사하는 것이 안전하다.</p>
+      </aside>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: going around a point</p>
+        <p><strong>Smooth.</strong> oriented surface의 점 \(p\)에서 tangent plane의 orientation은 방향들의 “반시계” 순서를 정한다. 작은 원을 따라 \(p\) 둘레를 돌 수 있고, 그 방향이 orientation이다. <strong>Discrete.</strong> halfedge mesh에서 \(\eta\circ\rho^{-1}\)은 vertex에서 나가는 edge들을 반시계 순서로 돈다. 이 순환 순서, 곧 rotation system이 surface의 orientation을 조합적으로 담는다.</p>
+        <p><strong>정확히 보존하는 것.</strong> oriented surface의 topology 전체다. 짝수 개의 halfedge 위의 permutation 쌍 하나가 닫힌 oriented surface를 정하고(<a href="#i-33-5-14">Proposition 33.5.14</a>), simplicial surface에서는 vertex, edge, face와 \(\chi\)를 정확히 되살린다(<a href="#i-33-5-13">Proposition 33.5.13</a>). <strong>잃는 것.</strong> 순서만 있고 각도는 없다. 이웃한 두 edge 사이의 각은 vertex 위치를 준 뒤에 계산한다(Chapter 38, Chapter 40). 또 halfedge는 non-manifold와 non-orientable 대상을 담지 못한다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>Track 1의 mesh 서술과 non-manifold 복원 mesh: <a href="../31-meshes/31-1-mesh-as-surface.html">Section 31.1</a>.</li>
+        <li>mesh 자료구조 전반(halfedge, 다른 구조, 구현): <a class="cite" href="../../references.html#PMP">[PMP]</a>.</li>
+        <li>polygon을 붙여 만든 surface와 CW complex: <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>.</li>
+        <li>signed incidence matrix가 discrete exterior derivative가 되는 곳: <a href="../36-discrete-exterior-calculus/index.html#toc-36-4">Section 36.4</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>face list는 top simplex만 저장한다. 작고 orientation을 담지만, 이웃을 찾으려면 전체를 훑어야 한다.</li>
+        <li>incidence matrix \(A_0, A_1\)은 vertex–edge, edge–triangle의 포함 관계다. \(A_0^{\mathsf T}A_0\)는 valence와 adjacency를, \(A_1\)의 열의 합은 edge의 triangle 수를 주고, star와 closure는 행렬 곱으로 계산된다. 실제로는 sparse로 저장한다.</li>
+        <li>signed incidence matrix \(A_0^{\pm}, A_1^{\pm}\)은 relative orientation의 부호를 넣은 것이다. orientation을 바꾸면 행과 열에 \(-1\)이 곱해지고, consistent orientation은 \(A_1^{\pm}\)의 열의 합으로 판정된다. \(A_1^{\pm}A_0^{\pm} = 0\)은 Chapter 36에서 증명한다.</li>
+        <li>halfedge mesh는 twin과 next 두 permutation이다. face, edge, vertex는 \(\rho\), \(\eta\), \(\rho\circ\eta\)의 orbit이고, oriented simplicial surface에서 이것들은 원래의 simplex와 정확히 대응한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 primal mesh와 짝을 이루는 dual complex를 정의한다. triangle은 dual vertex가, edge는 dual edge가, vertex는 vertex 둘레의 face를 잇는 dual face가 된다. 그 incidence matrix가 이 절의 \(A_0, A_1\)을 전치한 것이라는 사실이 Poincaré duality의 조합적 얼굴이다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-33-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 33.5.1</span> <span class="level">★</span>
+        정사각형을 대각선으로 나눈 face list \(F = (0, 1, 2), (0, 2, 3)\)에서 \(A_0\), \(A_1\)을 쓰고(edge 순서는 \(01, 02, 03, 12, 23\)), \(A_0^{\mathsf T}A_0\)를 계산해 <a href="#i-33-5-3">Proposition 33.5.3</a>을 확인하여라. 어느 edge가 boundary edge인지 \(A_1\)에서 읽어라.</p>
+        <details class="solution"><summary>Solution</summary>
+          \[ A_0 = \begin{pmatrix} 1&1&0&0\\ 1&0&1&0\\ 1&0&0&1\\ 0&1&1&0\\ 0&0&1&1 \end{pmatrix}, \qquad A_1 = \begin{pmatrix} 1&1&0&1&0\\ 0&1&1&0&1 \end{pmatrix}, \]
+          \[ A_0^{\mathsf T}A_0 = \begin{pmatrix} 3&1&1&1\\ 1&2&1&0\\ 1&1&3&1\\ 1&0&1&2 \end{pmatrix}. \]
+          <p>대각성분 \(3, 2, 3, 2\)가 valence이고, 비대각의 1은 edge로 이어진 쌍이다. vertex 1과 3은 이어져 있지 않아 \((A_0^{\mathsf T}A_0)_{13} = 0\)이다. \(A_1\)의 열의 합은 \(1, 2, 1, 1, 1\)이므로 대각선 02만 안쪽 edge이고 나머지 넷이 boundary edge다.</p>
+          <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-5-2" data-level="1">
+        <p><span class="thm-head">Exercise 33.5.2</span> <span class="level">★</span>
+        같은 face list에서 \(A_0^{\pm}\), \(A_1^{\pm}\)을 쓰고 \(A_1^{\pm}A_0^{\pm}\)와 \(\mathbf{1}^{\mathsf T}A_1^{\pm}\)를 계산하여라. 두 triangle이 consistent인지 <a href="#i-33-5-9">Proposition 33.5.9</a>로 판정하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          \[ A_0^{\pm} = \begin{pmatrix} -1&1&0&0\\ -1&0&1&0\\ -1&0&0&1\\ 0&-1&1&0\\ 0&0&-1&1 \end{pmatrix}, \]
+          \[ A_1^{\pm} = \begin{pmatrix} 1&-1&0&1&0\\ 0&1&-1&0&1 \end{pmatrix}. \]
+          <p>\((0,1,2)\)은 \(0\to1\)(+), \(1\to2\)(+), \(2\to0\)(02 반대, −)이고 \((0,2,3)\)은 \(0\to2\)(+), \(2\to3\)(+), \(3\to0\)(03 반대, −)이다. 곱하면 \(A_1^{\pm}A_0^{\pm} = 0\)이다. 예를 들어 첫 행과 vertex 0의 열: \(1\cdot(-1) + (-1)(-1) + 1\cdot 0 = 0\). \(\mathbf{1}^{\mathsf T}A_1^{\pm} = (1, 0, -1, 1, 1)\)이고, 성분이 둘인 유일한 열 02의 합이 0이므로 consistent다. boundary edge의 열은 \(\pm1\)로 남는다.</p>
+          <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-5-3" data-level="2">
+        <p><span class="thm-head">Exercise 33.5.3</span> <span class="level">★★</span>
+        pure 2-complex에서 \((A_1A_1^{\mathsf T})_{fg}\)와 \((A_1^{\mathsf T}A_1)_{ee'}\)이 무엇을 세는지 말하고, simplicial surface에서 \(A_1A_1^{\mathsf T} - 3I\)가 “edge를 공유하는 triangle의 쌍”의 adjacency matrix임을 보여라. 이 graph는 <a href="33-3-orientation.html#i-33-3-18">Proposition 33.3.18</a>의 search가 걷는 graph다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\((A_1A_1^{\mathsf T})_{fg} = \sum_e (A_1)_{fe}(A_1)_{ge}\)는 \(f\)와 \(g\)가 공유하는 edge의 수다. \(f = g\)이면 3이다. \(f \ne g\)이면 두 triangle은 vertex 셋을 공유할 수 없으므로(같은 집합이 되므로) 공유 edge는 0개 또는 1개다. 따라서 \(A_1A_1^{\mathsf T} - 3I\)는 edge를 공유하면 1, 아니면 0인 adjacency matrix다. \((A_1^{\mathsf T}A_1)_{ee'}\)는 \(e\)와 \(e'\)을 모두 포함하는 triangle의 수다. \(e = e'\)이면 \(e\)의 triangle 수(1 또는 2), \(e \ne e'\)이면 두 edge가 한 triangle의 변이면 1, 아니면 0이다. 이 graph의 vertex(triangle)와 edge(공유 edge)가 <a href="33-6-dual-complex.html">Section 33.6</a>의 dual vertex와 dual edge다.</p>
+          <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-5-4" data-level="2">
+        <p><span class="thm-head">Exercise 33.5.4</span> <span class="level">★★</span>
+        [Cr §2.6 변형] \(H = \{0, \dots, 5\}\), \(\eta(h) = h \oplus 1\)(짝 \(0\leftrightarrow1\), \(2\leftrightarrow3\), \(4\leftrightarrow5\)), \(\rho = (0\ 2\ 4)(1\ 5\ 3)\)인 halfedge mesh의 face, edge, vertex를 구하고 \(\chi^H\)를 계산하여라. 어떤 surface인가? 왜 simplicial complex로는 쓸 수 없는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>face는 \(\rho\)의 orbit \(\{0, 2, 4\}\), \(\{1, 5, 3\}\)의 둘(변이 셋인 polygon, 곧 triangle 둘), edge는 \(\{0,1\}, \{2,3\}, \{4,5\}\)의 셋이다. \(\rho\circ\eta\)는 \(0 \mapsto \rho(1) = 5 \mapsto \rho(4) = 0\), \(1 \mapsto \rho(0) = 2 \mapsto \rho(3) = 1\), \(3 \mapsto \rho(2) = 4 \mapsto \rho(5) = 3\)이므로 orbit이 \(\{0, 5\}, \{1, 2\}, \{3, 4\}\)의 셋, 곧 vertex 셋이다. \(\chi^H = 3 - 3 + 2 = 2\)이고, <a href="#i-33-5-14">Proposition 33.5.14</a>에 의해 sphere다. triangle 두 장의 세 변을 서로 붙인 “베개”다. 두 triangle의 vertex 집합이 같은 세 vertex이므로, 집합의 모임인 simplicial complex에서는 둘을 구별할 수 없다(<a href="33-1-simplicial-complexes.html#i-33-1-21">Non-example 33.1.21</a>(b)). 모든 vertex의 valence가 2이기도 하다(<a href="33-4-simplicial-manifolds.html#i-33-4-22">Non-example 33.4.22</a>).</p>
+          <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-5-5" data-level="1">
+        <p><span class="thm-head">Exercise 33.5.5</span> <span class="level">★</span>
+        <a href="#i-33-5-13">Proposition 33.5.13</a>(e)의 증명을 tetrahedron의 vertex 0에 대해 따라가 보아라. halfedge \(0 \to 1\)에서 출발해 \(\rho\circ\eta\)를 되풀이하면 어떤 halfedge들을 지나는가? face list는 <a href="#i-33-5-2">Example 33.5.2</a>의 것을 쓴다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(0 \to 1\)은 행 \((0,1,2)\)에 있다. \(\eta(0\to1) = 1 \to 0\)은 행 \((0,3,1)\)의 \(1 \to 0\)이고, 그 다음이 \(0 \to 3\)이다. \(\eta(0\to3) = 3 \to 0\)은 행 \((0,2,3)\)의 \(3 \to 0\)이고, 다음이 \(0 \to 2\)이다. \(\eta(0 \to 2) = 2 \to 0\)은 행 \((0,1,2)\)의 \(2 \to 0\)이고, 다음이 \(0 \to 1\)이다. orbit은 \(0\to1,\ 0\to3,\ 0\to2\)이고, link의 3-cycle \(1, 3, 2\)를 한 방향으로 돈다. normal 쪽에서 보면 시계 방향이다(Conventions 상자).</p>
+          <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-33-5-6" data-level="1">
+        <p><span class="thm-head">Exercise 33.5.6</span> <span class="level">★</span>
+        <strong>Coding.</strong> scipy 없이 numpy로 \(A_0\)를 CSR 형식(<code>indptr</code>, <code>indices</code>)으로 만들고, CSR로 행렬–벡터 곱 \(A_0x\)를 계산하는 함수를 써라. <code>dgmesh.icosphere(3)</code>에서 dense 곱과 결과가 같은지 확인하고, \(A_0^{\mathsf T}\)의 CSR(곧 \(A_0\)를 열 순서로 저장한 것)의 행 길이에서 valence의 분포를 읽어라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>COO 삼중쌍을 행 순서로 정렬하고, 행마다의 개수를 누적합해 <code>indptr</code>를 만든다.</p>
+          <pre id="code-ex-33-5-6"><code>import numpy as np
+import dgmesh as dm
+import dgdec as dd
+
+def csr(rows, cols, n_rows):           # 0/1 matrix from COO pairs
+    order = np.lexsort((cols, rows))
+    indptr = np.concatenate([[0], np.cumsum(np.bincount(rows, minlength=n_rows))])
+    return indptr, cols[order]
+
+def csr_matvec(indptr, indices, x):
+    return np.add.reduceat(x[indices], indptr[:-1])
+
+V, F = dm.icosphere(3)
+E, _ = dd.edge_list(F)
+rows, cols = np.repeat(np.arange(len(E)), 2), E.ravel()
+indptr, indices = csr(rows, cols, len(E))              # A0 (n1 x n0)
+x = np.random.default_rng(0).normal(size=len(V))
+dense = np.abs(dd.d0(F)) @ x
+print(len(indices), np.allclose(csr_matvec(indptr, indices, x), dense))
+indptrT, _ = csr(cols, rows, len(V))                   # A0^T: one row per vertex
+valence = np.diff(indptrT)
+print({int(d): int((valence == d).sum()) for d in np.unique(valence)})</code></pre>
+          <pre id="out-ex-33-5-6"><code>3840 True
+{5: 12, 6: 630}</code></pre>
+          <p>0이 아닌 성분은 \(2n_1 = 3840\)개이고, CSR 곱이 dense 곱과 같다. \(A_0^{\mathsf T}\)의 행 \(v\)의 길이가 \(\deg v\)이므로(<a href="#i-33-5-4">Proposition 33.5.4</a>(b)) valence 5가 12개, 6이 630개다(<a href="33-4-simplicial-manifolds.html#i-33-4-21">Example 33.4.21</a>). <code>np.add.reduceat</code>은 빈 행이 없을 때만 이렇게 쓸 수 있다. edge의 행은 언제나 성분이 둘이므로 여기서는 문제가 없다.</p>
+          <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code>(위 코드를 그대로 실행해 출력을 비교한다)</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="33-4-simplicial-manifolds.html">← 33.4 Simplicial Manifolds</a>
+    <a rel="next" href="33-6-dual-complex.html">33.6 The Dual Complex and Poincaré Duality →</a>
+  </nav>
+</body>
+</html>
