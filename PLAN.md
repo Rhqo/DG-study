@@ -787,3 +787,24 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
 - 2026-10-18: 33장 R1(33.1–33.3) 완료. 수학 오류는 없었다.
   - 저작권 문제: Crane의 예제와 문장에 너무 가까운 곳이 4곳 있었다(Example 33.3.9, 33.3 Motivation, Non-example 33.2.3(a), Def 33.3.11). 모두 새로 썼다. §2.5에 "예제도 그대로 쓰지 않는다"를 추가했다. 앞으로 작성 프롬프트에 강조한다.
   - orientation 코드 box의 잘못된 진술, Warning 2곳, 400px 수식을 고쳤다. 코드 블록은 id 방식으로 바꿨다(`out-N-M-K` 추가).
+- 2026-10-18: **33장 reviewed**(R2 33.4–33.6 완료). 수학 오류는 없었다.
+  - vertex orbit 규약: L2B 슬라이드는 η∘ρ, 노트는 ρ∘η다. Conventions box를 보강했다.
+  - Prop 33.6.5(c)의 증명을 보완했다.
+  - 근거 없는 진술 5곳을 약하게 고치거나 출처를 달았다.
+  - 33.4 discrete box의 틀린 진술("edge 위의 점은 문제없다")을 고쳤다.
+  - lib/ch33의 옛 코드 실행기를 지웠다.
+  - 남은 것: 33.4와 33.5는 길다(분할하려면 번호가 바뀐다). Example 33.5.2·33.5.15는 규약상 Crane과 같을 수밖에 없어서 출처를 달았다.
+  - 통합
+    - Tour 0.8 Where to Go Next와 31장 Leads to에서 Track 2로 가는 링크를 달았다.
+    - terms: rotation system
+  - commit f733507(branch push). 지금 도는 것: 34 검토, 35·37 작성
+- 2026-10-18: **34장 reviewed.** 검토가 고친 것
+  - 연습 34.1.3 풀이의 계산 오류(16−3 → 16−12)
+  - (34.2.5)의 "동치"를 "특히"로 낮췄다.
+  - Non-example 34.1.2에 (c)·(d)를 더했다(규칙 넷이 모두 필요함을 보임).
+  - orthogonal complement를 dfn으로 바꿨다.
+  - KN 귀속을 "일부 교재"로 바꿨다.
+  - 34.2 Motivation이 Cr §4.1.3을 너무 가깝게 옮긴 문장이었다. 새로 썼다.
+  - interactive 34.1.3의 카메라
+  - 통합: notation `#sec-ddg`에 32–34장 기호 9행, Alt 정규화 문헌 표기를 "일부 교재"로 바꿨다.
+  - **공개 절차**: 작성 중인 장(35, 37)이 생성 페이지에 섞이지 않게 한다. `git add`한 뒤 `/home/kbh/.claude/jobs/6f56e074/tmp/clean_build.sh`가 HEAD와 staged 파일로 만든 깨끗한 트리에서 glossary와 concepts를 만들고 검사한다. 그다음 commit하고 `git push origin worktree-ddg-cmu:main`

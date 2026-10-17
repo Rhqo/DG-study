@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>34.5 Exterior Algebra in Coordinates — DG Study</title>
+  <meta name="dg-id" content="34.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="34.1, 34.2, 34.3, 34.4, 1.3, 7.1">
+  <meta name="dg-refs" content="Cr §4.2, §4.3.1–4.3.2; CMU-DDG L3, L4">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">34. Exterior Algebra and k-Forms</a> ›
+    <span>34.5 Exterior Algebra in Coordinates</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>34.5 Exterior Algebra in Coordinates</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §4.2]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr §4.3.1–4.3.2]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a>,
+        <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>exterior algebra를 basis와 곱셈표로 구성해, Section 34.1의 규칙 (W1)–(W4)를 만족하는 대상이 있고 본질적으로 하나뿐임을 증명할 수 있다.</li>
+        <li>\(k\)-vector, \(k\)-form, \(\wedge\), \(\star\), \(\sharp\), \(\flat\)을 성분(index tuple, minor, Gram matrix)으로 계산하고, 짧은 코드로 구현할 수 있다.</li>
+        <li>\(\R^3\)에서 1-form과 2-form을 vector로, 3-form을 scalar로 옮기는 사전을 쓰고, 그것이 cross product와 inner product를 주는 것을 설명할 수 있다.</li>
+        <li>orthonormal이 아닌 basis에서 단위 부피와 \(\star\)를 \(\sqrt{\det G}\)로 계산할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="34-1-wedge-k-vectors.html#i-34-1-1">Definition 34.1.1</a>, <a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>, <a href="34-1-wedge-k-vectors.html#i-34-1-11">Theorem 34.1.11 (basis k-vectors)</a></li>
+        <li><a href="34-2-hodge-star.html#i-34-2-4">Proposition 34.2.4</a>, <a href="34-2-hodge-star.html#i-34-2-6">Theorem 34.2.6</a>, <a href="34-3-covectors-sharp-flat.html#eq-34-3-2">(34.3.2)</a>, <a href="34-4-k-forms.html#i-34-4-5">Lemma 34.4.5</a>, <a href="34-4-k-forms.html#i-34-4-11">Proposition 34.4.11</a></li>
+        <li><a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-9">Example 1.3.9 (dual basis of the polar coordinates basis)</a>, <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-2">Example 7.1.2</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 34.4까지 모든 측정이 determinant로 계산된다는 것을 보았다. 이제 그것을 컴퓨터가 다룰 수 있는 배열로 옮길 차례다. \(k\)-vector와 \(k\)-form을 어떤 수의 목록으로 저장하고, \(\wedge\)와 \(\star\)는 그 목록에 무엇을 하는가? Crane의 강의도 exterior algebra를 그림으로 소개한 뒤 마지막에 coordinate representation으로 정리한다 <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a> slides 35–45.</p>
+      <p>좌표에는 이론적인 쓸모도 하나 있다. <a href="34-1-wedge-k-vectors.html#i-34-1-1">Definition 34.1.1</a>은 “규칙 (W1)–(W4)를 만족하는 \(\Lambda^kV\)와 \(\wedge\)가 주어져 있다”고 가정했다. 그런 것이 정말 있는지, 둘 이상이면 서로 다른 답을 주지는 않는지 아직 보이지 않았다. 이 절에서 basis와 곱셈표로 그것을 직접 만들어 두 질문에 답한다.</p>
+    </section>
+
+    <section id="sec-construction">
+      <h2>The Exterior Algebra and Its Multiplication Table</h2>
+      <p>이 절에서 \((e_1, \dots, e_n)\)은 \(V\)의 basis이고, basis \(k\)-vector \(e_I = e_{i_1}\wedge\cdots\wedge e_{i_k}\)(\(I\)는 increasing multi-index)는 <a href="34-1-wedge-k-vectors.html#eq-34-1-4">(34.1.4)</a>와 같다. 각 degree를 한데 모은 것에 이름을 붙이자.</p>
+      <div class="thm definition" id="i-34-5-1">
+        <p><span class="thm-head">Definition 34.5.1</span> <span class="thm-name">(exterior algebra)</span>.
+        \(V\)가 \(n\)차원 vector space이고 \((\Lambda^kV)_{k \ge 0}\)와 \(\wedge\)가 규칙 (W1)–(W4)(<a href="34-1-wedge-k-vectors.html#i-34-1-1">Definition 34.1.1</a>)를 만족한다고 하자. direct sum</p>
+        <p>\[ \Lambda V = \Lambda^0V \oplus \Lambda^1V \oplus \cdots \oplus \Lambda^nV \]</p>
+        <p>에 \(\wedge\)를 degree별로 bilinear하게 넓힌 곱을 준 것을 \(V\)의 <dfn>exterior algebra</dfn>(외대수)라 한다. 원소 \(\xi = \xi_0 + \xi_1 + \cdots + \xi_n\)(\(\xi_k \in \Lambda^kV\))을 multivector라 부르기도 한다.</p>
+      </div>
+      <p><a href="34-1-wedge-k-vectors.html#i-34-1-11">Theorem 34.1.11</a>에 의해 \(\dim\Lambda V = \sum_{k=0}^{n}\binom{n}{k} = 2^n\)이다. \(\R^3\)이면 \(1 + 3 + 3 + 1 = 8\)이다. \(k \gt n\)인 \(\Lambda^kV\)는 \(\{0\}\)이라 direct sum에서 뺐다. <a href="34-1-wedge-k-vectors.html#i-34-1-2">Non-example 34.1.2</a>의 대상들(\(k \ge 2\)이면 모두 \(0\)인 것, 다항식의 곱, 군더더기를 붙인 것, 부호를 비튼 곱)은 각각 (W4), (W2), (W3), (W1)을 어겨 exterior algebra가 아니다. 곱의 결과의 degree는 두 degree의 합이므로 \(\Lambda V\)를 graded algebra라 한다 <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a> slide 41.</p>
+
+      <div class="thm proposition" id="i-34-5-2">
+        <p><span class="thm-head">Proposition 34.5.2</span> <span class="thm-name">(multiplication table)</span>.
+        increasing multi-index \(I = (i_1, \dots, i_k)\), \(J = (j_1, \dots, j_l)\)에 대하여, \(I\)와 \(J\)에 공통인 수가 있으면 \(e_I\wedge e_J = 0\)이다. 공통인 수가 없으면</p>
+        <div class="equation" id="eq-34-5-1">
+        \[ \begin{aligned} e_I\wedge e_J &amp;= \sgn(I, J)\; e_{I\cup J}, \qquad \sgn(I, J) = (-1)^{N(I, J)}, \\ N(I, J) &amp;= \#\{(a, b) : i_a \gt j_b\} \end{aligned} \tag{34.5.1} \]
+        </div>
+        <p>이다. 여기서 \(I\cup J\)는 두 목록의 수를 합쳐 작은 것부터 늘어놓은 것이다. 특히 <a href="34-2-hodge-star.html#eq-34-2-4">(34.2.4)</a>의 부호는</p>
+        <div class="equation" id="eq-34-5-2">
+        \[ \sgn(I, I^c) = (-1)^{\sum_{a=1}^{k}(i_a - a)} \tag{34.5.2} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <p>이 명제가 말하는 것. basis \(k\)-vector끼리의 곱은 “첨자를 이어 붙이고, 겹치면 \(0\), 아니면 정렬하면서 맞바꾼 횟수만큼 부호를 바꾼다”. \(N(I, J)\)는 이어 붙인 수열 \((I, J)\)에서 순서가 뒤집힌 쌍(inversion)의 수다. Crane이 exterior algebra를 형식적으로 정의할 때 쓰는 규칙이 이것이다 <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a> slide 41.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 공통인 수가 있으면 같은 \(e_i\)가 두 번 나오므로 <a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>(b)에 의해 \(0\)이다. 없으면 \(e_{i_1}\wedge\cdots\wedge e_{i_k}\wedge e_{j_1}\wedge\cdots\wedge e_{j_l}\)을 이웃한 맞바꾸기로 정렬한다. \(I\)가 증가하므로 \(j_1\)보다 큰 \(i_a\)들은 \(I\)의 끝에 모여 있다. \(e_{j_1}\)을 그것들 앞으로 옮기는 데 \(\#\{a : i_a \gt j_1\}\)번이 든다. 그다음 \(e_{j_2}\)(\(j_2 \gt j_1\))보다 큰 \(i_a\)들도 끝에 모여 있으므로 \(\#\{a : i_a \gt j_2\}\)번이 든다. 이렇게 모두 \(N(I, J)\)번 맞바꾸면 정렬되고, 한 번마다 부호가 바뀐다(<a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>(b)). <a href="#eq-34-5-2">(34.5.2)</a>: \(I^c\)의 수 가운데 \(i_a\)보다 작은 것은 \(1, \dots, i_a - 1\) 가운데 \(I\)에 없는 것, 곧 \((i_a - 1) - (a - 1) = i_a - a\)개이므로 \(N(I, I^c) = \sum_a (i_a - a)\)이다.</p>
+      </div>
+
+      <div class="thm theorem" id="i-34-5-3">
+        <p><span class="thm-head">Theorem 34.5.3</span> <span class="thm-name">(existence and uniqueness of the exterior algebra)</span>.
+        \(V\)가 \(n\)차원 vector space이고 \((e_1, \dots, e_n)\)이 basis라 하자.</p>
+        <ul>
+          <li>(a) (existence) \(0 \le k \le n\)이면 \(\Lambda^k\)를 increasing multi-index \(I\)(길이 \(k\))마다 하나씩인 기호 \(e_I\)를 basis로 하는 vector space(즉 \(\R^{\binom{n}{k}}\))로, \(k \gt n\)이면 \(\{0\}\)으로 두자. \(\Lambda^0 = \R\)(\(e_{()} = 1\))이고, \(\Lambda^1\)은 \(e_{(i)} \leftrightarrow e_i\)로 \(V\)와 같은 것으로 본다. \(\wedge\)를 basis 위에서 <a href="#eq-34-5-1">(34.5.1)</a>(공통인 수가 있으면 \(0\))로 정하고 bilinear하게 넓히면 (W1)–(W4)가 성립한다.</li>
+          <li>(b) (uniqueness) \((\Lambda^kV, \wedge)\)와 \((\Lambda'^kV, \wedge')\)가 둘 다 (W1)–(W4)를 만족하면, 모든 \(v_j \in V\)에 대해 \(\Phi(v_1\wedge\cdots\wedge v_k) = v_1\wedge'\cdots\wedge' v_k\)인 linear isomorphism \(\Phi\colon \Lambda^kV \to \Lambda'^kV\)가 각 \(k\)마다 꼭 하나 있고, \(\Phi(\xi\wedge\eta) = \Phi(\xi)\wedge'\Phi(\eta)\)이다.</li>
+        </ul>
+      </div>
+      <p>이 정리가 말하는 것. 규칙 (W1)–(W4)는 모순이 없고(그런 대상이 있다), 모든 것을 정한다(규칙만으로 계산한 결과는 어느 구성에서나 같다). 그래서 Section 34.1–34.4에서 규칙만 써서 증명한 것은 모두 이 구성에서 성립하고, 아래의 성분 계산과 코드는 그 결과를 그대로 계산한다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: (W2), (W3), (W4)는 곱셈표에서 바로 보인다. 결합법칙은 inversion의 수가 \[ N(I, J) + N(I\cup J, K) = N(I, J) + N(I, K) + N(J, K) \]처럼 쪼개진다는 셈으로 나온다. 유일성은 <a href="#i-34-5-2">Proposition 34.5.2</a>가 규칙만으로 곱셈표를 정한다는 데서 나온다.</p>
+        <p><span class="proof-head">Proof.</span> (a) bilinearity는 정의다. scalar 규칙: \(e_{()}\wedge e_J = (-1)^0 e_J\)이다. (W2): \(v = \sum_i v^i e_i\)이면 \(v\wedge v = \sum_{i,j} v^iv^j\,e_{(i)}\wedge e_{(j)}\)이다. \(i = j\)인 항은 \(0\)이고, \(i \lt j\)이면 \(e_{(i)}\wedge e_{(j)} = e_{(i,j)}\), \(e_{(j)}\wedge e_{(i)} = -e_{(i,j)}\)이므로 두 항 \(v^iv^j e_{(i,j)} - v^jv^i e_{(i,j)}\)가 상쇄된다. (W3): \(i_1 \lt \cdots \lt i_k\)이면 이미 정렬되어 있으므로 \(N = 0\)이고, \(k\)에 대한 귀납으로 \(e_{(i_1)}\wedge\cdots\wedge e_{(i_k)} = e_I\)이다. basis가 모두 simple이므로 (W3)이 성립한다. (W4): \(e_1\wedge\cdots\wedge e_n = e_{(1,\dots,n)} \neq 0\)이다.</p>
+        <p>(W1): basis 세 개 \(e_I, e_J, e_K\)에 대해 보이면 trilinearity로 충분하다. \(I, J, K\) 가운데 두 개가 공통인 수를 가지면 양쪽 모두 \(0\)이다. 예를 들어 \(I\cap K \neq \emptyset\)이면 \((e_I\wedge e_J)\wedge e_K\)에서는 \(I\cup J\)와 \(K\)가, \(e_I\wedge(e_J\wedge e_K)\)에서는 \(I\)와 \(J\cup K\)가 공통인 수를 가진다. 서로 겹치지 않으면 양쪽 모두 \(\pm e_{I\cup J\cup K}\)이고 부호의 지수는 각각 \(N(I, J) + N(I\cup J, K)\), \(N(J, K) + N(I, J\cup K)\)이다. \(N(I\cup J, K)\)는 \(I\cup J\)의 수 \(x\)와 \(K\)의 수 \(y\)로 \(x \gt y\)인 쌍의 수이므로 \(N(I, K) + N(J, K)\)이고, 같은 이유로 \(N(I, J\cup K) = N(I, J) + N(I, K)\)이다. 두 지수가 모두 \(N(I, J) + N(I, K) + N(J, K)\)로 같다.</p>
+        <p>(b) <a href="34-1-wedge-k-vectors.html#i-34-1-11">Theorem 34.1.11</a>에 의해 \((e_I)\)와 \((e'_I)\)(\(\wedge'\)로 만든 것)는 각각 basis다. \(\Phi(e_I) := e'_I\)로 linear isomorphism을 정하자. <a href="#i-34-5-2">Proposition 34.5.2</a>의 증명은 <a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>만 썼고 <a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>은 (W1), (W2)만 썼으므로, 두 곱셈표는 모두 <a href="#eq-34-5-1">(34.5.1)</a>이다. 따라서 basis에서 \(\Phi(e_I\wedge e_J) = \Phi(e_I)\wedge'\Phi(e_J)\)이고 bilinearity로 일반적으로 성립한다. \(\Lambda^1\)에서 \(\Phi\)는 identity(\(e_i \mapsto e_i\))이므로 \[ \Phi(v_1\wedge\cdots\wedge v_k) = \Phi(v_1)\wedge'\cdots\wedge'\Phi(v_k) = v_1\wedge'\cdots\wedge' v_k \]이다. 이 성질을 가진 linear map은 simple \(k\)-vector에서의 값으로 정해지므로 하나뿐이다(W3).</p>
+      </div>
+      <p>이 구성은 basis를 골라야 하지만, (b)에 의해 어느 basis로 만들어도 같은 대상이 나온다. basis 없이 만드는 표준 구성은 tensor algebra를 \(v\otimes v\)가 만드는 ideal로 나눈 몫이다(Go deeper). <a href="34-4-k-forms.html#i-34-4-6">Theorem 34.4.6</a>은 또 다른 구성을 주었다. \(V^*\)의 exterior algebra를 \(V\) 위의 alternating multilinear 함수로 실현한 것이다.</p>
+
+      <p><a href="#fig-34-5-1">Figure 34.5.1</a>은 \(\R^3\)의 basis \(k\)-vector \(1\), \(e_1, e_2, e_3\), \(e_2\wedge e_3, e_3\wedge e_1, e_1\wedge e_2\), \(e_1\wedge e_2\wedge e_3\)을 단위 정육면체의 한 vertex에 모아 그린 것이다. 세 축 화살표가 1-vector, 원점에서 만나는 세 면이 2-vector, 점선 정육면체가 3-vector다. 각 면은 그것에 수직인 화살표와 같은 색이다. 예를 들어 파란 \(e_1\)과 파란 면 \(e_2\wedge e_3\)이 짝이다. 면의 곡선 화살표는 그 면의 orientation이고, 짝인 화살표를 엄지로 하는 오른손 법칙과 맞는다. 이 짝짓기가 아래 표의 Hodge star다.</p>
+
+      <figure class="dg-figure" id="fig-34-5-1">
+        <img src="figures/fig-34-5-1-basis-star.svg" alt="3D 그림. 원점에서 세 축 방향으로 파란 e1, 초록 e2, 주황 e3 화살표가 나가고, 원점에서 만나는 단위 정육면체의 세 면이 칠해져 있다. yz 면은 파란색(e2∧e3), zx 면은 초록색(e3∧e1), xy 면은 주황색(e1∧e2)이고 각 면에 같은 색의 곡선 화살표가 있다. 정육면체의 나머지 모서리는 회색 점선이고 라벨 e1∧e2∧e3 = ⋆1이 있다.">
+        <figcaption><span class="fig-head">Figure 34.5.1.</span>
+        \(\R^3\)(유클리드, standard orientation)의 basis \(k\)-vector와 Hodge star.
+        읽는 법: 굵은 화살표는 basis 1-vector \(e_1\)(파랑), \(e_2\)(초록), \(e_3\)(주황)이고, 원점에서 만나는 세 단위 정사각형은 basis 2-vector \(e_2\wedge e_3\), \(e_3\wedge e_1\), \(e_1\wedge e_2\)이며 같은 색끼리 짝이다. 곡선 화살표는 각 면의 orientation, 회색 점선 정육면체는 3-vector \(e_1\wedge e_2\wedge e_3\)이다.
+        볼 것: 각 화살표는 같은 색 면에 수직이고, \(e_i\wedge(\text{짝인 면}) = +e_1\wedge e_2\wedge e_3\)이다. 그래서 \(\star e_1 = e_2\wedge e_3\), \(\star e_2 = e_3\wedge e_1\), \(\star e_3 = e_1\wedge e_2\)이고 \(\star 1 = e_1\wedge e_2\wedge e_3\)이다. 개수는 \(1, 3, 3, 1\)이다.
+        <a href="#i-34-5-2">Proposition 34.5.2</a>, <a href="#eq-34-5-2">(34.5.2)</a>, <a href="#i-34-5-4">Example 34.5.4</a>의 표를 보여 준다. (schematic: 크기와 위치는 실제 basis 그대로이고, 색의 짝은 설명을 위한 것이다.)</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-components">
+      <h2>Components</h2>
+      <p>앞 절들에서 증명한 것을 성분으로 모으면 다음과 같다. \(k\)-vector의 성분은 위첨자 multi-index, \(k\)-form의 성분은 아래첨자 multi-index로 쓴다(vector 성분 \(v^i\), covector 성분 \(\alpha_i\)와 같은 규칙, <a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-9">Remark 1.4.9</a>).</p>
+      <table>
+        <thead>
+          <tr><th>object or operation</th><th>components</th><th>where proved</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>\(k\)-vector</td><td>\(\xi = \sum_I \xi^I e_I\); simple이면 \(\xi^I = \det U_I\) (minor)</td><td><a href="34-1-wedge-k-vectors.html#eq-34-1-2">(34.1.2)</a>, <a href="34-1-wedge-k-vectors.html#i-34-1-11">Theorem 34.1.11</a></td></tr>
+          <tr><td>\(k\)-form</td><td>\(\omega = \sum_I \omega_I e^I\), \(\omega_I = \omega(e_{i_1}, \dots, e_{i_k})\)</td><td><a href="34-4-k-forms.html#i-34-4-5">Lemma 34.4.5</a></td></tr>
+          <tr><td>pairing</td><td>\(\omega(\xi) = \sum_I \omega_I\,\xi^I\); \(\omega(u_1, \dots, u_k) = \sum_I \omega_I\det U_I\)</td><td><a href="34-4-k-forms.html#i-34-4-7">Proposition 34.4.7</a></td></tr>
+          <tr><td>wedge</td><td>\(e_I\wedge e_J = \sgn(I, J)\,e_{I\cup J}\) or \(0\)</td><td><a href="#eq-34-5-1">(34.5.1)</a></td></tr>
+          <tr><td>inner product (orthonormal \(e_i\))</td><td>\(\inner{\xi}{\eta} = \sum_I \xi^I\eta^I\)</td><td><a href="34-2-hodge-star.html#i-34-2-1">Proposition 34.2.1</a></td></tr>
+          <tr><td>Hodge star (positively oriented orthonormal \(e_i\))</td><td>\(\star\xi = \sum_I \sgn(I, I^c)\,\xi^I e_{I^c}\), \(\sgn(I, I^c) = (-1)^{\sum_a(i_a - a)}\)</td><td><a href="34-2-hodge-star.html#eq-34-2-5">(34.2.5)</a>, <a href="#eq-34-5-2">(34.5.2)</a></td></tr>
+          <tr><td>flat on vectors</td><td>\((u^\flat)_i = \sum_j g_{ij}u^j\)</td><td><a href="34-3-covectors-sharp-flat.html#eq-34-3-2">(34.3.2)</a></td></tr>
+          <tr><td>flat on \(k\)-vectors</td><td>\((\xi^\flat)_I = \sum_J \det(G_{IJ})\,\xi^J\)</td><td><a href="#i-34-5-6">Proposition 34.5.6</a></td></tr>
+        </tbody>
+      </table>
+      <p>예를 들어 \(\R^4\)에서 \(\star e_{13}\)을 <a href="#eq-34-5-2">(34.5.2)</a>로 구하면 \(I = (1, 3)\), \(\sum_a(i_a - a) = 0 + 1 = 1\)이므로 \(\sgn = -1\), \(I^c = (2, 4)\)이고 \(\star e_{13} = -e_{24}\)이다. \(\star\)가 \(e_I\)와 \(e_{I^c}\)를 짝짓는 것은 \(\binom{n}{k} = \binom{n}{n-k}\)의 이유다. 길이 \(k\)인 increasing multi-index와 그 여집합(길이 \(n-k\))은 하나씩 대응한다.</p>
+
+      <div class="thm example" id="i-34-5-4">
+        <p><span class="thm-head">Example 34.5.4</span> <span class="thm-name">(the Hodge star table of three-space)</span>.
+        \(\R^3\)에서 <a href="#eq-34-5-2">(34.5.2)</a>로 모든 basis \(k\)-vector의 \(\star\)를 구하면 다음과 같다. \(\sgn\)이 \(-1\)인 것은 \(I = (2)\)(\(\sum(i_a - a) = 1\))과 \(I = (1, 3)\)(\(0 + 1 = 1\))뿐이다.</p>
+        <table>
+          <thead>
+            <tr><th>\(k\)</th><th>basis \(k\)-vector \(e_I\)</th><th>\(\star e_I\)</th><th>count</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0</td><td>\(1\)</td><td>\(e_{123}\)</td><td>1</td></tr>
+            <tr><td>1</td><td>\(e_1,\ e_2,\ e_3\)</td><td>\(e_{23},\ -e_{13},\ e_{12}\)</td><td>3</td></tr>
+            <tr><td>2</td><td>\(e_{12},\ e_{13},\ e_{23}\)</td><td>\(e_3,\ -e_2,\ e_1\)</td><td>3</td></tr>
+            <tr><td>3</td><td>\(e_{123}\)</td><td>\(1\)</td><td>1</td></tr>
+          </tbody>
+        </table>
+        <p>\(-e_{13} = e_3\wedge e_1\)이므로 \(\R^3\)에서는 increasing 대신 순환 순서 \((e_{23}, e_{31}, e_{12})\)를 2-vector의 basis로 쓰면 부호가 모두 \(+\)가 된다(<a href="34-2-hodge-star.html#eq-34-2-7">(34.2.7)</a>와 같다). \(k\)-form \(e^I\)의 표도 같다(<a href="34-4-k-forms.html#i-34-4-11">Proposition 34.4.11</a>(a)).</p>
+        <p class="verified">Verification: <code>verify/v-34-5-coordinates.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-dictionary">
+      <h2>Vectors and Forms in R^3</h2>
+      <p>유클리드 \(\R^3\)에서는 \(\dim\Lambda^1 = \dim\Lambda^2 = 3\), \(\dim\Lambda^0 = \dim\Lambda^3 = 1\)이라 모든 form을 vector나 scalar로 쓸 수 있다. 이 사전이 vector calculus의 grad, curl, div를 form의 언어로 옮기는 바탕이다(Chapter 35).</p>
+      <div class="thm proposition" id="i-34-5-5">
+        <p><span class="thm-head">Proposition 34.5.5</span> <span class="thm-name">(vectors and forms in three-space)</span>.
+        유클리드 \(\R^3\), standard orientation, standard basis라 하자. \(a, b, c, w \in \R^3\)에 대하여 다음이 성립한다.</p>
+        <ul>
+          <li>(a) (1-forms) \(a^\flat = a^1e^1 + a^2e^2 + a^3e^3\)이고 \(a^\flat(u) = \inner{a}{u}\)이다.</li>
+          <li>(b) (2-forms) \[ \star(w^\flat) = w^1\,e^2\wedge e^3 + w^2\,e^3\wedge e^1 + w^3\,e^1\wedge e^2 \]이고 \(\star(w^\flat)(u, v) = \inner{w}{u\times v}\)이다. 모든 2-form은 꼭 하나의 \(w\)에 대해 이 꼴이다.</li>
+          <li>(c) (3-forms) 모든 3-form은 \(c\,e^1\wedge e^2\wedge e^3\)이고 그 값은 \(c\det(u, v, w)\)이다.</li>
+          <li>(d) (products) \(a^\flat\wedge b^\flat = \star\big((a\times b)^\flat\big)\), \(a^\flat\wedge\star(b^\flat) = \inner{a}{b}\;e^1\wedge e^2\wedge e^3\), \(a^\flat\wedge b^\flat\wedge c^\flat = \det(a, b, c)\;e^1\wedge e^2\wedge e^3\)이다.</li>
+        </ul>
+      </div>
+      <p>이 명제가 말하는 것. 2-form \(\omega = w^1 e^{23} + w^2 e^{31} + w^3 e^{12}\)는 vector \(w = (w^1, w^2, w^3)\)의 flux를 잰다. 1-form 둘의 wedge는 cross product이고, 1-form과 2-form의 wedge는 inner product, 1-form 셋의 wedge는 determinant다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) <a href="34-3-covectors-sharp-flat.html#eq-34-3-2">(34.3.2)</a>에서 \(G = I\)이다. (b) \(\star e^1 = e^2\wedge e^3\), \(\star e^2 = e^3\wedge e^1\), \(\star e^3 = e^1\wedge e^2\)(<a href="#i-34-5-4">Example 34.5.4</a>)와 linearity에서 첫 식이 나온다. 값은 <a href="34-4-k-forms.html#eq-34-4-3">(34.4.3)</a>으로 \((e^2\wedge e^3)(u, v) = u^2v^3 - u^3v^2\), \((e^3\wedge e^1)(u, v) = u^3v^1 - u^1v^3\), \((e^1\wedge e^2)(u, v) = u^1v^2 - u^2v^1\)이고, 이것은 \(u\times v\)의 세 성분이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#eq-1-6-9">(1.6.9)</a>). \(\star\)와 \(\flat\)이 isomorphism이므로(<a href="34-4-k-forms.html#i-34-4-11">Proposition 34.4.11</a>(d)) \(w \mapsto \star(w^\flat)\)는 \(\R^3\)에서 \(\Lambda^2\)로의 isomorphism이다. (c) \(\dim\Lambda^3 = 1\)이고, <a href="34-4-k-forms.html#eq-34-4-3">(34.4.3)</a>에서 \(e^{123} = \det\)이다. (d) 첫째: <a href="34-4-k-forms.html#i-34-4-11">Proposition 34.4.11</a>(c)와 <a href="34-2-hodge-star.html#i-34-2-8">Proposition 34.2.8</a>에서 \[ \star(a^\flat\wedge b^\flat) = \star\big((a\wedge b)^\flat\big) = (\star(a\wedge b))^\flat = (a\times b)^\flat \]이고, 양변에 \(\star\)를 쓰면(\(\star\star = 1\)) 첫째 식이다. 둘째: <a href="34-4-k-forms.html#i-34-4-11">Proposition 34.4.11</a>(b)에서 \(\inner{a^\flat}{b^\flat} = \inner{a}{b}\)(\(\flat\)은 isometry). 셋째: <a href="34-4-k-forms.html#eq-34-4-3">(34.4.3)</a>과 \(\det[e^i\text{-성분}] = \det(a, b, c)\)이다. 즉 \[ \begin{aligned} (a^\flat\wedge b^\flat\wedge c^\flat)(e_1, e_2, e_3) &amp;= \det[a^\flat(e_j), b^\flat(e_j), c^\flat(e_j)] \\ &amp;= \det(a, b, c) \end{aligned} \](<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8</a>(c)).</p>
+      </div>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: indices, sums, and names of bases</p>
+        <ul>
+          <li>Crane은 Einstein summation을 쓴다: 위첨자와 아래첨자가 같은 문자이면 합 기호 없이 더한다(예: \(\alpha_iv^i\)) <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a> slides 38–39, <a class="cite" href="../../references.html#Cr">[Cr §4.3.2]</a>. 이 study set은 summation convention을 Chapter 13(<a href="../13-tangent-spaces/index.html#toc-13-4">Section 13.4</a>)에서 도입하므로, 그 전인 Track 2에서는 \(\sum\)를 직접 쓴다(<a href="../../notation.html">Notation and Conventions</a>). 첨자 위치의 규칙은 같다: vector 성분 \(v^i\)와 \(\xi^I\)는 위, covector 성분 \(\alpha_i\)와 \(\omega_I\)는 아래, basis vector \(e_i\)는 아래, dual basis \(e^i\)는 위.</li>
+          <li>Crane은 노트의 이 부분에서 \(\R^n\)의 orthonormal basis와 그 dual basis를 \(\partial/\partial x^i\)와 \(dx^i\)로 쓰고, 미분과 무관한 이름이라고 덧붙인다 <a class="cite" href="../../references.html#Cr">[Cr §4.3.1]</a>. 이 장은 Chapter 1(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-2">Example 1.3.2</a>(b))과 같이 \(e_i\)와 \(e^i\)로 쓴다. Chapter 35에서 coordinate function의 differential이 생기면 점마다 \(e^i = dx^i\)이다.</li>
+          <li>코드의 index tuple은 0부터 센다. <code>(0, 2)</code>는 \(e_{13}\)이다. 저장하는 key는 언제나 increasing tuple이고, 다른 순서는 <a href="#eq-34-5-1">(34.5.1)</a>의 부호로 바꾼다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-metric-coordinates">
+      <h2>Sharp, Flat, and the Hodge Star in a General Basis</h2>
+      <p>orthonormal이 아닌 basis \((b_1, \dots, b_n)\)(Gram matrix \(G = (g_{ij})\), dual basis \((\beta^i)\))에서는 성분 계산에 \(G\)가 들어간다. vector에 대해서는 <a href="34-3-covectors-sharp-flat.html#eq-34-3-2">(34.3.2)</a>이고, \(k\)-vector로는 다음과 같이 넓어진다. \(G_{IJ}\)는 \(G\)의 \(I\)행 \(J\)열로 만든 \(k\times k\) 행렬이다.</p>
+      <div class="thm proposition" id="i-34-5-6">
+        <p><span class="thm-head">Proposition 34.5.6</span> <span class="thm-name">(flat in a general basis)</span>.
+        \((b_J)^\flat = \sum_I \det(G_{IJ})\,\beta^I\)이다. 따라서 \((\xi^\flat)_I = \sum_J \det(G_{IJ})\,\xi^J\)이고, 특히 \(k = n\)이면 \((b_1\wedge\cdots\wedge b_n)^\flat = \det G\;\beta^1\wedge\cdots\wedge\beta^n\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="34-3-covectors-sharp-flat.html#eq-34-3-2">(34.3.2)</a>에서 \(b_j^\flat = \sum_i g_{ij}\beta^i\)이므로 \(b_j^\flat\)의 \((\beta^i)\)-성분 행렬은 \(G\)의 \(j\)번째 열이다. <a href="34-4-k-forms.html#i-34-4-8">Proposition 34.4.8</a>(a)에서 \((b_J)^\flat = b_{j_1}^\flat\wedge\cdots\wedge b_{j_k}^\flat\)이고, 이것을 \(V^*\)에서 <a href="34-1-wedge-k-vectors.html#eq-34-1-2">(34.1.2)</a>로 전개하면(<a href="34-4-k-forms.html#i-34-4-6">Theorem 34.4.6</a>(c)) 성분은 \(G\)의 \(j_1, \dots, j_k\)번째 열로 만든 \(n\times k\) 행렬의 \(I\)행 minor, 곧 \(\det G_{IJ}\)이다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-34-5-7">
+        <p><span class="thm-head">Proposition 34.5.7</span> <span class="thm-name">(unit volume in a general basis)</span>.
+        \(V\)에 orientation이 있고 \((b_i)\)가 positively oriented basis이면</p>
+        <div class="equation" id="eq-34-5-3">
+        \[ \begin{aligned} \mathrm{vol} &amp;= \frac{1}{\sqrt{\det G}}\; b_1\wedge\cdots\wedge b_n, \\ \star 1 &amp;= \sqrt{\det G}\;\beta^1\wedge\cdots\wedge\beta^n \quad(\text{in } \Lambda^n(V^*)) \end{aligned} \tag{34.5.3} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <p>이 명제가 말하는 것. 양의 단위 부피를 재는 \(n\)-form은 좌표 basis의 \(n\)-form \(\beta^1\wedge\cdots\wedge\beta^n\)에 \(\sqrt{\det G}\)를 곱한 것이다. surface에서는 \(\sqrt{\det G} = \sqrt{EG - F^2}\)이 area element의 coefficient이고(<a href="../07-first-fundamental-form/index.html">Chapter 7</a>), Riemannian manifold에서는 volume form \(dV_g = \sqrt{\det(g_{ij})}\,dx^1\wedge\cdots\wedge dx^n\)의 coefficient다(<a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>).</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 첫째 식은 <a href="34-2-hodge-star.html#i-34-2-4">Proposition 34.2.4</a>이다. 둘째: positively oriented orthonormal basis \((e_i)\)에 대해 <a href="34-4-k-forms.html#i-34-4-11">Proposition 34.4.11</a>(a), (c)에서 \(\star 1 = e^1\wedge\cdots\wedge e^n = (e_1\wedge\cdots\wedge e_n)^\flat = \mathrm{vol}^\flat\)이다(\(1^\flat = 1\)). 첫째 식과 <a href="#i-34-5-6">Proposition 34.5.6</a>(\(k = n\))에서 \[ \mathrm{vol}^\flat = (\det G)^{-1/2}\det G\;\beta^1\wedge\cdots\wedge\beta^n = \sqrt{\det G}\;\beta^1\wedge\cdots\wedge\beta^n \]이다.</p>
+      </div>
+
+      <div class="thm example" id="i-34-5-8">
+        <p><span class="thm-head">Example 34.5.8</span> <span class="thm-name">(the sphere, continued)</span>.
+        <a href="34-3-covectors-sharp-flat.html#i-34-3-5">Example 34.3.5</a>의 sphere \(S^2(r)\)의 점 \(p = \mathbf{x}(\theta, \varphi)\)에서 tangent plane의 basis \((\mathbf{x}_\theta, \mathbf{x}_\varphi)\)는 \(G = \diag(r^2, r^2\sin^2\theta)\)이다. orientation은 \((\mathbf{x}_\theta, \mathbf{x}_\varphi)\)가 positively oriented인 쪽으로 준다(\(\mathbf{x}_\theta\times\mathbf{x}_\varphi\)가 바깥쪽 \(\mathbf{N}\)을 향하는 쪽이다). orthonormal basis \(f_1 = \mathbf{x}_\theta/r\), \(f_2 = \mathbf{x}_\varphi/(r\sin\theta)\)는 positively oriented이고, <a href="34-2-hodge-star.html#i-34-2-7">Example 34.2.7</a>의 표 \(\star f_1 = f_2\), \(\star f_2 = -f_1\)에서</p>
+        <p>\[ \star\mathbf{x}_\theta = \frac{1}{\sin\theta}\,\mathbf{x}_\varphi, \qquad \star\mathbf{x}_\varphi = -\sin\theta\;\mathbf{x}_\theta \]</p>
+        <p>이다. dual basis \((\beta^1, \beta^2)\)에서는 \(f^1 = r\beta^1\), \(f^2 = r\sin\theta\,\beta^2\)가 positively oriented orthonormal이므로</p>
+        <p>\[ \begin{aligned} &amp;\star\beta^1 = \sin\theta\;\beta^2, \qquad \star\beta^2 = -\frac{1}{\sin\theta}\,\beta^1, \\ &amp;\star 1 = r^2\sin\theta\;\beta^1\wedge\beta^2 \end{aligned} \]</p>
+        <p>이다. 마지막 식은 <a href="#eq-34-5-3">(34.5.3)</a>의 \(\sqrt{\det G} = r^2\sin\theta\)와 맞는다. 이것이 sphere의 넓이 요소 \(dA = r^2\sin\theta\,d\theta\,d\varphi\)의 coefficient다. 성분으로는 \(\star\)가 행렬 \(\begin{pmatrix} 0 &amp; -\sin\theta \\ 1/\sin\theta &amp; 0\end{pmatrix}\)이라 회전처럼 보이지 않지만, \(g\)의 눈으로는 \(90^\circ\) 회전이다(<a href="34-2-hodge-star.html#i-34-2-10">Example 34.2.10</a>(b)와 같은 현상). Chapter 35에서 \(\beta^1, \beta^2\)는 \(d\theta, d\varphi\)가 된다.</p>
+        <p class="verified">Verification: <code>verify/v-34-5-coordinates.py</code></p>
+      </div>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: what is stored, and how</p>
+        <p>이 절의 저장 방식과 mesh의 저장 방식은 같은 생각을 따른다.</p>
+        <ul>
+          <li>smooth: \(\R^n\)의 상수 \(k\)-form 하나는 increasing multi-index \(I\)마다 수 하나, 모두 \(\binom{n}{k}\)개의 수다. Chapter 35의 differential form은 점마다 이런 수 \(\binom{n}{k}\)개다. \(\R^3\)의 2-form을 vector \((w^1, w^2, w^3)\)으로 저장하는 것(<a href="#i-34-5-5">Proposition 34.5.5</a>(b))이 tools/dgdec.py의 표현 \((w_{yz}, w_{zx}, w_{xy})\)이고, 거기서도 \(\omega(u, v) = \inner{w}{u\times v}\)이다.</li>
+          <li>discrete: mesh의 discrete \(k\)-form은 oriented \(k\)-simplex마다 수 하나, 모두 \(n_k\)개의 수다(Chapter 36). edge \(\{i, j\}\)는 \(i \lt j\)일 때 \(i \to j\)를 기준 orientation으로 저장하고(<a href="../../notation.html#sec-ddg">Notation and Conventions</a>), 반대 방향의 값은 부호를 바꿔 얻는다. increasing tuple \(I\)를 기준으로 저장하고 다른 순서는 <a href="#eq-34-5-1">(34.5.1)</a>의 부호로 바꾸는 것과 똑같다.</li>
+        </ul>
+        <p>보존하는 것: 기준 순서와 부호 규칙만 지키면 어느 쪽이든 orientation 정보가 정확하다. 잃는 것: discrete 쪽은 좌표 \(k\)-평면이 아니라 mesh의 simplex 위의 값만 가지므로, 한 점에서의 form 전체(\(\binom{n}{k}\)개의 성분)는 복원하지 못하고 interpolation으로 근사한다(<a href="../36-discrete-exterior-calculus/index.html#toc-36-3">Section 36.3</a>).</p>
+      </aside>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: multivectors as dictionaries of index tuples</p>
+<pre id="code-34-5-1"><code>def sort_sign(seq):
+    """(sign, sorted tuple) of the permutation that sorts seq; (0, None) if seq repeats an index."""
+    if len(set(seq)) &lt; len(seq):
+        return 0, None
+    inv = sum(1 for a in range(len(seq)) for b in range(a + 1, len(seq)) if seq[a] &gt; seq[b])
+    return (-1) ** inv, tuple(sorted(seq))
+
+def wedge(xi, eta):
+    """Wedge of multivectors stored as {increasing 0-based tuple: coefficient} (34.5.1)."""
+    out = {}
+    for I, a in xi.items():
+        for J, b in eta.items():
+            s, K = sort_sign(I + J)
+            if s:
+                out[K] = out.get(K, 0.0) + s * a * b
+    return {K: c for K, c in out.items() if c != 0.0}
+
+def hodge(xi, n):
+    """Euclidean Hodge star on R^n, standard orientation: star e_I = sgn(I, I^c) e_Ic (34.2.5)."""
+    out = {}
+    for I, a in xi.items():
+        Ic = tuple(j for j in range(n) if j not in I)
+        out[Ic] = out.get(Ic, 0.0) + sort_sign(I + Ic)[0] * a
+    return out
+
+u = {(0,): 1.0, (1,): 2.0, (2,): 3.0}       # (1, 2, 3)
+v = {(0,): -1.0, (2,): 2.0}                  # (-1, 0, 2)
+uv = wedge(u, v)                             # {(0, 1): 2, (0, 2): 5, (1, 2): 4}
+star_uv = hodge(uv, 3)                       # {(2,): 2, (1,): -5, (0,): 4}: u x v = (4, -5, 2)
+</code></pre>
+        <p>scalar는 key <code>()</code>로 저장한다. 같은 사전으로 \(k\)-form(\(e^I\)의 coefficient)도 저장할 수 있다. <code>wedge</code>는 degree가 섞인 multivector에도 그대로 쓸 수 있다. 연산량은 두 사전의 항 수의 곱에 비례한다. 성분이 \(2^n\)개까지 늘 수 있으므로 큰 \(n\)에는 쓰지 않고, mesh 계산은 Chapter 36의 sparse 행렬로 한다.</p>
+        <p class="verified">Verification: <code>verify/v-34-5-coordinates.py</code>가 이 코드를 그대로 실행하고, antisymmetric tensor로 따로 구현한 wedge와 Hodge star와 비교한다(\(n \le 5\)).</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Chapter 16–17: basis 없이 만드는 exterior algebra(tensor algebra의 몫)와 alternating tensor로 만드는 판. tensor는 <a href="../16-covectors-tensors/index.html#toc-16-4">Section 16.4</a>, \(\Lambda^k(V^*)\)의 basis와 determinant는 <a href="../17-differential-forms/index.html#toc-17-1">Section 17.1</a>.</li>
+          <li>Chapter 13: Einstein summation convention의 도입(<a href="../13-tangent-spaces/index.html#toc-13-4">Section 13.4</a>).</li>
+          <li>Chapter 21: Riemannian volume form \(dV_g\)과 musical isomorphism의 좌표 공식(<a href="../21-riemannian-metrics/index.html#toc-21-5">Section 21.5</a>, <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>).</li>
+          <li>Chapter 1: dual basis(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-4">Definition 1.3.4</a>)와 첨자 위치의 규칙(<a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-9">Remark 1.4.9</a>).</li>
+          <li>Tour: \(\R^3\)의 grad, curl, div와 form의 대응표(<a href="../00-tour/0-7-forms.html#sec-exterior-derivative">Section 0.7</a>).</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a> slides 35–45, <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a> slides 33–40, <a class="cite" href="../../references.html#Cr">[Cr §4.2]</a>, <a class="cite" href="../../references.html#Cr">[Cr §4.3.1–4.3.2]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>exterior algebra \(\Lambda V = \bigoplus_k\Lambda^kV\)는 (W1)–(W4)를 만족하는 graded algebra이고, \(\dim\Lambda V = 2^n\)이다(<a href="#i-34-5-1">Definition 34.5.1</a>).</li>
+        <li>basis 곱셈표는 \(e_I\wedge e_J = (-1)^{N(I, J)}e_{I\cup J}\)(겹치면 \(0\))이고, \(\sgn(I, I^c) = (-1)^{\sum_a(i_a - a)}\)이다(<a href="#i-34-5-2">Proposition 34.5.2</a>). 이 표로 만든 대상은 규칙을 만족하고, 규칙을 만족하는 대상은 모두 이것과 같다(<a href="#i-34-5-3">Theorem 34.5.3</a>).</li>
+        <li>성분 계산: \(k\)-vector의 성분은 minor, \(k\)-form의 성분은 basis에서의 값, pairing은 \(\sum_I\omega_I\xi^I\), \(\star\)는 \(e_I \mapsto \pm e_{I^c}\)(<a href="#sec-components">Components</a>의 표). 코드로는 increasing tuple을 key로 하는 사전이다.</li>
+        <li>\(\R^3\)에서 2-form \(w^1e^{23} + w^2e^{31} + w^3e^{12}\)는 \(w\)의 flux를 재고, 1-form끼리의 wedge는 cross product, 1-form과 2-form의 wedge는 inner product다(<a href="#i-34-5-5">Proposition 34.5.5</a>).</li>
+        <li>일반 basis에서 \(\flat\)은 \(G\)의 minor로, 단위 부피는 \(\sqrt{\det G}\)로 계산한다. sphere에서 \(\star 1 = r^2\sin\theta\,\beta^1\wedge\beta^2\)이다(<a href="#i-34-5-7">Proposition 34.5.7</a>, <a href="#i-34-5-8">Example 34.5.8</a>).</li>
+      </ul>
+      <p class="next">이 장은 한 점(하나의 vector space) 위의 대수였다. 다음 장에서는 점마다 \(k\)-form을 하나씩 붙인 differential form을 다룬다. 그러면 “점마다 다른 측정”을 미분하는 연산 \(d\)와 적분이 생기고, 이 장의 \(\wedge\), \(\star\), \(\sharp\), \(\flat\)이 점마다 그대로 쓰인다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-34-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 34.5.1</span> <span class="level">★</span>
+        \(\R^4\)에서 \(u = (1, 1, 0, 0)\), \(v = (0, 1, 1, 0)\), \(w = (0, 0, 1, 1)\)에 대하여 \(u\wedge v\)(성분 6개)와 \(u\wedge v\wedge w\)(성분 4개)를 minor로 구하고, \((u\wedge v)\wedge w\)를 곱셈표 <a href="#eq-34-5-1">(34.5.1)</a>로 계산해 검산하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(U = [u\ v]\)의 \(2\times 2\) minor는 행 \((1,2)\): \(1\cdot 1 - 0\cdot 1 = 1\), \((1,3)\): \(1\cdot 1 - 0\cdot 0 = 1\), \((1,4)\): \(0\), \((2,3)\): \(1\cdot 1 - 1\cdot 0 = 1\), \((2,4)\): \(0\), \((3,4)\): \(0\)이므로 \(u\wedge v = e_{12} + e_{13} + e_{23}\)이다. \([u\ v\ w]\)의 \(3\times 3\) minor는 \((1,2,3)\), \((1,2,4)\), \((1,3,4)\), \((2,3,4)\) 모두 \(1\)이므로 \(u\wedge v\wedge w = e_{123} + e_{124} + e_{134} + e_{234}\)이다. 검산: \[ (e_{12} + e_{13} + e_{23})\wedge(e_3 + e_4) = e_{123} + e_{124} + 0 + e_{134} + 0 + e_{234} \]이다. 곱 \(e_{12}\wedge e_3\), \(e_{13}\wedge e_4\) 등은 모두 이미 정렬되어 있어 부호가 \(+\)이다(\(N = 0\)).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-5-2" data-level="1">
+        <p><span class="thm-head">Exercise 34.5.2</span> <span class="level">★</span>
+        \(\R^4\)(standard)에서 <a href="#eq-34-5-2">(34.5.2)</a>로 \(\star e_1\), \(\star e_{24}\), \(\star e_{234}\)를 구하고, \(\star\star e_1\)과 \(\star\star e_{24}\)가 <a href="34-2-hodge-star.html#i-34-2-9">Proposition 34.2.9</a>의 부호와 맞는지 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(I = (1)\): \(\sum(i_a - a) = 0\)이므로 \(\star e_1 = e_{234}\). \(I = (2, 4)\): \((2-1) + (4-2) = 3\)이므로 \(\star e_{24} = -e_{13}\). \(I = (2, 3, 4)\): \(1 + 1 + 1 = 3\)이므로 \(\star e_{234} = -e_1\). 따라서 \(\star\star e_1 = \star e_{234} = -e_1 = (-1)^{1\cdot 3}e_1\)이고, \(I = (1, 3)\)에서 \(0 + 1 = 1\)이므로 \(\star e_{13} = -e_{24}\), 곧 \(\star\star e_{24} = -\star e_{13} = e_{24} = (-1)^{2\cdot 2}e_{24}\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-5-3" data-level="1">
+        <p><span class="thm-head">Exercise 34.5.3</span> <span class="level">★</span>
+        \(a = (1, 0, 2)\), \(b = (0, 1, -1)\)에 대하여 \(a^\flat\wedge b^\flat\)을 \(e^I\)로 전개하고, 순환 basis \((e^{23}, e^{31}, e^{12})\)의 coefficient가 \(a\times b\)임을 확인하여라. \((a^\flat\wedge b^\flat)(e_1, e_2)\)는 무엇인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\[ \begin{aligned} (e^1 + 2e^3)\wedge(e^2 - e^3) &amp;= e^{12} - e^{13} + 2\,e^3\wedge e^2 - 2\,e^3\wedge e^3 \\ &amp;= e^{12} - e^{13} - 2\,e^{23} \end{aligned} \]이다. \(-e^{13} = e^{31}\)이므로 순환 basis의 coefficient는 \((-2, 1, 1)\)이고, \[ a\times b = (0\cdot(-1) - 2\cdot 1,\ 2\cdot 0 - 1\cdot(-1),\ 1\cdot 1 - 0\cdot 0) = (-2, 1, 1) \]과 같다(<a href="#i-34-5-5">Proposition 34.5.5</a>(d)). \((a^\flat\wedge b^\flat)(e_1, e_2)\)는 \(e^{12}\)의 coefficient \(1\)이고, \(\inner{a\times b}{e_1\times e_2} = (a\times b)^3 = 1\)과 같다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-5-4" data-level="2">
+        <p><span class="thm-head">Exercise 34.5.4</span> <span class="level">★★</span>
+        (Chapter 35에서 사용) \(r \gt 0\)일 때 점 \((r\cos\theta, r\sin\theta)\)에서 polar coordinates의 basis \(b_1 = (\cos\theta, \sin\theta)\), \(b_2 = (-r\sin\theta, r\cos\theta)\)와 그 dual basis \((\beta^1, \beta^2)\)(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-9">Example 1.3.9</a>)를 쓰자. 유클리드 inner product와 standard orientation에서 \(\star b_1\), \(\star b_2\), \(\star\beta^1\), \(\star\beta^2\), 그리고 \(\Lambda^2\)의 \(\star 1\)을 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>Gram matrix는 \(G = \diag(1, r^2)\)이다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-14">Example 1.5.14</a>(b)). \(\det[b_1\ b_2] = r \gt 0\)이므로 positively oriented이다. \(f_1 = b_1\), \(f_2 = b_2/r\)는 positively oriented orthonormal이고, <a href="34-2-hodge-star.html#i-34-2-7">Example 34.2.7</a>에서 \(\star f_1 = f_2\), \(\star f_2 = -f_1\)이므로 \(\star b_1 = b_2/r\), \(\star b_2 = -r\,b_1\)이다. dual 쪽에서 \(f^1 = \beta^1\), \(f^2 = r\beta^2\)이므로 \(\star\beta^1 = r\beta^2\), \(\star\beta^2 = -\beta^1/r\)이다. <a href="#eq-34-5-3">(34.5.3)</a>에서 \(\star 1 = \sqrt{\det G}\;\beta^1\wedge\beta^2 = r\,\beta^1\wedge\beta^2\)이다. Chapter 35에서 \(\beta^1 = dr\), \(\beta^2 = d\theta\)가 되면 \(\star dr = r\,d\theta\), \(\star d\theta = -dr/r\), \(\star 1 = r\,dr\wedge d\theta\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-5-5" data-level="3">
+        <p><span class="thm-head">Exercise 34.5.5</span> <span class="level">★★★</span>
+        \(\xi = \sum_{i \lt j}\xi^{ij}e_{ij} \in \Lambda^2\R^4\)에 대하여 다음 세 조건이 동치임을 보여라. (a) \(\xi\)는 simple이다. (b) \(\xi\wedge\xi = 0\)이다. (c) \(\xi^{12}\xi^{34} - \xi^{13}\xi^{24} + \xi^{14}\xi^{23} = 0\)(Plücker relation).</p>
+        <details class="hint"><summary>Hint</summary><p>(c)⇒(a): \(\xi^{12} \neq 0\)이라 하고(아니면 첨자를 바꾼다) \(u = e_1 - \tfrac{\xi^{23}}{\xi^{12}}e_3 - \tfrac{\xi^{24}}{\xi^{12}}e_4\), \(v = \xi^{12}e_2 + \xi^{13}e_3 + \xi^{14}e_4\)를 보아라.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a)⇒(b): \((u\wedge v)\wedge(u\wedge v) = 0\)(같은 인자가 두 번). (b)⇔(c): 곱셈표 <a href="#eq-34-5-1">(34.5.1)</a>로 \(e_I\wedge e_J\)가 \(e_{1234}\)가 되는 것은 \(\{I, J\}\)가 \(\{12, 34\}\), \(\{13, 24\}\), \(\{14, 23\}\)일 때뿐이고 \(\sgn(12, 34) = +1\), \(\sgn(13, 24) = -1\), \(\sgn(14, 23) = +1\)이며, 2-vector끼리는 교환하므로(<a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>(c)) 각 쌍이 두 번 나온다. 따라서 \[ \xi\wedge\xi = 2(\xi^{12}\xi^{34} - \xi^{13}\xi^{24} + \xi^{14}\xi^{23})\,e_{1234} \]이다.</p>
+          <p>(c)⇒(a): \(\xi = 0\)이면 simple이다. \(\xi \neq 0\)이면 첨자 이름을 바꾸어 \(\xi^{12} \neq 0\)이라 해도 된다(이름을 바꾸면 (c)의 꼴이 부호까지 유지된다. (b)와 동치이고 (b)는 basis와 무관하기 때문이다). 힌트의 \(u, v\)에 대해 펼치면</p>
+          <p>\[ \begin{aligned} u\wedge v = {} &amp; \xi^{12}e_{12} + \xi^{13}e_{13} + \xi^{14}e_{14} + \xi^{23}e_{23} + \xi^{24}e_{24} \\ &amp; + \frac{\xi^{13}\xi^{24} - \xi^{14}\xi^{23}}{\xi^{12}}\,e_{34} \end{aligned} \]</p>
+          <p>이다(\(-\tfrac{\xi^{23}}{\xi^{12}}e_3\wedge\xi^{12}e_2 = \xi^{23}e_{23}\) 등). (c)에 의해 마지막 coefficient는 \(\xi^{34}\)이므로 \(u\wedge v = \xi\)이다. 따라서 \(\Lambda^2\R^4\)의 simple 2-vector 전체는 6차원 공간 안의 quadric 하나다(<a href="34-1-wedge-k-vectors.html#i-34-1-13">Non-example 34.1.13</a>은 이 quadric 밖의 점이다).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-5-6" data-level="2">
+        <p><span class="thm-head">Exercise 34.5.6</span> <span class="level">★★</span>
+        <strong>Coding.</strong> Implementation 상자의 <code>wedge</code>와 <code>hodge</code>로 (a) \(\R^5\)의 무작위 multivector(degree가 섞인 것)에서 결합법칙을, (b) \(k\)-vector와 \(l\)-vector에서 \(\xi\wedge\eta = (-1)^{kl}\eta\wedge\xi\)를, (c) \(n = 5\)의 모든 basis \(k\)-vector에서 \(\star\star = (-1)^{k(n-k)}\)를 확인하고, (d) <a href="#ex-34-5-1">Exercise 34.5.1</a>을 계산하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-34-5-6"><code>import itertools
+import random
+
+random.seed(6)
+n = 5
+keys = [I for k in range(n + 1) for I in itertools.combinations(range(n), k)]
+rand_mv = lambda: {I: random.uniform(-1, 1) for I in random.sample(keys, 8)}
+close = lambda x, y: all(abs(x.get(K, 0) - y.get(K, 0)) &lt; 1e-12 for K in set(x) | set(y))
+A, B, C = rand_mv(), rand_mv(), rand_mv()
+ok_a = close(wedge(wedge(A, B), C), wedge(A, wedge(B, C)))
+
+ok_b = True
+for k, l in [(1, 1), (1, 2), (2, 2), (2, 3)]:
+    X = {I: random.uniform(-1, 1) for I in itertools.combinations(range(n), k)}
+    Y = {I: random.uniform(-1, 1) for I in itertools.combinations(range(n), l)}
+    ok_b &amp;= close(wedge(X, Y), {K: (-1) ** (k * l) * c for K, c in wedge(Y, X).items()})
+
+ok_c = all(hodge(hodge({I: 1.0}, n), n) == {I: float((-1) ** (len(I) * (n - len(I))))} for I in keys)
+
+vec = lambda *x: {(i,): float(c) for i, c in enumerate(x) if c}
+u, v, w = vec(1, 1, 0, 0), vec(0, 1, 1, 0), vec(0, 0, 1, 1)
+print(ok_a, ok_b, ok_c, wedge(u, v), wedge(wedge(u, v), w))
+</code></pre>
+<pre id="out-ex-34-5-6"><code>True True True {(0, 1): 1.0, (0, 2): 1.0, (1, 2): 1.0} {(0, 1, 2): 1.0, (0, 1, 3): 1.0, (0, 2, 3): 1.0, (1, 2, 3): 1.0}</code></pre>
+          <p>(a)–(c)는 <a href="#i-34-5-3">Theorem 34.5.3</a>(a), <a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>(c), <a href="34-2-hodge-star.html#i-34-2-9">Proposition 34.2.9</a>를 수치로 확인한 것이다. (d)의 출력은 <a href="#ex-34-5-1">Exercise 34.5.1</a>의 답 \(e_{12} + e_{13} + e_{23}\)과 \(e_{123} + e_{124} + e_{134} + e_{234}\)를 0부터 센 첨자로 쓴 것이다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="34-4-k-forms.html">← 34.4 k-Forms as Measurement</a>
+    <a rel="next" href="../35-exterior-calculus/index.html">35. Exterior Calculus →</a>
+  </nav>
+</body>
+</html>

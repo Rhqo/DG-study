@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>34.3 Covectors, Sharp, and Flat — DG Study</title>
+  <meta name="dg-id" content="34.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="34.2, 1.3, 1.4, 1.5, 7.1">
+  <meta name="dg-refs" content="Cr §4.3; CMU-DDG L4">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">34. Exterior Algebra and k-Forms</a> ›
+    <span>34.3 Covectors, Sharp, and Flat</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>34.3 Covectors, Sharp, and Flat</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §4.3]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>covector를 “vector를 재는 도구”로 보고, inner product가 있으면 그 측정이 정사영의 길이에 비례함을 증명할 수 있다.</li>
+        <li>flat \(u^\flat\)과 sharp \(\alpha^\sharp\)을 Chapter 1의 isomorphism으로 이해하고, Gram matrix로 계산할 수 있다.</li>
+        <li>같은 covector라도 inner product가 바뀌면 \(\alpha^\sharp\)이 바뀐다는 것을 그림과 sphere의 예로 설명할 수 있다.</li>
+        <li>\(V^*\)에 inner product와 orientation을 주어, Section 34.2를 covector 쪽에서도 쓸 준비를 한다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-1">Definition 1.3.1 (dual space)</a>, <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-4">Definition 1.3.4 (dual basis)</a>, <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-5">Theorem 1.3.5</a></li>
+        <li><a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-6">Theorem 1.4.6 (transformation of covector components and the dual basis)</a>, <a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-7">Definition 1.4.7 (contravariant and covariant)</a></li>
+        <li><a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-12">Definition 1.5.12 (Gram matrix)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-15">Proposition 1.5.15 (isomorphism given by an inner product)</a>, <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-16">Example 1.5.16</a></li>
+        <li><a href="34-2-hodge-star.html#i-34-2-1">Proposition 34.2.1</a>, <a href="34-2-hodge-star.html#i-34-2-3">Lemma 34.2.3</a>, <a href="34-2-hodge-star.html#i-34-2-10">Example 34.2.10</a>(b)의 inner product \(G\)</li>
+        <li>sphere의 first fundamental form: <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-2">Example 7.1.2</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 34.2에서는 inner product를 써서 \(k\)-vector를 그 orthogonal complement 쪽으로 옮겼다. inner product에는 더 기본적인 쓰임이 하나 있다. vector를 “재는 도구”로 바꾸는 것이다.</p>
+      <p>무언가를 잴 때 쓰는 도구는 재는 대상과 같은 차원을 갖는다. 길이는 자로, 넓이는 넓이를 가진 무언가로 잰다 <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a>. 1차원의 측정 도구가 covector다. Chapter 35에서 적분하는 대상(differential form)과 Chapter 36에서 mesh의 edge에 저장하는 수는 모두 이런 측정값이다. 그래서 vector(“재어지는 것”)와 covector(“재는 것”)를 구별하고, 둘 사이를 오가는 규칙을 분명히 해 두어야 한다.</p>
+      <p>평평한 \(\R^n\)에서는 이 구별이 사소해 보인다. 성분만 보면 covector는 행벡터, vector는 열벡터이고 transpose로 오간다. 그러나 surface 위에서는 점마다 inner product(first fundamental form)가 다르고, 그때 “transpose”는 틀린 답을 준다. 이 절은 오가는 규칙이 inner product에 어떻게 의존하는지를 본다.</p>
+      <aside class="box backward">
+        <p class="box-title">Looking back: Chapter 1에서 이미 한 것과 새로운 것</p>
+        <p>dual space, covector, dual basis는 <a href="../01-linear-algebra/1-3-dual-spaces.html">Section 1.3</a>에서 정의했고, covector의 성분이 vector와 반대로 변한다는 것(covariant)은 <a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-6">Theorem 1.4.6</a>에서, inner product가 isomorphism \(\hat g\colon V \to V^*\)을 준다는 것은 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-15">Proposition 1.5.15</a>에서 증명했다. 이 절은 그것을 다시 정의하거나 증명하지 않는다. 새로운 것은 다음이다.</p>
+        <ul>
+          <li>\(\hat g\)과 그 역을 \(\flat\), \(\sharp\)이라 부르고, Crane의 “측정” 관점에서 읽는다: covector의 값은 정사영의 길이에 비례한다(<a href="#i-34-3-2">Proposition 34.3.2</a>).</li>
+          <li>inner product가 바뀌면 \(\sharp\)이 어떻게 바뀌는지 그림으로 본다(<a href="#fig-34-3-1">Figure 34.3.1</a>, <a href="#fig-34-3-2">Figure 34.3.2</a>).</li>
+          <li>\(V^*\)에 inner product와 orientation을 주어 Hodge star를 covector에도 쓸 수 있게 한다(<a href="#i-34-3-4">Proposition 34.3.4</a>). Section 34.4가 이것을 \(k\)-form으로 넓힌다.</li>
+          <li>mesh 위의 함수에서 \(\flat\)이 무엇인지 본다(Smooth vs. Discrete 상자).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-covectors">
+      <h2>Covectors Measure Vectors</h2>
+      <p><a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-1">Definition 1.3.1</a>을 상기하자. vector space \(V\)의 covector는 linear map \(\alpha\colon V \to \R\)이고, 그 전체가 dual space \(V^*\)이다. Crane의 그림으로는 covector가 방향 하나를 정해 두고 vector의 “그 방향으로의 그림자 길이”를 잰다 <a class="cite" href="../../references.html#Cr">[Cr §4.3]</a>. inner product 없이도 그릴 수 있는 그림은 Chapter 1의 등위선 그림이다: \(\alpha(u)\)는 \(u\)가 원점에서 출발해 건너는 등위선 \(\{\alpha = c\}\)(\(c\)는 정수)의 개수다(<a href="../01-linear-algebra/1-3-dual-spaces.html#fig-1-3-1">Figure 1.3.1</a>). 그림자 길이라는 그림은 inner product가 있어야 정확해진다. 그것은 아래 <a href="#i-34-3-2">Proposition 34.3.2</a>에서 본다.</p>
+
+      <div class="thm example" id="i-34-3-1">
+        <p><span class="thm-head">Example 34.3.1</span> <span class="thm-name">(covectors on functions sampled at vertices)</span>.
+        \(\R^n\)의 covector는 행벡터와의 곱이고(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-2">Example 1.3.2</a>(a)), 다항식 공간에서는 한 점에서의 값과 적분이 covector였다(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-2">Example 1.3.2</a>(d)). mesh에서 자주 만나는 예를 보자. vertex가 \(n_0\)개인 mesh 위의 함수를 vertex 값의 목록 \(u = (u_1, \dots, u_{n_0}) \in \R^{n_0}\)으로 저장한다. 다음은 \(\R^{n_0}\)의 covector다.</p>
+        <ul>
+          <li>(a) vertex \(i\)에서의 값 \(u \mapsto u_i\). 이것은 dual basis의 \(e^i\)이다.</li>
+          <li>(b) 넓이 가중합 \(u \mapsto \sum_i A_i u_i\). 여기서 \(A_i \gt 0\)은 vertex \(i\)에 배정한 넓이(예: 이웃 triangle 넓이의 \(1/3\)씩)다. 함수의 적분 \(\int u\,dA\)의 근사이고, 행벡터 \((A_1, \dots, A_{n_0})\)로 쓴다.</li>
+          <li>(c) (non-example) \(u \mapsto \max_i u_i\)와 \(u \mapsto \sum_i A_i u_i^2\)(에너지)는 covector가 아니다. \(u\)를 \(-u\)로 바꾸면 각각 값이 \(-\max_i u_i\)가 아니라 \(-\min_i u_i\)가 되거나, 부호가 바뀌지 않기 때문이다.</li>
+        </ul>
+        <p>(a)와 (b)는 둘 다 “함수를 재는 도구”지만 성격이 다르다. (a)는 점에서의 값이고, (b)는 넓이가 들어간 적분이다. 둘을 잇는 것이 아래의 \(\flat\)이다(Smooth vs. Discrete 상자).</p>
+      </div>
+
+      <aside class="box warning">
+        <p class="box-title">Common misconception: covector는 “눕힌 vector”다</p>
+        <p>Crane은 vector와 covector의 구별을 열벡터와 행벡터의 구별에 비유한다 <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a>. 좋은 비유지만 한계가 있다. basis를 바꾸면 vector의 성분은 change-of-basis matrix \(B\)의 inverse matrix로, covector의 성분은 \(B\)로 변한다(<a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-5">Theorem 1.4.5</a>, <a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-6">Theorem 1.4.6</a>). 그래서 “성분을 그대로 눕힌다”는 규칙은 basis에 따라 다른 답을 준다. 예를 들어 polar coordinates의 basis \(b_1 = (\cos\theta, \sin\theta)\), \(b_2 = (-r\sin\theta, r\cos\theta)\)에서 \(b_2\)에 inner product로 대응하는 covector는 \(r^2\beta^2\)이지 \(\beta^2\)가 아니다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-16">Example 1.5.16</a>(b)). 성분을 그대로 눕혀도 되는 것은 orthonormal basis에서뿐이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-sharp-flat">
+      <h2>Sharp and Flat</h2>
+      <p>이제 \((V, g)\)가 \(n\)차원 inner product space라 하자. <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-15">Proposition 1.5.15</a>의 isomorphism \(\hat g\colon V \to V^*\)과 그 역을</p>
+      <div class="equation" id="eq-34-3-1">
+      \[ \begin{aligned} u^\flat &amp;:= \hat g(u) = g(u, \cdot\,), \\ \alpha^\sharp &amp;:= \hat g^{-1}(\alpha), \quad\text{i.e.}\quad g(\alpha^\sharp, w) = \alpha(w)\ \text{ for all } w \in V \end{aligned} \tag{34.3.1} \]
+      </div>
+      <p>로 쓰고 flat, sharp라 읽는다. 둘을 함께 <strong>musical isomorphism</strong>(음악적 동형사상)이라 한다(<a href="../21-riemannian-metrics/index.html#toc-21-5">Section 21.5</a>). 기호는 악보에서 왔다. basis \((b_i)\)의 Gram matrix를 \(G = (g_{ij})\), 그 inverse matrix를 \((g^{ij})\)로 쓰면 <a href="../01-linear-algebra/1-5-inner-products.html#eq-1-5-7">(1.5.7)</a>이 성분 공식을 준다:</p>
+      <div class="equation" id="eq-34-3-2">
+      \[ \begin{aligned} (u^\flat)_i &amp;= \sum_{j} g_{ij}\, u^j, \qquad (\alpha^\sharp)^i = \sum_{j} g^{ij}\, \alpha_j, \\ \text{in matrix form:}\quad [u^\flat] &amp;= G[u], \qquad [\alpha^\sharp] = G^{-1}[\alpha]. \end{aligned} \tag{34.3.2} \]
+      </div>
+      <p>\(\flat\)은 vector의 위첨자를 아래로 내리고(♭, 반음 내림), \(\sharp\)은 covector의 아래첨자를 위로 올린다(♯, 반음 올림). 유클리드 \(\R^n\)의 standard basis에서는 \(G = I\)라 숫자가 그대로다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-16">Example 1.5.16</a>(a)). Crane의 노트도 같은 기호와 같은 정의를 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §4.3]</a>, <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a> slides 13–14.</p>
+
+      <div class="thm proposition" id="i-34-3-2">
+        <p><span class="thm-head">Proposition 34.3.2</span> <span class="thm-name">(a covector measures projected length)</span>.
+        \((V, g)\)가 inner product space이고 \(\alpha \in V^*\), \(\alpha \neq 0\)이라 하자. \(a = \alpha^\sharp\), \(\hat a = a/\abs{a}\)로 쓰자.</p>
+        <ul>
+          <li>(a) 모든 \(u\)에 대하여 \(\alpha(u) = \abs{a}\; g(\hat a, u)\)이다. \(g(\hat a, u)\)는 \(u\)를 직선 \(\R a\)로 정사영한 것의 부호 있는 길이다.</li>
+          <li>(b) \(\ker\alpha = a^\perp\)이고, level set \(\{\alpha = c\}\)는 \(a^\perp\)를 \(c\,a/\abs{a}^2\)만큼 평행 이동한 것이다. 이웃한 level set \(\{\alpha = c\}\)와 \(\{\alpha = c + 1\}\)은 \(a\) 방향으로 \(1/\abs{a}\)만큼 떨어져 있다.</li>
+          <li>(c) \(\abs{u}_g = 1\)인 \(u\) 가운데 \(\alpha(u)\)를 가장 크게 하는 것은 \(\hat a\) 하나뿐이고, 그 최댓값은 \(\abs{a}\)이다.</li>
+        </ul>
+      </div>
+      <p>이 명제가 말하는 것. covector는 한 방향(\(\alpha^\sharp\)의 방향)으로의 그림자 길이를 재고, 그 결과에 “눈금의 촘촘함” \(\abs{\alpha^\sharp}\)를 곱한다. 등위선이 촘촘할수록 \(\alpha^\sharp\)이 길다. \(\alpha^\sharp\)은 등위선에 수직이고 \(\alpha\)가 가장 빨리 커지는 방향이다. 단 “수직”, “길이”, “가장 빨리”가 모두 \(g\)로 잰 것이다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) <a href="#eq-34-3-1">(34.3.1)</a>에서 \(\alpha(u) = g(a, u) = \abs{a}\,g(\hat a, u)\)이다. 정사영은 \(g(\hat a, u)\,\hat a\)이고(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">Proposition 1.5.9</a>를 \(\hat a\)를 포함하는 orthonormal basis에 쓴다) 그 부호 있는 길이가 \(g(\hat a, u)\)다.</p>
+        <p>(b) \[ \begin{aligned} \alpha(x) = c &amp;\iff g(a, x) = c \\ &amp;\iff g\big(a, x - c\,a/\abs{a}^2\big) = 0 \\ &amp;\iff x - c\,a/\abs{a}^2 \in a^\perp. \end{aligned} \] \(c = 0\)이면 \(\ker\alpha = a^\perp\)이다. 두 level set의 점 \(c\,a/\abs{a}^2\)과 \((c+1)\,a/\abs{a}^2\)를 잇는 선분 \(a/\abs{a}^2\)는 두 평행한 hyperplane 모두에 수직이고 길이가 \(1/\abs{a}\)이다.</p>
+        <p>(c) Cauchy–Schwarz inequality(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-5">Theorem 1.5.5</a>)에서 \(\alpha(u) = g(a, u) \le \abs{a}\abs{u}_g = \abs{a}\)이고, 등호는 \(u\)가 \(a\)의 양수배일 때뿐이다.</p>
+      </div>
+
+      <p><a href="#fig-34-3-1">Figure 34.3.1</a>의 (a)를 보자. 자주색 직선들이 \(\alpha = e^1 + e^2\), 즉 \(\alpha(x) = x^1 + x^2\)의 등위선 \(\alpha = -3, \dots, 3\)이다. 파란 \(\alpha^\sharp = (1, 1)\)은 등위선에 수직이다. 반지름 \(\abs{\alpha^\sharp} = \sqrt2\)인 점선 원은 등위선 \(\{\alpha = 2\}\)에 \(\alpha^\sharp\)의 끝(검은 점)에서 접한다. <a href="#i-34-3-2">Proposition 34.3.2</a>(c)의 그림이다. 주황 \(u = (2.2, 0.4)\)에서 파란 점선 직선으로 내린 주황 점선이 정사영이다. 그 길이는 \(2.6/\sqrt2\)이고, \(\sqrt2\)를 곱하면 \(\alpha(u) = 2.6\)이다. \(u\)의 끝이 등위선 \(\alpha = 2\)와 \(\alpha = 3\) 사이에 있는 것과 맞는다. (b)는 다음 예에서 본다.</p>
+
+      <figure class="dg-figure" id="fig-34-3-1">
+        <img src="figures/fig-34-3-1-sharp-metric.svg" alt="두 패널의 평면 그림. 두 패널 모두 기울기 −1인 자주색 평행선(covector α = e^1 + e^2의 등위선)이 그려져 있다. (a)에는 원점에서 대각선 위로 향한 파란 화살표 α♯=(1,1), 반지름 √2의 점선 원이 그 끝에서 등위선에 접하는 모습, 주황 화살표 u와 그 끝에서 α♯의 직선으로 내린 주황 점선이 있다. (b)에는 기울어진 점선 타원 x^T G x = 1, 원점에서 위로 향한 파란 화살표 α♯g=(0,1)의 끝이 타원과 등위선 α=1의 접점에 있고, 회색 화살표 α♯(1,1)이 비교를 위해 그려져 있다.">
+        <figcaption><span class="fig-head">Figure 34.3.1.</span>
+        covector \(\alpha = e^1 + e^2\)(\(\alpha(x) = x^1 + x^2\))와 두 inner product가 주는 두 sharp. (a) 유클리드 inner product. (b) \(g(x, y) = x^{\mathsf T}Gy\), \(G = \begin{pmatrix} 2 &amp; 1 \\ 1 &amp; 1\end{pmatrix}\)(<a href="34-2-hodge-star.html#i-34-2-10">Example 34.2.10</a>(b)와 같다).
+        읽는 법: 자주색 직선은 등위선 \(\{\alpha = c\}\)(\(c = -3, \dots, 3\), \(c = 0\)이 굵다), 파랑은 \(\alpha^\sharp\), 점선 곡선은 (a) 반지름 \(\sqrt2\)인 원, (b) \(g\)-길이가 \(1\)인 vector들(\(x^{\mathsf T}Gx = 1\))이다. (a)의 주황은 시험 vector \(u = (2.2, 0.4)\)와 그 정사영, (b)의 회색은 비교용 유클리드 \(\alpha^\sharp\)이다.
+        볼 것: 같은 \(\alpha\)인데 (a)에서 \(\alpha^\sharp = (1, 1)\), (b)에서 \(\alpha^{\sharp_g} = G^{-1}(1, 1) = (0, 1)\)이다. 어느 쪽이든 \(\alpha^\sharp\)의 끝에서 “원”이 등위선 \(\{\alpha = \abs{\alpha^\sharp}^2\}\)에 접한다((a)는 \(\alpha = 2\), (b)는 \(\alpha = 1\)). (a)에서 \(\alpha(u) = 2.6 = \sqrt2\times 2.6/\sqrt2\)이다.
+        <a href="#i-34-3-2">Proposition 34.3.2</a>와 <a href="#i-34-3-3">Example 34.3.3</a>를 보여 준다.</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-34-3-3">
+        <p><span class="thm-head">Example 34.3.3</span> <span class="thm-name">(one covector, two inner products)</span>.
+        \(\R^2\)에서 \(\alpha = e^1 + e^2\)를 생각하자. 유클리드 inner product에서는 \(G = I\)이므로 <a href="#eq-34-3-2">(34.3.2)</a>에서 \(\alpha^\sharp = (1, 1)\)이다. \(G = \begin{pmatrix} 2 &amp; 1 \\ 1 &amp; 1\end{pmatrix}\)이면 \(\det G = 1\)이고 \(G^{-1} = \begin{pmatrix} 1 &amp; -1 \\ -1 &amp; 2\end{pmatrix}\)이므로</p>
+        <p>\[ \alpha^{\sharp_g} = G^{-1}\begin{pmatrix} 1 \\ 1\end{pmatrix} = \begin{pmatrix} 0 \\ 1\end{pmatrix} = e_2 \]</p>
+        <p>이다. 확인: \(g(e_2, w) = (0, 1)\,G\,w = w^1 + w^2 = \alpha(w)\). 등위선의 방향 \(d = (1, -1)\)에 대해 \(g(e_2, d) = 1 - 1 = 0\)이므로 \(e_2\)는 등위선과 \(g\)-수직이다. 유클리드로는 수직이 아니다. 거꾸로 같은 vector \(u = e_1\)도 \(e_1^\flat = e^1\)(유클리드)와 \(e_1^{\flat_g} = 2e^1 + e^2\)(\(G\)의 첫째 열)로 다른 covector가 된다. <a href="#fig-34-3-1">Figure 34.3.1</a>(b)에서 파란 \(\alpha^{\sharp_g} = (0, 1)\)의 끝이 점선 타원(\(g\)-단위원)과 등위선 \(\{\alpha = 1\}\)의 접점이다. 회색 \(\alpha^\sharp = (1,1)\)과 방향이 다르다.</p>
+        <p class="verified">Verification: <code>verify/v-34-3-sharp-flat.py</code></p>
+      </div>
+      <p>이처럼 \(\sharp\)과 \(\flat\)은 inner product에 의존한다. inner product를 하나 정하기 전에는 vector와 covector 사이에 자연스러운 대응이 없다(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-16">Remark 1.3.16</a>). Chapter 35에서 함수의 “gradient”를 이렇게 \(\sharp\)으로 정의하는 이유가 이것이다(<a href="../35-exterior-calculus/index.html#toc-35-2">Section 35.2</a>).</p>
+    </section>
+
+    <section id="sec-dual-inner-product">
+      <h2>An Inner Product and an Orientation on Covectors</h2>
+      <p>Section 34.2의 Hodge star는 orientation이 있는 inner product space면 어디서나 정의된다. \(V^*\)를 그런 공간으로 만들면 covector와 그 wedge에도 \(\star\)를 쓸 수 있다(Section 34.4).</p>
+      <div class="thm proposition" id="i-34-3-4">
+        <p><span class="thm-head">Proposition 34.3.4</span> <span class="thm-name">(inner product and orientation on the dual space)</span>.
+        \((V, g)\)가 \(n\)차원 inner product space라 하자.</p>
+        <ul>
+          <li>(a) \(\inner{\alpha}{\beta} := g(\alpha^\sharp, \beta^\sharp)\)는 \(V^*\)의 inner product이고, \(\flat\)과 \(\sharp\)은 이 inner product에 대한 isometry다. basis \((b_i)\)의 dual basis로 쓴 성분으로는 \(\inner{\alpha}{\beta} = \sum_{i,j} g^{ij}\,\alpha_i\beta_j\)이다.</li>
+          <li>(b) \((e_i)\)가 orthonormal basis이면 \(e_i^\flat = e^i\)이고 dual basis \((e^i)\)는 orthonormal이다.</li>
+          <li>(c) \(V\)에 orientation이 있을 때, positively oriented basis의 dual basis를 positively oriented로 정하면 \(V^*\)의 orientation이 하나로 정해지고, 이 orientation에서 \(\flat\)은 positively oriented basis를 positively oriented basis로 보낸다.</li>
+        </ul>
+      </div>
+      <p>이 명제가 말하는 것. \(\flat\)으로 \(V\)와 \(V^*\)를 같은 것으로 보면 길이, 각, orientation이 모두 그대로 옮겨진다. 그래서 \(V^*\)는 \(V\)와 똑같은 기하를 갖는 orientation이 있는 inner product space다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \(\sharp\)은 linear isomorphism이므로 \(g(\alpha^\sharp, \beta^\sharp)\)는 bilinear, symmetric이고 \(\alpha \neq 0\)이면 \(\alpha^\sharp \neq 0\)이라 양수다. \(\inner{u^\flat}{w^\flat} = g(u, w)\)이므로 \(\flat\)이 isometry이고 그 역 \(\sharp\)도 그렇다. 성분은 <a href="#eq-34-3-2">(34.3.2)</a>에서 \[ g(\alpha^\sharp, \beta^\sharp) = [\alpha]^{\mathsf T}G^{-1}\,G\,G^{-1}[\beta] = [\alpha]^{\mathsf T}G^{-1}[\beta] \]이다.</p>
+        <p>(b) orthonormal이면 \(G = I\)라 <a href="#eq-34-3-2">(34.3.2)</a>에서 \(e_i^\flat = e^i\)이고, (a)의 성분 공식에서 \(\inner{e^i}{e^j} = \delta^{ij}\)이다.</p>
+        <p>(c) \((b_i)\)에서 \((\tilde b_j)\)로의 change-of-basis matrix가 \(B\)이면 dual basis는 \(\tilde\beta^j = \sum_i (B^{-1})^j_i\,\beta^i\)로 변하므로(<a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-6">Theorem 1.4.6</a>) dual basis 사이의 change-of-basis matrix는 \((B^{-1})^{\mathsf T}\)이고 그 determinant는 \(1/\det B\)이다. 따라서 \((b_i)\)와 \((\tilde b_j)\)가 같은 orientation이면 dual basis도 그렇고, 정의가 잘 된다. \((b_i)\)가 positively oriented이면 <a href="#eq-34-3-2">(34.3.2)</a>에서 \(b_i^\flat = \sum_j g_{ij}\beta^j\)이고, \((\beta^j)\)에서 \((b_i^\flat)\)로의 matrix \(G\)의 determinant는 양수다(orthonormal basis에서 \((b_i)\)로의 change-of-basis matrix를 \(C\)라 하면 <a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-13">Proposition 1.5.13</a>(c)에서 \(G = C^{\mathsf T}C\)이고, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8</a>에서 \(\det G = (\det C)^2 \gt 0\)).</p>
+      </div>
+    </section>
+
+    <section id="sec-sphere">
+      <h2>Example: The Tangent Plane of the Sphere</h2>
+      <p>점마다 inner product가 다른 가장 친숙한 예가 sphere다. running example인 sphere \(S^2(r)\)와 그 parametrization \(\mathbf{x}(\theta, \varphi) = (r\sin\theta\cos\varphi,\ r\sin\theta\sin\varphi,\ r\cos\theta)\)를 쓴다.</p>
+      <div class="thm example" id="i-34-3-5">
+        <p><span class="thm-head">Example 34.3.5</span> <span class="thm-name">(sharp on the sphere)</span>.
+        점 \(p = \mathbf{x}(\theta, \varphi)\)(\(0 \lt \theta \lt \pi\))에서 tangent plane의 basis \((\mathbf{x}_\theta, \mathbf{x}_\varphi)\)를 쓰자. \(\R^3\)의 inner product를 tangent plane에 제한한 것의 Gram matrix는 first fundamental form이고 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-2">Example 7.1.2</a>에서</p>
+        <p>\[ G = \begin{pmatrix} E &amp; F \\ F &amp; G_{22}\end{pmatrix} = \begin{pmatrix} r^2 &amp; 0 \\ 0 &amp; r^2\sin^2\theta\end{pmatrix} \]</p>
+        <p>이다(여기서는 coefficient \(G\)와 행렬 \(G\)가 겹치지 않도록 \(G_{22}\)로 썼다). \((\beta^1, \beta^2)\)를 \((\mathbf{x}_\theta, \mathbf{x}_\varphi)\)의 dual basis라 하자. \(\beta^2\)는 tangent vector의 \(\mathbf{x}_\varphi\) 성분, 곧 “\(\varphi\)가 얼마나 변하는가”를 잰다. <a href="#eq-34-3-2">(34.3.2)</a>에서</p>
+        <p>\[ \begin{aligned} \mathbf{x}_\theta^\flat &amp;= r^2\beta^1, &amp; \mathbf{x}_\varphi^\flat &amp;= r^2\sin^2\theta\;\beta^2, \\ (\beta^1)^\sharp &amp;= \frac{\mathbf{x}_\theta}{r^2}, &amp; (\beta^2)^\sharp &amp;= \frac{\mathbf{x}_\varphi}{r^2\sin^2\theta} \end{aligned} \]</p>
+        <p>이다. \(\abs{\mathbf{x}_\varphi} = r\sin\theta\)이므로 \(\abs{(\beta^2)^\sharp} = \dfrac{1}{r\sin\theta}\)이다. \(r = 1\)이면 적도(\(\theta = \pi/2\))에서 \(1\), \(\theta = \pi/6\)에서 \(2\)이고, 극으로 갈수록 한없이 커진다. 성분은 어느 점에서나 \((0, 1)\)로 같은 covector인데 \(\sharp\)은 점마다 다르다.</p>
+        <p class="verified">Verification: <code>verify/v-34-3-sharp-flat.py</code></p>
+      </div>
+      <p><a href="#fig-34-3-2">Figure 34.3.2</a>가 이것이다. 자주색 곡선은 meridian \(\varphi = \text{const}\)이고, \(\beta^2\)가 재는 양 \(\varphi\)의 등위선이다. 점 \(p_1\)(적도)과 \(p_2\)(\(\theta = \pi/6\))에서 파란 화살표는 \(\mathbf{x}_\varphi\), 주황 화살표는 \((\beta^2)^\sharp\)이다. \(p_1\)에서는 둘이 같다. \(p_2\)에서는 meridian이 서로 가까워져 있다. 그래서 circle of latitude를 따라 조금만 움직여도 \(\varphi\)가 많이 변하고, <a href="#i-34-3-2">Proposition 34.3.2</a>(b)대로 등위선이 촘촘한 만큼 \((\beta^2)^\sharp\)이 길다(\(\mathbf{x}_\varphi\)의 네 배). <a href="../35-exterior-calculus/index.html">Chapter 35</a>에서 \(\beta^1, \beta^2\)는 \(d\theta, d\varphi\)가 되고, \((d\varphi)^\sharp\)은 함수 \(\varphi\)의 gradient가 된다.</p>
+
+      <figure class="dg-figure" id="fig-34-3-2">
+        <img src="figures/fig-34-3-2-sphere-sharp.svg" alt="반투명 회색 단위 sphere 위에 북극에서 모이는 자주색 meridian 일곱 개와 회색 적도가 있다. 적도 위의 점 p1에서 파란 화살표 x_φ와 주황 화살표 (β²)♯가 겹쳐 같은 길이로 오른쪽을 향한다. 북쪽의 점 p2에서는 짧은 파란 화살표 x_φ와 그 네 배 길이의 주황 화살표 (β²)♯가 같은 방향을 향한다.">
+        <figcaption><span class="fig-head">Figure 34.3.2.</span>
+        unit sphere(\(r = 1\))의 두 점 \(p_1 = \mathbf{x}(\pi/2, 0.35)\), \(p_2 = \mathbf{x}(\pi/6, 0.35)\)에서 같은 성분 \((0, 1)\)의 covector \(\beta^2\)를 \(\sharp\)한 결과.
+        읽는 법: 자주색 곡선은 meridian \(\varphi = 0.35 + 0.18j\)(\(j = -3, \dots, 3\); 굵은 것이 \(j = 0\)), 회색은 적도, 파랑은 \(\mathbf{x}_\varphi\), 주황은 \((\beta^2)^\sharp = \mathbf{x}_\varphi/\sin^2\theta\)이다. 화살표는 모두 실제 길이의 \(0.5\)배로 그렸다.
+        볼 것: \(p_1\)에서 \(\abs{\mathbf{x}_\varphi} = \abs{(\beta^2)^\sharp} = 1\)이라 두 화살표가 겹친다. \(p_2\)에서는 \(\abs{\mathbf{x}_\varphi} = 0.5\), \(\abs{(\beta^2)^\sharp} = 2\)이다. meridian(\(\varphi\)의 등위선)이 촘촘한 곳일수록 \(\sharp\)이 길다.
+        <a href="#i-34-3-5">Example 34.3.5</a>와 <a href="#i-34-3-2">Proposition 34.3.2</a>(b)를 보여 준다.</figcaption>
+      </figure>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: flat on mesh functions</p>
+        <p><a href="#i-34-3-1">Example 34.3.1</a>의 vertex 함수 \(u \in \R^{n_0}\)에 inner product</p>
+        <p>\[ \inner{u}{v}_M = \sum_i A_i\, u_i v_i = u^{\mathsf T}Mv, \qquad M = \diag(A_1, \dots, A_{n_0}) \]</p>
+        <p>를 주자. \(\int uv\,dA\)를 vertex 넓이 \(A_i\)로 근사한 것이다. 그러면 <a href="#eq-34-3-2">(34.3.2)</a>에서 \(u^\flat = Mu\)이다. 상수함수 \(\mathbf{1}\)의 flat \(\mathbf{1}^\flat = (A_1, \dots, A_{n_0})\)이 <a href="#i-34-3-1">Example 34.3.1</a>(b)의 넓이 가중합이고, 거꾸로 그 covector의 \(\sharp\)이 \(\mathbf{1}\)이다. 즉 mesh 함수의 \(\flat\)은 “점에서의 값”을 “넓이를 곱한 값”으로 바꾸고, \(\sharp\)은 넓이로 나누어 되돌린다. Chapter 36의 DEC에서는 이 \(M\)이 diagonal Hodge star \(\star_0\)이고(<a href="../36-discrete-exterior-calculus/index.html#toc-36-5">Section 36.5</a>), Chapter 42에서는 lumped mass matrix라 부른다.</p>
+        <ul>
+          <li>보존하는 것: \(\flat\)과 \(\sharp\)이 서로 역이고 선택한 inner product에 대해 정확하다는 것.</li>
+          <li>잃는 것: \(\inner{u}{v}_M\)은 \(\int uv\,dA\)의 근사일 뿐이다. \(A_i\)를 어떻게 배정할지(barycentric, Voronoi 등)도 선택이다(Chapter 36, 42).</li>
+        </ul>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Chapter 1: dual space와 dual basis(<a href="../01-linear-algebra/1-3-dual-spaces.html">Section 1.3</a>), contravariant와 covariant(<a href="../01-linear-algebra/1-4-change-of-basis.html#i-1-4-7">Definition 1.4.7</a>), inner product가 주는 isomorphism(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-15">Proposition 1.5.15</a>).</li>
+          <li>Chapter 16: tangent space마다 covector를 붙인 cotangent space와 1-form(<a href="../16-covectors-tensors/index.html#toc-16-1">Section 16.1</a>).</li>
+          <li>Chapter 21: Riemannian metric의 musical isomorphism과 gradient(<a href="../21-riemannian-metrics/index.html#toc-21-5">Section 21.5</a>).</li>
+          <li>Tour: covector를 등고선의 묶음으로 보는 그림과 backpropagation(<a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>).</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a> slides 3–14, 40, <a class="cite" href="../../references.html#Cr">[Cr §4.3]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>covector는 vector를 재는 linear 도구다. inner product가 있으면 \(\alpha(u) = \abs{\alpha^\sharp}\times(\alpha^\sharp\) 방향으로의 그림자 길이\()\)이고, \(\alpha^\sharp\)은 등위선에 수직이며 길이는 등위선의 촘촘함이다(<a href="#i-34-3-2">Proposition 34.3.2</a>).</li>
+        <li>\(u^\flat = g(u, \cdot)\)과 그 역 \(\sharp\)은 Chapter 1의 isomorphism이고, 성분으로는 \(G\)와 \(G^{-1}\)을 곱한다(<a href="#eq-34-3-1">(34.3.1)</a>, <a href="#eq-34-3-2">(34.3.2)</a>).</li>
+        <li>\(\sharp\)과 \(\flat\)은 inner product에 의존한다. 같은 covector가 다른 inner product에서 다른 vector가 되고(<a href="#i-34-3-3">Example 34.3.3</a>), sphere에서는 점마다 달라진다(<a href="#i-34-3-5">Example 34.3.5</a>).</li>
+        <li>\(V^*\)는 \(\inner{\alpha}{\beta} = g(\alpha^\sharp, \beta^\sharp)\)와 dual basis의 orientation으로 orientation이 있는 inner product space가 되고, \(\flat\)은 그 구조를 보존한다(<a href="#i-34-3-4">Proposition 34.3.4</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 1차원 측정에서 \(k\)차원 측정으로 간다. covector 두 개로 평행사변형의 그림자 넓이를, \(k\)개로 \(k\)차원 그림자 부피를 재는 도구가 \(k\)-form이고, 그 값이 determinant로 주어진다는 것을 증명한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-34-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 34.3.1</span> <span class="level">★</span>
+        유클리드 \(\R^3\)에서 \(\alpha = 2e^1 - e^3\)과 \(u = (1, 2, 3)\)에 대하여 \(\alpha(u)\), \(\alpha^\sharp\), \(u\)를 \(\alpha^\sharp\) 방향으로 정사영한 것의 부호 있는 길이, 그리고 level set \(\{\alpha = 0\}\)과 \(\{\alpha = 1\}\) 사이의 거리를 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\alpha(u) = 2\cdot 1 - 3 = -1\). \(G = I\)이므로 \(\alpha^\sharp = (2, 0, -1)\), \(\abs{\alpha^\sharp} = \sqrt5\)이다. <a href="#i-34-3-2">Proposition 34.3.2</a>(a)에서 부호 있는 정사영 길이는 \(\alpha(u)/\abs{\alpha^\sharp} = -1/\sqrt5\)이고, (b)에서 거리는 \(1/\sqrt5\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 34.3.2</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. (a) 어떤 basis에서든 \(u^\flat\)의 성분은 \(u\)의 성분과 같다. (b) \(\alpha^\sharp\)은 \(\ker\alpha\)와 수직이다. (c) inner product \(g\)를 \(4g\)로 바꾸면 \(\alpha^\sharp\)은 절반이 된다. (d) \(\flat\colon V \to V^*\)은 linear이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 거짓. \([u^\flat] = G[u]\)이므로 \(G = I\), 즉 orthonormal basis에서만 같다. (b) 참. <a href="#i-34-3-2">Proposition 34.3.2</a>(b)의 \(\ker\alpha = (\alpha^\sharp)^\perp\). (c) 거짓. \(4g(\alpha^{\sharp'}, w) = \alpha(w) = g(\alpha^\sharp, w)\)이므로 \(\alpha^{\sharp'} = \alpha^\sharp/4\), 즉 \(1/4\)이 된다. 길이를 재는 눈금이 두 배가 되면(\(\abs{u}_{4g} = 2\abs{u}_g\)) 같은 측정을 주는 vector는 \(4g\)-길이로 \(1/2\)배, 유클리드 성분으로 \(1/4\)배다. (d) 참. \(g\)가 bilinear이기 때문이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-3-3" data-level="2">
+        <p><span class="thm-head">Exercise 34.3.3</span> <span class="level">★★</span>
+        (a) \(V\)의 두 inner product \(g, h\)가 모든 covector에 같은 sharp를 준다면(\(\alpha^{\sharp_g} = \alpha^{\sharp_h}\)) \(g = h\)임을 보여라. (b) \(\R^n\)에 \(G = \diag(\lambda_1, \dots, \lambda_n)\)(\(\lambda_i \gt 0\))인 inner product를 주면 \(\alpha = \sum_i\alpha_i e^i\)의 \(\alpha^\sharp\)은 무엇인가? \(\lambda_1\)이 클수록 \(\alpha^\sharp\)의 \(e_1\) 성분은 어떻게 되는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 모든 \(\alpha, w\)에 대하여 \(g(\alpha^{\sharp}, w) = \alpha(w) = h(\alpha^{\sharp}, w)\)이다. \(\sharp\)은 \(V^*\)에서 \(V\)로의 isomorphism이므로(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-15">Proposition 1.5.15</a>) \(\alpha^\sharp\)은 \(V\)의 모든 vector를 지나고, 따라서 모든 \(v, w\)에 대해 \(g(v, w) = h(v, w)\)이다.</p>
+          <p>(b) <a href="#eq-34-3-2">(34.3.2)</a>에서 \(\alpha^\sharp = \sum_i (\alpha_i/\lambda_i)\,e_i\)이다. \(e_1\) 방향의 눈금이 촘촘할수록(\(\lambda_1\)이 클수록, 즉 \(e_1\) 방향의 길이를 크게 잴수록) 같은 측정을 주는 vector의 \(e_1\) 성분은 작아진다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-3-4" data-level="2">
+        <p><span class="thm-head">Exercise 34.3.4</span> <span class="level">★★</span>
+        <a href="#i-34-3-5">Example 34.3.5</a>의 sphere의 한 점에서 covector \(\alpha = a\beta^1 + b\beta^2\)의 길이 \(\abs{\alpha}\)(<a href="#i-34-3-4">Proposition 34.3.4</a>의 inner product)를 구하고, \(\abs{\alpha} = 1\)인 covector 전체가 \((a, b)\)-평면에서 반축이 \(r\)과 \(r\sin\theta\)인 타원임을 보여라. 극 근처에서 이 타원은 어떻게 되는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-34-3-4">Proposition 34.3.4</a>(a)에서 \(\abs{\alpha}^2 = \sum g^{ij}\alpha_i\alpha_j = a^2/r^2 + b^2/(r^2\sin^2\theta)\)이다. \(\abs{\alpha} = 1\)은 \(a^2/r^2 + b^2/(r\sin\theta)^2 = 1\), 반축이 \(r\)(\(a\) 방향)과 \(r\sin\theta\)(\(b\) 방향)인 타원이다. 극으로 가면(\(\sin\theta \to 0\)) \(b\) 방향 반축이 \(0\)으로 줄어든다. 길이가 \(1\)인 covector의 \(\beta^2\) 성분은 아주 작아야 한다는 뜻이고, \(\varphi\)가 극 근처에서 빨리 변한다는 것(<a href="#fig-34-3-2">Figure 34.3.2</a>)의 다른 표현이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-3-5" data-level="1">
+        <p><span class="thm-head">Exercise 34.3.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> Gram matrix \(G\)에 대한 <code>flat(u, G)</code>와 <code>sharp(alpha, G)</code>를 numpy로 써라. inverse matrix를 만들지 말고 linear system을 풀어라. 이것으로 (a) 무작위 positive definite \(G\)에서 <code>sharp(flat(u)) = u</code>와 \(g(\alpha^\sharp, w) = \alpha(w)\)를, (b) sphere(\(r = 1\), \(\theta = \pi/6\))에서 \(\abs{(\beta^2)^\sharp}_g = 2\)를 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-34-3-5"><code>import numpy as np
+
+def flat(u, G):
+    return G @ u                       # (34.3.2): lower the index
+
+def sharp(alpha, G):
+    return np.linalg.solve(G, alpha)   # raise the index without forming G^{-1}
+
+rng = np.random.default_rng(3)
+A = rng.normal(size=(4, 4))
+G = A.T @ A + 4 * np.eye(4)            # symmetric positive definite
+u, w, alpha = rng.normal(size=(3, 4))
+ok_a = np.allclose(sharp(flat(u, G), G), u) and np.isclose(sharp(alpha, G) @ G @ w, alpha @ w)
+
+th = np.pi / 6
+Gs = np.diag([1.0, np.sin(th) ** 2])   # first fundamental form of S^2(1) at theta
+s = sharp(np.array([0.0, 1.0]), Gs)    # (beta^2)^sharp in the basis (x_theta, x_phi)
+ok_b = np.isclose(np.sqrt(s @ Gs @ s), 2.0)
+print(ok_a, ok_b, s)
+</code></pre>
+<pre id="out-ex-34-3-5"><code>True True [0. 4.]</code></pre>
+          <p>(b)의 성분 \((0, 4)\)는 \((\beta^2)^\sharp = 4\,\mathbf{x}_\varphi = \mathbf{x}_\varphi/\sin^2(\pi/6)\)이고, \(g\)-길이는 \(4\abs{\mathbf{x}_\varphi} = 4\cdot\tfrac12 = 2\)이다. 출력은 <code>True True [0. 4.]</code>이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-3-6" data-level="2">
+        <p><span class="thm-head">Exercise 34.3.6</span> <span class="level">★★</span>
+        \(f(x, y) = x^2 + 3y\)의 점 \((1, 0)\)에서의 directional derivative는 covector \(\alpha = 2e^1 + 3e^2\)(즉 \(\alpha(u) = 2u^1 + 3u^2\))이다. (a) 유클리드 inner product에서, (b) <a href="#i-34-3-3">Example 34.3.3</a>의 \(G\)에서, “길이가 \(1\)인 \(u\) 가운데 \(\alpha(u)\)가 가장 큰 방향”과 그 최댓값을 구하여라. 두 답은 왜 다른가? (<a href="../35-exterior-calculus/index.html#toc-35-2">Section 35.2</a>에서 이 방향을 \(f\)의 gradient로 정의한다.)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-34-3-2">Proposition 34.3.2</a>(c)에서 답은 \(\alpha^\sharp/\abs{\alpha^\sharp}\)와 \(\abs{\alpha^\sharp}\)이다. (a) \(\alpha^\sharp = (2, 3)\), 최댓값 \(\sqrt{13}\), 방향 \((2, 3)/\sqrt{13}\). (b) \(\alpha^{\sharp_g} = G^{-1}(2, 3) = (2 - 3,\ -2 + 6) = (-1, 4)\), \(\abs{\alpha^{\sharp_g}}_g^2 = \alpha(\alpha^{\sharp_g}) = -2 + 12 = 10\)이므로 최댓값 \(\sqrt{10}\), 방향 \((-1, 4)/\sqrt{10}\)이다. “길이가 \(1\)”의 뜻이 inner product마다 다르므로(유클리드 원과 \(g\)-타원) 가장 가파른 방향도 다르다. covector \(\alpha\) 자체(변화율의 측정)는 inner product와 무관하지만, 그것을 하나의 방향 vector로 바꾸는 \(\sharp\)은 그렇지 않다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="34-2-hodge-star.html">← 34.2 The Hodge Star</a>
+    <a rel="next" href="34-4-k-forms.html">34.4 k-Forms as Measurement →</a>
+  </nav>
+</body>
+</html>

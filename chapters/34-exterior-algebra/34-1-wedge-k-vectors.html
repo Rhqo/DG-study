@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>34.1 The Wedge Product and k-Vectors — DG Study</title>
+  <meta name="dg-id" content="34.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="1.1, 1.2, 1.6">
+  <meta name="dg-refs" content="Cr §4.1.1–4.1.2, §4.2; CMU-DDG L3">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">34. Exterior Algebra and k-Forms</a> ›
+    <span>34.1 The Wedge Product and k-Vectors</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>34.1 The Wedge Product and k-Vectors</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §4.1.1–4.1.2]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr §4.2]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>\(k\)-vector를 “방향과 크기가 있는 \(k\)차원의 작은 부피”로 설명하고, wedge product의 네 규칙만으로 \(k\)-vector를 계산할 수 있다.</li>
+        <li>antisymmetry, degeneracy(\(u_1\wedge\cdots\wedge u_k = 0\)과 linear dependence의 동치), basis를 바꿀 때 determinant가 곱해진다는 사실을 증명할 수 있다.</li>
+        <li>basis \(k\)-vector \(e_{i_1}\wedge\cdots\wedge e_{i_k}\)(\(i_1 \lt \cdots \lt i_k\))가 basis이고 \(\dim\Lambda^kV = \binom{n}{k}\)임을 증명하고, simple \(k\)-vector의 성분이 \(k\times k\) minor임을 계산에 쓸 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-8">Definition 1.1.8 (linear combination and span)</a>, <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-9">Definition 1.1.9 (linearly independent)</a>, <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-11">Lemma 1.1.11 (linear dependence lemma)</a>, <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-18">Theorem 1.1.18 (existence and length of bases)</a></li>
+        <li><a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-4">Proposition 1.2.4 (a linear map is determined by its values on a basis)</a></li>
+        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-1">Definition 1.6.1 (multilinear and alternating)</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-5">Theorem 1.6.5 (existence and uniqueness of the determinant)</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8 (properties of the determinant)</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-11">Definition 1.6.11 (orientation)</a></li>
+        <li>(선택) Tour <a href="../00-tour/0-7-forms.html#sec-wedge">Section 0.7</a>의 “wedge product는 signed area”</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Track 2의 목표는 mesh 위에서 미분기하의 계산을 하는 것이다(<a href="../32-ddg-overview/index.html">Chapter 32</a>). <a href="../33-combinatorial-surfaces/index.html">Chapter 33</a>에서 보았듯이 mesh는 vertex, edge, triangle, tetrahedron으로 되어 있고, 이것들은 각각 \(0, 1, 2, 3\)차원의 작은 조각이다. mesh 위의 방정식을 풀려면 이런 조각 위에서 무언가를 적분하고, 조각끼리 비교하고, 조각의 경계를 따라 더해야 한다. 그러려면 먼저 “방향이 있는 작은 \(k\)차원 부피”를 대수적으로 다룰 수 있어야 한다.</p>
+      <p>Crane의 강의와 노트는 이 길을 네 단계로 나눈다 <a class="cite" href="../../references.html#Cr">[Cr ch. 4]</a>, <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a>.</p>
+      <ul>
+        <li><strong>linear algebra</strong>: vector, 즉 화살표를 더하고 늘인다(Chapter 1).</li>
+        <li><strong>vector calculus</strong>: 점마다 붙은 화살표가 어떻게 변하는지 미분한다.</li>
+        <li><strong>exterior algebra</strong>: \(k\)차원의 작은 부피(\(k\)-vector)를 더하고 늘이고 곱한다. 이 장의 주제다.</li>
+        <li><strong>exterior calculus</strong>: 점마다 붙은 작은 부피와 그것을 재는 도구가 어떻게 변하는지 미분하고 적분한다(<a href="../35-exterior-calculus/index.html">Chapter 35</a>). <a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>은 이것을 mesh 위에서 그대로 따라 한다.</li>
+      </ul>
+      <p>linear algebra에도 크기를 재는 도구가 이미 있다. 그러나 셋 다 모자란다. span(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-8">Definition 1.1.8</a>)은 vector들이 펼치는 subspace를 주지만 크기도 방향도 없다. determinant(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-6">Definition 1.6.6</a>)는 부호 있는 부피를 주지만 \(\R^n\)의 vector \(n\)개에만 쓸 수 있다. \(\R^3\)의 cross product(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-15">Definition 1.6.15</a>)는 평행사변형의 넓이를 주지만 \(\R^3\)에서만 정의되고, 평면을 그 법선 vector로 바꿔 놓는다. 이 절에서는 \(\R^n\)의 vector \(k\)개(\(k \le n\)이면 무엇이든)가 만드는 조각의 subspace, 크기, 방향을 한꺼번에 기록하고 더하거나 늘일 수 있는 대상, 즉 \(k\)-vector를 만든다.</p>
+    </section>
+
+    <section id="sec-intuition">
+      <h2>Little Oriented Volumes</h2>
+      <p>먼저 그림으로 보자. <a href="#fig-34-1-1">Figure 34.1.1</a>의 (a)에서 파란 화살표 \(u\)와 초록 화살표 \(v\)는 하늘색 평행사변형을 펼친다. 이 평행사변형에 “\(u\)에서 \(v\)로 도는 방향”(검은 곡선 화살표)을 붙인 것이 2-vector \(u\wedge v\)다. (b)에서는 같은 평행사변형을 주황 화살표 \(w\) 방향으로 밀어 parallelepiped를 만든다. 진하게 칠한 바닥면이 \(u\wedge v\)이고, 상자 전체가 3-vector \(u\wedge v\wedge w\)다. vector \(u\) 하나는 1-vector, 즉 방향이 있는 선분이다.</p>
+
+      <figure class="dg-figure" id="fig-34-1-1">
+        <img src="figures/fig-34-1-1-k-vectors.svg" alt="두 패널의 3D 그림. (a)에서는 원점에서 나가는 파란 화살표 u와 초록 화살표 v가 하늘색 평행사변형을 이루고, 평행사변형 가운데에 u에서 v 쪽으로 도는 검은 곡선 화살표와 라벨 u∧v가 있다. (b)에서는 같은 평행사변형(진한 하늘색 바닥면)을 주황 화살표 w 방향으로 밀어 만든 반투명 parallelepiped가 있고, 바닥면에 같은 곡선 화살표가 있다.">
+        <figcaption><span class="fig-head">Figure 34.1.1.</span>
+        \(\R^3\)의 \(u = (1, 0.15, 0)\), \(v = (0.3, 0.9, 0)\), \(w = (0.15, 0.2, 0.85)\)로 만든 2-vector와 3-vector.
+        읽는 법: 파랑은 첫째 인자 \(u\), 초록은 둘째 인자 \(v\), 주황은 셋째 인자 \(w\)다. 하늘색 면은 vector들이 펼치는 조각이고, 검은 곡선 화살표는 \(u\)에서 \(v\)로 도는 방향, 즉 orientation이다. (b)의 진한 바닥면이 (a)의 \(u\wedge v\)이고 반투명 상자가 그것을 \(w\) 방향으로 민 것이다.
+        볼 것: 평행사변형의 넓이는 \(\abs{u\times v} = 0.855\)이고, \(\det(u, v, w) = 0.727 \gt 0\)이라 \((u, v, w)\)는 positively oriented이다.
+        본문의 네 규칙((W1)–(W4), <a href="#i-34-1-1">Definition 34.1.1</a>)이 이 그림에서 나온다.</figcaption>
+      </figure>
+
+      <p>이 그림을 가지고 놀면 규칙 몇 개가 보인다.</p>
+      <ul>
+        <li><strong>늘이기.</strong> 한 변 \(u\)를 \(a\)배 하면 넓이가 \(a\)배가 된다. \(a \lt 0\)이면 도는 방향이 뒤집힌다. 그래서 \((au)\wedge v = a(u\wedge v)\)로 쓴다.</li>
+        <li><strong>더하기.</strong> 밑변 \(u\)가 같은 두 평행사변형 \(u\wedge v_1\)과 \(u\wedge v_2\)를 생각하자. 밑변이 같으면 넓이는 높이(\(u\)에 수직인 성분)로 정해지고, \(v_1 + v_2\)의 높이는 두 높이의 합이다. 그래서 \(u\wedge v_1 + u\wedge v_2 = u\wedge(v_1 + v_2)\)이다.</li>
+        <li><strong>납작함.</strong> \(u\)와 \(u\)로 만든 “평행사변형”은 넓이가 \(0\)이다: \(u\wedge u = 0\).</li>
+        <li><strong>밀기.</strong> \(u\wedge v\)를 만든 뒤 \(w\)로 밀든, \(v\wedge w\)를 만든 뒤 \(u\)로 밀든 같은 상자가 생긴다: \((u\wedge v)\wedge w = u\wedge(v\wedge w)\).</li>
+      </ul>
+      <p>평행사변형의 정확한 모양은 중요하지 않다. 같은 평면에 놓이고, 넓이가 같고, 도는 방향이 같으면 같은 2-vector다(<a href="#fig-34-1-2">Figure 34.1.2</a>, <a href="#i-34-1-9">Proposition 34.1.9</a>). 이 절은 위 규칙들을 정의로 삼고, 거기서 나머지를 모두 증명한다.</p>
+    </section>
+
+    <section id="sec-definition">
+      <h2>The Rules of the Wedge Product</h2>
+      <div class="thm definition" id="i-34-1-1">
+        <p><span class="thm-head">Definition 34.1.1</span> <span class="thm-name">(k-vector)</span>.
+        \(V\)가 \(n\)차원 vector space(\(n \ge 1\))라 하자. 각 정수 \(k \ge 0\)마다 vector space \(\Lambda^kV\)가 있어서 \(\Lambda^0V = \R\), \(\Lambda^1V = V\)이고, 각 \(k, l \ge 0\)마다 bilinear map
+        \[ \wedge\colon \Lambda^kV \times \Lambda^lV \to \Lambda^{k+l}V, \qquad (\xi, \eta) \mapsto \xi\wedge\eta \]
+        이 있어서 다음 네 규칙이 성립한다고 하자.</p>
+        <ul>
+          <li>(W1) associativity: \((\xi\wedge\eta)\wedge\zeta = \xi\wedge(\eta\wedge\zeta)\)이다. 또 \(c \in \Lambda^0V = \R\)이면 \(c\wedge\xi = \xi\wedge c = c\,\xi\)이다.</li>
+          <li>(W2) degeneracy: 모든 \(v \in V\)에 대하여 \(v\wedge v = 0\)이다.</li>
+          <li>(W3) generation: \(k \ge 1\)이면 \(\Lambda^kV\)의 모든 원소는 \(v_1\wedge\cdots\wedge v_k\)(\(v_j \in V\)) 꼴의 원소 유한 개의 합이다.</li>
+          <li>(W4) non-collapse: \(V\)의 어떤 basis \((b_1, \dots, b_n)\)에 대하여 \(b_1\wedge\cdots\wedge b_n \neq 0\)이다.</li>
+        </ul>
+        <p>\(\Lambda^kV\)의 원소를 <dfn>k-vector</dfn>(k-벡터)라 하고, \(v_1\wedge\cdots\wedge v_k\) 꼴의 \(k\)-vector(\(k = 0\)이면 scalar)를 <dfn>simple k-vector</dfn>(단순 k-벡터)라 한다. 연산 \(\wedge\)를 <strong>wedge product</strong>(쐐기곱)라 한다.</p>
+      </div>
+
+      <p>(W1) 덕분에 괄호 없이 \(v_1\wedge\cdots\wedge v_k\)라 쓸 수 있다. 0-vector는 scalar이고 1-vector는 \(V\)의 vector 그 자체다. bilinearity가 위의 “늘이기”와 “더하기”를, (W2)가 “납작함”을, (W1)이 “밀기”를 옮긴 것이다. (W3)은 \(\Lambda^kV\)에 vector들의 wedge로 만들 수 없는 군더더기가 없다는 뜻이고, (W4)는 진짜 \(n\)차원 상자의 부피가 \(0\)이 아니라는 뜻이다. 네 규칙 어디에도 inner product가 없다. 그래서 길이와 각은 아직 잴 수 없고, 같은 subspace 안의 부피의 <em>비</em>만 잴 수 있다(<a href="#i-34-1-9">Proposition 34.1.9</a>). 절대적인 크기는 <a href="34-2-hodge-star.html">Section 34.2</a>에서 inner product로 준다.</p>
+      <p>이런 \(\Lambda^kV\)와 \(\wedge\)가 실제로 있고 본질적으로 하나뿐이라는 것은 <a href="34-5-coordinates.html#i-34-5-3">Theorem 34.5.3</a>에서 좌표로 구성해 보인다. 이 절부터 Section 34.4까지의 증명은 (W1)–(W4)만 쓴다. 따라서 어떤 구성을 택하든 그 결과가 성립한다. 이 study set은 같은 이름의 연산을 Chapter 17에서 covector에 대해 정의한다(<a href="../17-differential-forms/index.html#toc-17-1">Section 17.1</a>). 두 연산의 관계는 <a href="34-4-k-forms.html">Section 34.4</a>에서 정리한다.</p>
+
+      <div class="thm nonexample" id="i-34-1-2">
+        <p><span class="thm-head">Non-example 34.1.2</span> <span class="thm-name">(dropping a rule)</span>.
+        네 규칙은 모두 필요하다. 하나씩 빼 보자.</p>
+        <ul>
+          <li>(a) (W4)를 빼면: \(k \ge 2\)이면 \(\Lambda^kV = \{0\}\)으로 두고 \(\wedge\)는 \(k + l \ge 2\)일 때 모두 \(0\)으로 둔다. (W1)–(W3)은 성립하지만 모든 넓이와 부피가 \(0\)이 되어 아무것도 잴 수 없다.</li>
+          <li>(b) (W2)를 빼면: \(V = \R^n\)이고 \(\Lambda^k\)를 변수 \(x^1, \dots, x^n\)의 \(k\)차 동차다항식 전체, \(\wedge\)를 다항식의 곱으로 두자(\(\Lambda^1\)은 일차식 \(\sum_i a_i x^i\)이고, 이것을 vector \((a_1, \dots, a_n)\)과 같은 것으로 본다). 곱은 bilinear이고 결합법칙을 만족하며, \(k\)차 동차다항식은 일차식 \(k\)개의 곱(단항식)의 합이고, \(x^1x^2\cdots x^n \neq 0\)이다. 그러나 \(x^1 \cdot x^1 = (x^1)^2 \neq 0\)이라 (W2)가 깨진다. 이 곱은 순서를 바꿔도 부호가 바뀌지 않는다. 방향이 없는 곱이다.</li>
+          <li>(c) (W3)을 빼면: (W1)–(W4)를 만족하는 \(\Lambda^kV\)와 \(\wedge\)(<a href="34-5-coordinates.html#i-34-5-3">Theorem 34.5.3</a>에서 만든다)를 잡고, 2-vector의 공간만 \(\Lambda^2V \oplus \R\)로 바꾸자. 덧붙인 \(\R\) 성분은 scalar를 곱하면 함께 늘어나고, degree가 \(1\) 이상인 것과 wedge할 때는 버린다. 그러면 bilinearity와 (W1), (W2), (W4)는 그대로지만 \((0, 1)\)은 vector들의 wedge의 합으로 쓸 수 없다. 이런 군더더기가 있으면 2-vector 공간의 dimension이 \(\binom{n}{2}\)로 정해지지 않는다(<a href="#i-34-1-11">Theorem 34.1.11</a>의 증명이 (W3)을 쓴다).</li>
+          <li>(d) (W1)을 빼면: \(V = \R^3\)에서 (W1)–(W4)를 만족하는 \(\wedge\)를 잡고, \(\Lambda^1V \times \Lambda^2V \to \Lambda^3V\)의 곱에만 \(-1\)을 곱하자. bilinearity, (W2), (W4), 그리고 (W3)(괄호를 어느 쪽으로 묶어 읽어도)은 그대로지만 \((e_1\wedge e_2)\wedge e_3 = -\,e_1\wedge(e_2\wedge e_3)\)이 된다. 같은 상자를 “밀기”의 순서에 따라 다른 부호로 기록하게 되므로 위의 그림과 맞지 않는다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="sec-antisymmetry">
+      <h2>Antisymmetry</h2>
+      <p>(W2)는 같은 vector 둘만 말한다. 순서를 바꾸면 무슨 일이 생기는지는 거기서 나온다.</p>
+      <div class="thm proposition" id="i-34-1-3">
+        <p><span class="thm-head">Proposition 34.1.3</span> <span class="thm-name">(antisymmetry)</span>.
+        <a href="#i-34-1-1">Definition 34.1.1</a>의 상황에서 다음이 성립한다.</p>
+        <ul>
+          <li>(a) 모든 \(u, v \in V\)에 대하여 \(u\wedge v = -v\wedge u\)이다.</li>
+          <li>(b) \(v_1\wedge\cdots\wedge v_k\)에서 두 인자의 자리를 맞바꾸면 부호만 바뀐다. 두 인자가 같으면 \(v_1\wedge\cdots\wedge v_k = 0\)이다. 즉 map \((v_1, \dots, v_k) \mapsto v_1\wedge\cdots\wedge v_k\)는 multilinear이고 alternating이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-1">Definition 1.6.1</a>).</li>
+          <li>(c) \(\xi \in \Lambda^kV\), \(\eta \in \Lambda^lV\)이면 \(\xi\wedge\eta = (-1)^{kl}\,\eta\wedge\xi\)이다.</li>
+        </ul>
+      </div>
+      <p>이 명제가 말하는 것. 인자를 한 번 맞바꿀 때마다 orientation이 뒤집힌다(<a href="#fig-34-1-2">Figure 34.1.2</a>(b)). (c)는 degree가 홀수인 것끼리만 부호가 바뀐다는 뜻이다. 예를 들어 vector와 2-vector는 \(u\wedge(v\wedge w) = (v\wedge w)\wedge u\)로 교환된다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: (a)는 \((u + v)\wedge(u + v) = 0\)을 bilinearity로 펼친다. (b)는 멀리 떨어진 맞바꾸기를 이웃한 맞바꾸기 여러 번으로 쪼갠다. (c)는 (b)를 \(kl\)번 쓴다.</p>
+        <p><span class="proof-head">Proof.</span> (a) (W2)와 bilinearity에서
+        \[ \begin{aligned} 0 = (u + v)\wedge(u + v) &amp;= u\wedge u + u\wedge v + v\wedge u + v\wedge v \\ &amp;= u\wedge v + v\wedge u \end{aligned} \]
+        이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-2">Lemma 1.6.2</a>의 (b)\(\Rightarrow\)(a)와 같은 계산).</p>
+        <p>(b) multilinear인 것은 bilinearity와 (W1)에서 나온다. 이웃한 두 인자 \(v_i, v_{i+1}\)을 맞바꾸면, (W1)로</p>
+        <p>\[ \begin{aligned} v_1\wedge\cdots\wedge v_k = {} &amp; (v_1\wedge\cdots\wedge v_{i-1})\wedge(v_i\wedge v_{i+1}) \\ &amp; \wedge(v_{i+2}\wedge\cdots\wedge v_k) \end{aligned} \]</p>
+        <p>로 묶고 가운데에 (a)를 쓰면 부호만 바뀐다. \(i \lt j\)인 \(v_i\)와 \(v_j\)를 맞바꾸려면, 먼저 \(v_j\)를 이웃한 맞바꾸기 \(j - i\)번으로 \(i\)번째 자리까지 옮기고, 그다음 한 칸 밀려난 \(v_i\)를 \(j - i - 1\)번으로 \(j\)번째 자리까지 옮긴다. 모두 \(2(j - i) - 1\)번, 홀수 번이므로 부호만 바뀐다. \(v_i = v_j\)이면 맞바꾼 결과가 원래와 같으므로 \(\xi = -\xi\), 즉 \(\xi = 0\)이다.</p>
+        <p>(c) \(k = 0\)이나 \(l = 0\)이면 (W1)의 둘째 문장이다. \(\xi = u_1\wedge\cdots\wedge u_k\), \(\eta = v_1\wedge\cdots\wedge v_l\)이 simple이면 \(v_1\)을 \(u_k, \dots, u_1\)을 차례로 지나 맨 앞으로 옮기는 데 이웃한 맞바꾸기 \(k\)번, \(v_2\)를 \(v_1\) 바로 뒤로 옮기는 데 \(k\)번, …, 모두 \(kl\)번이 든다. 일반적인 \(\xi, \eta\)는 (W3)에 의해 simple한 것의 합이고 양변이 bilinear이므로 성립한다.</p>
+      </div>
+
+      <div class="thm example" id="i-34-1-4">
+        <p><span class="thm-head">Example 34.1.4</span> <span class="thm-name">(computing with the rules)</span>.
+        (a) \(\R^2\)의 standard basis \((e_1, e_2)\)와 Chapter 1의 기준 basis \(b_1 = (2, 1) = 2e_1 + e_2\), \(b_2 = (-1, 1) = -e_1 + e_2\)(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-15">Example 1.1.15</a>)를 쓰자. 이 계산이 처음 나오므로 모든 단계를 쓴다. bilinearity로 펼치면</p>
+        <p>\[ \begin{aligned}
+           b_1\wedge b_2 &= (2e_1 + e_2)\wedge(-e_1 + e_2) \\
+           &= -2\,e_1\wedge e_1 + 2\,e_1\wedge e_2 - e_2\wedge e_1 + e_2\wedge e_2 \\
+           &= 0 + 2\,e_1\wedge e_2 + e_1\wedge e_2 + 0 = 3\,e_1\wedge e_2
+        \end{aligned} \]</p>
+        <p>이다. 셋째 줄에서 (W2)로 \(e_i\wedge e_i = 0\), <a href="#i-34-1-3">Proposition 34.1.3</a>(a)로 \(-e_2\wedge e_1 = e_1\wedge e_2\)를 썼다. coefficient \(3\)은 <a href="../01-linear-algebra/1-6-determinant-orientation.html#fig-1-6-1">Figure 1.6.1</a>(a)의 signed area \(\det(b_1, b_2) = 3\)이다.</p>
+        <p>(b) \(\R^3\)에서 \(u = (1, 2, 3) = e_1 + 2e_2 + 3e_3\), \(v = (-1, 0, 2) = -e_1 + 2e_3\)(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-18">Example 1.6.18</a>의 두 vector)이면 같은 방법으로</p>
+        <p>\[ \begin{aligned}
+           u\wedge v &= -e_1\wedge e_1 + 2\,e_1\wedge e_3 - 2\,e_2\wedge e_1 \\
+           &\quad + 4\,e_2\wedge e_3 - 3\,e_3\wedge e_1 + 6\,e_3\wedge e_3 \\
+           &= 2\,e_1\wedge e_2 + 5\,e_1\wedge e_3 + 4\,e_2\wedge e_3
+        \end{aligned} \]</p>
+        <p>이다. \(e_1\wedge e_3\)의 coefficient \(5\)는 \(2\,e_1\wedge e_3\)과 \(-3\,e_3\wedge e_1 = 3\,e_1\wedge e_3\)을 더한 것이다. 세 coefficient의 기하적 뜻은 <a href="#i-34-1-10">Example 34.1.10</a>에서 본다.</p>
+        <p class="verified">Verification: <code>verify/v-34-1-wedge.py</code></p>
+      </div>
+
+      <aside class="box warning">
+        <p class="box-title">Common misconception: \(u\wedge v\)는 무엇이 아닌가</p>
+        <ul>
+          <li>\(u\wedge v\)는 특정한 평행사변형이 아니다. 같은 평면, 같은 넓이, 같은 방향의 평행사변형은 모두 같은 2-vector를 준다(<a href="#fig-34-1-2">Figure 34.1.2</a>(a)). 평행사변형은 2-vector를 그리는 한 가지 방법일 뿐이다.</li>
+          <li>\(u\wedge v\)는 \(V\)의 vector가 아니다. \(\Lambda^2V\)라는 다른 공간의 원소다. \(\R^3\)에서 \(u\wedge v\)의 coefficient(<a href="#i-34-1-4">Example 34.1.4</a>(b)의 \(2, 5, 4\))와 \(u\times v = (4, -5, 2)\)(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-18">Example 1.6.18</a>)는 같은 숫자를 다른 순서와 부호로 담고 있지만, 둘을 잇는 데는 inner product와 orientation이 필요하다(<a href="34-2-hodge-star.html">Section 34.2</a>). <a href="../01-linear-algebra/1-6-determinant-orientation.html">Section 1.6</a>의 Conventions 상자가 \(\times\)와 \(\wedge\)를 구별한 이유다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-determinant">
+      <h2>Change of Basis and the Determinant</h2>
+      <p>계산을 체계적으로 하려면 <a href="#i-34-1-4">Example 34.1.4</a>의 “펼치고, 같은 것은 지우고, 순서를 맞춘다”를 한 번에 해 두면 좋다. 그 결과는 determinant다. 먼저 기호를 정하자. \(\{1, \dots, m\}\)에서 고른 서로 다른 수 \(k\)개를 작은 것부터 늘어놓은 \(I = (i_1, \dots, i_k)\), \(i_1 \lt \cdots \lt i_k\)를 <strong>increasing multi-index</strong>(증가 다중지표)라 한다. 그런 \(I\)는 \(\binom{m}{k}\)개다. \(m \times k\) 행렬 \(A\)에 대하여 \(A_I\)는 \(A\)의 \(i_1, \dots, i_k\)번째 행만 남긴 \(k \times k\) 행렬이고, \(\det A_I\)를 \(A\)의 \(k\times k\) <strong>minor</strong>(소행렬식)라 한다.</p>
+
+      <div class="thm lemma" id="i-34-1-5">
+        <p><span class="thm-head">Lemma 34.1.5</span> <span class="thm-name">(expansion lemma)</span>.
+        \(W\)가 basis \((b_1, \dots, b_m)\)를 가진 vector space이고 \(Z\)가 vector space이며 \(k \ge 1\)이라 하자. \(F\colon W \times \cdots \times W \to Z\)(\(W\)가 \(k\)개)가 multilinear이고 두 인자가 같으면 \(0\)이라 하자. \(w_j = \sum_{i=1}^{m} A^i_j\, b_i\)(\(j = 1, \dots, k\)), 즉 \(A\)가 \(j\)번째 열에 \(w_j\)의 성분을 담은 \(m \times k\) 행렬이면</p>
+        <div class="equation" id="eq-34-1-1">
+        \[ F(w_1, \dots, w_k) = \sum_{I} \det(A_I)\, F(b_{i_1}, \dots, b_{i_k}) \tag{34.1.1} \]
+        </div>
+        <p>이다. 합은 길이 \(k\)인 increasing multi-index \(I\) 전체에 대한 것이다. 특히 \(k \gt m\)이면 \(F = 0\)이다.</p>
+      </div>
+      <p>이 보조정리가 말하는 것. alternating multilinear map은 basis vector를 증가하는 순서로 넣은 값 \(\binom{m}{k}\)개로 완전히 정해지고, 각각의 coefficient는 minor다. \(k = m\)이고 \(Z = \R\)이면 <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-5">Theorem 1.6.5</a>의 <a href="../01-linear-algebra/1-6-determinant-orientation.html#eq-1-6-1">(1.6.1)</a> 그 자체다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(F(w_1, \dots, w_k)\)를 multilinearity로 모두 펼친 뒤, 같은 집합의 basis vector가 들어간 항끼리 묶는다. 한 묶음은 \(k\)차원에서의 determinant 계산과 똑같으므로 <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-5">Theorem 1.6.5</a>가 끝을 낸다.</p>
+        <p><span class="proof-head">Proof.</span> 1단계. <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-5">Theorem 1.6.5</a>의 유일성 증명(<a href="../01-linear-algebra/1-6-determinant-orientation.html#eq-1-6-3">(1.6.3)</a>에서 <a href="../01-linear-algebra/1-6-determinant-orientation.html#eq-1-6-1">(1.6.1)</a>을 얻는 부분)은 multilinearity와 “두 자리를 맞바꾸면 부호가 바뀐다”는 것만 쓰고, 값이 실수라는 사실은 쓰지 않는다. 따라서 값이 vector space \(Z\)에 있는 multilinear alternating map \(D\colon \R^k \times \cdots \times \R^k \to Z\)에도</p>
+        <p>\[ D(a_1, \dots, a_k) = \det[a_1\ \cdots\ a_k]\; D(e_1, \dots, e_k) \]</p>
+        <p>가 그대로 성립한다(\(e_c\)는 \(\R^k\)의 standard basis, \(D\)는 <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-2">Lemma 1.6.2</a>에 의해 alternating이다).</p>
+        <p>2단계. 각 자리의 linearity를 차례로 쓰면</p>
+        <p>\[ F(w_1, \dots, w_k) = \sum_{j_1=1}^{m}\cdots\sum_{j_k=1}^{m} A^{j_1}_1 \cdots A^{j_k}_k\, F(b_{j_1}, \dots, b_{j_k}) \]</p>
+        <p>이다. \(j_1, \dots, j_k\) 가운데 같은 것이 있는 항은 가정에 의해 \(0\)이다. \(k \gt m\)이면 모든 항이 그렇므로 \(F = 0\)이다. \(k \le m\)이면 남은 항의 \(\{j_1, \dots, j_k\}\)는 원소가 \(k\)개인 집합이고, 그것을 작은 것부터 늘어놓으면 increasing multi-index \(I\)가 된다. 남은 항을 \(I\)마다 묶자.</p>
+        <p>3단계. \(I = (i_1, \dots, i_k)\)를 고정하고 \(D_I\colon (\R^k)^k \to Z\)를 \[ D_I(a_1, \dots, a_k) = F\big(\sum_{c} a_1^c\, b_{i_c}, \dots, \sum_{c} a_k^c\, b_{i_c}\big) \]로 정의하자. linear map \(a \mapsto \sum_c a^c b_{i_c}\)와 \(F\)의 합성이므로 \(D_I\)는 multilinear이고 두 인자가 같으면 \(0\)이다. \(a_j\)를 \(A_I\)의 \(j\)번째 열, 즉 \(a_j^c = A^{i_c}_j\)로 두고 \(D_I(a_1, \dots, a_k)\)를 2단계처럼 펼치면 \[ \sum_{c_1, \dots, c_k} A^{i_{c_1}}_1 \cdots A^{i_{c_k}}_k\, F(b_{i_{c_1}}, \dots, b_{i_{c_k}}) \]이다. 이것은 2단계의 \(I\) 묶음에 같은 첨자가 있는 항(값이 \(0\))을 더한 것이다. 따라서 1단계에 의해 \(I\) 묶음의 합은</p>
+        <p>\[ D_I(a_1, \dots, a_k) = \det(A_I)\, D_I(e_1, \dots, e_k) = \det(A_I)\, F(b_{i_1}, \dots, b_{i_k}) \]</p>
+        <p>이다. \(I\)에 대해 더하면 <a href="#eq-34-1-1">(34.1.1)</a>이다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-34-1-6">
+        <p><span class="thm-head">Proposition 34.1.6</span> <span class="thm-name">(wedge products and determinants)</span>.
+        \(V\)가 \(n\)차원이라 하자.</p>
+        <ul>
+          <li>(a) (change of basis) \(u_1, \dots, u_k \in V\)이고 \(w_j = \sum_{i=1}^{k} A^i_j\, u_i\)(\(A\)는 \(k\times k\))이면 \(w_1\wedge\cdots\wedge w_k = \det(A)\; u_1\wedge\cdots\wedge u_k\)이다.</li>
+          <li>(b) (components) \((e_1, \dots, e_n)\)이 \(V\)의 basis이고 \(u_j = \sum_{i} U^i_j\, e_i\)(\(U\)는 \(n\times k\))이면
+          <div class="equation" id="eq-34-1-2">
+          \[ u_1\wedge\cdots\wedge u_k = \sum_{I} \det(U_I)\; e_{i_1}\wedge\cdots\wedge e_{i_k} \tag{34.1.2} \]
+          </div>
+          이다. \(k \gt n\)이면 \(u_1\wedge\cdots\wedge u_k = 0\)이다.</li>
+          <li>(c) \(u_1\wedge\cdots\wedge u_n = \det(U)\; e_1\wedge\cdots\wedge e_n\)이고, \(V\)의 <em>모든</em> basis \((c_1, \dots, c_n)\)에 대하여 \(c_1\wedge\cdots\wedge c_n \neq 0\)이다.</li>
+        </ul>
+      </div>
+      <p>이 명제가 말하는 것. 같은 subspace를 펼치는 두 목록의 \(k\)-vector는 change-of-basis matrix의 determinant 배만큼 다르다. 그리고 simple \(k\)-vector의 성분은 성분 행렬의 \(k\times k\) minor다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \(F\colon (\R^k)^k \to \Lambda^kV\)를 \[ F(a_1, \dots, a_k) = \big(\sum_i a_1^i u_i\big)\wedge\cdots\wedge\big(\sum_i a_k^i u_i\big) \]로 두면 \(F\)는 multilinear이고, <a href="#i-34-1-3">Proposition 34.1.3</a>(b)에 의해 두 인자가 같으면 \(0\)이다. <a href="#i-34-1-5">Lemma 34.1.5</a>를 \(W = \R^k\)(standard basis, \(m = k\))에 쓰면 increasing multi-index는 \((1, \dots, k)\) 하나뿐이고 \(A_{(1,\dots,k)} = A\)이므로 \[ F(A\text{의 열}) = \det(A)\,F(e_1, \dots, e_k) = \det(A)\,u_1\wedge\cdots\wedge u_k \]이다.</p>
+        <p>(b) map \((u_1, \dots, u_k) \mapsto u_1\wedge\cdots\wedge u_k\)는 <a href="#i-34-1-3">Proposition 34.1.3</a>(b)에 의해 multilinear이고 alternating이다. <a href="#i-34-1-5">Lemma 34.1.5</a>를 \(W = V\), basis \((e_i)\)에 쓴다.</p>
+        <p>(c) 첫째 식은 (b)에서 \(k = n\)인 경우다(\(I = (1, \dots, n)\) 하나뿐). (W4)의 basis \((b_1, \dots, b_n)\)를 \((c_i)\)로 전개한 행렬을 \(B\)라 하면 첫째 식에 의해 \(b_1\wedge\cdots\wedge b_n = \det(B)\,c_1\wedge\cdots\wedge c_n\)이다. 좌변이 \(0\)이 아니므로 \(c_1\wedge\cdots\wedge c_n \neq 0\)이다.</p>
+      </div>
+
+      <div class="thm example" id="i-34-1-7">
+        <p><span class="thm-head">Example 34.1.7</span> <span class="thm-name">(signed area in the plane)</span>.
+        \(n = 2\)이면 <a href="#eq-34-1-2">(34.1.2)</a>에서</p>
+        <div class="equation" id="eq-34-1-3">
+        \[ u\wedge v = (u^1v^2 - u^2v^1)\; e_1\wedge e_2 = \det[u\ v]\; e_1\wedge e_2 \tag{34.1.3} \]
+        </div>
+        <p>이다. coefficient는 <a href="../01-linear-algebra/1-6-determinant-orientation.html">Section 1.6</a>의 signed area다. \(b_1\wedge b_2 = 3\,e_1\wedge e_2\)(<a href="#i-34-1-4">Example 34.1.4</a>(a))는 \(\det\begin{pmatrix} 2 &amp; -1 \\ 1 &amp; 1\end{pmatrix} = 3\)이다. \(\Lambda^2\R^2\)는 \(e_1\wedge e_2\)의 배수뿐이므로(<a href="#i-34-1-11">Theorem 34.1.11</a>에서 \(\dim = \binom{2}{2} = 1\)), \(\R^2\)의 2-vector는 “signed area” 하나다.</p>
+        <p class="verified">Verification: <code>verify/v-34-1-wedge.py</code></p>
+      </div>
+
+      <p><a href="#fig-34-1-2">Figure 34.1.2</a>의 (a)를 보자. 세 하늘색 평행사변형은 모양이 다르다. 왼쪽은 \((b_1, b_2)\)이고, 가운데는 둘째 변을 \(b_1 + b_2\)로 밀어 기울였고(\(A = \begin{pmatrix} 1 &amp; 1 \\ 0 &amp; 1\end{pmatrix}\)), 오른쪽은 두 변을 \((b_2, -b_1)\)로 바꾸었다(\(A = \begin{pmatrix} 0 &amp; -1 \\ 1 &amp; 0\end{pmatrix}\)). 세 \(A\)의 determinant가 모두 \(1\)이므로 <a href="#i-34-1-6">Proposition 34.1.6</a>(a)에 의해 세 쌍은 같은 2-vector \(3\,e_1\wedge e_2\)를 준다. 곡선 화살표가 모두 반시계 방향인 것을 확인하자. (b)의 주황 평행사변형은 왼쪽 것과 같은 모양이지만 인자의 순서가 \((b_2, b_1)\)이라 시계 방향이고 값이 \(-3\,e_1\wedge e_2\)다. 아래의 겹친 두 화살표 \(b_1\)과 \(2b_1\)은 넓이가 없는 “평행사변형”이고 그 wedge는 \(0\)이다.</p>
+
+      <figure class="dg-figure" id="fig-34-1-2">
+        <img src="figures/fig-34-1-2-same-2-vector.svg" alt="두 패널의 평면 그림. (a)에는 하늘색 평행사변형 세 개가 나란히 있다. 왼쪽부터 (b1, b2), (b1, b1+b2), (b2, −b1)이고, 각각 파란 첫째 변, 초록 둘째 변, 가운데에 반시계 방향 곡선 화살표가 있다. 위에 'same 2-vector 3 e1∧e2'라고 적혀 있다. (b)에는 같은 모양의 주황 평행사변형 (b2, b1)과 시계 방향 곡선 화살표, 그 아래에 겹쳐 놓인 파란 화살표 b1과 초록 화살표 2b1, 라벨 'b1∧2b1 = 0'이 있다.">
+        <figcaption><span class="fig-head">Figure 34.1.2.</span>
+        Chapter 1의 기준 basis \(b_1 = (2, 1)\), \(b_2 = (-1, 1)\)로 만든 순서쌍들(평행 이동해 따로 그렸다).
+        읽는 법: 파랑은 첫째 인자, 초록은 둘째 인자, 곡선 화살표는 첫째에서 둘째로 도는 방향이다. 하늘색은 값이 양수, 주황은 음수다.
+        볼 것: (a)의 세 쌍 \((b_1, b_2)\), \((b_1, b_1 + b_2)\), \((b_2, -b_1)\)은 모양이 다르지만 change-of-basis matrix의 determinant가 모두 \(1\)이라 같은 2-vector \(3\,e_1\wedge e_2\)다. (b)의 \((b_2, b_1)\)은 \(-3\,e_1\wedge e_2\), \((b_1, 2b_1)\)은 \(0\)이다.
+        <a href="#i-34-1-6">Proposition 34.1.6</a>(a), <a href="#i-34-1-3">Proposition 34.1.3</a>, <a href="#i-34-1-9">Proposition 34.1.9</a>를 보여 준다.</figcaption>
+      </figure>
+
+      <div class="thm proposition" id="i-34-1-8">
+        <p><span class="thm-head">Proposition 34.1.8</span> <span class="thm-name">(degeneracy and linear dependence)</span>.
+        \(u_1, \dots, u_k \in V\)(\(k \ge 1\))에 대하여 \(u_1\wedge\cdots\wedge u_k = 0\)일 필요충분조건은 \((u_1, \dots, u_k)\)가 linearly dependent인 것이다. 특히 \(k \gt n\)이면 \(\Lambda^kV = \{0\}\)이다.</p>
+      </div>
+      <p>이 명제가 말하는 것. \(k\)개의 vector가 납작한 조각(\(k\)차원보다 작은 subspace 안의 조각)을 만들 때, 그리고 그때만 \(k\)-vector가 \(0\)이다. \(n\)차원 공간에는 \(n\)차원보다 큰 조각이 없다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> linearly dependent이면 <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-11">Lemma 1.1.11</a>에 의해 어떤 \(u_j\)가 \(u_j = \sum_{i \lt j} c^i u_i\)이다. 이것을 \(j\)번째 자리에 넣고 linearity로 펼치면 각 항에 같은 \(u_i\)가 두 번 나오므로 <a href="#i-34-1-3">Proposition 34.1.3</a>(b)에 의해 모든 항이 \(0\)이다.</p>
+        <p>거꾸로 linearly independent이면 <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-18">Theorem 1.1.18</a>(b)로 basis \((u_1, \dots, u_k, u_{k+1}, \dots, u_n)\)까지 늘린다. (W1)에 의해 \((u_1\wedge\cdots\wedge u_k)\wedge(u_{k+1}\wedge\cdots\wedge u_n) = u_1\wedge\cdots\wedge u_n\)이고, <a href="#i-34-1-6">Proposition 34.1.6</a>(c)에 의해 이것은 \(0\)이 아니다. \(0\wedge\eta = 0\)(bilinearity)이므로 \(u_1\wedge\cdots\wedge u_k \neq 0\)이다.</p>
+        <p>\(k \gt n\)이면 vector \(k\)개는 언제나 linearly dependent이므로(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-18">Theorem 1.1.18</a>) 모든 simple \(k\)-vector가 \(0\)이고, (W3)에 의해 \(\Lambda^kV = \{0\}\)이다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-34-1-9">
+        <p><span class="thm-head">Proposition 34.1.9</span> <span class="thm-name">(what a simple k-vector remembers)</span>.
+        \((u_1, \dots, u_k)\)와 \((w_1, \dots, w_k)\)가 \(V\)의 linearly independent인 목록이라 하자. \(u_1\wedge\cdots\wedge u_k = w_1\wedge\cdots\wedge w_k\)일 필요충분조건은 \(\Span(u_1, \dots, u_k) = \Span(w_1, \dots, w_k)\)이고, \(w_j = \sum_i A^i_j\, u_i\)로 쓴 \(k\times k\) 행렬 \(A\)가 \(\det A = 1\)인 것이다.</p>
+      </div>
+      <p>이 명제가 말하는 것. \(0\)이 아닌 simple \(k\)-vector는 세 가지를 기억한다. (1) 펼치는 \(k\)차원 subspace \(W\), (2) \(W\)의 orientation(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-11">Definition 1.6.11</a>: \(\det A \gt 0\)인 basis끼리 같다), (3) \(W\) 안에서의 부피의 눈금(\(\det A = 1\)). 모양과 위치는 기억하지 않는다. Crane이 2-vector를 “평면, 넓이, 방향이 같은 평행사변형들의 equivalence class”라고 부른 것을 정확히 한 것이다 <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a>.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 조건이 성립하면 <a href="#i-34-1-6">Proposition 34.1.6</a>(a)에 의해 \(w_1\wedge\cdots\wedge w_k = \det(A)\,u_1\wedge\cdots\wedge u_k = u_1\wedge\cdots\wedge u_k\)이다.</p>
+        <p>거꾸로 \(\xi := u_1\wedge\cdots\wedge u_k = w_1\wedge\cdots\wedge w_k\)라 하자. <a href="#i-34-1-8">Proposition 34.1.8</a>에 의해 \(\xi \neq 0\)이다. 각 \(j\)에 대하여 \(\xi\wedge w_j = w_1\wedge\cdots\wedge w_k\wedge w_j = 0\)이다(같은 인자가 두 번, <a href="#i-34-1-3">Proposition 34.1.3</a>(b)). 그런데 \(\xi\wedge w_j = u_1\wedge\cdots\wedge u_k\wedge w_j\)이므로 <a href="#i-34-1-8">Proposition 34.1.8</a>에 의해 \((u_1, \dots, u_k, w_j)\)는 linearly dependent이다. <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-11">Lemma 1.1.11</a>이 주는 vector는 \(u_i\)일 수 없으므로(\(u\)들은 linearly independent) \(w_j\)이고, 따라서 \(w_j \in \Span(u_1, \dots, u_k)\)이다. 그러면 \(\Span(w) \subseteq \Span(u)\)이고 둘 다 dimension이 \(k\)이므로 같다(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-21">Corollary 1.1.21</a>(c)). 이제 \(w_j = \sum_i A^i_j u_i\)로 쓰면 <a href="#i-34-1-6">Proposition 34.1.6</a>(a)에 의해 \(\xi = \det(A)\,\xi\)이고 \(\xi \neq 0\)이므로 \(\det A = 1\)이다.</p>
+      </div>
+
+      <div class="thm example" id="i-34-1-10">
+        <p><span class="thm-head">Example 34.1.10</span> <span class="thm-name">(components as shadow areas)</span>.
+        <a href="#i-34-1-4">Example 34.1.4</a>(b)의 \(u = (1, 2, 3)\), \(v = (-1, 0, 2)\)를 다시 보자. 성분 행렬은 \(U = \begin{pmatrix} 1 &amp; -1 \\ 2 &amp; 0 \\ 3 &amp; 2\end{pmatrix}\)이고, <a href="#eq-34-1-2">(34.1.2)</a>의 minor는</p>
+        <p>\[ \begin{aligned}
+           \det U_{(1,2)} &amp;= \det\begin{pmatrix} 1 &amp; -1 \\ 2 &amp; 0\end{pmatrix} = 2, \\
+           \det U_{(1,3)} &amp;= \det\begin{pmatrix} 1 &amp; -1 \\ 3 &amp; 2\end{pmatrix} = 5, \\
+           \det U_{(2,3)} &amp;= \det\begin{pmatrix} 2 &amp; 0 \\ 3 &amp; 2\end{pmatrix} = 4
+        \end{aligned} \]</p>
+        <p>이다. <a href="#i-34-1-4">Example 34.1.4</a>(b)에서 규칙으로 계산한 \(u\wedge v = 2\,e_1\wedge e_2 + 5\,e_1\wedge e_3 + 4\,e_2\wedge e_3\)와 같다. minor \(\det U_{(i,j)}\)의 기하적 뜻은 이렇다. \(\pi_{ij}\)를 좌표평면 \(\Span(e_i, e_j)\)로의 정사영이라 하면, \(\pi_{ij}u\)와 \(\pi_{ij}v\)의 \((e_i, e_j)\)-좌표는 \(U\)의 \(i, j\)번째 행이다. 따라서 <a href="#eq-34-1-3">(34.1.3)</a>에 의해 \(\det U_{(i,j)}\)는 평행사변형의 <em>그림자</em> \(\pi_{ij}(u\wedge v)\)의 signed area이다. 여기서 평면 \(\Span(e_i, e_j)\)는 \((e_i, e_j)\)로 orientation을 준다. 같은 방법으로 \(w = (1, 0, 1)\)이면 \[ u\wedge v\wedge w = \det(u, v, w)\,e_1\wedge e_2\wedge e_3 = 6\,e_1\wedge e_2\wedge e_3 \]이다.</p>
+        <p class="verified">Verification: <code>verify/v-34-1-wedge.py</code></p>
+      </div>
+
+      <p><a href="#fig-34-1-3">Figure 34.1.3</a>이 이 예다. 가운데 하늘색 평행사변형이 \(u\wedge v\)이고, 회색 점선은 네 vertex에서 세 벽으로 수직으로 내린 선이다. 주황 그림자는 바닥(\(xy\)평면과 평행), 오른쪽 벽(\(xz\)평면과 평행), 왼쪽 벽(\(yz\)평면과 평행)에 생긴다. 라벨의 숫자 \(+2\), \(+5\), \(+4\)가 그림자의 signed area이자 \(u\wedge v\)의 성분이다. \(xz\)평면의 그림자가 가장 크다. 평행사변형이 \(y\)축 방향에서 보면 가장 넓게 보인다는 뜻이다. 2-vector는 이렇게 세 좌표평면의 그림자 넓이 세 개로 기록된다.</p>
+
+      <figure class="dg-figure" id="fig-34-1-3">
+        <img src="figures/fig-34-1-3-shadows.svg" alt="3D 그림. 연회색 바닥과 두 벽으로 된 상자 안에 원점에서 나가는 파란 화살표 u와 초록 화살표 v가 하늘색 평행사변형 u∧v를 이룬다. 평행사변형의 네 vertex에서 바닥과 두 벽으로 회색 점선이 내려가고, 거기에 주황색 그림자 평행사변형 세 개가 있다. 바닥 그림자에는 'e1∧e2: +2', 오른쪽 벽 그림자에는 'e1∧e3: +5', 왼쪽 벽 그림자에는 'e2∧e3: +4' 라벨이 있다. 왼쪽 아래 구석에 x, y, z 축 표시가 있다.">
+        <figcaption><span class="fig-head">Figure 34.1.3.</span>
+        \(u = (1, 2, 3)\), \(v = (-1, 0, 2)\)의 2-vector와 세 좌표평면으로의 그림자. 그림자는 평행사변형 뒤의 평행한 평면(\(z = -1\), \(y = 3\), \(x = -2\))에 그렸다. 평행한 평면으로 옮겨도 그림자는 같다.
+        읽는 법: 하늘색이 \(u\wedge v\), 주황이 그림자, 회색 점선은 정사영의 방향이다. 라벨은 그림자가 놓인 좌표평면의 basis 2-vector와 그 signed area다(평면 \(\Span(e_i, e_j)\)의 orientation은 \((e_i, e_j)\)).
+        볼 것: 세 넓이 \(2, 5, 4\)가 \(u\wedge v = 2\,e_1\wedge e_2 + 5\,e_1\wedge e_3 + 4\,e_2\wedge e_3\)의 성분이고, \(2^2 + 5^2 + 4^2 = 45 = \abs{u\times v}^2\)이다(<a href="34-2-hodge-star.html#i-34-2-1">Proposition 34.2.1</a>에서 설명한다).
+        <a href="#i-34-1-10">Example 34.1.10</a>과 <a href="#eq-34-1-2">(34.1.2)</a>를 보여 준다. <a href="figures/fig-34-1-3-shadows-interactive.html">Interactive version</a>에서 돌려 볼 수 있다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-basis">
+      <h2>Basis k-Vectors and Dimension</h2>
+      <p><a href="#eq-34-1-2">(34.1.2)</a>는 모든 simple \(k\)-vector가 \(e_{i_1}\wedge\cdots\wedge e_{i_k}\)들의 linear combination임을 말한다. 이것들이 basis인지, 즉 서로 독립인지가 남은 질문이다. 기호를 줄이자. basis \((e_1, \dots, e_n)\)과 increasing multi-index \(I = (i_1, \dots, i_k)\)에 대하여</p>
+      <div class="equation" id="eq-34-1-4">
+      \[ e_I := e_{i_1}\wedge\cdots\wedge e_{i_k}, \qquad e_{()} := 1 \in \Lambda^0V \tag{34.1.4} \]
+      </div>
+      <p>로 쓰고 <strong>basis k-vector</strong>라 부른다. 예를 들어 \(e_{(1,3)} = e_1\wedge e_3\)이다. 혼동이 없으면 \(e_{13}\)으로 줄여 쓴다.</p>
+
+      <div class="thm theorem" id="i-34-1-11">
+        <p><span class="thm-head">Theorem 34.1.11</span> <span class="thm-name">(basis k-vectors)</span>.
+        \((e_1, \dots, e_n)\)이 \(V\)의 basis이고 \(0 \le k \le n\)이면, 길이 \(k\)인 increasing multi-index \(I\) 전체에 대한 \((e_I)\)는 \(\Lambda^kV\)의 basis다. 따라서
+        \[ \begin{aligned} \dim\Lambda^kV &amp;= \binom{n}{k} \qquad (0 \le k \le n), \\ \Lambda^kV &amp;= \{0\} \qquad (k \gt n) \end{aligned} \]
+        이다.</p>
+      </div>
+      <p>이 정리가 말하는 것. \(k\)차원 조각은 좌표 \(k\)-평면 \(\binom{n}{k}\)개 위의 그림자로 정확히 기록되고, 그 기록에는 군더더기가 없다. \(\R^3\)에서 dimension은 \(k = 0, 1, 2, 3\)에 대해 \(1, 3, 3, 1\)이다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: span은 (W3)과 <a href="#eq-34-1-2">(34.1.2)</a>에서 바로 나온다. 독립성은 \(e_J\)의 “여집합” \(e_{J^c}\)를 wedge하면 \(e_J\)의 coefficient만 살아남는다는 데서 나온다. 거기서 (W4)가 쓰인다.</p>
+        <p><span class="proof-head">Proof.</span> \(k = 0\)이면 \(\Lambda^0V = \R\)의 basis \((1)\)이다. \(k \gt n\)인 경우는 <a href="#i-34-1-8">Proposition 34.1.8</a>이다. \(1 \le k \le n\)이라 하자.</p>
+        <p>span: (W3)에 의해 \(\Lambda^kV\)의 원소는 simple \(k\)-vector의 합이고, <a href="#eq-34-1-2">(34.1.2)</a>에 의해 simple \(k\)-vector는 \(e_I\)들의 linear combination이다.</p>
+        <p>linear independence: \(\sum_I c_I\, e_I = 0\)이라 하자. increasing multi-index \(J\)를 하나 고르고, \(\{1, \dots, n\}\setminus J\)를 작은 것부터 늘어놓은 것을 \(J^c\)라 하자(길이 \(n - k\)). \(I \neq J\)이면 \(I\)에 있고 \(J\)에 없는 첨자가 있고, 그 첨자는 \(J^c\)에 있으므로 \(e_I\wedge e_{J^c}\)에는 같은 \(e_i\)가 두 번 나와 \(0\)이다(<a href="#i-34-1-3">Proposition 34.1.3</a>(b)). 한편 \(e_J\wedge e_{J^c}\)는 \(e_1, \dots, e_n\)을 한 번씩 재배열해 wedge한 것이므로 <a href="#i-34-1-3">Proposition 34.1.3</a>(b)에 의해 \(\pm e_1\wedge\cdots\wedge e_n\)이다. 따라서</p>
+        <p>\[ \begin{aligned} 0 = \Big(\sum_I c_I\, e_I\Big)\wedge e_{J^c} &amp;= c_J\, e_J\wedge e_{J^c} \\ &amp;= \pm c_J\; e_1\wedge\cdots\wedge e_n \end{aligned} \]</p>
+        <p>이고, <a href="#i-34-1-6">Proposition 34.1.6</a>(c)에 의해 \(e_1\wedge\cdots\wedge e_n \neq 0\)이므로 \(c_J = 0\)이다. \(J\)는 아무것이나 골랐으므로 모든 coefficient가 \(0\)이다. increasing multi-index의 개수가 \(\binom{n}{k}\)이므로 dimension이 따른다.</p>
+      </div>
+
+      <p>basis가 있으면 linear map을 basis 위의 값으로 정할 수 있다(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-4">Proposition 1.2.4</a>). 이것을 \(\Lambda^kV\)에 쓰면 뒤 절에서 Hodge star, inner product, \(k\)-form의 측정을 정의할 때 쓰는 도구가 된다.</p>
+      <div class="thm corollary" id="i-34-1-12">
+        <p><span class="thm-head">Corollary 34.1.12</span> <span class="thm-name">(linear maps out of the k-vectors)</span>.
+        \(Z\)가 vector space이고 \(F\colon V^k \to Z\)가 multilinear이며 두 인자가 같으면 \(0\)이라 하자(\(k \ge 1\)). 그러면 모든 \(u_1, \dots, u_k\)에 대하여
+        \[ L(u_1\wedge\cdots\wedge u_k) = F(u_1, \dots, u_k) \]
+        를 만족하는 linear map \(L\colon \Lambda^kV \to Z\)가 꼭 하나 있다.</p>
+      </div>
+      <p>이 따름정리가 말하는 것. “\(k\)개의 vector에 대해 alternating multilinear인 양”은 곧 “\(k\)-vector에 대해 linear인 양”이다. 이 성질을 exterior algebra의 <strong>universal property</strong>(보편 성질)라 부른다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 유일성: (W3)에 의해 simple \(k\)-vector들이 \(\Lambda^kV\)를 span하므로 linear map은 그 위의 값으로 정해진다. 존재: basis \((e_I)\)(<a href="#i-34-1-11">Theorem 34.1.11</a>) 위에서 \(L(e_I) := F(e_{i_1}, \dots, e_{i_k})\)로 정한 linear map을 \(L\)이라 하자(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-4">Proposition 1.2.4</a>). <a href="#eq-34-1-2">(34.1.2)</a>와 <a href="#i-34-1-5">Lemma 34.1.5</a>에서</p>
+        <p>\[ \begin{aligned} L(u_1\wedge\cdots\wedge u_k) &amp;= \sum_I \det(U_I)\, L(e_I) \\ &amp;= \sum_I \det(U_I)\, F(e_{i_1}, \dots, e_{i_k}) = F(u_1, \dots, u_k) \end{aligned} \]</p>
+        <p>이다.</p>
+      </div>
+
+      <div class="thm nonexample" id="i-34-1-13">
+        <p><span class="thm-head">Non-example 34.1.13</span> <span class="thm-name">(a 2-vector that is not simple)</span>.
+        \(V = \R^4\)에서 \(\xi = e_1\wedge e_2 + e_3\wedge e_4\)는 2-vector이지만 simple이 아니다. simple 2-vector \(u\wedge v\)는 \((u\wedge v)\wedge(u\wedge v) = 0\)이다(같은 인자가 두 번). 그런데 <a href="#i-34-1-3">Proposition 34.1.3</a>(c)로 \(e_3\wedge e_4\wedge e_1\wedge e_2 = e_1\wedge e_2\wedge e_3\wedge e_4\)이므로</p>
+        <p>\[ \begin{aligned} \xi\wedge\xi &amp;= e_1\wedge e_2\wedge e_3\wedge e_4 + e_3\wedge e_4\wedge e_1\wedge e_2 \\ &amp;= 2\,e_1\wedge e_2\wedge e_3\wedge e_4 \neq 0 \end{aligned} \]</p>
+        <p>이다(<a href="#i-34-1-11">Theorem 34.1.11</a>). 즉 “\(k\)-vector”는 “평행사변형 하나”보다 넓은 개념이다. 서로 수직인 두 평면 위의 조각을 더한 것은 한 평면 위의 조각으로 쓸 수 없다. 반면 \(\R^3\)에서는 모든 2-vector가 simple이다(<a href="#ex-34-1-6">Exercise 34.1.6</a>).</p>
+      </div>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: oriented simplices as k-vectors</p>
+        <p>mesh에 저장되는 것은 방향이 있는 조각이다. <a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-2">Definition 33.3.2</a>는 oriented \(k\)-simplex를 “vertex 순서 \((x_0, \dots, x_k)\)를 even permutation만큼 다른 것끼리 같다고 본 것”으로 정의한다. \(\R^n\) 안에 놓인 simplex에는 simple \(k\)-vector</p>
+        <p>\[ (x_1 - x_0)\wedge\cdots\wedge(x_k - x_0) \]</p>
+        <p>를 대응시킬 수 있다. triangle \((x_0, x_1, x_2)\)에서 \(a = x_1 - x_0\), \(b = x_2 - x_0\)라 하자. 순서를 순환시킨 \((x_1, x_2, x_0)\)에서는 \((x_2 - x_1)\wedge(x_0 - x_1) = (b - a)\wedge(-a) = a\wedge b\)로 같고, 두 vertex를 맞바꾼 \((x_1, x_0, x_2)\)에서는 \((x_0 - x_1)\wedge(x_2 - x_1) = (-a)\wedge(b - a) = -a\wedge b\)로 부호가 바뀐다. 즉 이 2-vector는 orientation의 equivalence class를 정확히 구별한다. 또 triangle이 퇴화하지 않았으면(세 점이 한 직선 위에 있지 않으면) <a href="#i-34-1-8">Proposition 34.1.8</a>에 의해 \(0\)이 아니다.</p>
+        <ul>
+          <li>보존하는 것: simplex가 놓인 \(k\)-평면의 방향, orientation, 크기(inner product를 주면 \(k\)-vector의 크기는 simplex 부피의 \(k!\)배다. triangle이면 넓이의 두 배다. <a href="34-2-hodge-star.html#i-34-2-1">Proposition 34.2.1</a>).</li>
+          <li>잃는 것: 위치(평행 이동에 무관하다)와 모양(<a href="#i-34-1-9">Proposition 34.1.9</a>: 같은 평면, 같은 넓이, 같은 방향이면 같다).</li>
+        </ul>
+        <p><a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>의 discrete form은 oriented simplex마다 수 하나를 저장한다. 그 수가 무엇을 재는지는 Section 34.4에서 본다.</p>
+      </aside>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: k-vectors from minors</p>
+        <p><a href="#eq-34-1-2">(34.1.2)</a>를 그대로 옮기면 \(\R^n\)의 vector \(k\)개의 wedge를 성분 사전 \(\{I: \det U_I\}\)로 계산할 수 있다. 코드의 첨자는 0부터 센다. 예를 들어 <code>(0, 2)</code>는 \(e_1\wedge e_3\)이다.</p>
+<pre id="code-34-1-1"><code>import itertools
+import numpy as np
+
+def wedge_vectors(*us):
+    """u_1 ^ ... ^ u_k in R^n as {I: det(U_I)} over increasing I (0-based).
+
+    This is (34.1.2): the component on e_I is the k x k minor of U = [u_1 ... u_k]
+    built from the rows I. For k > n the result is {} (Proposition 34.1.8)."""
+    U = np.column_stack(us)                       # n x k
+    n, k = U.shape
+    return {I: float(np.linalg.det(U[list(I), :]))
+            for I in itertools.combinations(range(n), k)}
+
+u, v, w = np.array([1., 2., 3.]), np.array([-1., 0., 2.]), np.array([1., 0., 1.])
+uv = wedge_vectors(u, v)        # {(0, 1): 2, (0, 2): 5, (1, 2): 4}  (Example 34.1.10)
+uvw = wedge_vectors(u, v, w)    # {(0, 1, 2): 6}
+</code></pre>
+        <p><code>np.linalg.det</code>는 LU 분해로 계산하므로 정수 입력이어도 \(10^{-15}\) 정도의 반올림 오차가 생길 수 있다. 큰 \(n\)에서는 \(\binom{n}{k}\)개의 minor가 빠르게 늘어난다. 실제 DEC 코드는 이렇게 모든 성분을 저장하지 않고, mesh의 simplex마다 수 하나를 저장한다(Chapter 36).</p>
+        <p class="verified">Verification: <code>verify/v-34-1-wedge.py</code>가 이 코드를 그대로 실행하고, 별도로 구현한 antisymmetric tensor 계산과 비교한다.</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Chapter 1: <a href="#i-34-1-5">Lemma 34.1.5</a>는 determinant의 유일성(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-5">Theorem 1.6.5</a>)을 \(k \le n\)개의 vector로 넓힌 것이다. orientation의 정의는 <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-11">Definition 1.6.11</a>.</li>
+          <li>Chapter 16–17: covector 쪽의 같은 대수를 alternating tensor와 \(\Alt\)로 만드는 엄밀한 판은 <a href="../16-covectors-tensors/index.html#toc-16-4">Section 16.4</a>(tensor)와 <a href="../17-differential-forms/index.html#toc-17-1">Section 17.1</a>(\(\Lambda^k(V^*)\)와 wedge product)이다.</li>
+          <li>Tour: <a href="../00-tour/0-7-forms.html#sec-wedge">Section 0.7</a>은 \(dx\wedge dy\)를 signed area로 소개한다. 이 절의 \(e_1\wedge e_2\)는 그 “재는 대상” 쪽이다.</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a> slides 16–28, <a class="cite" href="../../references.html#Cr">[Cr §4.1.1–4.1.2]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(k\)-vector는 wedge product의 네 규칙(bilinear, associative, \(v\wedge v = 0\), simple한 것들이 span, basis의 wedge \(\neq 0\))으로 정의한다(<a href="#i-34-1-1">Definition 34.1.1</a>). 규칙은 평행사변형과 parallelepiped의 그림에서 나온다.</li>
+        <li>인자를 맞바꾸면 부호가 바뀌고(antisymmetry), \(u_1\wedge\cdots\wedge u_k = 0\)은 linear dependence와 같다(<a href="#i-34-1-3">Proposition 34.1.3</a>, <a href="#i-34-1-8">Proposition 34.1.8</a>).</li>
+        <li>같은 subspace의 두 basis가 주는 \(k\)-vector는 change-of-basis matrix의 determinant 배만큼 다르다. 그래서 simple \(k\)-vector는 subspace, orientation, 부피의 눈금만 기억한다(<a href="#i-34-1-6">Proposition 34.1.6</a>, <a href="#i-34-1-9">Proposition 34.1.9</a>).</li>
+        <li>simple \(k\)-vector의 성분은 \(k\times k\) minor, 곧 좌표 \(k\)-평면 위 그림자의 signed volume이다(<a href="#eq-34-1-2">(34.1.2)</a>). basis \(k\)-vector \(e_I\)는 basis이고 \(\dim\Lambda^kV = \binom{n}{k}\)이다(<a href="#i-34-1-11">Theorem 34.1.11</a>).</li>
+        <li>alternating multilinear map은 \(\Lambda^kV\) 위의 linear map과 같다(<a href="#i-34-1-12">Corollary 34.1.12</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 inner product와 orientation을 더한다. 그러면 \(k\)-vector의 절대적인 크기를 잴 수 있고, 평면을 그 법선으로 바꾸듯 \(k\)-vector를 orthogonal complement 쪽의 \((n-k)\)-vector로 바꾸는 Hodge star를 정의할 수 있다. \(\R^3\)의 \(u\wedge v\)와 \(u\times v\)가 같은 숫자를 담는 이유가 거기서 밝혀진다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-34-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 34.1.1</span> <span class="level">★</span>
+        \(\R^3\)에서 규칙만 써서 다음을 \(e_I\)의 linear combination으로 계산하고, <a href="#eq-34-1-2">(34.1.2)</a>의 minor로 검산하여라. (a) \((e_1 - e_3)\wedge(2e_2 + e_3)\) (b) \((e_1 + e_2)\wedge(e_2 + e_3)\wedge(e_3 + e_1)\). (b)의 결과는 기하적으로 무엇을 뜻하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 펼치면 \[ 2\,e_1\wedge e_2 + e_1\wedge e_3 - 2\,e_3\wedge e_2 - e_3\wedge e_3 = 2\,e_{12} + e_{13} + 2\,e_{23} \]이다. 성분 행렬 \(\begin{pmatrix} 1 &amp; 0 \\ 0 &amp; 2 \\ -1 &amp; 1\end{pmatrix}\)의 minor는 행 \((1,2)\): \(2\), 행 \((1,3)\): \(1\cdot 1 - 0\cdot(-1) = 1\), 행 \((2,3)\): \(0\cdot 1 - 2\cdot(-1) = 2\)로 같다.</p>
+          <p>(b) 먼저 \[ (e_1 + e_2)\wedge(e_2 + e_3) = e_{12} + e_{13} + e_2\wedge e_2 + e_{23} = e_{12} + e_{13} + e_{23} \]이다. 여기에 \(e_3 + e_1\)을 wedge하면 같은 인자가 두 번 나오지 않는 항은 \(e_{12}\wedge e_3 = e_{123}\)과 \(e_{23}\wedge e_1 = e_2\wedge e_3\wedge e_1 = e_{123}\)(맞바꾸기 두 번)뿐이다. 따라서 \(2\,e_1\wedge e_2\wedge e_3\)이다. 검산: \(\det\begin{pmatrix} 1 &amp; 0 &amp; 1 \\ 1 &amp; 1 &amp; 0 \\ 0 &amp; 1 &amp; 1\end{pmatrix} = 1\cdot(1 - 0) - 0 + 1\cdot(1 - 0) = 2\). 뜻: 세 vector는 positively oriented이고, 이들이 만드는 parallelepiped의 부피는 단위 정육면체 \(e_1\wedge e_2\wedge e_3\)의 두 배다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 34.1.2</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. (a) \(u\wedge v = 0\)이면 \(u = 0\)이거나 \(v = 0\)이다. (b) \((2u)\wedge(3v) = 6\,u\wedge v\)이다. (c) \((u + v)\wedge(u - v) = -2\,u\wedge v\)이다. (d) \(\R^2\)의 어떤 세 vector에 대해서도 \(u\wedge v\wedge w = 0\)이다. (e) \(u\wedge v = v\wedge u\)이면 \(u\wedge v = 0\)이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 거짓. \(u = e_1\), \(v = 2e_1\)이면 \(u\wedge v = 2\,e_1\wedge e_1 = 0\)이다. 옳은 진술은 “\(u, v\)가 linearly dependent”이다(<a href="#i-34-1-8">Proposition 34.1.8</a>). (b) 참. bilinearity. (c) 참. \(u\wedge u - u\wedge v + v\wedge u - v\wedge v = -u\wedge v - u\wedge v\). (d) 참. \(\Lambda^3\R^2 = \{0\}\)이다(<a href="#i-34-1-11">Theorem 34.1.11</a>). 평면 안에는 3차원 상자가 없다. (e) 참. \(v\wedge u = -u\wedge v\)이므로 \(u\wedge v = -u\wedge v\), 즉 \(2\,u\wedge v = 0\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-1-3" data-level="2">
+        <p><span class="thm-head">Exercise 34.1.3</span> <span class="level">★★</span>
+        \((u_1, \dots, u_k)\)가 linearly independent일 때, \(x \in \Span(u_1, \dots, u_k)\)일 필요충분조건이 \(u_1\wedge\cdots\wedge u_k\wedge x = 0\)임을 보여라. 이것으로 \(x_1 = (1, 1, 1)\)과 \(x_2 = (1, 4, 8)\)이 \(u = (1, 2, 3)\), \(v = (-1, 0, 2)\)가 펼치는 평면에 있는지 판정하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>한 방향은 펼치기, 다른 방향은 <a href="#i-34-1-8">Proposition 34.1.8</a>과 <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-11">Lemma 1.1.11</a>이다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(x = \sum_i c^i u_i\)이면 \(u_1\wedge\cdots\wedge u_k\wedge x = \sum_i c^i\, u_1\wedge\cdots\wedge u_k\wedge u_i\)이고 각 항에 같은 인자가 두 번 있어 \(0\)이다. 거꾸로 \(u_1\wedge\cdots\wedge u_k\wedge x = 0\)이면 <a href="#i-34-1-8">Proposition 34.1.8</a>에 의해 \((u_1, \dots, u_k, x)\)가 linearly dependent이다. <a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-11">Lemma 1.1.11</a>이 주는 “앞의 것들의 span에 있는 vector”는 \(u_j\)일 수 없으므로(\(u\)들은 독립) \(x\)이고, 따라서 \(x \in \Span(u_1, \dots, u_k)\)이다.</p>
+          <p><a href="#eq-34-1-2">(34.1.2)</a>의 \(k = n = 3\) 경우로 \(u\wedge v\wedge x = \det(u, v, x)\,e_{123}\)이다. \(\det\begin{pmatrix} 1 &amp; -1 &amp; 1 \\ 2 &amp; 0 &amp; 1 \\ 3 &amp; 2 &amp; 1\end{pmatrix} = 1\cdot(0 - 2) + 1\cdot(2 - 3) + 1\cdot(4 - 0) = 1 \neq 0\)이므로 \(x_1\)은 평면 밖에 있다. \[ \det(u, v, x_2) = 1\cdot(0 - 8) + 1\cdot(16 - 12) + 1\cdot(4 - 0) = 0 \]이므로 \(x_2\)는 평면 안에 있다. 실제로 \(x_2 = 2u + v\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-1-4" data-level="1">
+        <p><span class="thm-head">Exercise 34.1.4</span> <span class="level">★</span>
+        \(\xi = u\wedge v\)라 하자. (a) 모든 실수 \(t\)에 대하여 \((u + tv)\wedge v = \xi\)이고 \(u\wedge(v + tu) = \xi\)임을 보여라. (b) \(u' = au + bv\), \(v' = cu + dv\)이면 \(u'\wedge v' = (ad - bc)\,\xi\)임을 <a href="#i-34-1-5">Lemma 34.1.5</a>를 쓰지 않고 규칙만으로 보여라. (c) <a href="#fig-34-1-2">Figure 34.1.2</a>(a)의 가운데와 오른쪽 쌍은 \((a, b, c, d)\)가 무엇인 경우인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \((u + tv)\wedge v = u\wedge v + t\,v\wedge v = \xi\)이고, \(u\wedge(v + tu) = u\wedge v + t\,u\wedge u = \xi\)이다. 그림으로는 평행사변형을 한 변 방향으로 밀어도(shear) 넓이와 방향이 변하지 않는다는 것이다.</p>
+          <p>(b) \[ u'\wedge v' = ac\,u\wedge u + ad\,u\wedge v + bc\,v\wedge u + bd\,v\wedge v = (ad - bc)\,u\wedge v \]이다(\(v\wedge u = -u\wedge v\)). 이것은 <a href="#i-34-1-6">Proposition 34.1.6</a>(a)에서 \(A = \begin{pmatrix} a &amp; c \\ b &amp; d\end{pmatrix}\)인 경우다.</p>
+          <p>(c) 가운데 \((b_1, b_1 + b_2)\)는 \((a, b, c, d) = (1, 0, 1, 1)\), 오른쪽 \((b_2, -b_1)\)은 \((0, 1, -1, 0)\)이고, 둘 다 \(ad - bc = 1\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-1-5" data-level="1">
+        <p><span class="thm-head">Exercise 34.1.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> Implementation 상자의 <code>wedge_vectors</code>를 써서 다음을 수치로 확인하는 코드를 써라. (a) 무작위 \(u, v \in \R^3\)에 대하여 \((c_{23}, -c_{13}, c_{12}) = u\times v\)이다(\(c_{ij}\)는 \(u\wedge v\)의 \(e_i\wedge e_j\) 성분). (b) 무작위 \(u, v, w \in \R^5\)에 대하여 \(u\)와 \(w\)를 맞바꾸면 10개의 성분이 모두 부호만 바뀌고, \(u\)에 대해 linear이다. (c) \(\R^3\)의 vector 4개의 wedge는 빈 사전이다.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-34-1-5"><code>rng = np.random.default_rng(0)
+u, v = rng.normal(size=3), rng.normal(size=3)
+c = wedge_vectors(u, v)
+ok_a = np.allclose([c[(1, 2)], -c[(0, 2)], c[(0, 1)]], np.cross(u, v))
+
+u, v, w, x = rng.normal(size=(4, 5))
+A, B = wedge_vectors(u, v, w), wedge_vectors(w, v, u)
+ok_b1 = len(A) == 10 and all(np.isclose(A[I], -B[I]) for I in A)
+C = wedge_vectors(2 * u + 3 * x, v, w)
+D = wedge_vectors(x, v, w)
+ok_b2 = all(np.isclose(C[I], 2 * A[I] + 3 * D[I]) for I in A)
+
+ok_c = wedge_vectors(*rng.normal(size=(4, 3))) == {}
+print(ok_a, ok_b1, ok_b2, ok_c)
+</code></pre>
+<pre id="out-ex-34-1-5"><code>True True True True</code></pre>
+          <p>(a)는 <a href="../01-linear-algebra/1-6-determinant-orientation.html#eq-1-6-9">(1.6.9)</a>의 세 성분이 바로 minor \(c_{23}\), \(c_{31} = -c_{13}\), \(c_{12}\)이기 때문이다(그 이유는 Section 34.2의 Hodge star). (b)는 <a href="#i-34-1-3">Proposition 34.1.3</a>(b)와 multilinearity, (c)는 \(\binom{3}{4} = 0\)이다. 출력은 <code>True True True True</code>이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-1-6" data-level="3">
+        <p><span class="thm-head">Exercise 34.1.6</span> <span class="level">★★★</span>
+        \(\dim V = 3\)이면 \(\Lambda^2V\)의 모든 원소가 simple임을 보여라(<a href="#i-34-1-13">Non-example 34.1.13</a>과 대조). 또 \(\R^3\)에서 \(u\wedge v = e_{12} + e_{13} + e_{23}\)인 \(u, v\)를 하나 구하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(\xi \in \Lambda^2V\)를 고정하고 linear map \(T\colon V \to \Lambda^3V\), \(T(x) = \xi\wedge x\)의 kernel을 보아라. \(\dim\Lambda^3V = 1\)이다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\xi = 0\)이면 \(\xi = 0\wedge 0\)이다. \(\xi \neq 0\)이라 하자. \(T(x) = \xi\wedge x\)는 linear이고 \(\dim\Lambda^3V = \binom33 = 1\)(<a href="#i-34-1-11">Theorem 34.1.11</a>)이므로 rank–nullity theorem(<a href="../01-linear-algebra/1-2-linear-maps.html#i-1-2-8">Theorem 1.2.8</a>)에 의해 \(\dim\ker T \ge 2\)이다. \(\ker T\)에서 linearly independent인 \(u, v\)를 고르고 basis \((u, v, w)\)로 늘리자. <a href="#i-34-1-11">Theorem 34.1.11</a>을 이 basis에 쓰면 \(\xi = a\,u\wedge v + b\,u\wedge w + c\,v\wedge w\)이다. \(0 = \xi\wedge u = c\,v\wedge w\wedge u = c\,u\wedge v\wedge w\)이고 \(u\wedge v\wedge w \neq 0\)이므로 \(c = 0\)이다. 같은 방법으로 \(0 = \xi\wedge v = b\,u\wedge w\wedge v = -b\,u\wedge v\wedge w\)에서 \(b = 0\)이다. 따라서 \(\xi = a\,u\wedge v = (au)\wedge v\)는 simple이다.</p>
+          <p>\(\xi = e_{12} + e_{13} + e_{23}\)이면 \(e_{12}\wedge x = x^3 e_{123}\), \(e_{13}\wedge x = x^2\,e_1\wedge e_3\wedge e_2 = -x^2 e_{123}\), \(e_{23}\wedge x = x^1 e_{123}\)이므로 \(\xi\wedge x = (x^1 - x^2 + x^3)\,e_{123}\)이다. kernel의 basis로 \(u = (1, 1, 0)\), \(v = (0, 1, 1)\)을 고르면 minor는 \(c_{12} = 1\), \(c_{13} = 1\), \(c_{23} = 1\)이므로 \(u\wedge v = \xi\)이다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 34. Exterior Algebra and k-Forms</a>
+    <a rel="next" href="34-2-hodge-star.html">34.2 The Hodge Star →</a>
+  </nav>
+</body>
+</html>

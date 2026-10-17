@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>34.4 k-Forms as Measurement — DG Study</title>
+  <meta name="dg-id" content="34.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="34.1, 34.2, 34.3, 1.6">
+  <meta name="dg-refs" content="Cr §4.3, §4.4; CMU-DDG L4">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">34. Exterior Algebra and k-Forms</a> ›
+    <span>34.4 k-Forms as Measurement</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>34.4 k-Forms as Measurement</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §4.3]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr §4.4]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>covector 두 개가 평행사변형의 그림자 넓이를, \(k\)개가 \(k\)차원 그림자 부피를 잰다는 것을 증명할 수 있다.</li>
+        <li>\(k\)-form을 alternating multilinear 측정으로 이해하고, covector의 wedge product가 determinant 공식 \((\alpha^1\wedge\cdots\wedge\alpha^k)(u_1, \dots, u_k) = \det[\alpha^i(u_j)]\)을 만족함을 증명할 수 있다.</li>
+        <li>\(k\)-form이 \(k\)-vector 위의 linear functional이고, 그 값이 \(\sharp\)한 \(k\)-vector와의 inner product임을 설명할 수 있다.</li>
+        <li>\(k\)-form의 Hodge star를 계산하고 \(\alpha\wedge\star\beta = \inner{\alpha}{\beta}\,e^1\wedge\cdots\wedge e^n\)을 쓸 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="34-1-wedge-k-vectors.html#i-34-1-1">Definition 34.1.1 (k-vector)</a>, <a href="34-1-wedge-k-vectors.html#i-34-1-5">Lemma 34.1.5 (expansion lemma)</a>, <a href="34-1-wedge-k-vectors.html#i-34-1-6">Proposition 34.1.6</a>, <a href="34-1-wedge-k-vectors.html#i-34-1-11">Theorem 34.1.11</a>, <a href="34-1-wedge-k-vectors.html#i-34-1-12">Corollary 34.1.12</a></li>
+        <li><a href="34-2-hodge-star.html#i-34-2-1">Proposition 34.2.1 (inner product of k-vectors)</a>, <a href="34-2-hodge-star.html#i-34-2-5">Definition 34.2.5 (Hodge star)</a>, <a href="34-2-hodge-star.html#i-34-2-6">Theorem 34.2.6</a>, <a href="34-2-hodge-star.html#i-34-2-8">Proposition 34.2.8</a></li>
+        <li><a href="34-3-covectors-sharp-flat.html#eq-34-3-1">(34.3.1)</a>, <a href="34-3-covectors-sharp-flat.html#i-34-3-2">Proposition 34.3.2</a>, <a href="34-3-covectors-sharp-flat.html#i-34-3-4">Proposition 34.3.4</a></li>
+        <li><a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-1">Definition 1.6.1 (multilinear and alternating)</a>, <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 34.3에서 covector \(\alpha\)는 vector를 한 방향으로의 그림자 길이로 잰다는 것을 보았다(<a href="34-3-covectors-sharp-flat.html#i-34-3-2">Proposition 34.3.2</a>). 이제 같은 질문을 한 차원 올리자. 평행사변형 \(u\wedge v\)를 어떻게 “재는가”? 1차원 측정 도구가 1차원(방향 하나)이었듯이, 넓이를 재는 도구는 평면 하나여야 한다. 평면에 평행사변형의 그림자를 드리우고 그 넓이를 읽는 것이다 <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a>.</p>
+      <p>이 측정은 mesh 계산의 기본 연산이다. Chapter 36의 discrete form은 oriented edge마다 1-form의 값을, oriented triangle마다 2-form의 값을 저장한다. 이 절은 그 값이 무엇인지, 어떤 공식으로 계산되는지, 왜 orientation에 따라 부호가 바뀌는지를 정확히 한다.</p>
+    </section>
+
+    <section id="sec-shadow">
+      <h2>Measuring Areas by Shadows</h2>
+      <p>평면 \(P\)를 orthonormal basis로 주면 그림자의 좌표를 바로 읽을 수 있다. Section 34.3에서 \(\alpha(x) = g(\alpha^\sharp, x)\)였으므로, 측정 도구로서의 평면은 \(\sharp\)이 orthonormal인 covector 두 개로 주는 것이 자연스럽다.</p>
+      <div class="thm proposition" id="i-34-4-1">
+        <p><span class="thm-head">Proposition 34.4.1</span> <span class="thm-name">(projected area)</span>.
+        \((V, g)\)가 inner product space이고 \(\alpha, \beta \in V^*\)의 sharp \(\alpha^\sharp, \beta^\sharp\)이 orthonormal이라 하자. \(P = \Span(\alpha^\sharp, \beta^\sharp)\)에 orientation \((\alpha^\sharp, \beta^\sharp)\)을 주고 \(\pi\colon V \to P\)를 orthogonal projection이라 하자. 그러면 모든 \(u, v \in V\)에 대하여</p>
+        <div class="equation" id="eq-34-4-1">
+        \[ \pi u\wedge\pi v = \big(\alpha(u)\beta(v) - \alpha(v)\beta(u)\big)\; \alpha^\sharp\wedge\beta^\sharp \tag{34.4.1} \]
+        </div>
+        <p>이다. 즉 \(\alpha(u)\beta(v) - \alpha(v)\beta(u)\)는 그림자 평행사변형 \((\pi u, \pi v)\)의 \(P\) 안에서의 signed area다.</p>
+      </div>
+      <p>여기서 “\(P\) 안에서의 signed area”는 \(\pi u\wedge\pi v\)를 \(P\)의 양의 단위 2-vector \(\alpha^\sharp\wedge\beta^\sharp\)(크기 \(1\), <a href="34-2-hodge-star.html#i-34-2-1">Proposition 34.2.1</a>)의 몇 배인지로 잰 값이다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \((\alpha^\sharp, \beta^\sharp)\)는 \(P\)의 orthonormal basis이므로 \[ \pi x = g(\alpha^\sharp, x)\,\alpha^\sharp + g(\beta^\sharp, x)\,\beta^\sharp = \alpha(x)\,\alpha^\sharp + \beta(x)\,\beta^\sharp \]이다(<a href="../01-linear-algebra/1-5-inner-products.html#i-1-5-9">Proposition 1.5.9</a>(b)를 \(P\)에 맞춘 orthonormal basis에 쓰고 <a href="34-3-covectors-sharp-flat.html#eq-34-3-1">(34.3.1)</a>을 쓴다). 따라서 \(\pi u, \pi v\)를 \((\alpha^\sharp, \beta^\sharp)\)로 쓴 성분 행렬은 \(\begin{pmatrix} \alpha(u) &amp; \alpha(v) \\ \beta(u) &amp; \beta(v)\end{pmatrix}\)이고, <a href="34-1-wedge-k-vectors.html#i-34-1-6">Proposition 34.1.6</a>(a)가 <a href="#eq-34-4-1">(34.4.1)</a>을 준다.</p>
+      </div>
+
+      <p><a href="#fig-34-4-1">Figure 34.4.1</a>을 보자. 위의 하늘색 평행사변형이 \(u\wedge v\)이고, 아래의 옅은 하늘색 사각형이 측정 평면 \(P\)다(평행 이동한 사본). 자주색 화살표 \(\alpha^\sharp, \beta^\sharp\)이 \(P\)를 펼치는 orthonormal basis, 곧 측정 도구다. 회색 점선을 따라 \(u\wedge v\)를 \(P\)에 수직으로 내리면 주황 그림자가 생기고, 그 signed area가 \(0.903\)이다. 원래 넓이 \(\abs{u\wedge v} = 1.069\)보다 작다. 평행사변형이 \(P\)에 대해 기울어 있기 때문이다.</p>
+
+      <figure class="dg-figure" id="fig-34-4-1">
+        <img src="figures/fig-34-4-1-projected-area.svg" alt="3D 그림. 위쪽에 파란 u와 초록 v가 만드는 하늘색 평행사변형 u∧v가 있고, 그 아래에 기울어진 옅은 하늘색 사각형 평면 P가 있다. P 위에는 자주색 화살표 α♯과 β♯이 원점에서 나가고, 주황색 평행사변형(그림자)이 놓여 있다. 위의 평행사변형 네 vertex에서 그림자의 vertex로 회색 점선이 이어진다. 라벨 (α∧β)(u, v) = 0.903이 있다.">
+        <figcaption><span class="fig-head">Figure 34.4.1.</span>
+        2-form \(\alpha\wedge\beta\)가 재는 그림자 넓이. \(u = (1.1, 0, 0.25)\), \(v = (0.2, 0.9, 0.35)\), \(\alpha^\sharp = (\cos 40^\circ, 0, \sin 40^\circ)\), \(\beta^\sharp = (0, 1, 0)\)(유클리드 \(\R^3\)).
+        읽는 법: 하늘색 평행사변형이 \(u\wedge v\), 옅은 하늘색 사각형이 \(P = \Span(\alpha^\sharp, \beta^\sharp)\)를 법선 \(\mathbf{n} = \alpha^\sharp\times\beta^\sharp\)의 반대 방향으로 \(1.25\)만큼 옮긴 사본, 자주색 화살표가 \(\alpha^\sharp\)과 \(\beta^\sharp\), 주황이 \(P\)로의 정사영(그림자), 회색 점선이 정사영의 방향이다.
+        볼 것: 그림자의 signed area는 \[ \alpha(u)\beta(v) - \alpha(v)\beta(u) = 1.003\cdot 0.9 - 0.378\cdot 0 = 0.903 \]이고, \(\abs{u\wedge v} = 1.069\)보다 작다. 평행 이동은 그림자의 넓이를 바꾸지 않는다.
+        <a href="#i-34-4-1">Proposition 34.4.1</a>과 <a href="#i-34-4-9">Corollary 34.4.9</a>를 보여 준다. <a href="figures/fig-34-4-1-projected-area-interactive.html">Interactive version</a>.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-k-forms">
+      <h2>k-Forms</h2>
+      <p>\(\alpha(u)\beta(v) - \alpha(v)\beta(u)\)는 \(u\)와 \(v\) 각각에 대해 linear이고, \(u\)와 \(v\)를 맞바꾸면 부호가 바뀐다. 이런 측정을 일반화한 것이 \(k\)-form이다. Crane은 이것을 “\(k\)-vector의 fully antisymmetric, multilinear 측정”이라 부른다 <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a>.</p>
+      <div class="thm definition" id="i-34-4-2">
+        <p><span class="thm-head">Definition 34.4.2</span> <span class="thm-name">(k-form on a vector space)</span>.
+        \(V\)가 \(n\)차원 vector space이고 \(k \ge 1\)이라 하자. \(k\)-multilinear이고 alternating인(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-1">Definition 1.6.1</a>) 함수 \(\omega\colon V \times \cdots \times V \to \R\)(\(V\)가 \(k\)개)을 \(V\) 위의 <strong>k-form</strong>(k-형식)이라 하고, 그 전체를 \(\Lambda^k(V^*)\)로 쓴다. 0-form은 scalar다: \(\Lambda^0(V^*) = \R\).</p>
+      </div>
+      <p>\(\Lambda^k(V^*)\)는 점마다의 덧셈과 scalar 곱으로 vector space다. 1-form은 covector와 같다(\(\Lambda^1(V^*) = V^*\)). 이 대상의 엄밀한 정본은 Chapter 17의 alternating covariant tensor다(<a href="../17-differential-forms/index.html#toc-17-1">Section 17.1</a>, <a href="../../notation.html">Notation and Conventions</a>의 \(\Lambda^k(V^*)\)). 기호 \(\Lambda^k(V^*)\)가 “\(V^*\)의 exterior algebra”처럼 보이는 것은 우연이 아니다. <a href="#i-34-4-6">Theorem 34.4.6</a>이 정말 그렇다는 것을 보인다.</p>
+
+      <div class="thm example" id="i-34-4-3">
+        <p><span class="thm-head">Example 34.4.3</span> <span class="thm-name">(k-forms you already know)</span>.
+        (a) \(\R^n\)의 determinant \((u_1, \dots, u_n) \mapsto \det(u_1, \dots, u_n)\)는 \(n\)-form이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-5">Theorem 1.6.5</a>). (b) <a href="#i-34-4-1">Proposition 34.4.1</a>의 \((u, v) \mapsto \alpha(u)\beta(v) - \alpha(v)\beta(u)\)는 2-form이다. (c) \(\R^3\)에서 고정된 \(w\)에 대한 \((u, v) \mapsto \inner{w}{u\times v}\)는 2-form이다(cross product는 bilinear이고 \(v\times u = -u\times v\), <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">Theorem 1.6.16</a>(a)). \(w\)가 flow의 속도라면 이 값은 평행사변형을 지나는 flux다.</p>
+      </div>
+      <div class="thm nonexample" id="i-34-4-4">
+        <p><span class="thm-head">Non-example 34.4.4</span>.
+        (a) inner product \((u, v) \mapsto \inner{u}{v}\)는 bilinear이지만 symmetric이라 2-form이 아니다(\(\inner{u}{u} \gt 0\)). (b) 넓이 \((u, v) \mapsto \abs{u\times v}\)는 \(u\)를 \(-u\)로 바꿔도 값이 그대로라 linear가 아니다. 부호를 떼어 낸 넓이는 측정 도구가 될 수 없다. (c) \((u, v) \mapsto \alpha(u)\beta(v)\) 하나만으로는 alternating이 아니다(\(\alpha = \beta\)이고 \(\alpha(u) \neq 0\)이면 \(u = v\)에서 \(0\)이 아니다). 반대 순서의 항을 빼야 2-form이 된다.</p>
+      </div>
+
+      <p>이제 covector의 wedge product를 \(k\)-form으로 만들자. covector \(\alpha^1, \dots, \alpha^k\)에 대하여 함수</p>
+      <div class="equation" id="eq-34-4-2">
+      \[ D[\alpha^1, \dots, \alpha^k](u_1, \dots, u_k) := \det\big[\alpha^i(u_j)\big]_{i,j=1}^{k} \tag{34.4.2} \]
+      </div>
+      <p>를 생각하자. \(j\)번째 열 \((\alpha^1(u_j), \dots, \alpha^k(u_j))\)가 \(u_j\)에 대해 linear이고 determinant는 열에 대해 multilinear이고 alternating이므로 \(D[\alpha^1, \dots, \alpha^k]\)는 \(k\)-form이다. 또 \(i\)번째 행이 \(\alpha^i\)에 대해 linear이므로 \(D[\alpha^1, \dots, \alpha^k]\)는 \((\alpha^1, \dots, \alpha^k)\)에 대해서도 multilinear이고, 두 \(\alpha\)가 같으면 두 행이 같아 \(0\)이다(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8</a>(c)). \(k = 1\)이면 \(D[\alpha] = \alpha\)이다. 이 기호는 이 절에서만 쓰는 임시 기호다.</p>
+
+      <div class="thm lemma" id="i-34-4-5">
+        <p><span class="thm-head">Lemma 34.4.5</span> <span class="thm-name">(basis k-forms)</span>.
+        \((e_1, \dots, e_n)\)이 \(V\)의 basis이고 \((e^1, \dots, e^n)\)이 그 dual basis(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-4">Definition 1.3.4</a>)라 하자. increasing multi-index \(I\)에 대해 \(e^I := D[e^{i_1}, \dots, e^{i_k}]\)로 두면 다음이 성립한다.</p>
+        <ul>
+          <li>(a) increasing multi-index \(J\)에 대하여 \(e^I(e_{j_1}, \dots, e_{j_k}) = \delta_{IJ}\)이다(\(I = J\)이면 \(1\), 아니면 \(0\)).</li>
+          <li>(b) 모든 \(k\)-form \(\omega\)는 \(\omega = \sum_I \omega_I\, e^I\), \(\omega_I = \omega(e_{i_1}, \dots, e_{i_k})\)로 꼭 한 가지 방식으로 쓰인다. 따라서 \((e^I)\)는 \(\Lambda^k(V^*)\)의 basis이고 \(\dim\Lambda^k(V^*) = \binom{n}{k}\)이다. \(k \gt n\)이면 \(0\)이 아닌 \(k\)-form은 없다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \[ e^I(e_{j_1}, \dots, e_{j_k}) = \det[e^{i_a}(e_{j_b})] = \det[\delta^{i_a}_{j_b}] \]이다. \(I = J\)이면 identity matrix이고, \(I \neq J\)이면 \(J\)에 없는 \(i_a\)가 있어 \(a\)번째 행이 모두 \(0\)이다. (b) \(\omega\)와 \(\sum_I\omega_I e^I\)는 둘 다 alternating multilinear이고 (a)에 의해 모든 \((e_{j_1}, \dots, e_{j_k})\)(\(J\) increasing)에서 값이 같으므로, <a href="34-1-wedge-k-vectors.html#i-34-1-5">Lemma 34.1.5</a>(\(Z = \R\))에 의해 같다. coefficient의 유일성은 \(\sum_I c_I e^I = 0\)에 \((e_{j_1}, \dots, e_{j_k})\)를 넣으면 (a)에서 \(c_J = 0\)이기 때문이다. \(k \gt n\)이면 <a href="34-1-wedge-k-vectors.html#i-34-1-5">Lemma 34.1.5</a>에 의해 모든 \(k\)-form이 \(0\)이다.</p>
+      </div>
+
+      <div class="thm theorem" id="i-34-4-6">
+        <p><span class="thm-head">Theorem 34.4.6</span> <span class="thm-name">(wedge product of forms and the determinant formula)</span>.
+        <a href="#i-34-4-5">Lemma 34.4.5</a>의 basis로 bilinear map \(\wedge\colon \Lambda^k(V^*) \times \Lambda^l(V^*) \to \Lambda^{k+l}(V^*)\)을</p>
+        <p>\[ \begin{aligned} e^I\wedge e^J &amp;:= D[e^{i_1}, \dots, e^{i_k}, e^{j_1}, \dots, e^{j_l}], \\ c\wedge\omega = \omega\wedge c &amp;:= c\,\omega \ \ (c \in \R) \end{aligned} \]</p>
+        <p>로 정하자. 그러면 다음이 성립한다.</p>
+        <ul>
+          <li>(a) 모든 covector에 대하여 \[ D[\alpha^1, \dots, \alpha^k]\wedge D[\beta^1, \dots, \beta^l] = D[\alpha^1, \dots, \alpha^k, \beta^1, \dots, \beta^l] \]이다. 특히 \(\wedge\)는 정의에 쓴 basis에 무관하다.</li>
+          <li>(b) (determinant formula) 모든 covector \(\alpha^1, \dots, \alpha^k\)와 vector \(u_1, \dots, u_k\)에 대하여
+          <div class="equation" id="eq-34-4-3">
+          \[ \begin{aligned} (\alpha^1\wedge\cdots\wedge\alpha^k)(u_1, \dots, u_k) &amp;= \det\big[\alpha^i(u_j)\big], \\ (\alpha\wedge\beta)(u, v) &amp;= \alpha(u)\beta(v) - \alpha(v)\beta(u) \end{aligned} \tag{34.4.3} \]
+          </div>
+          이다.</li>
+          <li>(c) \((\Lambda^\bullet(V^*), \wedge)\)는 vector space \(V^*\)에 대하여 규칙 (W1)–(W4)(<a href="34-1-wedge-k-vectors.html#i-34-1-1">Definition 34.1.1</a>)를 만족한다. 즉 \(k\)-form은 \(V^*\)의 \(k\)-vector이고, Section 34.1–34.2의 모든 결과가 \(k\)-form에 그대로 성립한다. \(e^I = e^{i_1}\wedge\cdots\wedge e^{i_k}\)는 \((e^i)\)의 basis \(k\)-vector다.</li>
+        </ul>
+      </div>
+      <p>이 정리가 말하는 것. \(k\)-form은 두 얼굴을 가진다. 하나는 vector \(k\)개를 받아 수를 내는 측정(<a href="#i-34-4-2">Definition 34.4.2</a>)이고, 다른 하나는 covector들의 wedge로 만든 \(V^*\)의 \(k\)-vector다. 두 얼굴을 잇는 것이 determinant 공식 <a href="#eq-34-4-3">(34.4.3)</a>이다. 즉 \(\alpha^1\wedge\cdots\wedge\alpha^k\)는 \(k\)개의 vector를 \(\alpha^1, \dots, \alpha^k\)로 재어 만든 \(k\times k\) 행렬의 determinant, 곧 “그림자의 부피”를 낸다 <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a> slide 30.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: (a)의 양변은 \(\alpha\)들에 대해(그리고 \(\beta\)들에 대해) alternating multilinear이므로 <a href="34-1-wedge-k-vectors.html#i-34-1-5">Lemma 34.1.5</a>에 의해 basis covector를 증가하는 순서로 넣은 경우만 보면 된다. 그 경우는 정의 그 자체다. (b), (c)는 (a)에서 바로 나온다.</p>
+        <p><span class="proof-head">Proof.</span> (a) \(\beta\)들을 고정하자. \((\alpha^1, \dots, \alpha^k) \mapsto D[\alpha]\wedge D[\beta]\)와 \((\alpha^1, \dots, \alpha^k) \mapsto D[\alpha, \beta]\)는 \((V^*)^k\)에서 \(\Lambda^{k+l}(V^*)\)로 가는 multilinear map이고 두 \(\alpha\)가 같으면 \(0\)이다(\(D\)의 성질과 \(\wedge\)의 bilinearity). <a href="34-1-wedge-k-vectors.html#i-34-1-5">Lemma 34.1.5</a>를 \(W = V^*\), basis \((e^i)\)에 쓰면 두 map은 \((e^{i_1}, \dots, e^{i_k})\)(\(I\) increasing)에서의 값으로 정해지고, 거기서 \(D[e^{i_1}, \dots, e^{i_k}] = e^I\)이다. 따라서 모든 \(I\)와 모든 \(\beta\)에 대해 \(e^I\wedge D[\beta] = D[e^{i_1}, \dots, e^{i_k}, \beta]\)를 보이면 된다. 같은 논법을 \(\beta\)들에 쓰면 \(e^I\wedge e^J = D[e^{i_1}, \dots, e^{i_k}, e^{j_1}, \dots, e^{j_l}]\)만 보이면 되고, 이것은 정의다. 다른 basis \((e'^i)\)로 정의한 곱 \(\wedge'\)도 (a)를 만족하고, \(D[\dots]\) 꼴의 \(k\)-form들이 \(\Lambda^k(V^*)\)를 span하므로(<a href="#i-34-4-5">Lemma 34.4.5</a>(b)의 \(e^I\)가 그런 꼴이다) 두 bilinear map은 같다.</p>
+        <p>(b) \(k\)에 대한 귀납법. \(k = 1\)이면 \(D[\alpha^1] = \alpha^1\)이다. \(\alpha^1\wedge\cdots\wedge\alpha^{k-1} = D[\alpha^1, \dots, \alpha^{k-1}]\)이면 (a)에서 \[ \alpha^1\wedge\cdots\wedge\alpha^k = D[\alpha^1, \dots, \alpha^{k-1}]\wedge D[\alpha^k] = D[\alpha^1, \dots, \alpha^k] \]이다. \(k = 2\)이면 \(\det\begin{pmatrix} \alpha(u) &amp; \alpha(v) \\ \beta(u) &amp; \beta(v)\end{pmatrix}\)이다.</p>
+        <p>(c) bilinearity와 scalar에 관한 규칙은 정의다. 결합법칙: basis에서 (a)를 두 번 쓰면 \((e^I\wedge e^J)\wedge e^K\)와 \(e^I\wedge(e^J\wedge e^K)\)가 둘 다 \(D[e^{i_1}, \dots, e^{i_k}, e^{j_1}, \dots, e^{j_l}, e^{m_1}, \dots, e^{m_p}]\)(\(K = (m_1, \dots, m_p)\))이고, 양변이 trilinear이므로 일반적으로 성립한다. (W2): \(\alpha\wedge\alpha = D[\alpha, \alpha] = 0\)(두 행이 같다). (W3): <a href="#i-34-4-5">Lemma 34.4.5</a>(b)와 (b)에서 모든 \(k\)-form은 \(e^I = e^{i_1}\wedge\cdots\wedge e^{i_k}\)들의 합이다. (W4): \((e^1\wedge\cdots\wedge e^n)(e_1, \dots, e_n) = \det I = 1\)이므로 \(e^1\wedge\cdots\wedge e^n \neq 0\)이다.</p>
+      </div>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: normalization of the wedge product</p>
+        <ul>
+          <li>이 study set은 wedge product에 <strong>determinant convention</strong>을 쓴다: <a href="#eq-34-4-3">(34.4.3)</a>, 곧 \(e^1\wedge e^2(e_1, e_2) = 1\)이다. Chapter 17이 쓰는 정의 \(\omega\wedge\eta = \tfrac{(k+l)!}{k!\,l!}\Alt(\omega\otimes\eta)\)도 같은 곱이다(<a href="../../notation.html#sec-wedge">Notation and Conventions</a>의 wedge product 항목. 거기 적힌 둘째 식이 <a href="#eq-34-4-3">(34.4.3)</a>이다). Crane도 같은 정규화를 쓴다. 2-form을 \(\alpha(u)\beta(v) - \alpha(v)\beta(u)\)로, \(k\)-form을 \(\det[\alpha_i(u_j)]\)로 정의한다 <a class="cite" href="../../references.html#Cr">[Cr §4.4]</a>, <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a> slides 23, 28–30.</li>
+          <li>일부 교재(예: Alt 정규화를 쓰는 교재)는 wedge product를 \(\omega\wedge_{\mathrm{A}}\eta := \Alt(\omega\otimes\eta)\)로 정의한다(<a href="../../notation.html#sec-wedge">Notation and Conventions</a>의 normalization 항목). 그러면 \((\alpha^1\wedge_{\mathrm{A}}\cdots\wedge_{\mathrm{A}}\alpha^k)(u_1, \dots, u_k) = \tfrac{1}{k!}\det[\alpha^i(u_j)]\), 예를 들어 \(e^1\wedge_{\mathrm{A}}e^2(e_1, e_2) = \tfrac12\)이고, 일반적으로 \(\omega\wedge_{\mathrm{A}}\eta = \tfrac{k!\,l!}{(k+l)!}\,\omega\wedge\eta\)이다. 두 곱 모두 결합법칙을 만족하므로 차이는 factorial 상수뿐이다(<a href="#ex-34-4-4">Exercise 34.4.4</a>). 다른 교재의 공식을 옮길 때는 이 상수를 확인한다.</li>
+          <li>한편 simplex 위의 적분에 나오는 \(1/k!\)(아래 Smooth vs. Discrete 상자)은 정규화가 아니라 기하다. simplex가 parallelepiped의 \(1/k!\)이기 때문이다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-pairing">
+      <h2>k-Forms Measure k-Vectors</h2>
+      <p>Crane의 표현대로 “부피는 부피로 잰다”. \(k\)-form은 vector \(k\)개를 받지만, 실제로는 그것들의 wedge인 \(k\)-vector만 본다.</p>
+      <div class="thm proposition" id="i-34-4-7">
+        <p><span class="thm-head">Proposition 34.4.7</span> <span class="thm-name">(pairing of k-forms and k-vectors)</span>.
+        각 \(k\)-form \(\omega\)에 대하여 모든 \(u_j\)에서 \(\omega(u_1\wedge\cdots\wedge u_k) = \omega(u_1, \dots, u_k)\)인 linear functional \(\xi \mapsto \omega(\xi)\)가 \(\Lambda^kV\) 위에 꼭 하나 있다. 이것으로 \(\Lambda^k(V^*)\)를 \(\Lambda^kV\)의 dual space \((\Lambda^kV)^*\)와 같은 것으로 볼 수 있고, 그때 \((e^I)\)는 \((e_I)\)의 dual basis다: \(e^I(e_J) = \delta_{IJ}\).</p>
+      </div>
+      <p>이 명제가 말하는 것. \(\omega(\xi)\)는 \(\xi\)를 simple \(k\)-vector의 합으로 어떻게 쓰든 같은 값이다(well-defined). 같은 2-vector를 주는 두 평행사변형(<a href="34-1-wedge-k-vectors.html#fig-34-1-2">Figure 34.1.2</a>(a))은 어떤 2-form으로 재도 같은 값이 나온다. 성분으로는 \(\omega(\xi) = \sum_I \omega_I\,\xi^I\)이다(Section 34.5).</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(\omega\)는 alternating multilinear이므로 <a href="34-1-wedge-k-vectors.html#i-34-1-12">Corollary 34.1.12</a>가 그런 linear functional을 꼭 하나 준다. 그 functional은 \(\omega\)에 대해 linear이다. \(e^I\)가 주는 functional은 \(e_J\)에서 \(\delta_{IJ}\)이므로(<a href="#i-34-4-5">Lemma 34.4.5</a>(a)) \((e_I)\)의 dual basis(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-4">Definition 1.3.4</a>)다. basis를 basis로 보내는 linear map이므로 \(\Lambda^k(V^*) \to (\Lambda^kV)^*\)는 isomorphism이다.</p>
+      </div>
+
+      <p>inner product가 있으면 측정을 inner product로 다시 쓸 수 있다. <a href="34-3-covectors-sharp-flat.html">Section 34.3</a>의 \(\alpha(u) = g(\alpha^\sharp, u)\)를 \(k\)차원으로 올리는 것이다. 이 절부터 \(\Lambda^k(V^*)\)에는 <a href="34-3-covectors-sharp-flat.html#i-34-3-4">Proposition 34.3.4</a>의 inner product를 \(V^*\)에 주고 <a href="34-2-hodge-star.html#i-34-2-1">Proposition 34.2.1</a>을 쓴 inner product, 곧 \(\inner{\alpha^1\wedge\cdots\wedge\alpha^k}{\beta^1\wedge\cdots\wedge\beta^k} = \det[\inner{\alpha^i}{\beta^j}]\)를 준다.</p>
+      <div class="thm proposition" id="i-34-4-8">
+        <p><span class="thm-head">Proposition 34.4.8</span> <span class="thm-name">(sharp and flat on k-vectors)</span>.
+        \((V, g)\)가 inner product space라 하자.</p>
+        <ul>
+          <li>(a) \((u_1\wedge\cdots\wedge u_k)^\flat = u_1^\flat\wedge\cdots\wedge u_k^\flat\)를 만족하는 linear map \(\flat\colon \Lambda^kV \to \Lambda^k(V^*)\)가 꼭 하나 있다. 이것은 isomorphism이고 역 \(\sharp\)은 \((\alpha^1\wedge\cdots\wedge\alpha^k)^\sharp = \alpha^{1\sharp}\wedge\cdots\wedge\alpha^{k\sharp}\)를 만족한다.</li>
+          <li>(b) 모든 \(\omega \in \Lambda^k(V^*)\)와 \(\xi \in \Lambda^kV\)에 대하여 \(\omega(\xi) = \inner{\omega^\sharp}{\xi}\)이다.</li>
+          <li>(c) \(\flat\)과 \(\sharp\)은 isometry다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \((u_1, \dots, u_k) \mapsto u_1^\flat\wedge\cdots\wedge u_k^\flat\)은 \(\flat\)이 linear이고 \(\wedge\)가 alternating multilinear이므로(<a href="#i-34-4-6">Theorem 34.4.6</a>(c)와 <a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>) alternating multilinear이다. <a href="34-1-wedge-k-vectors.html#i-34-1-12">Corollary 34.1.12</a>가 \(\flat\)을 준다. 같은 방법으로 \(V^*\)에서 \(\sharp\)이 생긴다(<a href="34-1-wedge-k-vectors.html#i-34-1-12">Corollary 34.1.12</a>를 \(V^*\)의 exterior algebra에 쓴다). 둘은 simple \(k\)-vector에서 서로 역이고, simple한 것들이 span하므로 서로 역이다.</p>
+        <p>(b) 양변이 \(\omega\)와 \(\xi\)에 대해 bilinear이므로 simple한 것에서만 보이면 된다. <a href="#eq-34-4-3">(34.4.3)</a>, <a href="34-3-covectors-sharp-flat.html#eq-34-3-1">(34.3.1)</a>, <a href="34-2-hodge-star.html#eq-34-2-1">(34.2.1)</a>에서 \[ \begin{aligned} (\alpha^1\wedge\cdots\wedge\alpha^k)(u_1, \dots, u_k) &amp;= \det[\alpha^i(u_j)] = \det[g(\alpha^{i\sharp}, u_j)] \\ &amp;= \inner{\alpha^{1\sharp}\wedge\cdots\wedge\alpha^{k\sharp}}{u_1\wedge\cdots\wedge u_k} \end{aligned} \]이다.</p>
+        <p>(c) \[ \begin{aligned} \inner{\alpha^1\wedge\cdots}{\beta^1\wedge\cdots} &amp;= \det[\inner{\alpha^i}{\beta^j}] = \det[g(\alpha^{i\sharp}, \beta^{j\sharp})] \\ &amp;= \inner{\alpha^{1\sharp}\wedge\cdots}{\beta^{1\sharp}\wedge\cdots} \end{aligned} \]이다(<a href="34-3-covectors-sharp-flat.html#i-34-3-4">Proposition 34.3.4</a>(a)).</p>
+      </div>
+
+      <div class="thm corollary" id="i-34-4-9">
+        <p><span class="thm-head">Corollary 34.4.9</span> <span class="thm-name">(k-forms measure projected volume)</span>.
+        \(\alpha^1, \dots, \alpha^k\)의 sharp가 orthonormal이라 하자. \(P = \Span(\alpha^{1\sharp}, \dots, \alpha^{k\sharp})\)에 orientation \((\alpha^{1\sharp}, \dots, \alpha^{k\sharp})\)를 주고 \(\pi\)를 \(P\)로의 orthogonal projection이라 하면</p>
+        <p>\[ \begin{aligned} \pi u_1\wedge\cdots\wedge\pi u_k = {} &amp; (\alpha^1\wedge\cdots\wedge\alpha^k)(u_1, \dots, u_k) \\ &amp; \times\alpha^{1\sharp}\wedge\cdots\wedge\alpha^{k\sharp} \end{aligned} \]</p>
+        <p>이다. 즉 \(\alpha^1\wedge\cdots\wedge\alpha^k\)는 parallelepiped의 \(P\)로의 그림자의 signed \(k\)차원 부피를 잰다. simple \(k\)-form \(c\,\alpha^1\wedge\cdots\wedge\alpha^k\)는 그 \(c\)배를 잰다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="#i-34-4-1">Proposition 34.4.1</a>의 증명과 같다. \(\pi x = \sum_i \alpha^i(x)\,\alpha^{i\sharp}\)이므로 성분 행렬은 \([\alpha^i(u_j)]\)이고, <a href="34-1-wedge-k-vectors.html#i-34-1-6">Proposition 34.1.6</a>(a)와 <a href="#eq-34-4-3">(34.4.3)</a>이 결과를 준다.</p>
+      </div>
+      <p>sharp가 orthonormal이 아니어도 <a href="#i-34-4-8">Proposition 34.4.8</a>(b)가 일반적인 답을 준다: \(\omega(\xi) = \inner{\omega^\sharp}{\xi}\)는 “\(\omega^\sharp\)의 크기 \(\times\) \(\xi\)를 \(\omega^\sharp\)의 \(k\)-평면으로 정사영한 그림자의 부피”다. Crane의 말로는 projected area가 \(\alpha^\sharp, \beta^\sharp\)이 만드는 평행사변형의 넓이만큼 배가 된다 <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a> slide 23.</p>
+
+      <div class="thm example" id="i-34-4-10">
+        <p><span class="thm-head">Example 34.4.10</span> <span class="thm-name">(measuring in space)</span>.
+        유클리드 \(\R^3\)과 standard basis를 쓴다.</p>
+        <ul>
+          <li>(a) basis 2-form \(e^1\wedge e^2\)는 \(xy\)평면으로의 그림자 넓이를 잰다(<a href="#i-34-4-9">Corollary 34.4.9</a>, \(e^{i\sharp} = e_i\)). <a href="34-1-wedge-k-vectors.html#i-34-1-10">Example 34.1.10</a>의 \(u = (1, 2, 3)\), \(v = (-1, 0, 2)\)이면 <a href="#eq-34-4-3">(34.4.3)</a>에서 \((e^1\wedge e^2)(u, v) = 1\cdot 0 - (-1)\cdot 2 = 2\), \((e^1\wedge e^3)(u, v) = 1\cdot 2 - (-1)\cdot 3 = 5\), \((e^2\wedge e^3)(u, v) = 2\cdot 2 - 0\cdot 3 = 4\)이다. \(u\wedge v\)의 성분 \(2, 5, 4\)와 같다. <a href="#i-34-4-7">Proposition 34.4.7</a>대로 \(e^I\)는 성분 \(\xi^I\)를 읽는다.</li>
+          <li>(b) <a href="#fig-34-4-1">Figure 34.4.1</a>의 기울어진 평면: \(\alpha = \cos 40^\circ\,e^1 + \sin 40^\circ\,e^3\), \(\beta = e^2\), \(u = (1.1, 0, 0.25)\), \(v = (0.2, 0.9, 0.35)\)이면 \(\alpha(u) = 1.003\), \(\alpha(v) = 0.378\), \(\beta(u) = 0\), \(\beta(v) = 0.9\)이므로 \((\alpha\wedge\beta)(u, v) = 0.903\)이다.</li>
+          <li>(c) 3-form: \(\alpha, \beta, \gamma\)의 sharp를 열로 하는 행렬을 \(A\), \(u, v, w\)를 열로 하는 행렬을 \(U\)라 하면 \([\alpha^i(u_j)] = A^{\mathsf T}U\)이므로 \((\alpha\wedge\beta\wedge\gamma)(u, v, w) = \det A\,\det U\)이다. “부피를 부피로 잰다”: 측정 도구 \((\alpha^\sharp, \beta^\sharp, \gamma^\sharp)\)의 부피 \(\times\) 재는 상자의 부피. 특히 \(e^1\wedge e^2\wedge e^3 = \det\)이다.</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-34-4-k-forms.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-hodge-forms">
+      <h2>The Hodge Star on k-Forms</h2>
+      <p><a href="34-3-covectors-sharp-flat.html#i-34-3-4">Proposition 34.3.4</a>에 의해 \(V^*\)는 orientation이 있는 inner product space이고, <a href="#i-34-4-6">Theorem 34.4.6</a>(c)에 의해 \(\Lambda^\bullet(V^*)\)는 그 exterior algebra다. 따라서 <a href="34-2-hodge-star.html#i-34-2-5">Definition 34.2.5</a>를 그대로 \(V^*\)에 쓰면 \(k\)-form의 Hodge star \(\star\colon \Lambda^k(V^*) \to \Lambda^{n-k}(V^*)\)가 생긴다. 새로 정의할 것은 없다.</p>
+      <div class="thm proposition" id="i-34-4-11">
+        <p><span class="thm-head">Proposition 34.4.11</span> <span class="thm-name">(Hodge star on k-forms)</span>.
+        \(V\)가 orientation이 있는 \(n\)차원 inner product space이고 \((e_i)\)가 positively oriented orthonormal basis, \((e^i)\)가 그 dual basis라 하자.</p>
+        <ul>
+          <li>(a) \(\star e^I = \sgn(I, I^c)\,e^{I^c}\)이다(부호는 <a href="34-2-hodge-star.html#eq-34-2-4">(34.2.4)</a>와 같다). 특히 \(\star 1 = e^1\wedge\cdots\wedge e^n\)이다.</li>
+          <li>(b) 모든 \(\alpha, \beta \in \Lambda^k(V^*)\)에 대하여 \(\alpha\wedge\star\beta = \inner{\alpha}{\beta}\;e^1\wedge\cdots\wedge e^n\)이다.</li>
+          <li>(c) \(\star\) commutes with \(\flat\): 모든 \(\xi \in \Lambda^kV\)에 대하여 \((\star\xi)^\flat = \star(\xi^\flat)\)이다.</li>
+          <li>(d) \(\star\star = (-1)^{k(n-k)}\)이고 \(\star\)는 isometry다.</li>
+        </ul>
+      </div>
+      <p>이 명제가 말하는 것. \(k\)-form의 \(\star\)는 \(\flat\)으로 옮긴 \(k\)-vector의 \(\star\)이고, 계산은 basis \(k\)-vector의 표와 똑같다. \(e^1\wedge\cdots\wedge e^n\)은 positively oriented orthonormal basis에서 \(1\)을 내는 \(n\)-form, 즉 \(V\)의 부피를 재는 형식이다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="34-3-covectors-sharp-flat.html#i-34-3-4">Proposition 34.3.4</a>(b), (c)에 의해 \((e^i)\)는 \(V^*\)의 positively oriented orthonormal basis이고, <a href="#i-34-4-6">Theorem 34.4.6</a>(c)에 의해 \(e^I\)는 그 basis \(k\)-vector다. 따라서 (a), (b), (d)는 <a href="34-2-hodge-star.html#i-34-2-6">Theorem 34.2.6</a>과 <a href="34-2-hodge-star.html#i-34-2-9">Proposition 34.2.9</a>를 \(V^*\)에 쓴 것이다(\(V^*\)의 단위 \(n\)-vector가 \(e^1\wedge\cdots\wedge e^n\)). (c) 양변이 \(\xi\)에 대해 linear이므로 \(\xi = e_I\)에서 보이면 된다. <a href="34-3-covectors-sharp-flat.html#i-34-3-4">Proposition 34.3.4</a>(b)에서 \(e_i^\flat = e^i\)이므로 <a href="#i-34-4-8">Proposition 34.4.8</a>(a)에서 \(e_I^\flat = e^I\)이고, (a)와 <a href="34-2-hodge-star.html#eq-34-2-5">(34.2.5)</a>에서 \[ \star(e_I^\flat) = \sgn(I, I^c)\,e^{I^c} = \big(\sgn(I, I^c)\,e_{I^c}\big)^\flat = (\star e_I)^\flat \]이다.</p>
+      </div>
+
+      <div class="thm example" id="i-34-4-12">
+        <p><span class="thm-head">Example 34.4.12</span> <span class="thm-name">(forms in the plane and in space)</span>.
+        (a) \(\R^2\): \(\star e^1 = e^2\), \(\star e^2 = -e^1\), \(\star 1 = e^1\wedge e^2\)이다(<a href="34-2-hodge-star.html#i-34-2-7">Example 34.2.7</a>을 \(V^*\)에서). </p>
+        <p>(b) \(\R^3\): \(\star e^1 = e^2\wedge e^3\), \(\star e^2 = e^3\wedge e^1\), \(\star e^3 = e^1\wedge e^2\)이고 \(\star(e^1\wedge e^2) = e^3\) 등이다(<a href="34-2-hodge-star.html#eq-34-2-7">(34.2.7)</a>을 \(V^*\)에서). 1-form \(\alpha = a^\flat\)(\(a \in \R^3\))의 \(\star\alpha\)는 무엇을 재는가? <a href="#i-34-4-8">Proposition 34.4.8</a>(b), <a href="#i-34-4-11">Proposition 34.4.11</a>(c), <a href="34-2-hodge-star.html#i-34-2-9">Proposition 34.2.9</a>, <a href="34-2-hodge-star.html#i-34-2-8">Proposition 34.2.8</a>을 차례로 쓰면</p>
+        <div class="equation" id="eq-34-4-4">
+        \[ \begin{aligned} (\star\alpha)(u, v) &amp;= \inner{(\star\alpha)^\sharp}{u\wedge v} = \inner{\star a}{u\wedge v} \\ &amp;= \inner{\star\star a}{\star(u\wedge v)} = \inner{a}{u\times v} \end{aligned} \tag{34.4.4} \]
+        </div>
+        <p>이다. 즉 \(\star\alpha\)는 평행사변형 \((u, v)\)를 지나는 \(a\)의 flux를 잰다(<a href="#i-34-4-3">Example 34.4.3</a>(c)). 그림자로 말하면 \(\star\alpha\)는 \(a\)에 수직인 평면으로의 그림자 넓이에 \(\abs{a}\)를 곱한 것이다. 또 \(\alpha = a^\flat\), \(\beta = b^\flat\)이면 \[ \star(\alpha\wedge\beta) = \star\big((a\wedge b)^\flat\big) = \big(\star(a\wedge b)\big)^\flat = (a\times b)^\flat \]이다.</p>
+        <p class="verified">Verification: <code>verify/v-34-4-k-forms.py</code></p>
+      </div>
+      <p><a href="#eq-34-4-4">(34.4.4)</a>는 \(\R^3\)에서 2-form과 vector를 잇는 사전의 핵심이다. Section 34.5에서 성분으로 정리하고, Chapter 35는 이것으로 curl과 divergence를 쓴다.</p>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: k-forms measure simplices</p>
+        <p><a href="#fig-34-4-2">Figure 34.4.2</a>를 보자. (a)의 자주색 직선은 1-form \(\alpha = e^1 + e^2\)의 등위선이고, 파란 화살표는 triangle \((x_0, x_1, x_2)\)의 oriented edge \(x_0 \to x_1\), \(x_1 \to x_2\), \(x_2 \to x_0\)이다. 각 edge의 값 \(\alpha(x_j - x_i)\)는 \(+2.5\), \(-0.3\), \(-2.2\)이다. 이 값은 edge를 따라 \(\alpha\)가 늘어난 양이다. 그림의 등위선은 \(0.5\) 간격이라, 예를 들어 \(x_0 \to x_1\)은 \(\alpha\)가 커지는 쪽으로 등위선 간격 다섯 개를 지나간다. 세 값의 합은 \(0\)이다. 세 edge vector의 합이 \(0\)이기 때문이다. (b)의 주황 triangle은 2-form \(e^1\wedge e^2\)로 잰 것이다. 회색 점선 평행사변형 \((x_1 - x_0, x_2 - x_0)\)의 값은 \(\det = 2.9\)이고, triangle은 그 절반 \(1.45\)이다.</p>
+        <figure class="dg-figure" id="fig-34-4-2">
+          <img src="figures/fig-34-4-2-measure-simplex.svg" alt="두 패널의 평면 그림. (a)에는 기울기 −1인 자주색 등위선 위에 vertex x0, x1, x2의 하늘색 triangle이 있고, 세 edge가 x0→x1, x1→x2, x2→x0 방향의 파란 화살표이며 각각 +2.5, −0.3, −2.2 라벨이 붙어 있다. (b)에는 주황색 triangle과 그것을 반으로 하는 회색 점선 평행사변형, 파란 x1−x0과 초록 x2−x0 화살표, 반시계 방향 곡선 화살표, 라벨 det = 2.9와 ∫σ e1∧e2 = 1.45가 있다.">
+          <figcaption><span class="fig-head">Figure 34.4.2.</span>
+          상수 form이 triangle \(x_0 = (0, 0)\), \(x_1 = (2, 0.5)\), \(x_2 = (0.6, 1.6)\)(반시계 방향)의 edge와 face를 잰 값.
+          읽는 법: (a) 자주색은 \(\alpha = e^1 + e^2\)의 등위선(간격 \(0.5\)), 파란 화살표는 oriented edge, 숫자는 \(\alpha(x_j - x_i)\)다. (b) 주황은 oriented face, 파랑과 초록은 edge vector \(x_1 - x_0\)과 \(x_2 - x_0\), 회색 점선은 그 둘이 만드는 평행사변형, 곡선 화살표는 face의 orientation이다.
+          볼 것: (a) 세 값 \(2.5 - 0.3 - 2.2 = 0\). (b) \((e^1\wedge e^2)(x_1 - x_0, x_2 - x_0) = 2.9\)이고 face의 값은 그 절반 \(1.45\)이다.
+          Smooth vs. Discrete 상자와 Implementation 상자의 식을 보여 준다. 두 값은 tools/dgdec.py의 <code>derham1</code>, <code>derham2</code>와 일치한다.</figcaption>
+        </figure>
+        <p>Chapter 35는 form을 곡선과 surface 위에서 적분한다. 상수 \(k\)-form \(\omega\)를 oriented \(k\)-simplex \(\sigma = (x_0, \dots, x_k)\) 위에서 적분한 값은</p>
+        <p>\[ \int_\sigma \omega = \frac{1}{k!}\,\omega(x_1 - x_0, \dots, x_k - x_0) \]</p>
+        <p>이다. 이 식의 증명(parametrization과 적분)은 Chapter 35의 몫이고, 여기서는 의미만 보자. \(\omega\)는 simplex의 \(k\)-vector \((x_1 - x_0)\wedge\cdots\wedge(x_k - x_0)\)(Section 34.1의 Smooth vs. Discrete 상자)를 재고, simplex는 parallelepiped의 \(1/k!\)이다. Chapter 36의 de Rham map은 smooth form을 oriented simplex마다 이런 적분값 하나로 바꾸어 저장한다.</p>
+        <ul>
+          <li>보존하는 것: 상수 form에서는 값이 정확하다. orientation을 뒤집으면 부호가 바뀐다(<a href="34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>). edge 값의 합이 둘레에서 \(0\)이 되는 것은 Chapter 36의 discrete Stokes의 가장 작은 예다.</li>
+          <li>잃는 것: 상수가 아닌 form은 simplex 안에서의 변화를 잃고 적분값 하나만 남는다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: a constant k-form on a k-simplex</p>
+<pre id="code-34-4-1"><code>import math
+import numpy as np
+
+def simplex_integral(omega, X):
+    """Integral of a constant k-form over the oriented k-simplex with vertex rows X = (x_0, ..., x_k).
+
+    omega(*vectors) evaluates the k-form on k vectors; the simplex is 1/k! of the
+    parallelepiped spanned by its edge vectors x_1 - x_0, ..., x_k - x_0."""
+    X = np.asarray(X, float)
+    k = len(X) - 1
+    return omega(*(X[1:] - X[0])) / math.factorial(k)
+
+alpha = lambda u: u[0] + u[1]                       # e^1 + e^2
+dxdy = lambda u, v: u[0] * v[1] - u[1] * v[0]       # e^1 ^ e^2, determinant convention
+tri = [(0.0, 0.0), (2.0, 0.5), (0.6, 1.6)]
+edge_values = [simplex_integral(alpha, [tri[i], tri[j]]) for i, j in [(0, 1), (1, 2), (2, 0)]]
+face_value = simplex_integral(dxdy, tri)            # 2.9 / 2 = 1.45
+</code></pre>
+        <p>\(k = 1\)이면 \(1/1! = 1\)이라 edge의 값은 \(\alpha(x_1 - x_0)\) 그 자체다. verify가 이 코드를 실행해 <code>edge_values</code> \(= (2.5, -0.3, -2.2)\), <code>face_value</code> \(= 1.45\)를 확인하고, tools/dgdec.py의 <code>derham1</code>, <code>derham2</code>(quadrature로 적분)와 비교한다.</p>
+        <p class="verified">Verification: <code>verify/v-34-4-k-forms.py</code></p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Chapter 17: alternating tensor, \(\Alt\), determinant convention의 wedge product를 tensor로 정의한 엄밀한 판(<a href="../17-differential-forms/index.html#toc-17-1">Section 17.1</a>). 점마다 \(k\)-form을 붙인 differential form은 <a href="../17-differential-forms/index.html#toc-17-2">Section 17.2</a>.</li>
+          <li>Chapter 16: tensor와 alternating tensor(<a href="../16-covectors-tensors/index.html#toc-16-4">Section 16.4</a>).</li>
+          <li>Chapter 1: determinant의 유일성(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-5">Theorem 1.6.5</a>)이 이 절의 모든 증명의 바탕이다.</li>
+          <li>Tour: \(dx\wedge dy\)를 signed area로 본 <a href="../00-tour/0-7-forms.html#sec-wedge">Section 0.7</a>.</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L4">[CMU-DDG L4]</a> slides 15–32, <a class="cite" href="../../references.html#Cr">[Cr §4.3]</a>, <a class="cite" href="../../references.html#Cr">[Cr §4.4]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>sharp가 orthonormal인 covector \(\alpha, \beta\)에 대해 \(\alpha(u)\beta(v) - \alpha(v)\beta(u)\)는 평면 \(\Span(\alpha^\sharp, \beta^\sharp)\) 위 그림자의 signed area다(<a href="#i-34-4-1">Proposition 34.4.1</a>).</li>
+        <li>\(k\)-form은 vector \(k\)개의 alternating multilinear 측정이다(<a href="#i-34-4-2">Definition 34.4.2</a>). covector의 wedge product는 determinant 공식 \((\alpha^1\wedge\cdots\wedge\alpha^k)(u_1, \dots, u_k) = \det[\alpha^i(u_j)]\)를 만족하고, \(k\)-form 전체는 \(V^*\)의 exterior algebra다(<a href="#i-34-4-6">Theorem 34.4.6</a>). 정규화는 Crane과 같은 determinant convention이다.</li>
+        <li>\(k\)-form은 \(k\)-vector 위의 linear functional이고 \((e^I)\)는 \((e_I)\)의 dual basis다(<a href="#i-34-4-7">Proposition 34.4.7</a>). inner product가 있으면 \(\omega(\xi) = \inner{\omega^\sharp}{\xi}\), 곧 그림자 부피다(<a href="#i-34-4-8">Proposition 34.4.8</a>, <a href="#i-34-4-9">Corollary 34.4.9</a>).</li>
+        <li>\(k\)-form의 Hodge star는 \(\flat\)과 교환하고 \(\alpha\wedge\star\beta = \inner{\alpha}{\beta}\,e^1\wedge\cdots\wedge e^n\)이다. \(\R^3\)에서 \(\star(a^\flat)\)은 \(a\)의 flux를 잰다(<a href="#i-34-4-11">Proposition 34.4.11</a>, <a href="#eq-34-4-4">(34.4.4)</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 지금까지의 모든 것을 성분으로 정리한다. exterior algebra를 basis와 곱셈표로 실제로 구성해 (W1)–(W4)를 만족하는 대상이 있음을 보이고, \(\wedge\), \(\star\), \(\sharp\), \(\flat\)을 index tuple과 Gram matrix로 계산하는 방법과 \(\R^3\)의 vector–form 사전을 만든다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-34-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 34.4.1</span> <span class="level">★</span>
+        \(\R^3\)에서 \(\alpha = e^1 + 2e^2\), \(\beta = e^2 - e^3\), \(u = (1, 0, 1)\), \(v = (0, 1, 1)\)이라 하자. (a) <a href="#eq-34-4-3">(34.4.3)</a>으로 \((\alpha\wedge\beta)(u, v)\)를 계산하여라. (b) \(\alpha\wedge\beta\)를 \(e^I\)로 전개하고, \(u\wedge v\)의 성분과의 곱의 합 \(\sum_I(\alpha\wedge\beta)_I\,(u\wedge v)^I\)로 다시 계산하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(\alpha(u) = 1\), \(\alpha(v) = 2\), \(\beta(u) = -1\), \(\beta(v) = 0\)이므로 \(1\cdot 0 - 2\cdot(-1) = 2\)이다. (b) \[ \begin{aligned} \alpha\wedge\beta &amp;= e^1\wedge e^2 - e^1\wedge e^3 + 2\,e^2\wedge e^2 - 2\,e^2\wedge e^3 \\ &amp;= e^{12} - e^{13} - 2\,e^{23} \end{aligned} \]이다. \(u\wedge v\)의 성분은 minor \((u\wedge v)^{12} = 1\), \((u\wedge v)^{13} = 1\cdot 1 - 0\cdot 1 = 1\), \((u\wedge v)^{23} = 0\cdot 1 - 1\cdot 1 = -1\)이므로 \(1\cdot 1 - 1\cdot 1 - 2\cdot(-1) = 2\)이다(<a href="#i-34-4-7">Proposition 34.4.7</a>: \(e^I(e_J) = \delta_{IJ}\)).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-4-2" data-level="1">
+        <p><span class="thm-head">Exercise 34.4.2</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. (a) \(\R^2\)의 모든 2-form은 \(c\,e^1\wedge e^2\)이다. (b) 모든 2-form \(\omega\)와 vector \(u\)에 대하여 \(\omega(u, u) = 0\)이다. (c) \(\R^3\)의 모든 2-form은 \(\alpha\wedge\beta\) 꼴이다. (d) \(\R^4\)의 모든 2-form은 \(\alpha\wedge\beta\) 꼴이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. \(\dim\Lambda^2(\R^{2*}) = \binom22 = 1\)(<a href="#i-34-4-5">Lemma 34.4.5</a>). (b) 참. alternating이다. (c) 참. <a href="34-1-wedge-k-vectors.html#ex-34-1-6">Exercise 34.1.6</a>을 3차원 vector space \(V^*\)에 쓴다(<a href="#i-34-4-6">Theorem 34.4.6</a>(c)). (d) 거짓. \(e^1\wedge e^2 + e^3\wedge e^4\)는 \(\omega\wedge\omega = 2\,e^1\wedge e^2\wedge e^3\wedge e^4 \neq 0\)이라 simple이 아니다(<a href="34-1-wedge-k-vectors.html#i-34-1-13">Non-example 34.1.13</a>을 \(V^*\)에서).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-4-3" data-level="2">
+        <p><span class="thm-head">Exercise 34.4.3</span> <span class="level">★★</span>
+        유클리드 \(\R^n\)에서 covector \(\alpha^1, \dots, \alpha^n\)과 vector \(u_1, \dots, u_n\)에 대하여 \[ (\alpha^1\wedge\cdots\wedge\alpha^n)(u_1, \dots, u_n) = \det[\alpha^{1\sharp}\ \cdots\ \alpha^{n\sharp}]\,\det[u_1\ \cdots\ u_n] \]임을 보이고, “부피는 부피로 잰다”는 말을 설명하여라. \(\R^3\)에서 \(\alpha^{i\sharp} = (1, 1, 0), (0, 1, 1), (1, 0, 1)\), \(u_j = (1, 2, 3), (-1, 0, 2), (1, 0, 1)\)이면 값은?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\alpha^i(u_j) = \inner{\alpha^{i\sharp}}{u_j}\)이므로 \([\alpha^i(u_j)] = A^{\mathsf T}U\)(\(A\)의 열은 \(\alpha^{i\sharp}\), \(U\)의 열은 \(u_j\))이고 <a href="#eq-34-4-3">(34.4.3)</a>과 <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-8">Theorem 1.6.8</a>(a), (c)에서 \(\det(A^{\mathsf T}U) = \det A\,\det U\)이다. 측정 도구가 이루는 parallelepiped의 부피와 재는 parallelepiped의 부피의 곱이다. 수치: \(\det A = 1\cdot(1 - 0) - 0 + 1\cdot(1 - 0) = 2\)(<a href="34-1-wedge-k-vectors.html#ex-34-1-1">Exercise 34.1.1</a>(b)), \(\det U = 6\)(<a href="34-1-wedge-k-vectors.html#i-34-1-10">Example 34.1.10</a>)이므로 값은 \(12\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-4-4" data-level="2">
+        <p><span class="thm-head">Exercise 34.4.4</span> <span class="level">★★</span>
+        \[ \Alt(T)(u_1, \dots, u_m) = \tfrac{1}{m!}\sum_\sigma \sgn(\sigma)\,T(u_{\sigma(1)}, \dots, u_{\sigma(m)}) \]로 두고 \(\omega\wedge_{\mathrm{A}}\eta := \Alt(\omega\otimes\eta)\)라 하자(\[ (\omega\otimes\eta)(u_1, \dots, u_{k+l}) = \omega(u_1, \dots, u_k)\eta(u_{k+1}, \dots, u_{k+l}) \]). (a) \(1\)-form \(\alpha, \beta\)에 대하여 \(\alpha\wedge_{\mathrm{A}}\beta = \tfrac12\,\alpha\wedge\beta\)임을 보여라. (b) \((e^1\wedge_{\mathrm{A}}e^2)\wedge_{\mathrm{A}}e^3\)과 \(e^1\wedge_{\mathrm{A}}(e^2\wedge_{\mathrm{A}}e^3)\)을 \((e_1, e_2, e_3)\)에서 계산하고 determinant convention의 값 \(1\)과 비교하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>(b)는 정의대로 \(3! = 6\)개의 permutation을 모두 적어도 되고, \(\Alt(\Alt(T)\otimes S) = \Alt(T\otimes S)\)를 써도 된다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \[ \Alt(\alpha\otimes\beta)(u, v) = \tfrac12\big(\alpha(u)\beta(v) - \alpha(v)\beta(u)\big) = \tfrac12(\alpha\wedge\beta)(u, v) \](<a href="#eq-34-4-3">(34.4.3)</a>).</p>
+          <p>(b) (a)에서 \(e^1\wedge_{\mathrm{A}}e^2 = \tfrac12(e^1\otimes e^2 - e^2\otimes e^1)\)이다. \(T = (e^1\wedge_{\mathrm{A}}e^2)\otimes e^3\)에 \(\Alt\)을 쓰자. \(T(u_{\sigma(1)}, u_{\sigma(2)}, u_{\sigma(3)})\)를 \((u_1, u_2, u_3) = (e_1, e_2, e_3)\)에서 보면 \(e^3(u_{\sigma(3)}) \neq 0\)이려면 \(\sigma(3) = 3\)이어야 하고, 남는 것은 \(\sigma = \id\)(값 \(\tfrac12\), 부호 \(+\))와 \(\sigma = (1\,2)\)(값 \(-\tfrac12\), 부호 \(-\))뿐이다. 따라서 \(\tfrac16\big(\tfrac12 + \tfrac12\big) = \tfrac16\)이다. 같은 계산으로 \(e^1\wedge_{\mathrm{A}}(e^2\wedge_{\mathrm{A}}e^3)\)도 \(\tfrac16\)이다. determinant convention에서는 \(\det I = 1\)이므로 Alt convention의 값은 \(1/3!\)배다. 일반적으로 \((\alpha^1\wedge_{\mathrm{A}}\cdots\wedge_{\mathrm{A}}\alpha^k)(u_1, \dots, u_k) = \tfrac{1}{k!}\det[\alpha^i(u_j)]\)이고, 두 정규화의 차이는 factorial 상수뿐이다(Conventions 상자).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-4-5" data-level="1">
+        <p><span class="thm-head">Exercise 34.4.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> \(k\)-form을 성분 사전 <code>{I: omega_I}</code>(\(I\)는 0부터 센 increasing tuple)로 저장하고 vector \(k\)개에서의 값 \(\omega(u_1, \dots, u_k) = \sum_I \omega_I\det(U_I)\)을 계산하는 함수 <code>eval_form</code>을 써라. 이것으로 (a) 무작위 covector \(\alpha^1, \alpha^2, \alpha^3 \in (\R^5)^*\)의 wedge(성분은 행이 \(\alpha^i\)인 행렬 \(A\)의 minor \(\det A_{:,I}\))가 determinant 공식 <a href="#eq-34-4-3">(34.4.3)</a>과 같은 값을 냄을, (b) 두 인자를 맞바꾸면 부호가 바뀜을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-34-4-5"><code>import itertools
+import numpy as np
+
+def eval_form(omega, *us):
+    """omega = sum_I omega_I e^I evaluated on u_1, ..., u_k: sum_I omega_I det(U_I)."""
+    U = np.column_stack(us)
+    return sum(c * np.linalg.det(U[list(I), :]) for I, c in omega.items())
+
+rng = np.random.default_rng(5)
+A = rng.normal(size=(3, 5))                 # rows: covectors alpha^1, alpha^2, alpha^3
+omega = {I: np.linalg.det(A[:, list(I)]) for I in itertools.combinations(range(5), 3)}
+u = rng.normal(size=(3, 5))
+ok_a = np.isclose(eval_form(omega, *u), np.linalg.det(A @ u.T))   # det[alpha^i(u_j)]
+ok_b = np.isclose(eval_form(omega, u[1], u[0], u[2]), -eval_form(omega, *u))
+print(ok_a, ok_b)
+</code></pre>
+<pre id="out-ex-34-4-5"><code>True True</code></pre>
+          <p>성분 \(\omega_I = \det A_{:,I}\)는 <a href="34-1-wedge-k-vectors.html#i-34-1-6">Proposition 34.1.6</a>(b)를 \(V^*\)에서 쓴 것(covector의 성분 행렬의 minor)이다. (a)의 일치는 Cauchy–Binet 공식 \(\det(AU) = \sum_I\det A_{:,I}\det U_{I,:}\)이기도 하다. 출력은 <code>True True</code>이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-34-4-6" data-level="2">
+        <p><span class="thm-head">Exercise 34.4.6</span> <span class="level">★★</span>
+        유클리드 \(\R^3\)에서 \(\omega\)가 크기 \(1\)인 simple 2-form이고 \(\xi = u\wedge v\)가 크기 \(1\)인 2-vector이면 \(\omega(\xi) = \cos\vartheta\)임을 보여라. 여기서 \(\vartheta\)는 두 단위 법선 \(\star(\omega^\sharp)\)과 \(\star\xi = u\times v\) 사이의 각이다. “그림자 넓이 \(=\) 넓이 \(\times\cos\)(두 평면 사이의 각)”이라는 공식과 비교하고, <a href="#fig-34-4-1">Figure 34.4.1</a>의 값 \(0.903\)으로 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-34-4-8">Proposition 34.4.8</a>(b)와 \(\star\)가 isometry라는 것(<a href="34-2-hodge-star.html#i-34-2-9">Proposition 34.2.9</a>)에서 \(\omega(\xi) = \inner{\omega^\sharp}{\xi} = \inner{\star\omega^\sharp}{\star\xi}\)이다. \(\star\omega^\sharp\)와 \(\star\xi\)는 크기 \(1\)인 vector(두 평면의 단위 법선, <a href="34-2-hodge-star.html#i-34-2-8">Proposition 34.2.8</a>)이므로 inner product가 \(\cos\vartheta\)이다. 크기가 \(\abs{\xi}\)인 2-vector면 \(\omega(\xi) = \abs{\xi}\cos\vartheta\), 곧 넓이 \(\times\cos\vartheta\)이다. <a href="#fig-34-4-1">Figure 34.4.1</a>에서 \(\star(\alpha^\sharp\wedge\beta^\sharp) = \alpha^\sharp\times\beta^\sharp = (-\sin 40^\circ, 0, \cos 40^\circ)\), \(u\times v = (-0.225, -0.335, 0.99)\), \(\abs{u\times v} = 1.069\)이고, \(\inner{\alpha^\sharp\times\beta^\sharp}{u\times v} = 0.1446 + 0.7584 = 0.903\)이다. 따라서 \(\cos\vartheta = 0.903/1.069 = 0.845\)이다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="34-3-covectors-sharp-flat.html">← 34.3 Covectors, Sharp, and Flat</a>
+    <a rel="next" href="34-5-coordinates.html">34.5 Exterior Algebra in Coordinates →</a>
+  </nav>
+</body>
+</html>
