@@ -15,11 +15,7 @@ Also writes an interactive version: the whole h = 0.1 sphere, faces with an angl
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-5-2-level-set-accuracy.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 

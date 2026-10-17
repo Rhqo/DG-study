@@ -10,11 +10,7 @@ Self-check: lambda_1..3 = 2 (relative 5e-6 on level 2, 4e-7 on level 3), groups 
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-4-1-spectrum.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 

@@ -15,11 +15,7 @@ sec^4(Theta/2) within a factor 1.5 (the cap boundary is jagged).
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-6-2-cap-distortion.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 

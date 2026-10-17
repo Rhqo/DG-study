@@ -5,10 +5,8 @@ Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/verify/
 
 import pathlib
 import runpy
-import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import numpy as np  # noqa: E402
 import sympy as sp  # noqa: E402

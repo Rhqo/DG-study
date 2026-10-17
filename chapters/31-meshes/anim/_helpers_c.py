@@ -13,9 +13,8 @@ Import from an animation script with::
 
     import pathlib, sys
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
     import _helpers_c as hc
-    import dgmesh as dm
+    import dgmesh as dm               # tools/dgmesh.py (PYTHONPATH contains tools)
 """
 
 import numpy as np

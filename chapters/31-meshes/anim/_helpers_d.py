@@ -1,7 +1,7 @@
 """Helpers for the animations of Sections 31.4-31.6 (GUIDELINES.md 12.8).
 
-This file is not a render target (its name does not start with ``anim-``). It adds chapters/31-meshes/lib to
-sys.path, so an animation script only needs::
+This file is not a render target (its name does not start with ``anim-``). It imports dgmesh (tools/dgmesh.py;
+render_anims.sh puts tools on PYTHONPATH), so an animation script only needs::
 
     import pathlib, sys
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -20,14 +20,9 @@ Contents
 """
 
 import os
-import pathlib
-import sys
 
 for _k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):   # before numpy (this machine freezes
     os.environ.setdefault(_k, "4")                                          # under long all-core loads)
-
-_HERE = pathlib.Path(__file__).resolve().parent
-sys.path.insert(0, str(_HERE.parent / "lib"))
 
 import numpy as np  # noqa: E402
 

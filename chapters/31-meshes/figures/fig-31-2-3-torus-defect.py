@@ -10,11 +10,7 @@ Self-check: sum of delta is 0 to 1e-11; the maximal error of K_i is below 0.03 a
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-2-3-torus-defect.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 

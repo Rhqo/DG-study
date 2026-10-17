@@ -8,7 +8,7 @@
 #   build_index는 저장소 전체를 --check-only로 검사한다(중복 정의는 전역 문제이므로). 공유 파일
 #   concepts.html은 다시 쓰지 않는다. 검사기 테스트와 dgnum 테스트는 건너뛴다.
 #
-# 순서: build_index → check_site → check_math → dgsym 자체 테스트 → 검사기 테스트 → dgnum 테스트
+# 순서: build_index → check_site → check_math → dgsym·dgmesh·dgdec 자체 테스트 → 검사기 테스트 → dgnum 테스트
 #       → 모든 그림 스크립트(재생성 확인) → 모든 verify 스크립트.
 # 실패해도 끝까지 돌리고 마지막에 요약한다. 하나라도 실패하면 종료코드 1.
 set -u
@@ -67,6 +67,14 @@ if [ -f tools/dgsym.py ]; then
 else
   record "dgsym self-test" SKIP "tools/dgsym.py not found"
 fi
+# mesh와 DEC 공용 모듈(Chapter 31, Track 2)의 자체 테스트. 빠르므로 --chapter 모드에서도 돌린다.
+for mod in dgmesh dgdec; do
+  if [ -f "tools/$mod.py" ]; then
+    step "$mod self-test"          python3 "tools/$mod.py"
+  else
+    record "$mod self-test" SKIP "tools/$mod.py not found"
+  fi
+done
 if [ -n "$CHAPTER" ]; then
   record "checker tests" SKIP "chapter mode"
 else

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>44. Geodesics — DG Study</title>
+  <meta name="dg-id" content="44">
+  <meta name="dg-status" content="planned">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb"><a href="../../index.html">Contents</a> › <span>44. Geodesics</span></nav>
+
+  <main>
+    <header>
+      <h1>44. Geodesics</h1>
+      <p class="meta">Track 2. Discrete Differential Geometry · Lectures: <a class="cite" href="../../references.html#CMU-DDG-L21-22">[CMU-DDG L21–22]</a> (<a href="https://www.youtube.com/watch?v=uojNGbVtlsQ&amp;list=PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS">video</a>, <a href="https://brickisland.net/DDGSpring2021/wp-content/uploads/2020/05/DDG_458_SP20_Lecture20_Geodesics.pdf">slides</a>), <a class="cite" href="../../references.html#CMU-DDG-HM1">[CMU-DDG HM1]</a> (<a href="https://www.youtube.com/watch?v=Dgu-V9ciGi8">video, outside the playlist</a>, no slides), <a class="cite" href="../../references.html#CMU-DDG-HM2">[CMU-DDG HM2]</a> (<a href="https://www.youtube.com/watch?v=4IZ-ykGnIRc">video, outside the playlist</a>, no slides) · References: <a class="cite" href="../../references.html#Crane13">[Crane13]</a>, <a class="cite" href="../../references.html#Crane17">[Crane17]</a></p>
+      <p class="threads">Threads: <strong>T4</strong> Parallel transport and geodesics (shortest vs. straightest, discrete geodesics on polyhedral surfaces, exponential and logarithm maps, the geodesic equation, the heat method)</p>
+    </header>
+
+    <section class="questions">
+      <h2>Questions</h2>
+      <ul>
+        <li>“가장 짧은 길”과 “가장 곧은 길”은 smooth surface에서는 같은 것(geodesic)인데, polyhedral surface에서는 왜 갈라지는가?</li>
+        <li>mesh 위에서 거리, exponential map, logarithm map을 어떻게 빠르고 안정적으로 계산하는가?</li>
+      </ul>
+    </section>
+
+    <section class="inherits">
+      <h2>Builds on</h2>
+      <ul>
+        <li><a href="../39-surface-curvature/index.html">Chapter 39</a>: geodesic curvature와 Darboux frame, \(K\). <a href="../40-discrete-curvature-integral/index.html">Chapter 40</a>: angle defect(cone vertex와 saddle vertex), discrete Gauss–Bonnet theorem. <a href="../42-laplace-beltrami/index.html">Chapter 42</a>: \(L\), \(M\), heat equation의 backward Euler, boundary condition, FEM의 hat function gradient. <a href="../37-curves-smooth-discrete/index.html">Chapter 37</a>: turning angle과 curve를 따른 parallel transport.</li>
+        <li>Track 1: <a href="../00-tour/0-5-intrinsic.html#sec-geodesics">Section 0.5</a>(geodesic, mesh 위 geodesic distance와 heat method 상자), <a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>(exponential map과 logarithm map, Fréchet mean), <a href="../31-meshes/31-4-spectral-geometry.html#sec-heat">Section 31.4</a>(heat kernel과 heat method), <a href="../30-radiance-field-surfaces/30-1-implicit-surfaces-eikonal.html#sec-eikonal">Section 30.1</a>(eikonal equation).</li>
+        <li>가정하는 배경: vector calculus, ODE의 수치 해법(RK4), linear algebra.</li>
+      </ul>
+    </section>
+
+    <h2>Sections</h2>
+    <ol class="toc">
+      <li id="toc-44-1" data-file="44-1-shortest-straightest.html">
+        <span class="toc-title">44.1 Shortest and Straightest</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: Euclidean 직선(가장 짧고 가장 곧다)과 휜 공간; geodesic(strong: <a href="../09-intrinsic-geometry/index.html#toc-9-5">Section 9.5</a>, <a href="../23-geodesics/index.html#toc-23-1">Section 23.1</a>; <a href="../00-tour/0-5-intrinsic.html#i-0-5-4">Definition 0.5.4</a>)의 두 특징; 예: sphere의 great circle(§7), graph의 shortest path, boundary가 있는 영역, 빛의 경로; isometry에 대한 불변성(intrinsic; <a href="../09-intrinsic-geometry/index.html#toc-9-3">Section 9.3</a> 상기); locally shortest와 globally shortest의 차이(sphere의 긴 호); variational 관점: curve의 length와 energy \(E(\gamma) = \tfrac12\int\abs{\gamma'}^2\,dt\)의 first variation(Derivation); Proposition(증명): 평면에서 critical point는 직선; Proposition(증명, \(\R^3\)의 surface): energy의 critical point ⇔ 가속도가 surface에 수직 ⇔ \(\kappa_g = 0\)(<a href="../39-surface-curvature/index.html#toc-39-2">Section 39.2</a> 상기); minimum이 아닌 saddle point인 geodesic(sphere의 긴 호) · Running examples: sphere(great circle), cylinder 위의 helix(geodesic, §7), 평면 · Go deeper: <a href="../09-intrinsic-geometry/index.html#toc-9-5">Section 9.5</a>, <a href="../23-geodesics/index.html#toc-23-1">Section 23.1</a>, <a href="../23-geodesics/index.html#toc-23-4">Section 23.4</a>, <a href="../00-tour/0-5-intrinsic.html#sec-geodesics">Section 0.5</a> · Lecture: L21–22 slides 3–17 · Notes: 노트에는 이 장이 없다(슬라이드와 <a class="cite" href="../../references.html#Crane17">[Crane17]</a>)</p>
+      </li>
+      <li id="toc-44-2" data-file="44-2-shortest-paths-cut-locus.html">
+        <span class="toc-title">44.2 Discrete Shortest Paths, Cut Locus, and Medial Axis</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: boundary value problem로서의 shortest path; edge graph 위의 Dijkstra path는 refinement해도 geodesic이 아니다(예와 metrication error); unfolding: triangle strip을 평면에 펼치면 그 안의 locally shortest path는 직선이다(Proposition, 증명); vertex를 지나는 path(Proposition, 증명): \(\delta_i \gt 0\)(cone)인 vertex는 locally shortest path가 지나지 않고, \(\delta_i = 0\)이면 곧게 지나고, \(\delta_i \lt 0\)(saddle)이면 여러 locally shortest path가 지난다(<a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>의 angle defect); algorithm: Dijkstra 뒤 path straightening, window를 전파하는 MMP(<a class="cite" href="../../references.html#Mitchell87">[Mitchell87]</a>; 진술과 복잡도), fast marching(<a class="cite" href="../../references.html#Kimmel98">[Kimmel98]</a>; 진술); smooth와 discrete의 차이(saddle vertex가 pseudo-source가 됨); closed geodesic(한 문단); cut locus(strong: cut point, <a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a>)와 injectivity radius(strong, §6.5의 \(\inj\)); polyhedral surface의 cut locus는 모든 cone vertex를 포함한다(Proposition, 증명); medial axis(dfn: boundary 위의 가장 가까운 점이 둘 이상인 점들의 집합. medial ball과 radius function으로 원래 모양을 복원한다); 예: 정사각형(대각선), 직사각형, ellipse(장축 위의 선분), nonconvex polygon(포물선 조각이 생긴다); 3D medial axis와 surface reconstruction(In computer vision, 한 문단) · Running examples: cube 표면(전개도로 최단 거리, cut locus), icosphere(cut locus ≈ antipode), ellipse \((2\cos t, \sin t)\)의 medial axis(끝점 \((\pm\tfrac32, 0)\)은 장축 끝 vertex의 center of curvature, verify), 정사각형 · Helpers: dgmesh.neighbors(Dijkstra), corner_angles, angle_defect · Overlap: angle defect의 정의는 Section 40.1 · Go deeper: <a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a>, <a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>(geodesic distance 상자) · Lecture: L21–22 slides 18–34 · Notes: 노트에는 없다(슬라이드만)</p>
+      </li>
+      <li id="toc-44-3" data-file="44-3-straightest-geodesics.html">
+        <span class="toc-title">44.3 Discrete Straightest Geodesics</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: “곧다”의 두 관점: 기하적(\(\kappa_g = 0\), <a href="../39-surface-curvature/index.html#toc-39-2">Section 39.2</a>)과 동역학적(가속도 0, Section 44.5); discrete surface 위의 discrete curve(face 안에서는 선분, edge에서는 펼쳐서, vertex에서는?); discrete geodesic curvature(dfn: face 안과 edge에서는 펼친 turning angle(<a href="../32-ddg-overview/index.html#toc-32-3">Section 32.3</a>의 turning angle과 같은 생각), vertex에서는 curve 왼쪽 각의 합 \(\theta_l\)과 오른쪽 각의 합 \(\theta_r\)로 정의. 정확한 정규화는 <a class="cite" href="../../references.html#Polthier98">[Polthier98]</a>를 확인해 적는다); discrete straightest geodesic(dfn: discrete geodesic curvature가 어디서나 0인 curve. vertex에서 \(\theta_l = \theta_r\)); Proposition(증명): 초기값 문제(점 + 방향)가 vertex를 지나도 유일하게 계속된다(shortest path와 대비); Proposition(증명): \(\delta_i\ne0\)인 vertex를 지나는 straightest geodesic은 locally shortest가 아니다; discrete Gauss–Bonnet과의 관계(boundary의 turning \(\pi - \sum\theta\) = discrete geodesic curvature, <a href="../40-discrete-curvature-integral/index.html#toc-40-2">Section 40.2</a>) · Running examples: cube 꼭짓점을 지나는 straightest path(\(\theta_l = \theta_r = 3\pi/4\)), icosphere 위 straightest path와 great circle의 비교, 평면 grid · Algorithm: straightest geodesic tracing(ray와 edge의 교차, vertex 처리; Implementation) · Overlap: smooth geodesic curvature는 Section 39.2. 여기서 discrete 판을 정의한다 · Go deeper: <a class="cite" href="../../references.html#Polthier98">[Polthier98]</a>, <a href="../09-intrinsic-geometry/index.html#toc-9-5">Section 9.5</a> · Lecture: L21–22 slides 35–40 · Notes: 노트에는 없다(슬라이드만)</p>
+      </li>
+      <li id="toc-44-4" data-file="44-4-exp-log-karcher.html">
+        <span class="toc-title">44.4 Exponential Map, Logarithm Map, and Karcher Mean</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: geodesic과 wavefront; exponential map(strong: <a href="../23-geodesics/index.html#toc-23-2">Section 23.2</a>, <a href="../10-gauss-bonnet/index.html#toc-10-6">Section 10.6</a>; <a href="../00-tour/0-8-riemannian.html#sec-geodesics">Section 0.8</a>) \(\exp_p(v)\); logarithm map(dfn: \(\exp_p\)가 injective인 영역에서의 inverse. \(\log_p(q)\)는 가장 짧은 geodesic의 처음 방향 × 길이), 존재(Hopf–Rinow; 진술, <a href="../23-geodesics/index.html#toc-23-5">Section 23.5</a>)와 유일성이 깨지는 곳(cut locus, Section 44.2), injectivity radius; Karcher mean(dfn: \(\sum_id(x, y_i)^2\)의 minimizer); Proposition(sphere에서 증명, 일반은 Derivation): cut locus 밖에서 \(\grad\tfrac12d(\cdot, y)^2 = -\log_x(y)\), 따라서 Karcher mean은 \(\sum_i\log_x(y_i) = 0\)을 만족; fixed-point algorithm(log → 평균 → exp; Implementation), 유일하지 않은 예(sphere의 antipodal 두 점); discrete exponential map(dfn: Section 44.3의 straightest geodesic tracing으로 정의한 \(\exp_p\)); Proposition(증명): discrete injectivity radius는 가장 가까운 cone vertex까지의 거리; log map의 계산(vector heat method — 진술, 한 문단); 응용: rotation averaging(<a href="../00-tour/0-8-riemannian.html#sec-cv-averaging">Section 0.8</a>, <a href="../28-lie-groups-poses/index.html">Chapter 28</a>) · Running examples: unit sphere의 닫힌 식 \(\exp_p(v) = \cos\abs{v}\,p + \sin\abs{v}\,v/\abs{v}\)와 \(\log_p\)(verify), sphere 위 점들의 Karcher mean, icosphere의 discrete exp와 비교 · Go deeper: <a href="../23-geodesics/index.html#toc-23-2">Section 23.2</a>, <a href="../00-tour/0-8-riemannian.html">Section 0.8</a>, <a href="../28-lie-groups-poses/index.html">Chapter 28</a> · Lecture: L21–22 slides 41–50 · Notes: 노트에는 없다(슬라이드만)</p>
+      </li>
+      <li id="toc-44-5" data-file="44-5-geodesic-equation.html">
+        <span class="toc-title">44.5 The Geodesic Equation</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: 동역학적 관점: 가속도 0; covariant derivative의 extrinsic 정의(\(\R^3\)의 미분을 tangent plane에 projection; strong: <a href="../09-intrinsic-geometry/index.html#toc-9-4">Section 9.4</a>)와 intrinsic 정의(성질로 특징짓기; strong: <a href="../22-connections/index.html#toc-22-1">Section 22.1</a>); Lie bracket(strong: <a href="../15-vector-fields-flows/index.html#toc-15-2">Section 15.2</a>)은 torsion-free 조건에 필요한 만큼만; metric에서 covariant derivative 정하기(Koszul formula; 진술, <a href="../22-connections/index.html#toc-22-5">Section 22.5</a>); Christoffel symbols(strong: <a href="../09-intrinsic-geometry/index.html#toc-9-1">Section 9.1</a>, §6.5의 공식); geodesic equation \(\ddot\gamma^k + \sum_{i,j}\Gamma^k_{ij}\dot\gamma^i\dot\gamma^j = 0\)(strong: <a href="../23-geodesics/index.html#toc-23-1">Section 23.1</a>; \(D_t\gamma' = 0\)에서 Derivation); parametrized surface 위에서 geodesic 계산: ODE를 RK4(dgnum)로 풀기(Implementation)와 정확성 확인(sphere의 great circle, cylinder의 helix, 보존량 \(\abs{\gamma'}\)); torus of revolution의 geodesic과 Clairaut 관계(선택) · Conventions: 합 기호 \(\sum\)를 명시한다(§6.1; Crane은 Einstein 표기). 점 표기 \(\dot\gamma^i\)는 §6.1이 허용한 geodesic equation의 성분에만 쓴다 · Running examples: sphere의 Christoffel symbols(§7: \(\Gamma^\theta_{\varphi\varphi} = -\sin\theta\cos\theta\), \(\Gamma^\varphi_{\theta\varphi} = \cot\theta\)), cylinder(helix), torus of revolution · Helpers: dgnum.rk4, dgsym.christoffel · Go deeper: <a href="../09-intrinsic-geometry/index.html#toc-9-1">Section 9.1</a>, <a href="../09-intrinsic-geometry/index.html#toc-9-4">Section 9.4</a>, <a href="../22-connections/index.html">Chapter 22</a>, <a href="../23-geodesics/index.html#toc-23-1">Section 23.1</a> · Lecture: L21–22 slides 51–60 · Notes: 노트에는 없다(슬라이드만)</p>
+      </li>
+      <li id="toc-44-6" data-file="44-6-heat-method.html">
+        <span class="toc-title">44.6 Geodesic Distance via the Heat Method</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: distance function의 성질 \(\abs{\grad\varphi} = 1\)(eikonal equation, strong: <a href="../30-radiance-field-surfaces/30-1-implicit-surfaces-eikonal.html#sec-eikonal">Section 30.1</a>)과 그것을 직접 풀기의 어려움(nonlinear, fast marching의 순서 의존); heat kernel(strong: <a href="../31-meshes/31-4-spectral-geometry.html#sec-heat">Section 31.4</a>)과 Varadhan's formula \(d(x, y) = \lim_{t\to0}\sqrt{-4t\log k_t(x, y)}\)(진술); heat method(dfn: (I) backward Euler 한 step \((M - tL)u = \delta_\gamma\)(<a href="../42-laplace-beltrami/index.html#toc-42-6">Section 42.6</a>), (II) face마다 \(X = -\grad u/\abs{\grad u}\), (III) \(\varphi\)에 대한 Poisson 문제를 integrated divergence로 풀고 최솟값을 0으로 옮긴다. 부호는 이 study set의 \(L\)에 맞춘다); 이산 연산: face마다의 gradient(hat function gradient, <a href="../42-laplace-beltrami/index.html#toc-42-3">Section 42.3</a> 상기), vertex의 integrated divergence \(\tfrac12\sum(\cot\theta_1\inner{e_1}{X} + \cot\theta_2\inner{e_2}{X})\)(Proposition, 증명: FEM의 weak divergence); 왜 정규화하는가(크기의 오차를 버리고 방향만 믿는다); time step \(t = \bar\ell^2\)(평균 edge 길이의 제곱; 정확도의 trade-off는 수치로); boundary condition(Dirichlet 해와 Neumann 해의 평균, <a href="../42-laplace-beltrami/index.html#toc-42-5">Section 42.5</a>); prefactorization(Cholesky 재사용); MMP와 Dijkstra와의 정확도·속도 비교; 확장(HM2의 vector heat method 등, 한 문단) · Running examples: icosphere(북극에서의 거리와 정확한 \(r\theta\)), torus_mesh, planar grid(Euclidean 거리), cube 표면(전개도의 정확한 거리와 비교) · Algorithm: heat method 전체(Implementation, 30줄 이하) · Conventions: heat method의 기호 \(u\)(열), \(X\)(정규화한 gradient), \(\varphi\)(거리)는 Crane13과 같다. time step \(t\)와 평균 edge 길이 \(\bar\ell\) · Overlap: <a href="../31-meshes/31-4-spectral-geometry.html#sec-heat">Section 31.4</a>와 <a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>는 결과와 직관만 strong으로 다루었다. 여기서 완전한 이산화와 증명을 한다 · Helpers: dgmesh.cotan_laplacian, mass_voronoi; dgdec.barycentric_gradients(heat method 전용 helper는 아직 없다: 장의 lib/에 두고 보고) · Go deeper: <a class="cite" href="../../references.html#Crane13">[Crane13]</a>, <a class="cite" href="../../references.html#Crane17">[Crane17]</a>, <a href="../31-meshes/31-4-spectral-geometry.html#sec-heat">Section 31.4</a> · Lecture: HM1, HM2(재생목록 밖의 보충 영상) · Notes: <a class="cite" href="../../references.html#Crane17">[Crane17]</a></p>
+      </li>
+    </ol>
+
+    <section class="handoff">
+      <h2>Leads to</h2>
+      <ul>
+        <li>straightest geodesic과 geodesic을 따른 transport → <a href="../45-vector-field-design/index.html">Chapter 45</a>(discrete connection, parallel transport, holonomy).</li>
+        <li>angle defect가 path에 미치는 영향(cone vertex, injectivity radius) → <a href="../45-vector-field-design/index.html#toc-45-3">Section 45.3</a>(holonomy = angle defect).</li>
+        <li>heat method와 Poisson solve → <a href="../45-vector-field-design/index.html">Chapter 45</a>(같은 prefactorization을 Hodge decomposition에 쓴다).</li>
+        <li>Go deeper(Track 3): <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>, <a href="../22-connections/index.html">Chapter 22</a>, <a href="../23-geodesics/index.html">Chapter 23</a>, <a href="../26-gauss-bonnet-jacobi/index.html">Chapter 26</a>(Jacobi field와 conjugate point).</li>
+        <li>Open question: geodesic을 따라 vector를 옮기는 parallel transport를 mesh 전체에서 일관되게 정할 수 있는가? 그럴 수 없다면 그 장애물은 무엇이고, 원하는 singularity를 가진 vector field는 어떻게 만드는가? → <a href="../45-vector-field-design/index.html">Chapter 45</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="../43-conformal-geometry/index.html">← 43. Conformal Geometry</a>
+    <a rel="next" href="../45-vector-field-design/index.html">45. Vector Field Decomposition and Design →</a>
+  </nav>
+</body>
+</html>

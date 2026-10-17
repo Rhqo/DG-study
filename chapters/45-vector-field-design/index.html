@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>45. Vector Field Decomposition and Design — DG Study</title>
+  <meta name="dg-id" content="45">
+  <meta name="dg-status" content="planned">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb"><a href="../../index.html">Contents</a> › <span>45. Vector Field Decomposition and Design</span></nav>
+
+  <main>
+    <header>
+      <h1>45. Vector Field Decomposition and Design</h1>
+      <p class="meta">Track 2. Discrete Differential Geometry · Lectures: none (no lecture video; assignment A6 only) · References: <a class="cite" href="../../references.html#Cr">[Cr ch8]</a>, <a class="cite" href="../../references.html#Crane10">[Crane10]</a>, <a class="cite" href="../../references.html#Eppstein03">[Eppstein03]</a></p>
+      <p class="threads">Threads: <strong>T4</strong> Parallel transport and geodesics (discrete connections, holonomy, trivial connections) · <strong>T5</strong> Integration and topology (Hodge decomposition, homology generators and harmonic forms, the index sum equals \(\chi\))</p>
+    </header>
+
+    <section class="questions">
+      <h2>Questions</h2>
+      <ul>
+        <li>surface 위의 vector field(1-form)를 curl-free, divergence-free, harmonic 성분으로 나누는 것은 mesh 위에서 무엇이고, harmonic 성분은 왜 surface의 genus를 반영하는가?</li>
+        <li>원하는 위치와 index의 singularity를 가진 가장 매끄러운 vector field를 어떻게 설계하는가? 이때 angle defect와 Gauss–Bonnet theorem은 어떤 제약을 주는가?</li>
+      </ul>
+    </section>
+
+    <section class="inherits">
+      <h2>Builds on</h2>
+      <ul>
+        <li><a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>: \(d_0, d_1\), \(\star_1\), discrete codifferential, dual form, chain과 cycle. <a href="../42-laplace-beltrami/index.html">Chapter 42</a>: Poisson solve와 prefactorization. <a href="../44-discrete-geodesics/index.html">Chapter 44</a>: straightest geodesic과 geodesic을 따른 transport. <a href="../40-discrete-curvature-integral/index.html">Chapter 40</a>: angle defect, discrete Gauss–Bonnet theorem.</li>
+        <li><a href="../33-combinatorial-surfaces/index.html">Chapter 33</a>: dual complex, halfedge mesh, \(\chi\). <a href="../35-exterior-calculus/index.html#toc-35-5">Section 35.5</a>: L2 inner product와 \(d^*\). <a href="../43-conformal-geometry/index.html#toc-43-3">Section 43.3</a>: complex structure \(J\).</li>
+        <li>Track 1: <a href="../00-tour/0-7-forms.html#sec-de-rham">Section 0.7</a>(closed와 exact, In computer vision 상자의 Hodge decomposition), <a href="../00-tour/0-5-intrinsic.html#sec-parallel-transport">Section 0.5</a>(parallel transport와 holonomy, surface 위 vector field 상자).</li>
+        <li>이 장에는 강의 영상이 없다(Cr ch8과 과제 A6). 가정하는 배경: linear algebra(orthogonal decomposition, least squares, kernel과 image), graph의 spanning tree.</li>
+      </ul>
+    </section>
+
+    <h2>Sections</h2>
+    <ol class="toc">
+      <li id="toc-45-1" data-file="45-1-hodge-decomposition.html">
+        <span class="toc-title">45.1 Hodge Decomposition</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: “나누기는 쉽다”: inner product space에서 \(\R^m = \im A\oplus\ker A^{\mathsf T}\)(Proposition, 증명; weighted inner product 판); smooth Helmholtz–Hodge decomposition(닫힌 oriented surface): Hodge decomposition(dfn: \(\omega = d\alpha + d^*\beta + \gamma\)의 orthogonal 분해)과 harmonic 1-form(dfn: \(d\gamma = 0\), \(d^*\gamma = 0\)); vector field 판 \(X = \grad u + J\grad v + h\)(curl-free, divergence-free, harmonic; Section 43.3의 \(J\)); smooth 판은 Proof sketch(elliptic theory는 Go deeper); Theorem(완전한 증명): discrete Hodge decomposition \(\R^{n_1} = \im d_0\oplus\im\star_1^{-1}d_1^{\mathsf T}\oplus\mathcal{H}\), \(\star_1\)-inner product에 대해 orthogonal, \(\mathcal{H} = \ker d_1\cap\ker d_0^{\mathsf T}\star_1\)(discrete harmonic 1-form, dfn); 계산(Cr §8.1.3): \(d_0^{\mathsf T}\star_1d_0\alpha = d_0^{\mathsf T}\star_1\omega\)(Chapter 42의 Poisson solve), \(d_1\star_1^{-1}d_1^{\mathsf T}\tilde\beta = d_1\omega\), 나머지가 harmonic 부분; discrete codifferential(<a href="../36-discrete-exterior-calculus/index.html#toc-36-6">Section 36.6</a> 상기); Theorem(증명): \(\mathcal{H}\cong\ker d_1/\im d_0\), 그 dimension이 \(2g\)라는 것은 Section 45.2의 tree-cotree 개수로 확인 · Warning: \(\star_1\)에 음의 원소가 있으면(non-Delaunay) \(\star_1\)-inner product가 inner product가 아니다. intrinsic Delaunay mesh나 양의 Hodge star를 쓰거나 가정으로 명시한다 · Conventions(Conventions box): codifferential은 \(d^*\)(<a href="../35-exterior-calculus/index.html#toc-35-5">Section 35.5</a>)이고 Crane(Cr §8.1)의 \(\delta\)와 부호를 비교한다. 이 장에서만 쓰는 기호(connection angle 등)를 이 상자에 모은다. Crane은 connection angle을 \(\varphi_{ij}\)로 쓰지만 hat function \(\varphi_i\)와 겹치므로 다른 문자를 고르고 최종 보고에 적는다 · Running examples: icosphere(\(\mathcal{H} = 0\)), torus_mesh(2, 0.8, nu, nv)(\(\dim\mathcal{H} = 2\)), 평면 grid 위의 \(\omega\) = gradient + rotated gradient + 상수 field(boundary가 있으면 harmonic의 뜻이 바뀐다 — 기본 예는 boundary 없는 mesh로) · Helpers: dgdec.d0, d1, hodge1, hodge_inverse, laplacian_psd · Go deeper: <a href="../00-tour/0-7-forms.html#sec-de-rham">Section 0.7</a>, <a href="../19-de-rham/index.html#toc-19-5">Section 19.5</a>, <a class="cite" href="../../references.html#Desbrun08">[Desbrun08]</a> · Lecture: 없음(과제 A6) · Notes: Cr §8.1(§8.1.1–8.1.3)</p>
+      </li>
+      <li id="toc-45-2" data-file="45-2-homology-harmonic-bases.html">
+        <span class="toc-title">45.2 Homology Generators and Harmonic Bases</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: cycle과 boundary 상기(<a href="../36-discrete-exterior-calculus/index.html#toc-36-2">Section 36.2</a>); simplicial homology(dfn: 실수 계수 \(H_1 = \ker\partial_1/\im\partial_2\)); homology generator(dfn: \(H_1\)의 basis를 대표하는 loop들)와 dual loop; tree-cotree decomposition(dfn: primal spanning tree \(T\), \(T\)의 edge와 교차하지 않는 dual spanning tree \(T^\star\), 그리고 남는 edge들; <a class="cite" href="../../references.html#Eppstein03">[Eppstein03]</a>); Theorem(완전한 증명): 남는 edge는 정확히 \(n_1 - (n_0 - 1) - (n_2 - 1) = 2 - \chi = 2g\)개이고, 각 edge가 \(T\) 안에서 닫는 loop가 homology generator다(generator임은 증명 또는 Proof sketch와 참고문헌); algorithm(BFS 두 번; Implementation); harmonic basis(dfn: generator loop마다 그 dual loop를 가로지르는 closed 1-form을 만들고 Section 45.1의 projection으로 harmonic 부분을 취한 것; Cr §8.2.2); Proposition(증명): 이렇게 얻은 \(2g\)개는 \(\mathcal{H}\)의 basis(period matrix가 가역); de Rham cohomology와의 대응(진술, Go deeper) · Running examples: torus_mesh(meridian과 longitude 두 generator), icosphere(0개), dgmesh.genus2_mesh(4개, 선택) · Helpers: dgdec.HalfedgeMesh, d0, d1; dgmesh.genus2_mesh(tree-cotree helper는 아직 없다: 장의 lib/에 두고 보고) · Go deeper: <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>, <a href="../19-de-rham/index.html#toc-19-5">Section 19.5</a> · Lecture: 없음(과제 A6) · Notes: Cr §8.2(§8.2.1–8.2.2)</p>
+      </li>
+      <li id="toc-45-3" data-file="45-3-discrete-connections.html">
+        <span class="toc-title">45.3 Discrete Connections and Parallel Transport</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: parallel transport(strong: <a href="../09-intrinsic-geometry/index.html#toc-9-4">Section 9.4</a>, <a href="../22-connections/index.html#toc-22-3">Section 22.3</a>; <a href="../00-tour/0-5-intrinsic.html#sec-parallel-transport">Section 0.5</a>)와 connection의 아이디어; face마다 기준 방향에 대한 angle로 vector field를 표현; discrete Levi-Civita connection(dfn: 이웃한 두 face를 공유 edge를 따라 펼쳐 “회전 없이” 옮기는 transport); discrete connection(dfn: dual edge마다 Levi-Civita로부터 더 돌리는 각. 방향을 바꾸면 부호가 바뀌는 dual 1-form); holonomy(strong: <a href="../22-connections/index.html#toc-22-3">Section 22.3</a>): dual cycle을 따라 transport했을 때의 각의 차이; Theorem(완전한 증명): discrete Levi-Civita connection의 vertex dual cell 둘레 holonomy = angle defect \(\delta_i\)(<a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>) — discrete Gaussian curvature의 또 다른 의미; Gauss map으로 sphere의 connection을 당겨 온다는 Kobayashi의 결과(진술); curvature of a discrete connection(dfn: dual cell 둘레의 holonomy) · Running examples: cube 꼭짓점 둘레의 holonomy \(\pi/2\), icosphere(level)에서 위도 띠를 한 바퀴 도는 holonomy \(\approx 2\pi(1 - \cos\theta_0)\)(§7의 parallel transport 검증 예, mod \(2\pi\)), 평면 grid(holonomy 0) · Helpers: dgmesh.face_frames, corner_angles, angle_defect(connection helper는 장의 lib/) · Overlap: curve를 따른 discrete parallel transport는 <a href="../37-curves-smooth-discrete/index.html#toc-37-5">Section 37.5</a>(curve의 Bishop frame), geodesic을 따른 transport는 <a href="../44-discrete-geodesics/index.html#toc-44-3">Section 44.3</a>–<a href="../44-discrete-geodesics/index.html#toc-44-4">Section 44.4</a>. 여기서는 surface 전체의 connection을 정의한다 · Go deeper: <a href="../22-connections/index.html#toc-22-3">Section 22.3</a>, <a href="../09-intrinsic-geometry/index.html#toc-9-4">Section 9.4</a>, <a href="../00-tour/0-5-intrinsic.html#i-0-5-7">Example 0.5.7</a>, <a class="cite" href="../../references.html#Crane10">[Crane10]</a> · Lecture: 없음(과제 A6) · Notes: Cr §8.3.1–8.3.4, §8.3.6</p>
+      </li>
+      <li id="toc-45-4" data-file="45-4-trivial-connections.html">
+        <span class="toc-title">45.4 Vector Field Design with Trivial Connections</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: trivial connection(dfn: 지정한 singularity를 빼고 모든 contractible loop의 holonomy가 0인 discrete connection); Proposition(증명): trivial connection의 transport는 path에 무관하므로 vector 하나에서 전체 vector field가 정해진다; Proposition(증명): 모든 discrete vector field는 어떤 trivial connection에 대해 parallel이다; singularity와 index(strong: Poincaré–Hopf theorem, <a href="../10-gauss-bonnet/index.html#toc-10-5">Section 10.5</a>; <a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>의 holonomy 상자); Theorem(증명): 지정한 index \(k_i\)를 갖는 trivial connection이 있으려면 \(\sum_ik_i = \chi\)(<a href="../40-discrete-curvature-integral/index.html#toc-40-2">Section 40.2</a>의 discrete Gauss–Bonnet 사용); 계산(Cr §8.3.7, §8.4): dual cell마다 holonomy가 \(-\delta_i + 2\pi k_i\)가 되고 homology generator(Section 45.2) 둘레의 holonomy도 지정한 값이 되는 connection angle 중 norm이 가장 작은 것 — Theorem(증명): 최소 norm 해는 유일하고 Hodge decomposition(Section 45.1)의 co-exact 부분과 harmonic 보정으로 주어진다; algorithm(Cr §8.4.1의 “Trivial Connections++”; Implementation); spanning tree를 따라 transport해 vector field를 추출; 결과: 지정한 singularity를 가진 가장 매끄러운 field, singularity 위치 옮기기 · In computer vision: direction field와 quad remeshing, texture synthesis(<a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>의 상자) · Running examples: icosphere(index \(+1\) 두 개, \(\chi = 2\)), torus_mesh(singularity 없음, \(\chi = 0\)), cube(꼭짓점 8개의 \(\delta_i = \pi/2\)) · Helpers: dgdec.d0, d1, hodge1, HalfedgeMesh(trivial connection helper는 장의 lib/) · Go deeper: <a class="cite" href="../../references.html#Crane10">[Crane10]</a>, <a href="../10-gauss-bonnet/index.html#toc-10-5">Section 10.5</a>, <a href="../26-gauss-bonnet-jacobi/index.html#toc-26-2">Section 26.2</a> · Lecture: 없음(과제 A6) · Notes: Cr §8.3.5, §8.3.7, §8.4(§8.4.1)</p>
+      </li>
+    </ol>
+
+    <section class="handoff">
+      <h2>Leads to</h2>
+      <ul>
+        <li>Track 2의 마지막 장이다. <a href="../32-ddg-overview/index.html">Chapter 32</a>의 질문(“smooth 정의 하나에 discrete 정의가 여럿 있을 때 무엇을 보존하는지 보고 고른다”)을 돌아보면: \(dd = 0\)과 Stokes(Chapter 36), Gauss–Bonnet(Chapter 40), holonomy = angle defect(이 장)는 정확히 보존되고, pointwise curvature와 Laplacian은 수렴의 의미로만 맞는다(Chapter 41, 42).</li>
+        <li>Go deeper(Track 3): Hodge decomposition과 harmonic form의 smooth 이론과 cohomology → <a href="../19-de-rham/index.html">Chapter 19</a>; connection, parallel transport, holonomy → <a href="../22-connections/index.html">Chapter 22</a>; Poincaré–Hopf theorem → <a href="../10-gauss-bonnet/index.html#toc-10-5">Section 10.5</a>; curvature와 topology → <a href="../26-gauss-bonnet-jacobi/index.html">Chapter 26</a>.</li>
+        <li>Open question: smooth surface 위 Levi-Civita connection의 holonomy와 curvature의 관계를 좌표와 tensor로 쓰면 무엇이 되고, 2차원을 넘는 manifold에서는 무엇이 바뀌는가? → <a href="../22-connections/index.html">Chapter 22</a>, <a href="../24-curvature/index.html">Chapter 24</a>(Track 3)</li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="../44-discrete-geodesics/index.html">← 44. Geodesics</a>
+    <a rel="next" href="../04-curves/index.html">4. Curves →</a>
+  </nav>
+</body>
+</html>

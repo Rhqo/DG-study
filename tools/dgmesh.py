@@ -1,6 +1,7 @@
-"""Triangle-mesh helpers shared by the figure and verify scripts of Chapter 31.
+"""Triangle-mesh helpers shared by the figure, verify and animation scripts of Chapter 31 and Track 2
+(Chapters 32-45). The discrete exterior calculus built on top of these helpers is in tools/dgdec.py.
 
-Conventions (Section 31.1, Conventions box):
+Conventions (Section 31.1, Conventions box; GUIDELINES 2.5):
 - V: (n0, 3) float array of vertex positions x_i, F: (n2, 3) int array of faces (i, j, k).
   A face (i, j, k) is positively oriented; its normal is (x_j - x_i) x (x_k - x_i) / |...|.
 - Laplacian sign follows the study set: Delta = div grad. The cotan matrix L returned here has
@@ -8,13 +9,16 @@ Conventions (Section 31.1, Conventions box):
   semidefinite and M^{-1} L approximates Delta. Many codes use the opposite sign (L_code = -L).
 - Euler characteristic chi = n0 - n1 + n2 (GUIDELINES 6.3; we do not write V - E + F).
 
-Import from a figure or verify script with::
+The module lives in tools/, which is on PYTHONPATH for every figure, verify and animation script
+(``PYTHONPATH=tools python3 <script>`` from the project root; tools/check_all.sh and tools/render_anims.sh set it).
+Import it with::
 
-    import sys, pathlib
-    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
     import dgmesh as dm
 
-The module limits BLAS threads to 4 (this machine freezes under long all-core loads).
+Import it before numpy (or anything that imports numpy, such as dgfig) so that the thread limit below takes
+effect: the module limits BLAS threads to 4 (this machine freezes under long all-core loads).
+
+Self-test: ``python3 tools/dgmesh.py`` (run by tools/check_all.sh).
 """
 
 import os
@@ -944,3 +948,53 @@ def uv_distortion(V, F, UV):
         J = P @ np.linalg.inv(U)
         s[f] = np.linalg.svd(J, compute_uv=False)
     return s, det
+
+
+# ---------------------------------------------------------------------------
+# self-test (python3 tools/dgmesh.py; run by tools/check_all.sh)
+# ---------------------------------------------------------------------------
+
+
+def _selftest():
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from dgcheck import check, close, summary
+
+    for lv, cnt in ((0, (12, 30, 20)), (2, (162, 480, 320))):
+        V, F = icosphere(lv)
+        check(f"icosphere({lv}): (n0, n1, n2) = {cnt}, chi = 2, manifold, consistently oriented, outward",
+              counts(F) == cnt and euler_characteristic(F) == 2 and is_manifold(F) and oriented_consistently(F)
+              and signed_volume(V, F) > 0 and np.allclose(np.linalg.norm(V, axis=1), 1.0))
+    Vt, Ft = torus_mesh(2.0, 0.8, 24, 48)
+    check("torus_mesh(2, 0.8, 24, 48): chi = 0, manifold, outward (signed volume > 0)",
+          euler_characteristic(Ft) == 0 and is_manifold(Ft) and oriented_consistently(Ft) and signed_volume(Vt, Ft) > 0)
+    close("torus_mesh: area -> 4 pi^2 R r and volume -> 2 pi^2 R r^2 (within 2%)",
+          [face_areas(Vt, Ft).sum() / (4 * np.pi ** 2 * 1.6), signed_volume(Vt, Ft) / (2 * np.pi ** 2 * 1.28)],
+          [1.0, 1.0], tol=0.02)
+    Vg, Fg = grid_mesh(np.linspace(0, 1, 5), np.linspace(0, 1, 4))
+    check("grid_mesh 5x4: chi = 1, one boundary loop of 14 vertices, all faces counterclockwise",
+          euler_characteristic(Fg) == 1 and len(boundary_loop(Fg)) == 14 and np.all(face_cross(Vg, Fg)[:, 2] > 0))
+    check("mobius_mesh: orient() reports a conflict (non-orientable)", not orient(mobius_mesh()[1])[1])
+    bowtie = np.array([[0, 1, 2], [0, 2, 3], [0, 3, 1], [0, 4, 5], [0, 5, 6], [0, 6, 4]])
+    check("two closed fans sharing a vertex: not a manifold (vertex link is two loops)",
+          not is_manifold(bowtie) and link_type(vertex_link(bowtie, 0)) == "other")
+    for name, (V, F), chi in (("icosphere(2)", icosphere(2), 2), ("torus", (Vt, Ft), 0), ("grid", (Vg, Fg), 1)):
+        close(f"sum of angle defects = 2 pi chi on {name}", angle_defect(V, F).sum(), 2 * np.pi * chi, tol=1e-9)
+        L = cotan_laplacian(V, F)
+        check(f"cotan matrix on {name}: symmetric, L 1 = 0, -L positive semidefinite",
+              np.abs(L - L.T).max() < 1e-13 and np.abs(L.sum(1)).max() < 1e-12
+              and np.linalg.eigvalsh(-L).min() > -1e-10)
+        close(f"cotan_apply(V, F, V) = L V on {name}", cotan_apply(V, F, V), L @ V, tol=1e-12)
+        close(f"mass_barycentric and mass_voronoi sum to the total area on {name}",
+              [mass_barycentric(V, F).sum(), mass_voronoi(V, F).sum()], [face_areas(V, F).sum()] * 2, tol=1e-12)
+    V, F = icosphere(3)
+    lam, Phi = generalized_eigs(cotan_laplacian(V, F), mass_voronoi(V, F), k=4)
+    close("unit sphere (icosphere(3)): -Delta eigenvalues 0, 2, 2, 2 = l(l + 1)", lam, [0, 2, 2, 2], tol=1e-4)
+    close("generalized_eigs: Phi^T M Phi = I", Phi.T @ (mass_voronoi(V, F)[:, None] * Phi), np.eye(4), tol=1e-10)
+    H = mean_curvature_dihedral(V, F)
+    close("mean_curvature_dihedral on the unit sphere, outward N: mean H = -1 (within 1%)", H.mean(), -1.0, tol=0.01)
+    summary()
+
+
+if __name__ == "__main__":
+    _selftest()

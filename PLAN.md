@@ -504,7 +504,7 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
       - 부록 E에 Chrome 스크린샷이 잘리는 문제를 적었다.
     - 31장은 작성 중이다. 공개 사이트에 깨진 링크가 없도록 31 index는 planned 판으로만 commit했다(작업 트리는 그대로 둔다).
   - 2026-10-08: **31장 작성·검토 완료(reviewed).**
-    - 6절, 그림 26개(interactive 9개), verify 6개, 공용 helper `chapters/31-meshes/lib/dgmesh.py`
+    - 6절, 그림 26개(interactive 9개), verify 6개, 공용 helper `chapters/31-meshes/lib/dgmesh.py`(2026-10-18 `tools/dgmesh.py`로 옮김)
     - 검토 R1(31.1–31.3)이 고친 것
       - Hildebrandt06 예의 수치(consistent mass)
       - Figure 31.3.3의 원인 설명(둔각삼각형의 mixed area)
@@ -569,7 +569,7 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
       - glossary: 11개를 추가했다.
     - 남은 것
       - 400px에서 2–3패널 그림 글자가 작다(검토자 여럿이 지적). 사이트 전체에 확대 CSS를 검토한다.
-      - lib/*.py를 tools/로 옮길지 검토한다.
+      - lib/*.py를 tools/로 옮길지 검토한다. (2026-10-18: dgmesh는 tools/로 옮겼다. 28장 lib/는 그대로다)
 
 ## 12. 애니메이션: manim (2026-10-11, 사용자 지시)
 
@@ -628,3 +628,103 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
 - **남은 것(선택)**
   - `_helpers_a.Painter`, `_helpers_c/d.MeshView`, `_helpers_b.View`를 tools/dganim으로 옮긴다.
   - Sun09 원문에서 HKS의 a₁ 서술(“scalar curvature … Gaussian curvature”)을 확인한다(31.4 본문, 이번 작업 이전부터 있던 문장).
+
+## 13. Track 2: Discrete Differential Geometry (CMU 15-458/858) + 세 track 재구성 (2026-10-18, 사용자 지시)
+
+- 사용자 요청: "discrete differential geometry만 모아보려고 해. cmu의 강의 기준으로 할거야(재생목록 PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS, 교재 Crane DDG notes). 하면서 전체 교재를 다시 정리해보자. 심화 버전(part 123), 기초와 쉬운 버전(tour, part 0·4). part 순서도 다시 정해보자. 이 강의는 독립적인 섹션으로 두자."
+- 이어서: "5시간 한도에 도달해도 초기화되면 알아서 계속 진행하고, 작업이 끝나면 알아서 commit push 해줘."
+  - 그래서 cron(매시 17분, 세션 안에서만 유지, 7일 뒤 만료)이 자동 재개를 점검한다.
+  - push는 검토와 check_all을 통과한 단위마다 origin/main으로 한다(push = 공개).
+- **결정** (AskUserQuestion, 모두 추천안)
+  1. 순서는 Track 1 기초·입문(Tour → Part IV → Part 0) → Track 2 DDG(32–45) → Track 3 심화(Part I–III)다.
+  2. 장 번호는 그대로 둔다. URL, 항목 번호, 애니메이션 id가 바뀌지 않는다.
+  3. 31장은 Part IV에 남기고 DDG와 서로 링크한다.
+  4. DDG 목차는 14장 73절로 승인되었다. 재생목록에 없는 43 Conformal(L19–20)과 45 Vector Fields(노트 8장)도 넣는다.
+- **작업 공간**
+  - worktree `.claude/worktrees/ddg-cmu`, branch `worktree-ddg-cmu`. 원래 세션(dg-study-main)이 main checkout을 쓰고 있어서 분리했다.
+  - `refs`와 `.manim`은 main checkout으로의 symlink이고, `.git/info/exclude`에 등록해 두었다.
+- **자료**
+  - `refs/ddg-crane/crane-ddg-notes.pdf`: 2025-01-29판. PDF 쪽 = 인쇄 쪽 + 1
+  - `refs/ddg-crane/slides/`: 강의 슬라이드와 과제
+  - 강의와 영상, 슬라이드의 대응표는 references.html `#sec-refs-ddg`에 있다.
+- **기반 작업**
+  - 완료(통합 담당)
+    - GUIDELINES: §1 세 track, §2.4 31장 처리, §2.5(Track 2 원칙: 출처, 엄밀성, dfn 규칙, 절 구성, 기호, 기준 예제), §5 표(Cr, CMU-DDG), §5.1 Track 2 자료, §9(Track 열, 32–45 행, DDG 상세표, 의존 관계), §10 도구 목록, §11.3 상자 `discrete`·`code`
+    - style.css: `aside.box.discrete`(olive), `aside.box.code`(slate, pre)
+    - references.html `#sec-refs-ddg`: CMU-DDG, 강의 행 `CMU-DDG-L1` … `CMU-DDG-L21-22`, `CMU-DDG-VVF`, `CMU-DDG-HM1/HM2`, 논문 16개
+    - 루트 index.html: About의 세 track, "어디서 시작할까"의 세 경로, Table of Contents를 `sec-track-1/2/3`로 묶음(Part는 h4), Track 2 표(32–45, Planned), Dependencies
+    - pager: 03 index와 3.7의 next → 32, 04 index의 prev → 45
+  - tools agent(진행 중)
+    - `chapters/31-meshes/lib/dgmesh.py` → `tools/dgmesh.py`
+    - 새 `tools/dgdec.py`: DEC, 단체복합체, halfedge, discrete curve, 기하량의 미분. self-test를 check_all에 등록
+  - planning agent(진행 중): 장 개요 14개(`planned`). toc-note가 작성자에게 주는 계약이다.
+- **웨이브 계획**
+  - 원칙
+    - 선행 장이 **draft**가 되면 다음 장을 시작한다. 이전 원칙(§3의 4번)은 reviewed 뒤에 시작했다. 검토자가 번호를 바꾸지 않으므로(§15.6) 이렇게 풀었다.
+    - 아직 쓰이지 않은 선행 장은 §15.5대로 장 개요를 링크하고 todo를 단다. 검토 단계에서 확정한다.
+  - 두 갈래로 나눈다.
+    - A갈래(forms/DEC): 34 → 35 → 36 → 42 → 43
+    - B갈래(curves/surfaces/curvature): 32 → 37 → 38 → 39 → 40 → 41
+    - 그 뒤 44(← 39, 42) → 45(← 36, 42, 44)
+  - 웨이브
+    - W1: 32, 33, 34
+    - W2: 35, 37
+    - W3: 36, 38
+    - W4: 39, 42
+    - W5: 40, 43
+    - W6: 41, 44
+    - W7: 45
+  - 장 하나가 draft가 되면 검토 agent를 띄운다. 6절인 장은 2명이 절을 나누고, 4–5절인 장은 1명이다.
+  - 동시에 도는 agent는 작성과 검토를 합쳐 5명 이하로 둔다(이 컴퓨터의 부하).
+  - 통합: 웨이브마다 공유 파일(terms.tsv, glossary `#sec-glossary-ddg`, notation `#sec-ddg`, references)을 반영한다. 그다음 check_all을 돌리고 commit한다. 검토가 끝난 단위는 push한다.
+  - 끝난 뒤
+    - Track 2 통합 검토(§15.6의 3단계)
+    - 31장·Tour에서 DDG로 가는 링크를 단다.
+    - 애니메이션 단계(§12.8): 사용자가 Tour·31장에서 원했던 수준으로 한다.
+    - 마지막에 push한다.
+
+### 13.1 DDG 장 작성 agent 프롬프트 (템플릿)
+
+```
+너는 DG-study의 Track 2(Discrete Differential Geometry) {NN}장 「{제목}」 작성 담당이다.
+작업 공간: /home/kbh2/DG-study/.claude/worktrees/ddg-cmu (git worktree). 여기서만 명령을 실행한다. commit하지 않는다.
+1. CLAUDE.md와 GUIDELINES.md 전체를 읽는다. 특히 §2.5(Track 2 원칙)를 지킨다.
+2. 다음을 읽는다.
+   - chapters/{폴더}/index.html: 절 계획과 toc-note. toc-note가 계약이다.
+   - 이어받는 장들의 index와 이미 쓰인 절
+   - 31장과 Tour의 해당 절. 겹치는 서술은 링크로 비교하고 복사하지 않는다.
+   - tools/tests/fixtures/site/, notation.html, glossary.html, concepts.html
+   - tools/dgmesh.py와 tools/dgdec.py(공용 구현, 부호의 정본)
+3. 출처: refs/ddg-crane/crane-ddg-notes.pdf(PDF 쪽 = 인쇄 + 1)와 refs/ddg-crane/slides/의 해당 강의.
+   - 구성만 참고한다. 문장, 그림, 연습문제를 옮기지 않는다(§2.5 저작권).
+   - 영상은 볼 수 없으므로 영상 내용을 지어내지 않는다.
+4. 절을 순서대로 쓴다. 절마다 figures(§12, 그림 설명 규칙 §12.6 필수)와 verify(§13)를 만들고 실행한다.
+   - Implementation 상자의 코드와 coding 연습의 풀이는 verify에서 그대로 실행한다.
+   - 3D mesh에는 interactive 그림을 권장한다. 애니메이션은 이번 단계에서 만들지 않는다.
+5. 장 index.html을 고친다. 쓴 절을 링크로 바꾸고 draft로 올린다. Builds on과 Leads to를 실제 내용에 맞게 고친다.
+6. bash tools/check_all.sh --chapter {NN}을 통과시킨다. node tools/shot.mjs로 절마다 900px과 400px에서 렌더링을 확인한다.
+7. 담당 장 폴더 밖의 파일은 수정하지 않는다. 공유 파일에 반영할 것은 보고한다.
+   - 공용 helper가 더 필요하면 장 안의 lib/에 두고 보고한다(통합 담당이 tools/로 옮긴다).
+8. 최종 보고(§15.4): 만든 파일, 새 용어(terms.tsv 형식), 새 기호, 새 참고문헌, [확인 필요], 규약 결정, 다음 장이 알아야 할 것
+```
+
+### 13.2 DDG 장 검토 agent 프롬프트 (템플릿)
+
+```
+너는 DG-study Track 2 {NN}장 「{제목}」({절 범위})의 검토 담당이다. 작성자와 독립적으로 판단한다.
+작업 공간: /home/kbh2/DG-study/.claude/worktrees/ddg-cmu. 여기서만 명령을 실행한다. commit하지 않는다.
+1. GUIDELINES.md 전체를 읽는다. 특히 §2.5, §15.6, §16, §12.6.
+2. 장 전체를 처음부터 끝까지 읽는다(맡은 절은 자세히). 순서는 수학 오류 → 규약(§6, §2.5 기호와 부호, dfn 규칙) → 연결 → 흐름 → 표현이다.
+3. 검산
+   - verify를 다시 실행한다.
+   - 절마다 독립 검산을 1개 이상 한다. scratch는 /home/kbh/.claude/jobs/6f56e074/tmp/에 둔다.
+   - Implementation 상자의 코드를 직접 돌려 본다.
+   - Crane 노트·슬라이드와 대조해 내용을 확인하되, 문장을 옮겨 오지 않았는지도 확인한다.
+4. 그림은 PNG로 렌더링해 눈으로 확인하고, 캡션의 네 부분(§12.6)을 확인한다. 400px 폭도 본다.
+5. 고칠 수 있는 것은 직접 고친다. 판단이 필요한 것은 <!-- REVIEW: … -->로 남긴다. 번호는 바꾸지 않는다.
+6. 선행 장이 쓰였으면 todo 링크를 확정한다. check_all --chapter {NN}을 통과시키고, 문제없는 절을 reviewed로 올린다.
+7. 최종 보고: 문제와 수정(심각도 순), 남은 REVIEW, 공유 파일 요청
+```
+
+### 13.3 진행 기록
+- 2026-10-18: 결정과 기반 작업(위). tools agent와 planning agent를 띄웠다.

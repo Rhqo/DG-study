@@ -17,11 +17,7 @@ Also writes an interactive version of (a).
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-6-3-bijectivity.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 

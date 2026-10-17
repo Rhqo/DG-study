@@ -12,11 +12,7 @@ Self-check: the tilts are 1.24, 6.50 and 4.22 degrees; all three errors decrease
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-2-1-vertex-normals.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 

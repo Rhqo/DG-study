@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>42. The Laplace–Beltrami Operator — DG Study</title>
+  <meta name="dg-id" content="42">
+  <meta name="dg-status" content="planned">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb"><a href="../../index.html">Contents</a> › <span>42. The Laplace–Beltrami Operator</span></nav>
+
+  <main>
+    <header>
+      <h1>42. The Laplace–Beltrami Operator</h1>
+      <p class="meta">Track 2. Discrete Differential Geometry · Lectures: <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> (<a href="https://www.youtube.com/watch?v=oEq9ROl9Umk&amp;list=PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS">video</a>, <a href="https://brickisland.net/DDGSpring2021/wp-content/uploads/2020/04/DDG_458_SP20_Lecture18_LaplaceOperator.pdf">slides</a>) · References: <a class="cite" href="../../references.html#Cr">[Cr ch6]</a></p>
+      <p class="threads">Threads: <strong>T5</strong> Integration and topology (Green's identity, Dirichlet energy, Poisson problems and boundary conditions) · <strong>T6</strong> Duality and tensors (\(\Delta = \star d\star d\), the Hodge Laplacian, FEM and DEC giving the same cotan matrix)</p>
+    </header>
+
+    <section class="questions">
+      <h2>Questions</h2>
+      <ul>
+        <li>Laplacian의 여러 정의(second derivative의 합, 평균과의 차이, divergence of gradient, Dirichlet energy의 gradient)는 왜 surface 위에서 같은 operator가 되는가?</li>
+        <li>FEM과 DEC라는 서로 다른 출발점이 왜 같은 cotan matrix를 주고, 그것으로 Poisson 문제, boundary condition, smoothing을 어떻게 푸는가?</li>
+      </ul>
+    </section>
+
+    <section class="inherits">
+      <h2>Builds on</h2>
+      <ul>
+        <li><a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>: cotan Laplacian \(L\)(Section 36.6), \(\star_0\), hat function과 Whitney form. <a href="../38-surfaces-smooth-discrete/index.html#toc-38-6">Section 38.6</a>: 곡면 mesh 위의 discrete Laplace–Beltrami operator. <a href="../41-discrete-curvature-variational/index.html">Chapter 41</a>: area gradient \(= -L\mathbf{x}\), mean curvature flow. <a href="../35-exterior-calculus/index.html">Chapter 35</a>: \(\star\), \(d^*\), Stokes's theorem.</li>
+        <li>Track 1: <a href="../00-tour/0-8-riemannian.html">Section 0.8</a>(gradient, divergence, Laplacian), <a href="../31-meshes/31-3-cotangent-laplacian.html">Section 31.3</a>(cotan Laplacian과 smoothing), <a href="../31-meshes/31-4-spectral-geometry.html">Section 31.4</a>(spectral geometry, heat kernel), <a href="../31-meshes/31-5-fields-to-meshes.html#sec-poisson">Section 31.5</a>(Poisson reconstruction).</li>
+        <li>가정하는 배경: vector calculus(Green's theorem, divergence theorem)와 linear algebra(symmetric matrix, positive semidefinite, eigenvalue, 선형계).</li>
+      </ul>
+    </section>
+
+    <h2>Sections</h2>
+    <ol class="toc">
+      <li id="toc-42-1" data-file="42-1-laplacian-definitions.html">
+        <span class="toc-title">42.1 Many Definitions of the Laplacian</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: Laplacian이 나오는 곳(heat, wave, Laplace equation; geometry processing); \(\R^n\)에서의 동치인 정의들: second partial derivative의 합 = Hessian의 trace(\(\tr\Hess u\), §6.5 기호) = \(\divg\grad\) = \(\star d\star d\)(<a href="../35-exterior-calculus/index.html#toc-35-2">Section 35.2</a> 상기) = 평균과의 차이(\(\Delta u(p) = \lim_{\varepsilon\to0}\tfrac{2n}{\varepsilon^2}(\bar u_\varepsilon - u(p))\), \(\bar u_\varepsilon\)은 sphere \(\partial B_\varepsilon(p)\) 위의 평균; Derivation), 1D에서의 convexity와 curvature 해석; graph Laplacian(dfn: \((L_Gu)_i = \sum_{j\sim i}w_{ij}(u_j - u_i)\). 흔히 쓰는 \(D - A\)는 부호가 반대)과 uniform Laplacian(<a href="../31-meshes/31-3-cotangent-laplacian.html#sec-smoothing">Section 31.3</a>); random walk 해석(진술); \(-\Delta\)는 Dirichlet energy의 gradient(Section 42.2에서); surface 위의 Laplace–Beltrami operator(strong: <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>, <a href="../00-tour/0-8-riemannian.html">Section 0.8</a>): conformal coordinates에서 \(\Delta = e^{-2\mu}(\partial_u^2 + \partial_v^2)\)(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-2">Section 38.2</a>의 \(\mu\); Derivation), 일반 좌표 공식 \(\tfrac{1}{\sqrt{\det g}}\sum_{i,j}\partial_i(\sqrt{\det g}\,g^{ij}\partial_j)\)(진술); 기본 성질: Green's first identity(Proposition, 증명: \(v\star du\)에 Stokes), self-adjoint, negative semidefinite, 닫힌 connected surface에서 kernel = 상수(Proposition, 증명); spectrum(eigenvalue \(\le 0\), unit sphere에서 \(-\ell(\ell+1)\); <a href="../31-meshes/31-4-spectral-geometry.html">Section 31.4</a> 상기); Hodge Laplacian(dfn: \(dd^* + d^*d\). 함수에서 \(-\Delta\)) · Conventions(Conventions box, 필수): §6.5의 \(\Delta = \divg\grad\)(negative semidefinite). Cr §6.1은 \(\Delta\)를 “positive-semidefinite”라 쓰고 바로 다음 Exercise 6.4에서 negative-semidefinite를 보이라고 한다(본문 부호가 섞여 있다). Crane의 \(\delta = \star d\star\)와 \(\Delta = \delta d + d\delta\)(Cr §4.6.6). graph Laplacian \(D - A\)의 부호. 이 장의 기호: smooth surface는 \(S\)로 쓴다(mass matrix \(M\)과 구분) · Running examples: \(\R^2\)의 harmonic 함수 \(x^2 - y^2\), unit sphere의 \(z\)(\(\Delta z = -2z\)), torus of revolution의 좌표 공식(선택) · Go deeper: <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>, <a href="../00-tour/0-8-riemannian.html#sec-metric">Section 0.8</a>, <a href="../31-meshes/31-4-spectral-geometry.html#sec-eigenproblem">Section 31.4</a> · Lecture: L18 slides 3–30 · Notes: Cr §6.1, §4.6.6</p>
+      </li>
+      <li id="toc-42-2" data-file="42-2-dirichlet-poisson.html">
+        <span class="toc-title">42.2 Dirichlet Energy, Harmonic Functions, and the Poisson Equation</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: interpolation problem(boundary 값이나 몇 점의 값이 주어졌을 때 가장 “매끄러운” 함수 찾기; piecewise constant와 비교); Dirichlet energy(dfn: \(E_D(u) = \tfrac12\int_S\abs{\grad u}^2\,dA\)); Dirichlet's principle(Theorem: boundary 값을 고정했을 때 \(E_D\)의 critical point는 \(\Delta u = 0\)을 만족한다. first variation과 Green's identity로 증명; minimizer의 존재는 진술, History 상자에 Weierstrass의 반례); harmonic function(dfn: \(\Delta u = 0\)); 성질: maximum principle(진술과 증명 아이디어), mean value property, Proposition(증명): 닫힌 connected surface의 harmonic function은 상수(\(E_D = 0\)에서); Poisson equation(dfn: \(\Delta u = f\)); 닫힌 surface에서의 solvability: \(\int_Sf\,dA = 0\)이 필요충분(필요는 증명, 충분은 진술), 해는 상수 차이를 빼면 유일, 평균을 빼는 trick의 의미; Green's function(strong, 한 문단); variational 판 \(\min_u E_D(u) + \int_Sfu\,dA\) · Conventions: Crane(Cr §7.4)은 \(E_D(z) = \tfrac12\langle\!\langle\Delta z, z\rangle\!\rangle\)로 쓴다(Crane의 \(\Delta\) 부호). 이 study set에서는 boundary 항이 없을 때 \(E_D(u) = -\tfrac12\langle\!\langle\Delta u, u\rangle\!\rangle\) · Running examples: unit disk에서 boundary 값 \(\cos\vartheta\)의 harmonic extension(\(x\)), unit sphere의 Poisson 문제 \(\Delta u = z\)(해 \(-z/2\)), 정사각형 grid · Go deeper: <a href="../31-meshes/31-5-fields-to-meshes.html#sec-poisson">Section 31.5</a>(Poisson reconstruction), <a href="../00-tour/0-7-forms.html">Section 0.7</a>(Poisson image editing 상자) · Lecture: L18 slides 31–42 · Notes: Cr §6.1, §6.5</p>
+      </li>
+      <li id="toc-42-3" data-file="42-3-fem.html">
+        <span class="toc-title">42.3 Discretization via FEM</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: weak form: 모든 test function \(v\)에 대해 \(\int\inner{\grad u}{\grad v}\,dA = -\int fv\,dA\)(boundary 없는 경우, Green's identity); Galerkin: piecewise linear 함수 공간과 hat function \(\varphi_i\)(<a href="../36-discrete-exterior-calculus/index.html#toc-36-3">Section 36.3</a> 상기); Lemma(완전한 증명): triangle 하나에서 \(i\ne j\)이면 \(A_f\inner{\grad\varphi_i}{\grad\varphi_j} = -\tfrac12\cot\theta_k\)(\(\theta_k\)는 맞은편 각), \(A_f\abs{\grad\varphi_i}^2 = \tfrac12(\cot\theta_j + \cot\theta_k)\); stiffness matrix(dfn: \(\int\inner{\grad\varphi_i}{\grad\varphi_j}\,dA\)를 원소로 하는 행렬. Gaussian curvature \(K\)와 겹치므로 문자 \(K\)를 쓰지 않는다); Theorem(증명): stiffness matrix \(= -L = d_0^{\mathsf T}\star_1d_0\) — DEC 정의(<a href="../36-discrete-exterior-calculus/index.html#toc-36-6">Section 36.6</a>)와 FEM이 정확히 같은 행렬을 준다; Corollary(증명): \(-L\)은 모든 triangle mesh(Delaunay가 아니어도)에서 symmetric positive semidefinite이고 connected mesh에서 kernel은 상수(\(u^{\mathsf T}(-L)u = \int\abs{\grad u}^2\,dA\); Section 36.6의 Delaunay 가정을 없앤다); mass matrix(dfn: Galerkin \(M_{ij} = \int\varphi_i\varphi_j\,dA\), triangle마다 \(\tfrac{A_f}{12}(1 + \delta_{ij})\))와 lumped mass matrix(dfn: 행의 합을 대각에 모은 것 = barycentric dual area); 선형계 \(Lu = Mf\)와 부호; piecewise linear FEM의 수렴(진술과 수치) · Running examples: icosphere에서 \(\Delta u = -2z\)를 풀어 \(z\)를 복원(level sweep으로 오차), planar grid(harmonic 함수의 재현), obtuse triangle이 섞인 mesh(cot weight는 음수지만 positive semidefinite는 유지) · Helpers: dgmesh.cotan_laplacian, cotan_weights, dirichlet_energy, mass_barycentric; dgdec.barycentric_gradients, laplacian_psd · Overlap: \(L\)의 정의는 Section 36.6(DEC 합성)에 있다. 여기서는 FEM이 같은 행렬을 준다는 것과 일반적인 positive semidefiniteness를 증명한다. <a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-1">Lemma 31.3.1</a>과 <a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-2">Proposition 31.3.2</a>는 같은 계산을 Track 1 수준으로 했다(Looking back에서 무엇을 더 엄밀히 하는지 밝힌다) · Go deeper: <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-pl-functions">Section 31.3</a> · Lecture: L18 slides 32–36 · Notes: Cr §6.2</p>
+      </li>
+      <li id="toc-42-4" data-file="42-4-dec.html">
+        <span class="toc-title">42.4 Discretization via DEC</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: \(\Delta = \star d\star d\)(Section 35.2)의 DEC 판: primal 0-form \(u\) → \(d_0u\) → \(\star_1\) → dual \(d\) → \(\star_0^{-1}\)(<a href="../36-discrete-exterior-calculus/index.html#toc-36-6">Section 36.6</a> 상기); 같은 결과를 “dual cell 위 적분 + Stokes”로 유도: Proposition(완전한 증명): piecewise linear \(u\)에 대해 \(\int_{C_i}\Delta u\,dA = \oint_{\partial C_i}\star du = \sum_j\tfrac{\abs{e_{ij}^\star}}{\abs{e_{ij}}}(u_j - u_i) = (Lu)_i\); integrated vs. pointwise: \(Lu\)는 dual cell 위의 적분값이고 pointwise 근사는 \(M^{-1}Lu\)(그래서 mass matrix가 필요하다); dual area의 선택: barycentric, circumcentric(Voronoi; obtuse에서 음수), mixed Voronoi(<a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>) — Proposition(증명): 각 선택에서 \(\sum_iA_i\) = 전체 넓이; 행렬 조립(Cr §6.4): vertex 번호, triangle 또는 halfedge loop로 triplet을 누적(Implementation, numpy만), 대칭 선형계와 평균 제거; FEM(Section 42.3)과 DEC의 비교 표(같은 \(L\), 다른 \(M\)의 선택) · Running examples: icosphere(세 dual area의 비교: \(K_i\), \(H_i\)의 오차), planar grid, obtuse triangle이 섞인 mesh · Helpers: dgdec.hodge0(kind), dual_areas(kind), d0, hodge1; dgmesh.mass_voronoi, mass_barycentric, cotan_laplacian · Overlap: \(L\)의 정의(Section 36.6)와 곡면판(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-6">Section 38.6</a>)은 상기만 한다 · Go deeper: <a class="cite" href="../../references.html#Desbrun05">[Desbrun05]</a>, <a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-3">Definition 31.3.3</a> · Lecture: L18(DEC 부분은 L9, L14 상기) · Notes: Cr §6.3–6.4</p>
+      </li>
+      <li id="toc-42-5" data-file="42-5-boundary-conditions.html">
+        <span class="toc-title">42.5 Boundary Conditions</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: boundary가 있는 surface에서 Green's identity의 boundary 항; Dirichlet boundary condition(dfn: \(u|_{\partial S} = g\)), Neumann boundary condition(dfn: \(\inner{\grad u}{\mathbf{n}} = g\), \(\mathbf{n}\)은 \(\partial S\)의 바깥쪽 conormal), mixed; 1D 예(구간 위의 \(u'' = f\))로 의미를 비교, 2D 예; 이산화: Dirichlet은 알려진 값을 우변으로 옮기고 나머지 block을 푼다 — Proposition(증명): mesh가 connected이고 boundary vertex가 하나 이상이면 reduced \(-L\)은 positive definite; Neumann은 weak form의 natural boundary condition이다 — Proposition(증명): 아무것도 하지 않으면 zero Neumann이 된다, 0이 아닌 Neumann 값은 boundary edge 위의 적분으로 우변에; Neumann 문제의 해가 있을 조건 \(\int_Sf\,dA = \oint_{\partial S}g\,ds\)(부호는 Green's identity로 확인); boundary vertex의 dual cell은 잘린다(<a href="../33-combinatorial-surfaces/index.html#toc-33-6">Section 33.6</a>); 고정 boundary 위의 harmonic interpolation과 Tutte embedding(<a href="../31-meshes/31-6-parametrization-texture.html#sec-guarantees">Section 31.6</a>)의 연결 · Running examples: unit square grid의 Dirichlet 문제(정확해 \(x^2 - y^2\)), grid를 잘라 만든 disk mesh의 Neumann 문제, icosphere의 hemisphere · Helpers: dgmesh.boundary_vertices, boundary_loop, submesh, fixed_boundary_map · Go deeper: <a href="../18-integration-stokes/index.html#toc-18-5">Section 18.5</a>(divergence theorem), <a href="../31-meshes/31-6-parametrization-texture.html">Section 31.6</a> · Lecture: L18 slides 43–51 · Notes: Cr §6.7(§6.7.1–6.7.2)</p>
+      </li>
+      <li id="toc-42-6" data-file="42-6-implicit-mcf.html">
+        <span class="toc-title">42.6 Poisson Problems and Implicit Mean Curvature Flow</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: 닫힌 surface의 Poisson problem: \(Lu = M\rho\)에서 \(\rho\)의 평균을 빼고 해의 평균을 0으로 고정(Proposition, 증명: 그 부분공간에서 해가 존재하고 유일); 예: point source와 그 potential(그림); dense solve와 Cholesky prefactorization(numpy. scipy 없이, 크기의 한계); heat equation \(\partial_tu = \Delta u\)의 backward Euler \((M - hL)u^{k+1} = Mu^k\); mean curvature flow(<a href="../41-discrete-curvature-variational/index.html#toc-41-5">Section 41.5</a>의 정의 상기) \(\partial_t\mathbf{x} = \Delta\mathbf{x}\)를 backward Euler로: \((M - hL)\mathbf{x}^{k+1} = M\mathbf{x}^k\)(\(L, M\)은 현재 mesh에서; semi-implicit); Theorem(증명): \(L, M\)을 고정하면 이 step은 모든 \(h \gt 0\)에서 안정하다(generalized eigenvalue로 \(1/(1 + h\lambda)\)); explicit step의 안정 조건 \(h \lesssim \bar\ell^2\)(수치); 넓이의 감소와 singularity, 처음 mesh의 \(L\)을 고정하는 변형(<a class="cite" href="../../references.html#Kazhdan12">[Kazhdan12]</a>의 conformalized mean curvature flow: 진술과 수치) · In computer vision: mesh denoising과 fairing(<a class="cite" href="../../references.html#Desbrun99">[Desbrun99]</a>), <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-smoothing">Section 31.3</a>과 <a href="../00-tour/0-4-curvature.html#anim-0-4-4">Animation 0.4.4</a> · Running examples: icosphere(\(r^2 = r_0^2 - 4t\)와 semi-implicit 결과의 비교), seed를 고정한 noisy icosphere, torus_mesh · Algorithm: implicit mean curvature flow 한 step(Implementation, 30줄 이하) · Conventions: time step은 \(h\), mesh 크기는 평균 edge 길이 \(\bar\ell\) · Overlap: flow의 정의는 Section 41.5(mean curvature flow)와 <a href="../37-curves-smooth-discrete/index.html#toc-37-6">Section 37.6</a>(gradient flow, explicit과 implicit). 여기서는 Laplacian으로 implicit하게 푸는 것만 다룬다 · Helpers: dgmesh.cotan_laplacian, mass_voronoi, generalized_eigs(선택) · Go deeper: <a href="../00-tour/0-4-curvature.html">Section 0.4</a>(mean curvature flow 상자), <a href="../31-meshes/31-4-spectral-geometry.html#sec-heat">Section 31.4</a>(heat kernel) · Lecture: L18 · Notes: Cr §6.5–6.6</p>
+      </li>
+    </ol>
+
+    <section class="handoff">
+      <h2>Leads to</h2>
+      <ul>
+        <li>\(L\), \(M\), Dirichlet energy, boundary condition, generalized eigenproblem → <a href="../43-conformal-geometry/index.html">Chapter 43</a>(conformal energy = Dirichlet energy − signed area, spectral conformal parametrization).</li>
+        <li>heat equation의 backward Euler와 Poisson solve → <a href="../44-discrete-geodesics/index.html#toc-44-6">Section 44.6</a>(heat method).</li>
+        <li>Poisson solve와 \(d^*\) → <a href="../45-vector-field-design/index.html">Chapter 45</a>(Hodge decomposition, trivial connection).</li>
+        <li>Go deeper(Track 3): <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>, <a href="../18-integration-stokes/index.html#toc-18-5">Section 18.5</a>.</li>
+        <li>Open question: Dirichlet energy에서 image의 signed area를 빼면 무엇을 재게 되고, 그것을 최소화하면 왜 각을 보존하는 map이 나오는가? → <a href="../43-conformal-geometry/index.html">Chapter 43</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="../41-discrete-curvature-variational/index.html">← 41. Discrete Curvature II: The Variational Viewpoint</a>
+    <a rel="next" href="../43-conformal-geometry/index.html">43. Conformal Geometry →</a>
+  </nav>
+</body>
+</html>

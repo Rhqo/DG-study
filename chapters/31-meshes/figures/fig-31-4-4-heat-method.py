@@ -14,11 +14,7 @@ Self-check: max |phi - theta| = 0.050, mean 0.021; u spans more than 8 orders of
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-4-4-heat-method.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>36. Discrete Exterior Calculus — DG Study</title>
+  <meta name="dg-id" content="36">
+  <meta name="dg-status" content="planned">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb"><a href="../../index.html">Contents</a> › <span>36. Discrete Exterior Calculus</span></nav>
+
+  <main>
+    <header>
+      <h1>36. Discrete Exterior Calculus</h1>
+      <p class="meta">Track 2. Discrete Differential Geometry · Lectures: <a class="cite" href="../../references.html#CMU-DDG-L8">[CMU-DDG L8]</a> (<a href="https://www.youtube.com/watch?v=PGzgE5fqPUo&amp;list=PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS">video</a>, <a href="https://brickisland.net/DDGSpring2021/wp-content/uploads/2020/02/DDG_08_DiscreteDifferentialForms.pdf">slides</a>), <a class="cite" href="../../references.html#CMU-DDG-L9">[CMU-DDG L9]</a> (<a href="https://www.youtube.com/watch?v=-cUhuzwW-_A&amp;list=PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS">video</a>, <a href="https://brickisland.net/DDGSpring2021/wp-content/uploads/2021/03/DDG_09_DiscreteExteriorCalculus.pdf">slides</a>) · References: <a class="cite" href="../../references.html#Cr">[Cr §4.8]</a></p>
+      <p class="threads">Threads: <strong>T5</strong> Integration and topology (chains and cochains, discrete Stokes's theorem, \(d_1d_0 = 0\)) · <strong>T6</strong> Duality and tensors (discrete differential forms, dual forms, the discrete Hodge star)</p>
+    </header>
+
+    <section class="questions">
+      <h2>Questions</h2>
+      <ul>
+        <li>smooth form을 mesh 위의 숫자 배열로 바꾸면 \(d\)와 Stokes's theorem은 근사가 아니라 정확히 살아남는가?</li>
+        <li>길이와 넓이 같은 metric 정보를 담는 Hodge star는 mesh 위에서 무엇이 되고, 거기서 왜 cotangent가 나오는가?</li>
+      </ul>
+    </section>
+
+    <section class="inherits">
+      <h2>Builds on</h2>
+      <ul>
+        <li><a href="../33-combinatorial-surfaces/index.html">Chapter 33</a>: simplicial complex, oriented simplex와 relative orientation, signed incidence matrix, 조합적 dual complex.</li>
+        <li><a href="../35-exterior-calculus/index.html">Chapter 35</a>: differential form, \(d\), integration, Stokes's theorem, \(\star\), L2 inner product와 \(d^*\).</li>
+        <li>Track 1: <a href="../00-tour/0-7-forms.html">Section 0.7</a>(In computer vision 상자의 DEC 예고), <a href="../31-meshes/31-3-cotangent-laplacian.html">Section 31.3</a>(cotan Laplacian을 strong으로 썼다. 여기서 DEC로 정의한다).</li>
+        <li>가정하는 배경: linear algebra(행렬, transpose, kernel과 image)와 vector calculus.</li>
+      </ul>
+    </section>
+
+    <h2>Sections</h2>
+    <ol class="toc">
+      <li id="toc-36-1" data-file="36-1-de-rham-map.html">
+        <span class="toc-title">36.1 Discretization: The de Rham Map</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: DEC의 동기와 기본 연산 지도(\(d\), \(\star\), 그 합성); discretization과 interpolation의 구분; de Rham map(dfn: smooth \(k\)-form \(\alpha\)를 oriented \(k\)-simplex마다의 적분값 \(\hat\alpha_\sigma = \int_\sigma\alpha\)의 배열로 보내는 map); 0-form(vertex 값), 1-form(edge 위 line integral, 예), 2-form(triangle 위 적분); Proposition(증명): simplex의 orientation을 뒤집으면 값의 부호가 바뀐다; discrete differential form(dfn: oriented \(k\)-simplex마다 실수 하나, \(\alpha\in\R^{n_k}\). vector encoding과 §2.5의 edge 번호(dgdec.edge_list 순서)); integrated quantity라는 관점(pointwise 값이 아니다) · Running examples: planar grid_mesh와 1-form \(x\,dy\)(edge 적분을 정확히), \(f = x^2 - y^2\)의 \(df\)(edge 값 = 끝점 값의 차), triangle 하나 위의 2-form, icosphere 위 높이 함수 \(z\)(0-form) · Conventions: \(\hat\alpha\) 표기와 orientation 규약(§2.5). Crane도 hat 표기를 쓴다 · Helpers: dgdec.derham0, derham1, derham2, edge_list, triangle_quadrature · Go deeper: <a href="../18-integration-stokes/index.html#toc-18-3">Section 18.3</a>, <a class="cite" href="../../references.html#Hirani03">[Hirani03]</a>, <a class="cite" href="../../references.html#Desbrun08">[Desbrun08]</a> · Lecture: L8 slides 3–23 · Notes: Cr §4.8.1–4.8.2</p>
+      </li>
+      <li id="toc-36-2" data-file="36-2-chains-cochains.html">
+        <span class="toc-title">36.2 Chains and Cochains</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: simplicial chain(dfn: oriented \(k\)-simplex의 정수(또는 실수) 계수 linear combination, \(-\sigma\) = 반대 orientation)과 그 덧셈; boundary operator(dfn: \(\partial(v_0\cdots v_k) = \sum_m(-1)^m(v_0\cdots\widehat{v_m}\cdots v_k)\)를 chain으로 선형 확장); Theorem(완전한 증명): \(\partial\circ\partial = 0\); 행렬로: \(\partial_1 = d_0^{\mathsf T}\), \(\partial_2 = d_1^{\mathsf T}\)(<a href="../33-combinatorial-surfaces/index.html#toc-33-5">Section 33.5</a>의 signed incidence matrix와 연결; Proposition); cochain(dfn: chain 위의 linear functional)과 pairing \(\langle\alpha, c\rangle\)(chain 위의 “적분”); coboundary operator(dfn: \(\partial\)의 dual, \((d\alpha)(c) = \alpha(\partial c)\). 이것이 Section 36.4의 discrete exterior derivative다); Proposition(증명): discrete differential form과 cochain의 동일시 \(\R^{n_k}\cong C^k\), de Rham map은 \(\langle\hat\alpha, c\rangle = \int_c\alpha\)를 만족; cycle과 boundary(진술만. homology는 <a href="../45-vector-field-design/index.html#toc-45-2">Section 45.2</a>) · Running examples: triangle 하나와 tetrahedron boundary의 \(\partial\) 손계산, 평면 grid의 1-cycle · Helpers: dgdec.boundary1, boundary2, d0, d1 · Go deeper: <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>(simplicial homology), <a href="../19-de-rham/index.html">Chapter 19</a>, <a href="../18-integration-stokes/index.html#toc-18-4">Section 18.4</a> · Lecture: L8 slides 24–32 · Notes: 노트에는 없다(슬라이드만)</p>
+      </li>
+      <li id="toc-36-3" data-file="36-3-whitney-forms.html">
+        <span class="toc-title">36.3 Interpolation: Whitney Forms</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: 0-form의 interpolation: barycentric coordinates(<a href="../33-combinatorial-surfaces/index.html#toc-33-1">Section 33.1</a> 상기)를 hat function \(\varphi_i\)로 보는 piecewise linear interpolation; Whitney form(dfn: Whitney 1-form \(\varphi_{ij} = \varphi_i\,d\varphi_j - \varphi_j\,d\varphi_i\), Whitney 2-form \(2(\varphi_i\,d\varphi_j\wedge d\varphi_k + \varphi_j\,d\varphi_k\wedge d\varphi_i + \varphi_k\,d\varphi_i\wedge d\varphi_j)\)); Whitney map(dfn: \(W\hat\alpha = \sum_\sigma\hat\alpha_\sigma\varphi_\sigma\)); Proposition(완전한 증명): \(\int_{\sigma'}\varphi_\sigma = \delta_{\sigma\sigma'}\)이므로 \(R\circ W = \id\)(\(R\)은 de Rham map), \(W\circ R \ne \id\)(예); Proposition(증명): \(dW = Wd\)(0-form에서 증명하고 1-form은 계산); Whitney 1-form의 tangential 성분이 edge를 건너 연속임; 그림: triangle 위 세 Whitney 1-form의 vector proxy \(\varphi_{ij}^\sharp\) · Running examples: triangle 하나(직각이등변과 정삼각형), planar grid 위 \(x\,dy\)의 \(WR\) 근사와 오차 · Helpers: dgdec.barycentric_coordinates, barycentric_gradients, whitney_basis, whitney_interpolate, whitney_at_barycenters · Overlap: hat function과 그 gradient는 <a href="../42-laplace-beltrami/index.html#toc-42-3">Section 42.3</a>(FEM)에서 여기의 \(\varphi_i\)를 상기해 쓴다 · Go deeper: <a class="cite" href="../../references.html#Whitney57">[Whitney57]</a>, <a class="cite" href="../../references.html#Desbrun08">[Desbrun08]</a>, <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-pl-functions">Section 31.3</a>(Looking back) · Lecture: L8 slides 33–39 · Notes: 노트에는 없다(슬라이드만)</p>
+      </li>
+      <li id="toc-36-4" data-file="36-4-discrete-exterior-derivative.html">
+        <span class="toc-title">36.4 The Discrete Exterior Derivative</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: 동기: Stokes \(\int_\sigma d\alpha = \int_{\partial\sigma}\alpha\)(<a href="../35-exterior-calculus/index.html#toc-35-4">Section 35.4</a>)를 정의로 삼는다; discrete exterior derivative(dfn: \((d\hat\alpha)_\sigma := \hat\alpha(\partial\sigma)\), 즉 Section 36.2의 coboundary); 0-form은 \((d_0u)_{ij} = u_j - u_i\), 1-form은 triangle 둘레의 부호 있는 합(부호 = relative orientation); 행렬 \(d_0\in\R^{n_1\times n_0}\), \(d_1\in\R^{n_2\times n_1}\)이 <a href="../33-combinatorial-surfaces/index.html#toc-33-5">Section 33.5</a>의 signed incidence matrix임(Proposition); Theorem(완전한 증명): discrete Stokes \(\langle d\alpha, c\rangle = \langle\alpha, \partial c\rangle\); Theorem(완전한 증명): \(d\)는 discretization과 commute한다, \(R\,d = d\,R\); Theorem(완전한 증명): \(d_1d_0 = 0\)(Section 36.2의 \(\partial\partial = 0\)에서); discrete closed와 exact 1-form, 예: 평면 grid의 exact 1-form, torus_mesh에서 closed이지만 exact가 아닌 1-form(<a href="../45-vector-field-design/index.html#toc-45-2">Section 45.2</a> 예고) · Smooth vs. Discrete: \(dd = 0\)과 Stokes는 mesh 위에서 근사가 아니라 정확한 항등식이다 · Running examples: tetrahedron의 \(d_0, d_1\) 손계산, planar grid의 \(df\), icosphere에서 \(d_1d_0 = 0\) 확인 · Helpers: dgdec.d0, d1, derham0, derham1, derham2 · Go deeper: <a href="../17-differential-forms/index.html#toc-17-3">Section 17.3</a>, <a href="../19-de-rham/index.html#toc-19-1">Section 19.1</a> · Lecture: L9 slides 3–13 · Notes: Cr §4.8.3</p>
+      </li>
+      <li id="toc-36-5" data-file="36-5-discrete-hodge-star.html">
+        <span class="toc-title">36.5 Dual Forms and the Discrete Hodge Star</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: 조합적 dual complex 상기(<a href="../33-combinatorial-surfaces/index.html#toc-33-6">Section 33.6</a>)와 dual cell \(\sigma^\star\)의 orientation 규약(primal edge를 +90° 돌린 방향 등. 부호의 정본은 dgdec); dual discrete form(dfn: dual cell 위의 값. primal form과는 더할 수 없다)과 그 해석(primal 1-form = circulation, dual 1-form = flux); dual exterior derivative \(\tilde d = \pm d^{\mathsf T}\)(Proposition, 증명; 부호 규약 명시); dual의 기하: circumcentric dual(dfn: triangle의 circumcenter, edge의 midpoint, vertex 자신을 잇는 dual), primal과 dual이 직교함, obtuse triangle에서 signed dual 길이가 음수가 됨; discrete Hodge star(dfn: primal \(k\)-form을 dual \((n-k)\)-form으로 보내는 map), diagonal Hodge star(dfn: \(\star_k = \diag(\abs{\sigma^\star}/\abs{\sigma})\), “primal 부피로 나누고 dual 부피를 곱한다”); \(\star_0\) = dual cell 넓이, \(\star_2\) = 1/넓이; Theorem(완전한 증명. cotan formula를 증명하는 유일한 곳): circumcentric dual에서 \(\abs{e_{ij}^\star}/\abs{e_{ij}} = \tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})\), 따라서 \(\star_1 = \diag\bigl(\tfrac12(\cot\alpha + \cot\beta)\bigr)\); 다른 선택(barycentric dual, Galerkin Hodge star)과 비교. 어느 것도 정확하지 않다(Chapter 32의 no free lunch와 연결) · Running examples: 정삼각형 grid(모든 cot이 \(1/\sqrt3\)), obtuse triangle(음의 weight), icosphere의 \(\star_0\) 합 = 전체 넓이 · Conventions: §2.5 기호 \(\star_0, \star_1, \star_2\), \(\sigma^\star\). Crane은 \(\hat\star\)로 쓴다 · Helpers: dgdec.circumcenters, primal_edge_lengths, dual_edge_lengths, dual_areas, hodge0, hodge1, hodge2, hodge_inverse · Overlap: dual complex의 조합적 정의는 Section 33.6. 곡면 mesh 위의 \(\star\)는 <a href="../38-surfaces-smooth-discrete/index.html#toc-38-6">Section 38.6</a> · Go deeper: <a class="cite" href="../../references.html#Hirani03">[Hirani03]</a>, <a class="cite" href="../../references.html#Desbrun05">[Desbrun05]</a>, <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-non-delaunay">Section 31.3</a> · Lecture: L9 slides 14–29 · Notes: Cr §4.8.4</p>
+      </li>
+      <li id="toc-36-6" data-file="36-6-composing-operators.html">
+        <span class="toc-title">36.6 Composing Operators</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: 기본 연산표(\(d_0, d_1, \star_0, \star_1, \star_2\), dual \(d\))와 합성으로 얻는 vector calculus: gradient(\(d_0\)), curl(\(\star_2d_1\)), divergence(\(\star_0^{-1}d_0^{\mathsf T}\star_1\)과 부호 규약); discrete codifferential(dfn: \(d^* = \star^{-1}d^{\mathsf T}\star\). Section 35.5의 L2 adjoint를 \(\star\)-inner product로; Proposition(증명): adjoint임); cotan Laplacian(dfn: \(L := -d_0^{\mathsf T}\star_1d_0\), 즉 \(L_{ij} = \tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})\), \(L_{ii} = -\sum_jL_{ij}\); §2.5); Proposition(증명): \(L\)은 symmetric이고 행의 합이 0이며, \(\star_1\)의 대각 원소가 모두 양이면(Delaunay) \(-L\)은 positive semidefinite이고 connected mesh에서 kernel은 상수(일반 mesh의 positive semidefiniteness는 <a href="../42-laplace-beltrami/index.html#toc-42-3">Section 42.3</a>에서 Dirichlet energy로 증명); discrete Laplacian \(\star_0^{-1}L\approx\Delta = \divg\grad\)(\(\star_0\)는 Chapter 42에서 mass matrix \(M\)이 된다는 한 문장 지시); 평면 grid의 Poisson 문제 \(Lu = \star_0f\) 풀기(Implementation, numpy dense solve); 다른 discrete 연산(wedge, interior product)은 진술만(Cr §4.8.5) · Conventions(Conventions box): \(-L\)이 positive semidefinite이고 \(M^{-1}L\approx\Delta\)(§2.5). Crane의 L9와 많은 코드는 positive semidefinite 쪽 행렬(\(d_0^{\mathsf T}\star_1d_0\))을 Laplacian이라 부른다 · Running examples: 정삼각형 grid의 \(L\)(7점 stencil), planar grid 위 harmonic 함수 \(x^2 - y^2\)에 대한 \(Lu\)(내부에서 0), icosphere의 \(L\mathbf{1} = 0\) · Helpers: dgdec.laplacian_psd, hodge0, hodge1, hodge2; dgmesh.cotan_laplacian, cotan_weights · Overlap: \(L\)의 정의는 여기 한 곳이다. 곡면 위의 해석은 <a href="../38-surfaces-smooth-discrete/index.html#toc-38-6">Section 38.6</a>, mean curvature normal은 <a href="../40-discrete-curvature-integral/index.html#toc-40-3">Section 40.3</a>, area gradient는 <a href="../41-discrete-curvature-variational/index.html#toc-41-2">Section 41.2</a>, FEM 유도와 일반 positive semidefiniteness는 <a href="../42-laplace-beltrami/index.html#toc-42-3">Section 42.3</a>, dual cell 적분 유도와 행렬 조립은 <a href="../42-laplace-beltrami/index.html#toc-42-4">Section 42.4</a> · Go deeper: <a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-3">Definition 31.3.3</a>(Looking back), <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a> · Lecture: L9 slides 30–35 · Notes: Cr §4.8.4–4.8.5, §4.6.6</p>
+      </li>
+    </ol>
+
+    <section class="handoff">
+      <h2>Leads to</h2>
+      <ul>
+        <li>\(d_0, d_1\), de Rham map → <a href="../37-curves-smooth-discrete/index.html">Chapter 37</a>(discrete curve의 \(d\gamma\)), <a href="../38-surfaces-smooth-discrete/index.html">Chapter 38</a>(discrete differential \(d\mathbf{x}\)와 곡면 위의 DEC).</li>
+        <li>\(\star_1\)의 cotan formula와 cotan Laplacian \(L\) → <a href="../40-discrete-curvature-integral/index.html">Chapter 40</a>(mean curvature normal), <a href="../41-discrete-curvature-variational/index.html">Chapter 41</a>(area gradient), <a href="../42-laplace-beltrami/index.html">Chapter 42</a>(Laplace–Beltrami, Poisson 문제).</li>
+        <li>Whitney form과 hat function → <a href="../42-laplace-beltrami/index.html#toc-42-3">Section 42.3</a>(FEM).</li>
+        <li>discrete codifferential, \(\im d_0\)과 \(\ker d_1\) → <a href="../45-vector-field-design/index.html">Chapter 45</a>(Hodge decomposition, homology).</li>
+        <li>Go deeper(Track 3): <a href="../17-differential-forms/index.html">Chapter 17</a>–<a href="../19-de-rham/index.html">Chapter 19</a>(smooth 이론), <a href="../21-riemannian-metrics/index.html">Chapter 21</a>(Laplacian).</li>
+        <li>Open question: 같은 cotan matrix가 test function(FEM)에서 출발해도 나오는 것은 우연인가? 그리고 \(\star_0\)(넓이)를 어떻게 고르는 것이 맞는가? → <a href="../42-laplace-beltrami/index.html">Chapter 42</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="../35-exterior-calculus/index.html">← 35. Exterior Calculus</a>
+    <a rel="next" href="../37-curves-smooth-discrete/index.html">37. Curves: Smooth and Discrete →</a>
+  </nav>
+</body>
+</html>

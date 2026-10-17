@@ -18,7 +18,7 @@
 1. 결과물은 **정적 HTML**이다. 한 절이 한 파일이고, 수식은 MathJax 3으로 쓰며, 공용 CSS와 설정 파일만 사용한다 (§11).
 2. 본문 문장은 한국어 "~이다"체로 쓰고, 대학 수학 용어와 라벨·제목은 영어로 쓴다. 용어를 처음 정의할 때 한국어 번역어를 괄호에 한 번 적는다 (§8).
 3. **아주 기초부터 차근차근** 쓴다. 순서는 동기 → 직관(그림) → 정의 → 예·비예 → 정리·증명 → 계산 → 요약 → 연습이다 (§2).
-4. 26장이 **한 권의 책처럼** 이어지게 쓴다. 큰 줄기, 이어받는 것·넘겨주는 것, 한 개념 한 정의, 필수 호환성 명제, 기준 예제의 여정이 그 장치다 (§3).
+4. 장들이 **한 권의 책처럼** 이어지게 쓴다. 큰 줄기, 이어받는 것·넘겨주는 것, 한 개념 한 정의, 필수 호환성 명제, 기준 예제의 여정이 그 장치다 (§3).
 5. 모든 정의와 정리에 가정을 빠짐없이 적는다. 이유 없는 "자명하다"는 쓰지 않는다 (§4).
 6. 표기와 부호 규약은 §6 하나만 쓴다 (Lee와 do Carmo 기반). 교재와 다른 점은 본문에 명시한다.
 7. §7 기준 예제의 매개화와 값을 모든 장에서 그대로 재사용한다.
@@ -38,6 +38,10 @@
   - Part II를 마치면 Lee, *Introduction to Smooth Manifolds*의 핵심 장 수준에 이른다.
   - Part III을 마치면 Lee, *Introduction to Riemannian Manifolds* 전반부(측지선, 곡률, 가우스-보네) 수준에 이른다.
 - 이 자료는 교재를 대체하지 않고 **교재와 나란히 읽도록** 만든다. 그래서 각 절에 대응하는 교재 절을 명시한다.
+- **세 track** (2026-10-18 사용자 결정): 목차는 세 묶음으로 나뉜다. 장 번호는 식별자일 뿐이고 바꾸지 않는다(§9).
+  - **Track 1. Foundations and Intuition** (기초·입문): Tour(0) → Part IV(27–31) → Part 0(1–3)
+  - **Track 2. Discrete Differential Geometry** (CMU 15-458/858 강의를 따르는 독립 섹션): 32–45 (§2.5)
+  - **Track 3. Rigorous Differential Geometry** (심화): Part I(4–10) → Part II(11–20) → Part III(21–26). 위의 "도달 목표"는 이 track의 목표다.
 
 ---
 
@@ -99,7 +103,7 @@ Chapter 0 「A Guided Tour of Differential Geometry」는 깊은 장(01–26) **
 
 ### 2.4 Part IV (3D Vision)의 원칙 (2026-10-07 사용자 결정)
 
-Part IV 「3D Vision Through Differential Geometry」(27–31장)는 3D vision(SfM, NeRF, 3D Gaussian Splatting)에 쓰이는 기하를 differential geometry로 해석한다. 목차에서 Tour 바로 다음에 두고, 읽는 순서도 Tour → Part IV → Part 0이다. 장 번호(27–31)는 식별자일 뿐이다. 31장(mesh)은 2026-10-07에 추가했다.
+Part IV 「3D Vision Through Differential Geometry」(27–31장)는 3D vision(SfM, NeRF, 3D Gaussian Splatting)에 쓰이는 기하를 differential geometry로 해석한다. 목차에서 Tour 바로 다음에 두고, 읽는 순서도 Tour → Part IV → Part 0이다(Track 1, §1). 장 번호(27–31)는 식별자일 뿐이다. 31장(mesh)은 2026-10-07에 추가했다. 31장은 Part IV에 남기고 DDG(Track 2)와 서로 링크한다(2026-10-18 결정).
 
 - **독자**: 3D vision 전공자. SfM, NeRF, 3DGS의 실제 파이프라인과 논문 수식은 알지만 differential geometry는 Tour 수준이다.
 - **선수**: Tour(0.1–0.8)만 가정한다. 깊은 장은 Go deeper로만 연결한다.
@@ -115,6 +119,97 @@ Part IV 「3D Vision Through Differential Geometry」(27–31장)는 3D vision(S
 - **용어 표시**: Tour와 같다. dfn을 쓰지 않고 `<strong>term</strong>(한국어)`로 쓴다. 정착된 번역어가 없는 CV 용어는 영어만 쓴다.
 - **그림**: 그림 설명을 많고 자세하게 쓴다. §12.6의 "그림 설명 규칙"을 반드시 따른다(사용자 요청: 예시 그림이 이해되지 않는 경우가 있었다).
 - **수치 실험**: "큰 Gaussian에서 EWA 근사가 깨진다", "isotropic이면 rotation gradient가 0이다" 같은 주장은 스크립트로 확인한다. 그 결과를 그림이나 표로 보여 준다.
+
+### 2.5 Track 2: Discrete Differential Geometry의 원칙 (2026-10-18 사용자 결정)
+
+Track 2 「Discrete Differential Geometry」(32–45장)는 CMU 15-458/858 강의(Keenan Crane, Spring 2021 녹화)와 Crane의 강의노트 [Cr]를 따라가는 **독립 섹션**이다. 목차에서 Track 1 다음, Track 3 앞에 온다(§1).
+
+- **출처**
+  - 강의 재생목록: <https://www.youtube.com/playlist?list=PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS> (22개 영상)
+  - 강의 사이트와 슬라이드: <https://brickisland.net/DDGSpring2021/>
+  - 노트: <https://www.cs.cmu.edu/~kmcrane/Projects/DDG/paper.pdf>
+  - 재생목록에 없는 것이 둘 있다. Conformal Geometry 강의(L19–20)는 사이트에 영상이 있지만 재생목록에 빠져 있다. 노트 8장(vector field decomposition)에는 강의 영상이 없고 과제 A6만 있다.
+  - 강의 번호와 영상 링크의 정본은 references.html의 `CMU-DDG` 항목이다.
+- **독자**: 그래픽스·3D vision을 공부하는 CS 학부생이다.
+  - 선형대수와 다변수 미적분을 알고, 짧은 증명은 따라갈 수 있다. analysis와 topology의 엄밀한 기초는 가정하지 않는다.
+  - Tour를 읽었으면 좋지만 필수는 아니다.
+- **목표**: 강의의 흐름(smooth 개념 → discrete 판 → 알고리즘)을 따라 smooth와 discrete를 함께 이해하고, 직접 구현할 수 있게 한다.
+  - 중심 주제는 "smooth 정의 하나에 discrete 정의가 여럿 있고, 무엇을 정확히 보존하는지를 보고 고른다"이다.
+- **강의와 노트를 따르는 법**
+  - 장과 절의 순서는 강의 순서를 따른다. 장 개요의 `p.meta`에 해당 강의 영상과 슬라이드를 링크한다.
+  - 절의 `p.meta`는 `References: [Cr §4.8] · Lecture: [CMU-DDG L9]` 꼴로 쓴다.
+  - Cr의 절 번호는 `refs/ddg-crane/crane-ddg-notes.pdf`(2025-01-29판)에서 확인하고 정확히 적는다(§5.1).
+  - **강의 영상은 볼 수 없다.** 강의 내용은 슬라이드(`refs/ddg-crane/slides/`)와 노트로만 확인한다. 영상의 시각이나 "강의에서 이렇게 말했다"는 쓰지 않는다.
+  - **저작권**: 노트와 슬라이드는 저자가 all rights reserved로 밝혔다.
+    - 문장 번역, 그림 재현, 연습문제 전재를 하지 않는다. 구성과 주제만 참고하고, 설명·그림·예·연습은 새로 만든다(§4.4).
+    - 노트의 문제와 비슷한 문제를 쓰려면 실질적으로 변형하고 "[Cr §x.y 변형]"을 단다.
+- **엄밀성**: Tour보다 깊고 Track 3보다 가볍다.
+  - **discrete 대상**의 정의와 정리는 가정을 빠짐없이 진술하고 **완전한 증명**을 쓴다. 대개 유한한 조합론과 선형대수라 짧다. 예: d∘d = 0, discrete Stokes, discrete Gauss–Bonnet, cotan formula, 기하량의 gradient
+  - **smooth 대상**(curve, surface, differential form, curvature, geodesic)은 ℝⁿ 안에서 필요한 만큼 정확히 정의한다.
+    - 무거운 정리는 "Proof sketch." 또는 `div.proof` 머리 "Derivation."으로 쓰고, 엄밀한 증명은 Go deeper로 Track 3에 보낸다.
+    - 단순화할 때는 무엇을 단순화했는지 밝힌다. 틀린 단순화는 하지 않는다(§2.3).
+  - 확립된 사실과 해석을 구분한다(§2.4).
+- **한 개념, 한 정의(§3.3)와 `<dfn>`**
+  - **discrete 개념은 Track 2가 정의하는 곳이다.** 예: simplicial complex, star, closure, link, cochain, de Rham map, discrete exterior derivative, discrete Hodge star, angle defect, cotan Laplacian
+    - `<dfn>`을 쓴다.
+    - 31장은 같은 개념을 `<strong>`으로 썼으므로 충돌하지 않는다. 31장과 겹치는 내용은 Track 2에서 더 깊이 다루고, 31장의 서술은 링크로 비교한다(`box backward` 또는 Go deeper).
+  - **Track 3의 장 계획에 있는 smooth 개념**에는 `<dfn>`을 쓰지 않는다. §9 표와 각 장 개요의 toc-note에 있는 개념이다. 예: differential form, exterior derivative, Stokes's theorem, Gaussian curvature, geodesic, Euler characteristic, Riemannian metric, Laplacian
+    - Tour처럼 `<strong>term</strong>(한국어)`으로 쓴다.
+    - 정의가 이미 있으면 그 위치를 링크하고, 아직 없으면 장 개요를 링크한다.
+    - 이미 정의된 개념인지는 concepts.html에서 확인한다.
+  - 같은 개념을 Track 2 안에서 두 번 정의하지 않는다. 뒤 장은 앞 장의 정의를 링크로 상기한다.
+  - **Track 3의 장 계획에 없어서 Track 2가 정의하는 smooth 개념**도 있다(2026-10-18 장 개요 기준): Hodge star, codifferential, L2 inner product(of forms), vector-valued form, harmonic 1-form, Hodge decomposition, logarithm map, Karcher mean, Dirichlet energy, harmonic function, Riemann surface, complex structure. 나중에 Track 3(예: 19, 21–23장)을 쓸 때는 이것을 다시 정의하지 말고 `data-generalizes`로 일반화하거나 링크한다.
+- **절의 구성**: §2.1을 따르고 다음을 더한다.
+  - **Smooth vs. Discrete 상자**(`aside.box.discrete`)를 1개 이상 둔다.
+    - 이 절의 smooth 개념과 discrete 판을 나란히 놓는다.
+    - discrete 판이 무엇을 정확히 보존하고 무엇을 잃는지 쓴다.
+  - **Implementation 상자**(`aside.box.code`): 알고리즘이 나오면 Python/NumPy 코드를 둔다.
+    - 형식은 `<pre><code>`이고 30줄 이하로 쓴다.
+    - verify 스크립트가 같은 코드를 실행해 확인한다.
+    - scipy는 쓰지 않는다(부록 E).
+    - 공용 함수는 `tools/dgmesh.py`(mesh)와 `tools/dgdec.py`(DEC, 곡선, 기하량의 미분)에 있다.
+  - In computer vision 상자(`application`)는 선택이다. 3D vision·graphics와의 연결이 정확할 때만 1–2개 둔다. Part IV, 특히 Chapter 31과 잇는다.
+  - **Go deeper 상자**(`deeper`)는 Track 3의 해당 장, Tour 절, Chapter 31의 해당 절을 링크한다.
+  - **Exercises**: 4–6개를 둔다.
+    - written(★–★★★)과 coding을 섞는다. coding 문제는 문장 앞에 `<strong>Coding.</strong>`을 붙이고, 절마다 1개 이상이 기준이다.
+    - 모든 문제에 완전한 풀이를 단다. coding 풀이에는 코드와 출력값을 쓰고, verify로 확인한다.
+  - 분량은 한 절에 30–50분이다.
+- **기호**: §6을 따른다. 아래는 Track 2가 **추가**하는 기호이며 §6을 바꾸지 않는다. Crane과 다른 곳에는 Conventions 상자를 둔다.
+  - **mesh**: Chapter 31과 같다(notation.html).
+    - vertex \(i\)의 위치는 \(x_i\)다. edge \(ij\)의 맞은편 각은 \(\alpha_{ij}, \beta_{ij}\)다. angle defect는 \(\delta_i\)다.
+    - 개수는 \(n_0, n_1, n_2\)이고 \(\chi = n_0 - n_1 + n_2\)다.
+    - cotan matrix는 \(L\)이고 mass matrix는 \(M\)이다. \(L_{ij} = \tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})\), \(L_{ii} = -\sum_{j} L_{ij}\)라서 \(-L\)이 positive semidefinite이고, \(M^{-1}L \approx \Delta = \divg\grad\)다.
+  - **smooth immersion**: §6.3처럼 \(\mathbf{x}\)로 쓴다. 미분은 \(d\mathbf{x}\)(vector-valued 1-form)다. Crane은 \(f\)로 쓴다. 함수는 \(u, \varphi\) 등으로 쓴다.
+  - **DEC**
+    - discrete \(k\)-form은 실수 벡터 \(\alpha \in \R^{n_k}\)다. smooth form \(\alpha\)의 de Rham 상은 \(\hat\alpha\), \(\hat\alpha_\sigma = \int_\sigma \alpha\)로 쓴다.
+    - exterior derivative 행렬 \(d_0 \in \R^{n_1 \times n_0}\), \(d_1 \in \R^{n_2 \times n_1}\)은 signed incidence matrix다.
+    - edge \(\{i, j\}\)(\(i \lt j\))는 \(i \to j\) 방향을 준다. face \((i, j, k)\)는 배열 \(F\)의 순서로 방향을 준다. 닫힌 mesh에서는 바깥쪽이다.
+    - diagonal Hodge star는 \(\star_0, \star_1, \star_2\)다. \(\star_1 = \diag\bigl(\tfrac12(\cot\alpha + \cot\beta)\bigr)\)이므로 \(d_0^{\mathsf T}\star_1 d_0 = -L\)이다.
+    - dual cell은 \(\sigma^\star\)로 쓴다. Hodge star \(\star\)는 TeX `\star`로 쓴다.
+    - 구현과 부호의 정본은 `tools/dgdec.py`다.
+  - **curvature**: §6.3을 따른다. \(W = -d\mathbf{N}\), \(H = \tfrac12\tr W\)다. 바깥쪽 \(\mathbf{N}\)인 반지름 \(r\)의 sphere에서 \(H = -1/r\)이다. mean curvature normal은 \(\Delta\mathbf{x} = 2H\mathbf{N}\)이다. Crane의 부호와 다른 곳은 반드시 Conventions 상자로 알린다.
+  - 장 안에서만 쓰는 기호는 그 장의 첫 절 Conventions 상자에 모은다. 새 기호는 최종 보고에 적는다.
+- **기준 예제**: §7의 smooth 예제를 discrete로 근사한 것을 장마다 다시 쓴다. 매개화와 값은 §7을 그대로 쓴다.
+  - plane curve
+    - 반지름 \(r\)인 circle에 내접한 정 \(n\)각형
+    - ellipse \((2\cos t, \sin t)\)
+    - nonconvex flower curve \(r(t) = 1 + 0.3\cos 5t\) (flow 예제)
+  - space curve: helix(§7). 수치는 주로 \((a, b) = (1, 0.3)\)이다.
+  - surface
+    - icosphere `dgmesh.icosphere(level)`: unit sphere \(S^2(1)\)
+    - torus mesh `dgmesh.torus_mesh(2, 0.8, nu, nv)`: \(T_{R,r}\), \((R, r) = (2, 0.8)\)으로 Chapter 31과 같다
+    - planar grid `dgmesh.grid_mesh`
+    - saddle \(z = x^2 - y^2\)의 grid mesh: 원점에서 \(K = -4\), \(H = 0\)
+    - 손계산용 regular tetrahedron, octahedron, cube
+  - 외부 mesh 데이터(Stanford bunny 등)는 쓰지 않는다(라이선스, 재현성).
+- **그림, verify, 애니메이션**
+  - 그림은 §12를 따르고, 그림 설명 규칙(§12.6)은 필수다. 3D mesh에는 interactive 그림(§12.7)을 권장한다.
+  - 모든 수치, 항등식, 코드 출력은 verify로 확인한다.
+  - 애니메이션(§12.8)은 장을 쓴 뒤 별도 단계에서 만든다.
+- **연결**
+  - Track 2 장끼리는 §3.2대로 Builds on / Leads to로 잇는다.
+  - Track 3과는 Go deeper와 Looking ahead로 잇는다. Track 1(Tour, Chapter 31)과는 Looking back으로 잇는다.
+  - 장 번호 32–45는 식별자다. pager는 Track 1의 마지막 장(03)에서 32로, 45에서 Track 3의 첫 장(04)으로 이어진다.
 
 ---
 
@@ -299,7 +394,8 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 | ON | B. O'Neill, *Elementary Differential Geometry*, rev. 2nd ed., Academic Press, 2006 | Part I 보조. 틀(frame)과 형식 관점 |
 | Sh | T. Shifrin, *Differential Geometry: A First Course in Curves and Surfaces* (저자 공개 강의노트) | Part I 보조. 공개 자료 |
 | Nd | T. Needham, *Visual Differential Geometry and Forms*, Princeton UP, 2021 | 직관과 그림 참고 |
-| Cr | K. Crane, *Discrete Differential Geometry: An Applied Introduction* (공개 강의노트) | 직관과 그림 참고 |
+| Cr | K. Crane, *Discrete Differential Geometry: An Applied Introduction* (공개 강의노트, 2025-01-29판) | Track 2 주교재. 직관과 그림 참고 |
+| CMU-DDG | K. Crane, CMU 15-458/858 Discrete Differential Geometry, Spring 2021 (강의 영상과 슬라이드) | Track 2 강의. 인용은 [CMU-DDG L9]처럼 강의 번호로 한다 |
 | Ax | S. Axler, *Linear Algebra Done Right*, 4th ed., Springer, 2024 (open access) | Part 0 선형대수 |
 | Sp-CoM | M. Spivak, *Calculus on Manifolds*, 1965 | Part 0 해석 |
 | Lee-ITM | J. M. Lee, *Introduction to Topological Manifolds*, 2nd ed., GTM 202, Springer, 2011 | Part 0 위상 |
@@ -318,6 +414,12 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 | dC | `refs/(Dover Books on Mathematics) Manfredo P. do Carmo - Differential Geometry of Curves and Surfaces-Dover Publications (2016).pdf` | Revised & Updated 2nd ed., Dover 2016, ISBN 978-0-486-80699-0. 529쪽 | 전 구간 **+16** (인쇄 1–510쪽) |
 | Lee-IRM | `refs/(Graduate Texts in Mathematics) John M. Lee - Introduction to Riemannian Manifolds-Springer (2018).pdf` | 2nd ed., GTM 176, Springer 2018, ISBN 978-3-319-91754-2. 447쪽 | 인쇄 1–83쪽 **+14**, 86–113쪽 **+13**, 116–191쪽 **+12**, 194–317쪽 **+11**, 320–437쪽 **+10**. 빈 쪽 84, 114, 192, 318은 PDF에 없다 |
 
+- **Track 2 자료** (2026-10-18 추가, `refs/ddg-crane/`)
+  - Cr: `refs/ddg-crane/crane-ddg-notes.pdf`. "Last updated: January 29, 2025", 174쪽이다. PDF 쪽 = 인쇄 쪽 **+1**이다(인쇄 7쪽의 2장 = PDF 8쪽).
+  - 슬라이드: `refs/ddg-crane/slides/*.pdf`. 강의별 슬라이드와 과제(A1, A3–A5, A2 written)가 있다.
+    - 강의 13(Smooth Surfaces II)은 슬라이드가 없다. 노트 §3.1–3.2로 대신한다.
+    - 일부 파일은 2019–2020년 판이다(파일 이름에 SP19, SP20). 강의 번호와 파일의 대응은 references.html의 `CMU-DDG` 항목에 있다.
+  - 텍스트는 깨끗하다. 수식이 많은 쪽은 쪽 이미지로 확인한다.
 - **읽는 법**
   - 텍스트: `pdftotext -f P -l P -layout 파일 -` (P는 PDF 쪽 번호)
   - 쪽 이미지: Read 도구의 `pages` 인자
@@ -671,11 +773,11 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 
 대응 교재 번호는 판본에 따라 다를 수 있다. 작성할 때 `refs/`로 다시 확인한다(§4.4). 표의 "(선택)" 장은 핵심 흐름이 끝난 뒤에 작성한다.
 
-**장 제목과 폴더 (정본)**: 모든 페이지의 제목, 링크, breadcrumb는 아래 이름을 그대로 쓴다. 표의 순서가 읽는 순서다. Part IV(27–31)는 Tour 다음, Part 0 앞에 온다(§2.4).
+**장 제목과 폴더 (정본)**: 모든 페이지의 제목, 링크, breadcrumb는 아래 이름을 그대로 쓴다. 표의 순서가 읽는 순서다(세 track, §1). 장 번호는 식별자이고, 읽는 순서와 같지 않다. Part IV(27–31)는 Tour 다음, Part 0 앞에 온다(§2.4). Track 2(32–45)는 Part 0 다음, Part I 앞에 온다(§2.5).
 
-| Part | 장 | 제목 (English) | 폴더 |
+| Track · Part | 장 | 제목 (English) | 폴더 |
 |---|---|---|---|
-| Tour | 00 | A Guided Tour of Differential Geometry | `00-tour` |
+| **Track 1. Foundations and Intuition** · Tour | 00 | A Guided Tour of Differential Geometry | `00-tour` |
 | IV. 3D Vision Through Differential Geometry | 27 | Cameras, Projections, and Rays | `27-cameras-rays` |
 | | 28 | Poses and Motion: Lie Groups for SfM and SLAM | `28-lie-groups-poses` |
 | | 29 | The Geometry of Gaussian Splatting | `29-gaussian-splatting` |
@@ -684,7 +786,21 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 | 0. Preliminaries | 01 | Linear Algebra Review | `01-linear-algebra` |
 | | 02 | Calculus on ℝⁿ | `02-calculus-rn` |
 | | 03 | Basic Topology | `03-topology-basics` |
-| I. Curves and Surfaces | 04 | Curves | `04-curves` |
+| **Track 2. Discrete Differential Geometry** | 32 | Overview: Discrete Curvature of Plane Curves | `32-ddg-overview` |
+| | 33 | Combinatorial Surfaces | `33-combinatorial-surfaces` |
+| | 34 | Exterior Algebra and k-Forms | `34-exterior-algebra` |
+| | 35 | Exterior Calculus | `35-exterior-calculus` |
+| | 36 | Discrete Exterior Calculus | `36-discrete-exterior-calculus` |
+| | 37 | Curves: Smooth and Discrete | `37-curves-smooth-discrete` |
+| | 38 | Surfaces: Smooth and Discrete | `38-surfaces-smooth-discrete` |
+| | 39 | Curvature of Surfaces | `39-surface-curvature` |
+| | 40 | Discrete Curvature I: The Integral Viewpoint | `40-discrete-curvature-integral` |
+| | 41 | Discrete Curvature II: The Variational Viewpoint | `41-discrete-curvature-variational` |
+| | 42 | The Laplace–Beltrami Operator | `42-laplace-beltrami` |
+| | 43 | Conformal Geometry | `43-conformal-geometry` |
+| | 44 | Geodesics | `44-discrete-geodesics` |
+| | 45 | Vector Field Decomposition and Design | `45-vector-field-design` |
+| **Track 3. Rigorous Differential Geometry** · I. Curves and Surfaces | 04 | Curves | `04-curves` |
 | | 05 | Space Curves and the Frenet Frame | `05-space-curves` |
 | | 06 | Regular Surfaces | `06-regular-surfaces` |
 | | 07 | The First Fundamental Form | `07-first-fundamental-form` |
@@ -707,6 +823,25 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 | | 24 | Curvature | `24-curvature` |
 | | 25 | Riemannian Submanifolds | `25-submanifold-geometry` |
 | | 26 | Gauss–Bonnet Revisited and Jacobi Fields (optional) | `26-gauss-bonnet-jacobi` |
+
+**Track 2. Discrete Differential Geometry** (§2.5). 강의 번호는 Spring 2021 사이트의 번호다. 재생목록에서는 L21–22가 "Lecture 20: Geodesics" 한 영상이다.
+
+| 장 | 폴더 | 핵심 내용 | 강의 · 노트 |
+|---|---|---|---|
+| 32 | `32-ddg-overview` | DDG란 무엇인가. plane curve의 curvature와 네 가지 discrete curvature(turning angle, length variation, Steiner formula, osculating circle). 무엇을 보존하는가와 curvature flow("no free lunch") | L1 · Cr ch1 |
+| 33 | `33-combinatorial-surfaces` | simplex와 simplicial complex(geometric, abstract), star·closure·link, orientation, simplicial manifold(link 조건), mesh 자료구조(adjacency·incidence matrix, halfedge), dual complex와 Poincaré duality | L2A, L2B · Cr ch2 |
+| 34 | `34-exterior-algebra` | wedge product와 k-vector, Hodge star, covector·sharp·flat, 측정으로서의 k-form, 좌표와 기저 | L3, L4 · Cr §4.1–4.3, §4.5 일부 |
+| 35 | `35-exterior-calculus` | differential form, exterior derivative(grad·curl·div, d∘d = 0), form의 적분, Stokes' theorem, form의 inner product와 vector-valued form | L5–L7, 보충 영상 · Cr §4.4–4.7 |
+| 36 | `36-discrete-exterior-calculus` | de Rham map, chain과 cochain, Whitney interpolation, discrete exterior derivative, dual form과 diagonal Hodge star(cotan), 연산자의 합성 | L8, L9 · Cr §4.8 |
+| 37 | `37-curves-smooth-discrete` | plane curve(differential, tangent, normal, curvature), turning number와 Whitney–Graustein, space curve와 adapted frame, discrete plane·space curve, curve의 curvature flow | L10, L11 · Cr §3.3 |
+| 38 | `38-surfaces-smooth-discrete` | parametrized surface와 differential, induced metric과 conformal coordinates, Gauss map과 vector-valued form, simplicial surface와 discrete immersion, discrete normal, 곡면 위의 DEC와 shape recovery | L12–L14 · Cr §3.1, 3.2, 3.5 |
+| 39 | `39-surface-curvature` | Weingarten map, normal·principal curvature, Gaussian·mean curvature, Gauss–Bonnet, fundamental form과 surface의 fundamental theorem | L15 · Cr §3.4 |
+| 40 | `40-discrete-curvature-integral` | angle defect, discrete Gauss–Bonnet, curvature normal, Steiner formula와 mollified polyhedron | L16 · Cr §5.5 |
+| 41 | `41-discrete-curvature-variational` | 기하량의 미분, volume·area·mean curvature의 gradient(Schläfli), discrete curvature의 전경, 수치 실험과 수렴, surface의 curvature flow | L17 · Cr §5.1–5.4, 5.6, App. A |
+| 42 | `42-laplace-beltrami` | Laplacian의 여러 정의, Dirichlet energy·harmonic function·Poisson equation, FEM과 DEC 이산화, boundary condition, Poisson 문제와 implicit mean curvature flow | L18 · Cr ch6 |
+| 43 | `43-conformal-geometry` | 왜 conformal인가, Cauchy–Riemann equation, surface의 conformal map과 uniformization, conformal energy, discrete conformal parameterization | L19–20 (재생목록 밖) · Cr ch7 |
+| 44 | `44-discrete-geodesics` | shortest와 straightest, discrete shortest path·cut locus·medial axis, discrete straightest geodesic, exp·log map과 Karcher mean, geodesic equation, heat method | L21–22, 보충 영상 · Cr13 |
+| 45 | `45-vector-field-design` | Hodge decomposition, homology generator와 harmonic basis, discrete connection과 parallel transport, trivial connection으로 vector field 설계 | 강의 영상 없음(과제 A6) · Cr ch8 |
 
 **Part 0. 준비**
 
@@ -759,6 +894,10 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 - Part I에는 01–03장이 필요하다. 04–05장도 03장의 컴팩트성 결과(정리 3.6.10, 르베그 수, 균등연속)를 쓰고, 06장부터는 부분공간 위상과 위상동형이 본격적으로 쓰인다. Part II에도 01–03장이 필요하다.
 - Part I과 Part II는 대부분 서로 독립이라 **병렬로 작성할 수 있다**. 11장의 "Part I과의 관계" 절만 06장 이후에 쓴다.
 - Part III에는 Part II(특히 13–18장)가 필요하고, Part I을 자주 참조한다.
+- **Track 2**는 Track 3에 의존하지 않는다(Go deeper로만 잇는다). Track 2 안의 의존 관계는 다음과 같다.
+  - 32, 33, 34는 서로 독립이다.
+  - 35 ← 34, 36 ← 33·35, 37 ← 32·36, 38 ← 35·36·37, 39 ← 38, 40 ← 33·39, 41 ← 40, 42 ← 36·41, 43 ← 42, 44 ← 39·42, 45 ← 36·42·44
+  - 병렬 작성 방법은 §15.5를 따른다. 선행 장의 장 개요("Leads to")가 넘겨줄 정의와 결과의 계약이다.
 
 ---
 
@@ -784,6 +923,8 @@ DG-study/
 │   ├── render_anims.sh        ← 애니메이션 렌더 (check_all에는 들어 있지 않다)
 │   ├── dgsym.py               ← §6 규약을 구현한 기호계산
 │   ├── dgnum.py               ← 수치 헬퍼 (RK4 등)
+│   ├── dgmesh.py              ← triangle mesh 헬퍼 (Chapter 31, Track 2 공용)
+│   ├── dgdec.py               ← DEC·discrete curve·기하량 미분의 정본 구현 (Track 2, §2.5)
 │   ├── dgcheck.py             ← verify 스크립트용 check/sym_equal/close/summary
 │   ├── check_site.py          ← HTML 구조·링크 검사
 │   ├── build_index.py         ← concepts.html 생성, 중복 정의 검사
@@ -883,6 +1024,8 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
   - `application`: In computer vision (주로 Chapter 0 Tour, §2.3)
   - `deeper`: Go deeper (깊은 장으로 가는 링크, §2.3)
   - `insight`: What geometry explains (Part IV, §2.4)
+  - `discrete`: Smooth vs. Discrete (Track 2, §2.5)
+  - `code`: Implementation (Track 2, §2.5). 안에 `<pre><code>…</code></pre>`를 둔다. 코드 안의 `<`, `&`는 `&lt;`, `&amp;`로 쓴다
 - **번호 붙은 식**
   ```html
   <div class="equation" id="eq-6-2-1">\[ … \tag{6.2.1} \]</div>
@@ -1672,6 +1815,7 @@ window.MathJax = {
    - 모든 `figures/*.py` (재생성)
    - 모든 `verify/*.py`
    - `python3 tools/dgsym.py`
+   - `python3 tools/dgmesh.py`, `python3 tools/dgdec.py` (2026-10-18 추가, Track 2 공용 구현의 self-test)
 10. **독자용 공용 페이지**
    - `index.html`: 로드맵 표와 절 상태
    - `notation.html`: §6을 독자용으로

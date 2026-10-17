@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>39. Curvature of Surfaces — DG Study</title>
+  <meta name="dg-id" content="39">
+  <meta name="dg-status" content="planned">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb"><a href="../../index.html">Contents</a> › <span>39. Curvature of Surfaces</span></nav>
+
+  <main>
+    <header>
+      <h1>39. Curvature of Surfaces</h1>
+      <p class="meta">Track 2. Discrete Differential Geometry · Lectures: <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> (<a href="https://www.youtube.com/watch?v=e-erMrqBd1w&amp;list=PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS">video</a>, <a href="https://brickisland.net/DDGSpring2021/wp-content/uploads/2020/03/DDG_458_SP20_Lecture15_SmoothCurvature.pdf">slides</a>) · References: <a class="cite" href="../../references.html#Cr">[Cr §3.4]</a></p>
+      <p class="threads">Threads: <strong>T1</strong> What is curvature? (the Weingarten map; normal, principal, Gaussian, and mean curvature of smooth surfaces) · <strong>T5</strong> Integration and topology (the Gauss–Bonnet theorem)</p>
+    </header>
+
+    <section class="questions">
+      <h2>Questions</h2>
+      <ul>
+        <li>surface는 방향에 따라 다르게 굽는다. 그 굽음을 모두 담는 linear map은 무엇이고, 거기서 어떤 숫자들(principal, Gaussian, mean curvature)이 나오는가?</li>
+        <li>Gaussian curvature의 전체 적분은 왜 surface의 topology만으로 정해지는가? 그리고 surface를 rigid motion을 제외하고 결정하는 데이터는 무엇인가?</li>
+      </ul>
+    </section>
+
+    <section class="inherits">
+      <h2>Builds on</h2>
+      <ul>
+        <li><a href="../38-surfaces-smooth-discrete/index.html">Chapter 38</a>: \(d\mathbf{x}\), Gauss map \(\mathbf{N}\)과 \(d\mathbf{N}\), induced metric, discrete Gauss map. <a href="../37-curves-smooth-discrete/index.html">Chapter 37</a>: curve의 curvature, Frenet frame과 adapted frame, turning number. <a href="../33-combinatorial-surfaces/index.html">Chapter 33</a>: \(\chi = n_0 - n_1 + n_2\).</li>
+        <li>Track 1: <a href="../00-tour/0-4-curvature.html">Section 0.4</a>(Gauss map, shape operator, \(K\)와 \(H\)), <a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>(Theorema Egregium, Gauss–Bonnet theorem), <a href="../31-meshes/31-2-discrete-curvature.html">Section 31.2</a>.</li>
+        <li>이 장은 smooth curvature를 Crane의 form 언어로 빠르게 정리한다. 정의는 Track 3 <a href="../08-gauss-map/index.html">Chapter 8</a>, <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>, <a href="../10-gauss-bonnet/index.html">Chapter 10</a>의 것을 링크로 상기하고, 무거운 증명은 그쪽으로 보낸다. 가정하는 배경: vector calculus와 linear algebra(eigenvalue, self-adjoint map).</li>
+      </ul>
+    </section>
+
+    <h2>Sections</h2>
+    <ol class="toc">
+      <li id="toc-39-1" data-file="39-1-weingarten-map.html">
+        <span class="toc-title">39.1 The Weingarten Map</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: curve의 curvature(Chapter 37)에서 surface의 curvature로: tangent의 변화 대신 normal의 변화를 본다; Weingarten map(strong: shape operator <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-12">Definition 8.1.12</a>): Crane이 “Weingarten map”이라 부르는 \(d\mathbf{N}\)(\(\R^3\)-valued 1-form)과 이 study set의 \(W = -d\mathbf{N}\)(\(T_pS\)의 linear map)의 관계; \(d\mathbf{N}(X)\)는 tangent(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-3">Section 38.3</a> 상기); 좌표에서의 행렬 \(\mathsf{g}^{-1}\mathsf{h}\)(symmetric이 아니지만 induced metric에 대해 self-adjoint: <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-6">Definition 8.1.6</a>, <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-10">Theorem 8.1.10</a> 상기); Weingarten map의 계산은 surface의 differential 계산과 같은 일이다(예) · Conventions(Conventions box, 필수): Crane(L15, Cr §3.4)은 \(d\mathbf{N}\)을 Weingarten map이라 하고 \(df(SX) = d\mathbf{N}(X)\)인 \(S\)를 shape operator라 부르며 principal curvature를 \(S\)의 eigenvalue로 정의한다. 이 study set은 \(W = -d\mathbf{N}\)(§6.3)이므로 같은 \(\mathbf{N}\)에서 Crane의 \(\kappa_i\)와 \(H\)는 부호가 반대이고 \(K\)는 같다. 또 Crane의 sphere 예(L15)는 안쪽 normal \(\mathbf{N} = -f\)를 쓴다 · Running examples: sphere(바깥쪽 \(\mathbf{N}\): \(d\mathbf{N} = \tfrac1r d\mathbf{x}\), \(W = -\tfrac1r\id\)), cylinder, torus of revolution(\(\mathbf{x}_u\times\mathbf{x}_v\)는 안쪽), saddle · Go deeper: <a href="../08-gauss-map/index.html#toc-8-1">Section 8.1</a>, <a href="../00-tour/0-4-curvature.html#sec-gauss-map">Section 0.4</a> · Lecture: L15 slides 3–16 · Notes: Cr §3.4</p>
+      </li>
+      <li id="toc-39-2" data-file="39-2-principal-curvatures.html">
+        <span class="toc-title">39.2 Normal and Principal Curvatures</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: surface 위의 curve: Darboux frame(dfn: \((\mathbf{t}, \mathbf{N}\times\mathbf{t}, \mathbf{N})\). Frenet frame(Section 37.3)과 비교); curvature vector의 분해 \(\kappa\mathbf{n} = \kappa_n\mathbf{N} + \kappa_g\,\mathbf{N}\times\mathbf{t}\) — normal curvature(strong: <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-4">Definition 8.2.4</a>)와 geodesic curvature(strong: <a href="../09-intrinsic-geometry/index.html#toc-9-5">Section 9.5</a>)는 Track 2에 여기서 처음 나온다; Proposition(증명): \(\kappa^2 = \kappa_n^2 + \kappa_g^2\); \(\kappa_n = \mathrm{II}(\mathbf{t},\mathbf{t})\)(Meusnier, <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-5">Theorem 8.2.5</a> 상기); principal curvature와 principal direction(strong: <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-4">Definition 8.3.4</a>) = \(W\)의 eigenvalue와 eigenvector, induced metric에 대해 직교(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-3">Theorem 8.3.3</a> 상기); Euler's formula \(\kappa_n = \kappa_1\cos^2\vartheta + \kappa_2\sin^2\vartheta\)(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-5">Theorem 8.3.5</a> 상기); umbilical point(strong: <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-7">Definition 8.3.7</a>); line of curvature(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-10">Definition 8.3.10</a>)의 net, umbilic 근처의 separatrix와 spiral(그림); principal direction field로 quad remeshing(In computer vision 상자) · Conventions: Crane의 \(\kappa_n(X) = \inner{d\mathbf{N}(X)}{d\mathbf{x}(X)}/\abs{d\mathbf{x}(X)}^2\)는 이 study set의 \(\kappa_n\)과 부호가 반대다(Section 39.1의 상자) · Running examples: sphere 위 circle of latitude(\(\kappa_n\)과 \(\kappa_g\)의 값과 부호를 orientation과 함께 명시, verify), cylinder 위 helix(\(\kappa_g = 0\)), torus of revolution의 principal curvature(<a href="../08-gauss-map/index.html#toc-8-3">Section 8.3</a>의 값을 normal 방향과 함께 인용), saddle · Overlap: geodesic의 정의(\(\kappa_g = 0\))는 <a href="../44-discrete-geodesics/index.html#toc-44-1">Section 44.1</a>, discrete geodesic curvature는 <a href="../44-discrete-geodesics/index.html#toc-44-3">Section 44.3</a> · Go deeper: <a href="../08-gauss-map/index.html#toc-8-2">Section 8.2</a>–<a href="../08-gauss-map/index.html#toc-8-3">Section 8.3</a>, <a href="../09-intrinsic-geometry/index.html#toc-9-5">Section 9.5</a>, <a href="../00-tour/0-4-curvature.html#sec-normal-curvature">Section 0.4</a> · Lecture: L15 slides 7–25 · Notes: Cr §3.4, §3.4.1</p>
+      </li>
+      <li id="toc-39-3" data-file="39-3-gaussian-mean-curvature.html">
+        <span class="toc-title">39.3 Gaussian and Mean Curvature</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: \(K = \kappa_1\kappa_2 = \det W\), \(H = \tfrac12(\kappa_1 + \kappa_2) = \tfrac12\tr W\)(strong: <a href="../08-gauss-map/8-4-gaussian-mean-curvature.html#i-8-4-1">Definition 8.4.1</a>); \(\mathbf{N}\to-\mathbf{N}\)에서 \(H\)만 부호가 바뀌고 mean curvature vector \(H\mathbf{N}\)은 변하지 않는다; 분류: convex(\(K \gt 0\)), developable(\(K = 0\); strong), minimal(\(H = 0\); strong: minimal surface, <a href="../08-gauss-map/index.html#toc-8-4">Section 8.4</a>); intrinsic 특징: geodesic ball의 넓이 \(A(\varepsilon) = \pi\varepsilon^2 - \tfrac{\pi}{12}K\varepsilon^4 + O(\varepsilon^5)\)(진술, sphere에서 Derivation) — <a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a> angle defect의 smooth 원형; Gauss map의 넓이 비율로서의 \(K\)(<a href="../08-gauss-map/index.html#toc-8-4">Section 8.4</a> 상기); Theorema Egregium(진술: <a href="../09-intrinsic-geometry/index.html#toc-9-3">Section 9.3</a>, <a href="../00-tour/0-5-intrinsic.html#sec-egregium">Section 0.5</a>); total mean curvature와 Minkowski inequality(진술), umbilic 개수의 topological invariance(진술, 선택) · Conventions(Conventions box): Crane(L15)은 \(\tfrac12\)을 빼는 convention도 흔하다고 경고한다. 이 study set은 §6.3의 \(H = \tfrac12\tr W\)이고 바깥쪽 \(\mathbf{N}\)인 sphere에서 \(H = -1/r\)이다. Crane의 \(H\)는 같은 \(\mathbf{N}\)에서 부호가 반대다 · Running examples: sphere(\(K = 1/r^2\), \(H = -1/r\)), cylinder(\(K = 0\), \(H = -1/(2r)\)), torus of revolution(\(K = \cos u/(r(R + r\cos u))\)), saddle(원점에서 \(K = -4\), \(H = 0\)) · Go deeper: <a href="../08-gauss-map/index.html#toc-8-4">Section 8.4</a>–<a href="../08-gauss-map/index.html#toc-8-5">Section 8.5</a>, <a href="../09-intrinsic-geometry/index.html#toc-9-3">Section 9.3</a>, <a href="../00-tour/0-4-curvature.html#sec-k-h">Section 0.4</a> · Lecture: L15 slides 26–32 · Notes: Cr §3.4.1</p>
+      </li>
+      <li id="toc-39-4" data-file="39-4-gauss-bonnet.html">
+        <span class="toc-title">39.4 The Gauss–Bonnet Theorem</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: closed plane curve의 total curvature \(= 2\pi\)·turning number(<a href="../37-curves-smooth-discrete/index.html#toc-37-2">Section 37.2</a> 상기); Gauss–Bonnet theorem(strong: <a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>, <a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>): 닫힌 oriented surface에서 \(\int_SK\,dA = 2\pi\chi(S)\). 여기서 \(\chi\)는 <a href="../33-combinatorial-surfaces/index.html#toc-33-4">Section 33.4</a>의 \(n_0 - n_1 + n_2\)를 triangulation에 적용한 값이고, triangulation에 무관하다는 것은 Chapter 10과 <a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>; genus와 \(\chi = 2 - 2g\); boundary가 있는 판 \(\int_SK\,dA + \int_{\partial S}\kappa_g\,ds + \sum_j\varepsilon_j = 2\pi\chi(S)\)(geodesic curvature는 Section 39.2, exterior angle은 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-9">Definition 5.6.9</a>); 증명은 Proof sketch(geodesic triangle의 local Gauss–Bonnet을 triangulation으로 합친다). 완전한 증명은 Chapter 10에, discrete 판의 완전한 증명은 Section 40.2에 있다(한 문장 지시); “surface나 boundary를 바꾸어도 total curvature가 변하지 않는다”의 뜻 · Running examples: sphere(\(4\pi\)), torus of revolution(\(\int K\,dA = 0\): 바깥쪽 \(K \gt 0\)과 안쪽 \(K \lt 0\)의 상쇄, 적분은 verify), planar disk(\(\kappa_g = 1/r\)이 \(2\pi\)를 낸다), hemisphere(boundary가 geodesic), 위도원이 둘러싼 polar cap(<a href="../00-tour/0-5-intrinsic.html#i-0-5-7">Example 0.5.7</a>, §7의 \(2\pi(1 - \cos\theta_0)\)) · Overlap: smooth 판은 진술과 sketch만 한다. discrete Gauss–Bonnet의 정의와 완전한 증명은 <a href="../40-discrete-curvature-integral/index.html#toc-40-2">Section 40.2</a> · Go deeper: <a href="../10-gauss-bonnet/index.html">Chapter 10</a>(<a href="../10-gauss-bonnet/index.html#toc-10-1">Section 10.1</a>–<a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>), <a href="../00-tour/0-5-intrinsic.html#sec-gauss-bonnet">Section 0.5</a>, <a href="../26-gauss-bonnet-jacobi/index.html#toc-26-1">Section 26.1</a> · Lecture: L15 slides 28–30 · Notes: Cr §3.4(discrete 판은 Cr §5.5)</p>
+      </li>
+      <li id="toc-39-5" data-file="39-5-fundamental-theorem.html">
+        <span class="toc-title">39.5 Fundamental Forms and the Fundamental Theorem of Surfaces</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: first fundamental form = induced metric(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-2">Section 38.2</a>, <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-1">Definition 7.1.1</a> 상기); second fundamental form \(\mathrm{II}(X,Y) = \inner{WX}{Y}\)(strong: <a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-1">Definition 8.2.1</a>). Crane의 \(\mathrm{II}(X,Y) = -\inner{d\mathbf{N}(X)}{d\mathbf{x}(Y)}\)와 같은 값이다; coefficient \(L, M, N\)(§6.3)은 cotan matrix \(L\), mass matrix \(M\)과 다른 기호라는 Warning; II는 normal 방향 offset \(\mathbf{x}+t\mathbf{N}\)에서 I의 변화율: \(\tfrac{d}{dt}\mathrm{I}_t\big|_{t=0} = -2\,\mathrm{II}\)(Proposition, 증명); fundamental theorem of surfaces(Bonnet: 진술. Gauss–Codazzi compatibility는 <a href="../09-intrinsic-geometry/index.html#toc-9-2">Section 9.2</a>)와 plane curve의 fundamental theorem(closing condition)과의 비유; bending angle(dfn: interior edge \(ij\)를 공유하는 두 face의 unit normal이 이루는 signed angle \(\theta_{ij}\). <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-5">Definition 31.2.5</a>와 같은 양, 같은 부호); Theorem(완전한 증명): fundamental theorem of discrete surfaces — connected simplicial surface에서 edge length(discrete I)와 bending angle(discrete II)이 어떤 discrete immersion에서 온 것이면 그 immersion은 rigid motion을 제외하고 유일하다(triangle을 하나씩 붙이는 구성); discrete compatibility 조건(vertex 둘레 회전의 곱 = identity, 진술) · Running examples: cylinder와 평면(같은 I, 다른 II), icosphere의 edge length와 bending angle에서 복원(Implementation), torus_mesh · Overlap: bending angle의 정의는 여기 한 곳이다. <a href="../40-discrete-curvature-integral/index.html">Chapter 40</a>(Steiner formula, Gauss curvature normal)과 <a href="../41-discrete-curvature-variational/index.html">Chapter 41</a>(Schläfli formula)은 상기만 한다 · Helpers: dgmesh.edge_bending_angles, corner_angles · Go deeper: <a href="../09-intrinsic-geometry/index.html#toc-9-2">Section 9.2</a>, <a href="../08-gauss-map/index.html#toc-8-5">Section 8.5</a> · Lecture: L15 slides 33–37 · Notes: Cr §3.4.2</p>
+      </li>
+    </ol>
+
+    <section class="handoff">
+      <h2>Leads to</h2>
+      <ul>
+        <li>\(K\), \(H\), Gauss–Bonnet theorem, geodesic ball의 넓이 → <a href="../40-discrete-curvature-integral/index.html">Chapter 40</a>(angle defect, discrete Gauss–Bonnet theorem, curvature normal).</li>
+        <li>II와 넓이의 변화율, bending angle → <a href="../40-discrete-curvature-integral/index.html#toc-40-4">Section 40.4</a>(Steiner formula), <a href="../41-discrete-curvature-variational/index.html">Chapter 41</a>(area gradient와 Schläfli formula).</li>
+        <li>geodesic curvature와 Darboux frame → <a href="../44-discrete-geodesics/index.html">Chapter 44</a>(shortest와 straightest).</li>
+        <li>Go deeper(Track 3): <a href="../08-gauss-map/index.html">Chapter 8</a>, <a href="../09-intrinsic-geometry/index.html">Chapter 9</a>, <a href="../10-gauss-bonnet/index.html">Chapter 10</a>, <a href="../25-submanifold-geometry/index.html">Chapter 25</a>.</li>
+        <li>Open question: polyhedral surface의 curvature는 vertex와 edge에 몰려 있다. curvature를 어떻게 정의해야 Gauss–Bonnet theorem이 근사가 아니라 정확히 성립하는가? → <a href="../40-discrete-curvature-integral/index.html">Chapter 40</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="../38-surfaces-smooth-discrete/index.html">← 38. Surfaces: Smooth and Discrete</a>
+    <a rel="next" href="../40-discrete-curvature-integral/index.html">40. Discrete Curvature I: The Integral Viewpoint →</a>
+  </nav>
+</body>
+</html>

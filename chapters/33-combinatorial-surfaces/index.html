@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>33. Combinatorial Surfaces — DG Study</title>
+  <meta name="dg-id" content="33">
+  <meta name="dg-status" content="planned">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb"><a href="../../index.html">Contents</a> › <span>33. Combinatorial Surfaces</span></nav>
+
+  <main>
+    <header>
+      <h1>33. Combinatorial Surfaces</h1>
+      <p class="meta">Track 2. Discrete Differential Geometry · Lectures: <a class="cite" href="../../references.html#CMU-DDG-L2A">[CMU-DDG L2A]</a> (<a href="https://www.youtube.com/watch?v=TDic3pJyYb8&amp;list=PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS">video</a>, <a href="https://brickisland.net/DDGSpring2021/wp-content/uploads/2021/02/DDG_03A_Meshes.pdf">slides</a>), <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a> (<a href="https://www.youtube.com/watch?v=KZjoxwUxlIs&amp;list=PL9_jI1bdZmz0hIrNCMQW1YmZysAiIYSSS">video</a>, <a href="https://brickisland.net/DDGSpring2021/wp-content/uploads/2021/02/DDG_02B_Manifolds.pdf">slides</a>) · References: <a class="cite" href="../../references.html#Cr">[Cr ch2]</a>, <a class="cite" href="../../references.html#Cr">[Cr §4.8.4]</a></p>
+      <p class="threads">Threads: <strong>T5</strong> Integration and topology (combinatorial topology: simplicial complexes, orientation, the Euler characteristic as a count, combinatorial Poincaré duality)</p>
+    </header>
+
+    <section class="questions">
+      <h2>Questions</h2>
+      <ul>
+        <li>“triangle mesh”를 좌표 없이 연결 정보만으로 정의하면 무엇이 되고, 그것이 언제 surface(manifold)라고 할 수 있는가?</li>
+        <li>그 연결 정보를 컴퓨터에 어떻게 저장하고 탐색하며, 왜 primal mesh와 짝을 이루는 dual complex가 필요한가?</li>
+      </ul>
+    </section>
+
+    <section class="inherits">
+      <h2>Builds on</h2>
+      <ul>
+        <li>가정하는 배경: 집합, permutation과 그 부호, 행렬 계산(linear algebra), 그리고 vector calculus 수준의 기하 직관. <a href="../32-ddg-overview/index.html">Chapter 32</a>, <a href="../34-exterior-algebra/index.html">Chapter 34</a>와는 서로 독립이다.</li>
+        <li>Track 1: <a href="../31-meshes/31-1-mesh-as-surface.html">Section 31.1</a>(mesh가 surface가 되는 조건, link, orientation, Euler characteristic을 strong으로 다루었다). 이 장은 같은 대상을 조합론으로 정의하고(dfn) 증명한다.</li>
+        <li>linear algebra: orientation과 determinant(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-11">Definition 1.6.11</a>), linear independence(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-9">Definition 1.1.9</a>).</li>
+        <li>geometric realization의 topology와 triangulation의 존재는 Track 3(<a href="../03-topology-basics/index.html">Chapter 3</a>, <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>)으로 Go deeper만 한다.</li>
+      </ul>
+    </section>
+
+    <h2>Sections</h2>
+    <ol class="toc">
+      <li id="toc-33-1" data-file="33-1-simplicial-complexes.html">
+        <span class="toc-title">33.1 Simplices and Simplicial Complexes</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: convex set과 convex hull(strong); linear independence(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-9">Definition 1.1.9</a> 상기)에서 affinely independent(dfn)로; simplex(dfn: \(k+1\)개 affinely independent 점의 convex hull인 \(k\)-simplex); barycentric coordinates(dfn; 1-simplex와 \(k\)-simplex. Chapter 36의 Whitney form과 Chapter 42의 hat function의 출발점); face of a simplex(dfn); simplicial complex(dfn, geometric: face에 닫혀 있고 두 simplex의 교집합은 공통 face이거나 공집합); abstract simplicial complex(dfn: 부분집합을 취하는 연산에 닫힌 유한 집합족); vertex, edge, triangle은 0-, 1-, 2-simplex의 이름(strong. “vertex”는 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-9">Definition 5.6.9</a>가 이미 쓰므로 dfn하지 않는다); Proposition(완전한 증명): 유한 abstract simplicial complex는 \(\R^{n_0}\)의 standard simplex 안에서 geometric realization을 갖는다; graph는 1-dimensional complex; non-example: T-junction이 있거나 두 triangle이 겹치는 모임 · In computer vision(선택): persistent homology와 topological data analysis를 한 문단 · Notation: simplicial complex는 \(\mathcal{K}\)로 쓴다(Gaussian curvature \(K\)와 겹치지 않게; Crane은 \(K\)) · Running examples: regular tetrahedron의 boundary(abstract complex로), octahedron, icosahedron(dgmesh.icosphere(0)), 평면의 작은 complex · Helpers: dgdec.simplex, faces, generate_complex, complex_from_faces, is_complex, dimension, k_simplices · Go deeper: <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-1">Definition 31.1.1</a>(triangle mesh; Looking back), <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>, <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a> · Lecture: L2A slides 3–29 · Notes: Cr §2.1</p>
+      </li>
+      <li id="toc-33-2" data-file="33-2-star-closure-link.html">
+        <span class="toc-title">33.2 Star, Closure, and Link</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: subcomplex(dfn); star \(\mathrm{St}(S)\)(dfn: \(S\)의 simplex를 face로 갖는 모든 simplex), closure \(\mathrm{Cl}(S)\)(dfn 용어는 “simplicial closure”로 쓴다: \(S\)를 포함하는 가장 작은 subcomplex. topological closure(<a href="../03-topology-basics/3-1-topological-spaces.html#i-3-1-15">Definition 3.1.15</a>)와 다르다는 Warning), link \(\mathrm{Lk}(S) = \mathrm{Cl}\,\mathrm{St}(S) \setminus \mathrm{St}\,\mathrm{Cl}(S)\)(dfn); Proposition(증명): \(\mathrm{Cl}(S)\)와 \(\mathrm{Lk}(S)\)는 subcomplex이고 \(\mathrm{St}(S)\)는 일반적으로 아니다; pure \(k\)-complex(dfn: pure simplicial complex); pure subcomplex의 boundary \(\mathrm{bd}(\mathcal{K}')\)와 interior(dfn 용어에 “of a pure subcomplex”를 붙여 <a href="../11-smooth-manifolds/11-5-manifolds-with-boundary.html#i-11-5-4">Definition 11.5.4</a>의 boundary와 구분); vertex link의 모양(한 cycle, 한 path, 여러 조각)으로 manifold 조건을 예고(Section 33.4); 계산: 집합 연산 algorithm(Implementation). 행렬로 계산하는 판은 Section 33.5 · Running examples: octahedron vertex의 star와 link(4-cycle), icosahedron(5-cycle), 평면 grid의 boundary vertex(path), 두 triangle이 vertex 하나로만 붙은 nonmanifold 예 · Helpers: dgdec.closure, star, link, is_pure, boundary_simplices, interior · Go deeper: <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-3">Definition 31.1.3</a>(link and manifold mesh; Looking back) · Lecture: L2A slides 30–31(나머지는 노트) · Notes: Cr §2.2</p>
+      </li>
+      <li id="toc-33-3" data-file="33-3-orientation.html">
+        <span class="toc-title">33.3 Orientation</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: oriented simplex(dfn: vertex 순서의 even permutation 동치류. 0-simplex에도 \(\pm i\)를 허용), permutation의 부호와 determinant(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-6">Definition 1.6.6</a>), \(\R^2\)의 triangle에서 orientation = determinant의 부호(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-11">Definition 1.6.11</a>과 비교); face에 유도되는 orientation(\(ijk\)가 \(ij, jk, ki\)를 유도; tetrahedron의 네 face), relative orientation(dfn: \((k-1)\)-face를 공유하는 두 \(k\)-simplex, 그리고 simplex와 그 face), oriented simplicial complex(dfn: simplex마다 orientation을 고른 것, 조건 없음), consistent orientation(dfn: 이웃한 두 \(k\)-simplex가 공유 face에 반대 orientation을 유도함); combinatorial Möbius band(non-example: consistent orientation이 없다, 증명); orientation propagation algorithm(BFS, edge마다 triangle이 둘 이하인 pure 2-complex에서) — Proposition(증명): connected complex가 consistently orientable이면 consistent orientation은 정확히 둘이고 algorithm이 그중 하나를 찾거나 불가능함을 보고한다 · Conventions(Conventions box): §2.5 규약 — edge \(\{i,j\}\)(\(i \lt j\))는 \(i \to j\), face \((i,j,k)\)는 배열 \(F\)의 순서, 닫힌 mesh의 face는 바깥쪽. Crane의 \(ijk\) 동치류 표기와의 대응 · Running examples: tetrahedron(바깥쪽 orientation), dgmesh.mobius_mesh, torus_mesh(2, 0.8, nu, nv), 평면 grid · Helpers: dgdec.permutation_sign, same_orientation, induced_boundary, induced_orientation, relative_orientation; dgmesh.oriented_consistently, orient · Overlap: “orientable simplicial surface”라는 이름은 Section 33.4가 surface 정의와 함께 붙인다. boundary operator \(\partial\)는 <a href="../36-discrete-exterior-calculus/index.html#toc-36-2">Section 36.2</a> · Go deeper: <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-5">Definition 31.1.5</a>, <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-6">Example 31.1.6</a>(Looking back), <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-4">Definition 7.5.4</a>(surface의 orientation), <a href="../18-integration-stokes/index.html#toc-18-1">Section 18.1</a> · Lecture: L2A slides 32–40 · Notes: Cr §2.2.1</p>
+      </li>
+      <li id="toc-33-4" data-file="33-4-simplicial-manifolds.html">
+        <span class="toc-title">33.4 Simplicial Manifolds</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: simplicial surface(dfn: 모든 vertex link가 하나의 cycle인 pure 2-complex)와 boundary가 있는 판(dfn: link가 cycle 또는 path); Proposition(증명): link 조건 ⇔ 모든 edge가 정확히 두(boundary에서는 하나) triangle에 속하고 vertex 둘레 triangle들이 edge로 이어진 한 바퀴(또는 한 줄)를 이룬다; nonmanifold edge와 nonmanifold vertex(non-example); Proposition(증명): simplicial surface의 boundary는 닫힌 loop들의 합이다; simplicial manifold(dfn: vertex link가 simplicial \((n-1)\)-sphere인 pure \(n\)-complex. 1-manifold는 loop들); orientable simplicial surface(dfn: Section 33.3의 consistent orientation이 있는 simplicial surface); manifold 조건이 왜 필요한가(Section 33.5의 halfedge 탐색, Chapter 38의 discrete immersion); 개수 \(n_0, n_1, n_2\)와 Proposition(증명): 닫힌 simplicial surface에서 \(3n_2 = 2n_1\); Euler characteristic \(\chi = n_0 - n_1 + n_2\)(strong, 링크: <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>, <a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-7">Proposition 31.1.7</a>)를 여기서는 개수로만 쓴다; genus \(g\)와 \(\chi = 2 - 2g\)(Euler–Poincaré formula, 진술만); valence(dfn), regular vertex(내부 valence 6), Proposition(증명): genus를 고정하고 vertex를 늘리면 평균 valence → 6 · Conventions(Conventions box): Crane(Cr §2.6)의 \(V - E + F\) 대신 \(n_0 - n_1 + n_2\)(§6.3. first fundamental form의 \(E, F\)와 겹치지 않게) · Running examples: tetrahedron, octahedron, icosahedron(\(\chi = 2\)), torus_mesh(2, 0.8, nu, nv)(\(\chi = 0\)), grid_mesh(\(\chi = 1\), boundary loop 1개), mobius_mesh(nonorientable), dgmesh.genus2_mesh(선택, \(\chi = -2\)) · Helpers: dgdec.vertex_link_type, is_simplicial_surface; dgmesh.manifold_report, is_manifold, counts, euler_characteristic, boundary_loop · Overlap: \(\chi\)의 topological invariance(triangulation에 무관함)는 <a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>에서 진술과 proof sketch로 다룬다. 여기서는 개수와 닫힌 식만 · Go deeper: <a href="../31-meshes/31-1-mesh-as-surface.html#sec-manifold">Section 31.1</a>(<a href="../31-meshes/31-1-mesh-as-surface.html#i-31-1-4">Proposition 31.1.4</a>), <a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a>(classification theorem), <a href="../11-smooth-manifolds/11-1-topological-manifolds.html">Section 11.1</a>(topological manifold) · Lecture: L2B slides 1–7 · Notes: Cr §2.3(valence와 \(\chi\)는 Cr §2.6 written exercises의 주제다. 연습문제는 새로 만든다)</p>
+      </li>
+      <li id="toc-33-5" data-file="33-5-mesh-data-structures.html">
+        <span class="toc-title">33.5 Mesh Data Structures</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: topological data structure가 할 일(이웃 찾기, 상수 시간 탐색); adjacency list; incidence matrix(dfn: \(A_0 \in \{0,1\}^{n_1\times n_0}\), \(A_1 \in \{0,1\}^{n_2\times n_1}\)); sparse 저장(COO triplet, CSR 개념. scipy 없이 numpy로 구현); star와 link를 incidence matrix 곱으로 계산(Section 33.2의 집합 algorithm과 비교); signed incidence matrix(dfn: relative orientation의 부호를 넣은 것, §2.5 orientation 규약). Chapter 36에서 이것이 \(d_0, d_1\)이 된다는 것은 Looking ahead 상자로만 알리고 정의와 증명에 쓰지 않는다; halfedge mesh(dfn: halfedge 집합 \(H\) 위의 두 permutation, fixed point 없는 involution twin과 next. face는 next의 orbit, edge는 twin의 orbit, vertex는 next∘twin(규약 명시)의 orbit); Proposition(증명): 그런 permutation 쌍은 닫힌 oriented surface를 정하고 \(\chi\) = vertex orbit 수 − edge orbit 수 + face orbit 수; 가장 작은 예; face list에서 halfedge를 만드는 algorithm(Implementation), vertex 둘레 순회, boundary halfedge 처리; quad-edge는 한 문단 · Running examples: tetrahedron(손으로 행렬 작성), octahedron, icosphere(level 2), torus_mesh, grid_mesh(boundary) · Helpers: dgdec.edge_list, d0, d1, HalfedgeMesh, permutation_cycles; dgmesh.edges, edge_faces, vertex_faces, neighbors · Overlap: \(d_1d_0 = 0\)의 증명은 <a href="../36-discrete-exterior-calculus/index.html#toc-36-4">Section 36.4</a>. 여기서는 수치로 보여 주고 예고만 한다 · Go deeper: <a href="../31-meshes/31-1-mesh-as-surface.html">Section 31.1</a>(Looking back) · Lecture: L2B slides 8–16 · Notes: Cr §2.4–2.5</p>
+      </li>
+      <li id="toc-33-6" data-file="33-6-dual-complex.html">
+        <span class="toc-title">33.6 The Dual Complex and Poincaré Duality</span> <span class="status planned">Planned</span>
+        <p class="toc-note">Topics: dual complex(dfn: 닫힌 simplicial surface의 \(k\)-simplex \(\sigma\)마다 \((2-k)\)-cell \(\sigma^\star\)(dfn: dual cell)를 대응. vertex ↔ dual face, edge ↔ dual edge, face ↔ dual vertex); 조합적 구성(dual vertex = face, dual edge = 이웃한 두 face를 잇는 것, dual face = vertex 둘레 face들의 cycle); dual은 일반적으로 simplicial이 아닌 polygonal cell complex(triangle mesh의 dual은 trivalent); Proposition(증명): \(n_k^\star = n_{2-k}\)이므로 \(\chi\)가 같다; Proposition(증명): dual의 incidence matrix는 primal incidence matrix의 transpose(부호는 dual orientation과 함께 Section 36.5에서); Poincaré duality(strong: 이 \(k\) ↔ \((n-k)\) 대응을 부르는 이름으로만 소개. cohomology 판은 Go deeper); boundary가 있는 surface에서는 boundary 근처 dual cell이 잘린다(진술); 자연 속의 Voronoi–Delaunay 쌍대(Intuition) · Overlap: 여기서는 조합적 dual만 정의한다. dual의 기하(circumcentric dual, dual 길이와 넓이, dual cell의 orientation, dual form)는 <a href="../36-discrete-exterior-calculus/index.html#toc-36-5">Section 36.5</a>가 정의한다 · Running examples: tetrahedron(self-dual), octahedron ↔ cube, icosahedron ↔ dodecahedron, torus_mesh(dual도 \(\chi = 0\)) · Helpers: dgdec.d0, d1(transpose), dgmesh.edge_faces · Go deeper: <a href="../19-de-rham/index.html#toc-19-5">Section 19.5</a>(de Rham cohomology), <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a> · Lecture: L2B slides 17–21 · Notes: Cr §4.8.4(dual mesh 부분)</p>
+      </li>
+    </ol>
+
+    <section class="handoff">
+      <h2>Leads to</h2>
+      <ul>
+        <li>simplicial complex, oriented simplex, signed incidence matrix → <a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>(chain, cochain, boundary operator, \(d_0, d_1\)).</li>
+        <li>dual complex → <a href="../36-discrete-exterior-calculus/index.html#toc-36-5">Section 36.5</a>(dual form, circumcentric dual, discrete Hodge star).</li>
+        <li>simplicial surface, halfedge mesh → <a href="../38-surfaces-smooth-discrete/index.html">Chapter 38</a>(simplicial map과 discrete immersion), <a href="../40-discrete-curvature-integral/index.html">Chapter 40</a>(angle defect), <a href="../45-vector-field-design/index.html">Chapter 45</a>(tree-cotree decomposition).</li>
+        <li>\(\chi\)의 개수 공식 → <a href="../40-discrete-curvature-integral/index.html">Chapter 40</a>(topological invariance와 discrete Gauss–Bonnet theorem).</li>
+        <li>Go deeper(Track 3): <a href="../10-gauss-bonnet/index.html">Chapter 10</a>(triangulation과 Euler characteristic), <a href="../18-integration-stokes/index.html">Chapter 18</a>(manifold의 orientation), <a href="../19-de-rham/index.html">Chapter 19</a>(cohomology).</li>
+        <li>Open question: 연결 정보만 있는 complex에 길이, 넓이, curvature를 주려면 무엇을 더해야 하고, 그 위에서 미분과 적분은 무엇이 되는가? → <a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>, <a href="../38-surfaces-smooth-discrete/index.html">Chapter 38</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="../32-ddg-overview/index.html">← 32. Overview: Discrete Curvature of Plane Curves</a>
+    <a rel="next" href="../34-exterior-algebra/index.html">34. Exterior Algebra and k-Forms →</a>
+  </nav>
+</body>
+</html>

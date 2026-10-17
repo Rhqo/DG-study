@@ -11,11 +11,7 @@ Self-check: delta = 2 pi - (sum of the six angles) equals the angle of the wedge
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-2-2-defect-unfold.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 

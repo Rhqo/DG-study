@@ -13,11 +13,7 @@ by a factor of about 4 per refinement on both kinds of meshes.
 Run from the project root: ``PYTHONPATH=tools python3 chapters/31-meshes/figures/fig-31-2-5-convergence.py``
 """
 
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "lib"))
-import dgmesh as dm  # noqa: E402
+import dgmesh as dm
 
 import dgfig  # noqa: E402
 
