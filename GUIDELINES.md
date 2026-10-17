@@ -158,7 +158,7 @@ Track 2 「Discrete Differential Geometry」(32–45장)는 CMU 15-458/858 강�
     - 정의가 이미 있으면 그 위치를 링크하고, 아직 없으면 장 개요를 링크한다.
     - 이미 정의된 개념인지는 concepts.html에서 확인한다.
   - 같은 개념을 Track 2 안에서 두 번 정의하지 않는다. 뒤 장은 앞 장의 정의를 링크로 상기한다.
-  - **Track 3의 장 계획에 없어서 Track 2가 정의하는 smooth 개념**도 있다(2026-10-18 장 개요 기준): Hodge star, codifferential, L2 inner product(of forms), vector-valued form, harmonic 1-form, Hodge decomposition, logarithm map, Karcher mean, Dirichlet energy, harmonic function, Riemann surface, complex structure. 나중에 Track 3(예: 19, 21–23장)을 쓸 때는 이것을 다시 정의하지 말고 `data-generalizes`로 일반화하거나 링크한다.
+  - **Track 3의 장 계획에 없어서 Track 2가 정의하는 smooth 개념**도 있다(2026-10-18 장 개요 기준): Hodge star, codifferential, L2 inner product(of forms), vector-valued form, harmonic 1-form, Hodge decomposition, logarithm map, Karcher mean, Dirichlet energy, harmonic function, Riemann surface, complex structure, orthogonal complement(Chapter 1에 정의가 없어 34.2가 정의한다), curve shortening flow(32.4). 나중에 Track 3(예: 19, 21–23장)을 쓸 때는 이것을 다시 정의하지 말고 `data-generalizes`로 일반화하거나 링크한다.
 - **절의 구성**: §2.1을 따르고 다음을 더한다.
   - **Smooth vs. Discrete 상자**(`aside.box.discrete`)를 1개 이상 둔다.
     - 이 절의 smooth 개념과 discrete 판을 나란히 놓는다.
@@ -168,6 +168,7 @@ Track 2 「Discrete Differential Geometry」(32–45장)는 CMU 15-458/858 강�
     - verify 스크립트가 같은 코드를 실행해 확인한다.
     - scipy는 쓰지 않는다(부록 E).
     - 공용 함수는 `tools/dgmesh.py`(mesh)와 `tools/dgdec.py`(DEC, 곡선, 기하량의 미분)에 있다.
+    - 코드 블록에는 id를 단다: Implementation은 `<pre id="code-N-M-K">`, 연습 풀이는 `<pre id="code-ex-N-M-K">`, 출력은 `<pre id="out-ex-N-M-K">`. verify는 `tools/dgcode.py`의 `run_block(page, id)`로 그 글자를 그대로 실행하고 출력과 비교한다(Chapter 32에서 시작).
   - In computer vision 상자(`application`)는 선택이다. 3D vision·graphics와의 연결이 정확할 때만 1–2개 둔다. Part IV, 특히 Chapter 31과 잇는다.
   - **Go deeper 상자**(`deeper`)는 Track 3의 해당 장, Tour 절, Chapter 31의 해당 절을 링크한다.
   - **Exercises**: 4–6개를 둔다.

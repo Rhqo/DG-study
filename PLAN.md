@@ -728,3 +728,49 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
 
 ### 13.3 진행 기록
 - 2026-10-18: 결정과 기반 작업(위). tools agent와 planning agent를 띄웠다.
+- 2026-10-18: 기반 작업 완료, commit b5a4f98(branch push, main은 아직).
+  - tools agent
+    - dgmesh를 tools/로 옮겼다. 31장 그림은 바이트 단위로 같고, anim --check 27/27이다.
+    - dgdec self-test 149 PASS. API와 규약은 dgdec docstring에 있다.
+    - 확인된 부호: ∇Area_i = −(Lx)_i, (Lx)_i ≈ 2HN A_i, 단위구에서 H = −1.
+    - Cr Exercise 5.4는 area gradient의 부호가 틀렸다. 41장에 Conventions가 필요하다.
+    - mean_curvature의 기본값은 mixed area다. barycentric은 valence 5 꼭짓점에서 점별 수렴하지 않는다.
+  - planning agent: 장 개요 14개
+    - 개념의 정의 위치표와 Conventions 목록은 각 장 toc-note에 있다.
+    - 다듬은 절 제목: 35.4 Stokes's Theorem, 38.1 Parametrized, 43.2 Equations, 43.5 Parametrization, 44.4 Logarithm Map
+  - 통합
+    - terms.tsv에 Track 2 용어 약 85개, references에 7개(Chern18, Alexandrov05, Borrelli03, Martinez05, Sharp19, Wang12, Max99)
+    - index의 37·39 thread에 T5를 더했다.
+    - §2.5에 "Track 2가 정의하는 smooth 개념" 목록을 넣었다(Track 3이 다시 정의하지 않게).
+  - W1 작성 agent 3명을 띄웠다(32, 33, 34).
+  - 통합 때 할 일: Tour 0.8 Where to Go Next와 31장 index·절에서 Track 2로 가는 링크, glossary `#sec-glossary-ddg`
+- 2026-10-18: 32장 작성 완료(draft). 그림 11개, verify 4개(172 checks).
+  - 결정
+    - edge i는 γ_i→γ_{i+1}이다.
+    - tangent angle은 φ로 쓴다(θ_i는 turning angle).
+    - D flow는 pointwise이고 외심 방향이다. bisector normal을 쓰면 원이 둥글게 남지 않는다.
+    - DRIFT를 정확히 진술했다. smooth flow에서는 무게중심이 움직인다(limaçon 예).
+  - 통합
+    - `tools/dgcode.py`(code_block, run_block)를 공용으로 올리고 §2.5에 코드 id 규칙을 적었다.
+    - references에 GageHamilton86, Grayson87, terms.tsv에 17개를 추가했다.
+  - 32장 검토 agent와 37장 작성 agent를 띄웠다. 지금 도는 것: 33·34 작성, 32 검토, 37 작성
+  - 나중에: dgsym.EXAMPLES에 ellipse와 flower를 넣는다(지금은 ddg32.py에 있다). D curvature vector를 dgdec에 넣는다.
+- 2026-10-18: 사용량 한도로 네 agent(33·34 작성, 32 검토, 37 작성)가 멈췄다(429, 07:30 초기화). cron 점검에서 SendMessage로 모두 재개했다.
+- 2026-10-18: 33장 작성 완료(draft). 6절, 그림 14개(interactive 3개), verify 253 checks.
+  - 계약과 다른 점
+    - Prop 33.5.14(halfedge mesh는 닫힌 가향 곡면)는 Proof sketch로 썼다.
+    - Prop 33.6.5(c)(dual = (H, η, ρ∘η))를 더했다.
+  - 기호
+    - 단체복합체 𝒦, St/Cl/Lk/bd/int, 부호 접속 행렬 A_k^±
+    - halfedge H, η, ρ(33.5–33.6에서만 쓴다)
+    - vertex orbit은 next∘twin(Crane)이다. dgdec는 반대 방향이다.
+  - 통합: terms 20개, Guibas85
+  - 검토 R1(33.1–33.3)과 R2(33.4–33.6)를 띄웠다. 코드 블록을 §2.5의 id 방식과 dgcode로 바꾸게 했다.
+- 2026-10-18: 34장 작성 완료(draft). 5절, 그림 10개(interactive 3개), verify 388 checks.
+  - 계약과 다른 점
+    - basis 정리를 34.1로 옮겼다(Theorem 34.1.11).
+    - k-vector를 규칙 (W1)–(W4)로 정의하고, 34.5에서 존재와 유일성을 보였다.
+    - k-form은 strong이다(17.1 링크). verify는 결정식 규약의 쐐기곱이 ((k+l)!/(k!l!))Alt(ω⊗η)와 같음을 확인한다.
+  - orthogonal complement는 Chapter 1에 정의가 없다. 34.2가 정의하기로 하고 §2.5 목록에 넣었다. 검토자가 dfn으로 바꾼다.
+  - 35장에 넘길 것(극좌표·구면의 Hodge star, 단체 위 상수 형식의 적분 (1/k!)ω(…))은 35장 작성 프롬프트에 넣었다.
+  - terms 15개. 35장 작성 agent를 띄웠다. 34장 검토는 동시 agent 수 때문에 다음 빈자리에 띄운다.

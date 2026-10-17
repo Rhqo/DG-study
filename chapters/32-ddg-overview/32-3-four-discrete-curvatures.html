@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>32.3 Four Discrete Curvatures — DG Study</title>
+  <meta name="dg-id" content="32.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="32.2, 5.6">
+  <meta name="dg-refs" content="CMU-DDG L1">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">32. Overview: Discrete Curvature of Plane Curves</a> ›
+    <span>32.3 Four Discrete Curvatures</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>32.3 Four Discrete Curvatures</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a> (노트에는 이 내용이 없고 강의 슬라이드에만 있다)</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>discrete curve의 vertex에서 turning angle을 정의하고 계산할 수 있으며, 닫힌 discrete curve에서 그 합이 \(2\pi\)의 정수배임을 증명할 수 있다.</li>
+        <li>Section 32.2의 (A)–(D)를 하나씩 discrete curve에 적용해 네 discrete curvature \(\kappa^A_i, \kappa^B_i, \kappa^C_i, \kappa^D_i\)를 얻고, 각 공식을 증명할 수 있다.</li>
+        <li>integrated 값과 pointwise 값을 구분하고, 네 정의가 refinement에서 모두 \(\kappa_s\)로 수렴함을 설명할 수 있다.</li>
+        <li>각 정의가 smooth curvature의 어떤 성질을 정확히 보존하는지 비교해, 용도에 맞는 정의를 고를 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Section 32.2: discrete curve <a href="32-2-plane-curve-curvature.html#i-32-2-8">Definition 32.2.8</a>, discrete tangent와 normal <a href="32-2-plane-curve-curvature.html#i-32-2-11">Definition 32.2.11</a>, 네 smooth 특징 <a href="32-2-plane-curve-curvature.html#i-32-2-2">Proposition 32.2.2</a>–<a href="32-2-plane-curve-curvature.html#i-32-2-5">Proposition 32.2.5</a>.</li>
+        <li>signed angle \(\angle(u, v)\)와 그 성질: <a href="../05-space-curves/5-6-rotation-index.html#eq-5-6-2">(5.6.2)</a>. 회전 \(R_\varphi\)와 \(J = R_{\pi/2}\): <a href="../04-curves/4-4-signed-curvature.html#eq-4-4-1">(4.4.1)</a>.</li>
+        <li>부등식 \(x - x^3/6 \le \sin x \lt x\) (\(x \gt 0\)): <a href="32-1-what-is-ddg.html#i-32-1-1">Proposition 32.1.1</a>의 증명.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="32-2-plane-curve-curvature.html#sec-no-pointwise">Section 32.2</a>는 discrete curve의 tangent angle이 계단 함수라는 관찰로 끝났다. edge 위에서는 평평하고 vertex에서만 뛴다. 그래서 점마다의 curvature는 쓸모가 없고, 쓸 수 있는 것은 vertex마다의 “적분한” 양이다. 이 절은 게임의 2단계를 한다. Section 32.2의 네 smooth 특징을 하나씩 discrete curve에 적용하면 vertex마다 수가 하나씩 나온다. smooth에서는 넷이 같았지만, 여기서 나오는 네 수는 서로 다르다.</p>
+      <p>이 절에서 discrete curve는 closed이거나, open이면 양 끝이 아닌 vertex만 본다. 그러면 모든 vertex \(i\)에 들어오는 edge \(i - 1\)과 나가는 edge \(i\)가 있다. 기호는 <a href="32-2-plane-curve-curvature.html#eq-32-2-6">(32.2.6)</a>의 \(e_i, \ell_i, \mathbf{t}_i\)를 쓴다.</p>
+    </section>
+
+    <section id="sec-turning-angle">
+      <h2>The Turning Angle</h2>
+      <div class="thm definition" id="i-32-3-1">
+        <p><span class="thm-head">Definition 32.3.1</span> <span class="thm-name">(turning angle)</span>.
+        discrete curve의 vertex \(i\)에서 \(\mathbf{t}_i \neq -\mathbf{t}_{i-1}\)이라 하자. \(\mathbf{t}_{i-1}\)에서 \(\mathbf{t}_i\)로의 signed angle</p>
+        <div class="equation" id="eq-32-3-1">
+        \[ \begin{aligned} \theta_i &= \angle(\mathbf{t}_{i-1}, \mathbf{t}_i) \in (-\pi, \pi),\\ \mathbf{t}_i &= R_{\theta_i}\mathbf{t}_{i-1} \end{aligned} \tag{32.3.1} \]
+        </div>
+        <p>를 vertex \(i\)의 <dfn>turning angle</dfn>(꺾임각)이라 한다. 성분으로는 \(\theta_i = \operatorname{atan2}\bigl(\det(\mathbf{t}_{i-1}, \mathbf{t}_i),\ \inner{\mathbf{t}_{i-1}}{\mathbf{t}_i}\bigr)\)이다.</p>
+      </div>
+      <p>\(\theta_i \gt 0\)이면 진행 방향이 왼쪽(\(J\mathbf{t}_{i-1}\) 쪽)으로 꺾이고, \(\theta_i \lt 0\)이면 오른쪽으로 꺾인다. 조건 \(\mathbf{t}_i \neq -\mathbf{t}_{i-1}\)은 <a href="../05-space-curves/5-6-rotation-index.html#eq-5-6-2">(5.6.2)</a>의 signed angle이 정의되는 조건이고, \(R_{\theta_i}\mathbf{t}_{i-1} = \mathbf{t}_i\)인 \(\theta_i \in (-\pi, \pi)\)가 꼭 하나 있다는 것도 거기서 보였다. atan2 식은 \(\mathbf{t}_{i-1} = (\cos a, \sin a)\)로 쓰면 \(\det(\mathbf{t}_{i-1}, \mathbf{t}_i) = \sin\theta_i\), \(\inner{\mathbf{t}_{i-1}}{\mathbf{t}_i} = \cos\theta_i\)이기 때문이다. 다각형이 curvilinear polygon이면 turning angle은 그 exterior angle(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-9">Definition 5.6.9</a>)과 같다. 강의 슬라이드는 같은 각을 \(\theta_i\)로 쓰고 “exterior angle”이라고도 부른다 <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a>.</p>
+
+      <div class="thm example" id="i-32-3-2">
+        <p><span class="thm-head">Example 32.3.2</span>.
+        (a) 반시계 방향 정 \(n\)각형에서는 모든 \(i\)에서 \(\theta_i = 2\pi/n\)이다(<a href="32-1-what-is-ddg.html#i-32-1-1">Proposition 32.1.1</a>(b)). 정사각형이면 \(\pi/2\)이다. 같은 다각형을 시계 방향으로 돌면 \(-2\pi/n\)이다.
+        (b) 열린 discrete curve \((0, 0), (2, 0), (3, 1)\)(<a href="32-2-plane-curve-curvature.html#i-32-2-9">Example 32.2.9</a>(c))의 가운데 vertex에서 \(\mathbf{t}_0 = (1, 0)\), \(\mathbf{t}_1 = (1, 1)/\sqrt2\)이므로 \(\theta_1 = \pi/4\)이다.
+        (c) flower curve를 \(\gamma_i = \gamma(2\pi i/40)\)으로 sampling한 다각형에서 turning angle은 \(-1.130\)에서 \(0.994\) 사이에 있다. 음수인 vertex는 waist 근처에 있다(<a href="32-2-plane-curve-curvature.html#fig-32-2-1">Figure 32.2.1</a>).</p>
+      </div>
+      <div class="thm nonexample" id="i-32-3-3">
+        <p><span class="thm-head">Non-example 32.3.3</span>.
+        \((0, 0), (1, 0), (0.5, 0)\)의 가운데 vertex에서는 \(\mathbf{t}_0 = (1, 0)\), \(\mathbf{t}_1 = (-1, 0)\)이다. 진행 방향이 정반대로 꺾여서, 왼쪽으로 \(\pi\) 돌았는지 오른쪽으로 \(\pi\) 돌았는지 정할 수 없다. 그래서 turning angle을 정의하지 않는다. 열린 discrete curve의 양 끝 vertex에도 turning angle이 없다. edge가 하나뿐이기 때문이다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-32-3-4">
+        <p><span class="thm-head">Proposition 32.3.4</span> <span class="thm-name">(total turning angle)</span>.
+        모든 vertex에서 \(\mathbf{t}_i \neq -\mathbf{t}_{i-1}\)인 closed discrete curve \(\gamma_0, \dots, \gamma_{n-1}\)에 대하여, 정수 \(k\)가 있어</p>
+        <div class="equation" id="eq-32-3-2">
+        \[ \sum_{i=0}^{n-1}\theta_i = 2\pi k \tag{32.3.2} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <p><strong>이 명제가 말하는 것.</strong> 닫힌 다각형을 한 바퀴 돌면 진행 방향은 정수 바퀴만큼 돈다. 다각형이 아무리 성기어도 그렇다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(\mathbf{t}_0\)의 각에 turning angle을 차례로 더해 가면 각 edge의 각이 나온다. 한 바퀴 돌아 \(\mathbf{t}_0\)으로 돌아오면 처음 각과 \(2\pi\)의 정수배만큼만 다를 수 있다.</p>
+        <p><span class="proof-head">Proof.</span> \(\mathbf{t}_0 = (\cos\varphi_0, \sin\varphi_0)\)인 \(\varphi_0\)을 하나 고르고, \(i = 1, \dots, n - 1\)에 대해 \(\varphi_i = \varphi_{i-1} + \theta_i\)로 정한다. \(i\)에 대한 귀납법으로 \(\mathbf{t}_i = (\cos\varphi_i, \sin\varphi_i)\)이다. \(i - 1\)에서 성립하면 <a href="#eq-32-3-1">(32.3.1)</a>과 덧셈정리에서 \(\mathbf{t}_i = R_{\theta_i}(\cos\varphi_{i-1}, \sin\varphi_{i-1}) = (\cos\varphi_i, \sin\varphi_i)\)이기 때문이다. closed curve이므로 vertex \(0\)에서도</p>
+        \[ \mathbf{t}_0 = R_{\theta_0}\mathbf{t}_{n-1} = \bigl(\cos(\varphi_{n-1} + \theta_0),\ \sin(\varphi_{n-1} + \theta_0)\bigr) \]
+        <p>이다. 이것이 \((\cos\varphi_0, \sin\varphi_0)\)과 같으므로 \(\varphi_{n-1} + \theta_0 - \varphi_0 = 2\pi k\)인 정수 \(k\)가 있다. 그런데 \(\varphi_{n-1} - \varphi_0 = \theta_1 + \cdots + \theta_{n-1}\)이므로 왼쪽은 \(\sum_{i=0}^{n-1}\theta_i\)이다.</p>
+      </div>
+      <p>정 \(n\)각형에서는 \(k = 1\)이고(<a href="32-1-what-is-ddg.html#i-32-1-1">Proposition 32.1.1</a>), 스스로 만나지 않는 반시계 방향 다각형이면 언제나 \(k = 1\)이다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-12">Proposition 5.6.12</a>). 이 정수 \(k\)는 Chapter 37에서 discrete turning number라는 이름을 얻는다.</p>
+    </section>
+
+    <section id="sec-four">
+      <h2>Playing the Game: Four Discretizations</h2>
+      <p>먼저 “vertex \(i\)에 속하는 조각”을 정하자. edge \(i - 1\)의 중점에서 vertex \(i\)를 지나 edge \(i\)의 중점까지 가는 꺾은선이다. 그 길이</p>
+      <div class="equation" id="eq-32-3-3">
+      \[ \bar\ell_i = \tfrac12(\ell_{i-1} + \ell_i) \tag{32.3.3} \]
+      </div>
+      <p>를 vertex \(i\)의 <strong>dual length</strong>라 부른다. closed curve에서는 \(\sum_i\bar\ell_i = \sum_i\ell_i = L\)이므로, 조각들이 trace를 겹치지 않게 덮는다(Chapter 36에서 이 조각은 vertex의 dual cell이 된다). vertex에서 정의되는 양 가운데 “조각 위의 적분”에 해당하는 것을 <strong>integrated</strong> 값, 그것을 \(\bar\ell_i\)로 나눠 “단위 길이당”으로 만든 것을 <strong>pointwise</strong> 값이라 부르자.</p>
+
+      <figure class="dg-figure" id="fig-32-3-1">
+        <img src="figures/fig-32-3-1-vertex-curvatures.svg" alt="두 패널. (a) 세 vertex gamma_{i-1}, gamma_i, gamma_{i+1}을 잇는 검은 꺾은선이 가운데 vertex에서 왼쪽으로 꺾인다. 들어오는 edge를 늘인 회색 점선과 나가는 edge 사이에 주황 호와 theta_i 라벨이 있다. gamma_i에서 주홍 화살표 n_i가 왼쪽 위(꺾이는 안쪽)로, 초록 화살표 nabla L이 오른쪽 아래(바깥쪽)로 나간다. (b) 같은 세 점을 지나는 파란 원과 그 중심 c_i, 중심에서 gamma_i까지의 파란 점선 r_i, gamma_{i-1}과 gamma_{i+1}을 잇는 회색 파선 w_i. gamma_i의 주홍 화살표 n_i는 중심 c_i 쪽을 거의 향하지만 정확히 향하지는 않는다.">
+        <figcaption><span class="fig-head">Figure 32.3.1.</span>
+        <em>무엇을</em>: discrete curve의 한 vertex \(\gamma_i = (0, 0)\)과 이웃 \(\gamma_{i-1} = (-1.1, -0.45)\), \(\gamma_{i+1} = (0.05, 1)\). 왼쪽으로 꺾이며 \(\theta_i = 1.1325\)이다.
+        <em>읽는 법</em>: (a)에서 회색 점선은 들어오는 edge를 늘인 것, 주황 호는 turning angle \(\theta_i\), 주홍 화살표는 vertex normal \(\mathbf{n}_i\)(길이 \(0.7\)로 그림), 초록 화살표는 길이의 gradient \(\nabla_{\gamma_i}L = \mathbf{t}_{i-1} - \mathbf{t}_i\)(실제 길이)다. (b)에서 파란 원은 세 vertex를 지나는 원, 파란 점은 그 중심 \(c_i\), 파란 점선은 반지름 \(r_i\), 회색 파선은 \(w_i = \abs{\gamma_{i+1} - \gamma_{i-1}}\)이다.
+        <em>볼 것</em>: (a)의 초록 화살표는 \(\mathbf{n}_i\)와 정반대이고 길이가 \(\kappa^B_i = 2\sin(\theta_i/2) = 1.0730\)이다. \(\theta_i\)보다 조금 짧다. (b)의 원은 반지름 \(r_i = 1.0219\)이므로 \(\kappa^D_i = 1/r_i = 0.9785\)이다. 두 edge의 길이가 달라서(\(1.188\)과 \(1.001\)) 중심은 \(\mathbf{n}_i\) 방향에서 조금 벗어나 있다.
+        <em>본문과의 연결</em>: (a)는 <a href="#i-32-3-6">Proposition 32.3.6</a>, (b)는 <a href="#i-32-3-8">Proposition 32.3.8</a>.</figcaption>
+      </figure>
+
+      <p><a href="#fig-32-3-1">Figure 32.3.1</a>은 한 vertex에서 네 정의가 무엇을 보는지 요약한다. (a)의 주황 호가 (A)의 turning angle이고, 초록 화살표가 (B)의 길이의 gradient다. 꺾인 vertex를 바깥쪽(초록 방향)으로 밀면 두 edge가 모두 늘어나므로 길이가 가장 빨리 는다. (b)의 파란 원이 (D)의 세 점을 지나는 원이다. (C)는 다음 소절의 <a href="#fig-32-3-2">Figure 32.3.2</a>에서 본다. 이제 네 정의를 한꺼번에 적고, 이어서 각각이 왜 그 smooth 특징의 discrete 판인지 증명한다.</p>
+
+      <div class="thm definition" id="i-32-3-5">
+        <p><span class="thm-head">Definition 32.3.5</span> <span class="thm-name">(four discrete curvatures)</span>.
+        vertex \(i\)에서 turning angle \(\theta_i\)가 정의되어 있다고 하자. \(w_i = \abs{\gamma_{i+1} - \gamma_{i-1}}\)이라 하고(\(\mathbf{t}_i \neq -\mathbf{t}_{i-1}\)이므로 \(w_i \gt 0\)), 다음 네 수를 정한다.</p>
+        <div class="equation" id="eq-32-3-4">
+        \[ \begin{aligned} \kappa^A_i &= \theta_i, &\qquad \kappa^B_i &= 2\sin\frac{\theta_i}{2},\\ \kappa^C_i &= 2\tan\frac{\theta_i}{2}, &\qquad \kappa^D_i &= \frac{2\sin\theta_i}{w_i}. \end{aligned} \tag{32.3.4} \]
+        </div>
+        <p>\(\kappa^A_i\)를 <dfn>turning-angle curvature</dfn>(꺾임각 곡률), \(\kappa^B_i\)를 <dfn>length-variation curvature</dfn>(길이 변분 곡률), \(\kappa^C_i\)를 <dfn>Steiner curvature</dfn>(슈타이너 곡률), \(\kappa^D_i\)를 <dfn>osculating-circle curvature</dfn>(접촉원 곡률)라 한다. 앞의 셋은 integrated 값(단위 없음)이고 \(\kappa^D_i\)는 pointwise 값(단위 1/길이)이다. 앞의 셋의 pointwise 값은 \(\kappa^X_i/\bar\ell_i\)(\(X = A, B, C\))로 쓴다.</p>
+      </div>
+      <aside class="box warning">
+        <p class="box-title">Common misconception</p>
+        <p>\(\kappa^A_i, \kappa^B_i, \kappa^C_i\)를 smooth \(\kappa_s\)와 바로 비교하면 안 된다. 이것들은 단위가 없는 integrated 값이라, 같은 곡선을 촘촘하게 sampling할수록 \(0\)으로 간다. 예를 들어 반지름 \(r\)인 원에 내접한 정 \(n\)각형에서 \(\kappa^A_i = 2\pi/n \to 0\)이지만 \(\kappa_s = 1/r\)이다. 비교하려면 dual length로 나눈 \(\kappa^X_i/\bar\ell_i\)를 쓴다. 반대로 \(\kappa^D_i\)는 이미 pointwise 값이므로 \(\bar\ell_i\)로 나누지 않는다.</p>
+      </aside>
+      <p>네 수는 모두 \(\theta_i\)와 같은 부호를 갖는다(\(\abs{\theta_i} \lt \pi\)이므로 \(\sin(\theta_i/2)\), \(\tan(\theta_i/2)\), \(\sin\theta_i\)의 부호가 \(\theta_i\)의 부호와 같다). 그래서 Section 32.2의 “curvature에는 부호가 있다”를 모두 지킨다. 강의 슬라이드의 네 정의와 같은 식이다 <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a>.</p>
+
+      <h3 id="sec-a">(A) Turning angle</h3>
+      <p>smooth curve에서 조각 위의 curvature의 적분은 tangent angle의 변화량이다(<a href="32-2-plane-curve-curvature.html#i-32-2-2">Proposition 32.2.2</a>). vertex \(i\)의 조각 위에서 discrete curve의 tangent는 \(\mathbf{t}_{i-1}\)에서 \(\mathbf{t}_i\)로 한 번 바뀌므로, 그 변화량을 \((-\pi, \pi)\)에서 잰 것이 \(\theta_i\)다. 그래서 \(\kappa^A_i = \theta_i\)는 “조각 위의 curvature의 적분”을 그대로 옮긴 것이고, <a href="#i-32-3-4">Proposition 32.3.4</a>가 그 합이 정확히 \(2\pi k\)임을 보장한다.</p>
+
+      <h3 id="sec-b">(B) Length variation</h3>
+      <p>smooth curve에서 길이의 gradient는 \(-\kappa_s\mathbf{n}_s\)였다(<a href="32-2-plane-curve-curvature.html#i-32-2-3">Proposition 32.2.3</a>). discrete curve의 길이 \(L = \sum_j\ell_j\)는 vertex 위치의 함수이므로 보통의 gradient를 계산할 수 있다.</p>
+      <div class="thm proposition" id="i-32-3-6">
+        <p><span class="thm-head">Proposition 32.3.6</span> <span class="thm-name">(gradient of discrete length)</span>.
+        vertex \(i\)에서 turning angle이 정의되어 있다고 하자. \(\bar{\mathbf{t}}_i = (\mathbf{t}_{i-1} + \mathbf{t}_i)/\abs{\mathbf{t}_{i-1} + \mathbf{t}_i}\)(두 tangent의 angle bisector)와 \(\mathbf{n}_i = J\bar{\mathbf{t}}_i\)라 하면</p>
+        <div class="equation" id="eq-32-3-5">
+        \[ \nabla_{\gamma_i}L = \mathbf{t}_{i-1} - \mathbf{t}_i = -\kappa^B_i\,\mathbf{n}_i \tag{32.3.5} \]
+        </div>
+        <p>이다. 특히 \(\abs{\nabla_{\gamma_i}L} = 2\abs{\sin(\theta_i/2)}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(\gamma_i\)를 포함하는 edge는 둘뿐이고, 선분 길이의 gradient는 그 선분 방향의 단위벡터다. 나머지는 \(\mathbf{t}_{i-1}\)과 \(\mathbf{t}_i\)를 bisector에서 \(\mp\theta_i/2\) 돌린 것으로 쓰는 삼각함수 계산이다.</p>
+        <p><span class="proof-head">Proof.</span> \(a \neq b\)이면 \(\nabla_b\abs{b - a} = (b - a)/\abs{b - a}\)이다(\(\abs{b - a}^2\)의 gradient \(2(b - a)\)에 chain rule). \(L\)에서 \(\gamma_i\)를 포함하는 항은 \(\ell_{i-1} = \abs{\gamma_i - \gamma_{i-1}}\)과 \(\ell_i = \abs{\gamma_{i+1} - \gamma_i}\)뿐이므로 \(\nabla_{\gamma_i}L = \mathbf{t}_{i-1} - \mathbf{t}_i\)이다.
+        이제 \(\theta = \theta_i\), \(\mathbf{u} = R_{\theta/2}\mathbf{t}_{i-1}\)이라 하면 \(\mathbf{t}_{i-1} = R_{-\theta/2}\mathbf{u}\), \(\mathbf{t}_i = R_{\theta}\mathbf{t}_{i-1} = R_{\theta/2}\mathbf{u}\)이다. 회전 행렬을 직접 빼고 더하면</p>
+        \[ \begin{aligned} R_a - R_{-a} &= \begin{pmatrix} 0 & -2\sin a \\ 2\sin a & 0 \end{pmatrix} = 2\sin a\,J,\\ R_a + R_{-a} &= 2\cos a\,I_2 \end{aligned} \]
+        <p>이다. 따라서 \(\mathbf{t}_i - \mathbf{t}_{i-1} = 2\sin(\theta/2)\,J\mathbf{u}\), \(\mathbf{t}_{i-1} + \mathbf{t}_i = 2\cos(\theta/2)\,\mathbf{u}\)이다. \(\abs{\theta} \lt \pi\)이므로 \(\cos(\theta/2) \gt 0\)이고, 둘째 식에서 \(\mathbf{u} = \bar{\mathbf{t}}_i\)이다. 첫째 식에 넣으면 \(\nabla_{\gamma_i}L = -(\mathbf{t}_i - \mathbf{t}_{i-1}) = -2\sin(\theta/2)\,J\bar{\mathbf{t}}_i = -\kappa^B_i\mathbf{n}_i\)이다.</p>
+      </div>
+      <p>\(\mathbf{n}_i\)를 vertex \(i\)의 <strong>vertex normal</strong>이라 부르자. edge에만 있던 normal \(J\mathbf{t}_{i-1}, J\mathbf{t}_i\)(<a href="32-2-plane-curve-curvature.html#i-32-2-11">Definition 32.2.11</a>)의 angle bisector이고, 반시계 방향 볼록 다각형에서는 안쪽을 향한다. smooth 식 \(\nabla L = -\kappa_s\mathbf{n}_s\)와 비교하면, discrete gradient의 계수 \(\kappa^B_i\)가 curvature의 자리에 온다. 이것은 integrated 값이다. smooth gradient는 단위 길이당의 양(density)이고, vertex를 하나 움직이는 것은 길이 \(\bar\ell_i\)쯤의 조각을 움직이는 것이기 때문이다. 이렇게 길이의 gradient에서 읽은 curvature가 \(\kappa^B_i = 2\sin(\theta_i/2)\)이다. turning angle \(\theta_i\)와는 다른 수다.</p>
+      <p>\(\mathbf{t}_i - \mathbf{t}_{i-1} = \kappa^B_i\mathbf{n}_i\)는 tangent가 vertex에서 “뛴” 양 자체이기도 하다. <a href="32-2-plane-curve-curvature.html#sec-no-pointwise">Section 32.2</a>에서 \(\gamma''\)이 vertex에서 정의되지 않았지만, \(\gamma'\)의 jump는 유한했다. 그 jump의 크기가 \(\kappa^B_i\)다.</p>
+
+      <h3 id="sec-c">(C) The Steiner formula</h3>
+      <p>smooth curve는 offset의 길이가 정확히 \(L - \varepsilon\int\kappa_s\,ds\)였다(<a href="32-2-plane-curve-curvature.html#i-32-2-4">Proposition 32.2.4</a>). discrete curve에서는 vertex에 normal이 하나로 정해지지 않으므로, edge마다 따로 민다. edge \(i\)를 \(\varepsilon J\mathbf{t}_i\)만큼 평행이동한 선분을 offset edge라 하자. 그러면 vertex \(i\)에서 offset edge \(i - 1\)의 끝 \(p_i^- = \gamma_i + \varepsilon J\mathbf{t}_{i-1}\)과 offset edge \(i\)의 시작 \(p_i^+ = \gamma_i + \varepsilon J\mathbf{t}_i\)가 어긋난다. 둘을 잇는 자연스러운 방법이 셋 있다(<a href="#fig-32-3-2">Figure 32.3.2</a>).</p>
+      <ul>
+        <li>(A) 중심 \(\gamma_i\), 반지름 \(\abs{\varepsilon}\)인 원호로 잇는다.</li>
+        <li>(B) 선분 \([p_i^-, p_i^+]\)로 잇는다.</li>
+        <li>(C) 두 offset edge를 직선으로 늘이거나 잘라서 만나게 한다.</li>
+      </ul>
+      <p>vertex \(i\)에서 \(\varepsilon\theta_i \lt 0\)이면 두 offset edge 사이에 틈이 생긴다. 예를 들어 반시계 방향 볼록 다각형(모든 \(\theta_i \gt 0\))을 바깥쪽으로 밀면(\(\varepsilon \lt 0\)) 모든 vertex에 틈이 생긴다. (A)와 (B)는 이 틈을 메우는 방법이다.</p>
+
+      <figure class="dg-figure" id="fig-32-3-2">
+        <img src="figures/fig-32-3-2-steiner-joins.svg" alt="두 패널. (a) 하늘색으로 칠한 검은 볼록 오각형과, 그 바깥에 같은 간격으로 밀어낸 offset 곡선 셋. 변 부분에서는 셋이 겹치고, 다섯 모서리에서만 다르다. 파란 실선은 둥근 호로 돌아가고, 초록 파선은 모서리를 직선으로 잘라 내고, 자주 점선은 두 변을 늘여 뾰족하게 만난다. (b) 한 vertex gamma_i를 확대한 그림. 검은 두 edge가 gamma_i에서 만나고, 회색 점선 두 개가 gamma_i에서 바깥으로 길이 |epsilon|만큼 나가 offset edge(회색 실선)의 끝점에 닿는다. 두 끝점 사이를 파란 호(A, 길이 |epsilon| theta_i), 초록 파선(B, 길이 2|epsilon| sin(theta_i/2)), 자주 점선 두 조각이 점 q_i에서 만나는 꺾은선(C, 길이 2|epsilon| tan(theta_i/2))이 잇는다.">
+        <figcaption><span class="fig-head">Figure 32.3.2.</span>
+        <em>무엇을</em>: 반시계 방향 볼록 오각형(vertex \((0, 0), (2, -0.1), (2.6, 1.1), (1.3, 2), (-0.3, 1.1)\), 둘레 \(L = 7.9012\))의 edge를 바깥쪽으로 \(\abs{\varepsilon} = 0.35\)만큼(\(\varepsilon = -0.35\)) 민 뒤, 세 방법으로 이은 closed curve.
+        <em>읽는 법</em>: (a)에서 검은 선이 오각형, 파란 실선이 (A) 원호로 이은 것, 초록 파선이 (B) 선분으로 이은 것, 자주 점선이 (C) edge를 늘여 만나게 한 것이다. (b)는 vertex \(\gamma_i = (2.6, 1.1)\)을 확대한 것으로, 회색 점선이 \(\abs{\varepsilon}J\mathbf{t}\), 회색 실선이 offset edge의 일부, \(q_i\)가 (C)의 꼭짓점이다. 색은 Section 32.3의 다른 그림에서도 A 파랑, B 초록, C 자주다.
+        <em>볼 것</em>: 세 곡선은 offset edge 위에서는 같고 모서리에서만 다르다. 모서리 하나가 더하는 길이는 (A) \(\abs{\varepsilon}\theta_i\), (B) \(2\abs{\varepsilon}\sin(\theta_i/2)\), (C) 두 조각 합쳐 \(2\abs{\varepsilon}\tan(\theta_i/2)\)이다. 세 곡선의 길이는 \(10.1003\), \(9.9552\), \(10.4567\)로 (B) &lt; (A) &lt; (C)이다.
+        <em>본문과의 연결</em>: <a href="#i-32-3-7">Proposition 32.3.7</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-32-3-2">Figure 32.3.2</a>의 (b)를 보자. 회색 점선 두 개는 \(\gamma_i\)에서 두 edge normal 방향으로 \(\abs{\varepsilon}\)만큼 나간 것이고, 그 사이의 각이 정확히 \(\theta_i\)다. 그래서 파란 호의 길이는 \(\abs{\varepsilon}\theta_i\)이다. 초록 선분은 같은 호의 현(chord)이므로 \(2\abs{\varepsilon}\sin(\theta_i/2)\)로 조금 짧다. 자주 꺾은선은 호의 양 끝에서 그은 두 접선이 \(q_i\)에서 만나는 것이므로, 각 조각이 \(\abs{\varepsilon}\tan(\theta_i/2)\)이고 호보다 길다. 곧 반지름 \(\abs{\varepsilon}\)인 원 위에서 각 \(\theta_i\)를 재는 세 방법(호, 현, 두 접선)이 세 discrete curvature를 준다. (a)에서는 이 차이가 모서리 다섯 곳에서 모두 일어난다.</p>
+
+      <div class="thm proposition" id="i-32-3-7">
+        <p><span class="thm-head">Proposition 32.3.7</span> <span class="thm-name">(discrete Steiner formulas)</span>.
+        모든 vertex에서 turning angle이 정의된 closed discrete curve를 생각하고, \(L = \sum_i\ell_i\)라 하자.
+        (a) 모든 \(i\)에서 \(\varepsilon\theta_i \lt 0\)이면, offset edge들을 (A) 원호로 이은 closed curve와 (B) 선분으로 이은 closed curve의 길이는 각각</p>
+        <div class="equation" id="eq-32-3-6">
+        \[ \begin{aligned} L_A(\varepsilon) &= L - \varepsilon\sum_i\kappa^A_i,\\ L_B(\varepsilon) &= L - \varepsilon\sum_i\kappa^B_i \end{aligned} \tag{32.3.6} \]
+        </div>
+        <p>이다.
+        (b) \(\varepsilon\)의 부호와 \(\theta_i\)의 부호에 관계없이, 모든 \(i\)에서 \(\ell_i - \varepsilon\bigl(\tan(\theta_i/2) + \tan(\theta_{i+1}/2)\bigr) \gt 0\)일 만큼 \(\abs{\varepsilon}\)이 작으면 다음이 성립한다. 점 \(q_i = \gamma_i + \varepsilon\,\mathbf{n}_i/\cos(\theta_i/2)\)은 offset edge \(i - 1\)과 offset edge \(i\)를 포함하는 두 직선 위에 있고, \(q_0, \dots, q_{n-1}\)을 잇는 closed discrete curve의 edge \(i\)는 offset edge \(i\)와 같은 방향 \(\mathbf{t}_i\)를 가지며, 그 길이는</p>
+        <div class="equation" id="eq-32-3-7">
+        \[ L_C(\varepsilon) = L - \varepsilon\sum_i\kappa^C_i \tag{32.3.7} \]
+        </div>
+        <p>이다. \(\theta_i \neq 0\)이면 \(q_i\)는 두 직선의 유일한 교점이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: offset edge는 평행이동이므로 길이가 같다. (a)는 틈을 메운 조각의 길이를 더하면 되고, (b)는 \(q_i\)를 \((\mathbf{t}_i, J\mathbf{t}_i)\) 좌표로 써서 각 edge가 양 끝에서 \(\varepsilon\tan(\theta/2)\)씩 줄어듦을 본다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) offset edge \(i\)는 edge \(i\)를 평행이동한 것이므로 길이가 \(\ell_i\)이고, 다 더하면 \(L\)이다. vertex \(i\)의 틈의 양 끝은 \(\gamma_i\)에서 거리 \(\abs{\varepsilon}\)이고, \(p_i^- - \gamma_i = \varepsilon J\mathbf{t}_{i-1}\)에서 \(p_i^+ - \gamma_i = \varepsilon J\mathbf{t}_i\)로의 각은 \(J\)가 회전과 교환하므로 \(\theta_i\)이다. 따라서 (A)의 원호의 길이는 \(\abs{\varepsilon}\abs{\theta_i}\)이고, (B)의 선분의 길이는 \(\abs{\varepsilon}\abs{J\mathbf{t}_i - J\mathbf{t}_{i-1}} = \abs{\varepsilon}\abs{\mathbf{t}_i - \mathbf{t}_{i-1}} = 2\abs{\varepsilon}\abs{\sin(\theta_i/2)}\)이다(<a href="#i-32-3-6">Proposition 32.3.6</a>의 증명). \(\varepsilon\theta_i \lt 0\)이면 \(\abs{\varepsilon}\abs{\theta_i} = -\varepsilon\theta_i\)이고, \(\sin(\theta_i/2)\)는 \(\theta_i\)와 부호가 같으므로 \(2\abs{\varepsilon}\abs{\sin(\theta_i/2)} = -\varepsilon\kappa^B_i\)이다. 모두 더하면 <a href="#eq-32-3-6">(32.3.6)</a>이다.
+        (b) \(\theta = \theta_i\)라 하자. <a href="#i-32-3-6">Proposition 32.3.6</a>의 증명에서 \(\mathbf{t}_i = R_{\theta/2}\bar{\mathbf{t}}_i\)이므로 \(\mathbf{n}_i = J\bar{\mathbf{t}}_i = R_{-\theta/2}J\mathbf{t}_i\)이다. \(R_{-a}v = \cos a\,v - \sin a\,Jv\)와 \(J^2 = -\id\)를 쓰면 \(\mathbf{n}_i = \cos(\theta/2)\,J\mathbf{t}_i + \sin(\theta/2)\,\mathbf{t}_i\)이다. 같은 방법으로 \(\mathbf{n}_i = R_{\theta/2}J\mathbf{t}_{i-1} = \cos(\theta/2)\,J\mathbf{t}_{i-1} - \sin(\theta/2)\,\mathbf{t}_{i-1}\)이다. 따라서</p>
+        <div class="equation" id="eq-32-3-8">
+        \[ \begin{aligned} q_i &= \bigl(\gamma_i + \varepsilon J\mathbf{t}_i\bigr) + \varepsilon\tan\tfrac{\theta_i}{2}\,\mathbf{t}_i\\ &= \bigl(\gamma_i + \varepsilon J\mathbf{t}_{i-1}\bigr) - \varepsilon\tan\tfrac{\theta_i}{2}\,\mathbf{t}_{i-1} \end{aligned} \tag{32.3.8} \]
+        </div>
+        <p>이다. 첫 식은 \(q_i\)가 offset edge \(i\)를 포함하는 직선 \(\{\gamma_i + \varepsilon J\mathbf{t}_i + \lambda\mathbf{t}_i\}\) 위에 있다는 것이고, 둘째 식은 offset edge \(i - 1\)을 포함하는 직선 위에 있다는 것이다. \(\theta_i \neq 0\)이면 두 직선은 평행하지 않으므로 교점이 하나뿐이다. <a href="#eq-32-3-8">(32.3.8)</a>의 첫 식을 \(i\)에, 둘째 식을 \(i + 1\)에 쓰면(\(\gamma_{i+1} = \gamma_i + \ell_i\mathbf{t}_i\))</p>
+        \[ q_{i+1} - q_i = \Bigl(\ell_i - \varepsilon\tan\tfrac{\theta_i}{2} - \varepsilon\tan\tfrac{\theta_{i+1}}{2}\Bigr)\mathbf{t}_i \]
+        <p>이다. 괄호 안이 양수라는 가정에서 이 edge의 방향은 \(\mathbf{t}_i\)이고 길이는 괄호 안의 수다. \(i\)에 대해 더하면 각 \(\tan(\theta_i/2)\)가 두 번(edge \(i - 1\)과 edge \(i\)에서) 나오므로 \(L - \varepsilon\sum_i 2\tan(\theta_i/2)\)이다.</p>
+      </div>
+      <p>(b)는 (a)보다 강하다. 틈이 생기는 쪽이든 겹치는 쪽이든, 볼록하든 아니든 (C)의 식은 그대로 성립한다. (A)와 (B)는 틈이 있어야 자연스럽다. 겹치는 쪽에서는 “메울 틈”이 없기 때문이다. 이렇게 Steiner formula 하나에서 discrete curvature가 셋 나온다. 원호로 이으면 (A), 현으로 이으면 (B), edge를 늘이면 새로운 \(\kappa^C\)다 <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a>. 곡면에서도 같은 일이 일어나는데, 그것은 <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-6">Proposition 31.2.6</a>과 <a href="../40-discrete-curvature-integral/index.html#toc-40-4">Section 40.4</a>에서 본다.</p>
+
+      <h3 id="sec-d">(D) The osculating circle</h3>
+      <p>smooth curve에서 \(\abs{\kappa_s}\)는 세 이웃한 점을 지나는 원의 극한의 반지름의 역수였다(<a href="32-2-plane-curve-curvature.html#i-32-2-5">Proposition 32.2.5</a>). discrete curve에서는 극한을 취하지 않고 세 이웃 vertex를 그대로 쓴다.</p>
+      <div class="thm proposition" id="i-32-3-8">
+        <p><span class="thm-head">Proposition 32.3.8</span> <span class="thm-name">(the circle through three consecutive vertices)</span>.
+        vertex \(i\)에서 \(\theta_i \neq 0\)이고 turning angle이 정의되어 있다고 하자. 그러면 \(\gamma_{i-1}, \gamma_i, \gamma_{i+1}\)은 한 직선 위에 있지 않고, 세 점을 지나는 원(circumcircle, 외접원)의 반지름 \(r_i\)와 중심(circumcenter, 외심) \(c_i\)는</p>
+        <div class="equation" id="eq-32-3-9">
+        \[ \begin{aligned} \frac{1}{r_i} &= \frac{2\abs{\sin\theta_i}}{w_i} = \abs{\kappa^D_i},\\ \inner{c_i - \gamma_i}{\mathbf{n}_i} &= \frac{\bar\ell_i}{\kappa^B_i} \end{aligned} \tag{32.3.9} \]
+        </div>
+        <p>를 만족한다. 특히 \(c_i\)가 \(\mathbf{n}_i\) 쪽에 있는 것은 \(\theta_i \gt 0\)인 것, 곧 \(\kappa^D_i \gt 0\)인 것과 같다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(\theta_i \neq 0, \pm\pi\)이면 \(\mathbf{t}_{i-1}\)과 \(\mathbf{t}_i\)는 평행하지 않으므로 세 점은 한 직선 위에 있지 않다. 삼각형 \(\gamma_{i-1}\gamma_i\gamma_{i+1}\)의 \(\gamma_i\)에서의 내각은 \(-\mathbf{t}_{i-1}\)과 \(\mathbf{t}_i\) 사이의 각이고, \(\inner{-\mathbf{t}_{i-1}}{\mathbf{t}_i} = -\cos\theta_i = \cos(\pi - \abs{\theta_i})\)이므로 \(\pi - \abs{\theta_i}\)이다. 사인법칙에서 그 맞은편 변 \(w_i\)는 \(2r_i\sin(\pi - \abs{\theta_i}) = 2r_i\abs{\sin\theta_i}\)이므로 첫 식이 나온다.
+        중심은 각 현의 수직이등분선 위에 있으므로 \(c_i\)를 현 위로 정사영하면 현의 중점이다. 곧 \(\inner{c_i - \gamma_i}{\mathbf{t}_i} = \ell_i/2\)이고 \(\inner{c_i - \gamma_i}{-\mathbf{t}_{i-1}} = \ell_{i-1}/2\)이다. 두 식을 더하면 \(\inner{c_i - \gamma_i}{\mathbf{t}_i - \mathbf{t}_{i-1}} = \bar\ell_i\)이고, <a href="#i-32-3-6">Proposition 32.3.6</a>의 증명에서 \(\mathbf{t}_i - \mathbf{t}_{i-1} = \kappa^B_i\mathbf{n}_i\)이며 \(\kappa^B_i \neq 0\)이므로 둘째 식이 나온다. \(\bar\ell_i \gt 0\)이므로 \(\inner{c_i - \gamma_i}{\mathbf{n}_i}\)의 부호는 \(\kappa^B_i\), 곧 \(\theta_i\)의 부호와 같다.</p>
+      </div>
+      <p>그래서 \(\kappa^D_i\)는 “세 점을 지나는 원의 반지름의 역수에, 중심이 \(\mathbf{n}_i\) 쪽이면 \(+\), 반대쪽이면 \(-\) 부호를 붙인 것”이다. smooth의 (D)에서 극한만 뺀 그대로다. 단 중심의 방향은 \(\mathbf{n}_i\)와 정확히 같지 않다. 두 edge의 길이가 같을 때만 같다(<a href="#ex-32-3-3">Exercise 32.3.3</a>). Section 32.4는 이 차이를 다시 만난다.</p>
+    </section>
+
+    <section id="sec-agreement">
+      <h2>How Different Are They?</h2>
+      <p>네 정의는 모두 \(\theta_i\)의 함수이거나(A, B, C) \(\theta_i\)와 이웃 vertex의 거리의 함수다(D). 꺾임이 작으면 차이도 작다.</p>
+      <div class="thm proposition" id="i-32-3-9">
+        <p><span class="thm-head">Proposition 32.3.9</span> <span class="thm-name">(small turning angles)</span>.
+        (a) \(\abs{\theta_i} \lt \pi\)이면 \(\abs{\kappa^B_i - \kappa^A_i} \le \abs{\theta_i}^3/24\)이다.
+        (b) \(\abs{\theta_i} \le \pi/2\)이면 \(\abs{\kappa^C_i - \kappa^A_i} \le \abs{\theta_i}^3/3\)이다.
+        (c) \(\ell_{i-1} = \ell_i\)이면 \(\kappa^D_i = \kappa^B_i/\bar\ell_i\)이다.
+        또 \(\theta_i \neq 0\)이면 \(\abs{\kappa^B_i} \lt \abs{\kappa^A_i} \lt \abs{\kappa^C_i}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 세 함수가 모두 홀함수이므로 \(\theta = \theta_i \ge 0\)이라 해도 된다. \(x = \theta/2\)라 하자.
+        (a) \(0 \le x \lt \pi/2\)에서 \(0 \le x - \sin x \le x^3/6\)이다(<a href="32-1-what-is-ddg.html#i-32-1-1">Proposition 32.1.1</a>의 증명). 따라서 \(0 \le \theta - 2\sin(\theta/2) = 2(x - \sin x) \le x^3/3 = \theta^3/24\)이다.
+        (b) \(0 \le u \lt \pi/2\)에서 \(\sec^2\)은 증가하므로 \(\tan u = \int_0^u\sec^2 v\,dv \le u\sec^2 u\)이다. \(0 \le u \le x \le \pi/4\)이면 \(\sec^2 u \le 2\)이므로 \(\tan^2 u \le 4u^2\)이다. \((\tan u - u)' = \tan^2 u\)이므로 \(0 \le \tan x - x = \int_0^x\tan^2 u\,du \le 4x^3/3\)이고, \(0 \le 2\tan(\theta/2) - \theta \le 8x^3/3 = \theta^3/3\)이다.
+        (c) \(\ell_{i-1} = \ell_i = \ell\)이면 \(\gamma_i\)에서의 내각이 \(\pi - \theta\)이므로 코사인법칙에서 \(w_i^2 = 2\ell^2 - 2\ell^2\cos(\pi - \theta) = 2\ell^2(1 + \cos\theta) = 4\ell^2\cos^2(\theta/2)\)이고 \(w_i = 2\ell\cos(\theta/2)\)이다. 따라서 \(\kappa^D_i = 2\sin\theta/w_i = 4\sin(\theta/2)\cos(\theta/2)/(2\ell\cos(\theta/2)) = 2\sin(\theta/2)/\ell = \kappa^B_i/\bar\ell_i\)이다.
+        마지막 부등식은 \(0 \lt x \lt \pi/2\)에서 \(\sin x \lt x \lt \tan x\)이기 때문이다(<a href="32-1-what-is-ddg.html#ex-32-1-2">Exercise 32.1.2</a>의 풀이).</p>
+      </div>
+      <p>smooth curve를 촘촘하게 sampling하면 turning angle은 간격에 비례해 작아지므로, 위 명제의 (a), (b)에서 A, B, C의 차이는 간격의 세제곱으로 작아진다. D는 (c)에서 보듯 이웃한 두 edge의 길이가 같으면 B의 pointwise 값과 같다. 그래서 고르게 sampling하면 네 정의의 pointwise 값은 같은 극한, 곧 \(\kappa_s\)로 간다.</p>
+      <div class="thm proposition" id="i-32-3-10">
+        <p><span class="thm-head">Proposition 32.3.10</span> <span class="thm-name">(convergence under refinement)</span>.
+        \(\gamma\)가 arc length로 parametrization된 주기 \(L\)인 smooth closed curve이고, \(h = L/n\), \(\gamma_i = \gamma(ih)\)라 하자. \(n \to \infty\)일 때</p>
+        \[ \begin{aligned} \max_i\Bigl|\frac{\kappa^X_i}{\bar\ell_i} - \kappa_s(ih)\Bigr| &= O(h^2) \quad (X = A, B, C),\\ \max_i\bigl|\kappa^D_i - \kappa_s(ih)\bigr| &= O(h^2) \end{aligned} \]
+        <p>이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof sketch.</span> tangent angle을 \(\varphi\)라 하고 \(m\)을 \([s, s + h]\)의 중점이라 하자. \(\mathbf{t}(u) = R_{\varphi(m)}(\cos\delta, \sin\delta)\), \(\delta(u) = \varphi(u) - \varphi(m) = \kappa_s(m)(u - m) + \tfrac12\kappa_s'(m)(u - m)^2 + O(h^3)\)으로 쓰고 현 \(\gamma(s + h) - \gamma(s) = \int_s^{s+h}\mathbf{t}\,du\)를 전개하면, 현의 길이는 \(h - \kappa_s^2h^3/24 + O(h^4)\)이고 현의 방향의 각은 \(\varphi(m) + \kappa_s'(m)h^2/24 + O(h^3)\)이다. vertex \(i\)의 turning angle은 이웃한 두 현의 각의 차이이므로</p>
+        \[ \begin{aligned} \theta_i &= \varphi(m_i) - \varphi(m_{i-1}) + \tfrac{h^2}{24}\bigl(\kappa_s'(m_i) - \kappa_s'(m_{i-1})\bigr) + O(h^3)\\ &= \int_{m_{i-1}}^{m_i}\kappa_s\,du + O(h^3) = h\,\kappa_s(ih) + O(h^3) \end{aligned} \]
+        <p>이고(\(\kappa_s'(m_i) - \kappa_s'(m_{i-1}) = O(h)\), 마지막 등호는 중점 공식), \(\bar\ell_i = h + O(h^3)\)이다. 따라서 \(\kappa^A_i/\bar\ell_i = \kappa_s(ih) + O(h^2)\)이다. B와 C는 <a href="#i-32-3-9">Proposition 32.3.9</a>에서 \(\kappa^A_i\)와 \(O(h^3)\)만큼 다르므로 같다. D는 \(w_i = 2h + O(h^3)\)과 \(\sin\theta_i = \theta_i + O(h^3)\)에서 \(\kappa^D_i = (2h\kappa_s + O(h^3))/(2h + O(h^3))\)이다. \(O\)의 상수는 \(\abs{\kappa_s}, \abs{\kappa_s'}, \abs{\kappa_s''}\)의 최댓값에만 의존하므로 \(i\)에 대해 균등하다. 정리된 증명은 이 절의 범위를 넘으므로 여기서는 이 계산과 아래 수치 실험으로 대신한다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-32-3-3">
+        <img src="figures/fig-32-3-3-convergence.svg" alt="두 패널. (a) 가로축 t(0에서 π), 세로축 curvature. 검은 곡선 kappa_s(t)가 t = 0에서 2, π/2에서 0.25, π에서 다시 2인 U자 모양이다. 그 위에 vertex 아홉 곳의 네 가지 표식(파랑 원 A, 초록 빈 사각형 B, 자주 삼각형 C, 주황 빈 마름모 D)이 곡선 가까이 있고, t = 0과 π에서만 곡선보다 눈에 띄게 아래(1.8 근처)에 있다. 자주 삼각형이 가장 높다. (b) log-log 그래프. 가로축 n(8에서 512), 세로축 max error(1에서 0.0001). 네 직선이 모두 오른쪽 아래로 같은 기울기로 내려가고, 회색 파선 기준선의 기울기는 −2다. 자주 점선(C)이 가장 아래에 있고, 초록(B)과 주황(D)은 겹친다.">
+        <figcaption><span class="fig-head">Figure 32.3.3.</span>
+        <em>무엇을</em>: 타원 \(\gamma(t) = (2\cos t, \sin t)\)를 \(\gamma_i = \gamma(2\pi i/n)\)으로 sampling한 closed discrete curve에서 네 discrete curvature의 pointwise 값 \(\kappa^A_i/\bar\ell_i\), \(\kappa^B_i/\bar\ell_i\), \(\kappa^C_i/\bar\ell_i\), \(\kappa^D_i\).
+        <em>읽는 법</em>: (a)는 \(n = 16\)이고, 가로축 \(t\), 검은 곡선이 smooth \(\kappa_s(t)\)이며, 표식은 A 파랑 원, B 초록 사각형, C 자주 삼각형, D 주황 마름모다(겹치지 않게 가로로 조금씩 옮겨 그렸다). (b)는 가로축 \(n\), 세로축 \(\max_i\abs{\text{pointwise 값} - \kappa_s(t_i)}\)의 log-log 그래프이고, 회색 파선은 기울기 \(-2\)다.
+        <em>볼 것</em>: (a)에서 오차는 curvature가 가장 큰 양 끝(\(t = 0\), \(\kappa_s = 2\))에서 가장 크다. 그곳의 값은 A \(1.84\), B와 D \(1.80\), C \(1.93\)이다. 대칭 때문에 그곳의 두 edge 길이가 같아서 B와 D가 같다. (b)에서 네 직선은 모두 기울기 \(-2\)이다. \(n\)을 두 배로 하면 오차가 \(1/4\)이 되고, \(n = 256 \to 512\)에서 측정한 차수는 네 정의 모두 \(2.00\)이다.
+        <em>본문과의 연결</em>: <a href="#i-32-3-10">Proposition 32.3.10</a>과 <a href="#i-32-3-9">Proposition 32.3.9</a>(c).</figcaption>
+      </figure>
+      <p><a href="#fig-32-3-3">Figure 32.3.3</a>의 (a)를 보면, 납작한 가운데(\(t = \pi/2\) 근처)에서는 네 표식이 검은 곡선 위에 거의 겹쳐 있고, 뾰족한 양 끝에서만 곡선 아래로 처진다. 그곳의 turning angle이 가장 크기 때문이다(\(n = 16\)이면 \(\theta_0 = 0.76\)). 자주 삼각형(C)이 가장 높고 초록과 주황(B, D)이 가장 낮은 것은 \(\abs{\kappa^B} \lt \abs{\kappa^A} \lt \abs{\kappa^C}\)의 순서 그대로다. (b)는 이 오차가 \(n\)이 커질 때 어떻게 줄어드는지 보여 준다. 네 직선이 평행하게 내려가므로 네 정의는 같은 속도로 수렴하고, 차이는 상수배뿐이다. 수렴만으로는 네 정의를 구별할 수 없다는 뜻이다.</p>
+      <p>sampling 방법에 대해 한 가지 덧붙인다. <a href="#i-32-3-10">Proposition 32.3.10</a>은 arc length로 같은 간격인 vertex를 가정한다. 그런데 <a href="#fig-32-3-3">Figure 32.3.3</a>과 <a href="#ex-32-3-6">Exercise 32.3.6</a>은 매개변수 \(t\)를 같은 간격으로 나눈 \(\gamma(2\pi i/n)\)을 쓴다. 이때 arc length 간격은 고르지 않지만 매끄럽게 변하므로 이웃한 두 edge의 길이 차이가 \(O(h^2)\)이고, 같은 \(O(h^2)\) 수렴이 관찰된다(verify는 arc length 간격의 sampling도 확인한다). 간격이 불규칙하게 흔들리면 사정이 다르다. 타원을 \(t_i = 2\pi(i + u_i)/n\)(\(u_i\)는 \([-0.25, 0.25]\)의 균등난수)으로 sampling하면, 네 정의 모두 \(n\)을 두 배로 할 때 오차가 절반으로만 줄어 수렴 차수가 \(1\)로 떨어진다. 예를 들어 A에서 vertex \(i\)는 자기 조각(edge \(i - 1\)의 중점에서 edge \(i\)의 중점까지)의 한가운데가 아니라 그 가운데서 arc length로 약 \((\ell_i - \ell_{i-1})/4\)만큼 떨어져 있고, 불규칙한 간격에서는 이 어긋남이 \(O(h)\)이기 때문이다.</p>
+
+      <div class="thm example" id="i-32-3-11">
+        <p><span class="thm-head">Example 32.3.11</span> <span class="thm-name">(regular polygon: closed forms)</span>.
+        반지름 \(r\)인 원에 내접한 반시계 방향 정 \(n\)각형에서 \(\theta_i = 2\pi/n\), \(\ell_i = \bar\ell_i = 2r\sin(\pi/n)\), \(w_i = 2r\sin(2\pi/n)\)이다(<a href="32-1-what-is-ddg.html#i-32-1-1">Proposition 32.1.1</a>). 따라서 pointwise 값은</p>
+        \[ \begin{aligned} \frac{\kappa^A_i}{\bar\ell_i} &= \frac{1}{r}\cdot\frac{\pi/n}{\sin(\pi/n)}, &\qquad \frac{\kappa^B_i}{\bar\ell_i} &= \frac1r,\\ \frac{\kappa^C_i}{\bar\ell_i} &= \frac{1}{r\cos(\pi/n)}, &\qquad \kappa^D_i &= \frac{2\sin(2\pi/n)}{2r\sin(2\pi/n)} = \frac1r \end{aligned} \]
+        <p>이다. B와 D는 모든 \(n\)에서 정확히 \(1/r\)이고, A와 C는 \(\tfrac1r(1 + \tfrac{\pi^2}{6n^2} + \cdots)\), \(\tfrac1r(1 + \tfrac{\pi^2}{2n^2} + \cdots)\)로 위에서부터 \(n^{-2}\)의 속도로 다가간다. 예를 들어 \(r = 1\), \(n = 8\)이면 A \(1.0262\), C \(1.0824\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-32-3-four-discrete-curvatures.py</code></p>
+      </div>
+      <div class="thm example" id="i-32-3-12">
+        <p><span class="thm-head">Example 32.3.12</span> <span class="thm-name">(unevenly spaced points on a circle)</span>.
+        단위원 위의 세 점 \(\gamma_{i-1}, \gamma_i, \gamma_{i+1}\)이 각 \(0^\circ, 18^\circ, 50^\circ\)에 있다고 하자. 이 셋을 지나는 원은 단위원 자신이므로 <a href="#i-32-3-8">Proposition 32.3.8</a>에서 \(\kappa^D_i = 1\)이다. 한편 원주각 정리에서 \(\theta_i\)는 두 호 \(18^\circ\), \(32^\circ\)의 합의 절반인 \(25^\circ\)이고, \(\ell_{i-1} = 2\sin 9^\circ\), \(\ell_i = 2\sin 16^\circ\), \(\bar\ell_i = 0.43207\)이다. 따라서 pointwise 값은 A \(1.0099\), B \(1.0019\), C \(1.0262\), D \(1.0000\)이다. 정다각형과 달리 간격이 고르지 않으면 B도 \(1/r\)과 다르다. 원 위의 점에서 언제나 정확한 것은 D뿐이다.</p>
+      </div>
+
+      <div class="thm proposition" id="i-32-3-13">
+        <p><span class="thm-head">Proposition 32.3.13</span> <span class="thm-name">(total curvature of a convex polygon)</span>.
+        closed discrete curve의 모든 turning angle이 \(0 \lt \theta_i \lt \pi\)이고 \(\sum_i\theta_i = 2\pi\)이면(예: 반시계 방향 볼록 다각형)</p>
+        \[ \sum_i\kappa^B_i \lt 2\pi = \sum_i\kappa^A_i \lt \sum_i\kappa^C_i \]
+        <p>이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(0 \lt \theta_i \lt \pi\)이므로 <a href="#i-32-3-9">Proposition 32.3.9</a>의 마지막 부등식에서 \(\kappa^B_i \lt \theta_i \lt \kappa^C_i\)이다. \(i\)에 대해 더한다.</p>
+      </div>
+      <p>예를 들어 정사각형에서는 \(\sum\kappa^B = 4\sqrt2 = 5.657\), \(\sum\kappa^C = 8\)이다. 곧 total curvature가 rotation index theorem을 정확히 따르는 것은 A뿐이다.</p>
+    </section>
+
+    <section id="sec-preserved">
+      <h2>What Each Definition Preserves</h2>
+      <p>지금까지의 결과를 표로 모으면 다음과 같다. “정확”은 discrete curve 위에서 등식으로 성립한다는 뜻이고, 근거가 되는 명제를 적었다. 마지막 줄은 Section 32.4의 결과를 미리 적은 것이다.</p>
+      <table>
+        <thead>
+          <tr><th>Property</th><th>A turning angle</th><th>B length variation</th><th>C Steiner</th><th>D osculating circle</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>닫힌 곡선에서 합이 정확히 \(2\pi k\)</td><td>정확 (<a href="#i-32-3-4">Prop. 32.3.4</a>)</td><td>아님 (<a href="#i-32-3-13">Prop. 32.3.13</a>)</td><td>아님 (<a href="#i-32-3-13">Prop. 32.3.13</a>)</td><td>아님 (pointwise)</td></tr>
+          <tr><td>길이의 gradient \(\nabla_{\gamma_i}L = -\kappa_i\mathbf{n}_i\)</td><td>아님</td><td>정확 (<a href="#i-32-3-6">Prop. 32.3.6</a>)</td><td>아님</td><td>아님</td></tr>
+          <tr><td>offset의 길이 \(L - \varepsilon\sum\kappa_i\)</td><td>원호로 이을 때 정확</td><td>현으로 이을 때 정확</td><td>edge를 늘일 때 정확, 양쪽 방향 (<a href="#i-32-3-7">Prop. 32.3.7</a>)</td><td>해당 없음</td></tr>
+          <tr><td>원 위의 vertex에서 pointwise 값 \(= 1/r\)</td><td>아님</td><td>간격이 같을 때만</td><td>아님</td><td>항상 정확 (<a href="#i-32-3-8">Prop. 32.3.8</a>)</td></tr>
+          <tr><td>값의 범위</td><td>\((-\pi, \pi)\)</td><td>\((-2, 2)\)</td><td>유계가 아님(\(\abs{\theta} \to \pi\))</td><td>유계가 아님(\(w_i \to 0\))</td></tr>
+          <tr><td>refinement에서 \(O(h^2)\) 수렴</td><td>예</td><td>예</td><td>예</td><td>예 (<a href="#i-32-3-10">Prop. 32.3.10</a>)</td></tr>
+          <tr><td>curvature flow에서 지키는 것 (Section 32.4)</td><td>total curvature</td><td>vertex들의 평균 위치</td><td>(셋 다 아님)</td><td>원이 원으로 남음</td></tr>
+        </tbody>
+      </table>
+      <p>그러면 어느 것을 써야 하는가? 강의 슬라이드의 답은 “용도에 맞는 도구를 고르라”이다 <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a>. 표에서 읽으면 다음과 같다. 곡선이 몇 바퀴 도는지 같은 위상적 정보가 중요하면 A를 쓴다. 곡선을 길이가 줄어드는 방향으로 움직이는 최적화와 flow에는 길이의 정확한 gradient인 B가 맞다. 일정한 두께로 둘레를 덧대는(mitered offset) 계산에는 C가, 점들이 원 위에 있는지 판정하거나 원을 정확히 재현해야 하는 곳에는 D가 맞다. 어느 하나가 모든 줄에서 “정확”이지는 않다. Section 32.4는 이것을 움직이는 곡선에서 다시 확인한다.</p>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: one curvature, four discrete curvatures</p>
+        <p><strong>Smooth.</strong> \(\kappa_s\)는 하나다. (A) \(\varphi'\), (B) 길이의 gradient의 계수, (C) offset 길이의 변화율, (D) osculating circle의 반지름의 역수가 모두 같은 함수다(Section 32.2).</p>
+        <p><strong>Discrete.</strong> 같은 네 특징이 vertex마다 \(\theta_i\), \(2\sin(\theta_i/2)\), \(2\tan(\theta_i/2)\), \(2\sin\theta_i/w_i\)라는 서로 다른 수를 준다. 앞의 셋은 dual length \(\bar\ell_i\)의 조각 위에서 적분한 값이고, 마지막은 점마다의 값이다.</p>
+        <p><strong>보존하는 것과 잃는 것.</strong> 각 정의는 자신을 낳은 smooth 특징 하나를 정확히 지킨다: A는 total curvature, B는 길이의 gradient, C는 mitered offset의 길이, D는 원. 나머지 특징은 근사로만 만족하고, 그 오차는 \(O(\theta^3)\)이다. 네 정의를 하나로 합칠 수 없다는 것이 이 절의 결론이다.</p>
+      </aside>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: four discrete curvatures</p>
+        <p>closed discrete curve의 vertex를 행으로 쌓은 \((n, 2)\) 배열에서 네 curvature와 dual length를 계산한다. 공용 구현 <code>tools/dgdec.py</code>의 <code>turning_angles</code>와 <code>DISCRETE_CURVATURES</code>가 같은 식이고, verify가 둘을 비교한다.</p>
+        <pre id="code-32-3-1"><code>import numpy as np
+
+def four_curvatures(X):
+    """X: (n, 2) vertices of a closed discrete curve, in order.
+    Returns kA, kB, kC (integrated), kD (pointwise) and the dual lengths lbar."""
+    X = np.asarray(X, float)
+    E = np.roll(X, -1, 0) - X                  # e_i = x_{i+1} - x_i
+    ell = np.linalg.norm(E, axis=1)            # edge lengths l_i
+    T = E / ell[:, None]                       # discrete tangents t_i
+    Tin = np.roll(T, 1, 0)                     # t_{i-1}, incoming at vertex i
+    cross = Tin[:, 0] * T[:, 1] - Tin[:, 1] * T[:, 0]
+    theta = np.arctan2(cross, (Tin * T).sum(1))           # turning angles (32.3.1)
+    w = np.linalg.norm(np.roll(X, -1, 0) - np.roll(X, 1, 0), axis=1)
+    kA = theta
+    kB = 2 * np.sin(theta / 2)
+    kC = 2 * np.tan(theta / 2)
+    kD = 2 * np.sin(theta) / w
+    lbar = 0.5 * (np.roll(ell, 1) + ell)       # dual lengths (32.3.3)
+    return kA, kB, kC, kD, lbar</code></pre>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">Looking ahead</p>
+        <p><a href="../37-curves-smooth-discrete/index.html#toc-37-4">Section 37.4</a>는 vertex 위치를 \(\R^2\)-valued 0-form으로, edge vector \(e_i\)를 그 discrete differential로 읽는다. 그러면 turning angle은 vertex의 dual cell 위의 적분값, 곧 dual 0-form이 된다. 이 절의 “vertex에 속하는 조각”과 dual length \(\bar\ell_i\)가 그 dual cell이다. 그곳은 이 절의 정의를 다시 정의하지 않고 해석만 바꾼다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>곡면의 Steiner formula와 convex polyhedron에서의 정확한 판: <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-6">Proposition 31.2.6</a>, <a href="../40-discrete-curvature-integral/index.html#toc-40-4">Section 40.4</a>(mollified polyhedron).</li>
+        <li>세 점을 지나는 원의 극한으로서의 osculating circle: <a href="../04-curves/4-5-osculating-circle.html#i-4-5-7">Proposition 4.5.7</a>.</li>
+        <li>다각형의 exterior angle 합(\(k = \pm 1\)인 경우): <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>.</li>
+        <li>mesh에서 같은 질문(어느 discrete curvature가 무엇을 보존하는가, 점마다의 값이 수렴하는가): <a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>turning angle \(\theta_i = \angle(\mathbf{t}_{i-1}, \mathbf{t}_i) \in (-\pi, \pi)\)은 vertex에서 진행 방향이 꺾인 부호 있는 각이고, 닫힌 곡선에서 합은 \(2\pi k\)다(<a href="#i-32-3-4">Proposition 32.3.4</a>).</li>
+        <li>네 smooth 특징에서 네 discrete curvature가 나온다: \(\kappa^A = \theta\)(접선의 회전), \(\kappa^B = 2\sin(\theta/2)\)(길이의 gradient, <a href="#eq-32-3-5">(32.3.5)</a>), \(\kappa^C = 2\tan(\theta/2)\)(edge를 늘인 offset, <a href="#eq-32-3-7">(32.3.7)</a>), \(\kappa^D = 2\sin\theta/w\)(세 vertex를 지나는 원, <a href="#eq-32-3-9">(32.3.9)</a>).</li>
+        <li>A, B, C는 dual length \(\bar\ell_i\)의 조각 위에서 적분한 값, D는 점마다의 값이다. 작은 각에서 서로 \(O(\theta^3)\)만큼 다르고, 모두 \(O(h^2)\)로 \(\kappa_s\)에 수렴한다.</li>
+        <li>각 정의는 smooth 성질 하나를 정확히 지킨다. 어느 것을 쓸지는 용도가 정한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 곡선을 움직인다. 길이를 가장 빨리 줄이는 curve shortening flow를 정의하고, 네 discrete curvature로 각각 discrete flow를 돌려 smooth flow의 세 성질 가운데 무엇이 남는지 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-32-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 32.3.1</span> <span class="level">★</span>
+        한 변의 길이가 \(1\)인 정사각형을 반시계 방향으로 돌 때, 한 vertex에서 네 discrete curvature와 그 pointwise 값을 구하여라. 외접원의 반지름과 비교하고, 네 정의 각각의 합 \(\sum_i\kappa^X_i\)(\(X = A, B, C\))도 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\theta_i = \pi/2\), \(\ell_i = \bar\ell_i = 1\), \(w_i = \sqrt2\)이다. <a href="#eq-32-3-4">(32.3.4)</a>에서 \(\kappa^A = \pi/2 = 1.5708\), \(\kappa^B = 2\sin(\pi/4) = \sqrt2 = 1.4142\), \(\kappa^C = 2\tan(\pi/4) = 2\), \(\kappa^D = 2\sin(\pi/2)/\sqrt2 = \sqrt2 = 1.4142\)이다. \(\bar\ell_i = 1\)이므로 pointwise 값도 같은 수다. 외접원의 반지름은 대각선의 절반 \(\sqrt2/2\)이므로 \(1/r = \sqrt2\)이고, D와 B(간격이 같은 원 위의 점)가 정확히 맞는다. 합은 \(\sum\kappa^A = 2\pi\), \(\sum\kappa^B = 4\sqrt2 = 5.657\), \(\sum\kappa^C = 8\)으로 <a href="#i-32-3-13">Proposition 32.3.13</a>의 부등식을 따른다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 32.3.2</span> <span class="level">★</span>
+        열린 discrete curve \((0, 0), (2, 0), (3, 1)\)의 가운데 vertex에서 네 discrete curvature를 구하여라. 세 점을 지나는 원의 중심과 반지름을 직접 구해서 <a href="#eq-32-3-9">(32.3.9)</a>의 두 식을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-32-3-2">Example 32.3.2</a>(b)에서 \(\theta_1 = \pi/4\)이다. \(\kappa^A = 0.7854\), \(\kappa^B = 2\sin(\pi/8) = 0.7654\), \(\kappa^C = 2\tan(\pi/8) = 0.8284\)이고, \(w_1 = \abs{(3, 1)} = \sqrt{10}\)이므로 \(\kappa^D = 2\sin(\pi/4)/\sqrt{10} = 1/\sqrt5 = 0.4472\)이다.
+          중심: \((0, 0)\)과 \((2, 0)\)의 수직이등분선은 \(x = 1\), \((2, 0)\)과 \((3, 1)\)의 수직이등분선은 중점 \((2.5, 0.5)\)를 지나고 \((1, 1)\)에 수직이므로 \(x + y = 3\)이다. 따라서 \(c_1 = (1, 2)\), \(r_1 = \abs{(1, 2)} = \sqrt5\)이고 \(1/r_1 = 1/\sqrt5 = \abs{\kappa^D_1}\)이다.
+          \(\bar{\mathbf{t}}_1\)은 \((1, 0) + (1, 1)/\sqrt2\)를 정규화한 \((0.9239, 0.3827)\)이고 \(\mathbf{n}_1 = (-0.3827, 0.9239)\)이다. \(\inner{c_1 - \gamma_1}{\mathbf{n}_1} = \inner{(-1, 2)}{\mathbf{n}_1} = 0.3827 + 1.8478 = 2.2304\)이고, \(\bar\ell_1/\kappa^B_1 = (2 + \sqrt2)/2/0.7654 = 1.7071/0.7654 = 2.2304\)로 같다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-3-3" data-level="2">
+        <p><span class="thm-head">Exercise 32.3.3</span> <span class="level">★★</span>
+        \(\theta_i \neq 0\)인 vertex에서, 세 이웃 vertex를 지나는 원의 중심 \(c_i\)가 직선 \(\{\gamma_i + \lambda\mathbf{n}_i\}\) 위에 있을 필요충분조건은 \(\ell_{i-1} = \ell_i\)임을 보여라.</p>
+        <details class="hint"><summary>Hint</summary><p><a href="#i-32-3-8">Proposition 32.3.8</a>의 증명에서 쓴 두 정사영 식을 빼라.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\((\bar{\mathbf{t}}_i, \mathbf{n}_i)\)는 orthonormal basis이므로 \(c_i - \gamma_i\)가 \(\mathbf{n}_i\)에 평행한 것은 \(\inner{c_i - \gamma_i}{\bar{\mathbf{t}}_i} = 0\)인 것과 같다. \(\bar{\mathbf{t}}_i\)는 \(\mathbf{t}_{i-1} + \mathbf{t}_i\)의 양수배이므로 이것은 \(\inner{c_i - \gamma_i}{\mathbf{t}_{i-1} + \mathbf{t}_i} = 0\)과 같다. <a href="#i-32-3-8">Proposition 32.3.8</a>의 증명에서 \(\inner{c_i - \gamma_i}{\mathbf{t}_i} = \ell_i/2\), \(\inner{c_i - \gamma_i}{\mathbf{t}_{i-1}} = -\ell_{i-1}/2\)이므로 왼쪽은 \((\ell_i - \ell_{i-1})/2\)이다. 따라서 \(\ell_{i-1} = \ell_i\)일 때, 그리고 그때만 \(c_i\)가 \(\mathbf{n}_i\) 방향에 있다. <a href="#fig-32-3-1">Figure 32.3.1</a>(b)에서는 두 edge 길이가 달라서 \(\mathbf{n}_i\)가 중심을 조금 비껴간다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-3-4" data-level="2">
+        <p><span class="thm-head">Exercise 32.3.4</span> <span class="level">★★</span>
+        반지름 \(r\)인 원에 내접한 반시계 방향 정 \(n\)각형을 <em>안쪽</em>으로 \(\varepsilon\)만큼 민 offset(edge를 늘이거나 잘라 만나게 한 것, <a href="#i-32-3-7">Proposition 32.3.7</a>(b))은 다시 정 \(n\)각형임을 보이고, 그 둘레를 직접 구해 <a href="#eq-32-3-7">(32.3.7)</a>과 비교하여라. \(\varepsilon\)은 어디까지 허용되는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>정 \(n\)각형의 각 edge는 중심에서 거리 \(\rho = r\cos(\pi/n)\)(내접원의 반지름)인 직선 위에 있다. edge를 \(\varepsilon J\mathbf{t}_i\)(안쪽, \(\varepsilon \gt 0\))만큼 밀면 그 직선의 중심까지의 거리가 \(\rho - \varepsilon\)이 되고, 방향은 그대로다. \(0 \lt \varepsilon \lt \rho\)이면 \(n\)개의 직선은 \(2\pi/n\) 회전 대칭이므로 내접원의 반지름이 \(\rho - \varepsilon\)인 정 \(n\)각형을 이룬다. 그 한 변은 \(2(\rho - \varepsilon)\tan(\pi/n)\)이므로 둘레는 \(2n(\rho - \varepsilon)\tan(\pi/n) = 2n r\sin(\pi/n) - 2n\varepsilon\tan(\pi/n)\)이다.
+          한편 \(\theta_i = 2\pi/n\)이므로 \(\sum\kappa^C_i = 2n\tan(\pi/n)\)이고, <a href="#eq-32-3-7">(32.3.7)</a>은 \(L - \varepsilon\cdot 2n\tan(\pi/n)\)으로 같다. 조건 \(\ell_i - 2\varepsilon\tan(\pi/n) \gt 0\)은 \(2r\sin(\pi/n) \gt 2\varepsilon\tan(\pi/n)\), 곧 \(\varepsilon \lt r\cos(\pi/n) = \rho\)이다. \(\varepsilon = \rho\)에서 다각형이 한 점으로 줄어든다. 바깥쪽(\(\varepsilon \lt 0\))은 아무 제한이 없다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-3-5" data-level="3">
+        <p><span class="thm-head">Exercise 32.3.5</span> <span class="level">★★★</span>
+        \(n\)개의 turning angle이 모두 \((0, \pi)\)에 있고 합이 \(2\pi\)인 closed discrete curve를 생각하자. \(\sum_i\kappa^B_i \le 2n\sin(\pi/n)\)이고 \(\sum_i\kappa^C_i \ge 2n\tan(\pi/n)\)이며, 등호는 모든 turning angle이 \(2\pi/n\)일 때뿐임을 보여라. 이 결과를 “정다각형에 가까울수록 B의 total curvature는 커지고 C의 total curvature는 작아진다”는 말로 해석하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>Jensen 부등식. \(f(x) = 2\sin(x/2)\)와 \(g(x) = 2\tan(x/2)\)의 이계도함수의 부호를 보라.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(f(x) = 2\sin(x/2)\)는 \(f''(x) = -\tfrac12\sin(x/2) \lt 0\) (\(0 \lt x \lt \pi\))이므로 \((0, \pi)\)에서 strictly concave이다. Jensen 부등식에서 \(\tfrac1n\sum f(\theta_i) \le f\bigl(\tfrac1n\sum\theta_i\bigr) = f(2\pi/n)\)이고, strictly concave이므로 등호는 모든 \(\theta_i\)가 같을 때뿐이다. 곧 \(\sum\kappa^B_i \le 2n\sin(\pi/n)\)이다.
+          \(g(x) = 2\tan(x/2)\)는 \(g'(x) = \sec^2(x/2)\), \(g''(x) = \sec^2(x/2)\tan(x/2) \gt 0\)이므로 strictly convex이고, 같은 논법으로 \(\sum\kappa^C_i \ge n\,g(2\pi/n) = 2n\tan(\pi/n)\)이다.
+          해석: turning angle의 합이 \(2\pi\)로 고정된 볼록 다각형 가운데, 꺾임이 고르게 나뉜 것일수록 \(\sum\kappa^B\)는 커지고(그래도 \(2\pi\)보다 작다) \(\sum\kappa^C\)는 작아진다(그래도 \(2\pi\)보다 크다). Section 32.4의 discrete flow가 다각형을 둥글게 만들면 B와 C의 total curvature가 움직이는 까닭이 여기에 있다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-3-6" data-level="1">
+        <p><span class="thm-head">Exercise 32.3.6</span> <span class="level">★</span>
+        <strong>Coding.</strong> 위 Implementation의 <code>four_curvatures</code>로 flower curve \(r(t) = 1 + 0.3\cos 5t\)를 \(n = 256, 512, 1024\)개의 vertex \(\gamma(2\pi i/n)\)으로 sampling하고, 네 pointwise 값의 최대 오차와 관측된 수렴 차수를 출력하여라. smooth \(\kappa_s\)는 <a href="32-2-plane-curve-curvature.html#eq-32-2-2">(32.2.2)</a>로 계산한다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-32-3-6"><code>def flower(t):
+    r = 1 + 0.3 * np.cos(5 * t)
+    return np.stack([r * np.cos(t), r * np.sin(t)], 1)
+
+def kappa_flower(t):                          # (32.2.2)
+    r, r1, r2 = 1 + 0.3 * np.cos(5 * t), -1.5 * np.sin(5 * t), -7.5 * np.cos(5 * t)
+    return (r**2 + 2 * r1**2 - r * r2) / (r**2 + r1**2) ** 1.5
+
+prev = None
+for n in [256, 512, 1024]:
+    t = 2 * np.pi * np.arange(n) / n
+    kA, kB, kC, kD, lbar = four_curvatures(flower(t))
+    err = np.array([np.abs(k - kappa_flower(t)).max() for k in (kA / lbar, kB / lbar, kC / lbar, kD)])
+    line = " ".join(f"{e:.2e}" for e in err)
+    if prev is not None:
+        line += "   order " + " ".join(f"{o:.2f}" for o in np.log2(prev / err))
+    print(f"n = {n:4d}  A B C D: {line}")
+    prev = err</code></pre>
+          <p>Implementation의 코드를 먼저 실행한 뒤 실행한다. 출력은 다음과 같다.</p>
+          <pre id="out-ex-32-3-6"><code>n =  256  A B C D: 2.69e-01 3.01e-01 2.06e-01 3.01e-01
+n =  512  A B C D: 6.84e-02 7.65e-02 5.21e-02 7.65e-02   order 1.98 1.98 1.98 1.98
+n = 1024  A B C D: 1.72e-02 1.92e-02 1.31e-02 1.92e-02   order 1.99 1.99 2.00 1.99</code></pre>
+          <p>네 정의의 오차가 \(n\)을 두 배로 할 때마다 약 \(1/4\)로 줄고, 차수가 \(2\)에 가깝다(<a href="#i-32-3-10">Proposition 32.3.10</a>). flower curve는 waist에서 \(\abs{\kappa_s}\)가 \(13.9\)까지 크므로, 타원보다 많은 vertex가 있어야 이 점근적인 영역에 들어간다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="32-2-plane-curve-curvature.html">← 32.2 Curvature of a Plane Curve</a>
+    <a rel="next" href="32-4-no-free-lunch.html">32.4 No Free Lunch: Discrete Curvature Flow →</a>
+  </nav>
+</body>
+</html>

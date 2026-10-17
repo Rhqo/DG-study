@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>32.1 What Is Discrete Differential Geometry? — DG Study</title>
+  <meta name="dg-id" content="32.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="0.2, 31.2">
+  <meta name="dg-refs" content="Cr ch1; CMU-DDG L1">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">32. Overview: Discrete Curvature of Plane Curves</a> ›
+    <span>32.1 What Is Discrete Differential Geometry?</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>32.1 What Is Discrete Differential Geometry?</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#Cr">[Cr ch1]</a> · Lecture: <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>smooth 대상을 수치로 근사하는 것과 discrete 대상 위에서 smooth 이론의 구조를 정확히 재현하는 것의 차이를 설명할 수 있다.</li>
+        <li>원에 내접한 정 \(n\)각형에서 “수렴하는 양”(둘레)과 “정확히 보존되는 양”(exterior angle의 합)을 구분하고 증명할 수 있다.</li>
+        <li>discrete 정의를 얻는 “the game”의 세 단계와, 좋은 discrete 정의를 판단하는 기준을 말할 수 있다.</li>
+        <li>Track 2의 장들이 어떤 순서와 의존 관계로 이어지는지 안다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>다변수 미적분과 linear algebra(<a href="index.html">Chapter overview</a>의 Builds on). Track 2는 Track 3에 의존하지 않는다.</li>
+        <li>권장: <a href="../00-tour/0-1-what-is-dg.html">Section 0.1</a>(differential geometry의 지도), <a href="../00-tour/0-2-curves.html#sec-curvature">Section 0.2</a>(curvature의 직관), <a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>(mesh의 discrete curvature를 고르는 기준).</li>
+        <li>signed angle \(\angle(u, v) \in (-\pi, \pi)\): <a href="../05-space-curves/5-6-rotation-index.html#eq-5-6-2">(5.6.2)</a>. exterior angle: <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-9">Definition 5.6.9</a>.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Track 1에서는 differential geometry의 지도를 직관으로 그렸고(Chapter 0), 3D vision에서 그 언어가 어떻게 쓰이는지 보았으며(Chapter 27–31), 선형대수, 미적분, 위상의 기초를 다졌다(Chapter 1–3). 특히 <a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>는 triangle mesh의 curvature에 정의가 여럿 있고, 그중 무엇을 쓸지는 “무엇을 정확히 보존하는가”로 고른다는 관찰로 끝났다. Track 2는 이 관찰을 출발점으로 삼는 분야인 <strong>discrete differential geometry</strong>(이산 미분기하, DDG)를 처음부터 차근차근 다룬다.</p>
+      <p>컴퓨터는 유한개의 수만 저장한다. 곡선은 점의 목록으로, 곡면은 삼각형의 목록으로 저장된다. 반면 differential geometry의 정의는 거의 모두 극한과 도함수로 쓰여 있다. 그렇다면 점의 목록 위에서 curvature 같은 양을 어떻게 정의해야 하는가? 이 절은 이 질문에 답하는 두 가지 태도를 비교하고, 가장 단순한 예인 원과 정다각형으로 둘의 차이를 정확히 보인다.</p>
+    </section>
+
+    <section id="sec-two-attitudes">
+      <h2>Approximating versus Discretizing</h2>
+      <p>첫째 태도는 <strong>수치 근사</strong>다. smooth 곡선 \(\gamma\)를 간격 \(h\)로 sampling하고, 도함수를 차분으로 바꾼다. 예를 들어 \(\gamma''(s) \approx \bigl(\gamma(s + h) - 2\gamma(s) + \gamma(s - h)\bigr)/h^2\)이다. 이렇게 얻은 수는 smooth 값의 근삿값이고, 좋고 나쁨은 \(h \to 0\)일 때 얼마나 빨리 수렴하는지로 잰다. smooth 곡선이 먼저 있고, 점의 목록은 그것을 엿보는 창일 뿐이다.</p>
+      <p>둘째 태도가 DDG의 태도다. 다각형이나 mesh를 smooth 대상의 그림자로 보지 않고 <em>그 자체로</em> 하나의 기하학적 대상으로 본다. 그리고 그 대상 위에서 smooth 이론의 중요한 구조, 곧 정리가 <em>정확히</em> 성립하도록 정의를 고른다. 강의 슬라이드는 이 분야의 큰 목표를 “differential geometry를 계산에 맞는 언어로 옮기는 것”으로 요약한다 <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a>. 노트의 첫 장도 같은 생각을 예로 든다. mesh의 vertex 둘레 각의 합은 일반적으로 \(2\pi\)가 아니지만, 각을 일정한 비율로 다시 재서 합이 정확히 \(2\pi\)가 되게 할 수 있다는 것이다 <a class="cite" href="../../references.html#Cr">[Cr ch1]</a>. smooth 곡면의 접평면에는 방향이 “한 바퀴” 있다는 구조를 거친 mesh에서도 지키는 셈이다.</p>
+      <p>두 태도는 서로 반대가 아니다. 좋은 discrete 정의는 대개 refinement에서 smooth 값으로 수렴하기도 한다. 차이는 무엇을 먼저 요구하느냐에 있다. 다음 예가 이 차이를 수식으로 보여 준다.</p>
+    </section>
+
+    <section id="sec-first-example">
+      <h2>A First Example: Polygons Inscribed in a Circle</h2>
+      <p>반지름 \(r\)인 원에 내접한 정 \(n\)각형을 생각하자. 원의 둘레는 \(2\pi r\)이고, 원을 한 바퀴 돌면 접선 방향도 정확히 한 바퀴, 곧 \(2\pi\)만큼 돈다(<a href="../00-tour/0-2-curves.html#i-0-2-7">Theorem 0.2.7</a>). 정 \(n\)각형에서 이 두 양에 해당하는 것은 둘레와 exterior angle의 합이다. exterior angle은 vertex에서 진행 방향이 꺾이는 부호 있는 각이다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-9">Definition 5.6.9</a>).</p>
+
+      <figure class="dg-figure" id="fig-32-1-1">
+        <img src="figures/fig-32-1-1-polygon-convergence.svg" alt="두 패널. (a) 회색 점선의 단위원에 내접한 검은 정육각형과 파란 정십이각형. 육각형의 오른쪽 vertex (1, 0)에서 들어오는 edge의 연장선(점선)과 나가는 edge 사이에 주황 호와 라벨 2π/6이 있다. (b) 가로축은 vertex 수 n(로그 눈금, 3에서 128), 세로축은 0.8에서 1.04. 주황 사각형은 모든 n에서 1에 붙어 있고, 검은 원은 n = 3에서 약 0.83으로 시작해 n = 6에서 0.955, n = 12에서 0.989를 지나 1에 가까워진다.">
+        <figcaption><span class="fig-head">Figure 32.1.1.</span>
+        <em>무엇을</em>: 반지름 \(r = 1\)인 원(회색 점선)에 내접한 정 \(n\)각형. vertex는 \(r(\cos(2\pi i/n), \sin(2\pi i/n))\)이고 반시계 방향으로 돈다.
+        <em>읽는 법</em>: (a)는 \(n = 6\)(검정)과 \(n = 12\)(파랑)이다. 주황 호는 육각형의 vertex \((1, 0)\)에서 들어오는 edge를 늘인 점선과 나가는 edge 사이의 exterior angle \(2\pi/6\)이다. (b)의 가로축은 \(n\)(로그 눈금)이고, 검은 원은 둘레를 \(2\pi r\)로 나눈 값, 주황 사각형은 exterior angle의 합을 \(2\pi\)로 나눈 값, 회색 점선은 \(1\)이다.
+        <em>볼 것</em>: 검은 원은 \(n = 3, 6, 12\)에서 \(0.827, 0.955, 0.989\)로 \(1\)에 다가가지만 어느 \(n\)에서도 \(1\)이 아니다. 주황 사각형은 \(n = 3\)부터 정확히 \(1\)이다.
+        <em>본문과의 연결</em>: <a href="#i-32-1-1">Proposition 32.1.1</a>의 (a)와 (b).</figcaption>
+      </figure>
+
+      <p><a href="#fig-32-1-1">Figure 32.1.1</a>의 (a)부터 보자. 육각형(검정)은 원(회색 점선)보다 확실히 안쪽에 있고, 십이각형(파랑)은 원에 훨씬 가깝다. 오른쪽 vertex에서는 들어오는 edge를 그대로 늘인 점선과 실제로 나가는 edge가 \(2\pi/6 = 60^\circ\)를 이룬다(주황 호). 이 꺾임이 여섯 번 있으므로 한 바퀴 돌면 진행 방향은 정확히 \(6 \cdot 2\pi/6 = 2\pi\) 돈다. 이제 (b)에서 두 양을 \(n\)에 따라 비교하자. 검은 원(둘레)은 \(n\)이 커질수록 점선 \(1\)로 올라가지만 닿지는 않는다. 주황 사각형(exterior angle의 합)은 처음부터 점선 위에 있다. 다음 명제가 이 그림을 정확한 부등식과 등식으로 바꾼다.</p>
+
+      <div class="thm proposition" id="i-32-1-1">
+        <p><span class="thm-head">Proposition 32.1.1</span> <span class="thm-name">(regular polygons: convergent length, exact total turning)</span>.
+        \(n \ge 3\)인 정수와 \(r \gt 0\)에 대해 \(\gamma_i = r\bigl(\cos(2\pi i/n), \sin(2\pi i/n)\bigr)\) (\(i = 0, \dots, n - 1\))을 이 순서로 잇는 정 \(n\)각형 \(P_n\)을 생각하자(첨자는 \(n\)을 법으로 읽는다).
+        (a) \(P_n\)의 둘레 \(L_n = 2nr\sin(\pi/n)\)은</p>
+        <div class="equation" id="eq-32-1-1">
+        \[ 0 \lt 2\pi r - L_n \le \frac{\pi^3 r}{3n^2} \tag{32.1.1} \]
+        </div>
+        <p>을 만족한다. 따라서 \(L_n \to 2\pi r\)이고 오차는 \(n^{-2}\)의 상수배 이하다.
+        (b) 모든 vertex에서 exterior angle은 \(2\pi/n\)이고, 그 합은 모든 \(n \ge 3\)에서 정확히 \(2\pi\)다.</p>
+      </div>
+      <p><strong>이 명제가 말하는 것.</strong> 정다각형은 원의 길이를 근사할 뿐 정확히 재현하지 못한다. 반면 “한 바퀴 돌면 방향이 \(2\pi\) 돈다”는 사실은 vertex가 셋뿐이어도 정확히 재현한다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: 한 edge의 길이를 삼각함수로 구하고 \(\sin x\)를 \(x\)와 \(x - x^3/6\) 사이에 끼운다. exterior angle은 \(P_n\)이 \(2\pi/n\) 회전에 대해 대칭이라는 것에서 바로 나온다.</p>
+        <p><span class="proof-head">Proof.</span>
+        (a) \(a_i = 2\pi i/n\)이라 하면 덧셈정리에서</p>
+        \[ \begin{aligned} \abs{\gamma_{i+1} - \gamma_i}^2 &= r^2\bigl[(\cos a_{i+1} - \cos a_i)^2 + (\sin a_{i+1} - \sin a_i)^2\bigr]\\ &= 2r^2\bigl(1 - \cos(2\pi/n)\bigr) = 4r^2\sin^2(\pi/n) \end{aligned} \]
+        <p>이다. \(0 \lt \pi/n \lt \pi\)이므로 \(\sin(\pi/n) \gt 0\)이고, 각 edge의 길이는 \(2r\sin(\pi/n)\)이다. edge가 \(n\)개이므로 \(L_n = 2nr\sin(\pi/n)\)이다.
+        이제 \(x \gt 0\)에서 \(x - x^3/6 \le \sin x \lt x\)임을 보이자. \(f(x) = x - \sin x\)는 \(f(0) = 0\)이고 \(f'(x) = 1 - \cos x \ge 0\)이며, \(f'\)은 \(x = 2k\pi\)에서만 \(0\)이므로 \(f\)는 순증가한다. 따라서 \(x \gt 0\)에서 \(\sin x \lt x\)이다. 이것을 \([0, x]\)에서 적분하면 \(1 - \cos x = \int_0^x \sin u\,du \le \int_0^x u\,du = x^2/2\)이다. \(g(x) = \sin x - x + x^3/6\)는 \(g(0) = 0\)이고 \(g'(x) = \cos x - 1 + x^2/2 \ge 0\)이므로 \(x \ge 0\)에서 \(g(x) \ge 0\)이다.
+        \(x = \pi/n\)을 대입하면 \(2\pi r - L_n = 2nr\bigl(x - \sin x\bigr)\)이고 \(0 \lt x - \sin x \le x^3/6\)이므로</p>
+        \[ 0 \lt 2\pi r - L_n \le 2nr\cdot\frac{\pi^3}{6n^3} = \frac{\pi^3 r}{3n^2} \]
+        <p>이다.
+        (b) \(R\)을 원점 둘레의 \(2\pi/n\) 회전이라 하면 \(\gamma_{i+1} = R\gamma_i\)이다(\(R^n = I_2\)이므로 \(i = n - 1\)에서도 성립한다). edge vector \(e_i = \gamma_{i+1} - \gamma_i\)는 \(e_{i} = R\gamma_{i} - R\gamma_{i-1} = Re_{i-1}\)을 만족하고, \(R\)은 길이를 보존하므로 단위벡터 \(e_i/\abs{e_i}\)도 앞의 것을 \(2\pi/n\)만큼 돌린 것이다.
+        \(n \ge 3\)이면 \(2\pi/n \in (0, \pi)\)이므로, signed angle의 성질(<a href="../05-space-curves/5-6-rotation-index.html#eq-5-6-2">(5.6.2)</a> 아래: \(v = R_\varphi u\)이고 \(\varphi \in (-\pi, \pi)\)이면 \(\angle(u, v) = \varphi\))에 의해 vertex \(\gamma_i\)의 exterior angle은 \(\angle(e_{i-1}/\abs{e_{i-1}}, e_i/\abs{e_i}) = 2\pi/n\)이다. \(n\)개를 더하면 \(2\pi\)이다.</p>
+      </div>
+
+      <div class="thm example" id="i-32-1-2">
+        <p><span class="thm-head">Example 32.1.2</span> <span class="thm-name">(numbers)</span>.
+        \(r = 1\)이면 \(L_6 = 12\sin(\pi/6) = 6\)이고 \(2\pi - L_6 = 0.2832\)이다. 상한 <a href="#eq-32-1-1">(32.1.1)</a>은 \(\pi^3/108 = 0.2871\)이다. \(n = 12\)이면 \(L_{12} = 24\sin(\pi/12) = 6.2117\), 오차 \(0.0715\), 상한 \(\pi^3/432 = 0.0718\)이다. \(n\)을 두 배로 늘릴 때마다 오차는 약 \(1/4\)이 된다. \((2\pi - L_n)\,n^2\)은 \(n = 6, 12, 96\)에서 \(10.19, 10.30, 10.33\)으로 \(\pi^3/3 = 10.335\)에 다가가므로, 상한의 상수도 개선할 수 없다. 반면 exterior angle의 합은 어느 \(n\)에서나 \(2\pi\)이고, 계산해 보면 \(10^{-15}\) 정도의 반올림 오차만 남는다.</p>
+        <p class="verified">Verification: <code>verify/v-32-1-what-is-ddg.py</code></p>
+      </div>
+
+      <div class="thm remark" id="i-32-1-3">
+        <p><span class="thm-head">Remark 32.1.3</span> <span class="thm-name">(this is not special to regular polygons)</span>.
+        (b)는 정다각형의 대칭 덕분이 아니다. 스스로 만나지 않는 다각형을 반시계 방향으로 돌면 exterior angle의 합은 언제나 정확히 \(2\pi\)다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-10">Example 5.6.10</a>, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-12">Proposition 5.6.12</a>). Section 32.3은 이 합을 첫째 discrete curvature로 삼고, 닫힌 discrete curve라면 스스로 만나도 합이 \(2\pi\)의 정수배임을 보인다(<a href="32-3-four-discrete-curvatures.html#i-32-3-4">Proposition 32.3.4</a>). 거꾸로 (a)의 둘레는 다각형 자신의 길이로는 정확하다. 틀린 것은 “원의 길이”로 읽을 때뿐이다. inscribed polygonal path의 길이가 곡선의 길이로 수렴한다는 일반적인 사실은 <a href="../04-curves/4-2-arc-length.html#i-4-2-11">Theorem 4.2.11</a>이다.</p>
+      </div>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: length and total turning</p>
+        <p><strong>Smooth.</strong> 반지름 \(r\)인 원의 길이는 \(2\pi r\)이고, 접선 방향은 한 바퀴에 \(2\pi\) 돈다. 일반적인 simple closed curve에서도 \(\int\kappa_s\,ds = \pm 2\pi\)이다(rotation index theorem, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a>).</p>
+        <p><strong>Discrete.</strong> 정 \(n\)각형의 둘레는 \(2\pi r\)과 다르고, 차이가 \(O(n^{-2})\)로 줄어들 뿐이다 <a href="#eq-32-1-1">(32.1.1)</a>. exterior angle의 합은 모든 \(n\)에서 정확히 \(2\pi\)다.</p>
+        <p><strong>보존하는 것과 잃는 것.</strong> 정다각형은 “한 바퀴”라는 전역적이고 위상적인 사실을 정확히 지키고, 길이라는 metric 정보는 근사로만 지킨다. 무엇을 정확히 지키고 무엇을 근사로 만족할지를 의식적으로 고르는 것이 DDG의 방법이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-game">
+      <h2>The Game</h2>
+      <p>정다각형의 예에서 exterior angle의 합이 정확했던 것은 우연이 아니다. “curvature를 적분하면 접선이 돈 각”이라는 smooth 사실을 다각형에 그대로 적용했기 때문이다. DDG에서 discrete 정의를 얻을 때 흔히 쓰는 절차를 강의 슬라이드는 “게임”이라 부른다 <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a>.</p>
+      <ol>
+        <li>smooth setting에서 서로 동치인 정의를 여러 개 적는다.</li>
+        <li>각 정의를 discrete 대상에 그대로 적용한다.</li>
+        <li>그렇게 얻은 discrete 정의들은 대개 서로 다르다. 각각이 smooth 대상의 어떤 성질을 정확히 지키는지 비교한다.</li>
+      </ol>
+      <p>이 장은 plane curve의 curvature로 이 게임을 한 판 해 본다. 1단계는 Section 32.2(curvature의 동치인 특징 넷), 2단계는 Section 32.3(discrete curvature 넷), 3단계는 Section 32.3의 표와 Section 32.4의 curvature flow다. 좋은 discrete 정의를 판단하는 기준은 대개 다음 세 가지다(슬라이드도 같은 세 기준을 든다).</p>
+      <ul>
+        <li><strong>구조 보존</strong>: smooth 대상의 성질이나 정리를 (일부라도) 정확히 만족하는가. 위의 exterior angle 합이 예다.</li>
+        <li><strong>수렴</strong>: discrete 대상을 촘촘하게 하면 smooth 값에 다가가는가, 그리고 얼마나 빨리 다가가는가. 위의 둘레가 예다.</li>
+        <li><strong>비용</strong>: 계산하기 쉽고, 그 정의로 세운 방정식을 빠르고 안정적으로 풀 수 있는가.</li>
+      </ul>
+      <p>셋을 모두 갖춘 하나의 정의가 있으면 좋겠지만, 흔히 그렇지 않다. 어떤 discrete 정의도 smooth 대상의 성질을 모두 지키지 못하는 상황을 강의 슬라이드는 “no free lunch”라 부른다. Section 32.4에서 curvature flow로 그 한 예를 보고, 이 장에서 확인할 수 있는 것과 없는 것을 구분한다.</p>
+    </section>
+
+    <section id="sec-applications">
+      <h2>Where DDG Is Used</h2>
+      <p>강의 슬라이드는 앞부분에서 DDG가 쓰이는 분야로 geometry processing, shape analysis, machine learning, numerical simulation, architecture and design, discrete models of nature를 든다 <a class="cite" href="../../references.html#CMU-DDG-L1">[CMU-DDG L1]</a>. 이 study set에서 해당 내용이 나오는 곳과 함께 몇 가지만 적는다.</p>
+      <ul>
+        <li><strong>Geometry processing.</strong> mesh를 매끄럽게 하기(curvature flow, <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-smoothing">Section 31.3</a>, <a class="cite" href="../../references.html#Desbrun99">[Desbrun99]</a>, Chapter 41–42), 평면에 펼치기(<a href="../43-conformal-geometry/index.html">Chapter 43</a>), 곡면 위의 거리 계산(heat method <a class="cite" href="../../references.html#Crane13">[Crane13]</a>, <a href="../44-discrete-geodesics/index.html">Chapter 44</a>), 방향장 설계(<a href="../45-vector-field-design/index.html">Chapter 45</a>). 노트의 첫 장은 smoothing, parameterization, vector field design 같은 작업 여럿이 대개 간단한 Poisson equation 하나를 푸는 것으로 쓰인다고 말한다 <a class="cite" href="../../references.html#Cr">[Cr ch1]</a>. 그 방정식의 행렬은 discrete Laplacian이고 sparse하다(<a href="../42-laplace-beltrami/index.html">Chapter 42</a>).</li>
+        <li><strong>Shape analysis.</strong> curvature나 Laplacian의 eigenfunction처럼 회전과 평행이동에 무관한 양을 모양의 설명자로 쓴다(<a href="../31-meshes/31-4-spectral-geometry.html">Section 31.4</a>).</li>
+        <li><strong>Simulation.</strong> 머리카락이나 케이블 같은 가는 물체를 discrete curve와 그 위의 frame으로 모형화한다. discrete elastic rods <a class="cite" href="../../references.html#Bergou08">[Bergou08]</a>가 대표적이고, 그 기하는 <a href="../37-curves-smooth-discrete/index.html">Chapter 37</a>에서 다룬다.</li>
+        <li><strong>Machine learning.</strong> mesh와 graph 위의 학습에서도 graph Laplacian 같은 discrete 연산자가 기본 재료로 쓰인다 <a class="cite" href="../../references.html#Bronstein17">[Bronstein17]</a>.</li>
+        <li><strong>Architecture and design.</strong> 건물의 외피는 평평한 판과 곧은 부재로 지어지므로, 이 경우 다각형과 mesh는 근사가 아니라 만들 물건 그 자체다. 그래서 discrete 대상 위의 기하가 직접 설계의 언어가 된다.</li>
+      </ul>
+      <p>이 목록은 개관일 뿐이다. 각 응용의 수학은 해당 장에서, 그 장에 필요한 정의와 정리를 갖춘 뒤에 다룬다.</p>
+    </section>
+
+    <section id="sec-roadmap">
+      <h2>A Map of Track 2</h2>
+      <p>Track 2는 CMU 15-458/858 강의(Keenan Crane)의 순서를 따른다 <a class="cite" href="../../references.html#CMU-DDG">[CMU-DDG]</a>. 강의 슬라이드의 course roadmap을 참고해 이 study set은 Track 2를 두 줄기로 정리한다. 하나는 curve와 surface와 curvature의 줄기이고, 다른 하나는 differential form을 discrete 대상 위로 옮기는 discrete exterior calculus(DEC)의 줄기다. <a href="#fig-32-1-2">Figure 32.1.2</a>가 장 사이의 의존 관계다.</p>
+
+      <figure class="dg-figure" id="fig-32-1-2">
+        <img src="figures/fig-32-1-2-roadmap.svg" alt="Track 2의 열네 장을 상자로 그린 의존 관계도. 왼쪽 열은 위에서 아래로 32(Plane-curve curvature, 하늘색으로 강조, you are here), 37 Curves, 38 Surfaces, 39 Curvature of surfaces, 40 Discrete curvature I, 41 Discrete curvature II. 오른쪽 열은 34 Exterior algebra, 35 Exterior calculus, 36 Discrete exterior calculus, 그리고 아래쪽 42 Laplace-Beltrami와 43 Conformal geometry. 가운데 열은 맨 위의 33 Combinatorial surfaces와 맨 아래의 44 Geodesics, 45 Vector fields. 회색 화살표는 꺾인 선으로 상자 사이의 빈 곳을 지난다. 두 열 안에서는 위에서 아래로 이어지고(34에서 35, 36으로, 37에서 38, 39, 40, 41로), 32에서 37로, 33에서 36과 40으로(가운데 열을 따라 내려간다), 35에서 38로, 36에서 37, 38, 42로, 39에서 44로, 41에서 42로, 42에서 43, 44, 45로, 44에서 45로, 36에서 45로(오른쪽 바깥을 돌아) 간다.">
+        <figcaption><span class="fig-head">Figure 32.1.2.</span>
+        <em>무엇을</em>: Track 2의 열네 장과 그 의존 관계(각 장 개요의 Builds on을 모은 것).
+        <em>읽는 법</em>: 상자 하나가 장 하나이고, 굵은 수가 장 번호다. 회색 화살표 \(a \to b\)는 “장 \(b\)가 장 \(a\)의 결과를 쓴다”는 뜻이다. 긴 화살표는 다른 상자 뒤로 지나가지 않도록 꺾어서 빈 곳으로 돌렸다. 왼쪽 열(파란 제목)은 curve, surface, curvature의 줄기, 오른쪽 열(초록 제목)은 differential form과 DEC의 줄기다. 가운데 열은 둘 다에 쓰이는 Chapter 33과 응용 장 44, 45이고, 응용 장 43은 오른쪽 열 맨 아래에 있다. 하늘색 상자가 지금 읽는 Chapter 32다.
+        <em>볼 것</em>: 모든 화살표는 번호가 작은 장에서 큰 장으로 간다. 그래서 번호 순서대로 읽으면 된다. 32, 33, 34는 서로 독립이고, 두 줄기는 Chapter 37(curve를 DEC 언어로)과 Chapter 38에서 만난다. Chapter 42(Laplace–Beltrami)는 뒤의 세 응용 장 43, 44, 45가 모두 쓴다.
+        <em>본문과의 연결</em>: 아래 표가 각 장의 질문과 강의 번호다. (schematic)</figcaption>
+      </figure>
+
+      <p><a href="#fig-32-1-2">Figure 32.1.2</a>를 위에서부터 따라가 보자. 맨 위 줄의 세 장은 서로 기대지 않는다. 이 장(32)은 plane curve 하나로 게임 전체를 미리 해 보는 장이고, 33은 mesh를 조합적 대상으로, 34는 differential form의 선형대수를 다룬다. 오른쪽 열은 34 → 35 → 36으로 내려가며 DEC를 완성하고, 35와 36에서 나온 화살표가 왼쪽 열의 37과 38로 건너간다. 33에서 나온 두 화살표는 가운데 열을 따라 내려가 36과 40에 닿는다. mesh의 조합 구조는 DEC와 discrete curvature 둘 다에 쓰인다. 왼쪽 열은 37(curve)에서 41(surface의 discrete curvature)까지 곧게 내려간다. 맨 아래에서는 42가 응용 장 셋으로 가지를 친다.</p>
+
+      <table>
+        <thead>
+          <tr><th>Chapter</th><th>Question</th><th>Lecture</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>32 (이 장)</td><td>smooth plane curve의 curvature 하나에서 discrete curvature가 넷 나오는 이유, 각각이 보존하는 것</td><td>L1</td></tr>
+          <tr><td><a href="../33-combinatorial-surfaces/index.html">33</a></td><td>mesh의 연결 구조를 어떻게 정의하고 저장하는가(simplicial complex, star·link, halfedge)</td><td>L2A, L2B</td></tr>
+          <tr><td><a href="../34-exterior-algebra/index.html">34</a></td><td>넓이와 부피를 좌표 없이 재는 선형대수(wedge product, Hodge star, \(k\)-form)</td><td>L3, L4</td></tr>
+          <tr><td><a href="../35-exterior-calculus/index.html">35</a></td><td>differential form의 미분과 적분, Stokes's theorem</td><td>L5–L7</td></tr>
+          <tr><td><a href="../36-discrete-exterior-calculus/index.html">36</a></td><td>mesh 위의 differential form: de Rham map, discrete \(d\)와 \(\star\)</td><td>L8, L9</td></tr>
+          <tr><td><a href="../37-curves-smooth-discrete/index.html">37</a></td><td>curve의 이론을 DEC로 다시 쓰기: turning number, space curve의 frame, curve의 flow</td><td>L10, L11</td></tr>
+          <tr><td><a href="../38-surfaces-smooth-discrete/index.html">38</a></td><td>surface의 differential, metric, normal을 smooth와 discrete로</td><td>L12–L14</td></tr>
+          <tr><td><a href="../39-surface-curvature/index.html">39</a></td><td>surface의 curvature(Weingarten map, Gaussian·mean curvature)</td><td>L15</td></tr>
+          <tr><td><a href="../40-discrete-curvature-integral/index.html">40</a></td><td>적분으로 본 discrete curvature: angle defect, discrete Gauss–Bonnet, Steiner formula</td><td>L16</td></tr>
+          <tr><td><a href="../41-discrete-curvature-variational/index.html">41</a></td><td>변분으로 본 discrete curvature: 넓이와 부피의 gradient, surface의 flow</td><td>L17</td></tr>
+          <tr><td><a href="../42-laplace-beltrami/index.html">42</a></td><td>Laplace–Beltrami operator와 cotan Laplacian, Poisson equation</td><td>L18</td></tr>
+          <tr><td><a href="../43-conformal-geometry/index.html">43</a></td><td>각을 보존하는 평면 펼치기</td><td>L19–20</td></tr>
+          <tr><td><a href="../44-discrete-geodesics/index.html">44</a></td><td>가장 짧은 길과 가장 곧은 길, heat method</td><td>L21–22</td></tr>
+          <tr><td><a href="../45-vector-field-design/index.html">45</a></td><td>Hodge decomposition과 vector field 설계</td><td>강의 없음(과제 A6)</td></tr>
+        </tbody>
+      </table>
+      <p>다른 track과의 관계는 다음과 같다. Track 1의 <a href="../31-meshes/index.html">Chapter 31</a>은 같은 주제(mesh, discrete curvature, cotan Laplacian, parametrization)를 3D vision의 언어로 미리 본 장이다. Track 2는 같은 대상을 정의와 완전한 증명으로 다시 쌓고, 겹치는 곳에서는 Chapter 31의 서술을 링크로 비교한다. smooth 대상의 엄밀한 이론(regular surface, manifold, Riemannian geometry)은 Track 3에 있고, Track 2의 각 절은 Go deeper 상자로 그곳을 가리킨다. Track 2를 읽는 데 Track 3은 필요 없다.</p>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>differential geometry 전체의 지도: <a href="../00-tour/0-1-what-is-dg.html">Section 0.1</a>.</li>
+        <li>곡선의 길이를 내접 꺾은선의 길이의 극한으로 보는 정리: <a href="../04-curves/4-2-arc-length.html#i-4-2-11">Theorem 4.2.11</a>. <a href="#i-32-1-1">Proposition 32.1.1</a>(a)는 그 특수한 경우를 오차까지 계산한 것이다.</li>
+        <li>다각형의 exterior angle 합이 \(\pm 2\pi\)라는 정리의 일반형: <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>.</li>
+        <li>mesh에서 discrete curvature를 “무엇을 보존하는가”로 고르는 기준과 수렴의 함정: <a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>수치 근사는 smooth 값을 refinement의 극한으로 맞힌다. DDG는 discrete 대상 위에서 smooth 이론의 구조가 정확히 성립하도록 정의를 고른다. 좋은 정의는 대개 둘 다 한다.</li>
+        <li>원에 내접한 정 \(n\)각형의 둘레는 \(2\pi r\)로 \(O(n^{-2})\)의 속도로 수렴하지만, exterior angle의 합은 모든 \(n\)에서 정확히 \(2\pi\)다(<a href="#i-32-1-1">Proposition 32.1.1</a>).</li>
+        <li>“the game”: smooth에서 동치인 정의 여럿 → 각각을 discretize → 무엇을 보존하는지 비교. 기준은 구조 보존, 수렴, 비용이다.</li>
+        <li>어떤 discrete 정의도 모든 성질을 지키지 못하는 상황을 “no free lunch”라 부른다.</li>
+        <li>Track 2는 curve·surface·curvature의 줄기와 DEC의 줄기로 이루어지고, 번호 순서대로 읽으면 의존 관계가 지켜진다(<a href="#fig-32-1-2">Figure 32.1.2</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 게임의 1단계를 한다. smooth plane curve의 signed curvature를 상기하고, 그것을 서로 동치인 네 가지 방식(접선의 각, 길이의 변분, offset curve의 길이, osculating circle)으로 쓴다. 그리고 다각형에는 왜 점마다의 curvature가 없는지 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-32-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 32.1.1</span> <span class="level">★</span>
+        반지름 \(1\)인 원에 내접한 정팔각형의 둘레 \(L_8\), 오차 \(2\pi - L_8\), 상한 <a href="#eq-32-1-1">(32.1.1)</a>을 계산하여라. 한 vertex의 exterior angle과 그 합도 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-32-1-1">Proposition 32.1.1</a>(a)에서 \(L_8 = 16\sin(\pi/8) = 16 \cdot 0.382683 = 6.1229\)이다. 오차는 \(2\pi - 6.1229 = 0.1603\)이고 상한은 \(\pi^3/(3 \cdot 64) = \pi^3/192 = 0.1615\)이므로 부등식이 성립한다. (b)에서 exterior angle은 각각 \(2\pi/8 = \pi/4\)이고 합은 \(8 \cdot \pi/4 = 2\pi\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 32.1.2</span> <span class="level">★</span>
+        반지름 \(r\)인 원에 <em>외접</em>하는 정 \(n\)각형(각 edge가 원에 접하는 것)의 둘레가 \(L_n' = 2nr\tan(\pi/n)\)임을 보이고, \(L_n \lt 2\pi r \lt L_n'\)임을 증명하여라. \(r = 1\), \(n = 6\)일 때 세 수를 비교하고, 외접 정 \(n\)각형의 exterior angle의 합도 구하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>edge는 원과 그 중점에서 접한다. \(h(x) = \tan x - x\)를 미분하여라.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>외접 정 \(n\)각형의 한 edge는 원과 중점 \(m\)에서 접하므로 중심 \(O\)에서 \(m\)까지의 선분은 edge에 수직이고 길이가 \(r\)이다. \(O\)에서 그 edge의 두 끝을 보는 각은 \(2\pi/n\)이므로, 직각삼각형 \(O, m\), 끝점에서 반 edge의 길이는 \(r\tan(\pi/n)\)이다. 따라서 \(L_n' = n \cdot 2r\tan(\pi/n)\)이다.
+          \(x = \pi/n \in (0, \pi/2)\)에서 \(h(x) = \tan x - x\)는 \(h(0) = 0\), \(h'(x) = \sec^2 x - 1 = \tan^2 x \gt 0\)이므로 \(\tan x \gt x\)이다. 그러면 \(L_n' = 2nr\tan x \gt 2nrx = 2\pi r\)이고, <a href="#i-32-1-1">Proposition 32.1.1</a>(a)에서 \(L_n \lt 2\pi r\)이다.
+          \(r = 1\), \(n = 6\)이면 \(L_6 = 6 \lt 2\pi = 6.2832 \lt L_6' = 12\tan(\pi/6) = 4\sqrt3 = 6.9282\)이다.
+          외접 정 \(n\)각형의 vertex는 \(\bigl(r/\cos(\pi/n)\bigr)\bigl(\cos(2\pi i/n + \pi/n), \sin(2\pi i/n + \pi/n)\bigr)\)이므로 <a href="#i-32-1-1">Proposition 32.1.1</a>(b)의 증명이 그대로 적용된다(\(2\pi/n\) 회전 대칭). 따라서 exterior angle의 합은 역시 정확히 \(2\pi\)이다. 원의 둘레를 안팎에서 끼우는 이 부등식은 Archimedes가 \(\pi\)를 어림한 방법이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-1-3" data-level="2">
+        <p><span class="thm-head">Exercise 32.1.3</span> <span class="level">★★</span>
+        원에 내접한 정 \(n\)각형의 넓이 \(A_n\)을 구하고, \(0 \lt \pi r^2 - A_n \le 2\pi^3 r^2/(3n^2)\)임을 보여라. 넓이는 “정확히 보존되는 양”인가, “수렴하는 양”인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>중심과 이웃한 두 vertex로 이루어진 삼각형 \(n\)개로 나누면, 각 삼각형은 두 변의 길이가 \(r\)이고 끼인각이 \(2\pi/n\)이므로 넓이가 \(\tfrac12 r^2\sin(2\pi/n)\)이다. 따라서 \(A_n = \tfrac{n}{2}r^2\sin(2\pi/n)\)이다.
+          \(y = 2\pi/n \in (0, 2\pi/3]\)라 하면 <a href="#i-32-1-1">Proposition 32.1.1</a>의 증명에서 보인 \(y - y^3/6 \le \sin y \lt y\)에 의해</p>
+          \[ \begin{aligned} \pi r^2 - A_n &= \frac{n r^2}{2}\,(y - \sin y)\\ &\in \Bigl(0,\ \frac{n r^2}{2}\cdot\frac{y^3}{6}\Bigr] = \Bigl(0,\ \frac{2\pi^3 r^2}{3n^2}\Bigr] \end{aligned} \]
+          <p>이다(\(\tfrac{n}{2}\cdot\tfrac{8\pi^3}{6n^3} = \tfrac{2\pi^3}{3n^2}\)). 넓이도 둘레처럼 \(O(n^{-2})\)로 수렴하는 양이고, 어떤 \(n\)에서도 \(\pi r^2\)과 같지 않다. 예: \(r = 1\), \(n = 12\)이면 \(A_{12} = 6\sin(\pi/6) = 3\), 오차 \(\pi - 3 = 0.1416 \le 2\pi^3/432 = 0.1435\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-1-4" data-level="1">
+        <p><span class="thm-head">Exercise 32.1.4</span> <span class="level">★</span>
+        참인지 거짓인지 판정하고 이유를 적어라.
+        (a) 다각형의 exterior angle의 합은 vertex를 늘릴수록 \(2\pi\)에 가까워지는 근삿값이다.
+        (b) 원에 내접한 정 \(n\)각형의 둘레는 언제나 \(2\pi r\)보다 작다.
+        (c) refinement에서 smooth 값으로 수렴하는 discrete 정의는 그 smooth 정리를 discrete 대상 위에서도 정확히 만족한다.
+        (d) “the game”의 결과는 대개 하나의 올바른 discrete 정의다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 거짓. 정 \(n\)각형에서는 모든 \(n \ge 3\)에서 정확히 \(2\pi\)이고(<a href="#i-32-1-1">Proposition 32.1.1</a>(b)), 스스로 만나지 않는 반시계 방향 다각형이면 언제나 정확히 \(2\pi\)다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-12">Proposition 5.6.12</a>). 근사가 아니다.
+          (b) 참. <a href="#eq-32-1-1">(32.1.1)</a>의 왼쪽 부등식이다.
+          (c) 거짓. 둘레 \(L_n\)은 \(2\pi r\)로 수렴하지만 어떤 \(n\)에서도 \(L_n = 2\pi r\)가 아니다. 수렴과 구조 보존은 다른 기준이다.
+          (d) 거짓. 3단계에서 보듯 discrete 정의는 대개 여럿 나오고 서로 다르다. 무엇을 보존하는지 보고 용도에 맞게 고른다(Section 32.3의 표).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-32-1-5" data-level="1">
+        <p><span class="thm-head">Exercise 32.1.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> NumPy로 반지름 \(1\)인 원에 내접한 정 \(n\)각형(\(n = 8, 32, 128, 512\))을 만들고, 둘레의 오차에 \(n^2\)을 곱한 값과 exterior angle의 합을 출력하여라. exterior angle은 들어오는 edge vector \(a\)와 나가는 edge vector \(b\)에서 \(\operatorname{atan2}(\det(a, b), \inner{a}{b})\)로 계산한다. 출력에서 <a href="#i-32-1-1">Proposition 32.1.1</a>의 두 결론을 읽어라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-32-1-5"><code>import numpy as np
+
+def ngon(n, r=1.0):
+    a = 2 * np.pi * np.arange(n) / n
+    return r * np.stack([np.cos(a), np.sin(a)], 1)
+
+for n in [8, 32, 128, 512]:
+    X = ngon(n)
+    E = np.roll(X, -1, 0) - X                   # edge vectors e_i = x_{i+1} - x_i
+    L = np.linalg.norm(E, axis=1).sum()         # perimeter
+    A = np.roll(E, 1, 0)                        # incoming edge at each vertex
+    ext = np.arctan2(A[:, 0] * E[:, 1] - A[:, 1] * E[:, 0], (A * E).sum(1))
+    print(f"n = {n:3d}   (2 pi - L) n^2 = {(2 * np.pi - L) * n**2:.4f}   "
+          f"sum of exterior angles = 2 pi: {abs(ext.sum() - 2 * np.pi) &lt; 1e-12}")</code></pre>
+          <p>출력은 다음과 같다.</p>
+          <pre id="out-ex-32-1-5"><code>n =   8   (2 pi - L) n^2 = 10.2560   sum of exterior angles = 2 pi: True
+n =  32   (2 pi - L) n^2 = 10.3304   sum of exterior angles = 2 pi: True
+n = 128   (2 pi - L) n^2 = 10.3351   sum of exterior angles = 2 pi: True
+n = 512   (2 pi - L) n^2 = 10.3354   sum of exterior angles = 2 pi: True</code></pre>
+          <p>둘째 열이 \(\pi^3/3 = 10.3354\)에 다가가므로 오차는 \(n^{-2}\)에 비례해 줄어들고(<a href="#eq-32-1-1">(32.1.1)</a>의 상수가 정확하다), 셋째 열은 모든 \(n\)에서 exterior angle의 합이 \(2\pi\)임(반올림 오차 \(10^{-12}\) 이내)을 보여 준다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 32. Overview: Discrete Curvature of Plane Curves</a>
+    <a rel="next" href="32-2-plane-curve-curvature.html">32.2 Curvature of a Plane Curve →</a>
+  </nav>
+</body>
+</html>
