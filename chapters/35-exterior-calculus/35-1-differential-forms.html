@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>35.1 Differential Forms — DG Study</title>
+  <meta name="dg-id" content="35.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="34.4, 34.5, 2.1, 2.2, 1.3">
+  <meta name="dg-refs" content="Cr §4.4, §4.5.1–4.5.2; CMU-DDG L5">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">35. Exterior Calculus</a> ›
+    <span>35.1 Differential Forms</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>35.1 Differential Forms</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §4.4]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr §4.5.1–4.5.2]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L5">[CMU-DDG L5]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>vector field와 differential 1-form을 구분하고, 1-form을 vector field에 적용해 함수를 얻을 수 있다.</li>
+        <li>differential \(k\)-form을 “점마다 붙인 \(k\)-form”으로 정의하고, coordinate basis \(dx^I\)로 쓰며, smooth한지를 coefficient로 판정할 수 있다(어느 coframe으로 판정해도 같다).</li>
+        <li>\(\wedge\), \(\star\), \(\sharp\), \(\flat\)을 점마다 적용해 계산할 수 있다. 예: \(\R^2\)의 \(\star dx = dy\), \(\star dy = -dx\), volume form과 \(\star 1\).</li>
+        <li>polar coordinates의 \(dr, d\theta\)와 그 Hodge star \(\star dr = r\,d\theta\), \(\star d\theta = -dr/r\), \(\star 1 = r\,dr\wedge d\theta\)를 계산할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-2">Definition 34.4.2 (k-form on a vector space)</a>, <a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-5">Lemma 34.4.5 (basis k-forms)</a>, <a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-6">Theorem 34.4.6</a>, <a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-11">Proposition 34.4.11 (Hodge star on k-forms)</a></li>
+        <li><a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-2">Proposition 34.5.2 (multiplication table)</a>, <a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-5">Proposition 34.5.5</a>, <a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-7">Proposition 34.5.7</a>, <a href="../34-exterior-algebra/34-3-covectors-sharp-flat.html#eq-34-3-2">(34.3.2)</a></li>
+        <li><a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-9">Definition 2.1.9 (directional derivative)</a>, <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-14">Example 2.1.14 (polar coordinate map)</a>, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">Definition 2.2.11 (smooth maps)</a></li>
+        <li><a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-9">Example 1.3.9 (dual basis of the polar coordinates basis)</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Chapter 34는 한 vector space 위의 대수였다. \(k\)-vector는 “작은 부피”이고 \(k\)-form은 그것을 재는 도구였다. 그 장은 질문 하나를 남기고 끝났다. 점마다 다른 \(k\)-form을 붙이면, 그것을 어떻게 미분하고 적분하는가?</p>
+      <p>실제로 재고 싶은 양은 공간과 시간에 따라 변한다. 바람이 부는 방 안에서 창문을 지나는 공기의 양(flux)은 창문의 넓이와 방향, 그리고 그 위치에서의 바람에 따라 달라진다. 닫힌 길을 따라 한 바퀴 돌며 바람이 한 일(circulation)은 길 위의 점마다 다른 속도를 그 점의 접선 방향으로 잰 값의 합이다. 이런 측정을 하려면 측정 도구 자체가 점마다 달라야 한다 <a class="cite" href="../../references.html#CMU-DDG-L5">[CMU-DDG L5]</a>. 이 절에서는 그 도구, 곧 differential form을 정의하고 Chapter 34의 연산을 점마다 쓰는 법을 정리한다. 미분은 Section 35.2, 적분은 Section 35.3–35.4의 주제다.</p>
+      <p>이 장은 평평한 공간, 곧 \(\R^n\)과 그 open set에서만 일한다. 그러면 계산이 간단하고 metric이 언제나 유클리드 inner product다. 그런데도 vector와 covector의 차이는 사라지지 않는다. standard coordinates에서는 둘의 성분이 같은 숫자라 구분이 형식처럼 보이지만, polar coordinates만 써도 둘의 성분이 달라진다(<a href="#i-35-1-9">Example 35.1.9</a>). 곡면 위에서는 metric 자체가 점마다 달라 차이가 본질적이 된다. 그 경우는 Chapter 38에서 다룬다.</p>
+    </section>
+
+    <section id="sec-forms">
+      <h2>Vector Fields and Differential Forms</h2>
+      <p>이 절에서 \(U\)는 언제나 \(\R^n\)의 open set이고, \(\R^n\)에는 유클리드 inner product와 standard orientation을 준다. \(U\) 위의 <strong>vector field</strong>(벡터장)는 점마다 vector 하나를 붙인 것, 곧 map \(X\colon U \to \R^n\)이다(정본은 <a href="../15-vector-fields-flows/index.html#toc-15-1">Section 15.1</a>). 성분 함수 \(X^1, \dots, X^n\)이 smooth이면(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-11">Definition 2.2.11</a>) \(X\)를 smooth vector field라 한다. differential form은 같은 생각을 Chapter 34의 \(k\)-form에 쓴 것이다.</p>
+      <div class="thm definition" id="i-35-1-1">
+        <p><span class="thm-head">Definition 35.1.1</span> <span class="thm-name">(differential form on an open set of \(\R^n\))</span>.
+        \(U \subseteq \R^n\)이 open set이고 \(k \ge 0\)이라 하자. 각 점 \(p \in U\)에 \(k\)-form \(\alpha_p \in \Lambda^k\big((\R^n)^*\big)\)(<a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-2">Definition 34.4.2</a>)를 하나씩 붙인 것 \(\alpha = (\alpha_p)_{p \in U}\)를 \(U\) 위의 <strong>differential k-form</strong>(미분 \(k\)-형식)이라 한다. <a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-5">Lemma 34.4.5</a>에 의해 \(\alpha_p\)는 dual basis \((e^i)\)로</p>
+        <div class="equation" id="eq-35-1-1">
+        \[ \begin{aligned} \alpha_p &amp;= \sum_I \alpha_I(p)\; e^{i_1}\wedge\cdots\wedge e^{i_k}, \\ \alpha_I(p) &amp;= \alpha_p(e_{i_1}, \dots, e_{i_k}) \end{aligned} \tag{35.1.1} \]
+        </div>
+        <p>로 꼭 한 가지 방식으로 쓰인다(\(I\)는 increasing multi-index). 함수 \(\alpha_I\colon U \to \R\)을 \(\alpha\)의 coefficient(성분)라 하고, 모든 coefficient가 smooth일 때 \(\alpha\)를 smooth라 한다. \(U\) 위의 smooth \(k\)-form 전체를 \(\Omega^k(U)\)로 쓴다. 0-form은 \(\Lambda^0 = \R\)이므로 함수와 같고, \(\Omega^0(U) = C^\infty(U)\)이다.</p>
+      </div>
+      <p>이것이 <strong>differential form</strong>(미분형식)이다. manifold 위의 정본 정의는 <a href="../17-differential-forms/index.html#toc-17-2">Section 17.2</a>에 있고, 여기서는 \(\R^n\)의 open set으로 단순화했다. “differential \(k\)-form”을 줄여 그냥 “\(k\)-form”이라 쓰는 문헌이 많다. 그러면 한 점 위의 \(k\)-form(Chapter 34)과 점마다의 \(k\)-form(이 장)이 같은 이름이 되므로, 어느 쪽인지는 문맥(점 \(p\)가 붙어 있는지)으로 정한다. 이 장에서 “\(k\)-form”은 따로 말하지 않으면 smooth differential \(k\)-form이다.</p>
+
+      <div class="thm example" id="i-35-1-2">
+        <p><span class="thm-head">Example 35.1.2</span> <span class="thm-name">(forms in the plane and in space)</span>.
+        coefficient로 쓰면 다음과 같다(아래 <a href="#eq-35-1-2">(35.1.2)</a>의 \(dx^i\) 표기를 미리 쓴다).</p>
+        <ul>
+          <li>(a) \(\R^2\)의 0-form \(f(x, y) = x^2 - y^2\)는 saddle의 높이 함수다.</li>
+          <li>(b) \(\R^2\)의 1-form \(\alpha = x\,dy\)는 점 \(p = (x, y)\)에서 covector \(x\,e^2\)이다. vector \(v\)를 넣으면 \(\alpha_p(v) = x\,v^2\), 곧 \(v\)의 \(y\) 성분에 그 점의 \(x\) 좌표를 곱한 값이다. \(y\)축 위에서는 아무것도 재지 않는다.</li>
+          <li>(c) \(\R^2\)의 2-form \((1 + x^2)\,dx\wedge dy\)는 점마다 넓이를 \(1 + x^2\)배로 잰다.</li>
+          <li>(d) \(\R^3\)의 2-form \(z\,dx\wedge dy\)는 평행사변형의 \(xy\)평면 그림자 넓이(<a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-10">Example 34.4.10</a>(a))에 높이 \(z\)를 곱한다.</li>
+          <li>(e) \(\R^2 \setminus \{0\}\)의 1-form \[ d\theta := \frac{-y\,dx + x\,dy}{x^2 + y^2} \] 이 이름은 <a href="#i-35-1-5">Example 35.1.5</a>와 Section 35.2에서 정당화된다. coefficient \(-y/(x^2 + y^2)\), \(x/(x^2 + y^2)\)는 \(\R^2 \setminus \{0\}\) 전체에서 smooth이므로, angle 함수 \(\theta\)가 \(\R^2 \setminus \{0\}\) 전체에서 연속인 함수로 정해지지 않는데도 \(d\theta\)는 \(\R^2 \setminus \{0\}\) 전체의 smooth 1-form이다(<a href="../00-tour/0-7-forms.html#i-0-7-4">Example 0.7.4</a>).</li>
+        </ul>
+      </div>
+      <div class="thm nonexample" id="i-35-1-3">
+        <p><span class="thm-head">Non-example 35.1.3</span> <span class="thm-name">(not smooth differential forms)</span>.
+        (a) \(\alpha_p = \abs{x}\,e^1\)은 differential 1-form이지만 coefficient \(\abs{x}\)가 \(x = 0\)에서 미분가능하지 않아 smooth가 아니다. (b) 점마다 넓이 \((u, v) \mapsto \abs{u\times v}\)를 붙인 것은 differential form이 아니다. 점마다의 값이 linear가 아니기 때문이다(<a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-4">Non-example 34.4.4</a>(b)). (c) vector field \(X = (-y, x)\)는 1-form이 아니다. vector를 넣어 수를 내는 도구가 아니라 점마다의 화살표다. 유클리드 inner product로 바꾼 \(X^\flat = -y\,dx + x\,dy\)가 1-form이다(아래 <a href="#i-35-1-6">Proposition 35.1.6</a>).</p>
+      </div>
+
+      <p>smoothness를 coefficient로 정의했으니, coefficient를 어느 basis로 잡느냐에 결과가 의존하지 않는지 확인해야 한다. 상수 basis를 바꾸면 coefficient는 상수 행렬의 minor로 바뀌므로 문제가 없다. polar coordinates처럼 점마다 다른 basis를 쓸 때도 그렇다는 것이 다음 명제다. \(U\) 위의 smooth 1-form \(\beta^1, \dots, \beta^n\)이 모든 점에서 \((\R^n)^*\)의 basis를 이루면 \((\beta^i)\)를 \(U\)의 smooth coframe이라 부르고, \(\beta^I := \beta^{i_1}\wedge\cdots\wedge\beta^{i_k}\)(점마다의 wedge)로 쓰자.</p>
+      <div class="thm proposition" id="i-35-1-4">
+        <p><span class="thm-head">Proposition 35.1.4</span> <span class="thm-name">(smoothness does not depend on the coframe)</span>.
+        \((\beta^i)\)가 \(U\)의 smooth coframe이면, differential \(k\)-form \(\alpha\)를 \(\alpha_p = \sum_I a_I(p)\,\beta^I_p\)로 쓸 때 coefficient \(a_I\)가 모두 smooth인 것과 \(\alpha\)가 smooth(<a href="#i-35-1-1">Definition 35.1.1</a>)인 것은 동치다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(\beta^i = \sum_j B^i_j\,e^j\)로 쓰면 \(B(p) = (B^i_j(p))\)는 entry가 smooth인 invertible matrix다(entry는 \(\beta^i\)의 coefficient다). <a href="../34-exterior-algebra/34-1-wedge-k-vectors.html#i-34-1-6">Proposition 34.1.6</a>(b)를 \(V^*\)에 쓰면 \(\beta^I = \sum_J \det\big(B_{IJ}\big)\,e^J\)이다(\(B_{IJ}\)는 \(B\)의 \(I\)행 \(J\)열 minor 행렬). 따라서 \(\alpha_J = \sum_I a_I\det(B_{IJ})\)이고, \(a_I\)가 smooth이면 \(\alpha_J\)도 smooth다(smooth 함수의 합과 곱, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">Proposition 2.2.12</a>). 반대로 \(\det B\)는 smooth이고 \(0\)이 아니므로 Cramer's rule에서 \(B^{-1}\)의 entry도 smooth이고, \(e^j = \sum_i (B^{-1})^j_i\,\beta^i\)에 같은 논법을 쓰면 \(a_I = \sum_J \alpha_J\det\big((B^{-1})_{JI}\big)\)가 smooth다.</p>
+      </div>
+    </section>
+
+    <section id="sec-coordinate-bases">
+      <h2>Coordinate Bases</h2>
+      <p>vector에 basis가 있듯이 vector field에도 basis가 있다. \(\R^n\)의 standard basis vector \(e_i\)를 모든 점에 붙인 상수 vector field를 \(\partial/\partial x^i\)로 쓴다. 그러면 모든 vector field는 \(X = \sum_i X^i\,\partial/\partial x^i\)이고, coefficient \(X^i\)가 점마다 달라질 수 있다는 점만 상수 vector와 다르다. 이름이 partial derivative처럼 생긴 이유는 vector field가 함수에 작용하는 방식에 있다. \(Xf\)를 점마다의 directional derivative \(Xf(p) := D_{X(p)}f(p)\)(<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-9">Definition 2.1.9</a>)로 정하면, \(X = \partial/\partial x^i\)일 때 \(Xf = \partial_i f\)이다.</p>
+      <p>쌍대 쪽도 같다. \(k\)-form의 dual basis \(e^i\)(Chapter 34)를 모든 점에 붙인 상수 1-form을 \(dx^i\)로 쓴다. 곧</p>
+      <div class="equation" id="eq-35-1-2">
+      \[ \begin{aligned} dx^i_p(v) &amp;= v^i, \\ dx^I &amp;:= dx^{i_1}\wedge\cdots\wedge dx^{i_k}, \\ \alpha &amp;= \sum_I \alpha_I\,dx^I \end{aligned} \tag{35.1.2} \]
+      </div>
+      <p>이고, <a href="#eq-35-1-1">(35.1.1)</a>은 모든 \(k\)-form이 coefficient 함수와 \(dx^I\)의 합이라는 말이다. \(\R^2\), \(\R^3\)에서는 \(dx^1, dx^2, dx^3\) 대신 \(dx, dy, dz\)로 쓴다. Chapter 34의 \(e^i\)가 이 장에서 \(dx^i\)가 된 것이다(<a href="../34-exterior-algebra/34-5-coordinates.html#sec-dictionary">Section 34.5</a>의 Conventions 상자). 지금은 \(dx^i\)를 basis의 이름으로만 쓴다. 이 기호가 정말로 coordinate function \(x^i\)의 “미분”이라는 것은 Section 35.2에서 보인다 <a class="cite" href="../../references.html#CMU-DDG-L5">[CMU-DDG L5]</a>.</p>
+
+      <p>곡선 좌표에서도 같은 일을 할 수 있다. \(W, U \subseteq \R^n\)이 open set이고 \(P\colon W \to U\)가 diffeomorphism이면, \(u = (u^1, \dots, u^n) \in W\)를 \(P(u)\)의 좌표로 쓸 수 있다. 점 \(P(u)\)에서</p>
+      <div class="equation" id="eq-35-1-3">
+      \[ \begin{aligned} \frac{\partial}{\partial u^j}\bigg|_{P(u)} &amp;:= \partial_jP(u), \\ (du^1, \dots, du^n) &amp;:= \text{dual basis of } \Big(\frac{\partial}{\partial u^1}, \dots, \frac{\partial}{\partial u^n}\Big) \end{aligned} \tag{35.1.3} \]
+      </div>
+      <p>로 coordinate vector field와 coordinate 1-form을 정한다. \(\partial_jP(u)\)는 \(DP(u)\)의 \(j\)번째 열이다. \(DP(u)\)가 invertible이므로 \((\partial/\partial u^j)\)는 점마다 basis다. \(du^i\)의 Cartesian coefficient는 \(DP(u)^{-1} = D(P^{-1})(P(u))\)의 \(i\)번째 행이고(<a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-8">Proposition 1.3.8</a>), \(P^{-1}\)이 smooth이므로 \((du^i)\)는 smooth coframe이다. 따라서 <a href="#i-35-1-4">Proposition 35.1.4</a>에 의해 곡선 좌표의 coefficient로 smoothness를 판정해도 된다.</p>
+
+      <div class="thm example" id="i-35-1-5">
+        <p><span class="thm-head">Example 35.1.5</span> <span class="thm-name">(polar coordinate fields and forms)</span>.
+        polar coordinate map \(P(r, \theta) = (r\cos\theta, r\sin\theta)\)(<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-14">Example 2.1.14</a>)를 \(W = (0, \infty)\times(-\pi, \pi)\)에서 slit plane \(\R^2 \setminus \{(x, 0) : x \le 0\}\)로 가는 diffeomorphism으로 쓰자. 점 \(p = (x, y) = P(r, \theta)\)에서 <a href="#eq-35-1-3">(35.1.3)</a>은</p>
+        <p>\[ \begin{aligned} \frac{\partial}{\partial r} &amp;= (\cos\theta, \sin\theta) = \frac{(x, y)}{r}, \\ \frac{\partial}{\partial\theta} &amp;= (-r\sin\theta, r\cos\theta) = (-y, x) \end{aligned} \]</p>
+        <p>이다. dual basis는 <a href="../01-linear-algebra/1-3-dual-spaces.html#i-1-3-9">Example 1.3.9</a>에서 이미 구했다: \(\beta^1 = (\cos\theta, \sin\theta)\), \(\beta^2 = (-\sin\theta, \cos\theta)/r\)(행벡터). 이것을 \(dx, dy\)로 쓰면</p>
+        <div class="equation" id="eq-35-1-4">
+        \[ dr = \frac{x\,dx + y\,dy}{\sqrt{x^2 + y^2}}, \qquad d\theta = \frac{-y\,dx + x\,dy}{x^2 + y^2} \tag{35.1.4} \]
+        </div>
+        <p>이다. 검산: \(dr(\partial/\partial r) = (x^2 + y^2)/r^2 = 1\), \(dr(\partial/\partial\theta) = (-xy + yx)/r = 0\), \(d\theta(\partial/\partial r) = (-yx + xy)/r^3 = 0\), \(d\theta(\partial/\partial\theta) = (y^2 + x^2)/r^2 = 1\). 둘째 식은 <a href="#i-35-1-2">Example 35.1.2</a>(e)의 \(d\theta\)와 같다. 좌표 \(\theta\)는 slit plane에서만 정의되지만, <a href="#eq-35-1-4">(35.1.4)</a>의 coefficient는 \(\R^2 \setminus \{0\}\) 전체에서 smooth이므로 \(dr\)과 \(d\theta\)는 \(\R^2 \setminus \{0\}\)의 smooth coframe으로 넓어진다. slit의 위치를 다른 반직선으로 옮겨도 \(\partial/\partial r\), \(\partial/\partial\theta\)와 그 dual basis는 점마다 같은 것이기 때문이다.</p>
+        <p class="verified">Verification: <code>verify/v-35-1-differential-forms.py</code></p>
+      </div>
+
+      <aside class="box warning">
+        <p class="box-title">Common misconception: \(\partial/\partial x\) depends on the whole coordinate system</p>
+        <p>\(dx\)는 함수 \(x\) 하나로 정해지지만 \(\partial/\partial x\)는 그렇지 않다. 좌표 \((x, s)\), \(s = y - x\)를 쓰자. 곧 \(P(x, s) = (x, x + s)\)이다. <a href="#eq-35-1-3">(35.1.3)</a>에서 \(DP = \begin{pmatrix} 1 &amp; 0 \\ 1 &amp; 1\end{pmatrix}\)이므로 이 좌표계의 \(\partial/\partial x\)는 \((1, 1)\)이다. standard coordinates \((x, y)\)의 \(\partial/\partial x = (1, 0)\)과 다르다. “\(x\)만 움직인다”는 말이 “다른 좌표 \(s\)를 고정한다”는 뜻이고, 무엇을 고정하는지가 좌표계마다 다르기 때문이다. 한편 \(DP^{-1} = \begin{pmatrix} 1 &amp; 0 \\ -1 &amp; 1\end{pmatrix}\)의 첫 행은 \((1, 0)\)이므로 이 좌표계의 \(dx\)는 standard coordinates의 \(dx\)와 같다. 그래서 \(\partial/\partial x^i\)를 쓸 때는 좌표계 전체를 밝힌다. 같은 현상의 다른 예는 <a href="#ex-35-1-3">Exercise 35.1.3</a>에 있다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-pointwise">
+      <h2>Pointwise Operations</h2>
+      <p>differential form의 대수 연산은 대부분 점마다 Chapter 34의 연산을 하는 것이다 <a class="cite" href="../../references.html#CMU-DDG-L5">[CMU-DDG L5]</a>. \(\alpha \in \Omega^k(U)\), \(\beta \in \Omega^l(U)\), vector field \(X, X_1, \dots, X_k\)에 대하여</p>
+      <div class="equation" id="eq-35-1-5">
+      \[ \begin{aligned} (\alpha\wedge\beta)_p &amp;:= \alpha_p\wedge\beta_p, \qquad (\star\alpha)_p := \star(\alpha_p), \\ (X^\flat)_p &amp;:= X(p)^\flat, \qquad (\alpha^\sharp)_p := (\alpha_p)^\sharp, \\ \alpha(X_1, \dots, X_k)(p) &amp;:= \alpha_p\big(X_1(p), \dots, X_k(p)\big) \end{aligned} \tag{35.1.5} \]
+      </div>
+      <p>로 정한다(\(\star\), \(\sharp\), \(\flat\)은 유클리드 inner product와 standard orientation으로). 마지막 줄은 1-form이 vector field를 “재서” 함수를 만든다는 뜻이다.</p>
+      <div class="thm proposition" id="i-35-1-6">
+        <p><span class="thm-head">Proposition 35.1.6</span> <span class="thm-name">(pointwise operations in coordinates)</span>.
+        \(\alpha = \sum_I \alpha_I\,dx^I\), \(\beta = \sum_J \beta_J\,dx^J\)가 smooth form이고 \(X, X_1, \dots, X_k\)가 smooth vector field이면 <a href="#eq-35-1-5">(35.1.5)</a>의 결과는 모두 smooth이고 다음이 성립한다.</p>
+        <ul>
+          <li>(a) \(\alpha\wedge\beta = \sum_{I,J}\alpha_I\beta_J\,dx^I\wedge dx^J\)이고 \(dx^I\wedge dx^J\)는 <a href="../34-exterior-algebra/34-5-coordinates.html#eq-34-5-1">(34.5.1)</a>의 곱셈표대로 \(\sgn(I, J)\,dx^{I\cup J}\) 또는 \(0\)이다.</li>
+          <li>(b) \(\star\alpha = \sum_I \sgn(I, I^c)\,\alpha_I\,dx^{I^c}\)이다. 특히 \(\star 1 = dx^1\wedge\cdots\wedge dx^n\)이다.</li>
+          <li>(c) \(X^\flat = \sum_i X^i\,dx^i\)이고, 1-form \(\alpha = \sum_i\alpha_i\,dx^i\)에 대해 \(\alpha^\sharp = \sum_i \alpha_i\,\partial/\partial x^i\)이다.</li>
+          <li>(d) \(\alpha(X_1, \dots, X_k) = \sum_I \alpha_I\det\big[X_j^{i_a}\big]_{a,j}\)이고, 특히 1-form이면 \(\alpha(X) = \sum_i \alpha_i X^i\)이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 각 점에서 (a)는 bilinearity와 <a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-2">Proposition 34.5.2</a>, (b)는 <a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-11">Proposition 34.4.11</a>(a)(\((e_i)\)는 positively oriented orthonormal basis)와 linearity, (c)는 <a href="../34-exterior-algebra/34-3-covectors-sharp-flat.html#eq-34-3-2">(34.3.2)</a>에서 \(G = I\)인 경우, (d)는 <a href="../34-exterior-algebra/34-4-k-forms.html#eq-34-4-3">(34.4.3)</a>을 \(dx^I\)에 쓴 것이다. 모든 coefficient가 주어진 smooth 함수들의 상수 계수 다항식이므로 smooth다(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-12">Proposition 2.2.12</a>).</p>
+      </div>
+
+      <div class="thm example" id="i-35-1-7">
+        <p><span class="thm-head">Example 35.1.7</span> <span class="thm-name">(a 1-form measures a vector field)</span>.
+        회전 vector field \(X = -y\,\partial/\partial x + x\,\partial/\partial y\)를 1-form \(\alpha = x\,dy\)로 재면 <a href="#i-35-1-6">Proposition 35.1.6</a>(d)에서</p>
+        <p>\[ \alpha(X) = 0\cdot(-y) + x\cdot x = x^2 \]</p>
+        <p>이다. 점 \(p\)에서 \(\alpha_p\)는 vector의 \(y\) 성분에 \(x\)를 곱하므로, \(X(p) = (-y, x)\)의 \(y\) 성분 \(x\)에 다시 \(x\)가 곱해진 것이다. 같은 \(X\)를 \(X^\flat = -y\,dx + x\,dy\)로 재면 \(X^\flat(X) = y^2 + x^2 = \abs{X}^2\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-35-1-differential-forms.py</code></p>
+      </div>
+
+      <p><a href="#fig-35-1-1">Figure 35.1.1</a>로 이 예를 보자. 왼쪽 (a)의 파란 화살표가 vector field \(X\)다. 원점 둘레를 반시계 방향으로 돌고, 원점에서 멀수록 길다. 오른쪽 (b)의 자주색 짧은 가로선 묶음이 1-form \(\alpha = x\,dy\)다. 각 점에서 covector \(x\,e^2\)의 level line(<a href="../34-exterior-algebra/34-3-covectors-sharp-flat.html#i-34-3-2">Proposition 34.3.2</a>(b))은 수평이고, 간격은 \(1/\abs{x}\)라 \(\abs{x}\)가 클수록 촘촘하다. 그래서 묶음 안의 선 개수가 \(\abs{x}\)에 비례하고, \(y\)축 위(\(x = 0\))에는 선이 없다. 작은 자주색 화살촉은 \(\alpha\)가 커지는 쪽이다: 오른쪽 반평면에서는 위, 왼쪽 반평면에서는 아래다. 배경의 회색 농도가 \(\alpha(X) = x^2\)이다. 표시한 두 점을 비교하자. \((1, 0)\)에서 \(X = (0, 1)\)은 수직으로 서서 가로선을 가로지르므로 \(\alpha(X) = 1\)이다. \((0, 1)\)에서는 \(X = (-1, 0)\)이 수평인 데다 그 점에는 선이 없으므로 \(\alpha(X) = 0\)이다. (a)와 (b)의 화살표와 선 묶음은 둘 다 점마다 방향을 가진 것처럼 보이지만 종류가 다르다. 화살표는 측정되는 것이고, 선 묶음은 측정하는 도구다.</p>
+      <figure class="dg-figure" id="fig-35-1-1">
+        <img src="figures/fig-35-1-1-one-form-field.svg" alt="두 패널의 평면 그림. (a)에는 정사각형 격자 위에 원점 둘레를 반시계 방향으로 도는 파란 화살표들이 있고, 바깥쪽일수록 길다. (b)에는 회색 배경(가운데 세로줄이 가장 밝고 좌우로 갈수록 어두움) 위에 격자점마다 자주색 짧은 가로선 묶음이 있다. 선의 개수는 가운데 세로줄에서 0이고 좌우 가장자리에서 3개다. 각 묶음 옆에 오른쪽 반평면에서는 위, 왼쪽 반평면에서는 아래를 향한 작은 자주색 화살촉이 있다. 점 (1, 0)에 위로 향한 파란 화살표와 라벨 α(X) = 1, 점 (0, 1)에 왼쪽으로 향한 파란 화살표와 라벨 α(X) = 0이 있다.">
+        <figcaption><span class="fig-head">Figure 35.1.1.</span>
+        vector field \(X = -y\,\partial/\partial x + x\,\partial/\partial y\)와 1-form \(\alpha = x\,dy\)를 \([-1.5, 1.5]^2\)의 \(7\times 7\) 격자에서 그린 것.
+        읽는 법: (a) 파란 화살표는 \(X\)이고 실제 길이의 \(0.22\)배로 그렸다. (b) 자주색 가로선 묶음은 각 격자점의 covector \(\alpha_p = x\,e^2\)의 level line이고, 높이 \(0.4\)인 창 안의 선 개수가 \(\mathrm{round}(2\abs{x})\)이다(밀도는 계산값이고 묶음의 모양은 schematic). 작은 자주색 화살촉은 \(\alpha_p\)가 커지는 방향, 배경의 회색 농도는 함수 \(\alpha(X) = x^2\)이다.
+        볼 것: \(y\)축에는 선이 없고(\(\alpha = 0\)), 좌우로 갈수록 선이 촘촘하다. \((1, 0)\)에서 \(\alpha(X) = 1\), \((0, 1)\)에서 \(\alpha(X) = 0\)이다.
+        <a href="#i-35-1-7">Example 35.1.7</a>을 보여 준다. vector field와 1-form은 다른 종류의 대상이고, 1-form은 vector field를 재어 함수를 만든다.</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-35-1-8">
+        <p><span class="thm-head">Example 35.1.8</span> <span class="thm-name">(Hodge star and wedge in the plane)</span>.
+        (a) <a href="#i-35-1-6">Proposition 35.1.6</a>(b)와 <a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-12">Example 34.4.12</a>(a)에서</p>
+        <p>\[ \begin{aligned} \star dx &amp;= dy, \qquad \star dy = -dx, \\ \star 1 &amp;= dx\wedge dy, \qquad \star(dx\wedge dy) = 1 \end{aligned} \]</p>
+        <p>이다. 1-form의 \(\star\)는 점마다 \(90^\circ\) 회전이다. 예를 들어 \(\star(x\,dy) = -x\,dx\)이고 \(\star(-y\,dx + x\,dy) = -y\,dy - x\,dx\)이다. 회전 field의 \(\flat\)이 원점에서 멀어지는 방향을 재는 1-form(의 \(-1\)배)으로 바뀐 것이다.</p>
+        <p>(b) \(\alpha = y\,dx + dy\), \(\beta = dx + x\,dy\)이면 <a href="#i-35-1-6">Proposition 35.1.6</a>(a)에서</p>
+        <p>\[ \alpha\wedge\beta = y\cdot x\;dx\wedge dy + 1\cdot 1\;dy\wedge dx = (xy - 1)\,dx\wedge dy \]</p>
+        <p>이다(\(dx\wedge dx = dy\wedge dy = 0\)). coefficient는 hyperbola \(xy = 1\) 위에서 \(0\)이다. 그 점들에서는 coefficient 벡터 \((y, 1)\)과 \((1, x)\)가 평행하므로 \(\alpha_p\)와 \(\beta_p\)가 linearly dependent이고, 따라서 wedge가 \(0\)이다(<a href="../34-exterior-algebra/34-1-wedge-k-vectors.html#i-34-1-8">Proposition 34.1.8</a>을 \(V^*\)에서).</p>
+        <p class="verified">Verification: <code>verify/v-35-1-differential-forms.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-polar-star">
+      <h2>Polar Coordinates and the Hodge Star</h2>
+      <p>\(dr\)과 \(d\theta\)의 Hodge star는 <a href="../34-exterior-algebra/34-5-coordinates.html#ex-34-5-4">Exercise 34.5.4</a>에서 orthonormal basis를 거쳐 미리 구해 보았다(그 연습은 “Chapter 35에서 사용”이라 표시되어 있다). 여기서는 그 결과를 가정하지 않고 Cartesian coefficient로 다시 계산한다.</p>
+      <div class="thm example" id="i-35-1-9">
+        <p><span class="thm-head">Example 35.1.9</span> <span class="thm-name">(Hodge star in polar coordinates)</span>.
+        \(\R^2 \setminus \{0\}\)에서 \(r = \sqrt{x^2 + y^2}\)로 쓰자. <a href="#eq-35-1-4">(35.1.4)</a>와 \(\star dx = dy\), \(\star dy = -dx\)(<a href="#i-35-1-8">Example 35.1.8</a>)에서</p>
+        <p>\[ \begin{aligned} \star dr &amp;= \frac{x\,\star dx + y\,\star dy}{r} = \frac{x\,dy - y\,dx}{r} \\ &amp;= r\cdot\frac{-y\,dx + x\,dy}{r^2} = r\,d\theta, \\ \star d\theta &amp;= \frac{-y\,\star dx + x\,\star dy}{r^2} = \frac{-y\,dy - x\,dx}{r^2} \\ &amp;= -\frac{1}{r}\cdot\frac{x\,dx + y\,dy}{r} = -\frac{dr}{r} \end{aligned} \]</p>
+        <p>이다. wedge는 <a href="#i-35-1-6">Proposition 35.1.6</a>(a)에서</p>
+        <p>\[ \begin{aligned} dr\wedge d\theta &amp;= \frac{(x\,dx + y\,dy)\wedge(-y\,dx + x\,dy)}{r^3} \\ &amp;= \frac{x\cdot x\;dx\wedge dy + y\cdot(-y)\;dy\wedge dx}{r^3} \\ &amp;= \frac{x^2 + y^2}{r^3}\,dx\wedge dy = \frac{dx\wedge dy}{r} \end{aligned} \]</p>
+        <p>이므로</p>
+        <div class="equation" id="eq-35-1-6">
+        \[ \begin{aligned} \star dr &amp;= r\,d\theta, \qquad \star d\theta = -\frac{dr}{r}, \\ \star 1 &amp;= dx\wedge dy = r\,dr\wedge d\theta \end{aligned} \tag{35.1.6} \]
+        </div>
+        <p>이다. <a href="../34-exterior-algebra/34-5-coordinates.html#ex-34-5-4">Exercise 34.5.4</a>의 답과 같다. coframe \((dr, d\theta)\)의 coefficient로 쓰면 \(\star\)는 행렬 \(\begin{pmatrix} 0 &amp; -1/r \\ r &amp; 0\end{pmatrix}\)라 회전처럼 보이지 않는다. 그러나 \(\abs{dr} = 1\), \(\abs{d\theta} = 1/r\)(\(d\theta^\sharp = \partial_\theta/r^2\)이고 \(\abs{\partial_\theta} = r\))이므로 길이로 재면 여전히 \(90^\circ\) 회전이다(<a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-8">Example 34.5.8</a>의 sphere와 같은 현상). 이것이 Motivation에서 말한 “곡선 좌표에서는 vector와 covector의 성분이 달라진다”의 첫 예다.</p>
+        <p class="verified">Verification: <code>verify/v-35-1-differential-forms.py</code></p>
+      </div>
+
+      <p><a href="#fig-35-1-2">Figure 35.1.2</a>는 \(d\theta\)와 \(\star d\theta\)를 함께 그린 것이다. 자주색 실선 반직선들이 \(d\theta\)의 level line이다. 각 반직선은 국소적인 angle 함수가 \(2\pi k/24\)인 곳이고, 원점 둘레를 반시계 방향으로 돌면 하나씩 넘어간다. 자주색 점선 원들이 \(\star d\theta = -dr/r\)의 level line이다. \(-dr/r\)은 원의 접선 방향을 \(0\)으로 재고 크기가 \(1/r\)이므로, 선 묶음은 원에 접하고 간격이 \(r\)에 비례해야 한다. 반지름 \(r_j = e^{hj}\)(\(h = 2\pi/24\))인 원들이 정확히 그렇다. 점 \(p\)의 두 화살표를 보자. 파란 \((d\theta)^\sharp\)은 반시계 방향 접선이고, 초록 \((\star d\theta)^\sharp\)은 그것을 반시계 방향으로 \(90^\circ\) 돌린 안쪽 방향이며, 길이는 둘 다 \(1/r\)이다. 그래서 두 선 묶음은 직교하고 간격도 같아, 주황으로 칠한 칸처럼 거의 정사각형인 칸을 만든다. \(\R^2\)의 \(\star\)는 1-form의 선 묶음을 \(90^\circ\) 돌리고 밀도는 그대로 둔다.</p>
+      <figure class="dg-figure" id="fig-35-1-2">
+        <img src="figures/fig-35-1-2-polar-star.svg" alt="원점에서 뻗은 자주색 실선 반직선 24개와 원점을 중심으로 하는 자주색 점선 원 8개가 그물을 이룬다. 원들의 반지름은 바깥으로 갈수록 일정한 비율로 커진다. 오른쪽 위의 점 p를 포함하는 칸 하나가 주황색으로 칠해져 있고 거의 정사각형이다. 점 p에서 파란 화살표 (dθ)♯이 반시계 방향 접선으로, 초록 화살표 (⋆dθ)♯이 원점 쪽으로 나간다. 아래에 범례 두 줄이 있다.">
+        <figcaption><span class="fig-head">Figure 35.1.2.</span>
+        \(\R^2 \setminus \{0\}\)의 1-form \(d\theta = (-y\,dx + x\,dy)/(x^2 + y^2)\)와 그 Hodge star \(\star d\theta = -dr/r\).
+        읽는 법: 자주색 실선 반직선은 \(d\theta\)의 level line(\(\theta = 2\pi k/24\)), 자주색 점선 원은 \(\star d\theta\)의 level line(반지름 \(e^{hj}\), \(h = 2\pi/24\), \(j = -4, \dots, 3\))이다. 점 \(p\)(\(r = 1.5\), \(\theta = 37.5^\circ\))의 파란 화살표는 \((d\theta)^\sharp\), 초록 화살표는 \((\star d\theta)^\sharp\)이고 실제 길이 \(1/r\)로 그렸다. 주황 칸은 \(p\)를 포함하는 칸이다.
+        볼 것: 두 화살표는 직교하고 길이가 같으며, \((\star d\theta)^\sharp\)은 \((d\theta)^\sharp\)을 반시계 방향으로 \(90^\circ\) 돌린 것이다. 칸의 지름 방향 변과 원호 변의 길이 비는 \((e^h - 1)/h = 1.14\)로 \(1\)에 가깝다.
+        <a href="#eq-35-1-6">(35.1.6)</a>의 \(\star d\theta = -dr/r\)과 “\(\R^2\)의 \(\star\)는 \(90^\circ\) 회전”(<a href="#i-35-1-8">Example 35.1.8</a>)을 보여 준다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-volume-form">
+      <h2>The Volume Form and Hodge Duality</h2>
+      <p>\(\R^2\)의 모든 2-form은 \(f\,dx\wedge dy\) 꼴이다. 점마다 \(\Lambda^2\big((\R^2)^*\big)\)가 1차원이기 때문이다. 일반적으로 \(\R^n\)의 \(n\)-form은 모두 \(f\,dx^1\wedge\cdots\wedge dx^n\)이고, \(dx^1\wedge\cdots\wedge dx^n\)은 점마다 positively oriented orthonormal basis가 만드는 단위 정육면체에 \(1\)을 준다. 이것을 \(\R^n\)의 standard <strong>volume form</strong>(체적형식)이라 하고(정본은 <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>), <a href="#i-35-1-6">Proposition 35.1.6</a>(b)에 의해 \(\star 1\)과 같다. 이 장에서는 \(dV := dx^1\wedge\cdots\wedge dx^n = \star 1\)로 쓴다. 양수 함수 \(f\)에 대한 \(f\,dV\)도 부피를 재는 도구라 volume form이라 부르기도 한다 <a class="cite" href="../../references.html#CMU-DDG-L5">[CMU-DDG L5]</a>.</p>
+      <p>곡선 좌표로 쓰면 \(dV\)의 coefficient에 부피의 늘어남이 나타난다.</p>
+      <div class="thm proposition" id="i-35-1-10">
+        <p><span class="thm-head">Proposition 35.1.10</span> <span class="thm-name">(the volume form in curvilinear coordinates)</span>.
+        \(P\colon W \to U\)가 \(\det DP \gt 0\)인 diffeomorphism이고 \(G = DP^{\mathsf T}DP\)(coordinate vector field \(\partial/\partial u^i\)의 Gram matrix)라 하자. 점 \(P(u)\)에서</p>
+        <div class="equation" id="eq-35-1-7">
+        \[ \begin{aligned} dx^1\wedge\cdots\wedge dx^n &amp;= \det DP(u)\; du^1\wedge\cdots\wedge du^n \\ &amp;= \sqrt{\det G(u)}\; du^1\wedge\cdots\wedge du^n \end{aligned} \tag{35.1.7} \]
+        </div>
+        <p>이다. 따라서 \(\star 1 = \sqrt{\det G}\;du^1\wedge\cdots\wedge du^n\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(dx^i(\partial/\partial u^j) = (\partial_jP)^i = (DP)^i_j\)이므로 coframe \((du^j)\)로 쓰면 \(dx^i = \sum_j (DP)^i_j\,du^j\)이다(1-form은 basis에서의 값으로 정해진다). <a href="../34-exterior-algebra/34-1-wedge-k-vectors.html#i-34-1-6">Proposition 34.1.6</a>(a)를 \(V^*\)에서 쓰면 \(dx^1\wedge\cdots\wedge dx^n = \det(DP)\,du^1\wedge\cdots\wedge du^n\)이다. \(\det G = (\det DP)^2\)이고 \(\det DP \gt 0\)이므로 \(\det DP = \sqrt{\det G}\)이다. 마지막 식은 <a href="#i-35-1-6">Proposition 35.1.6</a>(b)의 \(\star 1 = dx^1\wedge\cdots\wedge dx^n\)이다. 점마다 보면 이것은 <a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-7">Proposition 34.5.7</a>을 basis \((\partial/\partial u^i)\)에 쓴 것과 같다.</p>
+      </div>
+      <p>polar coordinates에서는 \(DP\)의 determinant가 \(r\)이므로(<a href="../02-calculus-rn/2-1-total-derivative.html#eq-2-1-5">(2.1.5)</a>) \(dx\wedge dy = r\,dr\wedge d\theta\)이고, <a href="#eq-35-1-6">(35.1.6)</a>을 다시 얻는다. 이 식은 적분의 change of variables \(dx\,dy = r\,dr\,d\theta\)(<a href="../02-calculus-rn/2-6-change-of-variables.html#i-2-6-10">Example 2.6.10</a>)와 모양이 같다. 다만 form의 식에는 절댓값이 없고 orientation이 들어 있다. 두 식의 관계는 Section 35.3에서 정확히 한다.</p>
+
+      <p>\(n\)차원에서 \(k\)-form과 \((n-k)\)-form은 점마다 같은 수 \(\binom{n}{k} = \binom{n}{n-k}\)의 coefficient를 가지고, \(\star\)가 둘을 짝짓는다(<a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-4">Example 34.5.4</a>) <a class="cite" href="../../references.html#Cr">[Cr §4.5.1]</a>. \(\R^3\)에서는 이 짝짓기와 \(\flat\)으로 모든 form을 함수나 vector field로 옮길 수 있다.</p>
+      <div class="thm example" id="i-35-1-11">
+        <p><span class="thm-head">Example 35.1.11</span> <span class="thm-name">(the dictionary of three-space, pointwise)</span>.
+        <a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-5">Proposition 34.5.5</a>를 점마다 쓰면, \(U \subseteq \R^3\)에서 smooth 함수 \(f\)와 smooth vector field \(X = (X^1, X^2, X^3)\)에 대하여 degree마다 다음 대응이 있다.</p>
+        <ul>
+          <li>0-form: 함수 \(f\) 자체. 점에서의 값을 준다.</li>
+          <li>1-form: \(X^\flat = X^1\,dx + X^2\,dy + X^3\,dz\). \(X^\flat(v) = \inner{X}{v}\)는 \(v\)를 따라 잰 \(X\)의 성분이다.</li>
+          <li>2-form: \(\star X^\flat = X^1\,dy\wedge dz + X^2\,dz\wedge dx + X^3\,dx\wedge dy\). \((\star X^\flat)(u, v) = \inner{X}{u\times v}\)는 평행사변형 \((u, v)\)를 지나는 \(X\)의 flux다.</li>
+          <li>3-form: \(\star f = f\,dx\wedge dy\wedge dz\). 값 \(f\det(u, v, w)\)는 \(f\)로 가중한 부피다.</li>
+        </ul>
+        <p>예를 들어 <a href="#i-35-1-2">Example 35.1.2</a>(d)의 \(z\,dx\wedge dy\)는 vector field \((0, 0, z)\)의 flux다. 이 대응이 Section 35.2에서 grad, curl, div를 \(d\)로 쓰는 바탕이다. 2-form을 vector \((X^1, X^2, X^3)\)으로 저장하는 이 방식은 tools/dgdec.py의 표현 \((w_{yz}, w_{zx}, w_{xy})\)와 같다.</p>
+      </div>
+
+      <aside class="box forward">
+        <p class="box-title">Looking ahead: forms on a curved surface</p>
+        <p>이 장의 \(\star\), \(\sharp\), \(\flat\)은 모두 유클리드 inner product를 쓴다. 곡면 위에서는 parameter domain \(U \subseteq \R^2\)의 각 점에 induced metric \(G(u)\)가 붙고, 같은 form에 다른 \(\star\)가 작용한다. 예를 들어 sphere \(S^2(r)\)의 매개화 \(\mathbf{x}(\theta, \varphi)\)(\(G = \diag(r^2, r^2\sin^2\theta)\))에서 <a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-8">Example 34.5.8</a>의 \(\beta^1, \beta^2\)가 \(d\theta, d\varphi\)가 되어 \(\star d\theta = \sin\theta\,d\varphi\), \(\star d\varphi = -d\theta/\sin\theta\), \(\star 1 = r^2\sin\theta\,d\theta\wedge d\varphi\)이다. 이 \(\star 1\)이 sphere의 넓이 요소이고, Section 35.3에서 \(\R^3\)의 2-form으로 같은 값을 얻는다. 곡면 위의 exterior calculus는 <a href="../38-surfaces-smooth-discrete/index.html">Chapter 38</a>에서 다룬다.</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions</p>
+        <ul>
+          <li>wedge product는 determinant convention, \(\star\)는 Chapter 34와 같은 정의를 쓴다(<a href="../34-exterior-algebra/34-4-k-forms.html#sec-k-forms">Section 34.4</a>의 Conventions 상자). Crane도 같다.</li>
+          <li>Crane은 노트에서 \(dx^i\)를 \(\R^n\)의 orthonormal basis의 이름으로 먼저 쓰고 미분과 무관하다고 덧붙인다 <a class="cite" href="../../references.html#Cr">[Cr §4.3.1]</a>, <a class="cite" href="../../references.html#Cr">[Cr §4.6.2]</a>. 이 study set은 Chapter 34에서 \(e^i\)로 쓰고, 이 장에서 점마다의 상수 1-form \(dx^i\)로 쓴다. 미분으로서의 의미는 Section 35.2의 <a href="35-2-exterior-derivative.html#i-35-2-2">Proposition 35.2.2</a>가 준다.</li>
+          <li>Einstein summation은 쓰지 않고 \(\sum\)를 직접 쓴다(<a href="../../notation.html">Notation and Conventions</a>). 이 장에서 새로 쓰는 기호는 \(\Omega^k(U)\)(smooth \(k\)-form 전체), \(dV = dx^1\wedge\cdots\wedge dx^n\), coordinate field \(\partial/\partial u^i\)와 coordinate 1-form \(du^i\)다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: values at points or values on simplices</p>
+        <p>differential \(k\)-form은 점마다 \(\binom{n}{k}\)개의 수를 가진다. 점이 무한히 많으므로 컴퓨터는 이것을 그대로 저장할 수 없다. Chapter 36의 discrete \(k\)-form은 대신 mesh의 oriented \(k\)-simplex마다 수 하나를 저장한다. 그 수는 한 점에서 잰 값(sample)이 아니라 simplex 전체에서 form을 적분한 값이다(Section 35.3). 예를 들어 1-form은 edge마다 “edge를 따라 잰 양”(circulation) 하나를, 2-form은 triangle마다 “triangle을 지나는 양”(flux) 하나를 가진다.</p>
+        <ul>
+          <li>보존하는 것: 각 simplex 위의 적분값과 orientation에 따른 부호. Section 35.4의 Stokes's theorem 덕분에 \(d\)는 이 적분값들만으로 정확히 계산된다.</li>
+          <li>잃는 것: 한 점에서의 값과 점마다의 연산. 이 절의 연산은 모두 점마다 정의되지만, mesh 위에는 “점”이 vertex뿐이라 \(\wedge\)나 \(\flat\)의 discrete 판은 정확하지 않다. Chapter 36은 \(\star\)만 따로 근사하고(diagonal Hodge star), 나머지 연산은 진술만 한다.</li>
+          <li>vector field와 1-form의 구분도 살아남는다. 1-form은 primal edge 위의 circulation으로, 그 \(\star\)는 dual edge를 지나는 flux로 저장된다(Section 36.5).</li>
+        </ul>
+      </aside>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: pointwise operations on sampled forms</p>
+<pre id="code-35-1-1"><code>import numpy as np
+
+# A form on an open set U of R^2 is stored by its coefficient functions (Proposition 35.1.6):
+# a 1-form a1 dx + a2 dy as p -> (a1(p), a2(p)), a 2-form f dx^dy as p -> f(p).
+# p may be an array of points of shape (..., 2); every operation acts point by point.
+
+def star1(a):
+    """star(a1 dx + a2 dy) = -a2 dx + a1 dy, since star dx = dy and star dy = -dx."""
+    return lambda p: np.stack([-a(p)[1], a(p)[0]])
+
+def wedge11(a, b):
+    """Coefficient of dx^dy in a ^ b (determinant convention): a1 b2 - a2 b1."""
+    return lambda p: a(p)[0] * b(p)[1] - a(p)[1] * b(p)[0]
+
+def apply1(a, X):
+    """The function alpha(X): p -> a1(p) X^1(p) + a2(p) X^2(p)."""
+    return lambda p: a(p)[0] * X(p)[0] + a(p)[1] * X(p)[1]
+
+x_dy = lambda p: np.stack([0 * p[..., 0], p[..., 0]])              # x dy
+alpha = lambda p: np.stack([p[..., 1], np.ones_like(p[..., 0])])  # y dx + dy
+beta = lambda p: np.stack([np.ones_like(p[..., 0]), p[..., 0]])   # dx + x dy
+rot = lambda p: np.stack([-p[..., 1], p[..., 0]])                 # X = -y d/dx + x d/dy
+
+g = np.linspace(-2, 2, 9)
+P = np.stack(np.meshgrid(g, g, indexing="ij"), -1)                # 9 x 9 grid of points
+values = apply1(x_dy, rot)(P)                                     # x^2  (Example 35.1.7)
+ab = wedge11(alpha, beta)(P)                                      # xy - 1  (Example 35.1.8)
+star_x_dy = star1(x_dy)(P)                                        # -x dx
+</code></pre>
+        <p>form을 coefficient 함수로 저장하면 모든 pointwise 연산이 coefficient의 대수다. 위 코드는 <a href="#i-35-1-7">Example 35.1.7</a>의 \(\alpha(X) = x^2\), <a href="#i-35-1-8">Example 35.1.8</a>의 \(\alpha\wedge\beta = (xy - 1)\,dx\wedge dy\)와 \(\star(x\,dy) = -x\,dx\)를 격자 \(81\)개 점에서 한꺼번에 계산한다. 미분(Section 35.2)은 이웃한 점의 값을 비교해야 하므로 이런 점마다의 연산으로는 할 수 없다.</p>
+        <p class="verified">Verification: <code>verify/v-35-1-differential-forms.py</code>가 이 코드를 그대로 실행하고 세 결과를 \(x^2\), \(xy - 1\), \((-x, 0)\)과 비교한다.</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Chapter 17: manifold 위의 differential form(<a href="../17-differential-forms/index.html#toc-17-2">Section 17.2</a>)과 alternating tensor(<a href="../17-differential-forms/index.html#toc-17-1">Section 17.1</a>).</li>
+          <li>Chapter 16: cotangent space와 1-form(<a href="../16-covectors-tensors/index.html#toc-16-1">Section 16.1</a>). Chapter 15: vector field(<a href="../15-vector-fields-flows/index.html#toc-15-1">Section 15.1</a>).</li>
+          <li>Chapter 21: Riemannian volume form \(dV_g = \sqrt{\det(g_{ij})}\,dx^1\wedge\cdots\wedge dx^n\)(<a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>). <a href="#eq-35-1-7">(35.1.7)</a>은 그 평평한 경우다.</li>
+          <li>Tour: covector를 “등고선의 묶음”으로 본 <a href="../00-tour/0-7-forms.html#sec-covectors">Section 0.7</a>.</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L5">[CMU-DDG L5]</a>, <a class="cite" href="../../references.html#Cr">[Cr §4.4]</a>, <a class="cite" href="../../references.html#Cr">[Cr §4.5.1–4.5.2]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>differential \(k\)-form은 open set \(U \subseteq \R^n\)의 점마다 \(k\)-form을 붙인 것이고, \(\alpha = \sum_I\alpha_I\,dx^I\)의 coefficient가 smooth이면 smooth다(<a href="#i-35-1-1">Definition 35.1.1</a>). 이 판정은 어느 smooth coframe으로 해도 같다(<a href="#i-35-1-4">Proposition 35.1.4</a>).</li>
+        <li>\(\partial/\partial x^i\)와 \(dx^i\)는 점마다의 상수 basis다. 곡선 좌표 \(P\)에서는 \(\partial/\partial u^j = \partial_jP\)이고 \(du^i\)는 그 dual이다(<a href="#eq-35-1-3">(35.1.3)</a>). \(\partial/\partial x^i\)는 좌표계 전체에 의존하고 \(dx^i\)는 함수 \(x^i\)에만 의존한다.</li>
+        <li>\(\wedge\), \(\star\), \(\sharp\), \(\flat\), 그리고 vector field를 재는 것은 모두 점마다의 연산이다(<a href="#i-35-1-6">Proposition 35.1.6</a>). 1-form은 vector field를 재어 함수를 만든다(<a href="#i-35-1-7">Example 35.1.7</a>).</li>
+        <li>\(\R^2\)에서 \(\star dx = dy\), \(\star dy = -dx\)이고, polar coordinates에서 \(\star dr = r\,d\theta\), \(\star d\theta = -dr/r\), \(\star 1 = r\,dr\wedge d\theta\)이다(<a href="#eq-35-1-6">(35.1.6)</a>). volume form은 곡선 좌표에서 \(\sqrt{\det G}\,du^1\wedge\cdots\wedge du^n\)이다(<a href="#i-35-1-10">Proposition 35.1.10</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 form이 점마다 어떻게 변하는지를 재는 연산, 곧 exterior derivative \(d\)를 다룬다. 함수의 \(df\)에서 시작해 product rule과 \(d\circ d = 0\)으로 \(d\)를 특징짓고, \(\R^3\)의 grad, curl, div와 Laplacian이 모두 \(d\)와 \(\star\)의 합성임을 보인다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-35-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 35.1.1</span> <span class="level">★</span>
+        \(\R^3\)에서 \(\alpha = z\,dx + x\,dy\), \(\beta = dy - dz\), \(X = y\,\partial/\partial x + \partial/\partial z\)라 하자. \(\alpha\wedge\beta\), \(\star\alpha\), \(\star(\alpha\wedge\beta)\), \(\alpha(X)\)를 구하여라. \(\alpha = a^\flat\), \(\beta = b^\flat\)으로 쓸 때 \(\alpha\wedge\beta\)의 순환 basis \((dy\wedge dz, dz\wedge dx, dx\wedge dy)\) coefficient가 \(a\times b\)인지 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\[ \begin{aligned} \alpha\wedge\beta &amp;= z\,dx\wedge dy - z\,dx\wedge dz + x\,dy\wedge dy - x\,dy\wedge dz \\ &amp;= -x\,dy\wedge dz + z\,dz\wedge dx + z\,dx\wedge dy \end{aligned} \]이다(\(-dx\wedge dz = dz\wedge dx\)). \(a = (z, x, 0)\), \(b = (0, 1, -1)\)이면 \(a\times b = (x\cdot(-1) - 0,\ 0 - z\cdot(-1),\ z\cdot 1 - 0) = (-x, z, z)\)로 순환 basis coefficient와 같다(<a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-5">Proposition 34.5.5</a>(d)를 점마다). 따라서 \(\star(\alpha\wedge\beta) = (a\times b)^\flat = -x\,dx + z\,dy + z\,dz\)이다. \(\star\alpha = z\,dy\wedge dz + x\,dz\wedge dx\)(<a href="#i-35-1-11">Example 35.1.11</a>)이고, \(\alpha(X) = z\cdot y + x\cdot 0 + 0\cdot 1 = yz\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-35-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 35.1.2</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. (a) open set \(U \subseteq \R^2\) 위의 모든 smooth 2-form은 smooth 함수 \(f\)에 대한 \(f\,dx\wedge dy\)이다. (b) \(\R^3\)의 모든 1-form \(\alpha\)에 대하여 \(\alpha\wedge\alpha = 0\)이다. (c) \(\R^4\)의 모든 2-form \(\omega\)에 대하여 \(\omega\wedge\omega = 0\)이다. (d) vector field \(-y\,\partial/\partial x + x\,\partial/\partial y\)와 1-form \(-y\,dx + x\,dy\)는 같은 대상이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. 점마다 \(\Lambda^2\big((\R^2)^*\big)\)의 basis는 \(dx\wedge dy\) 하나이고(<a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-5">Lemma 34.4.5</a>), smooth의 정의가 그 coefficient \(f\)가 smooth라는 것이다. (b) 참. 점마다 \(\alpha_p\wedge\alpha_p = 0\)이다(<a href="../34-exterior-algebra/34-1-wedge-k-vectors.html#i-34-1-3">Proposition 34.1.3</a>(b)를 \(V^*\)에서). (c) 거짓. \(\omega = dx^1\wedge dx^2 + dx^3\wedge dx^4\)이면 \(\omega\wedge\omega = 2\,dx^1\wedge dx^2\wedge dx^3\wedge dx^4 \neq 0\)이다(<a href="../34-exterior-algebra/34-1-wedge-k-vectors.html#i-34-1-13">Non-example 34.1.13</a>). (d) 거짓. 하나는 점마다의 vector, 다른 하나는 점마다의 covector다. 유클리드 inner product가 \(\flat\)으로 둘을 잇지만(<a href="#i-35-1-6">Proposition 35.1.6</a>(c)) 같은 대상은 아니다. polar coordinates로 쓰면 \(\partial/\partial\theta\)와 \(r^2\,d\theta\)가 되어 coefficient도 다르다(<a href="#i-35-1-5">Example 35.1.5</a>).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-35-1-3" data-level="2">
+        <p><span class="thm-head">Exercise 35.1.3</span> <span class="level">★★</span>
+        좌표 \((u, v)\)를 \(P(u, v) = (2u + v,\ v)\)로 정하자. (a) \(\partial/\partial u\), \(\partial/\partial v\), \(du\), \(dv\)를 Cartesian으로 쓰고, \(v = y\)인데도 \(\partial/\partial v \neq \partial/\partial y\)임을 확인하여라. (b) Gram matrix \(G\)와 \(\sqrt{\det G}\)를 구하고 <a href="#i-35-1-10">Proposition 35.1.10</a>으로 \(\star 1\)을 \(du\wedge dv\)로 써라. (c) \(\star du\)를 \(du, dv\)로 쓰고 \(du\wedge\star du = \abs{du}^2\,dx\wedge dy\)를 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(DP = \begin{pmatrix} 2 &amp; 1 \\ 0 &amp; 1\end{pmatrix}\)이므로 \(\partial/\partial u = (2, 0)\), \(\partial/\partial v = (1, 1)\)이다. \(DP^{-1} = \tfrac12\begin{pmatrix} 1 &amp; -1 \\ 0 &amp; 2\end{pmatrix}\)의 행이 \(du = \tfrac12(dx - dy)\), \(dv = dy\)이다. \(dv = dy\)이지만 \(\partial/\partial v = (1, 1) \neq (0, 1)\)이다. \(\partial/\partial v\)는 \(u\)를 고정하고 움직이는 방향이고, \(u\)를 고정하면 \(x = 2u + v\)도 함께 변하기 때문이다(Common misconception 상자).</p>
+          <p>(b) \(G = DP^{\mathsf T}DP = \begin{pmatrix} 4 &amp; 2 \\ 2 &amp; 2\end{pmatrix}\), \(\det G = 4\), \(\sqrt{\det G} = 2 = \det DP\)이다. 따라서 \(\star 1 = dx\wedge dy = 2\,du\wedge dv\)이다. 검산: \(du\wedge dv = \tfrac12(dx - dy)\wedge dy = \tfrac12\,dx\wedge dy\).</p>
+          <p>(c) \(\star du = \tfrac12(\star dx - \star dy) = \tfrac12(dy + dx)\)이다. \(dx = 2\,du + dv\), \(dy = dv\)이므로 \(\star du = du + dv\)이다. \(du\wedge\star du = du\wedge dv = \tfrac12\,dx\wedge dy\)이고, \(\abs{du}^2 = \abs{(1, -1)/2}^2 = \tfrac12\)이므로 <a href="../34-exterior-algebra/34-4-k-forms.html#i-34-4-11">Proposition 34.4.11</a>(b)와 맞는다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-35-1-4" data-level="2">
+        <p><span class="thm-head">Exercise 35.1.4</span> <span class="level">★★</span>
+        \(\R^2 \setminus \{0\}\)에서 \(dx\)와 \(dy\)를 coframe \((dr, d\theta)\)로 쓰고, coefficient가 \(\R^2 \setminus \{0\}\)에서 smooth임을 확인하여라. 이것으로 \(x\,dy\)를 \((dr, d\theta)\)로 쓰고, \(\abs{x\,dy}^2\)을 두 방법(Cartesian, polar)으로 계산해 같음을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(P(r, \theta)\)에서 \(dx^i = \sum_j (DP)^i_j\,du^j\)(<a href="#i-35-1-10">Proposition 35.1.10</a>의 증명)이므로 \(dx = \cos\theta\,dr - r\sin\theta\,d\theta = \tfrac{x}{r}\,dr - y\,d\theta\), \(dy = \sin\theta\,dr + r\cos\theta\,d\theta = \tfrac{y}{r}\,dr + x\,d\theta\)이다. coefficient \(x/r\), \(y/r\), \(-y\), \(x\)는 \(\R^2 \setminus \{0\}\)에서 smooth다. 따라서 \(x\,dy = \tfrac{xy}{r}\,dr + x^2\,d\theta\)이다. Cartesian으로는 \(\abs{x\,dy}^2 = x^2\)이다. polar로는 \(\inner{dr}{dr} = 1\), \(\inner{d\theta}{d\theta} = 1/r^2\), \(\inner{dr}{d\theta} = 0\)(<a href="#eq-35-1-4">(35.1.4)</a>의 Cartesian coefficient로 계산)이므로 \(\tfrac{x^2y^2}{r^2} + \tfrac{x^4}{r^2} = \tfrac{x^2(x^2 + y^2)}{r^2} = x^2\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-35-1-5" data-level="1">
+        <p><span class="thm-head">Exercise 35.1.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> Implementation 상자의 <code>star1</code>, <code>wedge11</code>를 써서, \(1 \le r \le 2\)인 annulus의 무작위 점 \(1000\)개에서 (a) \(\star dr = r\,d\theta\), (b) \(\star d\theta = -dr/r\), (c) \(dr\wedge d\theta = dx\wedge dy/r\), (d) \(\abs{d\theta} = 1/r\)을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-35-1-5"><code>import numpy as np
+
+dr = lambda p: np.stack([p[..., 0], p[..., 1]]) / np.hypot(p[..., 0], p[..., 1])
+dth = lambda p: np.stack([-p[..., 1], p[..., 0]]) / (p[..., 0] ** 2 + p[..., 1] ** 2)
+
+rng = np.random.default_rng(35)
+rad, ang = rng.uniform(1, 2, 1000), rng.uniform(0, 2 * np.pi, 1000)
+P = np.stack([rad * np.cos(ang), rad * np.sin(ang)], -1)
+ok_a = np.allclose(star1(dr)(P), rad * dth(P))
+ok_b = np.allclose(star1(dth)(P), -dr(P) / rad)
+ok_c = np.allclose(wedge11(dr, dth)(P), 1 / rad)
+ok_d = np.allclose(np.linalg.norm(dth(P), axis=0), 1 / rad)
+print(ok_a, ok_b, ok_c, ok_d)
+</code></pre>
+<pre id="out-ex-35-1-5"><code>True True True True</code></pre>
+          <p>(a)–(c)는 <a href="#eq-35-1-6">(35.1.6)</a>, (d)는 <a href="#i-35-1-9">Example 35.1.9</a>의 \(\abs{d\theta} = 1/r\)이다. 출력은 <code>True True True True</code>이다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 35. Exterior Calculus</a>
+    <a rel="next" href="35-2-exterior-derivative.html">35.2 The Exterior Derivative →</a>
+  </nav>
+</body>
+</html>
