@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>38.1 Parametrized Surfaces and the Differential — DG Study</title>
+  <meta name="dg-id" content="38.1">
+  <meta name="dg-status" content="draft">
+  <meta name="dg-prereq" content="35.5, 37.1, 37.2, 2.1, 2.2, 2.3">
+  <meta name="dg-refs" content="Cr §3.1, §3.2, §3.5; CMU-DDG L12">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">38. Surfaces: Smooth and Discrete</a> ›
+    <span>38.1 Parametrized Surfaces and the Differential</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>38.1 Parametrized Surfaces and the Differential</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr §3.2]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr §3.5]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L12">[CMU-DDG L12]</a> slides 3–20</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>parametrized surface \(\mathbf{x}\colon U \to \R^3\)의 differential \(d\mathbf{x}\)를 \(\R^3\)-valued 1-form, Jacobian matrix, directional derivative라는 세 관점으로 읽고 계산할 수 있다.</li>
+        <li>immersion의 조건 “\(d\mathbf{x}\)가 injective” ⇔ \(\mathbf{x}_u\times\mathbf{x}_v \neq 0\)을 증명하고, immersion이 국소적으로 injective임을 보일 수 있다.</li>
+        <li>immersion과 embedding을 예와 비예로 구분할 수 있다. immersion은 점 근처의 조건이고 embedding은 전체의 조건이다.</li>
+        <li>regular homotopy를 surface에 옮기고, 원과 달리 sphere는 immersion을 유지하며 안팎을 뒤집을 수 있다는 사실(sphere eversion)을 정확히 진술할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>vector-valued form <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-10">Definition 35.5.10</a>, map의 differential <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-11">Example 35.5.11</a>, self-wedge <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-14">Proposition 35.5.14</a>.</li>
+        <li>Chapter 37: plane curve의 differential과 immersion(<a href="../37-curves-smooth-discrete/37-1-plane-curves.html">Section 37.1</a>), regular homotopy <a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-7">Definition 37.2.7</a>, <a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-11">Theorem 37.2.11</a>, <a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-12">Corollary 37.2.12</a>.</li>
+        <li>Jacobian matrix <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-10">Definition 2.1.10</a>, directional derivative <a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-9">Definition 2.1.9</a>, chain rule <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-1">Theorem 2.2.1</a>, inverse function theorem <a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-5">Theorem 2.3.5</a>, cross product <a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">Theorem 1.6.16</a>.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Chapter 37은 곡선을 map \(\gamma\colon I \to \R^2\)로 보고, 그 differential \(d\gamma\)가 parameter 방향을 속도 vector로 보낸다는 것에서 출발했다. \(d\gamma\)가 어디서나 injective인 곡선이 regular curve, 곧 곡선의 immersion이었고, 다각형에서는 edge vector가 그 discrete 판이었다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-1">Proposition 37.4.1</a>). 전체 모양에 대해서는 turning number가 regular homotopy에서 변하지 않아서, 평면에서 원의 방향은 뒤집을 수 없었다(<a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-12">Corollary 37.2.12</a>).</p>
+      <p>이 장은 같은 이야기를 곡면에서 한다. 정의역이 2차원이 되면 바뀌는 것이 셋 있다. 첫째, 한 점에서 움직일 수 있는 방향이 직선이 아니라 평면을 이루므로, \(d\mathbf{x}\)는 vector 하나가 아니라 평면 전체를 \(\R^3\)으로 보낸다. 둘째, “\(\gamma' \neq 0\)”에 해당하는 조건은 “\(d\mathbf{x}\)가 rank 2”가 된다. 셋째, 전체 모양에 관한 질문이 달라진다. 원은 평면에서 뒤집을 수 없었는데, sphere는 \(\R^3\)에서 뒤집을 수 있는가?</p>
+      <p>이 절은 smooth 쪽의 출발점이다. Section 38.2에서 \(d\mathbf{x}\)로 길이와 각을 재고, Section 38.3에서 normal을 정한 뒤, Section 38.4부터 같은 것을 triangle mesh 위에서 정의한다. 그래서 정의를 고를 때 “mesh에서도 그대로 말할 수 있는가”를 늘 함께 본다.</p>
+    </section>
+
+    <section id="sec-parametrized">
+      <h2>Parametrized Surfaces</h2>
+      <p>곡면을 다루는 방법은 여럿이다. Track 3은 \(\R^3\)의 부분집합 \(S\)를 먼저 정하고, 그것을 덮는 parametrization을 붙인다(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>). 강의와 이 장은 map을 먼저 본다. 평면의 영역을 고무판으로 생각하고, 그것을 공간에 늘이고 구부려 놓는 map이 곡면이다 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>. mesh도 vertex에 좌표를 주는 map이므로(Section 38.4) 이 관점이 discrete 판과 잘 맞는다.</p>
+      <div class="thm definition" id="i-38-1-1">
+        <p><span class="thm-head">Definition 38.1.1</span> <span class="thm-name">(parametrized surface)</span>.
+        \(U \subseteq \R^2\)가 open set이고 \(\mathbf{x}\colon U \to \R^3\)이 smooth map일 때, \(\mathbf{x}\)를 <strong>parametrized surface</strong>(매개곡면)라 하고 \(\mathbf{x}(U)\)를 그 image라 한다. \(U\)의 좌표는 \((u, v)\)로 쓰고 \(\mathbf{x}_u = \partial\mathbf{x}/\partial u\), \(\mathbf{x}_v = \partial\mathbf{x}/\partial v\)로 쓴다. \(h\colon \tilde U \to U\)가 open set 사이의 diffeomorphism이면 \(\mathbf{x}\circ h\)를 \(\mathbf{x}\)의 <strong>reparametrization</strong>(재매개화)이라 하고, \(\det Dh \gt 0\)이면 orientation-preserving이라 한다.</p>
+      </div>
+      <p>image는 같은데 map이 다른 경우가 흔하다. 같은 곡면을 서로 다른 parametrization으로 나타낼 수 있다는 사실(“reparametrization symmetry”)은 두 mesh가 같은 모양인지 판정하기 어렵게 만드는 이유이기도 하다 <a class="cite" href="../../references.html#CMU-DDG-L12">[CMU-DDG L12]</a>. 이 정의에는 regularity 조건이 없다. Track 3의 parametrization(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>)은 여기에 immersion 조건(아래 <a href="#i-38-1-6">Definition 38.1.6</a>)과 image 위로의 homeomorphism 조건을 더한 것이다.</p>
+      <div class="thm example" id="i-38-1-2">
+        <p><span class="thm-head">Example 38.1.2</span> <span class="thm-name">(the running examples as parametrized surfaces)</span>.
+        §7의 매개화를 모두 \(\R^2\) 전체에서 정의된 smooth map으로 본다.</p>
+        <ul>
+          <li>(a) sphere \(\mathbf{x}(\theta, \varphi) = (r\sin\theta\cos\varphi,\ r\sin\theta\sin\varphi,\ r\cos\theta)\). image는 \(S^2(r)\)이고, 정의역을 \((0, \pi)\times(0, 2\pi)\)로 줄이면 반원 하나를 뺀 부분이다(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-7">Example 6.1.7</a>).</li>
+          <li>(b) torus of revolution \(\mathbf{x}(u, v) = ((R + r\cos u)\cos v,\ (R + r\cos u)\sin v,\ r\sin u)\), 이 장의 수치는 \((R, r) = (2, 0.8)\)이다. \(u\)와 \(v\) 모두 주기 \(2\pi\)이므로 \(\R^2\)를 \(T_{R,r}\) 위에 무한히 여러 번 감는다.</li>
+          <li>(c) cylinder \(\mathbf{x}(u, v) = (r\cos u,\ r\sin u,\ v)\)와 saddle의 graph 매개화 \(\mathbf{x}(u, v) = (u,\ v,\ u^2 - v^2)\).</li>
+          <li>(d) saddle의 polar reparametrization. \(h(\rho, t) = (\rho\cos t, \rho\sin t)\)는 \((0, \infty)\times(-\pi, \pi)\)에서 원점과 음의 \(u\)축을 뺀 영역으로 가는 diffeomorphism이고 \(\det Dh = \rho \gt 0\)이다. \(\mathbf{y} = \mathbf{x}\circ h\)는 \(\mathbf{y}(\rho, t) = (\rho\cos t,\ \rho\sin t,\ \rho^2\cos 2t)\)로, 같은 saddle의 일부를 다른 좌표로 나타낸다(\(u^2 - v^2 = \rho^2\cos 2t\)).</li>
+        </ul>
+      </div>
+      <div class="thm nonexample" id="i-38-1-3">
+        <p><span class="thm-head">Non-example 38.1.3</span> <span class="thm-name">(a parametrized surface whose image is a curve)</span>.
+        helix \(\gamma(s) = (\cos s, \sin s, 0.3s)\)로 \(\mathbf{x}(u, v) = \gamma(u + v)\)를 만들면 smooth map이므로 <a href="#i-38-1-1">Definition 38.1.1</a>의 의미로는 parametrized surface다. 그러나 image는 helix, 곧 곡선이다. \(\mathbf{x}_u = \mathbf{x}_v = \gamma'(u + v)\)이므로 두 방향이 같은 vector로 가고, 평면의 한 방향(\(\partial_u - \partial_v\))이 통째로 사라진다. map이 smooth라는 것만으로는 image가 2차원이라는 보장이 없다. 이것을 막는 조건이 아래의 immersion이다.</p>
+      </div>
+    </section>
+
+    <section id="sec-differential">
+      <h2>The Differential</h2>
+      <p>parametrized surface의 differential은 Chapter 35에서 이미 정의했다. \(\mathbf{x}\)를 \(U\) 위의 \(\R^3\)-valued 0-form으로 보면 그 exterior derivative가 \(\R^3\)-valued 1-form</p>
+      <div class="equation" id="eq-38-1-1">
+      \[ d\mathbf{x} = \sum_{a=1}^{3} d(\mathbf{x}^a)\,e_a = \mathbf{x}_u\,du + \mathbf{x}_v\,dv \tag{38.1.1} \]
+      </div>
+      <p>이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-11">Example 35.5.11</a>(a)). Equation <a href="#eq-38-1-1">(38.1.1)</a>은 점 \(q \in U\)와 vector \(X = (X^1, X^2) \in \R^2\)에 대하여 \(d\mathbf{x}_q(X) = X^1\mathbf{x}_u(q) + X^2\mathbf{x}_v(q)\)라는 뜻이다. \(X\)는 parameter 평면의 화살표이고 \(d\mathbf{x}_q(X)\)는 공간의 화살표다. 고무판 위에 그린 짧은 선분이 판을 늘이고 구부렸을 때 어떤 선분이 되는가를 기록하는 것이 \(d\mathbf{x}\)다 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>.</p>
+      <div class="thm proposition" id="i-38-1-4">
+        <p><span class="thm-head">Proposition 38.1.4</span> <span class="thm-name">(three readings of the differential)</span>.
+        \(\mathbf{x}\colon U \to \R^3\)이 smooth이고 \(q \in U\), \(X \in \R^2\)라 하자.</p>
+        <ul>
+          <li>(a) (Jacobian) \(d\mathbf{x}_q(X) = D\mathbf{x}(q)\,X\)이다. 여기서 \(D\mathbf{x}(q)\)는 열이 \(\mathbf{x}_u(q), \mathbf{x}_v(q)\)인 \(3\times 2\) Jacobian matrix다.</li>
+          <li>(b) (directional derivative) \(d\mathbf{x}_q(X) = \lim_{h\to 0}\dfrac{\mathbf{x}(q + hX) - \mathbf{x}(q)}{h}\)이다.</li>
+          <li>(c) (velocity) \(c\colon (-\varepsilon, \varepsilon) \to U\)가 \(c(0) = q\), \(c'(0) = X\)인 smooth curve이면 \((\mathbf{x}\circ c)'(0) = d\mathbf{x}_q(X)\)이다. 곧 \(d\mathbf{x}_q(X)\)는 \(X\)를 속도로 하는 parameter 곡선의 image가 갖는 속도다.</li>
+          <li>(d) (reparametrization) \(h\colon \tilde U \to U\)가 smooth이면 \(d(\mathbf{x}\circ h)_p = d\mathbf{x}_{h(p)}\circ Dh(p)\)이고, \(h\)가 diffeomorphism이면 \(d(\mathbf{x}\circ h)_p\)와 \(d\mathbf{x}_{h(p)}\)의 image는 \(\R^3\)의 같은 부분공간이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) <a href="#eq-38-1-1">(38.1.1)</a>에서 \(d\mathbf{x}_q(X) = X^1\mathbf{x}_u + X^2\mathbf{x}_v\)이고, 이것이 Jacobian matrix와 \(X\)의 곱이다(<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-11">Theorem 2.1.11</a>). (b) smooth map은 differentiable이므로 directional derivative가 total derivative를 \(X\)에 쓴 것과 같다(<a href="../02-calculus-rn/2-1-total-derivative.html#i-2-1-9">Definition 2.1.9</a>, <a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-2">Corollary 2.2.2</a>). (c) chain rule(<a href="../02-calculus-rn/2-2-chain-rule.html#i-2-2-1">Theorem 2.2.1</a>)에서 \((\mathbf{x}\circ c)'(0) = D\mathbf{x}(q)\,c'(0)\)이고 (a)를 쓴다. (d) chain rule에서 \(D(\mathbf{x}\circ h)(p) = D\mathbf{x}(h(p))\,Dh(p)\)이다. \(h\)가 diffeomorphism이면 \(Dh(p)\)가 invertible(<a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-4">Proposition 2.3.4</a>)이므로 \(D\mathbf{x}(h(p))\,Dh(p)\)와 \(D\mathbf{x}(h(p))\)의 column space가 같다.</p>
+      </div>
+      <p>(a)는 계산하는 법이고, (b)와 (c)는 뜻이다. (d)는 parameter를 바꿔도 \(d\mathbf{x}\)가 만드는 평면은 그대로라는 것이다. Track 3은 이 평면을 tangent plane이라 부른다(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-4">Proposition 6.2.4</a>).</p>
+
+      <p><a href="#fig-38-1-1">Figure 38.1.1</a>로 \(d\mathbf{x}\)가 하는 일을 보자. 왼쪽 (a)는 torus of revolution의 parameter 정사각형이고, 두 점 \(q_1 = (0, -1)\)과 \(q_2 = (2\pi/3, -0.25)\)에 반지름 \(0.45\)인 원이 있다. 원 위의 점은 길이가 같고 방향만 다른 vector \(X\)들의 끝점이다. 오른쪽 (b)에서 그 원들의 image \(\mathbf{x}(q) + d\mathbf{x}_q(X)\)를 보면 원이 아니라 타원이다. \(q_1\)은 바깥 적도(\(u = 0\))에 있어서 \(\mathbf{x}_v\) 방향(수평 원 방향)으로 \(R + r = 2.8\)배, \(\mathbf{x}_u\) 방향(관을 도는 방향)으로 \(r = 0.8\)배 늘어난다. \(q_2\)는 관의 위쪽 안쪽(\(u = 2\pi/3\))이어서 수평 방향의 배율이 \(R + r\cos u = 1.6\)으로 줄어든다. 파란 화살표 하나(\(X\)를 \(30^\circ\) 방향으로 잡은 것)를 따라가면, \(X\)와 \(d\mathbf{x}(X)\)의 방향도 같지 않다는 것이 보인다. 이 타원의 모양이 Section 38.2의 induced metric이다.</p>
+      <figure class="dg-figure" id="fig-38-1-1">
+        <img src="figures/fig-38-1-1-differential-ellipses.svg" alt="두 패널. (a) 하늘색 정사각형 u, v ∈ [−π, π]에 회색 격자가 있고, 두 점 q1(가운데 아래)과 q2(오른쪽)에 같은 크기의 파란 원과 30도 방향의 파란 화살표 X가 있다. 곡선 화살표 x가 오른쪽 패널로 향한다. (b) 회색 반투명 torus 위에, 바깥 적도의 점 x(q1)에는 수평으로 길게 늘어난 큰 파란 타원과 화살표 dx(X)가, 위쪽 안쪽의 점 x(q2)에는 덜 늘어난 작은 파란 타원이 있다.">
+        <figcaption><span class="fig-head">Figure 38.1.1.</span>
+        <em>무엇을</em>: torus of revolution \((R, r) = (2, 0.8)\)의 differential \(d\mathbf{x}\)가 같은 길이의 vector들을 어떻게 옮기는가. (a)는 parameter domain \([-\pi, \pi]^2\), (b)는 \(T_{2, 0.8}\)이다.
+        <em>읽는 법</em>: (a)의 파란 원은 \(q_1 = (0, -1)\), \(q_2 = (2\pi/3, -0.25)\)를 중심으로 한 반지름 \(0.45\)의 원(길이 \(0.45\)인 vector \(X\)들의 끝점)이고, 파란 화살표는 \(30^\circ\) 방향의 \(X\) 하나다. (b)의 파란 타원은 \(\mathbf{x}(q) + d\mathbf{x}_q(X)\)들이고, 파란 화살표는 \(d\mathbf{x}_q(X)\)다. 회색 격자는 coordinate curve로, \(u\)는 \(\pi/6\)마다, \(v\)는 \(\pi/12\)마다 그었다.
+        <em>볼 것</em>: 원이 타원으로 바뀐다. 타원의 반지름은 \(0.45\cdot r = 0.36\)(관을 도는 방향)과 \(0.45(R + r\cos u)\)이며, \(q_1\)에서는 \(1.26\), \(q_2\)에서는 \(0.72\)이다. 같은 \(X\)라도 점마다 늘어나는 정도가 다르다.
+        <em>본문과의 연결</em>: <a href="#i-38-1-4">Proposition 38.1.4</a>(a)와 <a href="#i-38-1-5">Example 38.1.5</a>. 타원의 모양은 Section 38.2의 induced metric(\(E = r^2\), \(G = (R + r\cos u)^2\))이 정한다.</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-38-1-5">
+        <p><span class="thm-head">Example 38.1.5</span> <span class="thm-name">(differentials of the running examples)</span>.
+        (a) torus of revolution에서 <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-5">Example 7.1.5</a>의 편미분을 쓰면</p>
+        <div class="equation" id="eq-38-1-2">
+        \[ \begin{aligned} d\mathbf{x} &= \mathbf{x}_u\,du + \mathbf{x}_v\,dv, \\ \mathbf{x}_u &= r\begin{pmatrix} -\sin u\cos v \\ -\sin u\sin v \\ \cos u \end{pmatrix}, \\ \mathbf{x}_v &= (R + r\cos u)\begin{pmatrix} -\sin v \\ \cos v \\ 0 \end{pmatrix} \end{aligned} \tag{38.1.2} \]
+        </div>
+        <p>이다. 두 coefficient vector는 서로 수직이고 길이가 \(r\)과 \(R + r\cos u\)다. 따라서 \(X = \cos\alpha\,\partial_u + \sin\alpha\,\partial_v\)이면 \(\abs{d\mathbf{x}(X)}^2 = r^2\cos^2\alpha + (R + r\cos u)^2\sin^2\alpha\)이고, 단위원의 image는 반지름이 \(r\)과 \(R + r\cos u\)인 타원이다(<a href="#fig-38-1-1">Figure 38.1.1</a>). 예를 들어 \(q = (\pi/2, 0)\)(관의 꼭대기)에서 \(d\mathbf{x}(\partial_u + \partial_v) = (-0.8, 0, 0) + (0, 2, 0) = (-0.8, 2, 0)\)이다.</p>
+        <p>(b) sphere에서는 \(d\mathbf{x} = \mathbf{x}_\theta\,d\theta + \mathbf{x}_\varphi\,d\varphi\)이고 \(\abs{\mathbf{x}_\theta} = r\), \(\abs{\mathbf{x}_\varphi} = r\sin\theta\)이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-11">Example 35.5.11</a>(b)). \(\theta\)가 \(0\)으로 가면 \(\varphi\) 방향의 배율이 \(0\)으로 줄어든다.</p>
+        <p>(c) saddle의 graph 매개화에서는 \(\mathbf{x}_u = (1, 0, 2u)\), \(\mathbf{x}_v = (0, 1, -2v)\)이다. 점 \(q = (0.5, -0.4)\)에서 \(d\mathbf{x}_q(X) = (X^1,\ X^2,\ X^1 + 0.8X^2)\)이므로 \(d\mathbf{x}_q\)는 \(X\)를 수평으로는 그대로 두고 높이 \(X^1 + 0.8X^2\)를 덧붙인다.</p>
+        <p class="verified">Verification: <code>verify/v-38-1-parametrized-surfaces.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-immersion">
+      <h2>Immersions</h2>
+      <p><a href="#i-38-1-3">Non-example 38.1.3</a>에서는 \(d\mathbf{x}\)가 평면의 한 방향을 \(0\)으로 보냈다. 곡선에서 \(\gamma' = 0\)인 점이 문제였던 것처럼, 곡면에서는 \(d\mathbf{x}\)의 kernel이 문제다.</p>
+      <div class="thm definition" id="i-38-1-6">
+        <p><span class="thm-head">Definition 38.1.6</span> <span class="thm-name">(immersion)</span>.
+        parametrized surface \(\mathbf{x}\colon U \to \R^3\)이 모든 \(q \in U\)에서 \(d\mathbf{x}_q\colon \R^2 \to \R^3\)이 injective이면, 곧 \(d\mathbf{x}_q(X) = 0\)이 \(X = 0\)일 때뿐이면, \(\mathbf{x}\)를 <strong>immersion</strong>(몰입)이라 한다. 일반 manifold 사이의 immersion은 <a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>에서 다룬다.</p>
+      </div>
+      <div class="thm proposition" id="i-38-1-7">
+        <p><span class="thm-head">Proposition 38.1.7</span> <span class="thm-name">(criteria for an immersion)</span>.
+        \(\mathbf{x}\colon U \to \R^3\)이 smooth이고 \(q \in U\)이면 다음은 서로 동치다.</p>
+        <ul>
+          <li>(i) \(d\mathbf{x}_q\)가 injective이다.</li>
+          <li>(ii) \(\mathbf{x}_u(q)\)와 \(\mathbf{x}_v(q)\)가 linearly independent이다(곧 \(D\mathbf{x}(q)\)의 rank가 \(2\)다).</li>
+          <li>(iii) \(\mathbf{x}_u(q)\times\mathbf{x}_v(q) \neq 0\)이다.</li>
+          <li>(iv) \(\R^3\)-valued 2-form \(d\mathbf{x}\wedge d\mathbf{x}\)가 \(q\)에서 \(0\)이 아니다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(d\mathbf{x}_q\)의 kernel은 \(\mathbf{x}_u\)와 \(\mathbf{x}_v\)의 linear relation이고, cross product는 두 vector가 평행할 때만 \(0\)이다.</p>
+        <p><span class="proof-head">Proof.</span> (i)⇔(ii): \(d\mathbf{x}_q(a, b) = a\mathbf{x}_u + b\mathbf{x}_v\)이므로 kernel이 \(\{0\}\)인 것과 \(a\mathbf{x}_u + b\mathbf{x}_v = 0 \Rightarrow a = b = 0\)인 것은 같은 말이다. (ii)⇔(iii): \(\abs{\mathbf{x}_u\times\mathbf{x}_v}\)는 \(\mathbf{x}_u, \mathbf{x}_v\)가 펼치는 평행사변형의 넓이이고(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-16">Theorem 1.6.16</a>), 그것이 \(0\)인 것은 두 vector가 linearly dependent인 것과 같다. (iii)⇔(iv): <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#eq-35-5-6">(35.5.6)</a>에서 \(d\mathbf{x}\wedge d\mathbf{x} = 2\,\mathbf{x}_u\times\mathbf{x}_v\,du\wedge dv\)이고, \(du\wedge dv\)는 어디서나 \(0\)이 아니다.</p>
+      </div>
+      <p>(iv)는 좌표를 쓰지 않는 판정법이다. \(d\mathbf{x}\wedge d\mathbf{x}\)는 Section 38.3에서 넓이와 normal을 함께 담는 양으로 다시 나온다.</p>
+      <div class="thm example" id="i-38-1-8">
+        <p><span class="thm-head">Example 38.1.8</span> <span class="thm-name">(immersions among the running examples)</span>.
+        (a) torus of revolution은 \(\R^2\) 전체에서 immersion이다. <a href="#eq-38-1-2">(38.1.2)</a>의 두 coefficient가 수직이고 길이가 \(r \gt 0\)과 \(R + r\cos u \ge R - r \gt 0\)이므로 \(\abs{\mathbf{x}_u\times\mathbf{x}_v} = r(R + r\cos u) \ge r(R - r)\)이다. \((R, r) = (2, 0.8)\)이면 최솟값은 안쪽 적도(\(u = \pi\))에서 \(0.96\)이다. map은 주기적이라 injective가 아니지만 immersion인 데는 문제가 없다.</p>
+        <p>(b) sphere는 \(\abs{\mathbf{x}_\theta\times\mathbf{x}_\varphi} = r^2\sin\theta\)이므로 \(\sin\theta \neq 0\)인 곳에서만 immersion이다. 띠 \((0, \pi)\times\R\)에서는 immersion이고, \(\theta = 0, \pi\)(극)에서는 \(\mathbf{x}_\varphi = 0\)이다. 극에서는 \(\varphi\)를 바꿔도 점이 움직이지 않는다. 곡면이 나쁜 것이 아니라 좌표가 나쁜 것이다. 다른 매개화(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-5">Example 6.1.5</a>의 hemisphere graph)는 극에서도 immersion이다.</p>
+        <p>(c) cylinder는 \(\mathbf{x}_u\times\mathbf{x}_v = (r\cos u, r\sin u, 0)\), saddle은 \(\mathbf{x}_u\times\mathbf{x}_v = (-2u, 2v, 1)\)이므로 둘 다 어디서나 immersion이다. polar reparametrization \(\mathbf{y}\)도 <a href="#i-38-1-4">Proposition 38.1.4</a>(d)에서 immersion이다.</p>
+        <p class="verified">Verification: <code>verify/v-38-1-parametrized-surfaces.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-38-1-9">
+        <p><span class="thm-head">Non-example 38.1.9</span> <span class="thm-name">(a cone and a fold)</span>.
+        (a) double cone \(\mathbf{x}(\rho, t) = (\rho\cos t,\ \rho\sin t,\ \rho)\), \((\rho, t) \in \R^2\)에서 \(\mathbf{x}_\rho\times\mathbf{x}_t = (-\rho\cos t,\ -\rho\sin t,\ \rho)\)이다. \(\rho = 0\)인 직선 전체에서 \(0\)이고, 그 직선은 꼭짓점 한 점으로 간다. 꼭짓점에서 나가는 방향 \(\mathbf{x}_\rho(0, t) = (\cos t, \sin t, 1)\)은 평면이 아니라 원뿔을 이루므로 어떤 매개화로도 바로잡을 수 없다(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-2">Non-example 6.2.2</a>).</p>
+        <p>(b) fold \(\mathbf{x}(u, v) = (u,\ v^2,\ 0)\)에서 \(\mathbf{x}_v = (0, 2v, 0)\)은 \(v = 0\)에서 \(0\)이다. image는 반평면 \(\{y \ge 0\}\)으로 멀쩡해 보이지만, map은 \(v\)와 \(-v\)를 같은 점으로 보내므로 \(v = 0\)의 어느 근방에서도 injective가 아니다. 종이를 반으로 접어 겹친 모양이다. Section 38.4의 discrete fold-over가 이것의 mesh 판이다.</p>
+      </div>
+
+      <p><a href="#fig-38-1-2">Figure 38.1.2</a>의 오른쪽 (b)가 (a)의 cone이다. 꼭짓점에서 파란 화살표 \(\mathbf{x}_\rho(0, t)\) 여덟 개가 원뿔 모양으로 퍼진다. 한 평면에 들어가지 않으므로 이 점에는 tangent plane이 없다. 왼쪽 (a)는 다음 소절의 예다.</p>
+
+      <p>immersion은 한 점에서의 미분 조건이지만, 그 점 근처의 모양에 대해서도 알려 준다. Chapter 37에서 regular curve가 국소적으로 자기 자신을 가로지르지 않았던 것과 같다.</p>
+      <div class="thm proposition" id="i-38-1-10">
+        <p><span class="thm-head">Proposition 38.1.10</span> <span class="thm-name">(immersions are locally injective)</span>.
+        \(\mathbf{x}\colon U \to \R^3\)이 immersion이면 모든 \(q \in U\)에 대하여 \(q\)의 open neighborhood \(W \subseteq U\)가 있어 \(\mathbf{x}|_W\)는 injective이고, \(\mathbf{x}(W)\)에 subspace topology를 주면 \(\mathbf{x}|_W\colon W \to \mathbf{x}(W)\)는 homeomorphism이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(\mathbf{x}\)의 세 성분 가운데 두 개를 고르면 inverse function theorem을 쓸 수 있는 \(\R^2 \to \R^2\) map이 된다.</p>
+        <p><span class="proof-head">Proof.</span> \(D\mathbf{x}(q)\)의 rank가 \(2\)이므로(<a href="#i-38-1-7">Proposition 38.1.7</a>) 어떤 두 행이 만드는 \(2\times 2\) minor가 \(0\)이 아니다. 좌표의 번호를 바꾸어 그것이 처음 두 행이라 하자. \(\pi(x, y, z) = (x, y)\)라 하면 \(\pi\circ\mathbf{x}\colon U \to \R^2\)의 Jacobian matrix는 그 minor이므로 \(q\)에서 invertible이다. inverse function theorem(<a href="../02-calculus-rn/2-3-inverse-function-theorem.html#i-2-3-5">Theorem 2.3.5</a>)에 의해 \(q\)의 open neighborhood \(W\)가 있어 \(\pi\circ\mathbf{x}|_W\)는 open set \(\pi(\mathbf{x}(W))\) 위로의 diffeomorphism이다. \(\mathbf{x}(p_1) = \mathbf{x}(p_2)\)이면 \(\pi\circ\mathbf{x}(p_1) = \pi\circ\mathbf{x}(p_2)\)이므로 \(W\)에서 \(p_1 = p_2\)이다. 또 \(\mathbf{x}(W)\) 위에서 \((\mathbf{x}|_W)^{-1} = (\pi\circ\mathbf{x}|_W)^{-1}\circ\pi\)는 continuous map의 합성이다.</p>
+      </div>
+      <div class="thm nonexample" id="i-38-1-11">
+        <p><span class="thm-head">Non-example 38.1.11</span> <span class="thm-name">(locally injective but not an immersion)</span>.
+        거꾸로는 성립하지 않는다. \(\mathbf{x}(u, v) = (u^3,\ v,\ 0)\)은 \(\R^2\)에서 평면 \(\{z = 0\}\) 위로 가는 homeomorphism이므로 어디서나 locally injective지만, \(u = 0\)에서 \(\mathbf{x}_u = (3u^2, 0, 0) = 0\)이다. smooth한 세계에서는 “immersion”이 “locally injective”보다 강한 조건이다. Section 38.4에서 mesh의 immersion을 정의할 때는 미분이 없으므로 locally injective를 정의로 쓴다.</p>
+      </div>
+    </section>
+
+    <section id="sec-embedding">
+      <h2>Immersed versus Embedded</h2>
+      <p>immersion은 점 근처만 본다. 멀리 떨어진 두 parameter가 같은 점으로 가는 것은 허용된다. 곡면 전체가 자기 자신과 만나지 않기를 원하면 조건을 더해야 한다.</p>
+      <div class="thm definition" id="i-38-1-12">
+        <p><span class="thm-head">Definition 38.1.12</span> <span class="thm-name">(embedding)</span>.
+        immersion \(\mathbf{x}\colon U \to \R^3\)이 injective이고, \(\mathbf{x}(U)\)에 subspace topology를 주었을 때 inverse \(\mathbf{x}(U) \to U\)가 continuous이면(곧 \(\mathbf{x}\)가 <strong>topological embedding</strong>(위상 매장, <a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-8">Definition 3.3.8</a>)이면) \(\mathbf{x}\)를 <strong>embedding</strong>(매장)이라 하고, 그 image를 embedded surface라 한다(<a href="../14-submanifolds/index.html#toc-14-3">Section 14.3</a>).</p>
+      </div>
+      <p>곡선에서도 같은 구분을 했다(<a href="../37-curves-smooth-discrete/37-1-plane-curves.html#i-37-1-5">Example 37.1.5</a>, <a href="../37-curves-smooth-discrete/37-1-plane-curves.html#i-37-1-6">Non-example 37.1.6</a>). Track 3의 regular surface는 모든 점 근처에서 embedding인 parametrization으로 덮이는 집합이다(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>). 그러니 <a href="#i-38-1-10">Proposition 38.1.10</a>은 “immersion의 image는 국소적으로 regular surface의 조각”이라는 말이기도 하다.</p>
+      <div class="thm example" id="i-38-1-13">
+        <p><span class="thm-head">Example 38.1.13</span> <span class="thm-name">(embeddings)</span>.
+        (a) saddle의 graph 매개화는 embedding이다. inverse가 \((x, y, z) \mapsto (x, y)\)의 제한이라 continuous다. (b) sphere를 \((0, \pi)\times(0, 2\pi)\)에서, torus of revolution을 \((0, 2\pi)^2\)에서 쓰면 embedding이다(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-7">Example 6.1.7</a>, <a href="../06-regular-surfaces/6-5-regular-values.html#i-6-5-8">Example 6.5.8</a>). 같은 식을 \(\R^2\)에서 쓰면 immersion이지만 injective가 아니다(<a href="#i-38-1-8">Example 38.1.8</a>).</p>
+      </div>
+      <div class="thm nonexample" id="i-38-1-14">
+        <p><span class="thm-head">Non-example 38.1.14</span> <span class="thm-name">(immersed but not embedded)</span>.
+        Chapter 37의 figure-eight curve(<a href="../37-curves-smooth-discrete/37-1-plane-curves.html#i-37-1-5">Example 37.1.5</a>)에 직선을 곱한 figure-eight cylinder \(\mathbf{x}(u, v) = (\sin u,\ \sin u\cos u,\ v)\)를 보자. \(\mathbf{x}_u = (\cos u, \cos 2u, 0)\), \(\mathbf{x}_v = (0, 0, 1)\)이므로 \(\abs{\mathbf{x}_u\times\mathbf{x}_v} = \abs{\mathbf{x}_u}\)이고, \(c = \cos u\)로 쓰면 \(\abs{\mathbf{x}_u}^2 = c^2 + (2c^2 - 1)^2 = 4c^4 - 3c^2 + 1 \ge \tfrac{7}{16}\)이다. 곧 어디서나 immersion이다. 그러나 \(\mathbf{x}(0, v) = \mathbf{x}(\pi, v) = (0, 0, v)\)이므로 \([0, 2\pi)\times\R\)로 제한해도 injective가 아니다. \(z\)축 위의 점에서 두 sheet가 서로 다른 normal \((1, -1, 0)/\sqrt2\)와 \((1, 1, 0)/\sqrt2\)를 가지고 가로지른다(<a href="../06-regular-surfaces/6-2-tangent-plane.html#i-6-2-6">Non-example 6.2.6</a>). 정의역을 \((0, 2\pi)\times\R\)로 줄이면 injective가 되지만 inverse가 \(z\)축에서 continuous가 아니다(<a href="../37-curves-smooth-discrete/37-1-plane-curves.html#i-37-1-6">Non-example 37.1.6</a>에 \(\R\)을 곱한 것).</p>
+        <p class="verified">Verification: <code>verify/v-38-1-parametrized-surfaces.py</code></p>
+      </div>
+      <figure class="dg-figure" id="fig-38-1-2">
+        <img src="figures/fig-38-1-2-immersed-embedded.svg" alt="두 패널. (a) 위에서 비스듬히 본 회색 원기둥 모양 곡면으로, 위쪽 단면이 검은 8자 곡선이다. 가운데 주황 세로선(z축)에서 두 sheet가 가로지르고, 그 위의 한 점에서 서로 다른 방향의 주홍 화살표 두 개 N(0, v), N(π, v)가 나간다. (b) 꼭짓점이 맞닿은 회색 이중 원뿔. 꼭짓점의 검은 점에서 파란 화살표 여덟 개가 위쪽 원뿔면을 따라 퍼진다.">
+        <figcaption><span class="fig-head">Figure 38.1.2.</span>
+        <em>무엇을</em>: immersion이 전체에서 깨지는 예와 한 점에서 깨지는 예. (a) figure-eight cylinder \((\sin u, \sin u\cos u, v)\), \(u \in [0, 2\pi]\), \(v \in [-0.9, 0.9]\). (b) double cone \((\rho\cos t, \rho\sin t, \rho)\), \(\rho \in [-1, 1]\).
+        <em>읽는 법</em>: (a)의 검은 곡선은 위쪽 단면(\(v = 0.9\)), 주황 선은 두 sheet가 만나는 \(z\)축(\(u = 0\)과 \(u = \pi\)의 image), 주홍 화살표는 점 \((0, 0, 0.5)\)에서 두 sheet의 unit normal \(\mathbf{x}_u\times\mathbf{x}_v/\abs{\mathbf{x}_u\times\mathbf{x}_v}\)이다(길이 \(0.55\)로 그렸다). (b)의 검은 점은 꼭짓점 \(\mathbf{x}(0, t)\), 파란 화살표는 \(\mathbf{x}_\rho(0, t)\)를 \(t = k\pi/4\)에서 그린 것이다(길이 \(0.55\)배).
+        <em>볼 것</em>: (a)는 어디서나 immersion(\(\abs{\mathbf{x}_u\times\mathbf{x}_v} \ge \sqrt7/4\))이지만 \(z\)축에서 서로 다른 두 tangent plane이 한 점을 지난다. (b)는 꼭짓점에서만 \(\mathbf{x}_\rho\times\mathbf{x}_t = 0\)이고, 거기서 나가는 방향들이 평면이 아니라 원뿔을 이룬다.
+        <em>본문과의 연결</em>: (a)는 <a href="#i-38-1-14">Non-example 38.1.14</a>(immersed but not embedded), (b)는 <a href="#i-38-1-9">Non-example 38.1.9</a>(a)(not immersed).</figcaption>
+      </figure>
+      <p><a href="#fig-38-1-2">Figure 38.1.2</a>의 왼쪽 (a)를 보자. 위쪽 검은 단면이 8자이고, 주황 선 위의 한 점에서 주홍 화살표 두 개가 서로 다른 방향을 가리킨다. 그 점은 하나지만 parameter는 둘(\(u = 0\)과 \(u = \pi\))이고, 각 parameter 근처의 sheet는 <a href="#i-38-1-10">Proposition 38.1.10</a>대로 멀쩡한 조각이다. 곧 immersion이 보장하는 것은 각 sheet가 국소적으로 좋다는 것뿐이고, 서로 다른 sheet가 공간에서 만나는 것은 막지 않는다. (b)는 반대로 전체로 보면 흔한 모양이지만 꼭짓점 한 점에서 국소 조건이 깨진다.</p>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: what “immersed” should mean on a mesh</p>
+        <ul>
+          <li>smooth: immersion은 \(d\mathbf{x}\)의 rank 조건이다. 그 결과로 국소적으로 injective가 되지만(<a href="#i-38-1-10">Proposition 38.1.10</a>), 거꾸로는 성립하지 않는다(<a href="#i-38-1-11">Non-example 38.1.11</a>).</li>
+          <li>discrete: triangle mesh는 triangle 안에서는 affine map이라 \(d\mathbf{x}\)가 상수이고, edge와 vertex에서는 미분이 없다. triangle 안의 rank 조건은 “넓이가 \(0\)인 triangle이 없다”가 된다. 그러나 이것만으로는 <a href="#i-38-1-9">Non-example 38.1.9</a>(b)의 fold 같은 접힘을 막지 못한다. 그래서 Section 38.4는 locally injective를 discrete immersion의 정의로 삼는다.</li>
+          <li>무엇을 보존하는가: “국소적으로 자기 자신과 겹치지 않는다”는 성질. 무엇을 잃는가: vertex에서의 tangent plane. mesh의 vertex에는 하나의 tangent plane이 없고, vertex normal을 여러 방법으로 정의해야 한다(Section 38.5).</li>
+        </ul>
+      </aside>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: an immersion check on a parameter grid</p>
+<pre id="code-38-1-1"><code>import numpy as np
+
+def area_density(x, u, v, h=1e-6):
+    """|x_u x x_v| on the grid u x v; partial derivatives by central differences."""
+    U, V = np.meshgrid(u, v, indexing="ij")
+    xu = (x(U + h, V) - x(U - h, V)) / (2 * h)
+    xv = (x(U, V + h) - x(U, V - h)) / (2 * h)
+    return np.linalg.norm(np.cross(xu, xv, axis=0), axis=0)
+
+def sphere(th, ph):
+    return np.array([np.sin(th) * np.cos(ph), np.sin(th) * np.sin(ph), np.cos(th)])
+
+def torus(u, v, R=2.0, r=0.8):
+    return np.array([(R + r * np.cos(u)) * np.cos(v), (R + r * np.cos(u)) * np.sin(v), r * np.sin(u)])
+
+def double_cone(rho, t):
+    return np.array([rho * np.cos(t), rho * np.sin(t), rho])
+
+t = np.linspace(0, 2 * np.pi, 361)
+for name, x, u in [("sphere", sphere, np.linspace(0, np.pi, 181)), ("torus", torus, t),
+                   ("double cone", double_cone, np.linspace(-1, 1, 201))]:
+    a = area_density(x, u, t)
+    i, j = np.unravel_index(a.argmin(), a.shape)
+    print(f"{name:12s} min |x_u x x_v| = {a.min():.3f} at first parameter {u[i]:.3f}")
+</code></pre>
+<pre id="out-38-1-1"><code>sphere       min |x_u x x_v| = 0.000 at first parameter 0.000
+torus        min |x_u x x_v| = 0.960 at first parameter 3.142
+double cone  min |x_u x x_v| = 0.000 at first parameter 0.000</code></pre>
+        <p>\(\abs{\mathbf{x}_u\times\mathbf{x}_v}\)의 최솟값이 \(0\)인 곳이 immersion이 깨지는 곳이다(<a href="#i-38-1-7">Proposition 38.1.7</a>(iii)). sphere는 극(\(\theta = 0\)), cone은 꼭짓점(\(\rho = 0\))에서 \(0\)이고, torus는 안쪽 적도(\(u = \pi\))에서 최솟값 \(r(R - r) = 0.96\)이다. 격자 검사는 격자점 사이를 보지 못하므로 증명이 아니라 진단이다. 여기서는 최솟값이 격자점에 놓이도록 격자를 골랐다.</p>
+        <p class="verified">Verification: <code>verify/v-38-1-parametrized-surfaces.py</code>가 이 코드를 그대로 실행하고 출력과 정확한 값을 비교한다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-eversion">
+      <h2>Regular Homotopy and Sphere Eversion</h2>
+      <p>Chapter 37의 regular homotopy(<a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-7">Definition 37.2.7</a>)는 곡선을 “멈추거나 꺾이지 않게” 움직이는 변형이었다. 곡면에도 같은 말을 옮길 수 있다. 닫힌 곡면, 예를 들어 sphere \(S^2\)의 두 immersion \(\mathbf{x}_0, \mathbf{x}_1\colon S^2 \to \R^3\)(\(S^2\) 위의 smooth map으로, parametrization으로 덮어 보면 각 조각이 <a href="#i-38-1-6">Definition 38.1.6</a>의 의미로 immersion인 것) 사이의 regular homotopy는 continuous family \(\mathbf{x}_\lambda\)(\(\lambda \in [0, 1]\))로서, 모든 \(\lambda\)에서 \(\mathbf{x}_\lambda\)가 immersion이고 parameter에 대한 일계 편미분이 \(\lambda\)까지 함께 continuous인 것이다. 각 순간에 자기 자신을 통과하는 것은 허용하지만, 주름(\(d\mathbf{x}\)의 rank가 떨어지는 곳)은 허용하지 않는다.</p>
+      <p>평면의 원은 turning number가 regular homotopy에서 변하지 않으므로 방향을 뒤집을 수 없었다(<a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-12">Corollary 37.2.12</a>). sphere에서 “뒤집는다”는 것은 \(\mathbf{x}_0 = \) 표준 embedding에서 출발해, image는 같은 sphere이지만 normal \(\mathbf{x}_\theta\times\mathbf{x}_\varphi\)가 안쪽을 향하는 immersion(예: \(\mathbf{x}_1 = -\mathbf{x}_0\), <a href="#ex-38-1-2">Exercise 38.1.2</a>)으로 가는 것이다. 가장 단순한 시도부터 보자.</p>
+      <div class="thm nonexample" id="i-38-1-15">
+        <p><span class="thm-head">Non-example 38.1.15</span> <span class="thm-name">(pushing a sphere through itself)</span>.
+        unit sphere를 \(z\) 방향으로 눌러 반대편으로 밀어내는 family</p>
+        <div class="equation" id="eq-38-1-3">
+        \[ \begin{aligned} \mathbf{x}_\lambda(\theta, \varphi) = \big(&\sin\theta\cos\varphi,\ \sin\theta\sin\varphi, \\ &(1 - 2\lambda)\cos\theta\big) \end{aligned} \tag{38.1.3} \]
+        </div>
+        <p>(\(\lambda \in [0, 1]\))를 보자. \(\lambda = 0\)은 sphere이고 \(\lambda = 1\)은 평면 \(z = 0\)에 대한 그 reflection이다. 계산하면</p>
+        <div class="equation" id="eq-38-1-4">
+        \[ \mathbf{x}_\theta\times\mathbf{x}_\varphi = \begin{pmatrix} (1 - 2\lambda)\sin^2\theta\cos\varphi \\ (1 - 2\lambda)\sin^2\theta\sin\varphi \\ \sin\theta\cos\theta \end{pmatrix} \tag{38.1.4} \]
+        </div>
+        <p>이다. 적도 \(\theta = \pi/2\)에서 이 vector의 길이는 \(\abs{1 - 2\lambda}\)이고 방향은 \(\lambda \lt \tfrac12\)이면 바깥쪽, \(\lambda \gt \tfrac12\)이면 안쪽이다. 따라서 \(\lambda = 1\)에서는 normal이 전부 안쪽을 향해 뒤집기는 성공했지만, \(\lambda = \tfrac12\)에서 적도 전체에 걸쳐 \(\mathbf{x}_\theta\times\mathbf{x}_\varphi = 0\)이 되어 immersion이 깨진다. 이 순간 곡면은 원판 위에 납작하게 눌려 있고, 적도는 날카로운 주름(crease)이다. 곡선이 cusp를 지나야 turning number를 바꿀 수 있었던 것(<a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-9">Non-example 37.2.9</a>)과 같은 현상이다.</p>
+        <p class="verified">Verification: <code>verify/v-38-1-parametrized-surfaces.py</code></p>
+      </div>
+      <figure class="dg-figure" id="fig-38-1-3">
+        <img src="figures/fig-38-1-3-naive-eversion.svg" alt="두 패널. (a) xz 평면의 단면: 오른쪽 절반에는 단위원(λ = 0)과 납작한 파란 타원(λ = 1/4)에 바깥을 향하는 주홍 화살표들이, 왼쪽 절반에는 같은 모양의 원(λ = 1)과 타원(λ = 3/4)에 안쪽을 향하는 주홍 화살표들이 있다. 가운데 수평의 주황 선분이 λ = 1/2이다. (b) 가로축 λ, 세로축 적도에서의 |x_θ × x_φ| 그래프로, 1에서 직선으로 내려가 λ = 1/2에서 0에 닿고 다시 1로 올라가는 V자 모양이다. 바닥의 주황 점에 crease라는 표시가 있다.">
+        <figcaption><span class="fig-head">Figure 38.1.3.</span>
+        <em>무엇을</em>: <a href="#eq-38-1-3">(38.1.3)</a>의 family \(\mathbf{x}_\lambda\). (a) \(xz\) 평면의 단면, (b) 적도에서의 \(\abs{\mathbf{x}_\theta\times\mathbf{x}_\varphi}\).
+        <em>읽는 법</em>: (a)의 오른쪽 절반(\(\varphi = 0\))은 \(\lambda = 0\)(검정)과 \(\lambda = \tfrac14\)(파랑), 왼쪽 절반(\(\varphi = \pi\))은 \(\lambda = 1\)(검정)과 \(\lambda = \tfrac34\)(파랑)이다. \(\lambda\)와 \(1 - \lambda\)의 image는 같은 집합이므로 절반씩만 그렸다. 주홍 화살표는 unit normal \(\mathbf{x}_\theta\times\mathbf{x}_\varphi/\abs{\mathbf{x}_\theta\times\mathbf{x}_\varphi}\)(길이 \(0.22\)), 주황 선분은 \(\lambda = \tfrac12\)의 image다. (b)의 가로축은 \(\lambda\), 세로축은 \(\theta = \pi/2\)에서의 \(\abs{\mathbf{x}_\theta\times\mathbf{x}_\varphi} = \abs{1 - 2\lambda}\)이다.
+        <em>볼 것</em>: 오른쪽의 화살표는 바깥을, 왼쪽의 화살표는 안쪽을 향한다. 모양은 같고 방향만 뒤집혔다. 그 사이의 \(\lambda = \tfrac12\)에서 (b)의 값이 \(0\)이 된다. 거기서 곡면은 원판으로 납작해지고 적도가 주름이 된다.
+        <em>본문과의 연결</em>: <a href="#i-38-1-15">Non-example 38.1.15</a>와 <a href="#eq-38-1-4">(38.1.4)</a>. 이 family는 regular homotopy가 아니다.</figcaption>
+      </figure>
+      <p><a href="#fig-38-1-3">Figure 38.1.3</a>의 (a)에서 오른쪽 절반의 바깥으로 향한 화살표와 왼쪽 절반의 안쪽으로 향한 화살표를 비교하자. 두 상태는 집합으로는 같은 sphere와 타원이고 normal만 반대다. (b)의 V자 그래프는 그 사이를 지나려면 적도의 \(\abs{\mathbf{x}_\theta\times\mathbf{x}_\varphi}\)가 \(0\)을 지나야 함을 보여 준다. 이 family만 보면 원처럼 sphere도 뒤집을 수 없을 것 같다. 그러나 사실은 그렇지 않다.</p>
+      <aside class="box history">
+        <p class="box-title">History: sphere eversion</p>
+        <p>S. Smale은 “A classification of immersions of the two-sphere”(Trans. Amer. Math. Soc. 90, 1959)에서 \(S^2\)의 \(\R^3\)으로의 immersion들의 regular homotopy class를 분류했다. 그 결과로 \(S^2\)의 어느 두 immersion도 regularly homotopic하다. 특히 표준 embedding과 안팎이 뒤집힌 \(-\mathbf{x}_0\) 사이에 regular homotopy가 있다. 곧 sphere는 주름 없이 뒤집을 수 있다(sphere eversion). 원에서는 turning number가 막았지만, sphere의 immersion에는 그런 불변량이 없다는 것이다. 중간 단계의 곡면은 자기 자신을 여러 번 통과해야 하므로 embedding은 아니고 immersion이다.</p>
+        <p>Smale의 증명은 존재만 보였고, 그 뒤 여러 사람이 구체적인 eversion을 만들었다. 강의 슬라이드는 B. Morin의 구성과 N. Max가 감독한 영상 “Turning a Sphere Inside Out”, Geometry Center의 영상 “Outside In”, 그리고 다른 구성들의 그림을 소개한다 <a class="cite" href="../../references.html#CMU-DDG-L12">[CMU-DDG L12]</a>. 이 study set은 eversion을 구성하거나 증명하지 않는다.</p>
+      </aside>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: the Tour and Chapter 37</p>
+        <p>Tour의 <a href="../00-tour/0-3-surfaces.html#i-0-3-1">Definition 0.3.1</a>은 parametrization과 regular surface를 “\(\mathbf{x}_u\times\mathbf{x}_v \neq 0\)”으로 줄여 소개했다. 이 절은 그 조건을 \(d\mathbf{x}\)의 injectivity로 다시 쓰고(<a href="#i-38-1-7">Proposition 38.1.7</a>), 그것이 국소 injectivity를 주는 이유를 증명했다(<a href="#i-38-1-10">Proposition 38.1.10</a>). 새로 생긴 것은 둘이다. \(d\mathbf{x}\)를 vector-valued 1-form으로 읽는 관점(Chapter 35)과, Chapter 37의 regular homotopy를 곡면으로 옮긴 질문이다.</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: Chapter 38</p>
+        <ul>
+          <li>immersion은 \(\mathbf{x}\)로 쓴다(§6.3). Crane은 \(f\)로 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>.</li>
+          <li>Track 3(§6.3)은 \(\mathbf{x}\)의 Jacobian을 \(D\mathbf{x}(q)\)로 쓰고, Track 2는 같은 linear map을 vector-valued 1-form \(d\mathbf{x}\)로 쓴다. \(d\mathbf{x}_q(X) = D\mathbf{x}(q)\,X\)이다(<a href="#i-38-1-4">Proposition 38.1.4</a>(a)).</li>
+          <li>Crane의 sphere 매개화 \((\cos u\sin v,\ \sin u\sin v,\ \cos v)\)는 §7의 \(\mathbf{x}(\theta, \varphi)\)에서 \(u = \varphi\), \(v = \theta\)로 둔 것이다(\(r = 1\)). 좌표의 순서가 \((\varphi, \theta)\)라서 \(f_u\times f_v = \mathbf{x}_\varphi\times\mathbf{x}_\theta = -\sin\theta\,\mathbf{x}\)는 안쪽을 향한다. 이 study set의 \(\mathbf{x}_\theta\times\mathbf{x}_\varphi\)는 바깥쪽이다. normal의 방향은 Section 38.3과 Chapter 39의 부호를 바꾸므로 Crane의 sphere 식을 옮길 때 주의한다.</li>
+          <li>이 장에서만 쓰는 기호: mesh의 vertex 위치를 굵은 \(\mathbf{x}_i\)로 쓴다. vertex 위치가 simplicial map \(\mathbf{x}\)의 값이기 때문이다(Section 38.4). Chapter 31과 notation 표는 \(x_i\)로 쓴다. discrete differential은 \((d\mathbf{x})_{ij} = \mathbf{x}_j - \mathbf{x}_i\), face \(f\)의 unit normal과 넓이는 \(\mathbf{N}_f\), \(A_f\), \(f\)에서 vertex \(i\)의 내각은 \(\theta_i^{jk}\)(\(f = ijk\))로 쓴다. \(\theta\)는 sphere의 colatitude와 겹치므로 한 항목 안에서 함께 쓰지 않는다.</li>
+          <li>conformal factor는 \(e^{2\mu}\)로 쓴다(Section 38.2). vector area는 굵은 \(\mathbf{A}\)로 쓰고 넓이 \(A\)와 구별한다(Section 38.3). surface 위 1-form의 Hodge star의 부호는 Section 38.3의 Conventions 상자에 있다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Chapter 6: regular surface와 parametrization(<a href="../06-regular-surfaces/index.html#toc-6-1">Section 6.1</a>), tangent plane(<a href="../06-regular-surfaces/index.html#toc-6-2">Section 6.2</a>), change of parameters(<a href="../06-regular-surfaces/index.html#toc-6-3">Section 6.3</a>), map의 differential(<a href="../06-regular-surfaces/index.html#toc-6-4">Section 6.4</a>).</li>
+          <li>Chapter 14: manifold 사이의 immersion, submersion, embedding과 rank theorem(<a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>, <a href="../14-submanifolds/index.html#toc-14-3">Section 14.3</a>).</li>
+          <li>Tour: <a href="../00-tour/0-3-surfaces.html#sec-parametrization">Section 0.3</a>의 parametrization.</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L12">[CMU-DDG L12]</a> slides 3–20, <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>, <a class="cite" href="../../references.html#Cr">[Cr §3.2]</a>, <a class="cite" href="../../references.html#Cr">[Cr §3.5]</a>(Jacobian과 좌표 표현).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>parametrized surface는 평면 영역에서 \(\R^3\)으로 가는 smooth map \(\mathbf{x}\)이고, 그 differential \(d\mathbf{x} = \mathbf{x}_u\,du + \mathbf{x}_v\,dv\)는 parameter 방향을 공간의 vector로 보내는 \(\R^3\)-valued 1-form이다. Jacobian, directional derivative, 곡선의 속도로 같은 것을 계산한다(<a href="#i-38-1-4">Proposition 38.1.4</a>).</li>
+        <li>\(d\mathbf{x}\)는 같은 길이의 vector들을 점마다 다른 비율로 늘인다. 단위원의 image는 타원이다(<a href="#fig-38-1-1">Figure 38.1.1</a>).</li>
+        <li>immersion은 모든 점에서 \(d\mathbf{x}\)가 injective인 map이고, \(\mathbf{x}_u\times\mathbf{x}_v \neq 0\)과 같다. immersion은 국소적으로 injective이지만 거꾸로는 성립하지 않는다(<a href="#i-38-1-7">Proposition 38.1.7</a>, <a href="#i-38-1-10">Proposition 38.1.10</a>, <a href="#i-38-1-11">Non-example 38.1.11</a>).</li>
+        <li>embedding은 injective이고 inverse가 continuous인 immersion이다. figure-eight cylinder는 immersed이지만 embedded가 아니다(<a href="#i-38-1-14">Non-example 38.1.14</a>).</li>
+        <li>sphere를 납작하게 눌러 뒤집으면 적도에 주름이 생긴다(<a href="#i-38-1-15">Non-example 38.1.15</a>). 그래도 Smale에 따르면 주름 없이 뒤집는 regular homotopy가 존재한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 \(d\mathbf{x}\)로 parameter 평면에 새 inner product를 준다. <a href="#fig-38-1-1">Figure 38.1.1</a>의 타원이 그 inner product의 단위원이고, 그것으로 곡면 위의 길이, 각, 넓이를 잰다. 각을 보존하는 특별한 좌표(conformal coordinates)도 만난다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-38-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 38.1.1</span> <span class="level">★</span>
+        cylinder \(\mathbf{x}(u, v) = (r\cos u, r\sin u, v)\)의 \(d\mathbf{x}\)와 \(\mathbf{x}_u\times\mathbf{x}_v\)를 구하고 immersion임을 보여라. 점 \(q = (\pi/2, 0)\)에서 \(d\mathbf{x}_q(\partial_u + \partial_v)\)를 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathbf{x}_u = (-r\sin u, r\cos u, 0)\), \(\mathbf{x}_v = (0, 0, 1)\)이므로 \(d\mathbf{x} = (-r\sin u, r\cos u, 0)\,du + (0, 0, 1)\,dv\)이다. \(\mathbf{x}_u\times\mathbf{x}_v = (r\cos u\cdot 1 - 0,\ 0 - (-r\sin u)\cdot 1,\ 0) = (r\cos u, r\sin u, 0)\)이고 길이가 \(r \gt 0\)이므로 <a href="#i-38-1-7">Proposition 38.1.7</a>(iii)에서 어디서나 immersion이다. \(q = (\pi/2, 0)\)에서 \(\mathbf{x}_u = (-r, 0, 0)\)이므로 \(d\mathbf{x}_q(\partial_u + \partial_v) = (-r, 0, 1)\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-38-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 38.1.2</span> <span class="level">★</span>
+        sphere의 매개화 \(\mathbf{x}(\theta, \varphi)\)에 대하여 \(\mathbf{y} = -\mathbf{x}\)를 생각하자. \(\mathbf{y}\)의 image가 \(S^2(r)\)이고 \(\mathbf{y}\)가 \((0, \pi)\times\R\)에서 immersion임을 보이고, \(\mathbf{y}_\theta\times\mathbf{y}_\varphi\)가 점 \(\mathbf{y}(\theta, \varphi)\)에서 안쪽을 향함을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\abs{-\mathbf{x}} = r\)이고 \(-S^2(r) = S^2(r)\)이므로 image는 \(S^2(r)\)이다. \(\mathbf{y}_\theta = -\mathbf{x}_\theta\), \(\mathbf{y}_\varphi = -\mathbf{x}_\varphi\)이므로 \(\mathbf{y}_\theta\times\mathbf{y}_\varphi = \mathbf{x}_\theta\times\mathbf{x}_\varphi = r\sin\theta\,\mathbf{x}\)(<a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-2">Example 7.5.2</a>(a)의 식)이다. 이것은 \(\sin\theta \neq 0\)이면 \(0\)이 아니므로 immersion이다. 점 \(\mathbf{y} = -\mathbf{x}\)에서 바깥쪽 normal은 \(\mathbf{y}/r = -\mathbf{x}/r\)이고, \(\mathbf{y}_\theta\times\mathbf{y}_\varphi = r\sin\theta\,\mathbf{x} = -r^2\sin\theta\,(\mathbf{y}/r)\)이므로 안쪽을 향한다. Smale의 정리는 \(\mathbf{x}\)와 \(\mathbf{y}\) 사이에 regular homotopy가 있다는 것이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-38-1-3" data-level="2">
+        <p><span class="thm-head">Exercise 38.1.3</span> <span class="level">★★</span>
+        \(\mathbf{x}\colon U \to \R^3\)이 immersion이고 \(h\colon \tilde U \to U\)가 diffeomorphism, \(\mathbf{y} = \mathbf{x}\circ h\)라 하자. (a) \(\mathbf{y}_s\times\mathbf{y}_t = \det Dh\,(\mathbf{x}_u\times\mathbf{x}_v)\circ h\)임을 보여라(\((s, t)\)는 \(\tilde U\)의 좌표). (b) \(\mathbf{y}\)가 immersion이고, unit normal \(\mathbf{y}_s\times\mathbf{y}_t/\abs{\mathbf{y}_s\times\mathbf{y}_t}\)가 \(\mathbf{x}\)의 것과 같을 필요충분조건은 \(\det Dh \gt 0\)임을 보여라. (c) saddle의 polar reparametrization(<a href="#i-38-1-2">Example 38.1.2</a>(d))에서 이것을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(h = (h^1, h^2)\)라 하면 chain rule에서 \(\mathbf{y}_s = h^1_s\,\mathbf{x}_u + h^2_s\,\mathbf{x}_v\), \(\mathbf{y}_t = h^1_t\,\mathbf{x}_u + h^2_t\,\mathbf{x}_v\)이다(모두 \(h(s, t)\)에서 계산). cross product의 bilinearity와 \(\mathbf{x}_u\times\mathbf{x}_u = 0\), \(\mathbf{x}_v\times\mathbf{x}_u = -\mathbf{x}_u\times\mathbf{x}_v\)에서 \(\mathbf{y}_s\times\mathbf{y}_t = (h^1_sh^2_t - h^2_sh^1_t)\,\mathbf{x}_u\times\mathbf{x}_v = \det Dh\,\mathbf{x}_u\times\mathbf{x}_v\)이다(Track 3의 <a href="../07-first-fundamental-form/7-3-area.html#i-7-3-1">Lemma 7.3.1</a>과 같은 계산). (b) \(h\)가 diffeomorphism이면 \(\det Dh \neq 0\)이므로 (a)에서 \(\mathbf{y}_s\times\mathbf{y}_t \neq 0\)이고 \(\mathbf{y}\)는 immersion이다. 두 unit normal의 비는 \(\det Dh/\abs{\det Dh} = \sgn\det Dh\)이다. (c) \(h(\rho, t) = (\rho\cos t, \rho\sin t)\)이면 \(\det Dh = \cos t\cdot\rho\cos t - (-\rho\sin t)\sin t = \rho\)이다. 직접 계산하면 \(\mathbf{y}_\rho = (\cos t, \sin t, 2\rho\cos 2t)\), \(\mathbf{y}_t = (-\rho\sin t, \rho\cos t, -2\rho^2\sin 2t)\)이고 \(\mathbf{y}_\rho\times\mathbf{y}_t = (-2\rho^2\cos t,\ 2\rho^2\sin t,\ \rho)\)이다. 한편 \(\mathbf{x}_u\times\mathbf{x}_v = (-2u, 2v, 1)\)에 \(u = \rho\cos t\), \(v = \rho\sin t\)를 넣고 \(\rho\)를 곱하면 같은 vector다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-38-1-4" data-level="2">
+        <p><span class="thm-head">Exercise 38.1.4</span> <span class="level">★★</span>
+        \(\mathbf{x}(u, v) = (uv,\ v,\ u^2)\)(Whitney umbrella)에 대하여 (a) immersion이 깨지는 점을 모두 찾고, (b) \(\mathbf{x}\)가 injective가 아닌 parameter 쌍을 모두 찾고, (c) \((0, 0)\)의 어느 근방에서도 \(\mathbf{x}\)가 injective가 아님을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(\mathbf{x}_u = (v, 0, 2u)\), \(\mathbf{x}_v = (u, 1, 0)\)이므로 \(\mathbf{x}_u\times\mathbf{x}_v = (0\cdot 0 - 2u\cdot 1,\ 2u\cdot u - v\cdot 0,\ v\cdot 1 - 0\cdot u) = (-2u,\ 2u^2,\ v)\)이다. 이것이 \(0\)인 것은 \(u = v = 0\)일 때뿐이다. (b) \(\mathbf{x}(u_1, v_1) = \mathbf{x}(u_2, v_2)\)이면 둘째 성분에서 \(v_1 = v_2 =: v\), 셋째에서 \(u_2 = \pm u_1\)이다. \(u_2 = -u_1 \neq u_1\)이면 첫째 성분에서 \(u_1v = -u_1v\), 곧 \(v = 0\)이다. 따라서 서로 다른 parameter가 같은 점으로 가는 것은 \((u, 0)\)과 \((-u, 0)\)(\(u \neq 0\))뿐이고, 그 image는 반직선 \(\{(0, 0, z) : z \gt 0\}\)이다. (c) 원점의 어떤 근방도 작은 \(u \neq 0\)에 대한 \((u, 0)\)과 \((-u, 0)\)을 함께 포함하고, 두 점의 image가 같다. 원점 밖에서는 (a)에 의해 immersion이므로 <a href="#i-38-1-10">Proposition 38.1.10</a>대로 국소적으로 injective다. 원점만 국소 injectivity가 깨지는 점(pinch point)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-38-1-5" data-level="2">
+        <p><span class="thm-head">Exercise 38.1.5</span> <span class="level">★★</span>
+        <strong>Coding.</strong> Implementation 상자의 <code>area_density</code>로 <a href="#eq-38-1-3">(38.1.3)</a>의 family \(\mathbf{x}_\lambda\)에 대하여, 띠 \(\pi/3 \le \theta \le 2\pi/3\)(극 근처를 뺀 부분) 위에서 \(\abs{\mathbf{x}_\theta\times\mathbf{x}_\varphi}\)의 최솟값 \(m(\lambda)\)를 \(\lambda = 0, 0.1, \dots, 1\)에서 계산하여라. \(m(\lambda) = 0\)인 \(\lambda\)는 어디이고, \(\lambda \lt \tfrac12\)에서 \(m(\lambda)\)의 식은 무엇인가?</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-38-1-5"><code>lams = np.round(np.linspace(0, 1, 11), 1)
+band = np.linspace(np.pi / 3, 2 * np.pi / 3, 61)
+m = [area_density(lambda th, ph: np.array([np.sin(th) * np.cos(ph), np.sin(th) * np.sin(ph),
+                                           (1 - 2 * lam) * np.cos(th)]), band, t).min() for lam in lams]
+print(" ".join(f"{v:.3f}" for v in m))
+</code></pre>
+<pre id="out-ex-38-1-5"><code>0.866 0.740 0.600 0.400 0.200 0.000 0.200 0.400 0.600 0.740 0.866</code></pre>
+          <p>\(m(\lambda) = 0\)은 \(\lambda = 0.5\)에서뿐이다. <a href="#eq-38-1-4">(38.1.4)</a>에서 \(a = \abs{1 - 2\lambda}\), \(w = \sin^2\theta\)로 쓰면 \(\abs{\mathbf{x}_\theta\times\mathbf{x}_\varphi}^2 = w\big(a^2w + 1 - w\big)\)이다. 띠에서 \(w \in [\tfrac34, 1]\)이고, 이 식은 \(w\)에 대해 위로 볼록한 이차식이므로 최솟값은 양 끝 \(w = 1\)(값 \(a^2\))이나 \(w = \tfrac34\)(값 \((9a^2 + 3)/16\)) 가운데 작은 것이다. \(a^2 \le (9a^2 + 3)/16\) ⇔ \(a^2 \le \tfrac37\)이므로 \(a \le 0.6547\)이면 \(m = a = \abs{1 - 2\lambda}\)(적도), 그보다 크면 \(m = \sqrt{(9a^2 + 3)/16}\)이다. \(\lambda = 0\)에서 \(\sqrt{12/16} = 0.866\), \(\lambda = 0.1\)(\(a = 0.8\))에서 \(\sqrt{0.5475} = 0.740\)이고, \(\lambda = 0.2, 0.3, 0.4\)에서는 \(a = 0.6, 0.4, 0.2\)다. 출력과 맞는다. 띠로 제한한 것은 극의 \(\sin\theta = 0\)(좌표의 문제, <a href="#i-38-1-8">Example 38.1.8</a>(b))을 eversion의 주름과 섞지 않기 위해서다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 38. Surfaces: Smooth and Discrete</a>
+    <a rel="next" href="38-2-induced-metric.html">38.2 The Induced Metric and Conformal Coordinates →</a>
+  </nav>
+</body>
+</html>

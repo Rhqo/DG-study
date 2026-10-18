@@ -889,3 +889,19 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - 38장 작성자에게 36장 API를 보냈다.
     - terms 10개, notation 4행
   - 다음에: lib/ch36.py의 dual_d0/dual_d1/left_right_faces를 dgdec로 옮기는 것을 검토한다. 36장 검토(2명).
+- 2026-10-18: **38장 작성 완료(draft).** 6절, 그림 18개(interactive 3개), verify 630 checks, todo 0.
+  - 주요 결과
+    - vertex normal 4종(Def 38.5.6)
+    - 정규화 없이 subdivision에 불변인 것은 angle-weighted뿐이다(Prop 38.5.8).
+    - 구면에서 Δ_h z ≈ −2z다. barycentric ⋆0로는 수렴하지 않는다(Ex 38.6.6).
+    - shape from normals(Thm 38.6.8, 증명), dimpled icosahedron(edge 길이가 같아도 부피가 다르다)
+  - 규약
+    - ⋆dx = −N×dx(Crane: ⋆df = N×df)
+    - e^{2μ}
+  - **검토 때 볼 것**
+    - 38장은 mesh vertex를 굵은 𝐱_i로 썼다. §2.5와 31장은 x_i다. 통일 여부를 정한다.
+    - 36장 번호를 바꾸지 않았는지 다시 확인한다.
+  - 통합
+    - 36장에서 38장으로 가는 링크 7개를 실제 절로 바꿨다.
+    - terms 14개, Smale59, notation 3행
+    - root index Draft
