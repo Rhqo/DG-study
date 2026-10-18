@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>37.2 Turning Number and the Whitney–Graustein Theorem — DG Study</title>
+  <meta name="dg-id" content="37.2">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="37.1, 5.6, 32.3">
+  <meta name="dg-refs" content="CMU-DDG L10; Whitney37; Jacobson13">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">37. Curves: Smooth and Discrete</a> ›
+    <span>37.2 Turning Number and the Whitney–Graustein Theorem</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>37.2 Turning Number and the Whitney–Graustein Theorem</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#Whitney37">[Whitney37]</a>, <a class="cite" href="../../references.html#Jacobson13">[Jacobson13]</a> · Lecture: <a class="cite" href="../../references.html#CMU-DDG-L10">[CMU-DDG L10]</a> (노트에는 이 내용이 없고 강의 슬라이드에만 있다)</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>closed curve의 turning number와 점에 대한 winding number를 정의하고 계산할 수 있으며, 둘의 차이와 관계(turning number는 tangent의 winding number)를 설명할 수 있다.</li>
+        <li>regular homotopy를 정의하고, turning number가 regular homotopy에서 변하지 않음을 증명할 수 있다.</li>
+        <li>Whitney–Graustein theorem을 진술하고, turning number가 \(0\)이 아닐 때 regular homotopy를 직접 만드는 방법을 설명할 수 있다.</li>
+        <li>다각형의 winding number를 부호 있는 각의 합으로 정확히 계산하고, 열린 자료에서 generalized winding number로 안팎을 판정할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Section 37.1: closed curve와 closing condition <a href="37-1-plane-curves.html#i-37-1-7">Proposition 37.1.7</a>, regular curve와 immersion.</li>
+        <li>closed curve와 simple closed curve <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-1">Definition 5.6.1</a>, rotation index <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-3">Definition 5.6.3</a>와 그 성질 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4</a>, continuous angle function <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>, rotation index theorem <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a>. 직관은 <a href="../00-tour/0-2-curves.html#i-0-2-7">Theorem 0.2.7</a>.</li>
+        <li>turning angle의 합 <a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-4">Proposition 32.3.4</a>.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="37-1-plane-curves.html#i-37-1-7">Proposition 37.1.7</a>은 curvature로 만든 곡선이 닫히려면 \(\frac{1}{2\pi}\int\kappa_s\,ds\)가 정수여야 한다는 것을 보였다. 그 정수가 rotation index다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-3">Definition 5.6.3</a>). 이 절은 이 정수를 위상의 눈으로 다시 본다. 곡선을 조금씩 움직이면 curvature는 어디서나 바뀌지만 그 적분은 정수라서 갑자기 뛸 수 없다. 그렇다면 이 정수는 어떤 변형에서 보존되고, 어떤 변형에서 바뀌는가?</p>
+      <p>Chapter 32도 같은 현상을 다각형에서 보았다. <a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-7">Proposition 32.4.7</a>은 turning angle의 합이 연속적인 변형에서 변하지 않는다는 것을 증명했고, 바뀌려면 edge의 길이가 \(0\)이 되거나 진행 방향이 정반대로 꺾여야 한다고 했다. smooth curve에서 그 “나쁜 순간”에 해당하는 것은 속도가 \(0\)이 되는 순간이다. 이 절은 그것을 regular homotopy라는 말로 정확히 하고, 강의가 소개하는 Whitney–Graustein theorem까지 간다.</p>
+    </section>
+
+    <section id="sec-turning">
+      <h2>Turning Number and Winding Number</h2>
+      <p>강의 슬라이드는 closed regular curve의 tangent가 반시계 방향으로 도는 횟수를 <strong>turning number</strong>(회전수)라 부른다 <a class="cite" href="../../references.html#CMU-DDG-L10">[CMU-DDG L10]</a>. 이것은 Chapter 5의 <strong>rotation index</strong> \(\operatorname{rot}(\gamma)\)(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-3">Definition 5.6.3</a>)와 같은 수다. 이 장에서는 두 이름을 같은 뜻으로 쓰고 기호는 \(\operatorname{rot}(\gamma)\), 그 값은 \(k\)로 쓴다. 다시 적으면, 주기 \(T\)인 closed curve \(\gamma\)의 continuous tangent angle \(\varphi\)에 대하여</p>
+      <div class="equation" id="eq-37-2-1">
+      \[ \begin{aligned} \operatorname{rot}(\gamma) &= \frac{1}{2\pi}\int_0^T\kappa_s\,\abs{\gamma'}\,dt\\ &= \frac{\varphi(T) - \varphi(0)}{2\pi} \in \Z \end{aligned} \tag{37.2.1} \]
+      </div>
+      <p>이다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4</a>(a)). 방향을 뒤집으면 부호가 바뀌고, rigid motion과 출발점을 바꾸는 것에는 변하지 않는다(같은 명제의 (a), (b), (d)).</p>
+
+      <div class="thm example" id="i-37-2-1">
+        <p><span class="thm-head">Example 37.2.1</span> <span class="thm-name">(turning numbers of the running examples)</span>.
+        반시계 방향 원은 \(k = 1\), 시계 방향 원은 \(k = -1\), 원을 두 번 돌면 \(k = 2\)이다. ellipse와 flower curve는 스스로 만나지 않는 반시계 방향 곡선이므로 \(k = 1\)이다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a>, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-12">Proposition 5.6.12</a>). flower curve는 \(\kappa_s\)가 열 번 부호를 바꾸므로(<a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-1">Example 32.2.1</a>) tangent angle이 오르내리지만, 한 바퀴의 순변화는 \(2\pi\)다. figure-eight \(\gamma(t) = (\sin t, \sin t\cos t)\)(<a href="37-1-plane-curves.html#i-37-1-5">Example 37.1.5</a>)는 \(k = 0\)이고(<a href="#ex-37-2-2">Exercise 37.2.2</a>), 안쪽에 고리가 있는 limaçon \(r(t) = \tfrac12 + \cos t\)(\(\gamma = r(\cos t, \sin t)\))는 \(k = 2\)다. 수치는 <a href="#fig-37-2-1">Figure 37.2.1</a>(b)에 있다.</p>
+        <p class="verified">Verification: <code>verify/v-37-2-turning-number.py</code></p>
+      </div>
+
+      <p>turning number는 tangent가 도는 횟수다. 이와 비슷하게 들리지만 다른 수가 있다. 곡선이 한 점 \(p\)의 둘레를 몇 번 감는가이다. 곡선 위의 점에서 \(p\)를 바라보는 방향이 한 바퀴 동안 몇 번 도는지를 세면 된다. 이 방향 \((\gamma(t) - p)/\abs{\gamma(t) - p}\)는 \(t\)의 연속함수이므로 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>(b)로 연속인 각으로 나타낼 수 있다.</p>
+      <div class="thm definition" id="i-37-2-2">
+        <p><span class="thm-head">Definition 37.2.2</span> <span class="thm-name">(winding number)</span>.
+        \(\gamma\colon \R \to \R^2\)가 주기 \(T\)인 continuous map이고 \(p \in \R^2\)가 trace \(\gamma([0, T])\) 위에 있지 않다고 하자. \(\alpha\colon [0, T] \to \R\)가 연속이고 모든 \(t\)에서 \((\gamma(t) - p)/\abs{\gamma(t) - p} = (\cos\alpha(t), \sin\alpha(t))\)를 만족하면</p>
+        <div class="equation" id="eq-37-2-2">
+        \[ \operatorname{wind}(\gamma, p) = \frac{\alpha(T) - \alpha(0)}{2\pi} \tag{37.2.2} \]
+        </div>
+        <p>를 \(p\)에 대한 \(\gamma\)의 <dfn>winding number</dfn>(감김수)라 한다.</p>
+      </div>
+      <p>정의가 잘 되어 있는지 확인하자. 그런 \(\alpha\)는 있다: \([0, T]\)는 compact이고 star-shaped이므로 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>(b)를 쓸 수 있다. 두 \(\alpha\)는 같은 lemma의 유일성에 의해 \(2\pi\)의 정수배 상수만큼만 다르므로 <a href="#eq-37-2-2">(37.2.2)</a>는 \(\alpha\)의 선택에 무관하다. \(\gamma(T) = \gamma(0)\)이므로 \(\alpha(T)\)와 \(\alpha(0)\)은 같은 방향을 나타내고, 따라서 \(\operatorname{wind}(\gamma, p)\)는 정수다. 출발점을 옮겨도 같은 값이 나온다는 것은 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4</a>(a)의 증명과 같다. 곡선의 각 점을 \(p\)를 중심으로 하는 단위원 위로 보내면, 그 점이 단위원 위를 움직인 부호 있는 거리가 바로 \(\alpha(T) - \alpha(0)\)이다.</p>
+
+      <div class="thm proposition" id="i-37-2-3">
+        <p><span class="thm-head">Proposition 37.2.3</span> <span class="thm-name">(integral formula)</span>.
+        \(\gamma\)가 주기 \(T\)인 매끄러운 closed curve이고 \(p\)가 trace 위에 있지 않으면</p>
+        <div class="equation" id="eq-37-2-3">
+        \[ \operatorname{wind}(\gamma, p) = \frac{1}{2\pi}\int_0^T\frac{\det(\gamma - p,\ \gamma')}{\abs{\gamma - p}^2}\,dt \tag{37.2.3} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(v(t) = \gamma(t) - p\), \(u = v/\abs{v}\)라 하자. \(u\)는 매끄럽고 크기가 \(1\)이므로 <a href="../04-curves/4-4-signed-curvature.html#i-4-4-8">Lemma 4.4.8</a>에 의해 매끄러운 angle function \(\alpha_1\)이 있고 \(\alpha_1' = \inner{u'}{Ju} = \det(u, u')\)이다(\(\inner{w}{Ju} = \det(u, w)\)는 성분으로 바로 확인된다). \(u' = v'/\abs{v} + v\,(1/\abs{v})'\)이고 \(\det(u, u)\)는 \(0\)이므로 \(\det(u, u') = \det(v, v')/\abs{v}^2\)이다. \(\alpha_1\)을 \([0, T]\)로 제한한 것은 <a href="#i-37-2-2">Definition 37.2.2</a>의 \(\alpha\)이므로 \(\alpha(T) - \alpha(0) = \int_0^T\alpha_1'\,dt\)이다.</p>
+      </div>
+
+      <div class="thm example" id="i-37-2-4">
+        <p><span class="thm-head">Example 37.2.4</span> <span class="thm-name">(winding numbers)</span>.
+        (a) 반지름 \(r\)인 원을 두 번 도는 \(\gamma(t) = r(\cos t, \sin t)\), \(0 \le t \le 4\pi\)에서 중심 \(p = 0\)이면 \(\alpha(t) = t\)이므로 \(\operatorname{wind} = 2\)이다. 원 밖의 점은 \(\operatorname{wind} = 0\)이다(<a href="#ex-37-2-1">Exercise 37.2.1</a>).
+        (b) figure-eight \((\sin t, \sin t\cos t)\)는 왼쪽 고리 안의 점에 대해 \(+1\), 오른쪽 고리 안의 점에 대해 \(-1\), 바깥의 점에 대해 \(0\)이다. 오른쪽 고리는 시계 방향으로, 왼쪽 고리는 반시계 방향으로 돌기 때문이다(<a href="#fig-37-2-1">Figure 37.2.1</a>(a)).
+        (c) limaçon \(r = \tfrac12 + \cos t\)는 안쪽 고리 안의 점 \((0.1, 0)\)에 대해 \(2\), 바깥 고리와 안쪽 고리 사이의 점 \((1.2, 0)\)에 대해 \(1\), 바깥의 점에 대해 \(0\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-37-2-turning-number.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-37-2-5">
+        <p><span class="thm-head">Non-example 37.2.5</span>.
+        \(p\)가 trace 위에 있으면 winding number는 정의되지 않는다. 예를 들어 figure-eight의 교차점 \(p = (0, 0)\)에서는 \(\gamma(t) - p\)가 \(t = 0, \pi\)에서 \(0\)이 되어 방향이 없다. \(p\)가 교차점을 지나 오른쪽 고리에서 왼쪽 고리로 옮겨 가면 winding number는 \(-1\)에서 \(+1\)로 뛴다. trace를 건널 때마다 winding number가 \(\pm1\)씩 바뀌는 것이 일반적인 모습이다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-37-2-1">
+        <img src="figures/fig-37-2-1-turning-winding.svg" alt="두 패널. (a) 가로로 누운 8자 모양의 검은 곡선. 가운데 교차점에 흰 동그라미가 있고, 곡선 위 네 곳에 진행 방향을 나타내는 파란 화살표가 있다. 왼쪽 고리 안에 주홍 +1, 오른쪽 고리 안에 주홍 −1, 위쪽 바깥에 회색 0이 적혀 있고, 아래에 rot = 0이라고 적혀 있다. (b) 가로축 s/L(0에서 1), 세로축 (φ(s) − φ(0))/2π의 그래프. 회색 직선이 0에서 1로, 회색 파선 직선이 0에서 −1로 간다. 파란 flower 곡선은 다섯 번 오르내리며 1에 닿고, 주홍 limaçon 곡선은 가운데에서 가파르게 오르며 2에 닿는다. 검은 figure-eight 곡선은 −0.75까지 내려갔다가 0으로 돌아온다.">
+        <figcaption><span class="fig-head">Figure 37.2.1.</span>
+        <em>무엇을</em>: (a) figure-eight \(\gamma(t) = (\sin t, \sin t\cos t)\)와 그 바깥 영역들의 winding number, (b) 다섯 closed curve의 tangent angle \(\varphi\)를 arc length의 함수로 그린 것.
+        <em>읽는 법</em>: (a)에서 파란 화살표가 진행 방향, 각 영역의 숫자가 그 영역 안의 점 \(p\)에 대한 \(\operatorname{wind}(\gamma, p)\), 흰 동그라미가 교차점이다. (b)의 가로축은 길이로 나눈 arc length \(s/L\), 세로축은 \((\varphi(s) - \varphi(0))/2\pi\)이고, 범례의 괄호 안 숫자가 turning number다. 회색 실선은 반시계 방향 원, 회색 파선은 시계 방향 원, 파랑은 flower curve, 주홍은 limaçon \(r = \tfrac12 + \cos t\), 검정은 figure-eight이다.
+        <em>볼 것</em>: (a)의 figure-eight은 두 고리 안에서 winding number가 \(+1\), \(-1\)로 다르지만 turning number는 \(0\)이다. (b)에서 각 곡선의 끝값이 turning number이고, 중간의 오르내림과 상관없이 정수에서 끝난다. figure-eight은 \(-0.75\)까지 내려갔다가 \(0\)으로 돌아온다.
+        <em>본문과의 연결</em>: <a href="#i-37-2-1">Example 37.2.1</a>, <a href="#i-37-2-2">Definition 37.2.2</a>, <a href="#i-37-2-4">Example 37.2.4</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-37-2-1">Figure 37.2.1</a>의 (a)에서 화살표를 따라 figure-eight을 한 바퀴 돌아 보자. 교차점에서 출발해 오른쪽 위로 올라간 뒤 오른쪽 고리를 시계 방향으로 돌고, 교차점을 지나 왼쪽 고리를 반시계 방향으로 돈다. 그래서 두 고리의 winding number는 부호가 반대다. tangent는 오른쪽 고리에서 시계 방향으로 거의 한 바퀴, 왼쪽 고리에서 반시계 방향으로 거의 한 바퀴 돌아 서로 상쇄된다. (b)의 검은 곡선이 정확히 그 모습이다. 처음에 \(-0.75\)바퀴까지 내려갔다가(오른쪽 고리), 다시 \(0\)으로 올라온다(왼쪽 고리). 주홍 limaçon은 안쪽 고리를 도는 동안(\(s/L\)가 \(0.5\) 근처) 가파르게 올라 모두 두 바퀴를 돈다.</p>
+
+      <p>두 수는 다음과 같이 이어진다. turning number는 곡선 자신이 아니라 속도 \(\gamma'\)가 그리는 closed curve의 winding number다.</p>
+      <div class="thm proposition" id="i-37-2-6">
+        <p><span class="thm-head">Proposition 37.2.6</span> <span class="thm-name">(turning number as a winding number)</span>.
+        \(\gamma\)가 주기 \(T\)인 regular closed curve이면 \(t \mapsto \gamma'(t)\)는 원점을 지나지 않는 주기 \(T\)인 closed curve이고</p>
+        <div class="equation" id="eq-37-2-4">
+        \[ \operatorname{rot}(\gamma) = \operatorname{wind}(\gamma', 0) \tag{37.2.4} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> regular이므로 \(\gamma'(t) \neq 0\)이다. <a href="#i-37-2-2">Definition 37.2.2</a>를 \(\gamma'\)과 \(p = 0\)에 적용하면 \(\alpha\)는 \(\gamma'/\abs{\gamma'} = \mathbf{t}\)의 연속인 각, 곧 continuous tangent angle이다. 따라서 <a href="#eq-37-2-1">(37.2.1)</a>에서 \((\alpha(T) - \alpha(0))/2\pi = \operatorname{rot}(\gamma)\)이다.</p>
+      </div>
+      <p>위상수학에서는 단위원에서 단위원으로 가는 연속 map이 단위원을 감는 횟수를 그 map의 degree라 부른다. 그 언어로는 turning number가 tangent map \(\mathbf{t}\colon S^1 \to S^1\)의 degree이고, winding number가 \(p\) 둘레로의 사영 \(S^1 \to S^1\)의 degree다 <a class="cite" href="../../references.html#CMU-DDG-L10">[CMU-DDG L10]</a>. 이 장에서는 degree를 따로 정의하지 않고 위의 각의 변화로만 쓴다. 두 수는 서로 다른 map의 degree이므로 같을 이유가 없다. figure-eight은 \(k = 0\)이지만 고리 안의 점에 대해 winding number가 \(\pm1\)이고, 원을 두 번 도는 곡선은 \(k = 2\)이고 중심에 대해서도 \(2\)다.</p>
+    </section>
+
+    <section id="sec-regular-homotopy">
+      <h2>Regular Homotopy</h2>
+      <p>이제 곡선을 연속적으로 변형하자. 주기는 \(1\)로 맞춘다. 주기 \(T\)인 closed curve는 \(t \mapsto \gamma(Tt)\)로 바꾸면 주기 \(1\)이 되고, rotation index는 그대로다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4</a>(b)).</p>
+      <div class="thm definition" id="i-37-2-7">
+        <p><span class="thm-head">Definition 37.2.7</span> <span class="thm-name">(regular homotopy)</span>.
+        \(\gamma_0, \gamma_1\colon \R \to \R^2\)가 주기 \(1\)인 regular closed curve라 하자. continuous map \(H\colon \R \times [0, 1] \to \R^2\)가 다음을 만족하면 \(H\)를 \(\gamma_0\)에서 \(\gamma_1\)로 가는 <dfn>regular homotopy</dfn>(정칙 호모토피)라 하고, 그런 \(H\)가 있으면 \(\gamma_0\)과 \(\gamma_1\)이 regularly homotopic하다고 한다.
+        (a) \(H(t, 0) = \gamma_0(t)\), \(H(t, 1) = \gamma_1(t)\).
+        (b) 모든 \(\lambda \in [0, 1]\)에서 \(\gamma_\lambda = H(\cdot, \lambda)\)는 주기 \(1\)인 regular closed curve다.
+        (c) 편도함수 \(\partial_tH\)가 \(\R \times [0, 1]\)에서 연속이다.</p>
+      </div>
+      <p>(b)가 핵심이다. 변형하는 도중의 모든 곡선이 regular해야 한다. 곧 어느 순간에도 속도가 \(0\)이 되어 뾰족점이 생기면 안 된다. (c)는 tangent가 \(t\)와 \(\lambda\)에 대해 함께 연속이라는 요구다.</p>
+
+      <div class="thm example" id="i-37-2-8">
+        <p><span class="thm-head">Example 37.2.8</span>.
+        (a) ellipse \(\gamma_0(t) = (2\cos 2\pi t, \sin 2\pi t)\)와 단위원 \(\gamma_1(t) = (\cos 2\pi t, \sin 2\pi t)\) 사이의 \(H(t, \lambda) = ((2 - \lambda)\cos 2\pi t, \sin 2\pi t)\)는 regular homotopy다. \(\partial_tH = 2\pi(-(2 - \lambda)\sin 2\pi t, \cos 2\pi t)\)는 연속이고, 두 성분이 동시에 \(0\)이 될 수 없기 때문이다.
+        (b) 평행이동, 회전, 양수배의 확대도 regular homotopy로 이을 수 있다. 예를 들어 \(H(t, \lambda) = \gamma(t) + \lambda c\)이면 \(\partial_tH = \gamma'(t) \neq 0\)이다.</p>
+      </div>
+      <div class="thm nonexample" id="i-37-2-9">
+        <p><span class="thm-head">Non-example 37.2.9</span> <span class="thm-name">(homotopies through a cusp)</span>.
+        (a) limaçon의 family \(\gamma_a(t) = (a + \cos t)(\cos t, \sin t)\)에서 \(\abs{\gamma_a'}^2 = 1 + a^2 + 2a\cos t\)이고, 그 최솟값은 \((1 - a)^2\)이다(<a href="#ex-37-2-4">Exercise 37.2.4</a>). 곧 \(a \neq 1\)이면 regular이고 \(a = 1\)(cardioid)에서는 \(t = \pi\)에서 속도가 \(0\)이 된다. \(a\)를 \(\tfrac12\)에서 \(\tfrac32\)로 바꾸는 family는 모든 순간 closed curve지만 \(a = 1\)에서 (b)가 깨지므로 regular homotopy가 아니다. 실제로 turning number는 \(a \lt 1\)에서 \(2\), \(a \gt 1\)에서 \(1\)이다(<a href="#fig-37-2-2">Figure 37.2.2</a>(b)).
+        (b) 반시계 방향 원 \((\cos 2\pi t, \sin 2\pi t)\)에서 시계 방향 원 \((\cos 2\pi t, -\sin 2\pi t)\)로 가는 직선 보간 \(H(t, \lambda) = (\cos 2\pi t, (1 - 2\lambda)\sin 2\pi t)\)는 \(\lambda = \tfrac12\)에서 선분을 왕복하는 곡선 \((\cos 2\pi t, 0)\)이 되고, 그 속도는 \(t = 0, \tfrac12\)에서 \(0\)이다.</p>
+      </div>
+
+      <div class="thm theorem" id="i-37-2-10">
+        <p><span class="thm-head">Theorem 37.2.10</span> <span class="thm-name">(invariance of the turning number)</span>.
+        \(\gamma_0\)과 \(\gamma_1\)이 regularly homotopic하면 \(\operatorname{rot}(\gamma_0) = \operatorname{rot}(\gamma_1)\)이다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> 뾰족점을 만들지 않고 곡선을 변형하는 동안 tangent가 도는 횟수는 바뀌지 않는다. 바꾸려면 어느 순간 속도가 \(0\)이 되어야 한다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: 변형 전체에 걸쳐 tangent의 각을 한꺼번에 연속으로 잡는다. 그러면 turning number는 \(\lambda\)의 연속함수이고 정수값만 가지므로 상수다.</p>
+        <p><span class="proof-head">Proof.</span> \(H\)를 regular homotopy라 하고 \(K = [0, 1] \times [0, 1]\)에서 \(\psi(t, \lambda) = \partial_tH/\abs{\partial_tH}\)라 하자. (b)에서 분모는 \(0\)이 아니고 (c)에서 \(\psi\)는 연속이다. \(K\)는 compact이고 한 점 \((0, 0)\)에 대해 star-shaped이므로 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>(b)에 의해 연속함수 \(\theta\colon K \to \R\)가 있어 \(\psi = (\cos\theta, \sin\theta)\)이다.
+        \(\lambda\)를 고정하면 \(\theta(\cdot, \lambda)\)는 \(\gamma_\lambda\)의 unit tangent의 \([0, 1]\) 위의 연속인 각이다. \(\gamma_\lambda\)의 매끄러운 tangent angle \(\varphi_\lambda\)(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-8">Lemma 4.4.8</a>)를 \([0, 1]\)로 제한한 것과 \(\theta(\cdot, \lambda)\)는 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>(b)의 유일성에 의해 \(2\pi\)의 정수배 상수만큼만 다르므로, <a href="#eq-37-2-1">(37.2.1)</a>에서</p>
+        \[ f(\lambda) := \frac{\theta(1, \lambda) - \theta(0, \lambda)}{2\pi} = \frac{\varphi_\lambda(1) - \varphi_\lambda(0)}{2\pi} = \operatorname{rot}(\gamma_\lambda) \in \Z \]
+        <p>이다. \(\theta\)가 연속이므로 \(f\)는 \([0, 1]\)에서 연속이다. 정수값만 갖는 연속함수가 \(f(0) \neq f(1)\)이면 intermediate value theorem에 의해 그 사이의 정수가 아닌 값도 가져야 하므로 모순이다. 따라서 \(f(0) = f(1)\)이다.</p>
+      </div>
+      <p><a href="#i-37-2-9">Non-example 37.2.9</a>가 이 정리와 맞는다는 것을 확인하자. limaçon family에서 turning number가 \(2\)에서 \(1\)로 바뀐 것은 cardioid에서 regularity가 깨졌기 때문이다. 다각형의 경우 <a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-7">Proposition 32.4.7</a>이 같은 논법(정수값 연속함수는 상수)이었다.</p>
+
+      <p>놀라운 것은 그 역도 성립한다는 것이다.</p>
+      <div class="thm theorem" id="i-37-2-11">
+        <p><span class="thm-head">Theorem 37.2.11</span> <span class="thm-name">(Whitney–Graustein theorem)</span>.
+        주기 \(1\)인 두 regular closed curve가 regularly homotopic할 필요충분조건은 turning number가 같은 것이다.</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> regular homotopy로 바꿀 수 없는 곡선의 성질은 turning number 하나뿐이다. 스스로 몇 번 가로지르는지, 어떤 모양의 고리가 있는지는 모두 regular homotopy로 바꿀 수 있다. 이 정리는 Whitney의 1937년 논문에 있고 <a class="cite" href="../../references.html#Whitney37">[Whitney37]</a>, 이름에는 Graustein도 함께 붙는다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof sketch.</span> “필요”는 <a href="#i-37-2-10">Theorem 37.2.10</a>이다. “충분”은 turning number \(k\)가 \(0\)이 아닐 때 다음과 같이 regular homotopy를 직접 만들 수 있다.
+        (1) 양수배 확대와 방향을 보존하는 reparametrization은 regular homotopy로 이을 수 있다. \(c \gt 0\)배 확대는 \(H(t, \lambda) = (1 - \lambda + \lambda c)\gamma(t)\)로, \(h' \gt 0\)이고 \(h(t + 1) = h(t) + 1\)인 reparametrization은 \(H(t, \lambda) = \gamma\bigl((1 - \lambda)t + \lambda h(t)\bigr)\)로 이으면 두 경우 모두 \(\partial_tH \neq 0\)이다. 그래서 두 곡선이 모두 길이 \(2\pi\)이고 arc length \(s\)로 parametrization되어 있다고 해도 된다(주기를 \(1\)로 되돌리려면 \(s = 2\pi t\)로 쓴다). tangent angle을 \(\varphi_0, \varphi_1\)이라 하면 \(\varphi_j(s + 2\pi) = \varphi_j(s) + 2\pi k\)이다.
+        (2) 각을 보간한다: \(\varphi_\lambda = (1 - \lambda)\varphi_0 + \lambda\varphi_1\). 이것도 \(\varphi_\lambda(s + 2\pi) = \varphi_\lambda(s) + 2\pi k\)를 만족하므로 \(\mathbf{t}_\lambda = (\cos\varphi_\lambda, \sin\varphi_\lambda)\)는 주기 \(2\pi\)다.
+        (3) 그러나 \(\mathbf{t}_\lambda\)를 적분한 곡선은 닫히지 않을 수 있다(<a href="37-1-plane-curves.html#i-37-1-7">Proposition 37.1.7</a>의 (ii)). 그래서 평균 \(m(\lambda) = \frac{1}{2\pi}\int_0^{2\pi}\mathbf{t}_\lambda\,ds\)를 빼고</p>
+        <div class="equation" id="eq-37-2-5">
+        \[ \begin{aligned} \gamma_\lambda(s) &= (1 - \lambda)\gamma_0(0) + \lambda\gamma_1(0)\\ &\quad + \int_0^s\bigl(\mathbf{t}_\lambda(u) - m(\lambda)\bigr)\,du \end{aligned} \tag{37.2.5} \]
+        </div>
+        <p>로 둔다. 적분하는 함수의 한 주기 평균이 \(0\)이므로 \(\gamma_\lambda\)는 주기 \(2\pi\)인 closed curve다. \(\lambda = 0\)에서는 \(m(0) = \frac{1}{2\pi}(\gamma_0(2\pi) - \gamma_0(0)) = 0\)이므로 \(\gamma_\lambda = \gamma_0\)이고, \(\lambda = 1\)에서도 같다.
+        (4) regularity: \(\abs{\gamma_\lambda'} = \abs{\mathbf{t}_\lambda - m(\lambda)} \ge 1 - \abs{m(\lambda)}\)이다. 적분의 삼각부등식에서 \(\abs{m(\lambda)} \le 1\)이고, 등호는 연속인 단위벡터 \(\mathbf{t}_\lambda\)가 상수일 때뿐이다. 그런데 \(\varphi_\lambda\)는 한 주기에 \(2\pi k \neq 0\)만큼 변하므로 \(\mathbf{t}_\lambda\)는 상수가 아니다. 따라서 \(\abs{m(\lambda)} \lt 1\)이고 \(\gamma_\lambda\)는 모든 \(\lambda\)에서 regular다. \(\partial_s\gamma_\lambda = \mathbf{t}_\lambda - m(\lambda)\)는 \((s, \lambda)\)에 대해 연속이다.
+        \(k = 0\)이면 (4)가 깨질 수 있다. 예를 들어 figure-eight과 그 거울상 \((x, y) \mapsto (-x, y)\)의 tangent angle은 \(\varphi_1 = \pi - \varphi_0\)이므로 \(\lambda = \tfrac12\)에서 \(\varphi_\lambda\)가 상수가 되고 \(\gamma_\lambda' = 0\)이다. 이 경우는 다른 논법이 필요하며 Whitney의 논문이 그것을 다룬다 <a class="cite" href="../../references.html#Whitney37">[Whitney37]</a>.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-37-2-2">
+        <img src="figures/fig-37-2-2-regular-homotopy.svg" alt="두 줄. (a) 윗줄에 곡선 다섯 개가 λ = 0, 1/4, 1/2, 3/4, 1의 순서로 놓여 있다. 맨 왼쪽은 안쪽에 작은 고리가 있는 검은 limaçon, 가운데 셋은 파란 곡선으로 안쪽 고리가 점점 커져 바깥 고리와 비슷한 크기가 되고, 맨 오른쪽은 검은 원 하나다. 왼쪽 위에 rot = 2 for every λ라고 적혀 있다. (b) 아랫줄에 limaçon 다섯 개가 a = 0.5, 0.8, 1, 1.2, 1.5의 순서로 놓여 있다. 왼쪽 둘은 안쪽 고리가 있고 rot = 2, 가운데 주홍 곡선은 왼쪽에 뾰족점(흰 동그라미)이 있는 cardioid, 오른쪽 둘은 안쪽 고리 없이 한쪽이 오목하고 rot = 1이다.">
+        <figcaption><span class="fig-head">Figure 37.2.2.</span>
+        <em>무엇을</em>: (a) <a href="#i-37-2-11">Theorem 37.2.11</a>의 Proof sketch의 <a href="#eq-37-2-5">(37.2.5)</a>로 만든 regular homotopy. limaçon \(r = \tfrac12 + \cos t\)(길이를 \(2\pi\)로 맞춤)에서 반지름 \(\tfrac12\)인 원을 두 번 도는 곡선까지. (b) limaçon \(r = a + \cos t\)의 family.
+        <em>읽는 법</em>: (a)는 왼쪽부터 \(\lambda = 0, \tfrac14, \tfrac12, \tfrac34, 1\)이고, 양 끝(검정)이 주어진 두 곡선, 가운데(파랑)가 중간 곡선이다. 맨 오른쪽 원은 두 번 겹쳐 돈다. (b)는 왼쪽부터 \(a = 0.5, 0.8, 1, 1.2, 1.5\)이고, 각 곡선을 최대 반지름이 \(1\)이 되게 축소해 그렸다. 주홍 곡선이 \(a = 1\)(cardioid)이고 흰 동그라미가 속도가 \(0\)인 점이다.
+        <em>볼 것</em>: (a)에서 안쪽 고리가 점점 커져 바깥 고리와 겹치고, 모든 \(\lambda\)에서 최소 속력이 \(0.94\) 이상이라 뾰족점이 생기지 않는다. turning number는 내내 \(2\)다. (b)에서는 안쪽 고리가 점점 작아지다가 \(a = 1\)에서 뾰족점으로 사라지고, 그 뒤로 turning number가 \(1\)이 된다.
+        <em>본문과의 연결</em>: <a href="#i-37-2-10">Theorem 37.2.10</a>, <a href="#i-37-2-11">Theorem 37.2.11</a>의 Proof sketch, <a href="#i-37-2-9">Non-example 37.2.9</a>(a).</figcaption>
+      </figure>
+      <p><a href="#fig-37-2-2">Figure 37.2.2</a>의 두 줄은 같은 곡선(안쪽 고리가 있는 limaçon)에서 출발한다. 윗줄은 tangent의 각을 섞어서 움직인다. 안쪽 고리는 사라지지 않고 오히려 커지면서 바깥 고리와 크기가 같아져, 끝에서는 원을 두 번 도는 곡선이 된다. 속도는 내내 \(0.94\) 이상이다. 아랫줄은 매개변수 \(a\)를 바꾼다. 안쪽 고리가 줄어들다가 가운데 주홍 곡선에서 한 점으로 오그라들며 뾰족점이 되고, 그 다음부터는 고리 없는 곡선이다. 고리 하나가 사라지면서 tangent가 도는 횟수가 하나 줄었다. regular homotopy로는 이 일이 일어날 수 없다.</p>
+
+      <div class="thm corollary" id="i-37-2-12">
+        <p><span class="thm-head">Corollary 37.2.12</span> <span class="thm-name">(no regular homotopy reverses a circle)</span>.
+        반시계 방향 원과 시계 방향 원은 regularly homotopic하지 않다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> turning number가 \(1\)과 \(-1\)로 다르므로(<a href="#i-37-2-1">Example 37.2.1</a>) <a href="#i-37-2-10">Theorem 37.2.10</a>에 의해 regularly homotopic하지 않다.</p>
+      </div>
+      <p>평면에서는 원을 “뒤집을” 수 없다. 반면 \(\R^3\)의 sphere는 immersion을 유지한 채로 안팎을 뒤집을 수 있다(Smale의 sphere eversion). 이것은 Section 38.1에서 짧게 소개한다(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-1">Chapter 38 overview</a>).</p>
+    </section>
+
+    <section id="sec-computing">
+      <h2>Computing Winding Numbers</h2>
+      <p>다각형의 winding number는 적분 없이 정확히 계산된다. closed polygon \(P_0, \dots, P_{n-1}\)(첨자는 \(n\)을 법으로)과 그 위에 있지 않은 점 \(p\)를 생각하자. 다각형을 continuous closed curve로 보면(edge \(j\)를 \([j, j + 1]\)에 선형으로 매개화, 주기 \(n\)) <a href="#i-37-2-2">Definition 37.2.2</a>가 그대로 적용된다.</p>
+      <div class="thm proposition" id="i-37-2-13">
+        <p><span class="thm-head">Proposition 37.2.13</span> <span class="thm-name">(winding number of a polygon)</span>.
+        \(a_j = P_j - p\)라 하면</p>
+        <div class="equation" id="eq-37-2-6">
+        \[ \begin{aligned} \operatorname{wind}(P, p) &= \frac{1}{2\pi}\sum_{j=0}^{n-1}\angle\bigl(a_j, a_{j+1}\bigr),\\ \angle(a, b) &= \operatorname{atan2}\bigl(\det(a, b),\ \inner{a}{b}\bigr) \end{aligned} \tag{37.2.6} \]
+        </div>
+        <p>이다. 여기서 \(\angle(a, b) \in (-\pi, \pi)\)는 \(a\)에서 \(b\)로의 signed angle이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: edge 하나 위에서 \(p\)를 바라보는 방향은 반바퀴보다 적게 돌므로, 각의 변화는 양 끝 방향 사이의 작은 쪽 각이다.</p>
+        <p><span class="proof-head">Proof.</span> edge \(j\) 위의 점은 \(\gamma(j + \sigma) - p = (1 - \sigma)a_j + \sigma a_{j+1}\)(\(0 \le \sigma \le 1\))이다. \(p\)가 edge 위에 있지 않으므로 이 vector는 \(0\)이 아니고, 특히 \(a_{j+1}\)은 \(a_j\)의 음수배가 아니다(그러면 선분이 \(p\)를 지난다). 따라서 \(\angle(a_j, a_{j+1})\)이 정의된다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>(a)). \(m\)을 \(a_j\)와 \(a_{j+1}\)의 각의 이등분선 방향의 단위벡터라 하자. 두 vector는 모두 \(m\)과 양의 inner product를 가지므로(각이 \(\pi/2\) 미만) 그 양수 결합인 edge 위의 모든 vector도 \(m\)과 양의 inner product를 가진다. 곧 edge 위에서 방향은 \(-m\)을 지나지 않고, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>(c)에 의해 각의 변화는 \(\angle(m, \cdot)\)의 변화, 곧 \(\angle(m, a_{j+1}) - \angle(m, a_j) = \angle(a_j, a_{j+1})\)이다. edge들의 각의 변화를 모두 더한 것이 \(\alpha(n) - \alpha(0)\)이다.</p>
+      </div>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: winding numbers of polygons</p>
+        <p><a href="#eq-37-2-6">(37.2.6)</a>을 그대로 계산한다. <code>closed=False</code>이면 마지막 vertex에서 처음 vertex로 가는 edge를 더하지 않는다. 그 값은 정수가 아니고, 아래 In computer vision 상자의 generalized winding number가 된다.</p>
+        <pre id="code-37-2-1"><code>import numpy as np
+
+def winding_number(P, q, closed=True):
+    """(1 / 2 pi) * sum of the signed angles subtended at the point q by the edges of the polygon P.
+    An integer for a closed polygon that does not pass through q."""
+    A = np.asarray(P, float) - q                     # vectors a_j from q to the vertices
+    B = np.roll(A, -1, 0) if closed else A[1:]       # a_{j+1}
+    A = A if closed else A[:-1]
+    cross = A[:, 0] * B[:, 1] - A[:, 1] * B[:, 0]    # det(a_j, a_{j+1})
+    return np.arctan2(cross, (A * B).sum(1)).sum() / (2 * np.pi)</code></pre>
+      </aside>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: winding numbers</p>
+        <p><strong>Smooth.</strong> winding number는 적분 <a href="#eq-37-2-3">(37.2.3)</a>이고, 수치로 계산하면 적분 오차가 남는다. 정수라는 사실은 적분 공식이 아니라 각의 연속성에서 나온다.</p>
+        <p><strong>Discrete.</strong> 다각형의 winding number는 유한 개의 signed angle의 합 <a href="#eq-37-2-6">(37.2.6)</a>이고, 반올림 오차를 빼면 정확히 정수다. 근사가 들어가지 않는다.</p>
+        <p><strong>보존하는 것과 잃는 것.</strong> 위상적인 정수(winding number, turning number)는 discrete 대상에서 정확히 계산된다. 이것은 Chapter 32에서 turning angle의 합이 정확히 \(2\pi k\)였던 것(<a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-4">Proposition 32.3.4</a>)과 같은 이유다. 각을 더하는 것은 연속 변화를 edge마다 정확히 적분하는 것이다. Section 37.4에서 turning number에 대해 같은 일을 한다.</p>
+      </aside>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: generalized winding numbers</p>
+        <p>스캔이나 segmentation에서 얻은 경계는 대개 완전히 닫혀 있지 않다. 구멍이 있거나, 조각이 겹치거나, edge의 방향만 맞는 “triangle soup”이다. 그래도 어느 점이 안쪽인지 알고 싶다. Jacobson, Kavan, Sorkine-Hornung은 <a href="#eq-37-2-6">(37.2.6)</a>의 합을 열린 자료에도 그대로 쓴다 <a class="cite" href="../../references.html#Jacobson13">[Jacobson13]</a>. 닫힌 경계에서는 안쪽 \(1\), 바깥 \(0\)이 정확히 나오고, 경계에 구멍이 있으면 그 근처에서 값이 \(0\)과 \(1\) 사이로 부드럽게 바뀐다. 그래서 \(\tfrac12\)을 문턱값으로 안팎을 나눈다. 3D에서는 각 대신 각 triangle이 점에서 차지하는 solid angle을 더하고 \(4\pi\)로 나눈다. <a class="cite" href="../../references.html#Jacobson13">[Jacobson13]</a>은 이 값으로 tetrahedral mesh의 cell을 안과 밖으로 나누어, 구멍이나 겹침이 있는 입력에서도 solid를 얻는다. <a href="#ex-37-2-5">Exercise 37.2.5</a>에서 원의 \(\tfrac18\)을 지운 다각형으로 직접 해 본다.</p>
+      </aside>
+    </section>
+
+    <aside class="box forward">
+      <p class="box-title">Looking ahead</p>
+      <p>Section 37.4는 이 절의 정리들의 discrete 판을 다룬다. 닫힌 regular discrete curve의 turning angle의 합으로 discrete turning number를 정의하고, 강의가 소개하는 discrete Whitney–Graustein theorem을 진술한다. regular homotopy는 Chapter 38에서 surface의 immersion으로 넓어진다(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-1">Chapter 38 overview</a>).</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>rotation index의 정의와 성질, rotation index theorem과 그 증명: <a href="../05-space-curves/index.html#toc-5-6">Section 5.6</a>. curvilinear polygon의 판: <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>. 직관: <a href="../00-tour/0-2-curves.html#i-0-2-7">Theorem 0.2.7</a>.</li>
+        <li>continuous angle function(lifting)의 존재와 유일성: <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>. 이 절의 증명들은 모두 이 lemma와 “정수값 연속함수는 상수”에 기댄다.</li>
+        <li>winding number를 de Rham cohomology의 언어로 보면 \(\R^2 \setminus \{p\}\) 위의 닫힌 1-form \(d\theta\)의 적분이다: <a href="../19-de-rham/index.html">Chapter 19</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>turning number \(\operatorname{rot}(\gamma)\)는 tangent가 도는 횟수이고 Chapter 5의 rotation index와 같다. winding number \(\operatorname{wind}(\gamma, p)\)는 곡선이 점 \(p\)를 감는 횟수다. 둘은 다른 수이며, turning number는 \(\gamma'\)의 원점에 대한 winding number다 <a href="#eq-37-2-4">(37.2.4)</a>.</li>
+        <li>regular homotopy는 모든 순간 regular한 closed curve를 거치는 연속 변형이다. turning number는 regular homotopy에서 변하지 않는다(<a href="#i-37-2-10">Theorem 37.2.10</a>). limaçon family처럼 뾰족점을 거치면 바뀔 수 있다.</li>
+        <li>Whitney–Graustein theorem: turning number가 같으면 regularly homotopic하다. \(k \neq 0\)이면 tangent angle을 보간하고 평균을 빼서 직접 만들 수 있다 <a href="#eq-37-2-5">(37.2.5)</a>. 원은 평면에서 뒤집을 수 없다.</li>
+        <li>다각형의 winding number는 signed angle의 합 <a href="#eq-37-2-6">(37.2.6)</a>으로 정확히 계산되고, 열린 자료에서는 generalized winding number가 된다.</li>
+      </ul>
+      <p class="next">다음 절에서는 평면을 떠나 space curve로 간다. 공간에서는 왼쪽·오른쪽이 없어 curvature의 부호가 사라지는 대신 torsion이 생긴다. Frenet frame이 언제 정의되지 않는지 보고, 그 대안인 adapted frame과 Bishop frame을 만든다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-37-2-1" data-level="1">
+        <p><span class="thm-head">Exercise 37.2.1</span> <span class="level">★</span>
+        원을 두 번 도는 \(\gamma(t) = r(\cos t, \sin t)\), \(0 \le t \le 4\pi\)(주기 \(4\pi\))에 대해 <a href="#eq-37-2-3">(37.2.3)</a>으로 \(\operatorname{wind}(\gamma, 0)\)을 계산하여라. \(\abs{p} \gt r\)인 점 \(p\)에 대해서는 \(0\)임을 각 함수로 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\gamma - 0 = r(\cos t, \sin t)\), \(\gamma' = r(-\sin t, \cos t)\)이므로 \(\det(\gamma, \gamma') = r^2\), \(\abs{\gamma}^2 = r^2\)이고 <a href="#eq-37-2-3">(37.2.3)</a>은 \(\frac{1}{2\pi}\int_0^{4\pi}1\,dt = 2\)이다. \(\abs{p} \gt r\)이면 trace는 \(p\)를 지나는 직선 \(\{x : \inner{x - p}{p} = 0\}\)의 한쪽, 곧 \(\inner{x - p}{-p} \gt 0\)인 쪽에 있다(\(\inner{x}{p} \le r\abs{p} \lt \abs{p}^2\)). 따라서 방향 \((\gamma - p)/\abs{\gamma - p}\)는 언제나 \(-p/\abs{p}\)와 \(\pi/2\) 미만의 각을 이루고, \(m = -p/\abs{p}\)로 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-6">Lemma 5.6.6</a>(c)를 쓰면 \(\alpha(4\pi) - \alpha(0) = \angle(m, \cdot)\)의 변화 \(= 0\)이다(\(\gamma(4\pi) = \gamma(0)\)).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-2-2" data-level="2">
+        <p><span class="thm-head">Exercise 37.2.2</span> <span class="level">★★</span>
+        figure-eight \(\gamma(t) = (\sin t, \sin t\cos t)\)의 속도 \(\gamma'(t) = (\cos t, \cos 2t)\)는 \((0, 1)\) 방향을 결코 가리키지 않음을 보여라. 이것과 <a href="#i-37-2-6">Proposition 37.2.6</a>으로 \(\operatorname{rot}(\gamma) = 0\)임을 증명하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>각 함수가 어떤 길이 \(2\pi\)의 열린 구간 안에만 머물면 한 주기의 변화는 \(2\pi\)의 정수배이면서 절댓값이 \(2\pi\)보다 작다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\gamma'(t)\)가 \((0, 1)\)의 양수배이면 \(\cos t = 0\)이고 \(\cos 2t \gt 0\)이어야 한다. 그런데 \(\cos t = 0\)이면 \(\cos 2t = 2\cos^2 t - 1 = -1\)이므로 불가능하다. \(\alpha\)를 \(\gamma'/\abs{\gamma'}\)의 연속인 각이라 하고, \(\gamma'(0) = (1, 1)\)이므로 \(\alpha(0) = \pi/4\)로 잡자. \(\alpha(t)\)가 \(\pi/2 + 2\pi j\)(\(j \in \Z\)) 꼴의 값을 가지면 그 순간 \(\gamma'\)이 \((0, 1)\) 방향이므로, \(\alpha\)는 그런 값을 지나지 않는다. intermediate value theorem에 의해 \(\alpha([0, 2\pi]) \subseteq (-3\pi/2, \pi/2)\)이다(\(\alpha(0) = \pi/4\)가 이 구간에 있다). 따라서 \(\abs{\alpha(2\pi) - \alpha(0)} \lt 2\pi\)인데, 이 차는 \(2\pi\operatorname{rot}(\gamma)\)이므로 \(\operatorname{rot}(\gamma) = 0\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-2-3" data-level="1">
+        <p><span class="thm-head">Exercise 37.2.3</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 들어라. (a) 원점에 대한 winding number가 \(0\)이 아닌 closed curve는 원점에서 나가는 모든 반직선과 만난다. (b) turning number가 \(0\)인 regular closed curve는 스스로 만나야 한다. (c) 원을 두 번 도는 곡선과 figure-eight은 regularly homotopic하다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. 원점에서 \(c = (\cos\beta, \sin\beta)\) 방향으로 나가는 반직선과 곡선이 만나지 않는다고 하자. 그러면 각 함수 \(\alpha\)는 \(\beta + 2\pi j\) 꼴의 값을 갖지 않으므로, intermediate value theorem에 의해 \(\alpha([0, T])\)는 길이 \(2\pi\)인 열린 구간 \((\beta + 2\pi j, \beta + 2\pi(j + 1))\) 하나에 들어간다. 그러면 \(\abs{\alpha(T) - \alpha(0)} \lt 2\pi\)이고 이것은 \(2\pi\)의 정수배이므로 winding number는 \(0\)이다. 대우를 취하면 된다. <a href="#ex-37-2-2">Exercise 37.2.2</a>와 같은 논법이다.
+          (b) 참. simple closed curve이면 rotation index theorem(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a>)에 의해 turning number가 \(\pm1\)이므로 \(0\)일 수 없다.
+          (c) 거짓. turning number가 \(2\)와 \(0\)으로 다르므로 <a href="#i-37-2-10">Theorem 37.2.10</a>에 의해 regularly homotopic하지 않다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-2-4" data-level="1">
+        <p><span class="thm-head">Exercise 37.2.4</span> <span class="level">★</span>
+        limaçon \(\gamma_a(t) = (a + \cos t)(\cos t, \sin t)\)에서 \(\abs{\gamma_a'(t)}^2 = 1 + a^2 + 2a\cos t\)임을 보이고, \(a \gt 0\)일 때 최솟값이 \((1 - a)^2\)임을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(u = (\cos t, \sin t)\), \(u^\perp = (-\sin t, \cos t)\)로 쓰면 \(u' = u^\perp\)이고 \(r = a + \cos t\), \(r' = -\sin t\)이므로 \(\gamma_a' = r'u + ru^\perp\)이다(<a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-1">Example 32.2.1</a>과 같은 계산). \(u, u^\perp\)는 orthonormal이므로 \(\abs{\gamma_a'}^2 = r'^2 + r^2 = \sin^2 t + a^2 + 2a\cos t + \cos^2 t = 1 + a^2 + 2a\cos t\)이다. \(a \gt 0\)이면 \(\cos t = -1\)(\(t = \pi\))에서 최소이고 그 값은 \(1 + a^2 - 2a = (1 - a)^2\)이다. 따라서 \(a = 1\)에서만 속도가 \(0\)이 되는 점이 생긴다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-2-5" data-level="1">
+        <p><span class="thm-head">Exercise 37.2.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> 단위원에 내접한 정 \(64\)각형의 vertex 가운데 처음 \(57\)개(각 \(0^\circ\)에서 \(315^\circ\)까지, edge \(56\)개)만 남긴 열린 다각형에 대해, Implementation의 <code>winding_number</code>로 다섯 점 \((0, 0)\), \((-0.5, 0)\), \((0.9, -0.2)\), \((1.2, -0.3)\), \((2, 0)\)의 generalized winding number를 계산하여라. 같은 vertex로 닫은 다각형의 값과 비교하고, 문턱값 \(\tfrac12\)로 판정한 안팎이 맞는지 보아라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-37-2-5"><code>a = 2 * np.pi * np.arange(57) / 64           # 56 edges: the arc from 0 to 315 degrees
+P = np.stack([np.cos(a), np.sin(a)], 1)
+for q in [(0.0, 0.0), (-0.5, 0.0), (0.9, -0.2), (1.2, -0.3), (2.0, 0.0)]:
+    w_open = winding_number(P, np.array(q), closed=False)
+    w_closed = winding_number(P, np.array(q), closed=True)
+    print(f"q = {q}: open {w_open:.3f}, closed {round(w_closed)}, inside by threshold: {w_open > 0.5}")</code></pre>
+          <p>Implementation의 코드를 먼저 실행한 뒤 실행한다. 출력은 다음과 같다.</p>
+          <pre id="out-ex-37-2-5"><code>q = (0.0, 0.0): open 0.875, closed 1, inside by threshold: True
+q = (-0.5, 0.0): open 0.916, closed 1, inside by threshold: True
+q = (0.9, -0.2): open 0.516, closed 1, inside by threshold: True
+q = (1.2, -0.3): open 0.266, closed 0, inside by threshold: False
+q = (2.0, 0.0): open 0.080, closed 0, inside by threshold: False</code></pre>
+          <p>닫은 다각형의 값은 정확히 \(1\)(안) 또는 \(0\)(밖)이다(<a href="#i-37-2-13">Proposition 37.2.13</a>). 열린 다각형에서 원점의 값 \(0.875 = 315/360\)은 원점에서 본 호의 각을 \(2\pi\)로 나눈 것이다. 빠진 호(\(315^\circ\)에서 \(360^\circ\))에 가까운 점일수록 값이 \(\tfrac12\)에 가까워지지만, 다섯 점 모두 문턱값 \(\tfrac12\)로 닫은 다각형과 같은 판정을 받는다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="37-1-plane-curves.html">← 37.1 Plane Curves</a>
+    <a rel="next" href="37-3-space-curves-frames.html">37.3 Space Curves and Adapted Frames →</a>
+  </nav>
+</body>
+</html>

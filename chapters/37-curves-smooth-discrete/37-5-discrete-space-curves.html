@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>37.5 Discrete Space Curves — DG Study</title>
+  <meta name="dg-id" content="37.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="37.3, 37.4, 32.3">
+  <meta name="dg-refs" content="CMU-DDG L11; Bergou08">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">37. Curves: Smooth and Discrete</a> ›
+    <span>37.5 Discrete Space Curves</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>37.5 Discrete Space Curves</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#Bergou08">[Bergou08]</a> · Lecture: <a class="cite" href="../../references.html#CMU-DDG-L11">[CMU-DDG L11]</a> (노트에는 이 내용이 없고 강의 슬라이드에만 있다)</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>space polygon의 vertex마다 curvature angle과 discrete binormal을, edge마다 부호 있는 discrete torsion angle을 정의하고 계산할 수 있다.</li>
+        <li>edge length, curvature angle, torsion angle이 space polygon을 rigid motion을 제외하고 결정한다는 fundamental theorem을 증명하고, 복원 algorithm을 구현할 수 있다.</li>
+        <li>discrete parallel transport와 discrete Bishop frame을 정의하고, 그것이 binormal에 대해 edge마다 \(-\psi_i\)씩 돈다는 것과 closed curve의 holonomy가 \(-\sum\psi_i\)임을 증명할 수 있다.</li>
+        <li>sampling한 helix와 trefoil에서 discrete 양이 smooth 양으로 이차 수렴하는 것을 확인할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Section 37.4: regular discrete curve <a href="37-4-discrete-plane-curves.html#i-37-4-2">Definition 37.4.2</a>, fundamental theorem <a href="37-4-discrete-plane-curves.html#i-37-4-6">Theorem 37.4.6</a>.</li>
+        <li>Section 37.3: Frenet frame과 torsion의 부호 <a href="37-3-space-curves-frames.html#eq-37-3-1">(37.3.1)</a>, Bishop frame <a href="37-3-space-curves-frames.html#i-37-3-8">Definition 37.3.8</a>, Bishop과 Frenet의 관계 <a href="37-3-space-curves-frames.html#i-37-3-10">Proposition 37.3.10</a>, holonomy <a href="37-3-space-curves-frames.html#i-37-3-13">Proposition 37.3.13</a>.</li>
+        <li>Chapter 32: dual length \(\bar\ell_i\) <a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#eq-32-3-3">(32.3.3)</a>, discrete curvature <a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-5">Definition 32.3.5</a>.</li>
+        <li>회전 행렬과 cross product: rigid motion of \(\R^3\) <a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-3">Definition 5.4.3</a>.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 37.4는 plane polygon이 edge length와 turning angle로 정확히 결정된다는 것을 보였다. Section 37.3은 space curve에서 curvature에 더해 torsion이 필요하고, Frenet frame 대신 Bishop frame을 쓰면 곧은 구간에서도 frame이 정의된다는 것을 보였다. 이 절은 두 결과를 합친다. 다각형이 공간에 있으면 무엇이 curvature와 torsion의 역할을 하는가?</p>
+      <p>vertex에서 꺾이는 각은 여전히 잴 수 있지만 부호는 사라진다. 대신 vertex마다 “꺾이는 평면”이 하나 있고, 그 평면이 이웃 vertex로 가며 edge 둘레로 도는 각이 torsion이 된다. smooth의 경우처럼 이 정보만으로 다각형이 rigid motion을 제외하고 정해지고, smooth의 경우와 달리 증명이 유한한 회전의 곱이다. 마지막으로 Section 37.3의 Bishop frame을 다각형에서 만든다. 이것이 discrete elastic rod 같은 응용에서 쓰이는 frame이다.</p>
+    </section>
+
+    <section id="sec-binormal-torsion">
+      <h2>Curvature Angles, Binormals, and Torsion Angles</h2>
+      <div class="thm definition" id="i-37-5-1">
+        <p><span class="thm-head">Definition 37.5.1</span> <span class="thm-name">(discrete space curve)</span>.
+        <a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-8">Definition 32.2.8</a>에서 점이 \(\R^3\)에 있는 것을 <dfn data-generalizes="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-8">discrete space curve</dfn>(이산 공간곡선)라 한다. edge vector, edge length, discrete tangent \(e_i, \ell_i, \mathbf{t}_i\)와 dual length \(\bar\ell_i\), 그리고 regularity(<a href="37-4-discrete-plane-curves.html#i-37-4-2">Definition 37.4.2</a>, \(\mathbf{t}_i \neq -\mathbf{t}_{i-1}\))는 plane curve와 같이 정의한다.</p>
+      </div>
+      <p>공간에서는 진행 방향의 “왼쪽”이 정해지지 않으므로 turning angle의 부호를 정할 수 없다. 남는 것은 크기다.</p>
+      <div class="thm definition" id="i-37-5-2">
+        <p><span class="thm-head">Definition 37.5.2</span> <span class="thm-name">(curvature angle)</span>.
+        regular discrete space curve의 vertex \(i\)에서 \(\mathbf{t}_{i-1}\)과 \(\mathbf{t}_i\) 사이의 각</p>
+        <div class="equation" id="eq-37-5-1">
+        \[ \begin{aligned} \theta_i &= \arccos\inner{\mathbf{t}_{i-1}}{\mathbf{t}_i}\\ &= \operatorname{atan2}\bigl(\abs{\mathbf{t}_{i-1} \times \mathbf{t}_i},\ \inner{\mathbf{t}_{i-1}}{\mathbf{t}_i}\bigr)\\ &\in [0, \pi) \end{aligned} \tag{37.5.1} \]
+        </div>
+        <p>를 vertex \(i\)의 <dfn>curvature angle</dfn>(곡률각)이라 한다. \(\kappa_i = \theta_i/\bar\ell_i\)를 vertex \(i\)의 pointwise discrete curvature라 한다.</p>
+      </div>
+      <p>plane polygon을 \(xy\)평면 위의 space curve로 보면 curvature angle은 turning angle의 절댓값이다. 곧 Chapter 32의 \(\kappa^A_i\)에서 부호를 뗀 것이고, smooth의 \(\kappa = \abs{\kappa_s}\)(<a href="../05-space-curves/5-1-curvature.html#i-5-1-5">Proposition 5.1.5</a>)에 해당한다. 공용 구현의 <code>dgdec.turning_angles</code>는 3차원 입력에서 이 값을 준다.</p>
+
+      <div class="thm definition" id="i-37-5-3">
+        <p><span class="thm-head">Definition 37.5.3</span> <span class="thm-name">(discrete binormal)</span>.
+        vertex \(i\)에서 \(0 \lt \theta_i \lt \pi\)이면 단위벡터</p>
+        <div class="equation" id="eq-37-5-2">
+        \[ \mathbf{b}_i = \frac{\mathbf{t}_{i-1} \times \mathbf{t}_i}{\abs{\mathbf{t}_{i-1} \times \mathbf{t}_i}} = \frac{e_{i-1} \times e_i}{\abs{e_{i-1} \times e_i}} \tag{37.5.2} \]
+        </div>
+        <p>를 vertex \(i\)의 <dfn>discrete binormal</dfn>(이산 종법선)이라 한다. \(\theta_i = 0\)이면 정의하지 않는다.</p>
+      </div>
+      <p>\(\mathbf{b}_i\)는 세 vertex \(\gamma_{i-1}, \gamma_i, \gamma_{i+1}\)을 지나는 평면의 unit normal이다. 이 평면은 다각형이 vertex \(i\)에서 꺾이는 평면이고, smooth의 osculating plane(<a href="../05-space-curves/5-1-curvature.html#i-5-1-9">Definition 5.1.9</a>)의 discrete 판이다. 방향은 \(\mathbf{t}_{i-1}\)에서 \(\mathbf{t}_i\)로 꺾는 회전의 축이 되게 골랐다.</p>
+      <div class="thm lemma" id="i-37-5-4">
+        <p><span class="thm-head">Lemma 37.5.4</span> <span class="thm-name">(turning in the osculating plane)</span>.
+        단위벡터 \(\mathbf{t}\)와 \(\mathbf{b} \perp \mathbf{t}\), 각 \(\theta \in (0, \pi)\)에 대하여 \(\mathbf{t}\)를 \(\mathbf{b}\) 둘레로 오른손 규칙의 각 \(\theta\)만큼 돌린 vector</p>
+        <div class="equation" id="eq-37-5-3">
+        \[ \mathbf{t}' = R(\mathbf{b}, \theta)\,\mathbf{t} = \cos\theta\,\mathbf{t} + \sin\theta\,(\mathbf{b} \times \mathbf{t}) \tag{37.5.3} \]
+        </div>
+        <p>는 \(\mathbf{t}\)와 각 \(\theta\)를 이루고 \(\mathbf{t} \times \mathbf{t}'/\abs{\mathbf{t} \times \mathbf{t}'} = \mathbf{b}\)이다. 거꾸로 vertex \(i\)에서 \(0 \lt \theta_i \lt \pi\)이면 \(\mathbf{t}_i = R(\mathbf{b}_i, \theta_i)\,\mathbf{t}_{i-1}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(\mathbf{b} \perp \mathbf{t}\)이므로 \((\mathbf{t}, \mathbf{b} \times \mathbf{t}, \mathbf{b})\)는 positively oriented orthonormal basis이고, <a href="#eq-37-5-3">(37.5.3)</a>은 Rodrigues 공식 \(R(\mathbf{b}, \theta)v = \cos\theta\,v + \sin\theta\,\mathbf{b} \times v + (1 - \cos\theta)\inner{\mathbf{b}}{v}\mathbf{b}\)에 \(v = \mathbf{t}\)를 넣은 것이다. \(\inner{\mathbf{t}}{\mathbf{t}'} = \cos\theta\)이고, \(\mathbf{t} \times (\mathbf{b} \times \mathbf{t}) = \mathbf{b}\inner{\mathbf{t}}{\mathbf{t}} - \mathbf{t}\inner{\mathbf{t}}{\mathbf{b}} = \mathbf{b}\)이므로 \(\mathbf{t} \times \mathbf{t}' = \sin\theta\,\mathbf{b}\)이고, \(\sin\theta \gt 0\)이다. 거꾸로 \(\mathbf{t}_i\)는 \(\mathbf{t}_{i-1}\)과 \(\mathbf{b}_i \times \mathbf{t}_{i-1}\)이 펼치는 평면에 있고(둘 다 \(\mathbf{b}_i\)에 수직), \(\inner{\mathbf{t}_{i-1}}{\mathbf{t}_i} = \cos\theta_i\), \(\inner{\mathbf{b}_i \times \mathbf{t}_{i-1}}{\mathbf{t}_i} = \inner{\mathbf{b}_i}{\mathbf{t}_{i-1} \times \mathbf{t}_i} = \sin\theta_i\)이므로 \(\mathbf{t}_i = \cos\theta_i\mathbf{t}_{i-1} + \sin\theta_i\,\mathbf{b}_i \times \mathbf{t}_{i-1}\)이다.</p>
+      </div>
+
+      <p>이웃한 두 vertex의 binormal \(\mathbf{b}_i\)와 \(\mathbf{b}_{i+1}\)은 모두 edge \(i\)의 tangent \(\mathbf{t}_i\)에 수직이다(\(\mathbf{b}_i \perp \mathbf{t}_i\)이고 \(\mathbf{b}_{i+1} \perp \mathbf{t}_i\)). 그래서 둘 사이의 각을 \(\mathbf{t}_i\) 둘레로 부호를 붙여 잴 수 있다.</p>
+      <div class="thm definition" id="i-37-5-5">
+        <p><span class="thm-head">Definition 37.5.5</span> <span class="thm-name">(discrete torsion angle)</span>.
+        edge \(i\)의 양 끝 vertex에서 \(\mathbf{b}_i\)와 \(\mathbf{b}_{i+1}\)이 정의되면, \(\mathbf{t}_i\) 둘레로 오른손 규칙으로 잰 \(\mathbf{b}_i\)에서 \(\mathbf{b}_{i+1}\)로의 각</p>
+        <div class="equation" id="eq-37-5-4">
+        \[ \begin{aligned} \psi_i &= \operatorname{atan2}\bigl(\inner{\mathbf{b}_i \times \mathbf{b}_{i+1}}{\mathbf{t}_i},\ \inner{\mathbf{b}_i}{\mathbf{b}_{i+1}}\bigr)\\ &\in (-\pi, \pi] \end{aligned} \tag{37.5.4} \]
+        </div>
+        <p>를 edge \(i\)의 <dfn>discrete torsion angle</dfn>(이산 비틀림각)이라 한다. 곧 \(\mathbf{b}_{i+1} = R(\mathbf{t}_i, \psi_i)\,\mathbf{b}_i\)이다. \(\tau_i = \psi_i/\ell_i\)를 edge \(i\)의 pointwise discrete torsion이라 한다.</p>
+      </div>
+      <p>curvature angle은 vertex에, torsion angle은 edge에 붙는다. smooth 쪽에서 보면 \(\theta_i\)는 vertex 둘레 조각(길이 \(\bar\ell_i\)) 위의 \(\kappa\)의 적분, \(\psi_i\)는 edge(길이 \(\ell_i\)) 위의 \(\tau\)의 적분에 해당한다. 부호는 §6.2와 맞춘 것이다. \(\mathbf{b}' = -\tau\mathbf{n}\)이고 \(\mathbf{t} \times \mathbf{b} = -\mathbf{n}\)이므로 \(\mathbf{b}' = \tau\,\mathbf{t} \times \mathbf{b}\), 곧 smooth binormal은 \(\mathbf{t}\) 둘레로 단위 길이당 \(+\tau\)씩 돈다. <a href="#eq-37-5-4">(37.5.4)</a>는 그 회전을 edge 하나만큼 적분한 것이다. 공용 구현은 <code>dgdec.vertex_binormals</code>, <code>dgdec.torsion_angles</code>, <code>dgdec.space_curve_curvature_torsion</code>이다.</p>
+
+      <figure class="dg-figure" id="fig-37-5-1">
+        <img src="figures/fig-37-5-1-discrete-binormals.svg" alt="두 패널. (a) 비스듬히 본 검은 다각형 helix(한 바퀴에 vertex 여덟 개, 1.5바퀴). 거의 모든 vertex에서 초록 화살표 b_i가 위쪽으로 약간 기울어 나오고, 앞쪽 아래의 두 vertex에 b_2, b_3 라벨, 그 사이 edge 아래에 파란 화살표 t_2가 있다. 연속한 세 vertex로 만든 하늘색 삼각형 몇 개가 칠해져 있다. (b) 회색 점선 단위원 가운데에 파란 동그라미 안의 점(화면 밖으로 나오는 t_2)이 있고, 초록 화살표 b_2는 오른쪽 수평으로, b_3는 그보다 조금 위로 기울어 있다. 두 화살표 사이의 주황 호에 psi_2 = 0.243 라벨이 있다.">
+        <figcaption><span class="fig-head">Figure 37.5.1.</span>
+        <em>무엇을</em>: helix \((a, b) = (1, 0.3)\)를 \(t_j = 2\pi j/8\)(한 바퀴에 vertex 8개)로 sampling한 다각형 13 vertex. (a)는 vertex의 discrete binormal, (b)는 edge \(2\)의 torsion angle이다.
+        <em>읽는 법</em>: (a)에서 검은 꺾은선이 다각형, 초록 화살표가 \(\mathbf{b}_i\)(길이 \(0.55\)로 그림), 하늘색 삼각형이 몇 vertex에서 \(\gamma_{i-1}, \gamma_i, \gamma_{i+1}\)이 이루는 평면(discrete osculating plane), 파란 화살표가 edge \(2\)의 tangent \(\mathbf{t}_2\)다. (b)는 edge \(2\)에 수직인 평면을 \(\mathbf{t}_2\)의 끝 쪽에서 본 것이다(\(\mathbf{t}_2\)는 화면에서 나오는 방향, 파란 동그라미). 가로축이 \(\mathbf{b}_2\)이고, 주황 호가 \(\psi_2\)다.
+        <em>볼 것</em>: (a)에서 이웃한 하늘색 삼각형은 서로 기울어 있다. 다각형은 평면 안에서만 꺾이는 것이 아니라 그 평면 자체가 돈다. (b)에서 \(\mathbf{b}_3\)은 \(\mathbf{b}_2\)를 \(\mathbf{t}_2\) 둘레로 반시계 방향(오른손 규칙)으로 \(0.243\) rad 돌린 것이다. 모든 edge가 같은 \(\psi = 0.243 \gt 0\)이다(right-handed helix).
+        <em>본문과의 연결</em>: <a href="#i-37-5-3">Definition 37.5.3</a>, <a href="#i-37-5-5">Definition 37.5.5</a>, <a href="#i-37-5-6">Example 37.5.6</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-37-5-1">Figure 37.5.1</a>의 (a)에서 앞쪽 아래의 두 vertex \(\gamma_2, \gamma_3\)을 보자. 각 vertex의 초록 화살표는 그곳의 하늘색 삼각형에 수직이고, 두 삼각형은 edge \(2\)를 경첩처럼 공유하며 조금 열려 있다. 그 열린 각이 torsion angle이다. (b)는 이 경첩을 edge 방향에서 정면으로 본 것이다. 두 초록 화살표가 모두 화면 안에 놓이고, 그 사이의 주황 호가 \(\psi_2 = 0.243\)이다. 평면 다각형이면 모든 삼각형이 한 평면에 놓이므로 두 화살표가 같거나 정반대다(<a href="#i-37-5-7">Example 37.5.7</a>).</p>
+
+      <div class="thm example" id="i-37-5-6">
+        <p><span class="thm-head">Example 37.5.6</span> <span class="thm-name">(the sampled helix)</span>.
+        helix \(\gamma(t) = (a\cos t, a\sin t, bt)\)를 \(t_j = j\Delta\)로 sampling하자(\(0 \lt \Delta \lt \pi\)). helix는 screw motion(\(z\)축 둘레의 \(\Delta\) 회전과 \(b\Delta\) 평행이동)에 대해 대칭이고 이 motion이 \(\gamma_j\)를 \(\gamma_{j+1}\)로 보내므로, 모든 edge의 \(\ell\)과 \(\psi\), 모든 vertex의 \(\theta\)가 같다. \(c_\Delta = 1 - \cos\Delta\)라 하고 \(t = 0\)의 vertex에서 계산하면 \(e_{-1} = (ac_\Delta, a\sin\Delta, b\Delta)\), \(e_0 = (-ac_\Delta, a\sin\Delta, b\Delta)\)이므로</p>
+        <div class="equation" id="eq-37-5-5">
+        \[ \begin{aligned} \ell &= \sqrt{2a^2c_\Delta + b^2\Delta^2},\\ \cos\theta &= \frac{a^2(\sin^2\Delta - c_\Delta^2) + b^2\Delta^2}{\ell^2},\\ \mathbf{b}_0 &= \frac{(0,\ -b\Delta,\ a\sin\Delta)}{\sqrt{b^2\Delta^2 + a^2\sin^2\Delta}},\\ \tan\psi &= \frac{b\Delta\sin\Delta\cdot\ell}{b^2\Delta^2\cos\Delta + a^2\sin^2\Delta} \end{aligned} \tag{37.5.5} \]
+        </div>
+        <p>이다(\(e_{-1} \times e_0 = 2ac_\Delta(0, -b\Delta, a\sin\Delta)\)에서 \(\mathbf{b}_0\)을 얻고, \(\mathbf{b}_1\)은 \(\mathbf{b}_0\)을 \(z\)축 둘레로 \(\Delta\) 돌린 것이다. 계산은 <a href="#ex-37-5-5">Exercise 37.5.5</a>와 verify에 있다). \(b \gt 0\)이면 \(\psi \gt 0\)이다. running example \((a, b) = (1, 0.3)\)에서 한 바퀴에 vertex \(n\)개(\(\Delta = 2\pi/n\))이면</p>
+        <table>
+          <thead><tr><th>\(n\)</th><th>\(\ell\)</th><th>\(\theta\)</th><th>\(\psi\)</th><th>\(\theta/\bar\ell\)</th><th>\(\psi/\ell\)</th></tr></thead>
+          <tbody>
+            <tr><td>\(8\)</td><td>\(0.80081\)</td><td>\(0.74887\)</td><td>\(0.24255\)</td><td>\(0.93513\)</td><td>\(0.30288\)</td></tr>
+            <tr><td>\(16\)</td><td>\(0.40758\)</td><td>\(0.37573\)</td><td>\(0.11486\)</td><td>\(0.92186\)</td><td>\(0.28182\)</td></tr>
+            <tr><td>\(32\)</td><td>\(0.20469\)</td><td>\(0.18802\)</td><td>\(0.05667\)</td><td>\(0.91854\)</td><td>\(0.27686\)</td></tr>
+            <tr><td>\(64\)</td><td>\(0.10246\)</td><td>\(0.09403\)</td><td>\(0.02824\)</td><td>\(0.91771\)</td><td>\(0.27564\)</td></tr>
+          </tbody>
+        </table>
+        <p>이고, pointwise 값은 smooth의 \(\kappa = 0.91743\), \(\tau = 0.27523\)으로 다가간다. \(n\)을 두 배로 하면 오차가 \(1/4\)이 된다(<a href="#fig-37-5-2">Figure 37.5.2</a>(a)).</p>
+        <p class="verified">Verification: <code>verify/v-37-5-discrete-space-curves.py</code></p>
+      </div>
+      <div class="thm example" id="i-37-5-7">
+        <p><span class="thm-head">Example 37.5.7</span> <span class="thm-name">(plane polygons)</span>.
+        \(xy\)평면의 regular polygon에서 \(\theta_i \neq 0\)인 vertex의 binormal은 turning angle(<a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-1">Definition 32.3.1</a>)이 양수이면 \(e_3\), 음수이면 \(-e_3\)이다. 따라서 이웃한 두 vertex에서 꺾이는 방향이 같으면 \(\psi_i = 0\), 다르면 \(\psi_i = \pi\)다. 볼록 다각형은 모든 \(\psi_i = 0\)이지만, flower curve를 \(n = 40\)으로 sampling한 다각형에서는 turning angle의 부호가 열 번 바뀌므로 열 개의 edge에서 \(\psi_i = \pi\)이다. smooth의 Frenet frame이 inflection에서 뒤집히는 것(<a href="37-3-space-curves-frames.html#i-37-3-12">Example 37.3.12</a>)과 같은 현상이다. 평면에 있다고 torsion angle이 모두 \(0\)인 것은 아니다.</p>
+        <p class="verified">Verification: <code>verify/v-37-5-discrete-space-curves.py</code></p>
+      </div>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: the sign of the discrete torsion</p>
+        <p>이 study set은 §6.2와 <code>tools/dgdec.py</code>의 부호를 쓴다. \(\psi_i\)는 \(\mathbf{t}_i\) 둘레로 오른손 규칙으로 잰 \(\mathbf{b}_i\)에서 \(\mathbf{b}_{i+1}\)로의 각이고, right-handed helix에서 양수다(smooth의 \(\tau \gt 0\)과 같다). 강의 슬라이드(“Fundamental Theorem of Discrete Space Curves”, “Discrete Space Curve—Reconstruction”)는 torsion을 edge의 각 \(\tau_{ij}\)로, 그림에서는 \(B_i\)에서 \(B_j\)로의 각으로 그린다 <a class="cite" href="../../references.html#CMU-DDG-L11">[CMU-DDG L11]</a>. 그러나 그 각을 재는 축의 방향은 적혀 있지 않다. 복원 algorithm의 회전 \(R(u, \theta) = \exp(\theta\hat u)\)에서 \(\hat u\)는 보통의 cross product 행렬(\(\hat u v = u \times v\)인 것)의 transpose로 인쇄되어 있어서, column vector에 작용한다고 읽으면 \(u\) 둘레로 \(-\theta\) 돌리는 회전이고, row vector에 작용한다고 읽으면 \(+\theta\) 회전이다. 슬라이드만으로는 부호를 확정할 수 없다. 또 그 algorithm에서 “normal”이라 부르는 vector는 꺾이는 평면의 normal, 곧 이 절의 \(\mathbf{b}_i\)다. smooth의 비교(강의 슬라이드와 노트는 \(B' = \tau N\)으로 이 study set과 부호가 반대)는 <a href="37-3-space-curves-frames.html#sec-crane-conventions">Section 37.3</a>의 Conventions에 있다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-fundamental">
+      <h2>The Fundamental Theorem of Discrete Space Curves</h2>
+      <p>Section 37.4의 복원은 “방향을 \(\theta_i\)만큼 돌리고 \(\ell_i\)만큼 간다”였다. 공간에서는 돌리는 축도 정해야 한다. 그 축이 binormal이고, 축 자체는 edge마다 torsion angle만큼 돈다.</p>
+      <div class="thm theorem" id="i-37-5-8">
+        <p><span class="thm-head">Theorem 37.5.8</span> <span class="thm-name">(fundamental theorem of discrete space curves)</span>.
+        \(m \ge 2\)라 하자.
+        (a) 양수 \(\ell_0, \dots, \ell_{m-1}\), curvature angle \(\theta_1, \dots, \theta_{m-1} \in (0, \pi)\), torsion angle \(\psi_1, \dots, \psi_{m-2} \in (-\pi, \pi]\), 점 \(p_0\), 단위벡터 \(\mathbf{t}_0\), \(\mathbf{t}_0\)에 수직인 단위벡터 \(\mathbf{b}_1\)을 주면, vertex가 \(m + 1\)개이고 다음을 만족하는 discrete space curve가 꼭 하나 있다: \(\gamma_0 = p_0\), 첫 tangent가 \(\mathbf{t}_0\), vertex \(1\)의 binormal이 \(\mathbf{b}_1\), edge length가 \(\ell_i\), 내부 vertex \(i\)의 curvature angle이 \(\theta_i\), edge \(i\)(\(1 \le i \le m - 2\))의 torsion angle이 \(\psi_i\). 그것은 다음 점화식으로 주어진다(\(i = 1, \dots, m - 1\)).</p>
+        <div class="equation" id="eq-37-5-6">
+        \[ \begin{aligned} \mathbf{t}_i &= R(\mathbf{b}_i, \theta_i)\,\mathbf{t}_{i-1},\\ \mathbf{b}_{i+1} &= R(\mathbf{t}_i, \psi_i)\,\mathbf{b}_i,\\ \gamma_{i+1} &= \gamma_i + \ell_i\,\mathbf{t}_i \end{aligned} \tag{37.5.6} \]
+        </div>
+        <p>(b) 내부 vertex의 curvature angle이 모두 \((0, \pi)\)에 있는 두 discrete space curve의 \(\ell_i, \theta_i, \psi_i\)가 모두 같으면, 한 곡선을 다른 곡선으로 보내는 rigid motion \(\rho(p) = Ap + c\)(\(A\)는 \(\det A = 1\)인 orthogonal matrix)가 꼭 하나 있다. (<a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-3">Definition 5.4.3</a>은 rigid motion을 \(\psi\)로 쓰지만, 이 절에서 \(\psi\)는 torsion angle이므로 \(\rho\)로 쓴다.)</p>
+      </div>
+      <p><strong>이 정리가 말하는 것.</strong> “얼마나 가고, 얼마나 꺾고, 꺾는 평면을 얼마나 돌리는가”의 목록이 space polygon의 모양을 정확히 정한다. smooth 판(<a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-8">Theorem 5.4.8</a>)이 ODE의 존재와 유일성에 기댔던 것과 달리, 여기서는 회전을 차례로 곱하면 된다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: <a href="37-4-discrete-plane-curves.html#i-37-4-6">Theorem 37.4.6</a>과 같은 귀납법이다. 각 단계에서 <a href="#i-37-5-4">Lemma 37.5.4</a>가 “축 \(\mathbf{b}_i\) 둘레로 \(\theta_i\) 돌린 tangent는 정확히 curvature angle \(\theta_i\)와 binormal \(\mathbf{b}_i\)를 준다”를 보장한다.</p>
+        <p><span class="proof-head">Proof.</span> (a) 존재. <a href="#eq-37-5-6">(37.5.6)</a>으로 \(\mathbf{t}_i, \mathbf{b}_{i+1}, \gamma_{i+1}\)을 정한다. 귀납법으로 \(\mathbf{t}_{i-1}\)과 \(\mathbf{b}_i\)가 서로 수직인 단위벡터임을 보이자. \(i = 1\)이면 가정이다. \(\mathbf{t}_{i-1} \perp \mathbf{b}_i\)이면 \(\mathbf{t}_i = R(\mathbf{b}_i, \theta_i)\mathbf{t}_{i-1}\)은 회전축 \(\mathbf{b}_i\)에 수직인 단위벡터이고, \(\mathbf{b}_{i+1} = R(\mathbf{t}_i, \psi_i)\mathbf{b}_i\)는 \(\mathbf{b}_i \perp \mathbf{t}_i\)를 축 \(\mathbf{t}_i\) 둘레로 돌린 것이므로 \(\mathbf{t}_i\)에 수직인 단위벡터다. 그러면 edge length는 \(\ell_i\)이고, <a href="#i-37-5-4">Lemma 37.5.4</a>에서 vertex \(i\)의 curvature angle은 \(\theta_i\), binormal은 \(\mathbf{b}_i\)이다. \(\theta_i \lt \pi\)이므로 \(\mathbf{t}_i \neq -\mathbf{t}_{i-1}\)이고 곡선은 regular다. edge \(i\)의 torsion angle은 \(\mathbf{b}_{i+1} = R(\mathbf{t}_i, \psi_i)\mathbf{b}_i\)이고 \(\psi_i \in (-\pi, \pi]\)이므로 <a href="#eq-37-5-4">(37.5.4)</a>에서 \(\psi_i\)다.
+        유일성. 같은 자료와 처음 값을 갖는 곡선 \(\tilde\gamma\)가 있다고 하자. \(i\)에 대한 귀납법으로 \(\tilde{\mathbf{t}}_{i-1} = \mathbf{t}_{i-1}\), \(\tilde{\mathbf{b}}_i = \mathbf{b}_i\), \(\tilde\gamma_i = \gamma_i\)이면 <a href="#i-37-5-4">Lemma 37.5.4</a>의 둘째 문장에서 \(\tilde{\mathbf{t}}_i = R(\tilde{\mathbf{b}}_i, \theta_i)\tilde{\mathbf{t}}_{i-1} = \mathbf{t}_i\)이고, torsion angle의 정의에서 \(\tilde{\mathbf{b}}_{i+1} = R(\mathbf{t}_i, \psi_i)\mathbf{b}_i = \mathbf{b}_{i+1}\), 그리고 \(\tilde\gamma_{i+1} = \gamma_{i+1}\)이다.
+        (b) 두 곡선을 \(\gamma, \tilde\gamma\)라 하자. \((\mathbf{t}_0, \mathbf{b}_1 \times \mathbf{t}_0, \mathbf{b}_1)\)과 \((\tilde{\mathbf{t}}_0, \tilde{\mathbf{b}}_1 \times \tilde{\mathbf{t}}_0, \tilde{\mathbf{b}}_1)\)은 positively oriented orthonormal basis이므로, 앞의 것을 뒤의 것으로 보내는 \(\det A = 1\)인 orthogonal matrix \(A\)가 꼭 하나 있다. \(c = \tilde\gamma_0 - A\gamma_0\), \(\rho(p) = Ap + c\)라 하자. \(A\)는 inner product와 cross product를 보존하므로(\(A(u \times v) = Au \times Av\), \(\det A = 1\)) \(\rho \circ \gamma\)의 \(\ell_i, \theta_i, \mathbf{b}_i, \psi_i\)는 각각 \(\ell_i\), \(\theta_i\), \(A\mathbf{b}_i\), \(\psi_i\)이다. 또 \(\rho \circ \gamma\)의 처음 값은 \(\tilde\gamma_0\), \(A\mathbf{t}_0 = \tilde{\mathbf{t}}_0\), \(A\mathbf{b}_1 = \tilde{\mathbf{b}}_1\)이므로 (a)의 유일성에서 \(\rho \circ \gamma = \tilde\gamma\)이다. 이런 \(\rho\)는 처음 frame과 처음 점을 맞춰야 하므로 하나뿐이다.</p>
+      </div>
+      <p>반사(\(\det A = -1\))는 \(A(u \times v) = -Au \times Av\)이므로 binormal을 뒤집고 torsion angle의 부호를 바꾼다(<a href="#ex-37-5-2">Exercise 37.5.2</a>). 그래서 (b)의 rigid motion에는 반사가 들어가지 않는다. smooth의 <a href="../05-space-curves/5-2-torsion.html#i-5-2-8">Proposition 5.2.8</a>과 같다.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: a space polygon from lengths, curvature angles, and torsion angles</p>
+        <p><a href="#eq-37-5-6">(37.5.6)</a>을 Rodrigues 공식으로 그대로 옮긴다. <code>theta[i - 1]</code>이 \(\theta_i\), <code>psi[i - 1]</code>이 \(\psi_i\)다.</p>
+        <pre id="code-37-5-1"><code>import numpy as np
+
+def rotate(v, axis, angle):
+    """rotate v about the unit vector axis by angle (right-hand rule, Rodrigues' formula)."""
+    return (np.cos(angle) * v + np.sin(angle) * np.cross(axis, v)
+            + (1 - np.cos(angle)) * np.dot(axis, v) * axis)
+
+def space_curve_from_angles(ell, theta, psi, p0, t0, b1):
+    """(37.5.6). ell: m edge lengths; theta: m-1 curvature angles (vertices 1..m-1);
+    psi: m-2 torsion angles (edges 1..m-2). Returns the m+1 vertices."""
+    t, b = np.asarray(t0, float), np.asarray(b1, float)
+    X = [np.asarray(p0, float), np.asarray(p0, float) + ell[0] * t]
+    for i in range(1, len(ell)):
+        t = rotate(t, b, theta[i - 1])        # turn about the binormal b_i
+        X.append(X[-1] + ell[i] * t)
+        if i &lt; len(ell) - 1:
+            b = rotate(b, t, psi[i - 1])      # twist the binormal about t_i
+    return np.array(X)</code></pre>
+      </aside>
+
+      <div class="thm nonexample" id="i-37-5-9">
+        <p><span class="thm-head">Non-example 37.5.9</span> <span class="thm-name">(a straight vertex)</span>.
+        <a href="#i-37-5-8">Theorem 37.5.8</a>은 모든 \(\theta_i \gt 0\)을 가정한다. 두 open curve
+        \(\gamma = \bigl((0, 1, 0), (0, 0, 0), (1, 0, 0), (2, 0, 0), (2, 1, 0)\bigr)\)과
+        \(\tilde\gamma = \bigl((0, 1, 0), (0, 0, 0), (1, 0, 0), (2, 0, 0), (2, 0, 1)\bigr)\)을 보자. 둘 다 edge length는 \((1, 1, 1, 1)\), curvature angle은 \((\pi/2, 0, \pi/2)\)이다. 가운데 vertex에서 \(\theta_2 = 0\)이라 \(\mathbf{b}_2\)가 정의되지 않고, edge \(1, 2\)의 torsion angle도 정의되지 않는다. 그런데 \(\gamma\)는 평면에 있고 \(\tilde\gamma\)는 어떤 평면에도 들어 있지 않으므로 두 곡선은 rigid motion으로 겹칠 수 없다. 곧은 vertex에서 다각형은 “꺾는 평면을 갈아탈” 수 있고, 이 정보는 \(\theta\)와 \(\psi\)에 남지 않는다. smooth의 <a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-11">Non-example 5.4.11</a>(\(\kappa = 0\)인 점)과 같은 현상이다.</p>
+      </div>
+    </section>
+
+    <section id="sec-bishop">
+      <h2>Discrete Parallel Transport and the Discrete Bishop Frame</h2>
+      <p><a href="#i-37-5-9">Non-example 37.5.9</a>가 보여 주듯 binormal에 기댄 frame은 곧은 vertex에서 실패한다. Section 37.3의 해결책은 Bishop frame이었다. normal vector를 “돌리지 않고” 옮기는 것이다. 다각형에서 tangent는 vertex에서만 바뀌므로, 옮기는 일도 vertex에서만 일어난다.</p>
+      <div class="thm definition" id="i-37-5-10">
+        <p><span class="thm-head">Definition 37.5.10</span> <span class="thm-name">(discrete parallel transport along a curve)</span>.
+        regular discrete space curve의 vertex \(i\)에서 \(\mathbf{t}_{i-1}\)을 \(\mathbf{t}_i\)로 보내는 가장 작은 회전 \(P_i\), 곧 \(\theta_i \gt 0\)이면 \(P_i = R(\mathbf{b}_i, \theta_i)\), \(\theta_i = 0\)이면 \(P_i = I_3\)을 vertex \(i\)의 <dfn>discrete parallel transport along a curve</dfn>(곡선을 따른 이산 평행이동)이라 한다. \(\mathbf{t}_{i-1}\)에 수직인 vector \(u\)를 \(P_iu\)로 보내는 것을 \(u\)를 edge \(i - 1\)에서 edge \(i\)로 옮긴다고 한다.</p>
+      </div>
+      <p>\(P_i\)는 \(\mathbf{t}_{i-1}\)과 \(\mathbf{t}_i\)가 이루는 평면에 수직인 축 둘레로 돌리므로, 그 평면에 수직인 vector(\(\mathbf{b}_i\))는 그대로 두고 평면 안의 vector만 \(\theta_i\)만큼 돌린다. \(\mathbf{t}_{i-1}\)을 \(\mathbf{t}_i\)로 보내는 회전 가운데 회전각이 가장 작은 것이다. \(\mathbf{t}_{i-1} \perp u\)이면 \(\mathbf{t}_i = P_i\mathbf{t}_{i-1} \perp P_iu\)이므로 normal vector는 normal vector로 간다. 계산에는 다음 공식이 편하다.</p>
+      <div class="thm proposition" id="i-37-5-11">
+        <p><span class="thm-head">Proposition 37.5.11</span> <span class="thm-name">(a formula for the transport)</span>.
+        \(v = \mathbf{t}_{i-1} \times \mathbf{t}_i\), \(c = \inner{\mathbf{t}_{i-1}}{\mathbf{t}_i} \gt -1\)이라 하고 \([v]_\times\)를 \([v]_\times x = v \times x\)인 행렬이라 하면</p>
+        <div class="equation" id="eq-37-5-7">
+        \[ P_i = I_3 + [v]_\times + \frac{1}{1 + c}\,[v]_\times^2 \tag{37.5.7} \]
+        </div>
+        <p>이다. 특히 \(u \perp \mathbf{t}_{i-1}\)이면 \(P_iu = u - \dfrac{\inner{u}{\mathbf{t}_i}}{1 + c}\,(\mathbf{t}_{i-1} + \mathbf{t}_i)\)이다(<a href="#ex-37-5-3">Exercise 37.5.3</a>).</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(\theta_i = 0\)이면 \(v = 0\)이고 <a href="#eq-37-5-7">(37.5.7)</a>은 \(I_3\)이다. \(\theta_i \gt 0\)이면 \(v = \sin\theta_i\,\mathbf{b}_i\), \(c = \cos\theta_i\)이므로 \([v]_\times = \sin\theta_i[\mathbf{b}_i]_\times\), \([v]_\times^2 = \sin^2\theta_i[\mathbf{b}_i]_\times^2\)이고 \(\sin^2\theta_i/(1 + \cos\theta_i) = 1 - \cos\theta_i\)이다. 따라서 <a href="#eq-37-5-7">(37.5.7)</a>은 \(I_3 + \sin\theta_i[\mathbf{b}_i]_\times + (1 - \cos\theta_i)[\mathbf{b}_i]_\times^2\)이고, 이것은 Rodrigues 공식의 행렬 꼴 \(R(\mathbf{b}_i, \theta_i)\)이다(\([\mathbf{b}]_\times^2x = \inner{\mathbf{b}}{x}\mathbf{b} - x\)를 쓰면 <a href="#i-37-5-4">Lemma 37.5.4</a>의 증명의 식과 같다).</p>
+      </div>
+      <p>이 식은 \(\mathbf{b}_i\)를 쓰지 않으므로 \(\theta_i = 0\)에서도 그대로 성립하고, 수치적으로도 안정하다. 공용 구현 <code>dgdec.rotation_between</code>이 이 식이다.</p>
+
+      <div class="thm definition" id="i-37-5-12">
+        <p><span class="thm-head">Definition 37.5.12</span> <span class="thm-name">(discrete Bishop frame)</span>.
+        regular discrete space curve에서 \(\mathbf{t}_0\)에 수직인 단위벡터 \(\mathbf{u}_0\)을 고르고 \(\mathbf{u}_i = P_i\mathbf{u}_{i-1}\), \(\mathbf{w}_i = \mathbf{t}_i \times \mathbf{u}_i\)로 정한 edge마다의 frame \((\mathbf{t}_i, \mathbf{u}_i, \mathbf{w}_i)\)를 <dfn>discrete Bishop frame</dfn>(이산 비숍 틀)이라 한다.</p>
+      </div>
+      <p>\(P_i\)가 회전이고 \(\mathbf{t}_i = P_i\mathbf{t}_{i-1}\)이므로 귀납법으로 \(\mathbf{u}_i\)는 \(\mathbf{t}_i\)에 수직인 단위벡터이고, \((\mathbf{t}_i, \mathbf{u}_i, \mathbf{w}_i)\)는 positively oriented orthonormal basis다. smooth Bishop frame(<a href="37-3-space-curves-frames.html#i-37-3-8">Definition 37.3.8</a>)은 ODE를 풀어야 했지만, discrete Bishop frame은 회전을 곱하는 것뿐이라 반올림 오차를 빼면 정확히 orthonormal이다. 곧은 vertex에서는 \(P_i = I_3\)이라 frame이 그대로 넘어간다. 다음 명제가 smooth의 \(\vartheta' = -\tau\)(<a href="37-3-space-curves-frames.html#i-37-3-10">Proposition 37.3.10</a>)의 discrete 판이다.</p>
+      <div class="thm proposition" id="i-37-5-13">
+        <p><span class="thm-head">Proposition 37.5.13</span> <span class="thm-name">(Bishop frame relative to the binormals)</span>.
+        edge \(i\)(\(i \ge 1\))의 양 끝에서 binormal이 정의되면(\(\theta_i, \theta_{i+1} \gt 0\)), \(\vartheta_i\)를 \(\mathbf{t}_i\) 둘레로 오른손 규칙으로 잰 \(\mathbf{b}_i\)에서 \(\mathbf{u}_i\)로의 각이라 하자. 그러면</p>
+        <div class="equation" id="eq-37-5-8">
+        \[ \vartheta_{i+1} \equiv \vartheta_i - \psi_i \pmod{2\pi} \tag{37.5.8} \]
+        </div>
+        <p>이다. 곧 discrete Bishop frame은 binormal에 대해 edge마다 \(-\psi_i\)씩 돈다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: vertex \(i + 1\)의 transport \(P_{i+1}\)은 \(\mathbf{b}_{i+1}\)을 축으로 하는 회전이라 \(\mathbf{b}_{i+1}\)을 움직이지 않는다. 회전은 각을 보존하므로, edge \(i\)에서 잰 \(\mathbf{b}_{i+1}\)과 \(\mathbf{u}_i\) 사이의 각이 그대로 edge \(i + 1\)로 넘어간다.</p>
+        <p><span class="proof-head">Proof.</span> 축 \(\mathbf{a}\) 둘레의 signed angle을 \(\angle_{\mathbf{a}}(x, y)\)라 쓰자(\(x, y \perp \mathbf{a}\)). 회전 \(P\)는 cross product와 inner product를 보존하므로 \(\angle_{P\mathbf{a}}(Px, Py) = \angle_{\mathbf{a}}(x, y)\)이다. \(P_{i+1}\mathbf{t}_i = \mathbf{t}_{i+1}\), \(P_{i+1}\mathbf{b}_{i+1} = \mathbf{b}_{i+1}\), \(P_{i+1}\mathbf{u}_i = \mathbf{u}_{i+1}\)이므로
+        \(\vartheta_{i+1} = \angle_{\mathbf{t}_{i+1}}(\mathbf{b}_{i+1}, \mathbf{u}_{i+1}) = \angle_{\mathbf{t}_i}(\mathbf{b}_{i+1}, \mathbf{u}_i)\)이다. 한 축 둘레의 각은 \(2\pi\)를 법으로 더해지므로 \(\angle_{\mathbf{t}_i}(\mathbf{b}_{i+1}, \mathbf{u}_i) \equiv \angle_{\mathbf{t}_i}(\mathbf{b}_i, \mathbf{u}_i) - \angle_{\mathbf{t}_i}(\mathbf{b}_i, \mathbf{b}_{i+1}) = \vartheta_i - \psi_i\)이다.</p>
+      </div>
+
+      <p>closed curve에서는 마지막 edge에서 처음 edge로 한 번 더 옮길 수 있다. \(\mathbf{u}_n := P_0\mathbf{u}_{n-1}\)(vertex \(0\)의 transport)은 다시 \(\mathbf{t}_0\)에 수직이다.</p>
+      <div class="thm proposition" id="i-37-5-14">
+        <p><span class="thm-head">Proposition 37.5.14</span> <span class="thm-name">(discrete holonomy)</span>.
+        closed regular discrete space curve의 모든 vertex에서 \(\theta_i \gt 0\)이면, \(\mathbf{u}_n\)은 \(\mathbf{u}_0\)을 \(\mathbf{t}_0\) 둘레로 오른손 규칙의 각</p>
+        <div class="equation" id="eq-37-5-9">
+        \[ \Delta \equiv -\sum_{i=0}^{n-1}\psi_i \pmod{2\pi} \tag{37.5.9} \]
+        </div>
+        <p>만큼 돌린 것이다. 이 각은 \(\mathbf{u}_0\)의 선택에 무관하다. 평면 다각형에서는 \(\Delta \equiv 0\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 첨자를 \(n\)을 법으로 읽고 \(\vartheta_i = \angle_{\mathbf{t}_i}(\mathbf{b}_i, \mathbf{u}_i)\)를 \(i = 0, \dots, n\)에 대해 정하자(\(\mathbf{t}_n = \mathbf{t}_0\), \(\mathbf{b}_n = \mathbf{b}_0\)). <a href="#i-37-5-13">Proposition 37.5.13</a>은 \(i = 0, \dots, n - 1\) 모두에서 같은 증명으로 성립하므로(vertex \(0\)의 transport \(P_0\)도 \(\mathbf{b}_0\) 둘레의 회전이다) 더하면 \(\vartheta_n - \vartheta_0 \equiv -\sum_{i=0}^{n-1}\psi_i\)이다. \(\vartheta_n\)과 \(\vartheta_0\)은 같은 축 \(\mathbf{t}_0\) 둘레에서 같은 기준 \(\mathbf{b}_0\)으로 잰 \(\mathbf{u}_n\)과 \(\mathbf{u}_0\)의 각이므로 \(\angle_{\mathbf{t}_0}(\mathbf{u}_0, \mathbf{u}_n) \equiv \vartheta_n - \vartheta_0\)이다. 이 값은 \(\mathbf{u}_0\)에 무관하다. 평면 다각형이면 <a href="#i-37-5-7">Example 37.5.7</a>에서 \(\psi_i \in \{0, \pi\}\)이고, \(\psi_i = \pi\)인 edge는 turning angle의 부호가 바뀌는 곳이다. closed curve를 한 바퀴 돌면 부호는 짝수 번 바뀌므로 합은 \(2\pi\)의 정수배다.</p>
+      </div>
+      <div class="thm example" id="i-37-5-15">
+        <p><span class="thm-head">Example 37.5.15</span> <span class="thm-name">(the trefoil, discretely)</span>.
+        <a href="37-3-space-curves-frames.html#i-37-3-14">Example 37.3.14</a>의 trefoil을 \(t_j = 2\pi j/n\)으로 sampling하면 모든 \(\theta_i \gt 0\)이고, discrete holonomy는 \(n = 60, 120, 240, 480\)에서 \(3.1307\), \(3.0533\), \(3.0336\), \(3.0286\)이다. smooth 값 \(-\int\tau\,ds \equiv 3.0270\)과의 차이는 \(n\)을 두 배로 할 때마다 \(1/4\)이 된다(<a href="#fig-37-5-2">Figure 37.5.2</a>(b)). 각 \(n\)에서 Bishop frame을 실제로 옮긴 각과 \(-\sum\psi_i\)는 \(10^{-9}\) 안에서 같다(<a href="#i-37-5-14">Proposition 37.5.14</a>).</p>
+        <p class="verified">Verification: <code>verify/v-37-5-discrete-space-curves.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-37-5-2">
+        <img src="figures/fig-37-5-2-convergence.svg" alt="두 패널, 모두 log-log 그래프. (a) 가로축 vertices per turn n(8에서 256), 주홍 원과 실선은 |theta_i / lbar_i − kappa|, 초록 사각형과 파선은 |psi_i / l_i − tau|이고, 둘 다 회색 점선 slope −2와 나란히 내려간다. (b) 가로축 vertices n(60에서 960), 주황 마름모와 실선은 |Delta_n − 3.0270|이고 회색 점선 slope −2와 거의 겹친다.">
+        <figcaption><span class="fig-head">Figure 37.5.2.</span>
+        <em>무엇을</em>: discrete 양이 smooth 양으로 수렴하는 빠르기. (a) helix \((a, b) = (1, 0.3)\)를 한 바퀴에 \(n\)개 vertex로 sampling했을 때 pointwise discrete curvature와 torsion의 오차(<a href="#eq-37-5-5">(37.5.5)</a>의 닫힌 꼴), (b) trefoil을 \(n\)개 vertex로 sampling했을 때 discrete holonomy의 오차.
+        <em>읽는 법</em>: 두 패널 모두 log-log 눈금이고, 회색 점선은 기울기 \(-2\)인 기준선이다. (a)의 주홍은 \(\abs{\theta_i/\bar\ell_i - \kappa}\), 초록은 \(\abs{\psi_i/\ell_i - \tau}\), (b)의 주황은 \(\abs{\Delta_n - 3.0270}\)이다.
+        <em>볼 것</em>: 세 오차 모두 기준선과 평행하다. 측정한 차수는 \(2.00\), \(2.01\), \(1.99\)이다. \(n = 8\)처럼 아주 성긴 helix에서도 curvature의 오차는 \(2\%\), torsion의 오차는 \(10\%\) 정도다.
+        <em>본문과의 연결</em>: <a href="#i-37-5-6">Example 37.5.6</a>, <a href="#i-37-5-15">Example 37.5.15</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-37-5-2">Figure 37.5.2</a>의 (a)에서 두 선은 평행하게 내려가고 초록(torsion)이 조금 위에 있다. torsion은 curvature보다 한 번 더 미분한 양이므로, 같은 sampling에서 상대 오차가 조금 큰 것은 자연스럽다. (b)는 holonomy, 곧 \(-\sum\psi_i\)라는 전역적인 양도 같은 차수로 수렴한다는 것을 보여 준다. Chapter 32에서 turning angle의 합이 정확히 정수였던 것과 달리, 여기서는 정확한 등식(<a href="#i-37-5-14">Proposition 37.5.14</a>)과 수렴(이 그림)이 함께 있다. discrete holonomy는 discrete Bishop frame의 정확한 성질이고, 그 값이 smooth holonomy로 수렴하는 것이다.</p>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: space curves</p>
+        <p><strong>Smooth.</strong> \(\kappa \gt 0\), \(\tau\)가 곡선을 rigid motion을 제외하고 정한다(ODE). Bishop frame은 \(\mathbf{u}' = -\inner{\mathbf{t}'}{\mathbf{u}}\mathbf{t}\)의 해이고 Frenet frame에 대해 \(-\tau\)로 돈다. closed curve의 holonomy는 \(-\int\tau\,ds\).</p>
+        <p><strong>Discrete.</strong> \(\theta_i \in (0, \pi)\), \(\psi_i\), \(\ell_i\)가 다각형을 rigid motion을 제외하고 정한다(회전의 곱, <a href="#i-37-5-8">Theorem 37.5.8</a>). discrete Bishop frame은 vertex마다 가장 작은 회전을 곱한 것이고 binormal에 대해 \(-\psi_i\)로 돈다. closed curve의 holonomy는 \(-\sum\psi_i\).</p>
+        <p><strong>보존하는 것과 잃는 것.</strong> fundamental theorem, “Bishop은 binormal에 대해 \(-\)torsion으로 돈다”, holonomy 공식이 모두 정확히 성립한다. \(\theta = 0\)에서 정보가 사라지는 것도 smooth의 \(\kappa = 0\)과 같다. 잃는 것은 점마다의 \(\kappa, \tau\)이고, pointwise 값 \(\theta_i/\bar\ell_i\), \(\psi_i/\ell_i\)는 이차로 수렴할 뿐 정확하지 않다.</p>
+      </aside>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: discrete elastic rods</p>
+        <p>머리카락, 케이블, 실처럼 가늘고 긴 물체는 휘고(bending) 비틀린다(twisting). Bergou, Wardetzky, Robinson, Audoly, Grinspun의 discrete elastic rods는 이것을 discrete space curve와 edge마다의 “material frame”으로 나타낸다 <a class="cite" href="../../references.html#Bergou08">[Bergou08]</a>. 비틀림을 재려면 비틀리지 않은 기준 frame이 필요한데, 그것이 이 절의 discrete Bishop frame, 곧 discrete parallel transport로 옮긴 frame이다. edge마다 material frame이 기준 frame에서 돌아간 각을 재고, 이웃한 두 edge 사이에서 그 각이 바뀐 양(twist)으로 twisting energy를 만든다. bending energy에는 vertex마다의 curvature binormal \(2\,e_{i-1} \times e_i/(\ell_{i-1}\ell_i + \inner{e_{i-1}}{e_i})\)을 쓰는데, 그 크기는 \(2\tan(\theta_i/2)\), 곧 Chapter 32의 Steiner curvature \(\kappa^C_i\)(<a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-5">Definition 32.3.5</a>)다(<a href="#ex-37-5-4">Exercise 37.5.4</a>).</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>smooth fundamental theorem과 \(\kappa \gt 0\)이 필요한 이유: <a href="../05-space-curves/index.html#toc-5-4">Section 5.4</a>, <a href="../05-space-curves/5-4-fundamental-theorem.html#i-5-4-11">Non-example 5.4.11</a>. torsion의 기하적 뜻: <a href="../05-space-curves/5-2-torsion.html#i-5-2-11">Remark 5.2.11</a>.</li>
+        <li>discrete elastic rods의 frame, twist, energy: <a class="cite" href="../../references.html#Bergou08">[Bergou08]</a>.</li>
+        <li>surface 위의 discrete parallel transport와 connection은 이 절의 곡선판과 다른 대상이다: <a href="../45-vector-field-design/index.html#toc-45-3">Section 45.3</a>(Chapter 45 overview).</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>space polygon의 vertex에는 curvature angle \(\theta_i \in [0, \pi)\)과 discrete binormal \(\mathbf{b}_i\)(꺾이는 평면의 normal)가, edge에는 \(\mathbf{b}_i\)에서 \(\mathbf{b}_{i+1}\)로의 torsion angle \(\psi_i\)가 붙는다. right-handed helix에서 \(\psi_i \gt 0\)이고, 평면 다각형에서는 \(\psi_i \in \{0, \pi\}\)이다.</li>
+        <li>\(\ell_i\), \(\theta_i \in (0, \pi)\), \(\psi_i\)는 space polygon을 rigid motion을 제외하고 정확히 정하고, 복원은 회전의 곱 <a href="#eq-37-5-6">(37.5.6)</a>이다. 곧은 vertex(\(\theta_i = 0\))가 있으면 이 자료로 부족하다.</li>
+        <li>discrete parallel transport는 vertex마다 \(\mathbf{t}_{i-1}\)을 \(\mathbf{t}_i\)로 보내는 가장 작은 회전이고, 이것으로 만든 discrete Bishop frame은 binormal에 대해 edge마다 \(-\psi_i\)씩 돌며 closed curve의 holonomy는 \(-\sum\psi_i\)이다.</li>
+        <li>sampling한 곡선에서 \(\theta_i/\bar\ell_i\), \(\psi_i/\ell_i\), holonomy는 smooth 값으로 이차 수렴한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 곡선을 움직인다. Chapter 32의 curve shortening flow를 energy의 gradient flow로 다시 보고, 어떤 inner product로 gradient를 잡는지와 explicit과 implicit time step이 결과를 어떻게 바꾸는지 본다. 그리고 휘는 정도를 줄이는 elastic flow와, 이 절과 Section 37.4의 복원을 이용해 edge length를 정확히 지키는 isometric elastic flow를 만든다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-37-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 37.5.1</span> <span class="level">★</span>
+        open discrete space curve \((0, 0, 0), (2, 0, 0), (2, 1, 0), (2, 1, 3)\)의 curvature angle, binormal, torsion angle을 구하여라. 이 곡선은 오른쪽으로 감기는가, 왼쪽으로 감기는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathbf{t}_0 = e_1\), \(\mathbf{t}_1 = e_2\), \(\mathbf{t}_2 = e_3\)이므로 \(\theta_1 = \theta_2 = \pi/2\)이다. \(\mathbf{b}_1 = e_1 \times e_2 = e_3\), \(\mathbf{b}_2 = e_2 \times e_3 = e_1\)이다. edge \(1\)의 torsion angle은 \(\mathbf{t}_1 = e_2\) 둘레로 \(e_3\)에서 \(e_1\)로의 각이다. \(e_3 \times e_1 = e_2 = \mathbf{t}_1\)이고 \(\inner{e_3}{e_1} = 0\)이므로 \(\psi_1 = \operatorname{atan2}(1, 0) = \pi/2\)이다. \(\psi_1 \gt 0\)이므로 right-handed helix처럼 오른손 나사 방향으로 감긴다. edge length와 무관하게 각만으로 정해진다는 점에 주의하자(\(\ell = (2, 1, 3)\)이어도 같다).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-5-2" data-level="1">
+        <p><span class="thm-head">Exercise 37.5.2</span> <span class="level">★</span>
+        discrete space curve를 반사 \(S(x, y, z) = (x, y, -z)\)로 옮기면 curvature angle은 그대로이고, 모든 torsion angle의 부호가 바뀜을 보여라(\(\psi_i = \pi\)인 것은 그대로다). sampling한 right-handed helix의 거울상은 어떤 helix인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(S\)는 orthogonal이고 \(\det S = -1\)이므로 inner product를 보존하고 \(S(u \times v) = -(Su \times Sv)\)이다. 따라서 \(\theta_i\)는 그대로이고, 새 binormal은 \(\tilde{\mathbf{b}}_i = S\mathbf{t}_{i-1} \times S\mathbf{t}_i/\abs{S\mathbf{t}_{i-1} \times S\mathbf{t}_i} = -S\mathbf{b}_i\)이다. <a href="#eq-37-5-4">(37.5.4)</a>에서 \(\inner{\tilde{\mathbf{b}}_i}{\tilde{\mathbf{b}}_{i+1}} = \inner{\mathbf{b}_i}{\mathbf{b}_{i+1}}\)이고 \(\inner{\tilde{\mathbf{b}}_i \times \tilde{\mathbf{b}}_{i+1}}{\tilde{\mathbf{t}}_i} = \inner{S\mathbf{b}_i \times S\mathbf{b}_{i+1}}{S\mathbf{t}_i} = \inner{-S(\mathbf{b}_i \times \mathbf{b}_{i+1})}{S\mathbf{t}_i} = -\inner{\mathbf{b}_i \times \mathbf{b}_{i+1}}{\mathbf{t}_i}\)이므로 atan2의 첫 인자만 부호가 바뀐다. 따라서 \(\tilde\psi_i = -\psi_i\)이다(\(\psi_i = \pi\)이면 첫 인자가 \(0\)이라 그대로 \(\pi\)). helix \((a\cos t, a\sin t, bt)\)의 거울상은 \((a\cos t, a\sin t, -bt)\), 곧 \(b\)의 부호를 바꾼 left-handed helix이고, 모든 \(\psi\)가 음수다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-5-3" data-level="2">
+        <p><span class="thm-head">Exercise 37.5.3</span> <span class="level">★★</span>
+        <a href="#i-37-5-11">Proposition 37.5.11</a>의 마지막 식 \(P_iu = u - \inner{u}{\mathbf{t}_i}(\mathbf{t}_{i-1} + \mathbf{t}_i)/(1 + c)\)(\(u \perp \mathbf{t}_{i-1}\))를 증명하여라. 이 식이 \(\mathbf{t}_{i-1}\)을 \(\mathbf{t}_i\)로 보내지 않는 것은 왜 문제가 되지 않는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\theta_i = 0\)이면 \(\mathbf{t}_i = \mathbf{t}_{i-1}\)이고 \(\inner{u}{\mathbf{t}_i} = 0\)이므로 양변이 \(u\)다. \(\theta_i \gt 0\)이면 \(u \perp \mathbf{t}_{i-1}\)을 \(u = \alpha\mathbf{b}_i + \beta\mathbf{m}\), \(\mathbf{m} = \mathbf{b}_i \times \mathbf{t}_{i-1}\)으로 쓰자(\((\mathbf{t}_{i-1}, \mathbf{m}, \mathbf{b}_i)\)가 orthonormal basis). 두 식이 linear이므로 \(u = \mathbf{b}_i\)와 \(u = \mathbf{m}\)에서 확인하면 된다. \(u = \mathbf{b}_i\): \(P_i\mathbf{b}_i = \mathbf{b}_i\)(회전축)이고 \(\inner{\mathbf{b}_i}{\mathbf{t}_i} = 0\)이므로 우변도 \(\mathbf{b}_i\)이다. \(u = \mathbf{m}\): <a href="#i-37-5-4">Lemma 37.5.4</a>에서 \(\mathbf{t}_i = \cos\theta\,\mathbf{t}_{i-1} + \sin\theta\,\mathbf{m}\)이므로 \(\inner{\mathbf{m}}{\mathbf{t}_i} = \sin\theta\)이고 \(\mathbf{t}_{i-1} + \mathbf{t}_i = (1 + \cos\theta)\mathbf{t}_{i-1} + \sin\theta\,\mathbf{m}\)이다. 우변은 \(\mathbf{m} - \sin\theta\,\mathbf{t}_{i-1} - \tfrac{\sin^2\theta}{1 + \cos\theta}\mathbf{m} = -\sin\theta\,\mathbf{t}_{i-1} + \cos\theta\,\mathbf{m}\)이다. 좌변은 \(\mathbf{m}\)을 \(\mathbf{b}_i\) 둘레로 \(\theta\) 돌린 것이고 \(\mathbf{b}_i \times \mathbf{m} = -\mathbf{t}_{i-1}\)이므로 \(\cos\theta\,\mathbf{m} - \sin\theta\,\mathbf{t}_{i-1}\)으로 같다. 이 식은 \(u \perp \mathbf{t}_{i-1}\)에서만 \(P_i\)와 같고, \(\mathbf{t}_{i-1}\)에는 쓰지 않는다. Bishop frame에서는 옮길 vector가 언제나 normal vector이므로 이것으로 충분하다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-5-4" data-level="2">
+        <p><span class="thm-head">Exercise 37.5.4</span> <span class="level">★★</span>
+        \(\theta_i \in (0, \pi)\)인 vertex에서 \((\kappa\mathbf{b})_i = 2\,e_{i-1} \times e_i/(\ell_{i-1}\ell_i + \inner{e_{i-1}}{e_i})\)이 \(2\tan(\theta_i/2)\,\mathbf{b}_i\)와 같음을 보여라. plane polygon에서 이것은 Chapter 32의 어떤 discrete curvature인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(e_{i-1} \times e_i = \ell_{i-1}\ell_i\,\mathbf{t}_{i-1} \times \mathbf{t}_i = \ell_{i-1}\ell_i\sin\theta_i\,\mathbf{b}_i\)이고 \(\inner{e_{i-1}}{e_i} = \ell_{i-1}\ell_i\cos\theta_i\)이므로 \((\kappa\mathbf{b})_i = 2\sin\theta_i/(1 + \cos\theta_i)\,\mathbf{b}_i = 2\tan(\theta_i/2)\,\mathbf{b}_i\)이다(반각 공식). edge length가 약분되어 사라진다. plane polygon에서는 \(\mathbf{b}_i = \sgn(\theta_i)\,e_3\)이고 크기 \(2\tan(\abs{\theta_i}/2)\)에 부호를 붙이면 \(2\tan(\theta_i/2) = \kappa^C_i\), 곧 Steiner curvature다(<a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-5">Definition 32.3.5</a>). \(\theta_i \to \pi\)에서 한없이 커지므로, 이 curvature로 만든 bending energy는 진행 방향이 거의 되돌아가는 vertex에 큰 벌을 준다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-5-5" data-level="1">
+        <p><span class="thm-head">Exercise 37.5.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> helix \((a, b) = (1, 0.3)\)를 한 바퀴에 \(n = 8, 16, 32, 64\)개 vertex로 sampling하고 <code>dgdec.space_curve_curvature_torsion</code>으로 pointwise discrete curvature와 torsion을 구해 smooth 값과의 오차를 출력하여라. <a href="#i-37-5-6">Example 37.5.6</a>의 표와 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-37-5-5"><code>import numpy as np
+import dgdec as dd
+
+a, b = 1.0, 0.3
+kappa, tau = a / (a * a + b * b), b / (a * a + b * b)
+for n in (8, 16, 32, 64):
+    t = 2 * np.pi / n * np.arange(6)
+    X = np.stack([a * np.cos(t), a * np.sin(t), b * t], 1)
+    k_i, t_i = dd.space_curve_curvature_torsion(X, False)   # theta_i / lbar_i and psi_i / l_i
+    print(f"n = {n:2d}: kappa_i = {k_i[2]:.5f} (error {abs(k_i[2] - kappa):.1e}), "
+          f"tau_i = {t_i[2]:.5f} (error {abs(t_i[2] - tau):.1e})")</code></pre>
+          <p>출력은 다음과 같다.</p>
+          <pre id="out-ex-37-5-5"><code>n =  8: kappa_i = 0.93513 (error 1.8e-02), tau_i = 0.30288 (error 2.8e-02)
+n = 16: kappa_i = 0.92186 (error 4.4e-03), tau_i = 0.28182 (error 6.6e-03)
+n = 32: kappa_i = 0.91854 (error 1.1e-03), tau_i = 0.27686 (error 1.6e-03)
+n = 64: kappa_i = 0.91771 (error 2.8e-04), tau_i = 0.27564 (error 4.1e-04)</code></pre>
+          <p>값은 <a href="#i-37-5-6">Example 37.5.6</a>의 표와 같고, 오차는 \(n\)을 두 배로 할 때마다 약 \(1/4\)이 된다. screw 대칭 때문에 어느 vertex와 edge에서 재도 같은 값이다(open curve의 양 끝은 제외).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-5-6" data-level="2">
+        <p><span class="thm-head">Exercise 37.5.6</span> <span class="level">★★</span>
+        <strong>Coding.</strong> <a href="#i-37-5-11">Proposition 37.5.11</a>의 식으로 discrete parallel transport를 구현하고, trefoil(<a href="37-3-space-curves-frames.html#i-37-3-14">Example 37.3.14</a>)을 \(n = 120\)으로 sampling한 다각형에서 서로 다른 두 \(\mathbf{u}_0\)으로 Bishop frame을 한 바퀴 옮겨 holonomy를 출력하여라. discrete binormal과 torsion angle을 직접 계산해 \(-\sum\psi_i \pmod{2\pi}\)와 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-37-5-6"><code>import numpy as np
+
+def transport(t0, t1, u):
+    """minimal rotation taking t0 to t1, applied to u orthogonal to t0 (Proposition 37.5.11)."""
+    return u - np.dot(u, t1) / (1 + np.dot(t0, t1)) * (t0 + t1)
+
+n = 120
+s = 2 * np.pi * np.arange(n) / n
+X = np.stack([(2 + np.cos(3 * s)) * np.cos(2 * s), (2 + np.cos(3 * s)) * np.sin(2 * s), np.sin(3 * s)], 1)
+E = np.roll(X, -1, 0) - X
+T = E / np.linalg.norm(E, axis=1, keepdims=True)
+for v in ([0.0, 0.0, 1.0], [1.0, 0.0, 0.0]):
+    u0 = np.cross(T[0], v) / np.linalg.norm(np.cross(T[0], v))
+    u = u0
+    for i in range(1, n + 1):                      # vertices 1, ..., n-1 and finally vertex 0
+        u = transport(T[i - 1], T[i % n], u)
+    print(f"holonomy from u0 = T0 x {v}: {np.arctan2(np.dot(np.cross(u0, u), T[0]), np.dot(u0, u)):.4f}")
+B = np.cross(np.roll(T, 1, 0), T)                  # b_i at vertex i (edges i-1, i)
+B /= np.linalg.norm(B, axis=1, keepdims=True)
+B1 = np.roll(B, -1, 0)                             # b_{i+1}
+psi = np.arctan2(np.sum(np.cross(B, B1) * T, 1), np.sum(B * B1, 1))
+print(f"-sum psi mod 2 pi: {np.angle(np.exp(-1j * psi.sum())):.4f}")</code></pre>
+          <p>출력은 다음과 같다.</p>
+          <pre id="out-ex-37-5-6"><code>holonomy from u0 = T0 x [0.0, 0.0, 1.0]: 3.0533
+holonomy from u0 = T0 x [1.0, 0.0, 0.0]: 3.0533
+-sum psi mod 2 pi: 3.0533</code></pre>
+          <p>두 처음 값에서 같은 holonomy가 나오고, 그 값은 \(-\sum\psi_i\)와 같다(<a href="#i-37-5-14">Proposition 37.5.14</a>). smooth 값 \(3.0270\)과의 차이 \(0.026\)은 \(n = 120\)의 discretization 오차다(<a href="#i-37-5-15">Example 37.5.15</a>).</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="37-4-discrete-plane-curves.html">← 37.4 Discrete Plane Curves</a>
+    <a rel="next" href="37-6-curve-flows.html">37.6 Curvature Flows on Curves →</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>37.1 Plane Curves — DG Study</title>
+  <meta name="dg-id" content="37.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="32.2, 32.3, 4.2, 4.4">
+  <meta name="dg-refs" content="Cr §3.3; CMU-DDG L10">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">37. Curves: Smooth and Discrete</a> ›
+    <span>37.1 Plane Curves</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>37.1 Plane Curves</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#Cr">[Cr §3.3]</a> · Lecture: <a class="cite" href="../../references.html#CMU-DDG-L10">[CMU-DDG L10]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>parametrized plane curve의 differential \(d\gamma\)를 “parameter 구간의 tangent vector를 평면의 vector로 늘이는 linear map”으로 설명하고, reparametrization이 그 늘이는 비율을 어떻게 바꾸는지 계산할 수 있다.</li>
+        <li>regular curve(immersion)와 embedded curve의 차이를 예와 비예로 구분할 수 있다.</li>
+        <li>signed curvature에서 tangent angle, tangent, curve를 차례로 적분해 plane curve를 복원하는 절차를 유도하고, rigid motion의 자유도와 closed curve가 되는 조건을 증명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Chapter 32: discrete curve <a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-8">Definition 32.2.8</a>, discrete tangent <a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-11">Definition 32.2.11</a>, signed curvature와 tangent angle <a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-2">Proposition 32.2.2</a>, turning angle <a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-1">Definition 32.3.1</a>.</li>
+        <li>parametrized curve <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-1">Definition 4.1.1</a>, regular curve <a href="../04-curves/4-2-arc-length.html#i-4-2-1">Definition 4.2.1</a>, reparametrization <a href="../04-curves/4-3-reparametrization.html#i-4-3-1">Definition 4.3.1</a>, arc length parametrization <a href="../04-curves/4-3-reparametrization.html#i-4-3-7">Definition 4.3.7</a>.</li>
+        <li>signed curvature <a href="../04-curves/4-4-signed-curvature.html#i-4-4-2">Definition 4.4.2</a>, fundamental theorem of plane curves <a href="../04-curves/4-4-signed-curvature.html#i-4-4-10">Theorem 4.4.10</a>, rigid motion of the plane(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-7">Proposition 4.4.7</a> 앞). 직관만 필요하면 <a href="../00-tour/0-2-curves.html#sec-shape">Section 0.2</a>로 충분하다.</li>
+        <li>rotation index <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-3">Definition 5.6.3</a>와 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4</a>(a).</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Chapter 32는 plane curve의 curvature 하나에서 discrete curvature가 넷 나오는 것을 보았고, 그것들로 discrete curve를 움직이는 flow에서 무엇이 남는지 확인했다. 그 장이 남긴 질문은 둘이다. 닫힌 다각형의 turning angle의 합이 \(2\pi\)의 정수배라는 사실(<a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-4">Proposition 32.3.4</a>)은 smooth curve의 어떤 정리와 대응하는가? 그리고 다각형을 움직일 때 시간 간격은 어떻게 골라야 하는가?</p>
+      <p><a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>은 mesh 위의 함수와 그 “차분”을 discrete differential form이라는 하나의 언어로 정리한다. 이 장은 그 언어가 가장 단순한 대상인 곡선에서 무엇이 되는지 보는 장이다. 강의 순서를 따라 먼저 smooth curve를 다시 쓰고(37.1–37.3), 그다음 discrete curve로 옮긴다(37.4–37.5). 이 절은 그 출발점으로 plane curve의 <em>differential</em>을 다룬다. smooth curve에서 \(d\gamma\)가 하는 일을 정확히 적어 두면, Section 37.4에서 다각형의 edge vector \(e_i = \gamma_{i+1} - \gamma_i\)가 왜 그 discrete 판인지가 한 줄로 설명된다.</p>
+      <p>절의 뒷부분에서는 반대 방향을 묻는다. curvature를 알면 곡선을 되살릴 수 있는가? smooth curve에서는 적분 두 번으로 되살릴 수 있고, 닫힌 곡선이 되려면 조건이 둘 필요하다. 이 조건들이 Section 37.2의 turning number와 Section 37.4의 discrete 복원으로 이어진다.</p>
+    </section>
+
+    <aside class="box convention" id="sec-conventions">
+      <p class="box-title">Conventions: Chapter 37의 기호</p>
+      <p>이 장 전체에서 다음 기호를 쓴다. smooth curve는 §6.2를 따른다: unit tangent \(\mathbf{t}\), signed curvature \(\kappa_s\)와 normal \(\mathbf{n}_s = J\mathbf{t}\)(\(J\)는 반시계 방향 \(90^\circ\) 회전), space curve의 Frenet frame \((\mathbf{t}, \mathbf{n}, \mathbf{b})\)와 \(\mathbf{b}' = -\tau\mathbf{n}\). tangent angle은 \(\varphi\)로 쓴다(Chapter 32와 같다). discrete curve는 Chapter 32를 따른다: vertex \(\gamma_i\), edge \(i\)는 \(\gamma_i\)에서 \(\gamma_{i+1}\)로 가고 \(e_i, \ell_i, \mathbf{t}_i\)를 가지며, vertex \(i\)의 turning angle은 \(\theta_i\), dual length는 \(\bar\ell_i\)다. 새로 쓰는 기호는 turning number의 값 \(k\)(Section 37.2, 37.4), winding number \(\operatorname{wind}(\gamma, p)\)(Section 37.2), Bishop frame의 \((\mathbf{t}, \mathbf{u}, \mathbf{w})\)와 계수 \(k_1, k_2\)(Section 37.3, 37.5), discrete binormal \(\mathbf{b}_i\)와 torsion angle \(\psi_i\)(Section 37.5), time step \(h\)(Section 37.6)다. \(k\)와 \(k_1, k_2\)는 서로 다른 절에서만 쓴다.</p>
+      <p>강의 슬라이드는 arc length parametrization의 tangent를 \(T = d\gamma(\tfrac{d}{ds})\), normal을 \(N = \mathcal{J}T\), plane curve의 curvature를 \(\kappa = \inner{N}{\tfrac{d}{ds}T}\)로 쓴다 <a class="cite" href="../../references.html#CMU-DDG-L10">[CMU-DDG L10]</a>(“Tangent of a Curve”, “Normal of a Curve”, “Curvature of a Plane Curve” 슬라이드). 곧 \(T = \mathbf{t}\), \(N = \mathbf{n}_s\), \(\kappa = \kappa_s\)이고 부호까지 같다. 노트는 같은 대상을 \(dT(X) = -\kappa N\)으로 쓰고 \(N\)을 \(T\)의 왼쪽(반시계 방향 \(90^\circ\))으로 고른다 <a class="cite" href="../../references.html#Cr">[Cr §3.3.1]</a>. 이것을 plane curve에 그대로 적용하면 노트의 \(\kappa\)는 \(-\kappa_s\)가 되어 슬라이드와 부호가 반대다. 이 장은 §6.2와 슬라이드의 부호(\(\mathbf{t}' = \kappa_s\mathbf{n}_s\))를 쓴다. space curve의 부호 비교는 <a href="37-3-space-curves-frames.html#sec-crane-conventions">Section 37.3</a>에 있다.</p>
+    </aside>
+
+    <section id="sec-differential">
+      <h2>The Differential of a Parametrized Curve</h2>
+      <p><strong>parametrized plane curve</strong>(매개 평면곡선)는 열린구간 \(I\)에서 \(\R^2\)로 가는 매끄러운 map \(\gamma\colon I \to \R^2\)이다(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-1">Definition 4.1.1</a>). 원 \(\gamma(t) = (r\cos t, r\sin t)\)처럼 점마다 위치를 주는 함수다. 이 절에서 새로 할 일은 미분 \(\gamma'(t)\)를 “숫자의 순서쌍” 대신 “vector를 vector로 보내는 linear map”으로 읽는 것이다.</p>
+      <p>parameter 구간의 한 점 \(t\)에서 움직일 수 있는 방향은 수직선 위의 vector, 곧 실수 \(X\) 하나다. \(X \gt 0\)이면 \(t\)가 커지는 쪽, \(X \lt 0\)이면 작아지는 쪽이다. 이 vector를 \(\gamma\)로 보내면 평면의 vector가 된다.</p>
+      <div class="equation" id="eq-37-1-1">
+      \[ \begin{aligned} d\gamma_t\colon \R &\to \R^2,\\ d\gamma_t(X) &= X\,\gamma'(t) = \lim_{\varepsilon \to 0}\frac{\gamma(t + \varepsilon X) - \gamma(t)}{\varepsilon}. \end{aligned} \tag{37.1.1} \]
+      </div>
+      <p>이 linear map을 \(t\)에서 \(\gamma\)의 <strong>differential</strong>(미분)이라 부른다. 행렬로 쓰면 \(2 \times 1\) Jacobian matrix \(D\gamma(t) = \gamma'(t)\)이고(§6.1), 새로운 대상이 아니라 같은 도함수를 “입력 vector를 받는 map”으로 본 것이다. 크기 \(\abs{d\gamma_t(X)} = \abs{\gamma'(t)}\,\abs{X}\)는 parameter 구간의 길이 \(\abs{X}\)가 곡선 위에서 얼마로 늘어나는지를 말한다. 이 비율이 speed \(\abs{\gamma'(t)}\)다(<a href="../04-curves/4-1-parametrized-curves.html#i-4-1-7">Definition 4.1.7</a>).</p>
+
+      <figure class="dg-figure" id="fig-37-1-1">
+        <img src="figures/fig-37-1-1-differential.svg" alt="두 패널. (a) 위쪽의 가로 수직선(0에서 2π)에 같은 간격의 점 열두 개가 있고, 각 점에서 같은 길이의 파란 화살표 X가 오른쪽을 향한다. (b) 아래쪽의 검은 타원 위 열두 점에서 곡선을 따라 반시계 방향으로 파란 화살표가 그려져 있고, 화살표는 곡선 바로 바깥에 나란히 놓였다. 오른쪽 끝(t = 0)의 화살표가 가장 짧고 길이 1이라는 라벨이, 맨 위(t = π/2)의 화살표가 가장 길고 길이 2라는 라벨이 붙어 있다.">
+        <figcaption><span class="fig-head">Figure 37.1.1.</span>
+        <em>무엇을</em>: ellipse \(\gamma(t) = (2\cos t, \sin t)\)의 differential. (a)는 parameter 구간 \([0, 2\pi]\)의 같은 간격의 점 \(t_j = 2\pi j/12\)와 그곳의 단위 vector \(X = 1\), (b)는 그 상 \(d\gamma_{t_j}(X) = \gamma'(t_j)\)이다.
+        <em>읽는 법</em>: 파란 화살표가 tangent vector다. (a)와 (b)의 화살표는 같은 축척(실제 길이의 \(0.35\)배)으로 그렸고, (b)에서는 곡선과 겹치지 않게 회색 짧은 선만큼 바깥쪽으로 옮겼다.
+        <em>볼 것</em>: (a)의 화살표는 모두 길이가 같지만 (b)의 화살표는 길이가 \(\abs{\gamma'(t)} = \sqrt{1 + 3\sin^2 t}\)로 \(1\)(\(t = 0, \pi\), 양 끝)에서 \(2\)(\(t = \pm\pi/2\), 위아래)까지 바뀐다. 같은 parameter 간격이 곡선 위에서는 위아래에서 두 배로 늘어난다.
+        <em>본문과의 연결</em>: <a href="#eq-37-1-1">(37.1.1)</a>과 <a href="#i-37-1-1">Example 37.1.1</a>. 이 늘이는 비율이 \(1\)인 parametrization이 arc length parametrization이다.</figcaption>
+      </figure>
+      <p><a href="#fig-37-1-1">Figure 37.1.1</a>의 (a)와 (b)를 위아래로 비교해 보자. (a)의 수직선 위에서는 열두 화살표가 모두 같다. (b)에서 같은 화살표의 상을 보면 오른쪽 끝(\(t = 0\))의 화살표가 가장 짧고, 맨 위(\(t = \pi/2\))로 갈수록 길어진다. 곧 \(d\gamma\)는 점마다 다른 비율로 vector를 늘인다. 방향은 언제나 곡선에 접한다. 그래서 \(d\gamma\)는 두 정보를 함께 담는다. 하나는 곡선이 어느 쪽으로 가는지(tangent 방향)이고, 다른 하나는 parametrization이 곡선을 얼마나 빨리 지나가는지(speed)다.</p>
+
+      <div class="thm example" id="i-37-1-1">
+        <p><span class="thm-head">Example 37.1.1</span> <span class="thm-name">(differentials of the running examples)</span>.
+        (a) 반지름 \(r\)인 원 \(\gamma(t) = (r\cos t, r\sin t)\)에서 \(d\gamma_t(X) = X(-r\sin t, r\cos t)\)이고 \(\abs{d\gamma_t(X)} = r\abs{X}\)이다. 모든 점에서 같은 비율 \(r\)로 늘인다.
+        (b) ellipse \(\gamma(t) = (2\cos t, \sin t)\)에서 \(d\gamma_t(X) = X(-2\sin t, \cos t)\)이고 \(\abs{d\gamma_t(X)} = \abs{X}\sqrt{4\sin^2 t + \cos^2 t} = \abs{X}\sqrt{1 + 3\sin^2 t}\)이다. 비율은 \(t = 0, \pi\)에서 \(1\), \(t = \pm\pi/2\)에서 \(2\)다(<a href="#fig-37-1-1">Figure 37.1.1</a>). 한 바퀴의 길이는 \(\int_0^{2\pi}\abs{\gamma'}\,dt = 9.6884\)이다(Chapter 32의 값과 같다).</p>
+        <p class="verified">Verification: <code>verify/v-37-1-plane-curves.py</code></p>
+      </div>
+
+      <p>parametrization을 바꾸면 곡선의 모양은 그대로이고 늘이는 비율만 바뀐다. <a href="../04-curves/4-3-reparametrization.html#i-4-3-1">Definition 4.3.1</a>처럼 \(h\colon J \to I\)가 매끄러운 bijection이고 \(h'\)이 \(0\)이 아니면 \(\tilde\gamma = \gamma \circ h\)는 같은 trace의 다른 parametrization이다.</p>
+      <div class="thm proposition" id="i-37-1-2">
+        <p><span class="thm-head">Proposition 37.1.2</span> <span class="thm-name">(the differential under reparametrization)</span>.
+        \(\tilde\gamma = \gamma \circ h\)이면 모든 \(u \in J\)와 \(Y \in \R\)에 대하여</p>
+        <div class="equation" id="eq-37-1-2">
+        \[ d\tilde\gamma_u(Y) = d\gamma_{h(u)}\bigl(h'(u)\,Y\bigr) \tag{37.1.2} \]
+        </div>
+        <p>이다. 특히 \(\abs{d\tilde\gamma_u(Y)} = \abs{h'(u)}\,\abs{\gamma'(h(u))}\,\abs{Y}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> chain rule에서 \(\tilde\gamma'(u) = h'(u)\,\gamma'(h(u))\)이므로, <a href="#eq-37-1-1">(37.1.1)</a>에서 \(d\tilde\gamma_u(Y) = Y h'(u)\gamma'(h(u)) = d\gamma_{h(u)}(h'(u)Y)\)이다.</p>
+      </div>
+      <p>곧 reparametrization은 parameter 구간의 vector를 먼저 \(h'(u)\)배 한 뒤 \(d\gamma\)로 보내는 것이다. 늘이는 비율이 어디서나 \(1\)이 되도록 \(h\)를 고른 것이 arc length parametrization이다(<a href="../04-curves/4-3-reparametrization.html#i-4-3-7">Definition 4.3.7</a>): 모든 \(X\)에서 \(\abs{d\gamma_s(X)} = \abs{X}\). discrete curve에는 parameter 구간이 처음부터 없다. 주어지는 것은 점의 목록뿐이므로, discrete 쪽에서는 각 edge가 “자기 길이만큼의 구간”을 차지한다고 보는 것, 곧 arc length parametrization이 자연스러운 선택이다.</p>
+
+      <!-- REVIEW: Chapter 35 (incl. 35.5) is now written and precedes 37 in reading order, so the 35.5 half of this box is really a look back. Kept as "Looking ahead" because the shared index Builds on bullet and the parallel box in 37.4 describe both as Looking ahead; once Chapter 36 is written, consider making both boxes "Looking back" (box backward) together with that bullet. -->
+      <aside class="box forward">
+        <p class="box-title">Looking ahead</p>
+        <p>강의는 \(\gamma\)를 구간 위의 \(\R^2\)-valued 0-form으로, \(d\gamma\)를 그 exterior derivative인 \(\R^2\)-valued 1-form으로 읽는다 <a class="cite" href="../../references.html#CMU-DDG-L10">[CMU-DDG L10]</a>. vector-valued form은 <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-10">Definition 35.5.10</a>이 정의하고, map \(\mathbf{x}\)의 differential을 \(\R^m\)-valued 1-form \(d\mathbf{x}\)로 읽는 것은 <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-11">Example 35.5.11</a>(a)다. 정의역이 구간인 경우(\(n = 1\))가 곡선의 \(d\gamma\)다. Chapter 38은 surface의 immersion \(\mathbf{x}\)와 \(d\mathbf{x}\)를 같은 언어로 쓴다. 이 장에서는 그 일반론 없이 \(d\gamma_t\)를 점마다의 linear map <a href="#eq-37-1-1">(37.1.1)</a>로만 쓴다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-regular">
+      <h2>Regular Curves and Embedded Curves</h2>
+      <p>\(d\gamma_t\)는 \(\R\)에서 \(\R^2\)로 가는 linear map이므로 injective이거나 \(0\)이다. injective라는 것은 \(\gamma'(t) \neq 0\)이라는 것, 곧 곡선이 그 점에서 멈추지 않는다는 것이다. 모든 점에서 이 조건이 성립하는 곡선이 <strong>regular curve</strong>(정칙곡선)다(<a href="../04-curves/4-2-arc-length.html#i-4-2-1">Definition 4.2.1</a>). differential이 모든 점에서 injective인 map을 일반적으로 <strong>immersion</strong>(몰입)이라 부르므로(<a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>), regular curve는 곡선의 immersion이다.</p>
+      <p>regular이면 unit tangent \(\mathbf{t} = \gamma'/\abs{\gamma'}\)가 모든 점에서 정의되고 매끄럽다. 그래서 normal \(\mathbf{n}_s = J\mathbf{t}\)와 curvature도 정의된다. 거꾸로 \(\gamma'\)이 \(0\)이 되는 점에서는 \(\gamma\)가 매끄러워도 그런 양이 정의되지 않을 수 있다.</p>
+
+      <div class="thm example" id="i-37-1-3">
+        <p><span class="thm-head">Example 37.1.3</span> <span class="thm-name">(regular curves)</span>.
+        원, ellipse, flower curve \(r(t) = 1 + 0.3\cos 5t\)(<a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-1">Example 32.2.1</a>)는 모두 regular다. flower curve에서는 \(\abs{\gamma'}^2 = r^2 + r'^2 \ge r^2 \ge 0.49\)이다. \(\gamma(t) = (t, t^3)\)도 regular다(\(\gamma' = (1, 3t^2) \neq 0\)). 이 곡선은 \(t = 0\)에서 curvature가 \(0\)이 되지만 regular인 것과는 상관없다. regularity는 일계도함수의 조건이고 curvature는 이계도함수의 양이다.</p>
+      </div>
+      <div class="thm nonexample" id="i-37-1-4">
+        <p><span class="thm-head">Non-example 37.1.4</span> <span class="thm-name">(a smooth curve with a cusp)</span>.
+        \(\gamma(t) = (t^3, t^2)\)은 매끄러운 map이지만 \(\gamma'(t) = (3t^2, 2t)\)가 \(t = 0\)에서 \(0\)이므로 regular가 아니다. trace는 원점에서 뾰족하다. \(t \neq 0\)에서 unit tangent는 \(\mathbf{t}(t) = (3\abs{t}, 2\sgn t)/\sqrt{9t^2 + 4}\)이고 \(t \to 0^\pm\)에서 \((0, \pm1)\)로 가므로, \(\mathbf{t}\)를 \(t = 0\)까지 연속으로 이을 수 없다(<a href="#ex-37-1-2">Exercise 37.1.2</a>). 축을 바꾼 \((t^2, t^3)\)으로 같은 cusp를 쓰고 trace의 모양으로 본 것이 <a href="../04-curves/4-1-parametrized-curves.html#i-4-1-9">Non-example 4.1.9</a>다. 다각형도 vertex 근처에서 속도가 \(0\)으로 줄어들도록 매개화하면 매끄러운 map이 되지만, vertex에서 tangent를 정할 수 없다는 사정은 그대로다.</p>
+      </div>
+
+      <p>regular는 점 하나 근처의 조건이다. 곡선 전체가 스스로를 가로지르는지는 따로 묻는다. 곡선 \(\gamma\colon I \to \R^2\)가 injective이고, trace \(\gamma(I)\)에 부분공간 위상을 주었을 때 \(\gamma\colon I \to \gamma(I)\)의 inverse가 연속이면 \(\gamma\)를 <strong>embedded curve</strong>(매장된 곡선)라 한다. 곧 \(\gamma\)가 <strong>topological embedding</strong>(위상 매장, <a href="../03-topology-basics/3-3-subspaces-products.html#i-3-3-8">Definition 3.3.8</a>)이다. regular이면서 embedding인 map이 smooth embedding이다(<a href="../14-submanifolds/index.html#toc-14-3">Section 14.3</a>).</p>
+
+      <div class="thm example" id="i-37-1-5">
+        <p><span class="thm-head">Example 37.1.5</span> <span class="thm-name">(immersed but not embedded)</span>.
+        figure-eight curve \(\gamma(t) = (\sin t, \sin t\cos t)\), \(t \in \R\)는 \(\gamma'(t) = (\cos t, \cos 2t)\)이고, \(\cos t = 0\)이면 \(\cos 2t = -1\)이므로 \(\gamma' \neq 0\)이다. 곧 regular(immersed)다. 그러나 \(\gamma(0) = \gamma(\pi) = (0, 0)\)이므로 \([0, 2\pi)\)로 제한해도 injective가 아니고, 원점에서 두 가지가 가로지른다. 이 곡선은 Section 37.2에서 turning number가 \(0\)인 예로 다시 쓴다.</p>
+      </div>
+      <div class="thm nonexample" id="i-37-1-6">
+        <p><span class="thm-head">Non-example 37.1.6</span> <span class="thm-name">(injective but not embedded)</span>.
+        같은 figure-eight을 열린구간으로 제한한 \(\gamma\colon (0, 2\pi) \to \R^2\), \(\gamma(t) = (\sin t, \sin t\cos t)\)는 regular이고 injective이며(<a href="#ex-37-1-3">Exercise 37.1.3</a>), trace는 여전히 8자 전체다. 원점은 \(t = \pi\)에서만 지난다. 그러나 inverse는 원점에서 연속이 아니다. \(t \to 0^+\)이면 \(\gamma(t)\)는 원점에 다가가지만 그 parameter는 \(0\)으로 가고, 원점 자신의 parameter는 \(\pi\)이기 때문이다. 정의역의 열린 끝이 trace의 다른 부분에 달라붙어 있는 것이다. injective immersion이라도 embedding이 아닐 수 있다.</p>
+      </div>
+      <p>이 장에서 닫힌 곡선은 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-1">Definition 5.6.1</a>처럼 주기 \(T\)인 regular map \(\gamma\colon \R \to \R^2\)로 다룬다. 주기 전체를 정의역으로 쓰므로 열린 끝이 생기지 않는다. 한 주기 \([0, T)\)에서 injective인 closed curve가 simple closed curve이고, figure-eight처럼 스스로 가로지르는 closed curve도 regular할 수 있다. Section 37.2는 이렇게 스스로 가로질러도 되는 regular closed curve를 연속적으로 변형하는 문제를 다룬다.</p>
+    </section>
+
+    <section id="sec-curvature">
+      <h2>Tangent, Normal, and Curvature, Recalled</h2>
+      <p>regular curve를 arc length \(s\)로 parametrization하면 \(\mathbf{t}(s) = \gamma'(s) = d\gamma_s(1)\)이고, normal은 \(\mathbf{n}_s = J\mathbf{t}\), signed curvature는 \(\mathbf{t}' = \kappa_s\mathbf{n}_s\)의 계수 \(\kappa_s\)다. 이 정의와 부호, 그리고 같은 수를 주는 네 특징은 <a href="../32-ddg-overview/32-2-plane-curve-curvature.html#sec-signed-curvature">Section 32.2</a>에 정리해 두었고 여기서 다시 정의하지 않는다. 이 절에서 쓰는 것은 그중 (A), 곧 tangent angle \(\varphi\)를 \(\mathbf{t} = (\cos\varphi, \sin\varphi)\)인 연속함수로 잡으면</p>
+      <div class="equation" id="eq-37-1-3">
+      \[ \varphi' = \kappa_s, \qquad \varphi(b) - \varphi(a) = \int_a^b \kappa_s\,ds \tag{37.1.3} \]
+      </div>
+      <p>라는 사실이다(<a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-2">Proposition 32.2.2</a>, <a href="../04-curves/4-4-signed-curvature.html#i-4-4-9">Theorem 4.4.9</a>). curvature를 적분하면 tangent가 돈 각이 나오고, tangent를 적분하면 위치가 나온다. 다음 소절의 복원 절차는 이 두 적분이다. osculating circle(<a href="../04-curves/4-5-osculating-circle.html#i-4-5-1">Definition 4.5.1</a>)도 같은 \(\kappa_s\)를 주지만, 이 장에서는 쓰지 않는다.</p>
+    </section>
+
+    <section id="sec-recovery">
+      <h2>Recovering a Curve from Its Curvature</h2>
+      <p>curvature는 rigid motion에 대해 변하지 않는다. 회전하고 옮겨도 tangent가 도는 빠르기는 같기 때문이다(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-7">Proposition 4.4.7</a>). fundamental theorem of plane curves(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-10">Theorem 4.4.10</a>, <a href="../04-curves/4-4-signed-curvature.html#i-4-4-11">Corollary 4.4.11</a>)는 그 반대도 성립한다고 말한다. arc length의 함수로 준 \(\kappa_s\)가 곡선을 rigid motion을 제외하고 정한다. 증명은 Chapter 4에 있고, 여기서는 그 증명이 사실상 하나의 algorithm이라는 점만 짚는다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Derivation.</span> \(\kappa\colon [0, L] \to \R\)가 주어졌다고 하자. 찾는 곡선이 arc length로 parametrization되어 있다면 <a href="#eq-37-1-3">(37.1.3)</a>에서 tangent angle은 \(\kappa\)의 적분이고, \(\gamma' = \mathbf{t}\)이므로 곡선은 tangent의 적분이다. 곧 세 단계로 된다.</p>
+        <div class="equation" id="eq-37-1-4">
+        \[ \begin{aligned} \varphi(s) &= \varphi_0 + \int_0^s\kappa(u)\,du,\\ \mathbf{t}(s) &= \bigl(\cos\varphi(s),\ \sin\varphi(s)\bigr),\\ \gamma(s) &= p_0 + \int_0^s\mathbf{t}(u)\,du. \end{aligned} \tag{37.1.4} \]
+        </div>
+        <p>거꾸로 이렇게 만든 \(\gamma\)는 \(\abs{\gamma'} = \abs{\mathbf{t}} = 1\)이고, \(\mathbf{t}' = \varphi'(-\sin\varphi, \cos\varphi) = \kappa\,J\mathbf{t}\)이므로 signed curvature가 \(\kappa\)다. 이것이 <a href="../04-curves/4-4-signed-curvature.html#eq-4-4-8">(4.4.8)</a>이다. 적분 상수는 \(\varphi_0\)(처음 방향, 숫자 하나)과 \(p_0\)(처음 위치, 숫자 둘)뿐이다. \(\varphi_0\)을 \(\alpha\)만큼 바꾸면 \(\mathbf{t}\)가 모두 \(R_\alpha\)만큼 돌아 곡선 전체가 \(p_0\) 둘레로 회전하고, \(p_0\)을 바꾸면 곡선이 평행이동한다. 이 세 숫자가 정확히 rigid motion of the plane의 자유도다.</p>
+      </div>
+      <p>\(\kappa\)가 상수 \(c \neq 0\)이면 <a href="#eq-37-1-4">(37.1.4)</a>를 손으로 적분할 수 있고 반지름 \(1/\abs{c}\)인 원이 나온다(<a href="#ex-37-1-4">Exercise 37.1.4</a>). 그러나 대부분의 \(\kappa\)에서 두 번째 적분은 닫힌 꼴로 계산되지 않는다. 그래서 실제로는 적분을 수치로 한다. 아래 Implementation은 \(\kappa\)를 같은 간격의 점에서 sampling한 값으로 사다리꼴 공식을 쓴다.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: a curve from its curvature</p>
+        <p><a href="#eq-37-1-4">(37.1.4)</a>의 세 단계를 그대로 옮긴다. \(\kappa\)의 값은 \(s_j = jL/m\)(\(j = 0, \dots, m\))에서 주어지고, 두 적분 모두 사다리꼴 공식으로 한다. 오차는 \(m\)의 이차로 준다(<a href="#i-37-1-8">Example 37.1.8</a>).</p>
+        <pre id="code-37-1-1"><code>import numpy as np
+
+def curve_from_curvature(kappa, L, phi0=0.0, p0=(0.0, 0.0)):
+    """kappa: samples of kappa_s at s_j = j L / m, j = 0, ..., m.
+    Returns (phi, gamma): tangent angles and points at the s_j (trapezoid rule)."""
+    kappa = np.asarray(kappa, float)
+    m = len(kappa) - 1
+    ds = L / m
+    # tangent angle: phi = phi0 + int kappa ds
+    phi = phi0 + np.concatenate([[0.0], np.cumsum(0.5 * (kappa[1:] + kappa[:-1]) * ds)])
+    # unit tangents: t = (cos phi, sin phi)
+    T = np.stack([np.cos(phi), np.sin(phi)], 1)
+    # positions: gamma = p0 + int t ds
+    steps = 0.5 * (T[1:] + T[:-1]) * ds
+    return phi, np.asarray(p0, float) + np.vstack([[0.0, 0.0], np.cumsum(steps, 0)])</code></pre>
+      </aside>
+
+      <p>이제 닫힌 곡선을 보자. 주기 \(L\)인 \(\kappa\)를 주고 <a href="#eq-37-1-4">(37.1.4)</a>로 곡선을 만들면, 그 곡선이 다시 닫히는가? 꼭 그렇지는 않다. tangent도 제자리로 돌아와야 하고, 위치도 제자리로 돌아와야 하기 때문이다.</p>
+      <div class="thm proposition" id="i-37-1-7">
+        <p><span class="thm-head">Proposition 37.1.7</span> <span class="thm-name">(closing conditions)</span>.
+        \(\kappa\colon \R \to \R\)가 매끄럽고 주기 \(L \gt 0\)인 함수이고, \(\varphi\)와 \(\gamma\colon \R \to \R^2\)를 <a href="#eq-37-1-4">(37.1.4)</a>로 정했다고 하자. 그러면 \(\gamma\)가 주기 \(L\)인 closed curve일 필요충분조건은</p>
+        <div class="equation" id="eq-37-1-5">
+        \[ \begin{aligned} &\text{(i)}\ \ \int_0^L\kappa\,ds \in 2\pi\Z,\\ &\text{(ii)}\ \ \int_0^L\bigl(\cos\varphi(s),\ \sin\varphi(s)\bigr)\,ds = 0 \end{aligned} \tag{37.1.5} \]
+        </div>
+        <p>이다. 이때 \(\gamma\)의 rotation index는 \(\frac{1}{2\pi}\int_0^L\kappa\,ds\)이다.</p>
+      </div>
+      <p><strong>이 명제가 말하는 것.</strong> (i)은 “한 바퀴 돌았을 때 tangent가 처음 방향으로 돌아온다”, (ii)는 “tangent를 다 더했을 때 처음 위치로 돌아온다”이다. (i)만으로는 부족하다.</p>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(\kappa\)가 주기 \(L\)이므로 한 주기 동안 각이 늘어나는 양은 출발점에 무관하다. (i)이면 tangent가 주기적이고, 그러면 위치의 변화도 출발점에 무관한 하나의 vector (ii)가 된다.</p>
+        <p><span class="proof-head">Proof.</span> \(\Theta = \int_0^L\kappa\,ds\)라 하자. \(\kappa\)가 주기 \(L\)이므로 모든 \(s\)에서 \(\varphi(s + L) - \varphi(s) = \int_s^{s+L}\kappa = \Theta\)이다(주기함수의 한 주기 적분은 구간의 위치에 무관하다).
+        (\(\Leftarrow\)) (i)에서 \(\Theta = 2\pi j\)(\(j \in \Z\))이면 \(\mathbf{t}(s + L) = (\cos(\varphi(s) + 2\pi j), \sin(\varphi(s) + 2\pi j)) = \mathbf{t}(s)\)이므로 \(\mathbf{t}\)는 주기 \(L\)이다. 그러면 \(\gamma(s + L) - \gamma(s) = \int_s^{s+L}\mathbf{t} = \int_0^L\mathbf{t}\)이고, (ii)에서 이것은 \(0\)이다. \(\gamma\)는 매끄럽고 \(\abs{\gamma'} = 1\)이므로 regular이고, 따라서 주기 \(L\)인 closed curve다.
+        (\(\Rightarrow\)) \(\gamma\)가 주기 \(L\)이면 \(\mathbf{t} = \gamma'\)도 주기 \(L\)이므로 \((\cos\varphi(L), \sin\varphi(L)) = (\cos\varphi(0), \sin\varphi(0))\)이고 \(\Theta = \varphi(L) - \varphi(0) \in 2\pi\Z\)이다. 또 \(\int_0^L\mathbf{t} = \gamma(L) - \gamma(0) = 0\)이다.
+        마지막 문장: \(\varphi\)는 \(\gamma\)의 연속인 tangent angle이므로 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-4">Proposition 5.6.4</a>(a)에서 rotation index는 \((\varphi(L) - \varphi(0))/2\pi = \Theta/2\pi\)이다.</p>
+      </div>
+
+      <div class="thm example" id="i-37-1-8">
+        <p><span class="thm-head">Example 37.1.8</span> <span class="thm-name">(the ellipse, recovered numerically)</span>.
+        ellipse \((2\cos t, \sin t)\)의 \(\kappa_s\)를 arc length의 함수로 \(m + 1\)개 점 \(s_j = jL/m\)(\(L = 9.6884\))에서 계산해 Implementation에 넣고, 결과를 가장 잘 맞는 rigid motion으로 원래 점 \(\gamma(t(s_j))\)에 겹쳐 보면 최대 거리는 \(m = 100, 200, 400, 800\)에서 \(2.6 \times 10^{-3}\), \(6.4 \times 10^{-4}\), \(1.6 \times 10^{-4}\), \(4.0 \times 10^{-5}\)이다. \(m\)을 두 배로 하면 \(1/4\)이 된다. \(\kappa_s\)의 적분은 \(2\pi\)이고(rotation index \(1\)), 끝점과 시작점의 거리는 \(2 \times 10^{-9}\) 이하로 (ii)도 성립한다. ellipse의 arc length parametrization에는 닫힌 꼴이 없으므로(<a href="../04-curves/4-3-reparametrization.html#i-4-3-12">Example 4.3.12</a>) \(t(s_j)\)는 수치적으로 구했다.</p>
+        <p class="verified">Verification: <code>verify/v-37-1-plane-curves.py</code></p>
+      </div>
+      <div class="thm example" id="i-37-1-9">
+        <p><span class="thm-head">Example 37.1.9</span> <span class="thm-name">(total curvature \(2\pi\) is not enough)</span>.
+        \(\kappa(s) = 1 + 0.5\cos s\)(주기 \(2\pi\))이면 \(\int_0^{2\pi}\kappa = 2\pi\)이므로 (i)은 성립한다. \(\varphi_0 = 0\)이면 \(\varphi(s) = s + 0.5\sin s\)이고, \(s \mapsto 2\pi - s\)를 대입하면 \(\sin\varphi\)의 적분은 \(0\)이다. 그러나 수치적분하면 \(\int_0^{2\pi}\cos\varphi\,ds = -1.5222\)이다. Bessel function \(J_1\)의 적분 표현을 쓰면 일반적으로 \(\int_0^{2\pi}\cos(s + a\sin s)\,ds = -2\pi J_1(a)\)이고, 이 값은 \(-2\pi J_1(0.5)\)이다. 곧 (ii)가 깨지고, 곡선은 한 바퀴 돈 뒤 출발점에서 \(1.5222\)만큼 떨어진 곳에 출발할 때와 같은 방향으로 도착한다(<a href="#fig-37-1-2">Figure 37.1.2</a>(b)의 주황 파선). 계수 \(0.5\)를 \(a\)로 바꾸고 \(a\)를 키우면 이 간격이 \(0\)이 되는 \(a\)가 있다(<a href="#ex-37-1-5">Exercise 37.1.5</a>).</p>
+        <p class="verified">Verification: <code>verify/v-37-1-plane-curves.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-37-1-2">
+        <img src="figures/fig-37-1-2-recovery.svg" alt="두 패널. (a) 가로축 arc length s(0에서 약 9.7). 검은 곡선 kappa_s(s)는 양 끝과 가운데에서 높이 2까지 솟는 봉우리 셋과 그 사이의 높이 0.25쯤의 낮은 골짜기로 이루어지고, 그 아래가 하늘색으로 칠해져 있으며 area = 2π라는 라벨이 있다. 파란 파선은 0에서 1까지 계단처럼 올라가는 곡선으로, 봉우리가 있는 곳에서 가파르다. (b) 검은 타원 하나, 그 오른쪽에 같은 모양으로 기울어진 회색 타원 하나, 아래쪽에 닫히지 않은 주황 파선 곡선 하나. 주황 곡선의 시작점(원)과 끝점(사각형) 사이에 gap이라는 라벨이 붙은 양방향 화살표가 있다.">
+        <figcaption><span class="fig-head">Figure 37.1.2.</span>
+        <em>무엇을</em>: curvature에서 곡선을 복원하는 <a href="#eq-37-1-4">(37.1.4)</a>. (a)는 ellipse \((2\cos t, \sin t)\)의 \(\kappa_s\)를 arc length \(s\)의 함수로 그린 것이고, (b)는 curvature 자료에서 Implementation으로 적분한 곡선이다.
+        <em>읽는 법</em>: (a)에서 검은 곡선이 \(\kappa_s(s)\), 하늘색이 그 아래 넓이, 파란 파선이 \((\varphi(s) - \varphi_0)/2\pi\)다. (b)에서 검정은 ellipse의 \(\kappa_s\)를 \(p_0 = (2, 0)\), \(\varphi_0 = \pi/2\)로, 회색은 같은 \(\kappa_s\)를 \(\varphi_0 = \pi/2 + 0.6\)과 다른 \(p_0\)으로 적분한 것이다. 주황 파선은 \(\kappa = 1 + 0.5\cos s\)(\(0 \le s \le 2\pi\))를 적분한 것이다. 각 곡선의 시작점은 동그라미이고, 짧은 화살표가 처음 진행 방향이다.
+        <em>볼 것</em>: (a)의 넓이는 \(2\pi\)이고 파선은 정확히 \(0\)에서 \(1\)까지 올라간다. 봉우리(ellipse의 뾰족한 양 끝, \(\kappa_s = 2\))에서 파선이 가파르게 오른다. (b)의 검정과 회색은 같은 곡선을 회전하고 옮긴 것이다. 주황 곡선도 total curvature가 \(2\pi\)지만 시작점(동그라미)과 끝점(사각형)이 \(1.5222\)만큼 떨어져 있다.
+        <em>본문과의 연결</em>: Derivation <a href="#eq-37-1-4">(37.1.4)</a>, <a href="#i-37-1-7">Proposition 37.1.7</a>의 두 조건, <a href="#i-37-1-8">Example 37.1.8</a>, <a href="#i-37-1-9">Example 37.1.9</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-37-1-2">Figure 37.1.2</a>를 왼쪽부터 보자. (a)의 검은 곡선은 tangent가 단위 길이당 도는 각이다. 파란 파선은 그것을 쌓아 올린 각이고, 한 바퀴 끝에서 정확히 \(1\)(곧 \(2\pi\))에 닿는다. 이것이 조건 (i)이다. (b)의 검은 타원과 회색 타원은 같은 curvature 자료에서 나왔고, 처음 방향과 처음 위치만 다르다. 이것이 rigid motion의 자유도다. 마지막으로 주황 파선을 따라가 보자. tangent가 도는 각의 합은 역시 \(2\pi\)라서 끝에서 처음과 같은 방향(오른쪽)을 향하지만, 시작점보다 왼쪽에서 끝난다. 조건 (ii)가 깨진 것이다. Section 37.4는 이 두 조건의 discrete 판을 다각형에서 정확한 등식으로 다시 얻는다.</p>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: the differential and the edge vectors</p>
+        <p><strong>Smooth.</strong> \(d\gamma_t(X) = X\gamma'(t)\)는 점마다의 linear map이고, 곡선은 \(d\gamma\)를 적분해 얻는다: \(\gamma(b) - \gamma(a) = \int_a^b\gamma'(t)\,dt\). closed curve에서는 \(\oint\gamma'\,dt = 0\)이다.</p>
+        <p><strong>Discrete.</strong> 다각형에는 점마다의 미분이 없고 edge마다 vector \(e_i = \gamma_{i+1} - \gamma_i\)가 하나 있다. edge를 \([s_i, s_{i+1}]\)에 놓인 선분으로 보면 미적분학의 기본정리에서 \(e_i = \int_{s_i}^{s_{i+1}}\gamma'\,ds\), 곧 edge vector는 edge 위에서 적분한 tangent다. discrete tangent \(\mathbf{t}_i = e_i/\ell_i\)(<a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-11">Definition 32.2.11</a>)는 그 평균 방향이다.</p>
+        <p><strong>보존하는 것과 잃는 것.</strong> 적분한 양은 정확하다. 이웃한 edge vector를 더하면 위치의 차이가 정확히 나오고, closed polygon에서는 \(\sum_ie_i = 0\)이 정확히 성립한다. 잃는 것은 점마다의 \(\gamma'\)이다. 그래서 discrete 쪽의 기본 자료는 vertex 위치와 edge vector(적분한 \(d\gamma\))이고, 일반적인 틀은 Chapter 36이 준다 <span class="todo">[확인 필요: Chapter 36 미작성 — 참조 번호 확정 필요]</span>. Section 37.4가 이 관점으로 fundamental theorem을 다시 쓴다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>parametrized curve, regular curve, reparametrization, arc length: <a href="../04-curves/index.html#toc-4-1">Section 4.1</a>–<a href="../04-curves/index.html#toc-4-3">Section 4.3</a>. 직관은 <a href="../00-tour/0-2-curves.html#sec-velocity">Section 0.2</a>.</li>
+        <li>signed curvature와 fundamental theorem of plane curves의 증명: <a href="../04-curves/index.html#toc-4-4">Section 4.4</a>. osculating circle: <a href="../04-curves/index.html#toc-4-5">Section 4.5</a>. “curvature가 모양을 정한다”의 직관: <a href="../00-tour/0-2-curves.html#sec-shape">Section 0.2</a>.</li>
+        <li>immersion과 embedding의 일반론: <a href="../14-submanifolds/index.html#toc-14-1">Section 14.1</a>, <a href="../14-submanifolds/index.html#toc-14-3">Section 14.3</a>.</li>
+        <li>discrete curve와 그 tangent: <a href="../32-ddg-overview/32-2-plane-curve-curvature.html#sec-discrete">Section 32.2</a>. contour를 curvature로 기술하는 3D vision의 예: <a href="../00-tour/0-2-curves.html#sec-shape">Section 0.2</a>의 In computer vision 상자.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>plane curve의 differential \(d\gamma_t(X) = X\gamma'(t)\)는 parameter 구간의 vector를 곡선의 tangent vector로 늘이는 linear map이다. reparametrization은 늘이는 비율만 바꾸고 <a href="#eq-37-1-2">(37.1.2)</a>, arc length parametrization은 그 비율이 \(1\)인 것이다.</li>
+        <li>regular curve는 \(d\gamma\)가 모든 점에서 injective인 곡선, 곧 immersion이다. embedded curve는 trace 위로의 inverse가 연속인 injective 곡선이다. figure-eight은 immersed지만 embedded가 아니고, 열린구간 \((0, 2\pi)\)로 제한해 injective로 만들어도 embedded가 아니다.</li>
+        <li>signed curvature에서 곡선을 복원하는 절차는 각 → tangent → 위치의 두 번의 적분 <a href="#eq-37-1-4">(37.1.4)</a>이고, 적분 상수 셋이 rigid motion의 자유도다.</li>
+        <li>주기적인 \(\kappa\)로 만든 곡선이 닫히려면 \(\int\kappa \in 2\pi\Z\)와 \(\int\mathbf{t} = 0\)이 모두 필요하다(<a href="#i-37-1-7">Proposition 37.1.7</a>). 앞의 정수는 rotation index다.</li>
+      </ul>
+      <p class="next">다음 절에서는 이 정수, 곧 rotation index(turning number)를 자세히 본다. turning number는 곡선이 점을 감는 횟수(winding number)와 어떻게 다르고, 곡선을 regular하게 유지하며 변형할 때 왜 바뀌지 않으며, 거꾸로 turning number가 같은 두 곡선은 언제나 그렇게 변형해 이을 수 있는가?</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-37-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 37.1.1</span> <span class="level">★</span>
+        ellipse \(\gamma(t) = (2\cos t, \sin t)\)를 \(\tilde\gamma(u) = \gamma(2u)\)(\(0 \le u \le \pi\))로 다시 매개화하자. <a href="#eq-37-1-2">(37.1.2)</a>로 \(d\tilde\gamma_u(1)\)을 구하고, \(u = 0\)과 \(u = \pi/4\)에서 그 길이를 구하여라. 같은 점에서 \(d\gamma\)의 비율과 비교하면 몇 배인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(h(u) = 2u\), \(h' = 2\)이므로 \(d\tilde\gamma_u(1) = d\gamma_{2u}(2) = 2\gamma'(2u) = 2(-2\sin 2u, \cos 2u)\)이다. \(u = 0\)에서 \(2(0, 1)\), 길이 \(2\)이고, \(u = \pi/4\)에서 \(2(-2, 0)\), 길이 \(4\)이다. 같은 점은 각각 \(t = 0\)과 \(t = \pi/2\)이고 거기서 \(\abs{\gamma'} = 1, 2\)이므로(<a href="#i-37-1-1">Example 37.1.1</a>), 어디서나 정확히 \(h' = 2\)배다. 방향은 그대로다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 37.1.2</span> <span class="level">★</span>
+        <a href="#i-37-1-4">Non-example 37.1.4</a>의 \(\gamma(t) = (t^3, t^2)\)에서 \(t \neq 0\)일 때 \(\mathbf{t}(t) = (3\abs{t}, 2\sgn t)/\sqrt{9t^2 + 4}\)임을 보이고, 양쪽 극한을 구하여라. trace가 \(y = \abs{x}^{2/3}\)의 그래프임을 보이고, 그래프가 원점에서 미분가능하지 않음을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\gamma'(t) = (3t^2, 2t)\)이고 \(\abs{\gamma'} = \abs{t}\sqrt{9t^2 + 4}\)이므로 \(\mathbf{t} = \gamma'/\abs{\gamma'} = (3t^2/\abs{t},\ 2t/\abs{t})/\sqrt{9t^2 + 4} = (3\abs{t}, 2\sgn t)/\sqrt{9t^2 + 4}\)이다. \(t \to 0^+\)이면 \((0, 1)\), \(t \to 0^-\)이면 \((0, -1)\)이다. \(x = t^3\)에서 \(t = x^{1/3}\)(실수 세제곱근)이므로 \(y = t^2 = \abs{x}^{2/3}\)이다. \(x \gt 0\)에서 \(y' = \tfrac23x^{-1/3} \to \infty\)이므로 원점에서 미분계수가 없다. 진행 방향이 원점에서 아래로 내려오다가 위로 올라가는 뾰족점이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 37.1.3</span> <span class="level">★</span>
+        <a href="#i-37-1-6">Non-example 37.1.6</a>의 \(\gamma(t) = (\sin t, \sin t\cos t)\), \(0 \lt t \lt 2\pi\)가 injective임을 보여라. \(p_m = \gamma(1/m)\)이라 하면 \(p_m \to \gamma(\pi)\)이지만 \(\gamma^{-1}(p_m) \not\to \pi\)임을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>injective: \(\gamma(t) = \gamma(t')\)이면 \(\sin t = \sin t'\)이므로 \((0, 2\pi)\) 안에서 \(t' = t\), \(t' = \pi - t\), \(t' = 3\pi - t\) 가운데 하나다. \(t' = \pi - t\)이면 \(\cos t' = -\cos t\)이므로 둘째 성분에서 \(\sin t\cos t = -\sin t\cos t\), 곧 \(\sin t\cos t = 0\)이다. \(t' = \pi - t \in (0, 2\pi)\)이려면 \(t \lt \pi\)이므로 \(t = \pi/2\)이고 \(t' = t\)이다. \(t' = 3\pi - t\)이면 \(t \gt \pi\)이고 같은 계산으로 \(t = 3\pi/2 = t'\)이다. 따라서 \(\gamma\)는 injective다.
+          \(p_m = (\sin(1/m), \sin(1/m)\cos(1/m)) \to (0, 0) = \gamma(\pi)\)이지만 \(\gamma^{-1}(p_m) = 1/m \to 0 \neq \pi\)이다. 연속이면 수열의 극한을 보존해야 하므로 \(\gamma^{-1}\)은 원점에서 연속이 아니다. 곧 \(\gamma\)는 regular이고 injective지만 embedded curve가 아니다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-1-4" data-level="2">
+        <p><span class="thm-head">Exercise 37.1.4</span> <span class="level">★★</span>
+        상수 \(c\)와 \(L \gt 0\)에 대해 \(\kappa \equiv c\)를 주기 \(L\)인 함수로 보자. <a href="#i-37-1-7">Proposition 37.1.7</a>로 <a href="#eq-37-1-4">(37.1.4)</a>의 곡선이 주기 \(L\)인 closed curve가 될 필요충분조건이 \(cL \in 2\pi\Z \setminus \{0\}\)임을 보이고, 그때의 곡선과 rotation index를 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(i)은 \(\int_0^L c\,ds = cL \in 2\pi\Z\)이다. \(c = 0\)이면 \(\varphi \equiv \varphi_0\)이고 \(\int_0^L\mathbf{t} = L(\cos\varphi_0, \sin\varphi_0) \neq 0\)이므로 (ii)가 깨진다. \(cL = 2\pi j\), \(j \neq 0\)이면 \(\varphi = \varphi_0 + cs\)이고 \(\int_0^L(\cos(\varphi_0 + cs), \sin(\varphi_0 + cs))\,ds = \tfrac1c\bigl(\sin(\varphi_0 + cs), -\cos(\varphi_0 + cs)\bigr)\big|_0^L = 0\)이다(\(cL\)이 \(2\pi\)의 정수배). 따라서 필요충분조건은 \(cL \in 2\pi\Z \setminus \{0\}\)이다. 이때 곡선은 반지름 \(1/\abs{c}\)인 원을 \(\abs{j}\)바퀴 도는 것이고(\(c \gt 0\)이면 반시계, \(c \lt 0\)이면 시계 방향), rotation index는 \(cL/2\pi = j\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-37-1-5" data-level="2">
+        <p><span class="thm-head">Exercise 37.1.5</span> <span class="level">★★</span>
+        <strong>Coding.</strong> \(\kappa_a(s) = 1 + a\cos s\)(\(0 \le s \le 2\pi\), \(\varphi_0 = 0\))로 만든 곡선의 간격 \(\gamma(2\pi) - \gamma(0)\)을 Implementation으로 계산하는 함수를 만들어라. <a href="#i-37-1-9">Example 37.1.9</a>의 \(a = 0.5\)를 확인하고, \([3, 4.5]\)에서 이분법으로 곡선이 닫히는 \(a\)를 찾아라. 그 곡선의 rotation index는 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-37-1-5"><code>def gap(a, m=4000):
+    s = np.linspace(0, 2 * np.pi, m + 1)
+    _, G = curve_from_curvature(1 + a * np.cos(s), 2 * np.pi)
+    return G[-1, 0] - G[0, 0]          # the y-component is 0 by the symmetry s -> 2 pi - s
+
+print(f"gap(0.5) = {gap(0.5):.4f}")
+lo, hi = 3.0, 4.5                      # gap(3) &lt; 0 &lt; gap(4.5)
+for _ in range(50):
+    mid = 0.5 * (lo + hi)
+    lo, hi = (lo, mid) if gap(lo) * gap(mid) &lt;= 0 else (mid, hi)
+print(f"closes at a = {lo:.6f}")</code></pre>
+          <p>Implementation의 코드를 먼저 실행한 뒤 실행한다. 출력은 다음과 같다.</p>
+          <pre id="out-ex-37-1-5"><code>gap(0.5) = -1.5222
+closes at a = 3.831707</code></pre>
+          <p>\(y\) 성분은 모든 \(a\)에서 \(0\)이다. \(\varphi(2\pi - s) = 2\pi - s + a\sin(2\pi - s) = 2\pi - \varphi(s)\)이므로 \(\sin\varphi(2\pi - s) = -\sin\varphi(s)\)이고, \(\sin\varphi\)의 적분이 \(0\)이기 때문이다. 그래서 \(x\) 성분 하나가 \(0\)이 되는 \(a\)만 찾으면 된다. 찾은 \(a = 3.8317\)은 Bessel function \(J_1\)의 첫 양의 영점과 같다(<a href="#i-37-1-9">Example 37.1.9</a>에서 간격은 일반적으로 \(-2\pi J_1(a)\)이다). 이 \(a\)에서 (i)과 (ii)가 모두 성립하므로 <a href="#i-37-1-7">Proposition 37.1.7</a>에 의해 곡선은 닫히고, rotation index는 \(\frac{1}{2\pi}\int_0^{2\pi}(1 + a\cos s)\,ds = 1\)이다. \(a \gt 1\)이므로 \(\kappa\)는 \(s = \pi\) 근처에서 음수가 되어, 곡선은 그 근처에서 오른쪽으로 꺾인다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 37. Curves: Smooth and Discrete</a>
+    <a rel="next" href="37-2-turning-number.html">37.2 Turning Number and the Whitney–Graustein Theorem →</a>
+  </nav>
+</body>
+</html>

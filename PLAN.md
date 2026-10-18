@@ -808,3 +808,49 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
   - interactive 34.1.3의 카메라
   - 통합: notation `#sec-ddg`에 32–34장 기호 9행, Alt 정규화 문헌 표기를 "일부 교재"로 바꿨다.
   - **공개 절차**: 작성 중인 장(35, 37)이 생성 페이지에 섞이지 않게 한다. `git add`한 뒤 `/home/kbh/.claude/jobs/6f56e074/tmp/clean_build.sh`가 HEAD와 staged 파일로 만든 깨끗한 트리에서 glossary와 concepts를 만들고 검사한다. 그다음 commit하고 `git push origin worktree-ddg-cmu:main`
+- 2026-10-18: **공개 1차**: origin/main = b8c9dce(fast-forward). Pages "built b8c9dce", 34.2 페이지 200.
+  - 세 track 목차, Track 2 32–34장(reviewed), 35–45장 개요(planned)
+  - dg-study-main 세션에 "main이 앞서 갔으니 pull --ff-only 하라"고 알렸다.
+  - Pages 확인은 `gh api repos/Rhqo/DG-study/pages/builds/latest`로 한다. 인증 없는 API는 404다.
+- 2026-10-18: 37장 작성 완료(draft). 6절, 그림 15개(interactive 1개), verify 267 checks.
+  - 결정
+    - Crane의 Frenet–Serret 부호를 정리한 표(τ_Crane = −τ)
+    - discrete torsion은 dgdec의 부호를 따른다.
+    - D(차분 행렬)는 Chapter 36이 생기면 d_0으로 바꿀 수 있다.
+    - 새 예제: figure-eight, limaçon, trefoil(holonomy 3.0270)
+  - 통합: references 7개(Whitney37, Bishop75, MehlhornYap91, Crane13f, Yu21, Hasimoto72, Padilla19), terms 13개
+  - 검토 R1(37.1–37.3)과 R2(37.4–37.6)를 띄웠다. 35장 작성은 계속 돌고 있다.
+  - todo 표기: "NN장 미작성"은 check_site가 한국어 참조로 경고한다. "Chapter NN 미작성"으로 쓴다(§15.5 문구를 고칠 것).
+- 2026-10-18: 두 번째로 사용량 한도에 걸렸다(12:30 초기화). 35 작성과 37 R1·R2 검토를 SendMessage로 재개했다. 사용자도 "다시 시작"이라고 했다.
+- 2026-10-18: 35장 작성 완료(draft). 5절, 그림 11개, verify 430 checks. dfn은 L2 inner product, codifferential, vector-valued form뿐이다.
+  - **42.1 작성자에게 넘길 것**
+    - d*는 L2 adjoint다: d* = (−1)^{n(k+1)+1}⋆d⋆.
+    - n = 2에서 Crane의 δ = −d*이다.
+    - n = 3의 1-form에서 Crane의 δd + dδ는 (curl curl + grad div)♭이다. 우리 dd* + d*d는 −(ΔX)♭다(Ex 35.5.6).
+  - **36장에 넘길 것**
+    - 단체 적분 (35.3.6–7)과 Prop 35.3.12(상수 ω면 (1/k!)ω(…), 순서를 바꾸면 sgn π)
+    - 점 적분(Remark 35.3.14)
+    - ∂σ = Σ(−1)^m(…)(Prop 35.4.4 = 33.3.7)
+    - Stokes(edge, triangle: Cor 35.4.11)
+    - ∂∂ = 0의 증명은 36.2로 남겼다.
+  - 38.3은 N dA = ½dx∧dx와 vector area를 맡는다. 35.5는 sphere 값만 주었다.
+  - terms 반영. 35 검토, 36 작성, 38 작성을 띄웠다.
+- 2026-10-18: **37장 reviewed.**
+  - R1(37.1–37.3): 수학 오류는 없었다.
+    - holonomy 진술과 Prop 37.3.9의 Lemma 적용(열린 구간)을 고쳤다.
+    - Crane의 Frenet box를 원문과 대조해 보강했다.
+    - Whitney37·Bishop75를 cite로 바꿨다.
+  - R2(37.4–37.6)가 고친 수학 오류
+    - flower에서 가정이 성립하는 n(n ≥ 24가 아니라 10, 20, n ≥ 23이다)
+    - κᴮ·κᶜ로도 곡선이 결정된다(닫힘 조건만 비선형이 된다). κᴰ로는 θ를 되찾을 수 없다.
+  - R2가 고친 그 밖의 것
+    - Figure 37.6.1의 설명이 그림과 맞지 않았다. 측정한 사실로 다시 썼다.
+    - smoke-ring 식의 부호
+    - ψ 기호 충돌
+  - 남은 REVIEW 2개
+    - Fig 37.6.1(a)를 edge-length plot으로 바꾸자는 제안
+    - 37.1의 Looking ahead를 36장 뒤에 Looking back으로 바꾸는 것
+    - Track 2 통합 검토에서 처리한다.
+  - 통합
+    - style.css: 좁은 화면에서 `.thm td`가 숫자를 자르지 않게 했다.
+    - notation: 35·37장 기호 9행
