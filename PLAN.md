@@ -958,3 +958,15 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
   - 남은 판단
     - C_i가 38.4에서는 closed star, 38.5에서는 dual cell을 뜻한다. 절마다 밝혀 두었다. 40·42장 계획도 C_i를 dual cell로 쓴다.
   - 통합: terms(flat edge), notation(x̃, C_i), root index 36·38 Reviewed
+- 2026-10-18: **36·38장 검토 완료, 공개.** origin/main = 15134e9, Pages built, 38.5 페이지 200, 전체 check_all OK. 자동 재개 cron 394d867b를 지웠다(활성 cron 없음). **사용자 지시대로 여기서 멈춘다.**
+  - Track 2 현황: reviewed 32–38(7장), planned 39–45
+  - **다음에 할 일**
+    1. W4: 39, 42 → W5: 40, 43 → W6: 41, 44 → W7: 45. 작성 프롬프트는 §13.1, 검토는 §13.2다. 각 장 작성 프롬프트에 위 기록의 "~ 작성자에게" 인계 사항(42.1 부호, 43 ⋆dz, 45 δ 부호 등)을 넣는다.
+    2. Track 2 통합 검토. 남은 REVIEW 2개(37.6 Fig 37.6.1(a), 37.1 Looking ahead → back), C_i 표기, Pinkall todo(37.4)
+    3. 도구
+       - plotly_save의 400px 잘림
+       - check_site의 링크 글자 검사
+       - lib/ch36의 dual helper를 dgdec로 옮기기
+       - dgsym.EXAMPLES에 ellipse·flower 넣기
+    4. 애니메이션 단계(§12.8)
+    5. 제안(사용자 승인 필요): GUIDELINES §6.6에 표면 위 1-form ⋆의 Crane 비교 행
