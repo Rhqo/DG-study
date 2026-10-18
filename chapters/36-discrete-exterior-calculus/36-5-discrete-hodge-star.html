@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>36.5 Dual Forms and the Discrete Hodge Star — DG Study</title>
+  <meta name="dg-id" content="36.5">
+  <meta name="dg-status" content="draft">
+  <meta name="dg-prereq" content="36.4, 33.6, 34.2, 35.5">
+  <meta name="dg-refs" content="Cr §4.8.4; CMU-DDG L9; Hirani03; Desbrun05; Pinkall93">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">36. Discrete Exterior Calculus</a> ›
+    <span>36.5 Dual Forms and the Discrete Hodge Star</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>36.5 Dual Forms and the Discrete Hodge Star</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#Cr">[Cr §4.8.4]</a>,
+        <a class="cite" href="../../references.html#Hirani03">[Hirani03]</a>,
+        <a class="cite" href="../../references.html#Desbrun05">[Desbrun05]</a>,
+        <a class="cite" href="../../references.html#Pinkall93">[Pinkall93]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L9">[CMU-DDG L9]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>dual cell에 orientation을 주고 dual discrete form을 정의하며, dual exterior derivative가 \(\tilde d_0 = d_1^{\mathsf T}\), \(\tilde d_1 = -d_0^{\mathsf T}\)임을 증명할 수 있다.</li>
+        <li>circumcentric dual을 만들고, primal–dual이 직교함과 signed dual length를 설명할 수 있다.</li>
+        <li>cotan formula \(\abs{e^\star}/\abs{e} = \tfrac12(\cot\alpha + \cot\beta)\)를 obtuse한 경우까지 완전하게 증명할 수 있다.</li>
+        <li>diagonal Hodge star \(\star_0, \star_1, \star_2\)를 정의하고, 그것이 상수 form에서 정확함을 증명하며, 다른 선택과 비교할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-1">Definition 33.6.1</a>, <a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-2">Definition 33.6.2</a>: dual cell \(\sigma^\star\)와 dual complex, <a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-6">Proposition 33.6.6</a>: dual incidence는 transpose</li>
+        <li><a href="../34-exterior-algebra/34-2-hodge-star.html#i-34-2-5">Definition 34.2.5</a>: Hodge star, <a href="../34-exterior-algebra/34-2-hodge-star.html#eq-34-2-6">(34.2.6)</a>: 평면의 \(\star\)</li>
+        <li><a href="36-2-chains-cochains.html#i-36-2-13">Proposition 36.2.13</a>: chain 위의 적분, <a href="36-4-discrete-exterior-derivative.html#i-36-4-1">Definition 36.4.1</a>, <a href="36-4-discrete-exterior-derivative.html#i-36-4-5">Theorem 36.4.5</a>: discrete \(d\)와 Stokes</li>
+        <li><a href="36-3-whitney-forms.html#i-36-3-2">Proposition 36.3.2</a>: \(+90^\circ\) 회전 \(J\)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>의 \(d_0, d_1\)과 de Rham map은 vertex의 위치와 연결 구조만 썼다. 길이와 각은 한 번도 나오지 않았다. smooth 세계에서도 \(d\)는 metric 없이 정의되지만, Hodge star \(\star\)는 inner product를 쓴다(<a href="../34-exterior-algebra/34-2-hodge-star.html#i-34-2-5">Definition 34.2.5</a>). 그리고 L2 inner product, codifferential, Laplacian은 모두 \(\star\)를 거친다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html">Section 35.5</a>). 그러므로 mesh 위의 Laplacian을 만들려면 metric을 담은 discrete \(\star\)가 필요하다.</p>
+      <p>평면에서 1-form의 \(\star\)는 “선을 따라 흐르는 양”을 “선을 가로지르는 양”으로 바꾼다(<a href="../33-combinatorial-surfaces/33-6-dual-complex.html">Section 33.6</a>의 Smooth vs. Discrete 상자). edge \(e\)를 따라 잰 값을 가로지르는 양으로 바꾸려면, \(e\)를 가로지르는 선분이 있어야 한다. 그것이 dual edge \(e^\star\)다. Chapter 33은 dual cell을 위치 없이 조합적으로만 정의하고, orientation과 기하를 이 절에 남겼다(<a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-6">Proposition 33.6.6</a> 뒤). 이 절은 그 둘을 정하고, circumcenter를 dual vertex로 고르면 cotangent가 나온다는 것을 증명한다.</p>
+    </section>
+
+    <section id="sec-dual-forms">
+      <h2>Dual Cells, Their Orientation, and Dual Forms</h2>
+      <p>이 절에서 \(\mathcal{K}\)는 consistently oriented simplicial surface(boundary가 있어도 된다)이고, face list가 orientation을 준다: \(\R^2\)의 mesh는 반시계 방향, \(\R^3\)의 닫힌 mesh는 바깥쪽이다. dual cell \(\sigma^\star\)는 <a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-1">Definition 33.6.1</a>의 것이다. boundary edge의 dual edge는 그 edge의 중점에서 끝나는 반쪽이다.</p>
+      <div class="thm remark" id="i-36-5-1">
+        <p><span class="thm-head">Remark 36.5.1</span> <span class="thm-name">(dual orientation convention)</span>.
+        이 study set은 dual cell에 다음 orientation을 준다.</p>
+        <ul>
+          <li>dual vertex \(f^\star\)는 \(+\)이다.</li>
+          <li>edge \(e = [i, j]\)의 dual edge \(e^\star\)는 \(o(g, e) = -1\)인 face \(g\)의 dual vertex에서 \(o(f, e) = +1\)인 face \(f\)의 dual vertex로 간다(\(o\)는 relative orientation, 곧 \(d_1\)의 성분). \(\R^2\)의 반시계 방향 mesh에서 \(f\)는 \(i \to j\)의 왼쪽, \(g\)는 오른쪽에 있으므로, \(e^\star\)는 \(e\)를 \(+90^\circ\) 돌린 방향 \(J(x_j - x_i)\)을 향한다.</li>
+          <li>dual face \(i^\star\)는 face들과 같은 방향(평면에서는 반시계 방향)으로 돈다.</li>
+        </ul>
+      </div>
+      <p>둘째 항목의 “왼쪽”을 확인하자. \(o(f, [i,j]) = +1\)이면 \(f\)의 순서가 \([i, j, k]\)(cyclic)이고, \(f\)가 반시계 방향이므로 \(\det(x_j - x_i, x_k - x_i) \gt 0\), 곧 \(x_k\)가 \(i \to j\)의 왼쪽에 있다. 부호의 정본은 이 규약과 <code>lib/ch36.py</code>의 <code>left_right_faces</code>, <code>dual_d0</code>, <code>dual_d1</code>이다(<code>tools/dgdec.py</code>에는 dual \(d\)가 아직 없다).</p>
+
+      <div class="thm definition" id="i-36-5-2">
+        <p><span class="thm-head">Definition 36.5.2</span> <span class="thm-name">(dual discrete form)</span>.
+        oriented dual \(k\)-cell마다 실수 하나를 주되 orientation을 뒤집으면 부호가 바뀌게 한 것을 <dfn>dual discrete form</dfn>(쌍대 이산 형식), 짧게 dual \(k\)-form이라 한다. <a href="#i-36-5-1">Remark 36.5.1</a>의 orientation으로 저장하면 dual 0-form은 \(\R^{n_2}\)(face마다), dual 1-form은 \(\R^{n_1}\)(edge마다), dual 2-form은 \(\R^{n_0}\)(vertex마다)의 vector다. 이와 구별해 <a href="36-1-de-rham-map.html#i-36-1-6">Definition 36.1.6</a>의 discrete form을 primal form이라 부른다.</p>
+      </div>
+      <div class="thm example" id="i-36-5-3">
+        <p><span class="thm-head">Example 36.5.3</span> <span class="thm-name">(dual forms from smooth forms)</span>.
+        smooth form을 dual cell 위에서 적분하면 dual form이 된다(dual de Rham map, \(\tilde R\)로 쓴다). (a) 2-form \(dx\wedge dy\)를 dual face \(i^\star\) 위에서 적분하면 dual cell의 넓이 \(\abs{i^\star}\)이다. (b) 평면의 1-form \(\star X^\flat = X^1\,dy - X^2\,dx\)를 dual edge \(e^\star\)를 따라 적분하면 vector field \(X\)가 \(e^\star\)를 가로지르는 flux다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-12">Proposition 35.4.12</a>(b)의 계산). (c) 함수 \(g\)를 dual vertex \(f^\star\)에서 읽은 값 \(g(f^\star)\)는 dual 0-form이다.</p>
+      </div>
+      <div class="thm nonexample" id="i-36-5-4">
+        <p><span class="thm-head">Non-example 36.5.4</span> <span class="thm-name">(primal and dual forms do not add)</span>.
+        primal 0-form과 dual 2-form은 둘 다 \(\R^{n_0}\)의 vector지만 더할 수 없다. 상수 함수 \(1\)의 primal 0-form은 모든 vertex에서 \(1\)이고(점의 값), \(dx\wedge dy\)의 dual 2-form은 \(\abs{i^\star}\)(넓이)이다. mesh를 반으로 세분하면 앞의 것은 그대로이고 뒤의 것은 \(\tfrac14\)이 된다. 둘의 합은 어떤 smooth 양의 측정도 아니다. 같은 이유로 primal 1-form(edge를 따라 잰 circulation)과 dual 1-form(dual edge를 가로지르는 flux)도 더하지 않는다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-36-5-1">
+        <img src="figures/fig-36-5-1-circulation-flux.svg" alt="두 패널. 같은 두 triangle(가로 edge e를 공유하는 마름모 모양, 위가 f, 아래가 g)과 같은 회색 화살표 field(오른쪽 위를 향하는 상수 vector field X)를 두 번 그렸다. (a) e가 파란 굵은 화살표로 x_i에서 x_j로 그려져 있고 아래에 circulation = 1.60이 있다. (b) e는 얇은 파란 선이고, 그에 수직인 주황 dual edge가 아래의 c_g에서 m_e를 지나 위의 c_f로 간다(위쪽 화살표). dual edge를 오른쪽으로 가로지르는 주홍 화살표 다섯 개가 있고 아래에 flux = 1.15 = ⋆1 × 1.6이 있다.">
+        <figcaption><span class="fig-head">Figure 36.5.1.</span>
+        primal 1-form은 edge를 따른 circulation, dual 1-form은 dual edge를 가로지르는 flux다. <em>무엇을</em>: 반시계 방향 triangle \(f = [x_i, x_j, x_k]\), \(g = [x_j, x_i, x_l]\)(\(x_i = (0, 0)\), \(x_j = (2, 0)\), \(x_k = (1.05, 2)\), \(x_l = (0.9, -1.9)\))와 상수 vector field \(X = (0.8, 0.5)\), 곧 \(\alpha = X^\flat = 0.8\,dx + 0.5\,dy\). <em>읽는 법</em>: 회색 화살표가 \(X\)다. (a) 파란 화살표는 primal edge \(e\)(\(i \to j\))다. (b) 주황 선은 circumcentric dual edge \(e^\star\)(\(c_g \to m_e \to c_f\), <a href="#i-36-5-1">Remark 36.5.1</a>의 방향)이고, 주홍 화살표는 \(e^\star\)를 가로지르는 \(X\)의 성분 \(\inner{X}{t}\)(\(t\)는 \(e\)의 unit tangent, \(e^\star\)의 normal)다. <em>볼 것</em>: circulation \(\int_e\alpha = \inner{X}{x_j - x_i} = 1.6\)과 flux \(\int_{e^\star}\star\alpha = \inner{X}{t}\abs{e^\star} = 1.152\)는 같은 수 \(\inner{X}{t} = 0.8\)에 각각 \(\abs{e} = 2\)와 \(\abs{e^\star} = 1.440\)을 곱한 것이다. 그래서 둘의 비 \(\abs{e^\star}/\abs{e} = 0.720\)이 \(\star_1\)이다. <em>본문과의 연결</em>: <a href="#i-36-5-2">Definition 36.5.2</a>, <a href="#i-36-5-14">Definition 36.5.14</a>, <a href="#i-36-5-16">Theorem 36.5.16</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-36-5-1">Figure 36.5.1</a>의 두 패널을 비교하자. (a)에서 edge \(e\)를 따라 재는 것은 \(X\)의 가로 성분 \(0.8\)이 길이 \(2\)만큼 쌓인 \(1.6\)이다. (b)의 dual edge는 \(e\)와 수직이라 \(X\)의 가로 성분이 그것을 가로지르고, 그 길이 \(1.44\)만큼 쌓여 \(1.152\)가 된다. 두 측정은 같은 “가로 성분”을 서로 다른 길이로 적분한 것이다. 상수 field에서는 정확히 \(\abs{e^\star}/\abs{e}\)배 차이가 나고, 이 비가 diagonal Hodge star의 출발점이다.</p>
+
+      <p>dual cell도 Stokes's theorem으로 \(d\)를 갖는다. dual \(k\)-form의 dual \((k+1)\)-cell 위의 값은 그 boundary의 dual \(k\)-cell 값을 relative orientation의 부호로 더한 것이다(<a href="36-4-discrete-exterior-derivative.html#i-36-4-1">Definition 36.4.1</a>과 같은 규칙). 이것을 dual exterior derivative \(\tilde d_0, \tilde d_1\)이라 하자.</p>
+      <div class="thm proposition" id="i-36-5-5">
+        <p><span class="thm-head">Proposition 36.5.5</span> <span class="thm-name">(the dual exterior derivative)</span>.
+        boundary가 없는 consistently oriented surface에서 <a href="#i-36-5-1">Remark 36.5.1</a>의 orientation을 쓰면</p>
+        <div class="equation" id="eq-36-5-1">
+        \[ \tilde d_0 = d_1^{\mathsf T}, \qquad \tilde d_1 = -d_0^{\mathsf T} \tag{36.5.1} \]
+        </div>
+        <p>이고, 따라서 \(\tilde d_1\tilde d_0 = -(d_1d_0)^{\mathsf T} = 0\)이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: dual cell의 boundary를 primal의 incidence로 읽는다. dual edge의 양 끝은 두 face이고, dual face의 변은 vertex를 품은 edge들이다(<a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-6">Proposition 33.6.6</a>). 남는 것은 부호다.</p>
+        <p><span class="proof-head">Proof.</span> \(\tilde d_0\): <a href="#i-36-5-1">Remark 36.5.1</a>에서 \(e^\star\)는 \(g^\star\)(\(o(g, e) = -1\))에서 \(f^\star\)(\(o(f, e) = +1\))로 가므로 \(\partial e^\star = [f^\star] - [g^\star] = \sum_{h \ni e}o(h, e)\,[h^\star]\)이다. 따라서 dual 0-form \(w\)에 대해 \((\tilde d_0w)_{e^\star} = \sum_ho(h, e)\,w_h = (d_1^{\mathsf T}w)_e\)이다.</p>
+        <p>\(\tilde d_1\): vertex \(i\) 둘레의 face를 orientation 방향으로 \(f_1, f_2, \dots, f_m\)이라 하고 \(f_r = [i, j_r, j_{r+1}]\)(<a href="../33-combinatorial-surfaces/33-6-dual-complex.html#sec-dual">Section 33.6</a>의 기호, \(j_{m+1} = j_1\))로 쓰자. \(f_{r-1} = [i, j_{r-1}, j_r]\)과 \(f_r\)은 edge \(\{i, j_r\}\)을 공유하고, \(i^\star\)의 boundary는 \(f_{r-1}^\star \to f_r^\star\)의 순서로 이 edge의 dual을 지난다. edge가 \([i, j_r]\)로 저장되어 있으면(\(i\)가 tail, \(o(e, [i]) = (d_0)_{e,i} = -1\)) \(o(f_r, e) = +1\), \(o(f_{r-1}, e) = -1\)이므로 \(e^\star\)는 \(f_{r-1}^\star \to f_r^\star\)를 향해 \(i^\star\)의 boundary 방향과 같다. \([j_r, i]\)로 저장되어 있으면(\(i\)가 head, \((d_0)_{e,i} = +1\)) \(e^\star\)는 반대다. 두 경우 모두 \(e^\star\)가 \(\partial i^\star\)에 들어가는 부호는 \(-(d_0)_{e,i}\)이다. 따라서 dual 1-form \(\beta\)에 대해 \((\tilde d_1\beta)_{i^\star} = -\sum_e(d_0)_{e,i}\beta_e = -(d_0^{\mathsf T}\beta)_i\)이다. 마지막 주장은 <a href="36-4-discrete-exterior-derivative.html#i-36-4-8">Theorem 36.4.8</a>의 transpose다.</p>
+      </div>
+      <p>부호 \(-\)는 규약의 결과다. dual edge를 \(-90^\circ\) 방향으로 orient하면 \(\tilde d_0 = -d_1^{\mathsf T}\), \(\tilde d_1 = d_0^{\mathsf T}\)가 된다(<a href="#ex-36-5-3">Exercise 36.5.3</a>). 어느 규약이든 뒤에서 쓰는 cotan Laplacian \(d_0^{\mathsf T}\star_1d_0\)에는 \(\tilde d\)가 직접 나타나지 않으므로 영향이 없다.</p>
+    </section>
+
+    <section id="sec-circumcentric">
+      <h2>The Circumcentric Dual</h2>
+      <p>dual vertex를 어디에 두느냐가 dual cell의 길이와 넓이를 정한다. Hodge star가 flux와 circulation의 비라면 dual edge는 primal edge에 수직이어야 한다(<a href="#fig-36-5-1">Figure 36.5.1</a>). triangle마다 세 edge의 수직이등분선이 한 점에서 만나므로, 그 점, 곧 circumcenter가 자연스러운 선택이다.</p>
+      <div class="thm definition" id="i-36-5-6">
+        <p><span class="thm-head">Definition 36.5.6</span> <span class="thm-name">(circumcentric dual)</span>.
+        triangle \(f\)의 circumcenter를 \(c_f\), edge \(e\)의 중점을 \(m_e\)라 하자. \(f\)의 edge \(e\)에 대해 \(h_{f,e}\)를 \(f\)의 평면 안에서 \(m_e\)에서 \(c_f\)까지의 부호 있는 거리(\(c_f\)가 \(e\)를 지나는 직선에 대해 \(f\)의 나머지 vertex와 같은 쪽이면 \(+\))라 한다. dual vertex \(f^\star = c_f\), dual edge \(e^\star\) = 1-chain \([c_g, m_e] + [m_e, c_f]\)(<a href="#i-36-5-1">Remark 36.5.1</a>의 \(g, f\). boundary edge는 한 항), dual face \(i^\star\) = 2-chain \(\sum_{f \ni i}\big([x_i, m_{ij}, c_f] + [x_i, c_f, m_{ik}]\big)\)(\(f = [i, j, k]\))로 정한 dual을 <dfn>circumcentric dual</dfn>(외심 쌍대)이라 하고, 그 크기를</p>
+        <div class="equation" id="eq-36-5-2">
+        \[ \begin{aligned} \abs{e^\star} &:= h_{f,e} + h_{g,e}, \\ \abs{i^\star} &:= \sum_{f \ni i}\Big(\tfrac12\cdot\tfrac{\abs{e_{ij}}}{2}\,h_{f,e_{ij}} \\ &\qquad\quad + \tfrac12\cdot\tfrac{\abs{e_{ik}}}{2}\,h_{f,e_{ik}}\Big) \end{aligned} \tag{36.5.2} \]
+        </div>
+        <p>로 정한다(부호 있는 길이와 넓이. boundary edge는 한 항).</p>
+      </div>
+      <p>dual cell을 <a href="36-2-chains-cochains.html">Section 36.2</a>의 chain으로 정의한 덕분에 길이와 넓이는 각 조각의 부호 있는 크기의 합이 되고, circumcenter가 triangle 밖으로 나가도 정의가 그대로 성립한다. triangle이 모두 acute이면 모든 \(h \gt 0\)이고, interior vertex의 \(i^\star\)는 \(c_{f_1}, m, c_{f_2}, m, \dots\)를 꼭짓점으로 하는 다각형, 곧 \(i\)의 Voronoi cell을 star에 제한한 것이다. 곡면 mesh에서는 \(e^\star\)의 두 조각이 서로 다른 평면에 있고, \(\abs{e^\star}\)는 두 triangle을 공유 edge를 따라 평면에 펼쳤을 때의 길이다(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-6">Section 38.6</a>).</p>
+      <div class="thm example" id="i-36-5-7">
+        <p><span class="thm-head">Example 36.5.7</span> <span class="thm-name">(three triangles)</span>.
+        (a) 한 변이 \(\ell\)인 정삼각형: circumcenter는 무게중심이고 \(h = \tfrac{\ell}{2\sqrt3}\)이다(무게중심에서 변까지의 거리는 높이 \(\tfrac{\sqrt3}{2}\ell\)의 \(\tfrac13\)). (b) 직각삼각형: circumcenter는 빗변의 중점이므로 빗변에 대한 \(h\)는 \(0\)이다. (c) 둔각삼각형: circumcenter가 triangle 밖, 둔각의 맞은편 변 너머에 있으므로 그 변에 대한 \(h\)는 음수다. 예를 들어 \(x_i = (-1, 0)\), \(x_j = (1, 0)\), \(p = (0.3, 0.4)\)이면 \(c = (0, -0.9375)\), \(h = -0.9375\)이다(<a href="#fig-36-5-2">Figure 36.5.2</a>(b)).</p>
+        <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-36-5-8">
+        <p><span class="thm-head">Non-example 36.5.8</span> <span class="thm-name">(the barycentric dual is not orthogonal)</span>.
+        dual vertex를 무게중심 \(b_f\)에 두는 barycentric dual에서는 dual edge \([m_e, b_f]\)가 일반적으로 \(e\)에 수직이 아니다. triangle \((0, 0), (2, 0), (0, 1)\)과 그 밑변 \(e\)에서 \(m_e = (1, 0)\), \(b_f = (\tfrac23, \tfrac13)\)이고 \(b_f - m_e = (-\tfrac13, \tfrac13)\)은 \(e\)와 \(45^\circ\)를 이룬다. 그래서 \(e\)와 평행한 흐름도 이 dual edge를 “가로지른다”(<a href="#ex-36-5-4">Exercise 36.5.4</a>). 정삼각형에서는 무게중심과 circumcenter가 같아 두 dual이 일치한다.</p>
+      </div>
+
+      <div class="thm lemma" id="i-36-5-9">
+        <p><span class="thm-head">Lemma 36.5.9</span> <span class="thm-name">(the circumcenter seen from an edge)</span>.
+        triangle \(f\)의 edge \(e\)와 그 맞은편 각 \(\theta \in (0, \pi)\)에 대하여 (a) \(c_f - m_e\)는 \(e\)에 수직이고 (b)</p>
+        <div class="equation" id="eq-36-5-3">
+        \[ h_{f,e} = \frac{\abs{e}}{2}\cot\theta \tag{36.5.3} \]
+        </div>
+        <p>이다. 특히 \(\theta\)가 acute, right, obtuse이면 \(h_{f,e}\)는 각각 양수, \(0\), 음수다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(f\)의 평면에 직교좌표를 잡아 \(e\)의 끝점을 \(x_i = (-a, 0)\), \(x_j = (a, 0)\)(\(a = \abs{e}/2\)), 나머지 vertex를 \(p = (p_1, p_2)\), \(p_2 \gt 0\)으로 두자(\(f\)가 위쪽에 있다). (a) \(c_f\)는 \(x_i, x_j\)에서 같은 거리에 있으므로 수직이등분선 \(x = 0\) 위에 있고, \(m_e = (0, 0)\)이므로 \(c_f - m_e\)는 \(e\)에 수직이다. (b) \(c_f = (0, c)\)라 하면 \(\abs{c_f - x_i}^2 = \abs{c_f - p}^2\)에서 \(a^2 + c^2 = p_1^2 + (p_2 - c)^2\), 곧 \(c = \dfrac{p_1^2 + p_2^2 - a^2}{2p_2}\)이다. 한편 \(\theta\)는 \(u = x_i - p\)와 \(w = x_j - p\) 사이의 각이고</p>
+        <p>\[ \begin{aligned} \inner{u}{w} &= (-a - p_1)(a - p_1) + p_2^2 \\ &= p_1^2 + p_2^2 - a^2, \\ u^1w^2 - u^2w^1 &= (-a - p_1)(-p_2) - (-p_2)(a - p_1) \\ &= 2ap_2 \gt 0 \end{aligned} \]</p>
+        <p>이므로 \(\cot\theta = \dfrac{\inner{u}{w}}{u^1w^2 - u^2w^1} = \dfrac{p_1^2 + p_2^2 - a^2}{2ap_2}\)이다(분모는 \(\abs{u}\abs{w}\sin\theta \gt 0\)). 따라서 \(c = a\cot\theta\)이다. \(p_2 \gt 0\)이므로 \(c \gt 0\)은 \(c_f\)가 \(p\)와 같은 쪽에 있다는 뜻이고, 정의에 의해 \(h_{f,e} = c = \tfrac{\abs{e}}{2}\cot\theta\)이다. 마지막 문장은 \(\cot\)의 부호다.</p>
+      </div>
+      <figure class="dg-figure" id="fig-36-5-2">
+        <img src="figures/fig-36-5-2-cotan-geometry.svg" alt="두 패널. 각각 가로 파란 edge(x_i = (−1,0)에서 x_j = (1,0))와 그 위의 vertex p로 된 하늘색 triangle, 회색 점선 circumcircle, edge 중점 m_e에서 circumcenter c로 가는 주황 수직 선분이 있다. (a) p = (0.35, 1.25): triangle이 높고 p의 각 θ = 74.7°이다. c는 edge 위쪽 triangle 안에 있고 h = 0.274라고 적혀 있다. m_e에 직각 표시가 있고 c에서 x_j로 점선이 있다. (b) p = (0.3, 0.4): triangle이 납작하고 p의 각 θ = 133.2°(둔각)이다. c는 edge 아래쪽 멀리 있고 h = −0.9375라고 적혀 있으며, circumcircle이 크다.">
+        <figcaption><span class="fig-head">Figure 36.5.2.</span>
+        edge에서 본 circumcenter의 부호 있는 거리는 \(\tfrac{\abs{e}}{2}\cot\theta\)다. <em>무엇을</em>: edge \(x_i = (-1, 0)\), \(x_j = (1, 0)\)(\(\abs{e} = 2\))와 맞은편 vertex (a) \(p = (0.35, 1.25)\), (b) \(p = (0.3, 0.4)\). <em>읽는 법</em>: 하늘색이 triangle, 파랑이 edge \(e\), 회색 점선이 circumcircle, 주홍 호가 \(p\)의 각 \(\theta\), 주황 선분이 \(m_e\)에서 circumcenter \(c\)까지(길이와 부호가 \(h\)), 작은 꺾임 표시는 직각이다. <em>볼 것</em>: (a) \(\theta = 74.7^\circ\)(acute)에서 \(c\)는 \(p\)와 같은 쪽에 있고 \(h = \cot\theta = 0.274\)이다. 점선 \(c x_j\)와 \(m_e\)가 만드는 직각삼각형의 \(c\)에서의 각이 \(\theta\)라서 \(h = \tfrac{\abs{e}}{2}\cot\theta\)를 눈으로 읽을 수 있다. (b) \(\theta = 133.2^\circ\)(obtuse)에서는 \(c\)가 edge 반대쪽으로 넘어가 \(h = \cot\theta = -0.9375\)이다. <em>본문과의 연결</em>: <a href="#i-36-5-9">Lemma 36.5.9</a>, <a href="#i-36-5-7">Example 36.5.7</a>(c).</figcaption>
+      </figure>
+      <p><a href="#fig-36-5-2">Figure 36.5.2</a>의 (a)를 보자. \(c\)에서 edge로 내린 수선의 발이 \(m_e\)이고, \(c\), \(m_e\), \(x_j\)가 직각삼각형을 이룬다. 그 \(c\)에서의 각은 원주각 \(\theta\)와 같으므로 밑변 \(\abs{e}/2\)와 높이 \(h\)의 비가 \(\tan\theta\)다. 이것이 <a href="#eq-36-5-3">(36.5.3)</a>을 그림으로 읽는 법이다. (b)처럼 \(p\)가 edge에 가까워져 \(\theta\)가 \(90^\circ\)를 넘으면 원이 커지면서 중심이 edge 아래로 넘어간다. 증명은 원주각 정리 대신 좌표 계산을 썼으므로 이 경우도 따로 다룰 필요가 없다.</p>
+
+      <div class="thm theorem" id="i-36-5-10">
+        <p><span class="thm-head">Theorem 36.5.10</span> <span class="thm-name">(cotan formula)</span>.
+        circumcentric dual에서 interior edge \(e\)의 맞은편 두 각을 \(\alpha_e, \beta_e\)라 하면</p>
+        <div class="equation" id="eq-36-5-4">
+        \[ \frac{\abs{e^\star}}{\abs{e}} = \frac12\big(\cot\alpha_e + \cot\beta_e\big) \tag{36.5.4} \]
+        </div>
+        <p>이다. boundary edge(맞은편 각 \(\alpha_e\) 하나)에서는 \(\abs{e^\star}/\abs{e} = \tfrac12\cot\alpha_e\)이다. 이 값은 \(\alpha_e + \beta_e \lt \pi\)이면 양수, \(= \pi\)이면 \(0\), \(\gt \pi\)이면 음수다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="#eq-36-5-2">(36.5.2)</a>와 <a href="#i-36-5-9">Lemma 36.5.9</a>에서 \(\abs{e^\star} = h_{f,e} + h_{g,e} = \tfrac{\abs{e}}{2}(\cot\alpha_e + \cot\beta_e)\)이다. boundary edge는 한 항이다. 부호는 \(\cot\alpha + \cot\beta = \sin(\alpha + \beta)/(\sin\alpha\sin\beta)\)(<a href="../31-meshes/31-3-cotangent-laplacian.html#eq-31-3-5">(31.3.5)</a>)에서 \(\sin\alpha\sin\beta \gt 0\)이므로 \(\sin(\alpha + \beta)\)의 부호다(\(0 \lt \alpha + \beta \lt 2\pi\)).</p>
+      </div>
+      <p>이 정리가 말하는 것. dual edge와 primal edge의 길이의 비는 맞은편 두 각만으로 정해진다. 길이를 직접 재지 않아도 각에서 \(\star_1\)이 나온다. \(\alpha + \beta \gt \pi\)인 edge는 Delaunay 조건을 어기는 edge이고(<a href="../31-meshes/31-3-cotangent-laplacian.html#sec-non-delaunay">Section 31.3</a>), 그런 edge에서 dual edge는 거꾸로 놓인다.</p>
+      <div class="thm corollary" id="i-36-5-11">
+        <p><span class="thm-head">Corollary 36.5.11</span> <span class="thm-name">(circumcentric dual cell areas)</span>.
+        vertex \(i\)의 circumcentric dual cell의 부호 있는 넓이는</p>
+        <div class="equation" id="eq-36-5-5">
+        \[ \begin{aligned} \abs{i^\star} = \frac18\sum_{f = [i,j,k] \ni i}\Big(&\abs{x_j - x_i}^2\cot\theta_k \\ &+ \abs{x_k - x_i}^2\cot\theta_j\Big) \end{aligned} \tag{36.5.5} \]
+        </div>
+        <p>이다. 여기서 \(\theta_j, \theta_k\)는 \(f\)의 \(x_j, x_k\)에서의 각이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="#eq-36-5-2">(36.5.2)</a>의 각 항 \(\tfrac12\cdot\tfrac{\abs{e_{ij}}}{2}h_{f,e_{ij}}\)에 <a href="#eq-36-5-3">(36.5.3)</a>을 넣으면 \(\tfrac12\cdot\tfrac{\abs{e_{ij}}}{2}\cdot\tfrac{\abs{e_{ij}}}{2}\cot\theta_k = \tfrac18\abs{e_{ij}}^2\cot\theta_k\)이다(\(e_{ij}\)의 맞은편 각은 \(\theta_k\)). \(e_{ik}\)의 항도 같다.</p>
+      </div>
+      <p>각 항은 다리가 \(\abs{e}/2\)와 \(h\)인 직각삼각형 \([x_i, m_e, c_f]\)의 부호 있는 넓이다. 이 넓이들을 모두 더하면 triangle마다 그 넓이가 되어 \(\sum_i\abs{i^\star}\)는 mesh 전체의 넓이와 같다. 그 증명과 다른 dual area(barycentric, mixed)와의 비교는 <a href="../42-laplace-beltrami/index.html#toc-42-4">Section 42.4</a>에서 한다.</p>
+
+      <div class="thm example" id="i-36-5-12">
+        <p><span class="thm-head">Example 36.5.12</span> <span class="thm-name">(a dual edge of negative length)</span>.
+        <code>lib/ch36.non_delaunay_pair</code>: \(x_0 = (0, 0)\), \(x_1 = (2, 0)\), \(x_2 = (1, 0.3)\), \(x_3 = (1, -0.25)\), face \(f = (0, 1, 2)\)(위), \(g = (1, 0, 3)\)(아래). 공유 edge \(e = [x_0, x_1]\)의 맞은편 각은 <a href="#i-36-5-9">Lemma 36.5.9</a>의 증명의 공식(\(a = 1\))으로 \(\cot\alpha = (0.09 - 1)/0.6 = -1.5167\)(\(x_2\)에서), \(\cot\beta = (0.0625 - 1)/0.5 = -1.875\)(\(x_3\)에서)이고, \(\alpha + \beta = 298.5^\circ\)이다. 따라서 \(h_{f,e} = -1.5167\), \(h_{g,e} = -1.875\): \(c_f\)는 edge 아래, \(c_g\)는 edge 위에 있다. \(\abs{e^\star} = -3.392\), \(\star_1 = \tfrac12(\cot\alpha + \cot\beta) = -1.696\)이다(<a href="#fig-36-5-3">Figure 36.5.3</a>(b)). <code>dgdec</code>의 self-test가 같은 쌍을 쓴다.</p>
+        <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code></p>
+      </div>
+      <figure class="dg-figure" id="fig-36-5-3">
+        <img src="figures/fig-36-5-3-circumcentric-dual.svg" alt="두 패널. (a) 거의 정삼각형인 triangle 24개로 된 육각형 patch(회색 edge). 주황 점(circumcenter)들을 잇는 주황 선이 벌집 모양의 dual을 이루고, 바깥 테두리 edge의 dual edge는 edge 중점에서 끝나는 주황 점선이다. 가운데 vertex 0 둘레의 육각형 dual cell이 연한 주황으로 칠해져 있고 0*이라 적혀 있다. 두 곳에 직각 표시가 있다. (b) 아주 납작한 두 triangle(x0, x1, x2 위, x3 아래)이 가로 파란 edge x0x1을 공유한다. 주황 점 c_g가 edge 훨씬 위에, c_f가 훨씬 아래에 있고, c_g에서 c_f로 아래를 향하는 주홍 화살표가 있다. 옆에 위를 향하는 회색 점선 화살표 Jt가 있다. 아래에 α + β = 298.5°, |e*| = −3.392, ⋆1 = −1.696.">
+        <figcaption><span class="fig-head">Figure 36.5.3.</span>
+        circumcentric dual과 길이가 음수인 dual edge. <em>무엇을</em>: (a) <code>lib/ch36.equilateral_patch(2)</code>(vertex 19, triangle 24, 간격 1)의 vertex를 seed를 고정한 작은 난수만큼 옮긴 mesh(모든 triangle acute)와 그 circumcentric dual. (b) <a href="#i-36-5-12">Example 36.5.12</a>의 non-Delaunay pair. <em>읽는 법</em>: 회색이 primal edge, 주황 점이 circumcenter, 주황 선이 dual edge다(boundary edge의 dual은 edge 중점에서 끝나는 점선). (a)의 연한 주황은 가운데 vertex의 dual cell \(0^\star\), 작은 꺾임은 직각 표시다. (b)의 파랑이 공유 edge \(e\), 주홍 화살표가 dual edge \(c_g \to c_f\), 회색 점선 화살표가 \(e\)를 \(+90^\circ\) 돌린 방향 \(Jt\)(<a href="#i-36-5-1">Remark 36.5.1</a>의 기준 방향)이다. <em>볼 것</em>: (a)에서 모든 dual edge가 primal edge에 수직이고, dual cell은 Voronoi 모양의 다각형이다. 모든 \(\star_1 \gt 0\)이다. (b)에서는 \(c_g\)가 위, \(c_f\)가 아래에 있어 dual edge가 \(Jt\)와 반대로 놓이고, 그 부호 있는 길이 \(-3.392\)와 \(\star_1 = -1.696\)이 음수다. <em>본문과의 연결</em>: <a href="#i-36-5-6">Definition 36.5.6</a>, <a href="#i-36-5-10">Theorem 36.5.10</a>, <a href="#i-36-5-12">Example 36.5.12</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-36-5-3">Figure 36.5.3</a>의 (a)에서 가운데 육각형을 보자. 그 꼭짓점은 vertex 0 둘레의 여섯 triangle의 circumcenter이고, 변은 vertex 0에서 나가는 여섯 edge의 dual edge다. 각 dual edge는 자기 primal edge를 수직으로 가로지른다. 모든 triangle이 acute이면 이렇게 깔끔한 Voronoi 그림이 된다. (b)에서는 사정이 다르다. 두 triangle이 모두 납작해서 맞은편 각이 둘 다 둔각이고, 위 triangle의 circumcenter는 아래로, 아래 triangle의 circumcenter는 위로 넘어가 dual edge가 뒤집힌다. 기하적으로는 길이 \(3.392\)인 선분이지만 orientation 규약에 대해 반대로 놓였으므로 부호 있는 길이는 음수다. 이것이 \(\star_1\)과 cotan weight가 음수가 되는 정확한 이유다.</p>
+    </section>
+
+    <section id="sec-hodge-star">
+      <h2>The Discrete Hodge Star</h2>
+      <div class="thm definition" id="i-36-5-13">
+        <p><span class="thm-head">Definition 36.5.13</span> <span class="thm-name">(discrete Hodge star)</span>.
+        2차원 mesh 위의 primal \(k\)-form을 dual \((2-k)\)-form으로 보내는 linear map \(\star_k\colon \R^{n_k} \to \R^{n_k}\)(\(k = 0, 1, 2\))을 <dfn>discrete Hodge star</dfn>(이산 호지 스타)라 한다. 목표는 smooth form \(\alpha\)에 대해 \(\star_kR_k\alpha \approx \tilde R_{2-k}(\star\alpha)\), 곧 “primal 측정값에서 \(\star\alpha\)의 dual 측정값을 추정하는 것”이다.</p>
+      </div>
+      <p>가장 단순한 추정은 이렇다. primal 값 \(\hat\alpha_\sigma\)를 \(\abs{\sigma}\)로 나누면 \(\sigma\) 위의 평균 밀도이고, 그 밀도가 dual cell에서도 같다고 보고 \(\abs{\sigma^\star}\)를 곱한다.</p>
+      <div class="thm definition" id="i-36-5-14">
+        <p><span class="thm-head">Definition 36.5.14</span> <span class="thm-name">(diagonal Hodge star)</span>.
+        각 simplex마다</p>
+        <div class="equation" id="eq-36-5-6">
+        \[ (\star_k\alpha)_{\sigma^\star} := \frac{\abs{\sigma^\star}}{\abs{\sigma}}\,\alpha_\sigma \tag{36.5.6} \]
+        </div>
+        <p>로 정한 discrete Hodge star를 <dfn>diagonal Hodge star</dfn>(대각 호지 스타)라 한다. 0차원 cell의 크기는 \(1\)로 둔다(\(\abs{x_i} = \abs{f^\star} = 1\)). circumcentric dual을 쓰면 <a href="#i-36-5-10">Theorem 36.5.10</a>과 <a href="#i-36-5-11">Corollary 36.5.11</a>에서</p>
+        <p>\[ \begin{aligned} \star_0 &= \diag\big(\abs{i^\star}\big), \\ \star_1 &= \diag\big(\tfrac12(\cot\alpha_e + \cot\beta_e)\big), \\ \star_2 &= \diag\big(1/\abs{f}\big) \end{aligned} \]</p>
+        <p>이다. 각 행렬은 해당 simplex의 번호(vertex, <code>edge_list</code>, \(F\)의 행) 순서로 쓴다.</p>
+      </div>
+      <p><code>dgdec.hodge0(V, F, "circumcentric")</code>, <code>hodge1</code>, <code>hodge2</code>가 이 세 대각 성분이다. <code>hodge0</code>의 기본값은 barycentric이므로(<a href="#i-36-5-17">Remark 36.5.17</a>) circumcentric이 필요하면 kind를 준다. 이 장에서 \(\star_0\)은 따로 말하지 않으면 circumcentric이다. 대각 행렬이므로 모든 대각 성분이 \(0\)이 아니면 역행렬 \(\star_k^{-1}\)(dual에서 primal로)은 대각 성분의 역수다(<code>dgdec.hodge_inverse</code>).</p>
+      <div class="thm example" id="i-36-5-15">
+        <p><span class="thm-head">Example 36.5.15</span> <span class="thm-name">(equilateral grid and icosphere)</span>.
+        (a) 간격 \(\ell\)인 정삼각형 grid(<code>lib/ch36.equilateral_patch</code>)에서 모든 각이 \(60^\circ\)이므로 interior edge의 \(\star_1 = \tfrac12(\tfrac{1}{\sqrt3} + \tfrac{1}{\sqrt3}) = \tfrac{1}{\sqrt3} \approx 0.5774\), boundary edge의 \(\star_1 = \tfrac{1}{2\sqrt3} \approx 0.2887\)이다. interior vertex의 dual cell은 정육각형이고 \(\star_0 = \tfrac18\cdot 6\cdot 2\ell^2\tfrac{1}{\sqrt3} = \tfrac{\sqrt3}{2}\ell^2\), \(\star_2 = 1/(\tfrac{\sqrt3}{4}\ell^2)\)이다. (b) <code>dgmesh.icosphere(1)</code>은 모든 triangle이 acute이고, valence 5인 vertex 12개의 \(\star_0 = 0.2560\), valence 6인 vertex 30개의 \(\star_0 = 0.2865\)이며, 합 \(11.6659\)는 triangle 80개의 넓이의 합과 같다(unit sphere의 \(4\pi = 12.566\)보다 작다. triangle은 sphere 안쪽의 평면 조각이다). <code>icosphere(2)</code>에서는 합이 \(12.3298\)이고 모든 \(\star_1 \gt 0\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code></p>
+      </div>
+      <figure class="dg-figure" id="fig-36-5-4">
+        <img src="figures/fig-36-5-4-icosphere-dual.svg" alt="두 패널. (a) icosphere(1)을 옆에서 본 그림. 회색 primal edge 위에 주황 dual edge가 그려져 있고, 각 vertex의 dual cell이 색칠되어 있다: 오각형 cell 12개(일부만 보임)는 연한 노랑, 육각형 cell은 진한 갈색이다. (b) 막대그래프. valence 5(12 pentagons)와 valence 6(30 hexagons) 각각에 두 막대가 있다: circumcentric(연노랑 0.2560, 갈색 0.2865)과 barycentric(회색 빗금 0.2322, 0.2960).">
+        <figcaption><span class="fig-head">Figure 36.5.4.</span>
+        icosphere의 circumcentric dual cell과 \(\star_0\). <em>무엇을</em>: <code>dgmesh.icosphere(1)</code>(vertex 42, triangle 80, 모두 acute)의 circumcentric dual cell \(i^\star\). 각 cell은 face마다 두 개의 직각삼각형 \([x_i, m_{ij}, c_f]\), \([x_i, c_f, m_{ik}]\)로 되어 있다. <em>읽는 법</em>: (a) 회색은 primal edge, 주황은 dual edge \(m_e c_f\), 색은 cell의 넓이 \(\star_0\)(연할수록 작다)이다. 뒤쪽 face는 그리지 않았다. (b) valence 5와 6인 vertex의 \(\star_0\)를 circumcentric(색 막대)과 barycentric(빗금 막대, 둘레 triangle 넓이의 \(\tfrac13\)씩)으로 비교했다. <em>볼 것</em>: valence 5인 vertex의 dual cell은 오각형이고 넓이 \(0.2560\), valence 6은 육각형이고 \(0.2865\)로, 넓이가 딱 두 값뿐이다. barycentric 값 \(0.2322\), \(0.2960\)과는 다르지만, 두 선택 모두 합은 \(11.6659\)(전체 넓이)이다. <em>본문과의 연결</em>: <a href="#i-36-5-11">Corollary 36.5.11</a>, <a href="#i-36-5-15">Example 36.5.15</a>(b), <a href="#i-36-5-17">Remark 36.5.17</a>. 돌려 볼 수 있는 <a href="figures/fig-36-5-4-icosphere-dual-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+      <p><a href="#fig-36-5-4">Figure 36.5.4</a>의 (a)에서 연한 노란 오각형을 찾아보자. 정이십면체의 원래 vertex 12개가 그 중심이고, 나머지 vertex는 진한 육각형 cell을 갖는다. 오각형 cell이 더 작은 것은 둘레의 triangle이 다섯 개뿐이고, 그 triangle들도 조금 작기 때문이다. (b)는 dual vertex를 무게중심에 두면 같은 vertex의 \(\star_0\)가 달라진다는 것을 보여 준다. 오각형 쪽은 \(9\%\) 작고 육각형 쪽은 \(3\%\) 크다. 어느 쪽도 smooth sphere의 넓이를 “정확히” 나누는 것은 아니다. 이 선택의 영향은 Chapter 42에서 다시 본다.</p>
+
+      <div class="thm theorem" id="i-36-5-16">
+        <p><span class="thm-head">Theorem 36.5.16</span> <span class="thm-name">(the diagonal Hodge star is exact on constant forms)</span>.
+        \(\R^2\)의 반시계 방향 mesh와 그 circumcentric dual에서, 상수 \(k\)-form \(\alpha\)(\(k = 0, 1, 2\))에 대하여</p>
+        <p>\[ \star_kR_k\alpha = \tilde R_{2-k}(\star\alpha) \]</p>
+        <p>이다. 여기서 \(\tilde R\)은 <a href="#i-36-5-1">Remark 36.5.1</a>의 orientation을 준 dual cell(<a href="#i-36-5-6">Definition 36.5.6</a>의 chain) 위의 적분이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: 상수 form은 dual cell 위에서도 같은 밀도를 갖는다. 남는 일은 1-form에서 \(\star\)가 dual edge의 방향(primal edge에 수직)을 primal edge의 방향으로 돌려놓는다는 것을 확인하는 것이다.</p>
+        <p><span class="proof-head">Proof.</span> \(k = 0\): \(\alpha = c\)(상수 함수)이면 \(\star\alpha = c\,dx\wedge dy\)이고, \(i^\star\)는 oriented triangle들의 2-chain이므로 그 위의 적분은 각 항의 부호 있는 넓이에 \(c\)를 곱한 것의 합, 곧 \(c\abs{i^\star}\)이다. 이때 각 직각삼각형 \([x_i, m_{ij}, c_f]\)의 부호 있는 넓이가 <a href="#eq-36-5-2">(36.5.2)</a>의 \(\tfrac12\cdot\tfrac{\abs{e_{ij}}}{2}h_{f,e_{ij}}\)인 것은 \(f\)가 \(i \to j\)의 왼쪽에 있고 \(c_f\)가 \(h \gt 0\)일 때 그 쪽에 있다는 것(<a href="#i-36-5-1">Remark 36.5.1</a> 뒤의 확인)에서 나온다(\([x_i, c_f, m_{ik}]\)도 같다). 한편 \((\star_0R_0\alpha)_i = \abs{i^\star}c\)이다.</p>
+        <p>\(k = 1\): \(\alpha = a\,dx + b\,dy\)이면 \(\star\alpha = a\,dy - b\,dx\)이고(<a href="../34-exterior-algebra/34-2-hodge-star.html#eq-34-2-6">(34.2.6)</a>, <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-9">Example 35.5.9</a>(a)와 같은 표), 모든 vector \(v\)에 대해 \((\star\alpha)(v) = a v^2 - b v^1 = \alpha(-Jv)\)이다. edge \(e = [i, j]\)의 unit tangent를 \(t\)라 하자. <a href="#i-36-5-9">Lemma 36.5.9</a>(a)와 \(h\)의 정의에서 \(c_f = m_e + h_{f,e}Jt\)(\(f\)는 왼쪽, \(Jt\) 쪽), \(c_g = m_e - h_{g,e}Jt\)(\(g\)는 오른쪽)이다. 상수 form의 선분 위 적분은 끝점의 차이를 넣은 값이므로(<a href="../35-exterior-calculus/35-3-integration.html#eq-35-3-7">(35.3.7)</a>, \(k = 1\))</p>
+        <p>\[ \begin{aligned} \int_{e^\star}\star\alpha &= (\star\alpha)(m_e - c_g) + (\star\alpha)(c_f - m_e) \\ &= (h_{g,e} + h_{f,e})\,\alpha(-JJt) \\ &= \abs{e^\star}\,\alpha(t) = \frac{\abs{e^\star}}{\abs{e}}\,\alpha(x_j - x_i) \end{aligned} \]</p>
+        <p>이다(\(JJ = -1\)). 마지막 값은 \((\star_1R_1\alpha)_e\)이다. boundary edge는 한 항이다.</p>
+        <p>\(k = 2\): \(\alpha = c\,dx\wedge dy\)이면 \(\star\alpha = c\)(함수)이고 \(\tilde R_0(\star\alpha)_{f^\star} = c\)이다. 반시계 방향 \(f\)에서 \(R_2\alpha_f = c\abs{f}\)(<a href="../35-exterior-calculus/35-3-integration.html#eq-35-3-7">(35.3.7)</a>)이므로 \((\star_2R_2\alpha)_f = c\)이다.</p>
+      </div>
+      <p>이 정리가 diagonal Hodge star를 정당화한다. form이 한 dual cell 안에서 거의 상수이면(mesh가 충분히 작으면) 오차가 작다. 반대로 form이 cell 안에서 크게 변하면 오차는 \(h\)에 비례한다(<a href="#ex-36-5-5">Exercise 36.5.5</a>). 곡면 mesh에서는 각 triangle이 평평하므로 triangle마다 같은 계산을 한다(<a href="../38-surfaces-smooth-discrete/index.html#toc-38-6">Section 38.6</a>).</p>
+
+      <div class="thm remark" id="i-36-5-17">
+        <p><span class="thm-head">Remark 36.5.17</span> <span class="thm-name">(other discrete Hodge stars)</span>.
+        (a) barycentric dual(dual vertex를 무게중심에)의 diagonal star: \(\star_0^{\mathrm{bary}}\)는 둘레 triangle 넓이의 \(\tfrac13\)씩의 합으로 언제나 양수다(<code>dgdec.hodge0</code>의 기본값, Chapter 42의 lumped mass matrix). 그러나 dual edge가 primal edge에 수직이 아니므로 그 \(\star_1^{\mathrm{bary}} = \abs{e^\star_{\mathrm{bary}}}/\abs{e}\)는 상수 1-form에서도 <a href="#i-36-5-16">Theorem 36.5.16</a>을 만족하지 않는다(<a href="#i-36-5-8">Non-example 36.5.8</a>, <a href="#ex-36-5-4">Exercise 36.5.4</a>). (b) Galerkin Hodge star: Whitney 1-form의 L2 inner product \(M_{ee'} = \int\inner{\varphi_e}{\varphi_{e'}}\,dA\)(<a href="36-3-whitney-forms.html#i-36-3-5">Definition 36.3.5</a>)를 행렬로 쓰는 것이다. 대각 행렬이 아니지만 sparse이고, 양의 정부호이며, <a href="36-3-whitney-forms.html#i-36-3-13">Corollary 36.3.13</a>에 의해 상수 form의 norm을 정확히 재현한다. (c) 어떤 선택도 모든 form에서 정확하지는 않다. circumcentric star는 orthogonality를 위해 양수성을 잃고(<a href="#i-36-5-12">Example 36.5.12</a>), barycentric star는 양수성을 위해 orthogonality를 잃는다. Chapter 32의 “no free lunch”(<a href="../32-ddg-overview/32-4-no-free-lunch.html">Section 32.4</a>)가 여기서도 나타나고, Laplacian 수준의 정확한 진술은 <a class="cite" href="../../references.html#Wardetzky07">[Wardetzky07]</a>에 있다.</p>
+      </div>
+
+      <div class="thm nonexample" id="i-36-5-18">
+        <p><span class="thm-head">Non-example 36.5.18</span> <span class="thm-name">(the unsigned ratio)</span>.
+        <a href="#eq-36-5-6">(36.5.6)</a>에서 부호 있는 길이 대신 선분의 기하적 길이를 써서 \(\star_1^{\mathrm{abs}} := \abs{\star_1} \ge 0\)으로 정하면 non-Delaunay edge에서 <a href="#i-36-5-16">Theorem 36.5.16</a>이 깨진다. <a href="#i-36-5-12">Example 36.5.12</a>의 pair에서 공유 edge \(e = [x_0, x_1]\)과 상수 1-form \(\alpha = dx\)를 보자. \(R_1\alpha_e = 2\)이다. <a href="#i-36-5-1">Remark 36.5.1</a>에 따라 \(e^\star\)는 오른쪽 face \(g\)의 \(c_g = (1, 1.875)\)에서 왼쪽 face \(f\)의 \(c_f = (1, -1.5167)\)로 가고, \(\star\alpha = dy\)이므로 \(\int_{e^\star}\star\alpha = -1.5167 - 1.875 = -3.392\)이다. \(\star_1R_1\alpha_e = (-1.696)(2) = -3.392\)는 이것과 같지만 \(\star_1^{\mathrm{abs}}R_1\alpha_e = 3.392\)는 부호가 반대다. 두 circumcenter가 서로 넘어가 dual edge가 거꾸로 놓였다는 정보를 부호가 담고 있기 때문이다. 모든 \(\star_1 \ge 0\)인 mesh(예: Delaunay mesh)에서는 두 정의가 같다.</p>
+        <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code></p>
+      </div>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: the three diagonal Hodge stars from angles</p>
+        <p>face마다 세 각의 cotangent를 \(\cot\theta = \inner{u}{w}/\abs{u\times w}\)로 구하고 <a href="#eq-36-5-4">(36.5.4)</a>와 <a href="#eq-36-5-5">(36.5.5)</a>로 누적한다. circumcenter를 직접 계산하지 않는다. corner \(c\)의 각은 맞은편 edge \((a, b)\)의 \(\star_1\)에 \(\tfrac12\cot\theta\)를 더하고, 그 edge의 양 끝 vertex의 \(\star_0\)에 직각삼각형 하나씩(\(\tfrac18\abs{e}^2\cot\theta\))을 더한다.</p>
+        <pre id="code-36-5-1"><code>import numpy as np
+import dgmesh as dm
+import dgdec as dd
+
+def hodge_stars(V, F):
+    """Diagonal circumcentric Hodge stars (star0, star1, star2) of a triangle mesh in R^3, edges in edge_list order."""
+    E, index = dd.edge_list(F)
+    s0, s1, s2 = np.zeros(len(V)), np.zeros(len(E)), np.zeros(len(F))
+    for f, tri in enumerate(F):
+        P = V[tri]
+        s2[f] = 2.0 / np.linalg.norm(np.cross(P[1] - P[0], P[2] - P[0]))   # 1 / area
+        for c in range(3):                                   # corner c and its opposite edge (a, b)
+            a, b = tri[(c + 1) % 3], tri[(c + 2) % 3]
+            u, w = V[a] - P[c], V[b] - P[c]
+            cot = (u @ w) / np.linalg.norm(np.cross(u, w))   # cot of the angle at corner c
+            s1[index[(min(a, b), max(a, b))]] += 0.5 * cot   # Theorem 36.5.10
+            s0[[a, b]] += np.sum((V[a] - V[b]) ** 2) * cot / 8.0   # Corollary 36.5.11
+    return s0, s1, s2
+
+V, F = dm.icosphere(2)
+s0, s1, s2 = hodge_stars(V, F)
+print(np.allclose(s0, dd.hodge0(V, F, "circumcentric")), np.allclose(s1, dd.hodge1(V, F)),
+      np.allclose(s2, dd.hodge2(V, F)))
+print(round(s0.sum(), 6), round(dm.face_areas(V, F).sum(), 6), round(4 * np.pi, 6), s1.min() &gt; 0)
+Vn = np.array([[0.0, 0, 0], [2.0, 0, 0], [1.0, 0.3, 0], [1.0, -0.25, 0]])     # a non-Delaunay pair
+s0n, s1n, s2n = hodge_stars(Vn, np.array([[0, 1, 2], [1, 0, 3]]))
+print(np.round(s1n, 4))</code></pre>
+        <pre id="out-36-5-1"><code>True True True
+12.329849 12.329849 12.566371 True
+[-1.6958  1.6667  2.      1.6667  2.    ]</code></pre>
+        <p>세 star가 공용 구현과 같고, <code>icosphere(2)</code>에서 \(\star_0\)의 합이 전체 넓이와 같으며 모든 \(\star_1\)이 양수다. non-Delaunay pair에서는 공유 edge \([0, 1]\)(첫 성분)만 \(-1.6958\)이고, 나머지 네 boundary edge는 맞은편 각 하나의 \(\tfrac12\cot\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: stars, signs, and dual orientation</p>
+        <ul>
+          <li>이 study set은 diagonal Hodge star를 \(\star_0, \star_1, \star_2\)(§2.5)로 쓰고, 역행렬은 \(\star_k^{-1}\)로 쓴다. Crane의 노트는 discrete star를 \(\hat\star\)로 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §4.8.4]</a>.</li>
+          <li>Crane의 노트는 diagonal star를 부호 없는(unsigned) 부피의 비로 정의한다. 이 study set은 circumcentric dual의 <em>부호 있는</em> 길이와 넓이를 쓰므로(<a href="#eq-36-5-2">(36.5.2)</a>, <code>dgdec.dual_edge_lengths</code>), non-Delaunay edge에서 \(\star_1 = \tfrac12(\cot\alpha + \cot\beta) \lt 0\)이다. 부호를 버리면 상수 form에서도 틀린다(<a href="#i-36-5-18">Non-example 36.5.18</a>). 강의 슬라이드의 circumcentric dual 예와 실제 코드가 쓰는 cotan 값이 이 부호 있는 값이다 <a class="cite" href="../../references.html#CMU-DDG-L9">[CMU-DDG L9]</a>.</li>
+          <li>dual edge의 orientation은 primal edge를 \(+90^\circ\) 돌린 방향이고, 그래서 \(\tilde d_0 = d_1^{\mathsf T}\), \(\tilde d_1 = -d_0^{\mathsf T}\)이다(<a href="#i-36-5-5">Proposition 36.5.5</a>). 문헌마다 dual orientation이 달라 이 부호는 바뀔 수 있다. 이 장의 Laplacian과 codifferential(<a href="36-6-composing-operators.html">Section 36.6</a>)은 \(d_k^{\mathsf T}\)로 쓰므로 그 선택에 의존하지 않는다.</li>
+          <li><code>dgdec.hodge0</code>의 기본 kind는 barycentric이고, 이 장의 \(\star_0\)은 circumcentric이다. Chapter 42는 둘과 mixed area를 비교한다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: the Hodge star</p>
+        <p><strong>Smooth.</strong> \(\star\)는 점마다 \(k\)-form을 \((n-k)\)-form으로 보내는 isometry이고, inner product와 orientation만으로 정해진다(<a href="../34-exterior-algebra/34-2-hodge-star.html#i-34-2-5">Definition 34.2.5</a>). \(\star\star = \pm1\)이다. <strong>Discrete.</strong> \(\star_k\)는 primal cell의 측정값을 dual cell의 측정값으로 바꾸는 대각 행렬이고, metric(길이, 각, 넓이)은 모두 여기에 들어 있다.</p>
+        <ul>
+          <li>정확히 보존하는 것: 상수 form에서는 정확하다(<a href="#i-36-5-16">Theorem 36.5.16</a>). circumcentric dual은 primal과 직교하므로 1-form의 circulation과 flux를 같은 성분으로 잇는다(<a href="#fig-36-5-1">Figure 36.5.1</a>).</li>
+          <li>잃는 것: 일반 form에서의 정확성(오차는 \(h\)에 비례), 그리고 non-Delaunay mesh에서의 양수성(<a href="#i-36-5-12">Example 36.5.12</a>). 대각 성분이 음수나 \(0\)이 되면 \(\star_k\)로 만든 “inner product”가 positive definite가 아니고 \(\star_k^{-1}\)이 없을 수도 있다. \(\star\star = -1\)(1-form, 2차원) 같은 관계는 dual에서 primal로 가는 star의 부호로만 흉내 낸다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>circumcentric dual과 diagonal Hodge star의 체계적인 정리, 고차원 판: <a class="cite" href="../../references.html#Hirani03">[Hirani03]</a>, <a class="cite" href="../../references.html#Desbrun05">[Desbrun05]</a>. cotan formula의 원전 중 하나: <a class="cite" href="../../references.html#Pinkall93">[Pinkall93]</a>.</li>
+          <li>Delaunay 조건과 음수 cotan weight, intrinsic Delaunay triangulation: <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-non-delaunay">Section 31.3</a>, <a class="cite" href="../../references.html#Bobenko07">[Bobenko07]</a>.</li>
+          <li>Riemannian manifold의 Hodge star와 volume form: <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>.</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L9">[CMU-DDG L9]</a> slides 14–29, <a class="cite" href="../../references.html#Cr">[Cr §4.8.4]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>dual cell은 vertex → dual face, edge → dual edge, face → dual vertex이고, dual edge는 primal edge를 \(+90^\circ\) 돌린 방향(오른쪽 face에서 왼쪽 face로)으로 orient한다. 그러면 \(\tilde d_0 = d_1^{\mathsf T}\), \(\tilde d_1 = -d_0^{\mathsf T}\)이다(<a href="#i-36-5-1">Remark 36.5.1</a>, <a href="#i-36-5-5">Proposition 36.5.5</a>).</li>
+        <li>circumcentric dual에서 dual edge는 primal edge에 수직이고, circumcenter까지의 부호 있는 거리는 \(\tfrac{\abs{e}}{2}\cot\theta\)이다(<a href="#i-36-5-6">Definition 36.5.6</a>, <a href="#i-36-5-9">Lemma 36.5.9</a>).</li>
+        <li>cotan formula: \(\abs{e^\star}/\abs{e} = \tfrac12(\cot\alpha + \cot\beta)\), non-Delaunay edge에서는 음수다. dual cell의 넓이는 \(\tfrac18\sum(\abs{e}^2\cot\theta)\)이다(<a href="#i-36-5-10">Theorem 36.5.10</a>, <a href="#i-36-5-11">Corollary 36.5.11</a>).</li>
+        <li>diagonal Hodge star는 “primal 크기로 나누고 dual 크기를 곱한다”: \(\star_0 = \diag\abs{i^\star}\), \(\star_1 = \diag\tfrac12(\cot\alpha + \cot\beta)\), \(\star_2 = \diag(1/\abs{f})\). 상수 form에서 정확하다(<a href="#i-36-5-14">Definition 36.5.14</a>, <a href="#i-36-5-16">Theorem 36.5.16</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 \(d_0, d_1\)과 \(\star_0, \star_1, \star_2\)를 이어 붙여 gradient, curl, divergence, codifferential, 그리고 cotan Laplacian \(L = -d_0^{\mathsf T}\star_1d_0\)을 만든다. 그 성질을 증명하고 평면 grid에서 Poisson 문제를 푼다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-36-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 36.5.1</span> <span class="level">★</span>
+        간격 \(\ell\)인 정삼각형 grid의 interior vertex에서 circumcentric \(\star_0\)과 barycentric \(\star_0\)(둘레 triangle 넓이의 \(\tfrac13\)씩)을 구하고 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>둘레 triangle은 6개이고 넓이는 각각 \(\tfrac{\sqrt3}{4}\ell^2\)이다. barycentric은 \(6\cdot\tfrac13\cdot\tfrac{\sqrt3}{4}\ell^2 = \tfrac{\sqrt3}{2}\ell^2\)이다. circumcentric은 <a href="#eq-36-5-5">(36.5.5)</a>에서 face마다 \(\tfrac18(\ell^2 + \ell^2)\tfrac{1}{\sqrt3}\)이므로 \(6\cdot\tfrac{\ell^2}{4\sqrt3} = \tfrac{\sqrt3}{2}\ell^2\)이다. 둘이 같다. 정삼각형에서는 무게중심과 circumcenter가 같기 때문이다(<a href="#i-36-5-8">Non-example 36.5.8</a>).</p>
+          <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-36-5-2" data-level="1">
+        <p><span class="thm-head">Exercise 36.5.2</span> <span class="level">★</span>
+        <code>dgmesh.grid_mesh</code>(정사각형을 대각선으로 나눈 grid, 간격 \(\ell\))에서 대각선 edge와 가로·세로 interior edge의 \(\star_1\)을 구하여라. \(\star_1^{-1}\)은 있는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>모든 triangle이 직각이등변삼각형이다. 대각선은 빗변이고 맞은편 각이 양쪽 모두 \(90^\circ\)이므로 \(\star_1 = \tfrac12(0 + 0) = 0\)이다. 두 circumcenter가 모두 빗변의 중점이라 dual edge가 한 점으로 줄어든 것이다(<a href="#i-36-5-7">Example 36.5.7</a>(b)). 가로·세로 interior edge의 맞은편 각은 \(45^\circ\) 둘이므로 \(\star_1 = \tfrac12(1 + 1) = 1\)이다. 대각 성분에 \(0\)이 있으므로 \(\star_1^{-1}\)은 없다. 이 mesh에서는 \(\star_1^{-1}\)이 필요한 연산(<a href="36-6-composing-operators.html">Section 36.6</a>의 2-form의 codifferential)을 쓸 수 없다.</p>
+          <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-36-5-3" data-level="2">
+        <p><span class="thm-head">Exercise 36.5.3</span> <span class="level">★★</span>
+        dual edge를 primal edge를 \(-90^\circ\) 돌린 방향으로 orient하고 dual face는 그대로 두면 \(\tilde d_0 = -d_1^{\mathsf T}\), \(\tilde d_1 = d_0^{\mathsf T}\)임을 보여라. \(\tilde d_1\tilde d_0\)은 여전히 \(0\)인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>모든 dual edge의 orientation을 뒤집는 것은 dual 1-form의 성분에 \(-1\)을 곱하는 것이다. dual edge의 boundary가 \(-1\)배가 되므로 \(\tilde d_0\)의 모든 행이 \(-1\)배가 되어 \(-d_1^{\mathsf T}\)이고, dual face의 boundary에서 각 dual edge의 부호가 바뀌므로 \(\tilde d_1\)의 모든 열이 \(-1\)배가 되어 \(d_0^{\mathsf T}\)이다(<a href="../33-combinatorial-surfaces/33-5-mesh-data-structures.html#i-33-5-8">Proposition 33.5.8</a>과 같은 \(P\)의 계산, 여기서 \(P = -I\)). \(\tilde d_1\tilde d_0 = -d_0^{\mathsf T}d_1^{\mathsf T} = -(d_1d_0)^{\mathsf T} = 0\)으로 여전히 \(0\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-36-5-4" data-level="2">
+        <p><span class="thm-head">Exercise 36.5.4</span> <span class="level">★★</span>
+        triangle \(f = [(0, 0), (2, 0), (0, 1)]\)과 밑변 \(e = [(0, 0), (2, 0)]\), 상수 1-form \(\alpha = dy\)를 보자. (a) \(R_1\alpha_e\)를 구하라. (b) \(e\)의 circumcentric 반쪽 dual edge \([m_e, c_f]\)와 barycentric 반쪽 dual edge \([m_e, b_f]\) 위에서 \(\star\alpha\)를 적분하여라. 어느 쪽이 <a href="#i-36-5-16">Theorem 36.5.16</a>과 맞는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(e\) 위에서 \(dy = 0\)이므로 \(R_1\alpha_e = 0\)이다. (b) \(\star(dy) = -dx\), 곧 \((\star\alpha)(v) = -v^1\)이다. 빗변의 중점이 circumcenter이므로 \(c_f = (1, 0.5)\)이고 \(m_e = (1, 0)\)에서 \(c_f - m_e = (0, 0.5)\), 적분은 \(0\)이다. 이것은 \(\star_1R_1\alpha_e = 0\)과 맞는다. barycentric은 \(b_f = (\tfrac23, \tfrac13)\), \(b_f - m_e = (-\tfrac13, \tfrac13)\)이므로 적분은 \(\tfrac13\)이다. 그런데 \(\star_1^{\mathrm{bary}}R_1\alpha_e\)는 \(R_1\alpha_e = 0\)의 배수라 \(0\)이다. \(e\)와 수직인 흐름 \(dy\)는 \(e\)를 따라서는 아무것도 재지 않는데, 비스듬한 barycentric dual edge는 그 흐름을 가로지르는 양을 잰다. 대각 행렬로는 이 차이를 담을 수 없다.</p>
+          <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-36-5-5" data-level="2">
+        <p><span class="thm-head">Exercise 36.5.5</span> <span class="level">★★</span>
+        <strong>Coding.</strong> 정삼각형 grid의 vertex를 조금 흔든 mesh(<a href="#fig-36-5-3">Figure 36.5.3</a>(a)와 같은 방법)에서 (a) 무작위 상수 1-form에 대해 \(\int_{e^\star}\star\alpha\)를 <code>lib/ch36.dual_edge_polylines</code>로 직접 계산해 \(\star_1R_1\alpha\)와 비교하고, (b) 상수가 아닌 \(\alpha = x^2\,dy\)에서 같은 비교를, 같은 mesh를 점 \((1, 0.5)\)를 중심으로 \(s = 0.4, 0.2, 0.1, 0.05\)배로 줄여 가며 하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-36-5-5"><code>import sys
+import numpy as np
+import dgdec as dd
+sys.path.insert(0, "chapters/36-discrete-exterior-calculus/lib")
+import ch36
+
+rng = np.random.default_rng(365)
+V0, F = ch36.equilateral_patch(2)
+V0 = V0 + 0.09 * rng.uniform(-1, 1, size=V0.shape)
+J = np.array([[0.0, -1.0], [1.0, 0.0]])
+
+def dual_flux(alpha, V, F, m=6):            # integral of star(alpha) over each dual edge, (star a)(v) = a(-J v)
+    t, w = dd.gauss_legendre_01(m)
+    out = []
+    for P in ch36.dual_edge_polylines(V, F):
+        out.append(sum(wq * alpha(p + tq * (q - p)) @ (-J @ (q - p)) for p, q in zip(P[:-1], P[1:])
+                       for tq, wq in zip(t, w)))
+    return np.array(out)
+
+a, b = rng.normal(size=2)
+const = lambda p: np.array([a, b])
+E, _ = dd.edge_list(F)
+print(np.abs(dual_flux(const, V0, F) - dd.hodge1(V0, F) * dd.derham1(const, V0, E)).max() &lt; 1e-12)
+x2dy = lambda p: np.array([0.0, p[0] ** 2])
+prev = None
+for s in (0.4, 0.2, 0.1, 0.05):
+    V = np.array([1.0, 0.5]) + s * V0               # the same patch, scaled about (1, 0.5)
+    err = np.abs(dual_flux(x2dy, V, F) - dd.hodge1(V, F) * dd.derham1(x2dy, V, E)).max()
+    print(s, f"{err:.3e}", "" if prev is None else f"{prev / err:.2f}")
+    prev = err</code></pre>
+          <pre id="out-ex-36-5-5"><code>True
+0.4 2.681e-02
+0.2 5.362e-03 5.00
+0.1 1.173e-03 4.57
+0.05 2.723e-04 4.31</code></pre>
+          <p>(a) 상수 form에서는 \(10^{-12}\) 안쪽으로 같다(<a href="#i-36-5-16">Theorem 36.5.16</a>). (b) \(x^2\,dy\)에서는 오차가 남고, mesh를 반으로 줄일 때마다 오차가 약 \(\tfrac14\)이 된다(마지막 열의 비가 \(4\)로 다가간다). 값 자체(edge 적분 \(\times\,\star_1\))는 간격 \(s\)에 비례해 줄므로, 값에 대한 상대 오차는 \(s\)에 비례한다. 곧 diagonal Hodge star는 1차 정확도의 근사다.</p>
+          <p class="verified">Verification: <code>verify/v-36-5-discrete-hodge-star.py</code>(프로젝트 루트에서 위 코드를 그대로 실행해 출력을 비교한다)</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="36-4-discrete-exterior-derivative.html">← 36.4 The Discrete Exterior Derivative</a>
+    <a rel="next" href="36-6-composing-operators.html">36.6 Composing Operators →</a>
+  </nav>
+</body>
+</html>

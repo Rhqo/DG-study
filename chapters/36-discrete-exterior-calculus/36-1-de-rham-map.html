@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>36.1 Discretization: The de Rham Map — DG Study</title>
+  <meta name="dg-id" content="36.1">
+  <meta name="dg-status" content="draft">
+  <meta name="dg-prereq" content="33.3, 35.3, 35.4">
+  <meta name="dg-refs" content="Cr §4.8.1–4.8.2; CMU-DDG L8; Hirani03; Desbrun08">
+  <meta name="dg-updated" content="2026-10-18">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">36. Discrete Exterior Calculus</a> ›
+    <span>36.1 Discretization: The de Rham Map</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>36.1 Discretization: The de Rham Map</h1>
+      <p class="meta">References: <a class="cite" href="../../references.html#Cr">[Cr §4.8.1–4.8.2]</a>,
+        <a class="cite" href="../../references.html#Hirani03">[Hirani03]</a>,
+        <a class="cite" href="../../references.html#Desbrun08">[Desbrun08]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L8">[CMU-DDG L8]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>smooth form과 mesh 위의 유한한 수 사이를 오가는 두 방향(discretization과 interpolation)을 구분하고, discrete exterior calculus의 기본 연산(\(d\), \(\star\), 그 합성)이 이 장의 어디에서 나오는지 말할 수 있다.</li>
+        <li>de Rham map을 정의하고, 0-form, 1-form, 2-form의 de Rham 상을 계산할 수 있다.</li>
+        <li>simplex의 orientation을 뒤집으면 값의 부호가 바뀜을 증명하고, discrete \(k\)-form을 \(\R^{n_k}\)의 vector로 저장하는 규약을 쓸 수 있다.</li>
+        <li>discrete form의 값이 점마다의 값이 아니라 simplex 위에서 적분한 양이라는 것을 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-15">Definition 33.1.15</a>: simplicial complex, <a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-2">Definition 33.3.2</a>: oriented simplex, <a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-12">Example 33.3.12</a>: face list가 정하는 orientation</li>
+        <li><a href="../35-exterior-calculus/35-3-integration.html#i-35-3-4">Definition 35.3.4</a>: line integral, <a href="../35-exterior-calculus/35-3-integration.html#eq-35-3-6">(35.3.6)</a>와 <a href="../35-exterior-calculus/35-3-integration.html#i-35-3-12">Proposition 35.3.12</a>: simplex 위의 적분, <a href="../35-exterior-calculus/35-3-integration.html#i-35-3-14">Remark 35.3.14</a>: 점 위의 적분</li>
+        <li><a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>: fundamental theorem for line integrals</li>
+        <li><a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-5">Proposition 34.5.5</a>: \(\R^3\)의 2-form과 vector의 대응 \((w_{yz}, w_{zx}, w_{xy})\)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Chapter 35는 \(\R^n\)의 open set 위에서 differential form, exterior derivative \(d\), 적분, Stokes's theorem, Hodge star \(\star\), codifferential \(d^*\)를 세우고 “다음 장에서는 이 모든 연산을 mesh 위로 옮긴다”는 예고로 끝났다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#sec-vector-valued">Section 35.5</a>). 그 예고를 실행하려면 먼저 답해야 할 질문이 있다. 평면의 1-form \(\alpha = P\,dx + Q\,dy\)는 점마다 수 두 개, 곧 무한히 많은 수다. vertex \(n_0\)개, edge \(n_1\)개, triangle \(n_2\)개인 mesh에는 유한한 수만 저장할 수 있다. 어떤 수를 저장해야 하는가?</p>
+      <p>첫 번째 후보는 vertex마다 coefficient를 sampling하는 것, 곧 \((P(x_i), Q(x_i))\)를 저장하는 것이다. 이 방식에는 두 가지 문제가 있다. 저장한 수가 좌표축의 선택에 따라 바뀌고, 무엇보다 \(d\alpha = (\partial_xQ - \partial_yP)\,dx\wedge dy\)를 계산하려면 편미분이 필요한데 sample에는 편미분이 없다. 차분으로 근사할 수밖에 없다. 두 번째 후보는 적분값을 저장하는 것이다. edge마다 \(\int_e\alpha\)를, triangle마다 \(\int_f\omega\)를 저장한다. 그러면 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#eq-35-4-4">(35.4.4)</a>가 \(\int_fd\alpha\)를 세 edge의 저장값의 합으로 <em>정확히</em> 준다. discrete exterior calculus(DEC)는 이 두 번째 길을 택한다 <a class="cite" href="../../references.html#Desbrun05">[Desbrun05]</a>, <a class="cite" href="../../references.html#Hirani03">[Hirani03]</a>.</p>
+      <p>이 절은 그 저장 방식, 곧 de Rham map을 정의한다. 이 장의 나머지가 무엇을 하는지는 <a href="#fig-36-1-1">Figure 36.1.1</a>이 한 장으로 보여 준다.</p>
+    </section>
+
+    <section id="sec-map">
+      <h2>The Map of This Chapter</h2>
+      <figure class="dg-figure" id="fig-36-1-1">
+        <img src="figures/fig-36-1-1-dec-map.svg" alt="세 줄로 된 도식. 위 줄(smooth)은 회색 상자 Ω⁰(U), Ω¹(U), Ω²(U)가 d 화살표로 이어진다. 가운데 줄(primal)은 파란 상자 ℝ^{n0}(vertices), ℝ^{n1}(edges), ℝ^{n2}(faces)가 d0, d1 화살표로 이어진다. 아래 줄(dual)은 주황 상자 ℝ^{n0}(dual faces), ℝ^{n1}(dual edges), ℝ^{n2}(dual vertices)이고 주황 화살표 d̃0, d̃1이 오른쪽에서 왼쪽으로 간다. 위 줄과 가운데 줄 사이에는 아래로 가는 R 화살표와 위로 가는 점선 W 화살표가 있고, 가운데 줄과 아래 줄 사이에는 주황 ⋆0, ⋆1, ⋆2 화살표가 아래로 간다. 오른쪽에 각 화살표가 정의되는 절 번호 36.1, 36.3, 36.2, 36.4, 36.5가 회색으로 적혀 있고, 맨 아래에 36.6: compose, e.g. Δ ≈ ⋆0⁻¹ d̃1 ⋆1 d0이 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 36.1.1.</span>
+        discrete exterior calculus의 지도. <em>무엇을</em>: triangle mesh 위의 세 층의 대상과 그 사이의 linear map. 위 줄은 mesh를 품는 open set \(U\) 위의 smooth form, 가운데 줄은 vertex·edge·face마다 수 하나씩인 primal discrete form, 아래 줄은 dual cell마다 수 하나씩인 dual discrete form이다. <em>읽는 법</em>: 검은 가로 화살표는 exterior derivative(\(d\), 그리고 행렬 \(d_0, d_1\)), 주황 가로 화살표는 dual 쪽의 exterior derivative \(\tilde d_0, \tilde d_1\)(오른쪽에서 왼쪽으로)이다. 파란 세로 화살표 \(R\)(아래로)은 이 절의 de Rham map, 점선 \(W\)(위로)는 Whitney map, 주황 세로 화살표 \(\star_0, \star_1, \star_2\)는 diagonal Hodge star다. 오른쪽 회색 글자는 각 화살표를 정의하는 절이다. <em>볼 것</em>: primal 줄의 \(d_0, d_1\)과 위아래를 잇는 \(R\)은 길이나 넓이를 쓰지 않는다. metric은 \(\star\)에만 들어간다. 아래 줄은 위 줄과 순서가 반대로 놓여, \(k\)-form 바로 아래에 dual \((2-k)\)-form이 온다. Laplacian 같은 연산은 화살표를 이어 붙인 경로다. <em>본문과의 연결</em>: 이 장 전체의 계획이고, 이 절은 \(R\)을 만든다(schematic).</figcaption>
+      </figure>
+      <p><a href="#fig-36-1-1">Figure 36.1.1</a>을 위에서 아래로 읽어 보자. 맨 위 줄의 \(\Omega^k(U)\)는 Chapter 35의 smooth form이다. 파란 화살표 \(R\)을 따라 내려가면 가운데 줄, 곧 mesh 위의 수의 배열이 된다. 이것이 이 절의 de Rham map이다. 점선 \(W\)는 거꾸로 수의 배열에서 form을 다시 만드는 interpolation이고 <a href="36-3-whitney-forms.html">Section 36.3</a>에서 다룬다. 가운데 줄의 \(d_0, d_1\)은 Stokes's theorem에서 나오는 행렬이다(<a href="36-2-chains-cochains.html">Section 36.2</a>, <a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>). 여기까지는 mesh의 조합 구조와 vertex의 위치만 쓴다. 길이와 넓이는 가운데 줄에서 아래 줄로 내려가는 \(\star_k\)에서 처음 등장한다(<a href="36-5-discrete-hodge-star.html">Section 36.5</a>). 마지막으로 <a href="36-6-composing-operators.html">Section 36.6</a>은 화살표를 이어 gradient, divergence, curl, Laplacian을 만든다. 그림 맨 아래의 식이 그 한 예다.</p>
+    </section>
+
+    <section id="sec-discretization">
+      <h2>Discretization and Interpolation</h2>
+      <p>smooth 대상과 discrete 대상 사이에는 두 방향의 다리가 필요하다. <strong>discretization</strong>(이산화)은 smooth 대상에서 유한한 측정값을 뽑는 일이고, <strong>interpolation</strong>(보간)은 유한한 측정값에서 그 값들을 다시 내는 smooth(또는 조각마다 smooth) 대상을 만드는 일이다. 함수(0-form)에서는 둘 다 익숙하다. vertex에서 값을 읽는 것이 discretization이고, 삼각형마다 linear하게 이어 붙이는 것이 interpolation이다(<a href="../31-meshes/31-3-cotangent-laplacian.html#sec-pl-functions">Section 31.3</a>). 두 일은 서로 역이 아니다. interpolation한 뒤 다시 측정하면 원래 값이 나오지만, 측정한 뒤 interpolation하면 원래 함수와 다른 것이 나온다. 같은 비대칭이 \(k\)-form에서도 나타난다(<a href="36-3-whitney-forms.html">Section 36.3</a>).</p>
+      <p>이 장에서 \(\mathcal{K}\)는 \(\R^N\)(예제에서는 \(N = 2\) 또는 \(3\)) 안의 simplicial complex(<a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-15">Definition 33.1.15</a>)이고, \(U\)는 \(\abs{\mathcal{K}}\)(simplex들의 합집합)를 품는 open set이다. \(\mathcal{K}\)에는 face list의 orientation(<a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-12">Example 33.3.12</a>, §2.5)을 준다.</p>
+      <ul>
+        <li>vertex \(i\)는 \(+[x_i]\)이다.</li>
+        <li>edge \(\{i, j\}\)(\(i \lt j\))는 \([i, j]\), 곧 \(i \to j\) 방향이다. edge의 번호는 <code>dgdec.edge_list</code>의 사전식 순서다.</li>
+        <li>triangle은 face list \(F\)의 행의 순서 \([i, j, k]\)로 orient하고, 행 번호로 번호를 매긴다. 평면 mesh는 반시계 방향, 닫힌 mesh는 바깥쪽이다.</li>
+      </ul>
+      <p>\(n_k\)는 \(k\)-simplex의 수다. curved surface mesh도 \(\R^3\)의 complex이므로, 여기서 다루는 form은 둘러싼 공간 \(\R^3\)의 open set 위의 form이다. surface 자체에만 정의된 form은 Chapter 38에서 다룬다.</p>
+    </section>
+
+    <section id="sec-de-rham">
+      <h2>The de Rham Map</h2>
+      <div class="thm definition" id="i-36-1-1">
+        <p><span class="thm-head">Definition 36.1.1</span> <span class="thm-name">(de Rham map)</span>.
+        \(\mathcal{K}\)가 위의 oriented simplicial complex이고 \(0 \le k \le \dim\mathcal{K}\)이며 \(\alpha\)가 \(U\) 위의 continuous \(k\)-form이라 하자. oriented \(k\)-simplex \(\sigma\)마다</p>
+        <div class="equation" id="eq-36-1-1">
+        \[ \hat\alpha_\sigma := \int_\sigma\alpha \tag{36.1.1} \]
+        </div>
+        <p>로 정한 vector \(\hat\alpha \in \R^{n_k}\)를 \(\alpha\)의 de Rham 상(image)이라 하고, linear map \(R_k\colon \alpha \mapsto \hat\alpha\)를 <dfn>de Rham map</dfn>(드람 사상)이라 한다. \(k\)가 분명하면 \(R\)로 쓴다. 적분은 \(k \ge 1\)이면 vertex 순서의 affine parametrization <a href="../35-exterior-calculus/35-3-integration.html#eq-35-3-6">(35.3.6)</a>으로, \(k = 0\)이면 <a href="../35-exterior-calculus/35-3-integration.html#i-35-3-14">Remark 35.3.14</a>로 정한다.</p>
+      </div>
+      <p>세 degree를 풀어 쓰면 다음과 같다(\(\Delta^2\)는 standard 2-simplex).</p>
+      <div class="equation" id="eq-36-1-2">
+      \[ \begin{aligned} \hat\alpha_i &= \alpha(x_i), \\ \hat\alpha_{[i,j]} &= \int_0^1\alpha_{\gamma(t)}(x_j - x_i)\,dt, \\ \hat\alpha_{[i,j,k]} &= \int_{\Delta^2}\alpha_{p(s,t)}(x_j - x_i,\ x_k - x_i)\,ds\,dt. \end{aligned} \tag{36.1.2} \]
+      </div>
+      <p>여기서 \(\gamma(t) = x_i + t(x_j - x_i)\), \(p(s, t) = x_i + s(x_j - x_i) + t(x_k - x_i)\)이다. 0-form에서는 point sample과 적분값이 같다. 1-form은 edge 방향의 vector를 넣은 값을 edge를 따라 더한 것, 곧 edge를 따라 흐르는 총량이다. 2-form은 triangle의 두 edge vector를 넣은 값을 triangle 위에서 더한 것이다. 계수가 다항식이면 Gauss quadrature로 오차 없이 계산할 수 있고, <code>dgdec.derham0</code>, <code>derham1</code>, <code>derham2</code>가 그렇게 한다.</p>
+
+      <div class="thm example" id="i-36-1-2">
+        <p><span class="thm-head">Example 36.1.2</span> <span class="thm-name">(a planar grid)</span>.
+        unit square를 vertex \(3\times 3\)개, 간격 \(\tfrac12\)로 나누고 대각선을 번갈아 그은 mesh(<code>dgmesh.grid_mesh</code>)를 쓰자. vertex \(3a + b\)는 \((a/2, b/2)\)에 있고, triangle 8개는 모두 반시계 방향이며, edge 16개는 \([0,1], [0,3], [0,4], [1,2], \dots, [7,8]\)의 순서다.</p>
+        <ul>
+          <li>(a) 0-form \(f = x^2 - y^2\)의 de Rham 상은 vertex 값의 vector \(\hat f\) \(= (0, -0.25, -1, 0.25, 0,\) \(-0.75, 1, 0.75, 0)\)이다.</li>
+          <li>(b) \(df = 2x\,dx - 2y\,dy\)의 de Rham 상은 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>에 의해 \(\widehat{df}_{[i,j]} = f(x_j) - f(x_i) = \hat f_j - \hat f_i\)이다. 예를 들어 \(\widehat{df}_{[0,1]} = -0.25,\) \(\widehat{df}_{[2,4]} = 0 - (-1) = 1,\) \(\widehat{df}_{[4,8]} = 0 - 0 = 0\)이다.</li>
+          <li>(c) 1-form \(x\,dy\): edge \([i, j]\) 위에서 integrand \(x(t)\,(y_j - y_i)\)는 \(t\)의 linear 함수이므로 적분은 중점 값과 같다: \(\widehat{x\,dy}_{[i,j]} = \tfrac{x_i + x_j}{2}(y_j - y_i)\). 가로 edge에서는 \(0\)이고, 세로 edge \([7, 8]\)(\(x = 1\))에서는 \(0.5\), 대각선 \([4, 8]\)에서는 \(0.75\cdot 0.5 = 0.375\), 대각선 \([2, 4]\)(\((0, 1) \to (0.5, 0.5)\))에서는 \(0.25\cdot(-0.5) = -0.125\)이다.</li>
+          <li>(d) 2-form \(x\,dx\wedge dy\): triangle \([4, 7, 8]\)은 넓이 \(\tfrac18\)인 반시계 방향 triangle이고 integrand \(x\)가 linear이므로 적분은 넓이 \(\times\) 무게중심에서의 값 \(= \tfrac18\cdot\tfrac{0.5 + 1 + 1}{3} = \tfrac{5}{48} \approx 0.1042\)이다. 같은 이유로 \(dx\wedge dy\)의 de Rham 상은 모든 face에서 \(\tfrac18\)이다.</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-36-1-2">
+        <img src="figures/fig-36-1-2-grid-values.svg" alt="두 패널. 3×3 vertex의 정사각형 grid(대각선이 번갈아 있음)를 두 번 그렸다. (a) vertex마다 색 점과 굵은 숫자(f = x² − y²의 값: 아래 줄 0, 0.25, 1, 가운데 줄 −0.25, 0, 0.75, 위 줄 −1, −0.75, 0)가 있고, 모든 edge에 번호가 작은 vertex에서 큰 vertex로 가는 회색 화살표와 작은 숫자(끝 값 빼기 시작 값)가 있다. (b) 같은 grid에서 edge 화살표를 x dy의 적분값으로 색칠했다. 가로 edge는 회색 0, 세로 edge는 파랑(가운데 0.25, 오른쪽 0.5), 오른쪽 위와 왼쪽 아래 대각선은 파랑(0.375, 0.125), 왼쪽 위와 오른쪽 아래 대각선은 주홍(−0.125, −0.375)이다.">
+        <figcaption><span class="fig-head">Figure 36.1.2.</span>
+        <a href="#i-36-1-2">Example 36.1.2</a>의 grid 위의 de Rham 상. <em>무엇을</em>: unit square, vertex \(3\times 3\)개, 간격 \(\tfrac12\), 반시계 방향 triangle 8개. (a) 0-form \(f = x^2 - y^2\)와 그 differential \(df\), (b) 1-form \(x\,dy\). <em>읽는 법</em>: (a)의 굵은 숫자와 점의 색(파랑 음수, 빨강 양수)은 vertex 값 \(\hat f_i\), edge 옆의 작은 숫자는 \(\widehat{df}_{[i,j]}\)이다. 회색 화살표는 edge의 orientation \(i \to j\)(\(i \lt j\))다. (b)의 숫자는 그 화살표 방향으로 잰 \(\int x\,dy\)이고, 화살표의 색은 부호(파랑 양수, 주홍 음수, 회색 \(0\))다. <em>볼 것</em>: (a)의 모든 edge에서 작은 숫자는 화살표 끝의 굵은 숫자 빼기 시작의 굵은 숫자다. (b)의 가로 edge는 모두 \(0\)이고(\(dy = 0\)), 오른쪽으로 갈수록 값이 커진다(\(x\)가 커진다). 오른쪽 아래 대각선 \([4, 6]\)은 아래로 가므로 \(-0.375\)이다. <em>본문과의 연결</em>: <a href="#i-36-1-2">Example 36.1.2</a>(a)–(c)와 <a href="#eq-36-1-2">(36.1.2)</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-36-1-2">Figure 36.1.2</a>의 (a)에서 가운데 vertex 4(값 \(0\))와 왼쪽 위 vertex 2(값 \(-1\))를 잇는 대각선을 보자. 화살표는 번호가 작은 2에서 4로 가고, 그 옆의 숫자 \(1\)은 \(0 - (-1)\)이다. \(df\)의 적분이 끝점의 차이라는 사실(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>)이 모든 edge에서 이렇게 보인다. (b)에서는 같은 grid에 \(x\,dy\)를 적분했다. 가로 edge가 모두 회색 \(0\)인 것은 그 위에서 \(y\)가 변하지 않기 때문이고, 세로 edge의 값이 가운데 \(0.25\), 오른쪽 \(0.5\)로 커지는 것은 \(x\)가 커지기 때문이다. 대각선은 위로 가면 파랑, 아래로 가면 주홍이다. 화살표를 거꾸로 돌리면 모든 숫자의 부호가 바뀐다. 이것이 다음 명제다.</p>
+
+      <div class="thm example" id="i-36-1-3">
+        <p><span class="thm-head">Example 36.1.3</span> <span class="thm-name">(forms in space)</span>.
+        (a) <code>dgmesh.icosphere(1)</code>(vertex 42개, unit sphere 위)에서 높이 함수 \(z\)의 de Rham 상 \(\hat z\)는 vertex 높이의 vector이고, \(\widehat{dz}_{[i,j]} = z_j - z_i\)이다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>). (b) <a href="../35-exterior-calculus/35-3-integration.html#i-35-3-13">Example 35.3.13</a>(b)의 triangle \(\sigma = [x_0, x_1, x_2]\), \(x_0 = (1, 0, 0)\), \(x_1 = (0, 2, 0)\), \(x_2 = (0, 0, 1)\)에서 2-form \(\omega = z\,dx\wedge dy\)를 보자(<a href="../34-exterior-algebra/34-5-coordinates.html#i-34-5-5">Proposition 34.5.5</a>의 vector로는 \(w = (0, 0, z)\)). <a href="#eq-36-1-2">(36.1.2)</a>의 parametrization은 \((1 - s - t, 2s, t)\)이므로 \(z = t\)이고, \(dx\wedge dy(x_1 - x_0, x_2 - x_0)\) \(= (-1)(0) - (2)(-1)\) \(= 2\)이다. 따라서 \(\hat\omega_\sigma = \int_{\Delta^2}2t\,ds\,dt = 2\cdot\tfrac16 = \tfrac13\)이다. 같은 triangle에서 상수 form \(dx\wedge dy\)는 \(\tfrac12\cdot 2 = 1\)(그림자의 넓이)이었다.</p>
+        <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code></p>
+      </div>
+
+      <div class="thm proposition" id="i-36-1-4">
+        <p><span class="thm-head">Proposition 36.1.4</span> <span class="thm-name">(linearity and orientation)</span>.
+        <a href="#i-36-1-1">Definition 36.1.1</a>의 상황에서</p>
+        <ul>
+          <li>(a) \(R_k\)는 linear이다: \(\widehat{a\alpha + b\beta} = a\hat\alpha + b\hat\beta\).</li>
+          <li>(b) \(k \ge 1\)이고 \(\sigma = [v_0, \dots, v_k]\)의 vertex를 permutation \(\pi\)로 바꾸어 늘어놓으면 적분은 \(\sgn\pi\)배가 된다. 특히 orientation을 뒤집은 \(-\sigma\)에서 \(\int_{-\sigma}\alpha = -\hat\alpha_\sigma\)이다.</li>
+          <li>(c) \(k\)-simplex들의 orientation 선택을 바꾸는 것을 대각성분이 \(\pm 1\)인 대각행렬 \(P_k\)(뒤집은 simplex 자리가 \(-1\))로 나타내면, 새 선택에 대한 de Rham map은 \(P_kR_k\)이다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) 적분 <a href="#eq-36-1-2">(36.1.2)</a>의 integrand는 \(\alpha\)에 대해 linear이고 적분도 linear이다. (b) <a href="../35-exterior-calculus/35-3-integration.html#i-35-3-12">Proposition 35.3.12</a>(c)이다. orientation을 뒤집는 것은 odd permutation 하나(예: 첫 두 vertex의 맞바꿈)이므로 \(\sgn = -1\)이다. (c) (b)를 성분마다 쓴 것이다. 뒤집은 \(\sigma\)의 성분만 \(-1\)배가 된다.</p>
+      </div>
+      <p>이 명제가 말하는 것. mesh는 simplex마다 orientation 하나에 대한 값만 저장하면 된다. 반대 orientation의 값은 부호를 바꿔 얻는다. 0-simplex에는 orientation \(+\)만 준다(<a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-11">Definition 33.3.11</a>). (c)의 \(P_k\)는 <a href="../33-combinatorial-surfaces/33-5-mesh-data-structures.html#i-33-5-8">Proposition 33.5.8</a>에서 signed incidence matrix를 바꾼 것과 같은 행렬이고, 그래서 <a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>의 정리들은 orientation 선택에 무관하게 성립한다.</p>
+
+      <div class="thm nonexample" id="i-36-1-5">
+        <p><span class="thm-head">Non-example 36.1.5</span> <span class="thm-name">(sampling instead of integrating)</span>.
+        (a) edge의 중점 \(m_{ij}\)에서 잰 값 \(S(\alpha)_{[i,j]} := \alpha_{m_{ij}}(x_j - x_i)\)는 linear이고 orientation을 뒤집으면 부호가 바뀌지만 de Rham map이 아니다. coefficient가 affine이면 적분과 같지만(<a href="#i-36-1-2">Example 36.1.2</a>(c)) 일반적으로 다르다. \(f = x^3\)과 edge \([(0, 0), (1, 0)]\)에서 \(S(df) = 3\cdot(\tfrac12)^2 = \tfrac34\)인데 \(\int df = f(1) - f(0) = 1\)이다. 그래서 \(S\)로 저장하면 “\(df\)의 edge 값 = 끝점 값의 차이”가 깨지고, <a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>의 정확한 \(d\)를 잃는다. (b) vertex마다 coefficient의 쌍 \((P(x_i), Q(x_i))\)를 저장하는 것은 oriented simplex마다 수 하나가 아니라 vertex마다 수 둘이다. 좌표축을 \(90^\circ\) 돌리면 같은 1-form인데 저장한 수가 \((Q, -P)\)로 바뀐다. de Rham 상은 vertex의 위치와 form만으로 정해지므로 좌표를 돌려도 같다.</p>
+        <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-discrete-forms">
+      <h2>Discrete Differential Forms</h2>
+      <p>de Rham map은 smooth form에서 수의 배열을 만든다. 그러나 mesh 위의 계산은 대개 smooth form 없이 수의 배열에서 시작한다. vertex의 측정값, 다른 연산의 결과, 임의의 입력 등이다. 그래서 수의 배열 자체를 하나의 대상으로 정의한다.</p>
+      <div class="thm definition" id="i-36-1-6">
+        <p><span class="thm-head">Definition 36.1.6</span> <span class="thm-name">(discrete differential form)</span>.
+        oriented simplicial complex \(\mathcal{K}\)의 oriented \(k\)-simplex \(\sigma\)마다 실수 \(\alpha_\sigma\)를 주되 \(\alpha_{-\sigma} = -\alpha_\sigma\)를 만족하게 한 것을 \(\mathcal{K}\) 위의 <dfn>discrete differential form</dfn>(이산 미분형식), 짧게 discrete \(k\)-form이라 한다(\(k = 0\)이면 vertex마다 실수 하나이고 부호 조건은 없다). 각 \(k\)-simplex에서 face list가 정한 orientation(위의 규약)의 값만 모으면 vector \(\alpha \in \R^{n_k}\)를 얻고, 거꾸로 모든 vector가 discrete \(k\)-form을 하나 정한다.</p>
+      </div>
+      <p>저장 규약을 정리하면 다음과 같다(§2.5, 정본은 <code>tools/dgdec.py</code>).</p>
+      <ul>
+        <li>discrete 0-form: \(\alpha \in \R^{n_0}\), 성분 \(i\)가 vertex \(i\)의 값이다.</li>
+        <li>discrete 1-form: \(\alpha \in \R^{n_1}\), 성분 \(e\)가 <code>edge_list</code>의 \(e\)번째 행 \([i, j]\)(\(i \lt j\))의 값이다. \([j, i]\)의 값은 \(-\alpha_e\)이다.</li>
+        <li>discrete 2-form: \(\alpha \in \R^{n_2}\), 성분 \(f\)가 \(F\)의 \(f\)번째 행 \([i, j, k]\)의 값이다. vertex를 odd permutation으로 바꾼 순서의 값은 \(-\alpha_f\)이다.</li>
+      </ul>
+      <p>기호의 약속. 임의의 discrete form은 \(\alpha \in \R^{n_k}\)처럼 모자 없이 쓰고, smooth form \(\alpha\)의 de Rham 상만 \(\hat\alpha = R_k(\alpha)\)로 쓴다. 따라서 “\(\hat\alpha\)”라고 쓰면 그 수들이 어떤 smooth form의 적분값이라는 뜻이 함께 들어 있다.</p>
+
+      <div class="thm example" id="i-36-1-7">
+        <p><span class="thm-head">Example 36.1.7</span> <span class="thm-name">(discrete forms that are not given by a formula)</span>.
+        (a) edge마다 아무 수나 적은 것, 예를 들어 <a href="#i-36-1-2">Example 36.1.2</a>의 grid의 edge 16개에 \(1, 2, \dots, 16\)을 적은 것도 discrete 1-form이다. (b) mesh의 vertex 위치 \(x_i \in \R^3\)는 성분마다 discrete 0-form이고, 셋을 묶어 \(\R^3\)-valued discrete 0-form이라 부른다. (c) edge vector \(x_j - x_i\)(edge \([i, j]\))는 \(\R^3\)-valued discrete 1-form이다. 이것은 vector-valued 1-form \(d\mathbf{x}\)의 de Rham 상이기도 하다: 성분마다 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>을 쓰면 \(\int_{[x_i, x_j]}d\mathbf{x} = x_j - x_i\)이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#sec-vector-valued">Section 35.5</a>의 Smooth vs. Discrete 상자). 곡선에서는 이것이 Chapter 37의 edge vector다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-1">Proposition 37.4.1</a>).</p>
+      </div>
+      <div class="thm nonexample" id="i-36-1-8">
+        <p><span class="thm-head">Non-example 36.1.8</span> <span class="thm-name">(edge length)</span>.
+        oriented edge마다 길이를 주는 함수 \(\ell([i, j]) := \abs{x_j - x_i}\)는 discrete 1-form이 아니다. \(\ell([j, i]) = \ell([i, j]) \gt 0\)이라 \(\alpha_{-\sigma} = -\alpha_\sigma\)를 어긴다. 길이는 방향이 없는 양이고, 어떤 1-form의 적분도 아니다(<a href="../35-exterior-calculus/35-3-integration.html#i-35-3-7">Non-example 35.3.7</a>). 길이와 넓이는 discrete form의 <em>값</em>이 아니라, <a href="36-5-discrete-hodge-star.html">Section 36.5</a>의 Hodge star 안에 <em>계수</em>로 들어간다.</p>
+      </div>
+    </section>
+
+    <section id="sec-integrated">
+      <h2>Integrated Quantities</h2>
+      <p>discrete form의 값은 점에서의 값이 아니라 simplex 위의 총량이다. 그래서 mesh를 세분하면 값 자체가 작아진다. 간격 \(h\)인 grid에서 edge의 길이는 \(h\) 정도, triangle의 넓이는 \(h^2\) 정도이므로, smooth form을 고정하고 \(h\)를 줄이면 1-form의 값은 \(h\)에, 2-form의 값은 \(h^2\)에 비례해 줄어든다. 0-form만 \(h\)와 무관하다.</p>
+      <figure class="dg-figure" id="fig-36-1-3">
+        <img src="figures/fig-36-1-3-integrated-quantities.svg" alt="두 패널. (a) Example 36.1.2의 grid의 triangle 8개를 주황 색조로 칠하고 각 triangle 안에 x dx∧dy의 적분값을 적었다. 왼쪽 열 0.0208, 0.0417, 가운데 0.0833, 오른쪽 0.1042로 오른쪽으로 갈수록 진하다. (b) 로그–로그 그래프. 가로축은 spacing h(약 0.016에서 0.5), 세로축은 largest value. 검은 선(k = 0, x² − y²)은 1에서 수평이고, 파란 선(k = 1, x dy)은 기울기 1, 주황 선(k = 2, x dx∧dy)은 기울기 2로 h가 작아질수록 내려간다. 회색 점선이 기울기 0, 1, 2의 기준선이다.">
+        <figcaption><span class="fig-head">Figure 36.1.3.</span>
+        discrete form은 적분한 양이다. <em>무엇을</em>: (a) <a href="#i-36-1-2">Example 36.1.2</a>의 grid 위의 2-form \(x\,dx\wedge dy\)의 de Rham 상, (b) unit square를 \(n\times n\)칸(\(h = 1/n\), \(n = 2, 4, \dots, 64\))으로 나눈 grid에서 0-form \(x^2 - y^2\), 1-form \(x\,dy\), 2-form \(x\,dx\wedge dy\)의 de Rham 상의 가장 큰 절댓값. <em>읽는 법</em>: (a)의 숫자와 색은 그 triangle 위의 적분값이다. (b)는 log–log 축이고, 검정·파랑·주황이 \(k = 0, 1, 2\), 회색 점선은 기울기 \(0, 1, 2\)의 기준선이다. <em>볼 것</em>: (a)에서 넓이가 모두 \(\tfrac18\)인데 값이 오른쪽으로 갈수록 커진다. 값 \(\div\) 넓이가 무게중심의 \(x\)이기 때문이다. (b)에서 세 선의 기울기는 \(0\), \(1\), \(1.95\)이다(마지막은 가장 오른쪽 face의 값이 \(\tfrac{h^2}{2}(1 - \tfrac h3)\)이라 \(2\)보다 조금 작다). <em>본문과의 연결</em>: 이 절의 “integrated quantity” 관점과 <a href="#i-36-1-2">Example 36.1.2</a>(d).</figcaption>
+      </figure>
+      <p><a href="#fig-36-1-3">Figure 36.1.3</a>의 (a)를 보자. 8개의 triangle은 넓이가 모두 \(\tfrac18\)인데 적힌 값은 \(0.0208\)에서 \(0.1042\)까지 다섯 배 차이가 난다. 넓이로 나누면 \(\tfrac16, \tfrac13, \tfrac23, \tfrac56\), 곧 각 triangle의 무게중심의 \(x\)좌표가 된다. 값을 넓이로 나눠야 “점에서의 밀도”가 나온다는 뜻이다. (b)는 같은 일을 세분하면서 본다. 검은 선은 \(h\)를 바꿔도 \(1\)에 머물고, 파란 선은 \(h\)를 반으로 줄일 때마다 반으로, 주황 선은 \(\tfrac14\)로 줄어든다. 그래서 서로 다른 degree의 discrete form을 더하거나, 그 값을 그대로 함수값처럼 비교하는 것은 단위가 맞지 않는다. 적분값을 밀도로 바꾸고 다른 cell의 크기를 곱하는 일, 곧 길이와 넓이를 쓰는 변환이 <a href="36-5-discrete-hodge-star.html">Section 36.5</a>의 Hodge star다.</p>
+
+      <div class="thm example" id="i-36-1-9">
+        <p><span class="thm-head">Example 36.1.9</span> <span class="thm-name">(what the de Rham map forgets)</span>.
+        unit square를 간격 \(h = 1/n\)인 grid로 나누고 \(g(x, y) = \sin(\pi x/h)\sin(\pi y/h)\)라 하자. vertex는 \((ah, bh)\)(정수 \(a, b\))이므로 모든 vertex에서 \(g = 0\), 곧 \(\hat g = 0\)이다. 또 모든 edge에서 \(\widehat{dg}_{[i,j]} = g(x_j) - g(x_i) = 0\)이다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>). 그러나 \(g \neq 0\)이고 \(dg \neq 0\)이다. 따라서 \(R_0\)과 \(R_1\)은 injective가 아니다. 일반적으로 \(\R^{n_k}\)는 finite-dimensional이고 continuous \(k\)-form의 공간은 그렇지 않으므로 de Rham map은 결코 injective가 아니다. 이 예는 그 kernel의 원소를 구체적으로 보여 준다. mesh보다 짧은 파장의 진동은 측정에 잡히지 않는다.</p>
+        <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code></p>
+      </div>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: the de Rham map of a 1-form</p>
+        <p><a href="#eq-36-1-2">(36.1.2)</a>의 둘째 식을 그대로 옮겼다. \([0, 1]\) 위의 \(m\)점 Gauss–Legendre rule은 차수 \(2m - 1\) 이하의 다항식을 정확히 적분하므로, coefficient가 다항식인 form은 오차 없이 적분된다. 결과를 공용 구현 <code>dgdec.derham1</code>과 비교하고, edge를 모두 뒤집으면 부호만 바뀜(<a href="#i-36-1-4">Proposition 36.1.4</a>(b))을 확인한다.</p>
+        <pre id="code-36-1-1"><code>import numpy as np
+import dgmesh as dm
+import dgdec as dd
+
+def derham1(alpha, V, E, m=6):
+    """Line integrals of the 1-form alpha over the oriented edges E[n] = [i, j], as in (36.1.2)."""
+    t, w = np.polynomial.legendre.leggauss(m)
+    t, w = (t + 1) / 2, w / 2                       # Gauss-Legendre rule on [0, 1]
+    out = np.zeros(len(E))
+    for n, (i, j) in enumerate(E):
+        e = V[j] - V[i]                             # velocity of t -> x_i + t (x_j - x_i)
+        out[n] = sum(wq * (alpha(V[i] + tq * e) @ e) for tq, wq in zip(t, w))
+    return out
+
+xs = np.linspace(0.0, 1.0, 3)
+V, F = dm.grid_mesh(xs, xs)
+V = V[:, :2]                                        # the grid of Example 36.1.2
+E, index = dd.edge_list(F)                          # rows [i, j], i &lt; j, lexicographic
+xdy = lambda p: np.array([0.0, p[0]])               # x dy as the covector field (0, x)
+a = derham1(xdy, V, E)
+print(E[[2, 5, 12]].tolist(), a[[2, 5, 12]])        # the edges [0,4], [2,4], [4,8]
+print(np.allclose(a, dd.derham1(xdy, V, E)))        # same as the shared implementation
+print(np.allclose(derham1(xdy, V, E[:, ::-1]), -a)) # reversed edges: opposite signs</code></pre>
+        <pre id="out-36-1-1"><code>[[0, 4], [2, 4], [4, 8]] [ 0.125 -0.125  0.375]
+True
+True</code></pre>
+        <p>edge \([0, 4]\)(\((0,0) \to (0.5, 0.5)\))의 값 \(0.125 = 0.25\cdot 0.5\)를 포함해 <a href="#i-36-1-2">Example 36.1.2</a>(c)의 값이 나온다. 2-form의 de Rham map(<code>dgdec.derham2</code>)은 같은 생각으로 triangle 위의 quadrature를 쓴다.</p>
+        <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: hats, orientations, and the letters R and W</p>
+        <ul>
+          <li>Crane의 노트와 슬라이드는 discrete form 자체를 \(\hat\alpha\)로 쓰고, discrete 연산도 \(\hat d\), \(\hat\star\)처럼 모자를 씌운다 <a class="cite" href="../../references.html#Cr">[Cr §4.8.1]</a>. 이 study set은 모자를 smooth form의 de Rham 상에만 쓰고(§2.5), discrete 연산은 행렬 이름 \(d_0, d_1\)(<a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>)과 \(\star_0, \star_1, \star_2\)(<a href="36-5-discrete-hodge-star.html">Section 36.5</a>)로 쓴다.</li>
+          <li>Crane은 simplex마다 orientation을 하나 골라 일관되게 쓰라고만 한다. 이 study set은 그 선택을 face list에서 정한다: edge는 \(i \lt j\)이면 \(i \to j\), triangle은 행의 순서(§2.5, <code>tools/dgdec.py</code>). 다른 선택으로 옮기려면 <a href="#i-36-1-4">Proposition 36.1.4</a>(c)의 \(P_k\)를 곱한다.</li>
+          <li>Crane은 edge 적분을 unit tangent와 호의 길이로 쓰고, 이 study set은 vertex 순서의 affine parametrization <a href="../35-exterior-calculus/35-3-integration.html#eq-35-3-6">(35.3.6)</a>으로 쓴다. parametrization에 무관하므로(<a href="../35-exterior-calculus/35-3-integration.html#i-35-3-9">Proposition 35.3.9</a>) 같은 값이다.</li>
+          <li>이 장에서 \(R\)은 de Rham map, \(W\)는 Whitney map(<a href="36-3-whitney-forms.html">Section 36.3</a>)이다. 반지름 \(R\)이나 Weingarten map \(W = -d\mathbf{N}\)(§6.3)은 이 장에 나오지 않는다. torus mesh는 반지름을 숫자로 써서 \(T_{2, 0.8}\)로 부른다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: what a mesh can store</p>
+        <p><strong>Smooth.</strong> \(\R^2\)의 1-form은 coefficient 함수 두 개다. 점마다 값이 있고, 그 값으로 어떤 vector든 잴 수 있으며, 곡선이 어떻게 생겼든 적분할 수 있다. <strong>Discrete.</strong> de Rham 상은 edge마다 수 하나, 모두 \(n_1\)개다. edge 방향의 총량만 기록한다.</p>
+        <ul>
+          <li>정확히 보존하는 것: 각 simplex 위의 적분값, 그리고 그 합으로 얻는 simplex들의 합집합 위의 적분값(<a href="36-2-chains-cochains.html">Section 36.2</a>의 chain), orientation의 부호, linearity. 좌표의 선택에도 무관하다(<a href="#i-36-1-5">Non-example 36.1.5</a>(b)). de Rham map은 길이나 inner product를 전혀 쓰지 않는다.</li>
+          <li>잃는 것: simplex 안에서 form이 어떻게 변하는지, edge와 수직인 방향의 성분, 그리고 mesh보다 짧은 파장의 정보(<a href="#i-36-1-9">Example 36.1.9</a>). \(R\)은 injective가 아니므로 저장한 수에서 원래 form을 복원할 수 없다. <a href="36-3-whitney-forms.html">Section 36.3</a>의 interpolation은 원래 form이 아니라 같은 수를 내는 form 하나를 만든다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back</p>
+        <p>Tour의 <a href="../00-tour/0-7-forms.html#sec-de-rham">Section 0.7</a>은 In computer vision 상자에서 “0-form은 vertex마다, 1-form은 방향을 준 edge마다(그 edge를 따른 적분값), 2-form은 face마다 수 하나”라고 소개했다. 그 문장이 <a href="#i-36-1-1">Definition 36.1.1</a>과 <a href="#i-36-1-6">Definition 36.1.6</a>이 되었다. 새로 정한 것은 orientation 규약과 그 부호 법칙(<a href="#i-36-1-4">Proposition 36.1.4</a>), 그리고 sampling이 아니라 적분이어야 하는 이유(<a href="#i-36-1-5">Non-example 36.1.5</a>)다. Chapter 31이 vertex 값만 다룬 것(<a href="../31-meshes/31-3-cotangent-laplacian.html#sec-pl-functions">Section 31.3</a>)은 이 절의 \(k = 0\)인 경우다.</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>manifold 위의 적분과 orientation: <a href="../18-integration-stokes/index.html#toc-18-3">Section 18.3</a>.</li>
+          <li>DEC의 체계적인 정리와 de Rham map: <a class="cite" href="../../references.html#Hirani03">[Hirani03]</a>, <a class="cite" href="../../references.html#Desbrun08">[Desbrun08]</a>.</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L8">[CMU-DDG L8]</a> slides 3–23, <a class="cite" href="../../references.html#Cr">[Cr §4.8.1–4.8.2]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>smooth와 discrete 사이에는 discretization(측정)과 interpolation(복원)의 두 방향이 있고, 둘은 서로 역이 아니다. 이 장은 \(R\), \(W\), \(d_k\), \(\star_k\)와 그 합성을 차례로 만든다(<a href="#fig-36-1-1">Figure 36.1.1</a>).</li>
+        <li>de Rham map은 smooth \(k\)-form을 oriented \(k\)-simplex마다의 적분값 \(\hat\alpha_\sigma = \int_\sigma\alpha\)의 배열로 보낸다. 0-form은 vertex 값, 1-form은 edge를 따른 총량, 2-form은 triangle 위의 총량이다(<a href="#i-36-1-1">Definition 36.1.1</a>, <a href="#eq-36-1-2">(36.1.2)</a>).</li>
+        <li>\(R\)은 linear이고, orientation을 뒤집으면 값의 부호가 바뀐다(<a href="#i-36-1-4">Proposition 36.1.4</a>). 그래서 simplex마다 한 orientation의 값만 저장한다.</li>
+        <li>discrete \(k\)-form은 oriented \(k\)-simplex마다의 실수이고 \(\R^{n_k}\)의 vector로 저장한다. edge는 <code>edge_list</code> 순서, face는 \(F\)의 행 순서다(<a href="#i-36-1-6">Definition 36.1.6</a>).</li>
+        <li>값은 적분한 양이라 \(h^k\)로 줄어들고, \(R\)은 injective가 아니다(<a href="#fig-36-1-3">Figure 36.1.3</a>, <a href="#i-36-1-9">Example 36.1.9</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 simplex 자체를 더하고 빼는 대상인 chain과, discrete form을 chain 위의 linear functional로 보는 cochain을 세운다. boundary operator \(\partial\)를 정의하고 “boundary의 boundary는 \(0\)”을 증명한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-36-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 36.1.1</span> <span class="level">★</span>
+        triangle \([x_0, x_1, x_2]\), \(x_0 = (0, 0)\), \(x_1 = (1, 0)\), \(x_2 = (0, 1)\)의 세 edge \([x_0, x_1]\), \([x_1, x_2]\), \([x_2, x_0]\)에서 1-form \(y\,dx\)를 적분하여라. 세 값의 합과 \(\int_{[x_0, x_1, x_2]}d(y\,dx)\)를 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\([x_0, x_1]\)에서는 \(y = 0\)이므로 \(0\)이다. \([x_1, x_2]\)는 \((1 - t, t)\)이므로 \(y = t\), \(dx(\gamma') = -1\)이고 \(\int_0^1 -t\,dt = -\tfrac12\)이다. \([x_2, x_0]\)는 \((0, 1 - t)\)이므로 \(dx(\gamma') = 0\)이고 \(0\)이다. 합은 \(-\tfrac12\)이다. 한편 \(d(y\,dx) = dy\wedge dx = -dx\wedge dy\)이고 반시계 방향 triangle에서 \(\int dx\wedge dy = \tfrac12\)이므로 \(\int d(y\,dx) = -\tfrac12\)이다. 두 값이 같은 것은 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#eq-35-4-4">(35.4.4)</a>이고, <a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>는 이 관계를 discrete exterior derivative의 정의로 쓴다.</p>
+          <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-36-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 36.1.2</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. (a) \(R_0(f)\)는 \(f\)를 vertex에서 sampling한 것이다. (b) \(\hat\alpha = 0\)이면 \(\alpha = 0\)이다. (c) 모든 edge의 orientation을 뒤집으면 \(R_1\)은 \(-R_1\)이 되고 \(R_0\), \(R_2\)는 그대로다. (d) \(\R^2\)의 시계 방향 triangle에서 \(dx\wedge dy\)의 de Rham 상은 넓이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. 점 위의 적분은 함숫값이다(<a href="../35-exterior-calculus/35-3-integration.html#i-35-3-14">Remark 35.3.14</a>). (b) 거짓. <a href="#i-36-1-9">Example 36.1.9</a>의 \(g\)는 \(\hat g = 0\)이지만 \(g \neq 0\)이다. (c) 참. <a href="#i-36-1-4">Proposition 36.1.4</a>(c)에서 \(P_1 = -I\), \(P_0 = P_2 = I\)이다. (d) 거짓. 시계 방향 triangle \([x_0, x_1, x_2]\)에서는 \(\det(x_1 - x_0, x_2 - x_0) \lt 0\)이므로 <a href="../35-exterior-calculus/35-3-integration.html#eq-35-3-7">(35.3.7)</a>에서 \(-\)넓이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-36-1-3" data-level="2">
+        <p><span class="thm-head">Exercise 36.1.3</span> <span class="level">★★</span>
+        \(\R^2\)의 triangle \([x_i, x_j, x_k]\)와 상수 1-form \(\alpha = a\,dx + b\,dy\)에 대하여 (a) \(\hat\alpha_{[i,j]} = \alpha(x_j - x_i)\)이고 \(\hat\alpha_{[i,j]} + \hat\alpha_{[j,k]} + \hat\alpha_{[k,i]} = 0\)임을 보여라. (b) 거꾸로, 합이 \(0\)인 세 수 \((c_{ij}, c_{jk}, c_{ki})\)는 정확히 하나의 상수 1-form의 de Rham 상임을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(\alpha\)가 상수이면 <a href="#eq-36-1-2">(36.1.2)</a>의 integrand가 상수 \(\alpha(x_j - x_i)\)이다(<a href="../35-exterior-calculus/35-3-integration.html#eq-35-3-7">(35.3.7)</a>, \(k = 1\)). 세 edge vector의 합은 \((x_j - x_i) + (x_k - x_j) + (x_i - x_k) = 0\)이고 \(\alpha\)는 linear이므로 합은 \(0\)이다.</p>
+          <p>(b) map \(T\colon (a, b) \mapsto (\hat\alpha_{[i,j]}, \hat\alpha_{[j,k]}, \hat\alpha_{[k,i]})\)는 \(\R^2\)에서 \(\R^3\)으로 가는 linear map이고, (a)에 의해 그 image는 plane \(Z = \{c : c_{ij} + c_{jk} + c_{ki} = 0\}\)(dimension 2)에 들어 있다. \(T(a, b) = 0\)이면 \(\alpha(x_j - x_i) = \alpha(x_k - x_i) = 0\)인데 두 vector가 linearly independent(<a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-1">Definition 33.1.1</a>)이므로 \(\alpha = 0\)이다. 따라서 \(T\)는 injective이고 rank-nullity로 image의 dimension이 2, 곧 \(Z\) 전체다. 합이 \(0\)이 아닌 세 수는 상수 1-form으로 나타낼 수 없다. 그런 값에는 상수가 아닌 form이 필요하다(<a href="36-3-whitney-forms.html">Section 36.3</a>의 Whitney form).</p>
+          <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code>(무작위 triangle에서 \(T\)의 rank 2와 역변환)</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-36-1-4" data-level="2">
+        <p><span class="thm-head">Exercise 36.1.4</span> <span class="level">★★</span>
+        \(\rho\)가 \(\R^2\)의 \(C^1\) 함수이고 \(\omega = \rho\,dx\wedge dy\)라 하자. 반시계 방향 triangle \(f\)의 넓이를 \(A_f\), 지름(가장 긴 edge의 길이)을 \(h_f\)라 하면, \(f\)의 아무 점 \(p\)에서 \(\abs{\hat\omega_f/A_f - \rho(p)} \le h_f\max_f\abs{\nabla\rho}\)임을 보여라. 이것이 “적분값 \(\div\) 넓이 = 밀도”(<a href="#fig-36-1-3">Figure 36.1.3</a>(a))의 정확한 판이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>반시계 방향이므로 \(\hat\omega_f = \int_f\rho\,dx\,dy\)이다(<a href="../35-exterior-calculus/35-3-integration.html#i-35-3-1">Definition 35.3.1</a>). 따라서 \(\hat\omega_f/A_f - \rho(p) = \tfrac{1}{A_f}\int_f(\rho(q) - \rho(p))\,dq\)이다. \(f\)는 convex이므로 \(p\)와 \(q\)를 잇는 선분이 \(f\) 안에 있고, mean value theorem(선분 위에서)으로 \(\abs{\rho(q) - \rho(p)}\) \(\le \max_f\abs{\nabla\rho}\,\abs{q - p}\) \(\le \max_f\abs{\nabla\rho}\,h_f\)이다(triangle 안의 두 점의 거리는 지름 이하). 적분하고 \(A_f\)로 나누면 결론이다. \(\rho = x\)이고 <a href="#i-36-1-2">Example 36.1.2</a>의 grid이면 \(h_f = \sqrt2/2\), 오차는 \(p\)에 따라 최대 \(\tfrac13\)이다(무게중심에서는 \(0\)).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-36-1-5" data-level="1">
+        <p><span class="thm-head">Exercise 36.1.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> <code>dgmesh.icosphere(2)</code>에서 (a) \(R_1(dz)\)를 <code>dgdec.derham1</code>로 계산해 vertex 높이의 차이 \(z_j - z_i\)와 비교하고, (b) 2-form \(dx\wedge dy\)(vector \(w = (0, 0, 1)\))의 de Rham 상을 <code>dgdec.derham2</code>로 계산해 모든 face에 대한 합과, 바깥쪽 normal의 \(z\)성분이 양수인 face에 대한 합을 구하여라. (c) <a href="#i-36-1-3">Example 36.1.3</a>(b)의 \(\tfrac13\)을 <code>derham2</code>로 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-36-1-5"><code>import numpy as np
+import dgmesh as dm
+import dgdec as dd
+
+V, F = dm.icosphere(2)
+E, _ = dd.edge_list(F)
+dz = dd.derham1(lambda p: np.array([0.0, 0.0, 1.0]), V, E)
+print(np.abs(dz - (V[E[:, 1], 2] - V[E[:, 0], 2])).max() &lt; 1e-14)
+w = dd.derham2(lambda p: np.array([0.0, 0.0, 1.0]), V, F)
+up = dm.face_normals(V, F)[:, 2] &gt; 0
+print(abs(w.sum()) &lt; 1e-13, round(w[up].sum(), 4), round(np.pi, 4))
+T = np.array([[1.0, 0, 0], [0, 2.0, 0], [0, 0, 1.0]])
+print(round(dd.derham2(lambda p: np.array([0.0, 0.0, p[2]]), T, np.array([[0, 1, 2]]))[0], 12))</code></pre>
+          <pre id="out-ex-36-1-5"><code>True
+True 3.0786 3.1416
+0.333333333333</code></pre>
+          <p>(a) \(dz\)의 edge 값은 높이의 차이와 \(10^{-14}\) 안쪽으로 같다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>). (b) 각 face의 값은 \(xy\)평면에 비친 그림자의 부호 있는 넓이다(<a href="#i-36-1-3">Example 36.1.3</a>). 바깥쪽 normal이 위를 향하는 face의 그림자는 unit disk에 내접한 다각형을 덮으므로 합 \(3.0786\)는 \(\pi\)보다 조금 작다. 모든 face의 합은 \(0\)이다. 아래를 향하는 face가 같은 그림자를 반대 부호로 덮기 때문이고, 이것은 <a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>의 discrete Stokes's theorem의 한 예다. (c) \(\tfrac13\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code>(위 코드를 그대로 실행해 출력을 비교한다)</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 36. Discrete Exterior Calculus</a>
+    <a rel="next" href="36-2-chains-cochains.html">36.2 Chains and Cochains →</a>
+  </nav>
+</body>
+</html>
