@@ -70,7 +70,7 @@ for ax, p, (theta, c, R), name in zip(axes, cases, info, ("(a) acute angle: $h >
     ax.text(*(xj + np.array([0.18, -0.05])), r"$x_j$", fontsize=11, ha="center")
     ax.text(0.05, -0.17 if c[1] > 0 else 0.07, r"$m_e$", fontsize=10.5)
     ax.text(*(c + np.array([0.08, 0.02])), r"$c$", fontsize=12, color="#8a5a00")
-    ax.text(-0.42, 0.5 * c[1], rf"$h = {c[1]:.4g}$", fontsize=10.5, color="#8a5a00", ha="center")
+    ax.text(-0.07, 0.5 * c[1], rf"$h = {c[1]:.4g}$", fontsize=10.5, color="#8a5a00", ha="right", va="center")
     ax.text(0.0, -1.7 if c[1] > 0 else 1.25, rf"$\theta = {np.degrees(theta):.1f}^\circ$", fontsize=11,
             ha="center")
     ax.set_title(name, fontsize=11)

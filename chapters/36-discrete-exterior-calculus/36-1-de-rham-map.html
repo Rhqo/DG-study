@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>36.1 Discretization: The de Rham Map — DG Study</title>
   <meta name="dg-id" content="36.1">
-  <meta name="dg-status" content="draft">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="33.3, 35.3, 35.4">
   <meta name="dg-refs" content="Cr §4.8.1–4.8.2; CMU-DDG L8; Hirani03; Desbrun08">
   <meta name="dg-updated" content="2026-10-18">
@@ -51,7 +51,7 @@
 
     <section id="sec-motivation">
       <h2>Motivation</h2>
-      <p>Chapter 35는 \(\R^n\)의 open set 위에서 differential form, exterior derivative \(d\), 적분, Stokes's theorem, Hodge star \(\star\), codifferential \(d^*\)를 세우고 “다음 장에서는 이 모든 연산을 mesh 위로 옮긴다”는 예고로 끝났다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#sec-vector-valued">Section 35.5</a>). 그 예고를 실행하려면 먼저 답해야 할 질문이 있다. 평면의 1-form \(\alpha = P\,dx + Q\,dy\)는 점마다 수 두 개, 곧 무한히 많은 수다. vertex \(n_0\)개, edge \(n_1\)개, triangle \(n_2\)개인 mesh에는 유한한 수만 저장할 수 있다. 어떤 수를 저장해야 하는가?</p>
+      <p>Chapter 35는 \(\R^n\)의 open set 위에서 differential form, exterior derivative \(d\), 적분, Stokes's theorem, Hodge star \(\star\), codifferential \(d^*\)를 세우고 “다음 장에서는 이 모든 연산을 mesh 위로 옮긴다”는 예고로 끝났다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html">Section 35.5</a>). 그 예고를 실행하려면 먼저 답해야 할 질문이 있다. 평면의 1-form \(\alpha = P\,dx + Q\,dy\)는 점마다 수 두 개, 곧 무한히 많은 수다. vertex \(n_0\)개, edge \(n_1\)개, triangle \(n_2\)개인 mesh에는 유한한 수만 저장할 수 있다. 어떤 수를 저장해야 하는가?</p>
       <p>첫 번째 후보는 vertex마다 coefficient를 sampling하는 것, 곧 \((P(x_i), Q(x_i))\)를 저장하는 것이다. 이 방식에는 두 가지 문제가 있다. 저장한 수가 좌표축의 선택에 따라 바뀌고, 무엇보다 \(d\alpha = (\partial_xQ - \partial_yP)\,dx\wedge dy\)를 계산하려면 편미분이 필요한데 sample에는 편미분이 없다. 차분으로 근사할 수밖에 없다. 두 번째 후보는 적분값을 저장하는 것이다. edge마다 \(\int_e\alpha\)를, triangle마다 \(\int_f\omega\)를 저장한다. 그러면 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#eq-35-4-4">(35.4.4)</a>가 \(\int_fd\alpha\)를 세 edge의 저장값의 합으로 <em>정확히</em> 준다. discrete exterior calculus(DEC)는 이 두 번째 길을 택한다 <a class="cite" href="../../references.html#Desbrun05">[Desbrun05]</a>, <a class="cite" href="../../references.html#Hirani03">[Hirani03]</a>.</p>
       <p>이 절은 그 저장 방식, 곧 de Rham map을 정의한다. 이 장의 나머지가 무엇을 하는지는 <a href="#fig-36-1-1">Figure 36.1.1</a>이 한 장으로 보여 준다.</p>
     </section>
@@ -69,13 +69,13 @@
     <section id="sec-discretization">
       <h2>Discretization and Interpolation</h2>
       <p>smooth 대상과 discrete 대상 사이에는 두 방향의 다리가 필요하다. <strong>discretization</strong>(이산화)은 smooth 대상에서 유한한 측정값을 뽑는 일이고, <strong>interpolation</strong>(보간)은 유한한 측정값에서 그 값들을 다시 내는 smooth(또는 조각마다 smooth) 대상을 만드는 일이다. 함수(0-form)에서는 둘 다 익숙하다. vertex에서 값을 읽는 것이 discretization이고, 삼각형마다 linear하게 이어 붙이는 것이 interpolation이다(<a href="../31-meshes/31-3-cotangent-laplacian.html#sec-pl-functions">Section 31.3</a>). 두 일은 서로 역이 아니다. interpolation한 뒤 다시 측정하면 원래 값이 나오지만, 측정한 뒤 interpolation하면 원래 함수와 다른 것이 나온다. 같은 비대칭이 \(k\)-form에서도 나타난다(<a href="36-3-whitney-forms.html">Section 36.3</a>).</p>
-      <p>이 장에서 \(\mathcal{K}\)는 \(\R^N\)(예제에서는 \(N = 2\) 또는 \(3\)) 안의 simplicial complex(<a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-15">Definition 33.1.15</a>)이고, \(U\)는 \(\abs{\mathcal{K}}\)(simplex들의 합집합)를 품는 open set이다. \(\mathcal{K}\)에는 face list의 orientation(<a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-12">Example 33.3.12</a>, §2.5)을 준다.</p>
+      <p>이 장에서 \(\mathcal{K}\)는 \(\R^N\)(예제에서는 \(N = 2\) 또는 \(3\)) 안의 simplicial complex(<a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-15">Definition 33.1.15</a>)이고, \(U\)는 \(\abs{\mathcal{K}}\)(simplex들의 합집합)를 품는 open set이다. \(\mathcal{K}\)에는 face list의 orientation(<a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-12">Example 33.3.12</a>, <a href="../../notation.html#sec-ddg">Notation</a>)을 준다.</p>
       <ul>
         <li>vertex \(i\)는 \(+[x_i]\)이다.</li>
         <li>edge \(\{i, j\}\)(\(i \lt j\))는 \([i, j]\), 곧 \(i \to j\) 방향이다. edge의 번호는 <code>dgdec.edge_list</code>의 사전식 순서다.</li>
         <li>triangle은 face list \(F\)의 행의 순서 \([i, j, k]\)로 orient하고, 행 번호로 번호를 매긴다. 평면 mesh는 반시계 방향, 닫힌 mesh는 바깥쪽이다.</li>
       </ul>
-      <p>\(n_k\)는 \(k\)-simplex의 수다. curved surface mesh도 \(\R^3\)의 complex이므로, 여기서 다루는 form은 둘러싼 공간 \(\R^3\)의 open set 위의 form이다. surface 자체에만 정의된 form은 Chapter 38에서 다룬다.</p>
+      <p>\(n_k\)는 \(k\)-simplex의 수다. curved surface mesh도 \(\R^3\)의 complex이므로, 여기서 다루는 form은 둘러싼 공간 \(\R^3\)의 open set 위의 form이다. surface 자체에만 정의된 form은 <a href="../38-surfaces-smooth-discrete/index.html">Chapter 38</a>에서 다룬다.</p>
     </section>
 
     <section id="sec-de-rham">
@@ -92,7 +92,7 @@
       <div class="equation" id="eq-36-1-2">
       \[ \begin{aligned} \hat\alpha_i &= \alpha(x_i), \\ \hat\alpha_{[i,j]} &= \int_0^1\alpha_{\gamma(t)}(x_j - x_i)\,dt, \\ \hat\alpha_{[i,j,k]} &= \int_{\Delta^2}\alpha_{p(s,t)}(x_j - x_i,\ x_k - x_i)\,ds\,dt. \end{aligned} \tag{36.1.2} \]
       </div>
-      <p>여기서 \(\gamma(t) = x_i + t(x_j - x_i)\), \(p(s, t) = x_i + s(x_j - x_i) + t(x_k - x_i)\)이다. 0-form에서는 point sample과 적분값이 같다. 1-form은 edge 방향의 vector를 넣은 값을 edge를 따라 더한 것, 곧 edge를 따라 흐르는 총량이다. 2-form은 triangle의 두 edge vector를 넣은 값을 triangle 위에서 더한 것이다. 계수가 다항식이면 Gauss quadrature로 오차 없이 계산할 수 있고, <code>dgdec.derham0</code>, <code>derham1</code>, <code>derham2</code>가 그렇게 한다.</p>
+      <p>여기서 \(\gamma(t) = x_i + t(x_j - x_i)\), \(p(s, t) = x_i + s(x_j - x_i) + t(x_k - x_i)\)이다. 0-form에서는 point sample과 적분값이 같다. 1-form은 edge 방향의 vector를 넣은 값을 edge를 따라 더한 것, 곧 edge를 따라 흐르는 총량이다. 2-form은 triangle의 두 edge vector를 넣은 값을 triangle 위에서 더한 것이다. 계수가 다항식이면 차수에 맞는 Gauss quadrature로 오차 없이 계산할 수 있고, <code>dgdec.derham0</code>, <code>derham1</code>, <code>derham2</code>가 그렇게 한다.</p>
 
       <div class="thm example" id="i-36-1-2">
         <p><span class="thm-head">Example 36.1.2</span> <span class="thm-name">(a planar grid)</span>.
@@ -147,7 +147,7 @@
         <p><span class="thm-head">Definition 36.1.6</span> <span class="thm-name">(discrete differential form)</span>.
         oriented simplicial complex \(\mathcal{K}\)의 oriented \(k\)-simplex \(\sigma\)마다 실수 \(\alpha_\sigma\)를 주되 \(\alpha_{-\sigma} = -\alpha_\sigma\)를 만족하게 한 것을 \(\mathcal{K}\) 위의 <dfn>discrete differential form</dfn>(이산 미분형식), 짧게 discrete \(k\)-form이라 한다(\(k = 0\)이면 vertex마다 실수 하나이고 부호 조건은 없다). 각 \(k\)-simplex에서 face list가 정한 orientation(위의 규약)의 값만 모으면 vector \(\alpha \in \R^{n_k}\)를 얻고, 거꾸로 모든 vector가 discrete \(k\)-form을 하나 정한다.</p>
       </div>
-      <p>저장 규약을 정리하면 다음과 같다(§2.5, 정본은 <code>tools/dgdec.py</code>).</p>
+      <p>저장 규약을 정리하면 다음과 같다(<a href="../../notation.html#sec-ddg">Notation</a>, 정본은 <code>tools/dgdec.py</code>).</p>
       <ul>
         <li>discrete 0-form: \(\alpha \in \R^{n_0}\), 성분 \(i\)가 vertex \(i\)의 값이다.</li>
         <li>discrete 1-form: \(\alpha \in \R^{n_1}\), 성분 \(e\)가 <code>edge_list</code>의 \(e\)번째 행 \([i, j]\)(\(i \lt j\))의 값이다. \([j, i]\)의 값은 \(-\alpha_e\)이다.</li>
@@ -157,7 +157,7 @@
 
       <div class="thm example" id="i-36-1-7">
         <p><span class="thm-head">Example 36.1.7</span> <span class="thm-name">(discrete forms that are not given by a formula)</span>.
-        (a) edge마다 아무 수나 적은 것, 예를 들어 <a href="#i-36-1-2">Example 36.1.2</a>의 grid의 edge 16개에 \(1, 2, \dots, 16\)을 적은 것도 discrete 1-form이다. (b) mesh의 vertex 위치 \(x_i \in \R^3\)는 성분마다 discrete 0-form이고, 셋을 묶어 \(\R^3\)-valued discrete 0-form이라 부른다. (c) edge vector \(x_j - x_i\)(edge \([i, j]\))는 \(\R^3\)-valued discrete 1-form이다. 이것은 vector-valued 1-form \(d\mathbf{x}\)의 de Rham 상이기도 하다: 성분마다 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>을 쓰면 \(\int_{[x_i, x_j]}d\mathbf{x} = x_j - x_i\)이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#sec-vector-valued">Section 35.5</a>의 Smooth vs. Discrete 상자). 곡선에서는 이것이 Chapter 37의 edge vector다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-1">Proposition 37.4.1</a>).</p>
+        (a) edge마다 아무 수나 적은 것, 예를 들어 <a href="#i-36-1-2">Example 36.1.2</a>의 grid의 edge 16개에 \(1, 2, \dots, 16\)을 적은 것도 discrete 1-form이다. (b) mesh의 vertex 위치 \(x_i \in \R^3\)는 성분마다 discrete 0-form이고, 셋을 묶어 \(\R^3\)-valued discrete 0-form이라 부른다. (c) edge vector \(x_j - x_i\)(edge \([i, j]\))는 \(\R^3\)-valued discrete 1-form이다. 이것은 vector-valued 1-form \(d\mathbf{x}\)(\(\mathbf{x}\colon U \to \R^3\)은 점을 자기 위치로 보내는 identity map, 곧 성분이 좌표 함수 \(x, y, z\)인 \(\R^3\)-valued 0-form)의 de Rham 상이기도 하다: 성분마다 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>을 쓰면 \(\int_{[x_i, x_j]}d\mathbf{x} = x_j - x_i\)이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#sec-vector-valued">Section 35.5</a>의 Smooth vs. Discrete 상자). 곡선에서는 이것이 Chapter 37의 edge vector다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-1">Proposition 37.4.1</a>).</p>
       </div>
       <div class="thm nonexample" id="i-36-1-8">
         <p><span class="thm-head">Non-example 36.1.8</span> <span class="thm-name">(edge length)</span>.
@@ -169,7 +169,7 @@
       <h2>Integrated Quantities</h2>
       <p>discrete form의 값은 점에서의 값이 아니라 simplex 위의 총량이다. 그래서 mesh를 세분하면 값 자체가 작아진다. 간격 \(h\)인 grid에서 edge의 길이는 \(h\) 정도, triangle의 넓이는 \(h^2\) 정도이므로, smooth form을 고정하고 \(h\)를 줄이면 1-form의 값은 \(h\)에, 2-form의 값은 \(h^2\)에 비례해 줄어든다. 0-form만 \(h\)와 무관하다.</p>
       <figure class="dg-figure" id="fig-36-1-3">
-        <img src="figures/fig-36-1-3-integrated-quantities.svg" alt="두 패널. (a) Example 36.1.2의 grid의 triangle 8개를 주황 색조로 칠하고 각 triangle 안에 x dx∧dy의 적분값을 적었다. 왼쪽 열 0.0208, 0.0417, 가운데 0.0833, 오른쪽 0.1042로 오른쪽으로 갈수록 진하다. (b) 로그–로그 그래프. 가로축은 spacing h(약 0.016에서 0.5), 세로축은 largest value. 검은 선(k = 0, x² − y²)은 1에서 수평이고, 파란 선(k = 1, x dy)은 기울기 1, 주황 선(k = 2, x dx∧dy)은 기울기 2로 h가 작아질수록 내려간다. 회색 점선이 기울기 0, 1, 2의 기준선이다.">
+        <img src="figures/fig-36-1-3-integrated-quantities.svg" alt="두 패널. (a) Example 36.1.2의 grid의 triangle 8개를 주황 색조로 칠하고 각 triangle 안에 x dx∧dy의 적분값을 적었다. 무게중심이 왼쪽에 있는 triangle부터 0.0208, 0.0417, 0.0833, 0.1042이고(같은 값이 위아래로 둘씩), 오른쪽으로 갈수록 진하다. (b) 로그–로그 그래프. 가로축은 spacing h(약 0.016에서 0.5), 세로축은 largest value. 검은 선(k = 0, x² − y²)은 1에서 수평이고, 파란 선(k = 1, x dy)은 기울기 1, 주황 선(k = 2, x dx∧dy)은 기울기 2로 h가 작아질수록 내려간다. 회색 점선이 기울기 0, 1, 2의 기준선이다.">
         <figcaption><span class="fig-head">Figure 36.1.3.</span>
         discrete form은 적분한 양이다. <em>무엇을</em>: (a) <a href="#i-36-1-2">Example 36.1.2</a>의 grid 위의 2-form \(x\,dx\wedge dy\)의 de Rham 상, (b) unit square를 \(n\times n\)칸(\(h = 1/n\), \(n = 2, 4, \dots, 64\))으로 나눈 grid에서 0-form \(x^2 - y^2\), 1-form \(x\,dy\), 2-form \(x\,dx\wedge dy\)의 de Rham 상의 가장 큰 절댓값. <em>읽는 법</em>: (a)의 숫자와 색은 그 triangle 위의 적분값이다. (b)는 log–log 축이고, 검정·파랑·주황이 \(k = 0, 1, 2\), 회색 점선은 기울기 \(0, 1, 2\)의 기준선이다. <em>볼 것</em>: (a)에서 넓이가 모두 \(\tfrac18\)인데 값이 오른쪽으로 갈수록 커진다. 값 \(\div\) 넓이가 무게중심의 \(x\)이기 때문이다. (b)에서 세 선의 기울기는 \(0\), \(1\), \(1.95\)이다(마지막은 가장 오른쪽 face의 값이 \(\tfrac{h^2}{2}(1 - \tfrac h3)\)이라 \(2\)보다 조금 작다). <em>본문과의 연결</em>: 이 절의 “integrated quantity” 관점과 <a href="#i-36-1-2">Example 36.1.2</a>(d).</figcaption>
       </figure>
@@ -217,10 +217,10 @@ True</code></pre>
       <aside class="box convention">
         <p class="box-title">Conventions: hats, orientations, and the letters R and W</p>
         <ul>
-          <li>Crane의 노트와 슬라이드는 discrete form 자체를 \(\hat\alpha\)로 쓰고, discrete 연산도 \(\hat d\), \(\hat\star\)처럼 모자를 씌운다 <a class="cite" href="../../references.html#Cr">[Cr §4.8.1]</a>. 이 study set은 모자를 smooth form의 de Rham 상에만 쓰고(§2.5), discrete 연산은 행렬 이름 \(d_0, d_1\)(<a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>)과 \(\star_0, \star_1, \star_2\)(<a href="36-5-discrete-hodge-star.html">Section 36.5</a>)로 쓴다.</li>
-          <li>Crane은 simplex마다 orientation을 하나 골라 일관되게 쓰라고만 한다. 이 study set은 그 선택을 face list에서 정한다: edge는 \(i \lt j\)이면 \(i \to j\), triangle은 행의 순서(§2.5, <code>tools/dgdec.py</code>). 다른 선택으로 옮기려면 <a href="#i-36-1-4">Proposition 36.1.4</a>(c)의 \(P_k\)를 곱한다.</li>
+          <li>Crane의 노트와 슬라이드는 discrete form 자체를 \(\hat\alpha\)로 쓰고, discrete 연산도 \(\hat d\), \(\hat\star\)처럼 모자를 씌운다 <a class="cite" href="../../references.html#Cr">[Cr §4.8.1, §4.8.3–4.8.4]</a>. 이 study set은 모자를 smooth form의 de Rham 상에만 쓰고(<a href="../../notation.html#sec-ddg">Notation</a>), discrete 연산은 행렬 이름 \(d_0, d_1\)(<a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>)과 \(\star_0, \star_1, \star_2\)(<a href="36-5-discrete-hodge-star.html">Section 36.5</a>)로 쓴다.</li>
+          <li>Crane은 simplex마다 orientation을 하나 골라 일관되게 쓰라고만 한다. 이 study set은 그 선택을 face list에서 정한다: edge는 \(i \lt j\)이면 \(i \to j\), triangle은 행의 순서(<a href="../../notation.html#sec-ddg">Notation</a>, <code>tools/dgdec.py</code>). 다른 선택으로 옮기려면 <a href="#i-36-1-4">Proposition 36.1.4</a>(c)의 \(P_k\)를 곱한다.</li>
           <li>Crane은 edge 적분을 unit tangent와 호의 길이로 쓰고, 이 study set은 vertex 순서의 affine parametrization <a href="../35-exterior-calculus/35-3-integration.html#eq-35-3-6">(35.3.6)</a>으로 쓴다. parametrization에 무관하므로(<a href="../35-exterior-calculus/35-3-integration.html#i-35-3-9">Proposition 35.3.9</a>) 같은 값이다.</li>
-          <li>이 장에서 \(R\)은 de Rham map, \(W\)는 Whitney map(<a href="36-3-whitney-forms.html">Section 36.3</a>)이다. 반지름 \(R\)이나 Weingarten map \(W = -d\mathbf{N}\)(§6.3)은 이 장에 나오지 않는다. torus mesh는 반지름을 숫자로 써서 \(T_{2, 0.8}\)로 부른다.</li>
+          <li>이 장에서 \(R\)은 de Rham map, \(W\)는 Whitney map(<a href="36-3-whitney-forms.html">Section 36.3</a>)이다. 반지름 \(R\)이나 Weingarten map \(W = -d\mathbf{N}\)(<a href="../../notation.html#sec-surfaces">Notation</a>)은 이 장에 나오지 않는다. torus mesh는 반지름을 숫자로 써서 \(T_{2, 0.8}\)로 부른다.</li>
         </ul>
       </aside>
 
@@ -318,7 +318,7 @@ print(round(dd.derham2(lambda p: np.array([0.0, 0.0, p[2]]), T, np.array([[0, 1,
           <pre id="out-ex-36-1-5"><code>True
 True 3.0786 3.1416
 0.333333333333</code></pre>
-          <p>(a) \(dz\)의 edge 값은 높이의 차이와 \(10^{-14}\) 안쪽으로 같다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>). (b) 각 face의 값은 \(xy\)평면에 비친 그림자의 부호 있는 넓이다(<a href="#i-36-1-3">Example 36.1.3</a>). 바깥쪽 normal이 위를 향하는 face의 그림자는 unit disk에 내접한 다각형을 덮으므로 합 \(3.0786\)는 \(\pi\)보다 조금 작다. 모든 face의 합은 \(0\)이다. 아래를 향하는 face가 같은 그림자를 반대 부호로 덮기 때문이고, 이것은 <a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>의 discrete Stokes's theorem의 한 예다. (c) \(\tfrac13\)이다.</p>
+          <p>(a) \(dz\)의 edge 값은 높이의 차이와 \(10^{-14}\) 안쪽으로 같다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>). (b) 각 face의 값은 \(xy\)평면에 비친 그림자의 부호 있는 넓이다(<a href="#i-36-1-3">Example 36.1.3</a>). 바깥쪽 normal이 위를 향하는 face의 그림자는 polyhedron 전체의 그림자, 곧 unit disk 안에 놓인 다각형(꼭짓점이 원점에서 \(0.987\)–\(1\) 거리에 있다)을 한 번씩 덮으므로 합 \(3.0786\)은 \(\pi\)보다 조금 작다. 모든 face의 합은 \(0\)이다. 아래를 향하는 face가 같은 그림자를 반대 부호로 덮기 때문이고, 이것은 <a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>의 discrete Stokes's theorem의 한 예다. (c) \(\tfrac13\)이다.</p>
           <p class="verified">Verification: <code>verify/v-36-1-de-rham-map.py</code>(위 코드를 그대로 실행해 출력을 비교한다)</p>
         </details>
       </div>

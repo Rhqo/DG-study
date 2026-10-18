@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>38.1 Parametrized Surfaces and the Differential — DG Study</title>
   <meta name="dg-id" content="38.1">
-  <meta name="dg-status" content="draft">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="35.5, 37.1, 37.2, 2.1, 2.2, 2.3">
-  <meta name="dg-refs" content="Cr §3.1, §3.2, §3.5; CMU-DDG L12">
+  <meta name="dg-refs" content="Cr §3.1, §3.2, §3.5; CMU-DDG L12; Smale59">
   <meta name="dg-updated" content="2026-10-18">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
@@ -58,15 +58,15 @@
 
     <section id="sec-parametrized">
       <h2>Parametrized Surfaces</h2>
-      <p>곡면을 다루는 방법은 여럿이다. Track 3은 \(\R^3\)의 부분집합 \(S\)를 먼저 정하고, 그것을 덮는 parametrization을 붙인다(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>). 강의와 이 장은 map을 먼저 본다. 평면의 영역을 고무판으로 생각하고, 그것을 공간에 늘이고 구부려 놓는 map이 곡면이다 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>. mesh도 vertex에 좌표를 주는 map이므로(Section 38.4) 이 관점이 discrete 판과 잘 맞는다.</p>
+      <p>곡면을 다루는 방법은 여럿이다. Track 3은 \(\R^3\)의 부분집합 \(S\)를 먼저 정하고, 그것을 덮는 parametrization을 붙인다(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>). 강의 슬라이드와 노트는 map을 먼저 본다 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>. 곡면을 점들의 집합으로 보기 전에, 평면 영역의 각 점에 \(\R^3\)의 위치를 하나씩 정해 주는 규칙으로 보는 것이다. 지도책의 한 쪽은 지구의 한 부분에 평면 좌표를 주는데, 그 대응을 거꾸로 읽어 좌표에서 지구 위의 점으로 가는 것이 이런 map이다. mesh도 vertex에 좌표를 주는 map이므로(Section 38.4) 이 관점이 discrete 판과 잘 맞는다.</p>
       <div class="thm definition" id="i-38-1-1">
         <p><span class="thm-head">Definition 38.1.1</span> <span class="thm-name">(parametrized surface)</span>.
-        \(U \subseteq \R^2\)가 open set이고 \(\mathbf{x}\colon U \to \R^3\)이 smooth map일 때, \(\mathbf{x}\)를 <strong>parametrized surface</strong>(매개곡면)라 하고 \(\mathbf{x}(U)\)를 그 image라 한다. \(U\)의 좌표는 \((u, v)\)로 쓰고 \(\mathbf{x}_u = \partial\mathbf{x}/\partial u\), \(\mathbf{x}_v = \partial\mathbf{x}/\partial v\)로 쓴다. \(h\colon \tilde U \to U\)가 open set 사이의 diffeomorphism이면 \(\mathbf{x}\circ h\)를 \(\mathbf{x}\)의 <strong>reparametrization</strong>(재매개화)이라 하고, \(\det Dh \gt 0\)이면 orientation-preserving이라 한다.</p>
+        \(U \subseteq \R^2\)가 open set이고 \(\mathbf{x}\colon U \to \R^3\)이 smooth map일 때, \(\mathbf{x}\)를 <dfn>parametrized surface</dfn>(매개곡면)라 하고 \(\mathbf{x}(U)\)를 그 image라 한다. \(U\)의 좌표는 \((u, v)\)로 쓰고 \(\mathbf{x}_u = \partial\mathbf{x}/\partial u\), \(\mathbf{x}_v = \partial\mathbf{x}/\partial v\)로 쓴다. \(h\colon \tilde U \to U\)가 open set 사이의 diffeomorphism이면 \(\mathbf{x}\circ h\)를 \(\mathbf{x}\)의 <strong>reparametrization</strong>(재매개화, 곡선의 경우는 <a href="../04-curves/4-3-reparametrization.html#i-4-3-1">Definition 4.3.1</a>)이라 하고, \(\det Dh \gt 0\)이면 orientation-preserving이라 한다.</p>
       </div>
-      <p>image는 같은데 map이 다른 경우가 흔하다. 같은 곡면을 서로 다른 parametrization으로 나타낼 수 있다는 사실(“reparametrization symmetry”)은 두 mesh가 같은 모양인지 판정하기 어렵게 만드는 이유이기도 하다 <a class="cite" href="../../references.html#CMU-DDG-L12">[CMU-DDG L12]</a>. 이 정의에는 regularity 조건이 없다. Track 3의 parametrization(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>)은 여기에 immersion 조건(아래 <a href="#i-38-1-6">Definition 38.1.6</a>)과 image 위로의 homeomorphism 조건을 더한 것이다.</p>
+      <p>image는 같은데 map이 다른 경우가 흔하다(아래 <a href="#i-38-1-2">Example 38.1.2</a>(d)). 그래서 두 parametrized surface가 같은 곡면을 나타내는지 물을 때는 map을 그대로 비교하지 말고 reparametrization만큼의 차이를 허용해야 한다. 강의 슬라이드는 이 자유도를 “reparametrization symmetry”라 부르고, 응용에서 겪는 어려움의 하나로 든다 <a class="cite" href="../../references.html#CMU-DDG-L12">[CMU-DDG L12]</a>. 이 정의에는 regularity 조건이 없다. Track 3의 parametrization(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-1">Definition 6.1.1</a>)은 여기에 immersion 조건(아래 <a href="#i-38-1-6">Definition 38.1.6</a>)과 image 위로의 homeomorphism 조건을 더한 것이다.</p>
       <div class="thm example" id="i-38-1-2">
         <p><span class="thm-head">Example 38.1.2</span> <span class="thm-name">(the running examples as parametrized surfaces)</span>.
-        §7의 매개화를 모두 \(\R^2\) 전체에서 정의된 smooth map으로 본다.</p>
+        running example(<a href="../../notation.html#sec-examples">Notation and Conventions</a>)의 매개화를 모두 \(\R^2\) 전체에서 정의된 smooth map으로 본다.</p>
         <ul>
           <li>(a) sphere \(\mathbf{x}(\theta, \varphi) = (r\sin\theta\cos\varphi,\ r\sin\theta\sin\varphi,\ r\cos\theta)\). image는 \(S^2(r)\)이고, 정의역을 \((0, \pi)\times(0, 2\pi)\)로 줄이면 반원 하나를 뺀 부분이다(<a href="../06-regular-surfaces/6-1-definition.html#i-6-1-7">Example 6.1.7</a>).</li>
           <li>(b) torus of revolution \(\mathbf{x}(u, v) = ((R + r\cos u)\cos v,\ (R + r\cos u)\sin v,\ r\sin u)\), 이 장의 수치는 \((R, r) = (2, 0.8)\)이다. \(u\)와 \(v\) 모두 주기 \(2\pi\)이므로 \(\R^2\)를 \(T_{R,r}\) 위에 무한히 여러 번 감는다.</li>
@@ -86,7 +86,7 @@
       <div class="equation" id="eq-38-1-1">
       \[ d\mathbf{x} = \sum_{a=1}^{3} d(\mathbf{x}^a)\,e_a = \mathbf{x}_u\,du + \mathbf{x}_v\,dv \tag{38.1.1} \]
       </div>
-      <p>이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-11">Example 35.5.11</a>(a)). Equation <a href="#eq-38-1-1">(38.1.1)</a>은 점 \(q \in U\)와 vector \(X = (X^1, X^2) \in \R^2\)에 대하여 \(d\mathbf{x}_q(X) = X^1\mathbf{x}_u(q) + X^2\mathbf{x}_v(q)\)라는 뜻이다. \(X\)는 parameter 평면의 화살표이고 \(d\mathbf{x}_q(X)\)는 공간의 화살표다. 고무판 위에 그린 짧은 선분이 판을 늘이고 구부렸을 때 어떤 선분이 되는가를 기록하는 것이 \(d\mathbf{x}\)다 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>.</p>
+      <p>이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-11">Example 35.5.11</a>(a)). Equation <a href="#eq-38-1-1">(38.1.1)</a>은 점 \(q \in U\)와 vector \(X = (X^1, X^2) \in \R^2\)에 대하여 \(d\mathbf{x}_q(X) = X^1\mathbf{x}_u(q) + X^2\mathbf{x}_v(q)\)라는 뜻이다. \(X\)는 parameter 평면의 화살표이고 \(d\mathbf{x}_q(X)\)는 공간의 화살표다. 곧 \(d\mathbf{x}_q\)는 \(q\)에서 출발하는 parameter 화살표마다 그것이 곡면 위에서 어떤 화살표가 되는지를 알려 주는 linear map이고 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>, 아래 <a href="#fig-38-1-1">Figure 38.1.1</a>에서 작은 원이 타원으로 바뀌는 것이 그 모습이다.</p>
       <div class="thm proposition" id="i-38-1-4">
         <p><span class="thm-head">Proposition 38.1.4</span> <span class="thm-name">(three readings of the differential)</span>.
         \(\mathbf{x}\colon U \to \R^3\)이 smooth이고 \(q \in U\), \(X \in \R^2\)라 하자.</p>
@@ -107,7 +107,7 @@
         <img src="figures/fig-38-1-1-differential-ellipses.svg" alt="두 패널. (a) 하늘색 정사각형 u, v ∈ [−π, π]에 회색 격자가 있고, 두 점 q1(가운데 아래)과 q2(오른쪽)에 같은 크기의 파란 원과 30도 방향의 파란 화살표 X가 있다. 곡선 화살표 x가 오른쪽 패널로 향한다. (b) 회색 반투명 torus 위에, 바깥 적도의 점 x(q1)에는 수평으로 길게 늘어난 큰 파란 타원과 화살표 dx(X)가, 위쪽 안쪽의 점 x(q2)에는 덜 늘어난 작은 파란 타원이 있다.">
         <figcaption><span class="fig-head">Figure 38.1.1.</span>
         <em>무엇을</em>: torus of revolution \((R, r) = (2, 0.8)\)의 differential \(d\mathbf{x}\)가 같은 길이의 vector들을 어떻게 옮기는가. (a)는 parameter domain \([-\pi, \pi]^2\), (b)는 \(T_{2, 0.8}\)이다.
-        <em>읽는 법</em>: (a)의 파란 원은 \(q_1 = (0, -1)\), \(q_2 = (2\pi/3, -0.25)\)를 중심으로 한 반지름 \(0.45\)의 원(길이 \(0.45\)인 vector \(X\)들의 끝점)이고, 파란 화살표는 \(30^\circ\) 방향의 \(X\) 하나다. (b)의 파란 타원은 \(\mathbf{x}(q) + d\mathbf{x}_q(X)\)들이고, 파란 화살표는 \(d\mathbf{x}_q(X)\)다. 회색 격자는 coordinate curve로, \(u\)는 \(\pi/6\)마다, \(v\)는 \(\pi/12\)마다 그었다.
+        <em>읽는 법</em>: (a)의 파란 원은 \(q_1 = (0, -1)\), \(q_2 = (2\pi/3, -0.25)\)를 중심으로 한 반지름 \(0.45\)의 원(길이 \(0.45\)인 vector \(X\)들의 끝점)이고, 파란 화살표는 \(30^\circ\) 방향의 \(X\) 하나다. (a)의 회색 격자는 \(\pi/4\) 간격이다. (b)의 파란 타원은 \(\mathbf{x}(q) + d\mathbf{x}_q(X)\)들이고, 파란 화살표는 \(d\mathbf{x}_q(X)\)다. (b)의 회색 격자는 coordinate curve로, \(u\)는 \(\pi/6\)마다, \(v\)는 \(\pi/12\)마다 그었다.
         <em>볼 것</em>: 원이 타원으로 바뀐다. 타원의 반지름은 \(0.45\cdot r = 0.36\)(관을 도는 방향)과 \(0.45(R + r\cos u)\)이며, \(q_1\)에서는 \(1.26\), \(q_2\)에서는 \(0.72\)이다. 같은 \(X\)라도 점마다 늘어나는 정도가 다르다.
         <em>본문과의 연결</em>: <a href="#i-38-1-4">Proposition 38.1.4</a>(a)와 <a href="#i-38-1-5">Example 38.1.5</a>. 타원의 모양은 Section 38.2의 induced metric(\(E = r^2\), \(G = (R + r\cos u)^2\))이 정한다.</figcaption>
       </figure>
@@ -276,7 +276,7 @@ double cone  min |x_u x x_v| = 0.000 at first parameter 0.000</code></pre>
       <p><a href="#fig-38-1-3">Figure 38.1.3</a>의 (a)에서 오른쪽 절반의 바깥으로 향한 화살표와 왼쪽 절반의 안쪽으로 향한 화살표를 비교하자. 두 상태는 집합으로는 같은 sphere와 타원이고 normal만 반대다. (b)의 V자 그래프는 그 사이를 지나려면 적도의 \(\abs{\mathbf{x}_\theta\times\mathbf{x}_\varphi}\)가 \(0\)을 지나야 함을 보여 준다. 이 family만 보면 원처럼 sphere도 뒤집을 수 없을 것 같다. 그러나 사실은 그렇지 않다.</p>
       <aside class="box history">
         <p class="box-title">History: sphere eversion</p>
-        <p>S. Smale은 “A classification of immersions of the two-sphere”(Trans. Amer. Math. Soc. 90, 1959)에서 \(S^2\)의 \(\R^3\)으로의 immersion들의 regular homotopy class를 분류했다. 그 결과로 \(S^2\)의 어느 두 immersion도 regularly homotopic하다. 특히 표준 embedding과 안팎이 뒤집힌 \(-\mathbf{x}_0\) 사이에 regular homotopy가 있다. 곧 sphere는 주름 없이 뒤집을 수 있다(sphere eversion). 원에서는 turning number가 막았지만, sphere의 immersion에는 그런 불변량이 없다는 것이다. 중간 단계의 곡면은 자기 자신을 여러 번 통과해야 하므로 embedding은 아니고 immersion이다.</p>
+        <p>S. Smale은 1959년 논문 <a class="cite" href="../../references.html#Smale59">[Smale59]</a>에서 \(S^2\)의 \(\R^3\)으로의 immersion들의 regular homotopy class를 분류했다. 그 결과로 \(S^2\)의 어느 두 immersion도 regularly homotopic하다. 특히 표준 embedding과 안팎이 뒤집힌 \(-\mathbf{x}_0\) 사이에 regular homotopy가 있다. 곧 sphere는 주름 없이 뒤집을 수 있다(sphere eversion). 원에서는 turning number가 막았지만, sphere의 immersion에는 그런 불변량이 없다는 것이다. 중간 단계의 곡면은 어딘가에서 자기 자신과 교차해야 하므로 embedding은 아니고 immersion이다.</p>
         <p>Smale의 증명은 존재만 보였고, 그 뒤 여러 사람이 구체적인 eversion을 만들었다. 강의 슬라이드는 B. Morin의 구성과 N. Max가 감독한 영상 “Turning a Sphere Inside Out”, Geometry Center의 영상 “Outside In”, 그리고 다른 구성들의 그림을 소개한다 <a class="cite" href="../../references.html#CMU-DDG-L12">[CMU-DDG L12]</a>. 이 study set은 eversion을 구성하거나 증명하지 않는다.</p>
       </aside>
 
@@ -288,9 +288,10 @@ double cone  min |x_u x x_v| = 0.000 at first parameter 0.000</code></pre>
       <aside class="box convention">
         <p class="box-title">Conventions: Chapter 38</p>
         <ul>
-          <li>immersion은 \(\mathbf{x}\)로 쓴다(§6.3). Crane은 \(f\)로 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>.</li>
-          <li>Track 3(§6.3)은 \(\mathbf{x}\)의 Jacobian을 \(D\mathbf{x}(q)\)로 쓰고, Track 2는 같은 linear map을 vector-valued 1-form \(d\mathbf{x}\)로 쓴다. \(d\mathbf{x}_q(X) = D\mathbf{x}(q)\,X\)이다(<a href="#i-38-1-4">Proposition 38.1.4</a>(a)).</li>
-          <li>Crane의 sphere 매개화 \((\cos u\sin v,\ \sin u\sin v,\ \cos v)\)는 §7의 \(\mathbf{x}(\theta, \varphi)\)에서 \(u = \varphi\), \(v = \theta\)로 둔 것이다(\(r = 1\)). 좌표의 순서가 \((\varphi, \theta)\)라서 \(f_u\times f_v = \mathbf{x}_\varphi\times\mathbf{x}_\theta = -\sin\theta\,\mathbf{x}\)는 안쪽을 향한다. 이 study set의 \(\mathbf{x}_\theta\times\mathbf{x}_\varphi\)는 바깥쪽이다. normal의 방향은 Section 38.3과 Chapter 39의 부호를 바꾸므로 Crane의 sphere 식을 옮길 때 주의한다.</li>
+          <li>immersion은 \(\mathbf{x}\)로 쓴다(<a href="../../notation.html#sec-surfaces">Notation and Conventions</a>). Crane은 \(f\)로 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §3.1]</a>.</li>
+          <li>Track 3은 \(\mathbf{x}\)의 Jacobian을 \(D\mathbf{x}(q)\)로 쓰고, Track 2는 같은 linear map을 vector-valued 1-form \(d\mathbf{x}\)로 쓴다. \(d\mathbf{x}_q(X) = D\mathbf{x}(q)\,X\)이다(<a href="#i-38-1-4">Proposition 38.1.4</a>(a)).</li>
+          <li>강의 슬라이드는 embedding을 image 위로의 continuous bijection이면서 inverse도 continuous인 map으로 정의하고, immersion 조건을 따로 두지 않는다 <a class="cite" href="../../references.html#CMU-DDG-L12">[CMU-DDG L12]</a>. 이 장의 <a href="#i-38-1-12">Definition 38.1.12</a>는 immersion 조건을 더한 표준 정의다. 예를 들어 <a href="#i-38-1-11">Non-example 38.1.11</a>의 \((u^3, v, 0)\)은 슬라이드의 뜻으로는 embedding이지만 이 장의 뜻으로는 아니다.</li>
+          <li>Crane의 sphere 매개화 \((\cos u\sin v,\ \sin u\sin v,\ \cos v)\)는 running example의 \(\mathbf{x}(\theta, \varphi)\)에서 \(u = \varphi\), \(v = \theta\)로 둔 것이다(\(r = 1\)). 좌표의 순서가 \((\varphi, \theta)\)라서 \(f_u\times f_v = \mathbf{x}_\varphi\times\mathbf{x}_\theta = -\sin\theta\,\mathbf{x}\)는 안쪽을 향한다. 이 study set의 \(\mathbf{x}_\theta\times\mathbf{x}_\varphi\)는 바깥쪽이다. normal의 방향은 Section 38.3과 Chapter 39의 부호를 바꾸므로 Crane의 sphere 식을 옮길 때 주의한다.</li>
           <li>이 장에서만 쓰는 기호: mesh의 vertex 위치를 굵은 \(\mathbf{x}_i\)로 쓴다. vertex 위치가 simplicial map \(\mathbf{x}\)의 값이기 때문이다(Section 38.4). Chapter 31과 notation 표는 \(x_i\)로 쓴다. discrete differential은 \((d\mathbf{x})_{ij} = \mathbf{x}_j - \mathbf{x}_i\), face \(f\)의 unit normal과 넓이는 \(\mathbf{N}_f\), \(A_f\), \(f\)에서 vertex \(i\)의 내각은 \(\theta_i^{jk}\)(\(f = ijk\))로 쓴다. \(\theta\)는 sphere의 colatitude와 겹치므로 한 항목 안에서 함께 쓰지 않는다.</li>
           <li>conformal factor는 \(e^{2\mu}\)로 쓴다(Section 38.2). vector area는 굵은 \(\mathbf{A}\)로 쓰고 넓이 \(A\)와 구별한다(Section 38.3). surface 위 1-form의 Hodge star의 부호는 Section 38.3의 Conventions 상자에 있다.</li>
         </ul>
@@ -338,8 +339,8 @@ double cone  min |x_u x x_v| = 0.000 at first parameter 0.000</code></pre>
         </details>
       </div>
 
-      <div class="exercise" id="ex-38-1-3" data-level="2">
-        <p><span class="thm-head">Exercise 38.1.3</span> <span class="level">★★</span>
+      <div class="exercise" id="ex-38-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 38.1.3</span> <span class="level">★</span>
         \(\mathbf{x}\colon U \to \R^3\)이 immersion이고 \(h\colon \tilde U \to U\)가 diffeomorphism, \(\mathbf{y} = \mathbf{x}\circ h\)라 하자. (a) \(\mathbf{y}_s\times\mathbf{y}_t = \det Dh\,(\mathbf{x}_u\times\mathbf{x}_v)\circ h\)임을 보여라(\((s, t)\)는 \(\tilde U\)의 좌표). (b) \(\mathbf{y}\)가 immersion이고, unit normal \(\mathbf{y}_s\times\mathbf{y}_t/\abs{\mathbf{y}_s\times\mathbf{y}_t}\)가 \(\mathbf{x}\)의 것과 같을 필요충분조건은 \(\det Dh \gt 0\)임을 보여라. (c) saddle의 polar reparametrization(<a href="#i-38-1-2">Example 38.1.2</a>(d))에서 이것을 확인하여라.</p>
         <details class="solution"><summary>Solution</summary>
           <p>(a) \(h = (h^1, h^2)\)라 하면 chain rule에서 \(\mathbf{y}_s = h^1_s\,\mathbf{x}_u + h^2_s\,\mathbf{x}_v\), \(\mathbf{y}_t = h^1_t\,\mathbf{x}_u + h^2_t\,\mathbf{x}_v\)이다(모두 \(h(s, t)\)에서 계산). cross product의 bilinearity와 \(\mathbf{x}_u\times\mathbf{x}_u = 0\), \(\mathbf{x}_v\times\mathbf{x}_u = -\mathbf{x}_u\times\mathbf{x}_v\)에서 \(\mathbf{y}_s\times\mathbf{y}_t = (h^1_sh^2_t - h^2_sh^1_t)\,\mathbf{x}_u\times\mathbf{x}_v = \det Dh\,\mathbf{x}_u\times\mathbf{x}_v\)이다(Track 3의 <a href="../07-first-fundamental-form/7-3-area.html#i-7-3-1">Lemma 7.3.1</a>과 같은 계산). (b) \(h\)가 diffeomorphism이면 \(\det Dh \neq 0\)이므로 (a)에서 \(\mathbf{y}_s\times\mathbf{y}_t \neq 0\)이고 \(\mathbf{y}\)는 immersion이다. 두 unit normal의 비는 \(\det Dh/\abs{\det Dh} = \sgn\det Dh\)이다. (c) \(h(\rho, t) = (\rho\cos t, \rho\sin t)\)이면 \(\det Dh = \cos t\cdot\rho\cos t - (-\rho\sin t)\sin t = \rho\)이다. 직접 계산하면 \(\mathbf{y}_\rho = (\cos t, \sin t, 2\rho\cos 2t)\), \(\mathbf{y}_t = (-\rho\sin t, \rho\cos t, -2\rho^2\sin 2t)\)이고 \(\mathbf{y}_\rho\times\mathbf{y}_t = (-2\rho^2\cos t,\ 2\rho^2\sin t,\ \rho)\)이다. 한편 \(\mathbf{x}_u\times\mathbf{x}_v = (-2u, 2v, 1)\)에 \(u = \rho\cos t\), \(v = \rho\sin t\)를 넣고 \(\rho\)를 곱하면 같은 vector다.</p>

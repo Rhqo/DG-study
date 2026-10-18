@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>38.4 Simplicial Surfaces and Discrete Immersions — DG Study</title>
   <meta name="dg-id" content="38.4">
-  <meta name="dg-status" content="draft">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="38.1, 38.3, 33.1, 33.2, 33.4, 33.5, 37.4, 35.4">
   <meta name="dg-refs" content="CMU-DDG L14">
   <meta name="dg-updated" content="2026-10-18">
@@ -53,7 +53,7 @@
 
     <section id="sec-simplicial-map">
       <h2>Simplicial Maps</h2>
-      <p>simplicial surface \(\mathcal{K}\)(boundary가 있어도 된다, <a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-3">Definition 33.4.3</a>)의 vertex를 \(1, \dots, n_0\)으로 번호 붙이자. \(\mathcal{K}\)는 \(\R^{n_0}\) 안에 geometric realization \(\abs{\mathcal{K}}\)을 갖는다(<a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-22">Proposition 33.1.22</a>). vertex \(i\)는 표준기저 \(e_i\)이고, simplex \(\sigma\)는 \(\{e_m : m \in \sigma\}\)의 convex hull \(\abs{\sigma}\)이며, 점 \(p \in \abs{\sigma}\)의 좌표 \(p^m\)이 곧 \(p\)의 barycentric coordinates다. 이 \(\abs{\mathcal{K}}\)이 “모양 없는” 곡면을 공간 속에 놓은 표준 모형이다. 이제 각 vertex에 \(\R^3\)의 점을 준다.</p>
+      <p>simplicial surface \(\mathcal{K}\)(boundary가 있어도 된다, <a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-3">Definition 33.4.3</a>)의 vertex를 \(1, \dots, n_0\)으로 번호 붙이자(예와 코드에서는 \(0\)부터 센다). \(\mathcal{K}\)는 \(\R^{n_0}\) 안에 geometric realization \(\abs{\mathcal{K}}\)을 갖는다(<a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-22">Proposition 33.1.22</a>). vertex \(i\)는 표준기저 \(e_i\)이고, simplex \(\sigma\)는 \(\{e_m : m \in \sigma\}\)의 convex hull \(\abs{\sigma}\)이며, 점 \(p \in \abs{\sigma}\)의 좌표 \(p^m\)이 곧 \(p\)의 barycentric coordinates다. 이 \(\abs{\mathcal{K}}\)이 “모양 없는” 곡면을 공간 속에 놓은 표준 모형이다. 이제 각 vertex에 \(\R^3\)의 점을 준다.</p>
       <div class="thm definition" id="i-38-4-1">
         <p><span class="thm-head">Definition 38.4.1</span> <span class="thm-name">(simplicial map)</span>.
         \(\mathcal{K}\)가 vertex \(1, \dots, n_0\) 위의 simplicial surface이고 \(\mathbf{x}_1, \dots, \mathbf{x}_{n_0} \in \R^3\)이라 하자. map \(\mathbf{x}\colon \abs{\mathcal{K}} \to \R^3\),</p>
@@ -62,13 +62,13 @@
         </div>
         <p>를 vertex 위치 \(\mathbf{x}_m\)이 정하는 <dfn>simplicial map</dfn>(단체 사상)이라 한다. 위치들의 목록 \((\mathbf{x}_m)\)은 vertex마다 \(\R^3\)의 값을 하나씩 주는 것이므로 \(\R^3\)-valued discrete 0-form이다.</p>
       </div>
-      <p>코드에서는 \(n_0\times 3\) 배열 <code>V</code>(\(m\)번째 행이 \(\mathbf{x}_m\))가 바로 이 map이다. <a href="#eq-38-4-1">(38.4.1)</a>은 \(\R^{n_0}\) 전체의 linear map \(L(p) = V^{\mathsf T}p\)를 \(\abs{\mathcal{K}}\)로 제한한 것이다.</p>
+      <p>코드에서는 \(n_0\times 3\) 배열 <code>V</code>(\(m\)번째 행이 \(\mathbf{x}_m\))가 바로 이 map이다. <a href="#eq-38-4-1">(38.4.1)</a>은 \(\R^{n_0}\) 전체의 linear map \(\tilde{\mathbf{x}}(p) = V^{\mathsf T}p\)를 \(\abs{\mathcal{K}}\)로 제한한 것이다. 이 linear extension을 \(\tilde{\mathbf{x}}\)로 쓴다(\(L\)은 Section 38.6에서 cotan Laplacian의 기호다).</p>
       <div class="thm proposition" id="i-38-4-2">
         <p><span class="thm-head">Proposition 38.4.2</span> <span class="thm-name">(basic properties of a simplicial map)</span>.
         (a) \(\mathbf{x}\)는 continuous이고 \(\mathbf{x}(e_m) = \mathbf{x}_m\)이다. (b) simplex \(\sigma\)의 점 \(p\)의 barycentric coordinates가 \((\lambda_m)_{m\in\sigma}\)이면 \(\mathbf{x}(p) = \sum_{m\in\sigma}\lambda_m\mathbf{x}_m\)이다. 곧 \(\mathbf{x}\)는 각 \(\abs{\sigma}\) 위에서 affine이고, \(\mathbf{x}(\abs{\sigma})\)는 \(\{\mathbf{x}_m : m \in \sigma\}\)의 convex hull이다(퇴화할 수 있다). (c) 두 simplicial map은 vertex 위치가 같으면 같다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">Proof.</span> (a) linear map \(L\)의 제한이므로 continuous이고, \(L(e_m) = \mathbf{x}_m\)이다. (b) <a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-22">Proposition 33.1.22</a>의 증명 (ii)에 의해 \(p \in \abs{\sigma}\)이면 \(p^m = \lambda_m\)(\(m \in \sigma\))이고 나머지 좌표는 \(0\)이다. 그러면 \(\mathbf{x}(p) = \sum_{m\in\sigma}\lambda_m\mathbf{x}_m\)이고, \(\lambda\)가 \(\lambda_m \ge 0\), \(\sum\lambda_m = 1\)을 모두 지나므로 image는 convex hull이다. (c) <a href="#eq-38-4-1">(38.4.1)</a>이 vertex 위치만으로 쓰여 있다.</p>
+        <p><span class="proof-head">Proof.</span> (a) linear map \(\tilde{\mathbf{x}}\)의 제한이므로 continuous이고, \(\tilde{\mathbf{x}}(e_m) = \mathbf{x}_m\)이다. (b) <a href="../33-combinatorial-surfaces/33-1-simplicial-complexes.html#i-33-1-22">Proposition 33.1.22</a>의 증명 (ii)에 의해 \(p \in \abs{\sigma}\)이면 \(p^m = \lambda_m\)(\(m \in \sigma\))이고 나머지 좌표는 \(0\)이다. 그러면 \(\mathbf{x}(p) = \sum_{m\in\sigma}\lambda_m\mathbf{x}_m\)이고, \(\lambda\)가 \(\lambda_m \ge 0\), \(\sum\lambda_m = 1\)을 모두 지나므로 image는 convex hull이다. (c) <a href="#eq-38-4-1">(38.4.1)</a>이 vertex 위치만으로 쓰여 있다.</p>
       </div>
       <p><a href="#fig-38-4-1">Figure 38.4.1</a>의 왼쪽 (a)는 octahedron의 simplicial surface를 평면에 그린 것이다. 여기에는 길이도 각도 없다. 선분은 “이웃”이라는 정보일 뿐이고, 같은 graph를 어떻게 그려도 된다. 하늘색 face \((0, 2, 4)\) 안의 주황 점 \(p\)는 barycentric coordinates \((0.5, 0.3, 0.2)\)로 정해진다. 오른쪽 (b)가 vertex를 \(\pm e_k\)에 둔 simplicial map의 image다. \(p\)는 같은 barycentric coordinates로 \(\mathbf{x}(p) = 0.5\mathbf{x}_0 + 0.3\mathbf{x}_2 + 0.2\mathbf{x}_4\)에 간다. 파란 화살표는 아래에서 정의할 discrete differential이다.</p>
       <figure class="dg-figure" id="fig-38-4-1">
@@ -81,7 +81,7 @@
       </figure>
       <div class="thm example" id="i-38-4-3">
         <p><span class="thm-head">Example 38.4.3</span> <span class="thm-name">(simplicial maps)</span>.
-        (a) icosphere(<code>dgmesh.icosphere(level)</code>)는 icosahedron을 나눈 simplicial surface에 unit sphere 위의 점을 vertex 위치로 준 simplicial map이다. (b) <code>dgmesh.torus_mesh(2, 0.8, nu, nv)</code>는 \(u, v\) 격자를 삼각형으로 나눈 torus 모양의 simplicial surface(\(\chi = 0\))에 \(\mathbf{x}_{ij} = \mathbf{x}(2\pi i/n_u, 2\pi j/n_v)\)(§7의 torus of revolution)를 준 것이다. (c) hinge: triangle 두 개 \((0, 1, 2)\), \((1, 0, 3)\)로 된 simplicial surface with boundary에 \(\mathbf{x}_0 = (0, 0, 0)\), \(\mathbf{x}_1 = (1, 0, 0)\), \(\mathbf{x}_2 = (0.5, 0.8, 0)\), \(\mathbf{x}_3(\psi) = (0.3, -0.9\cos\psi, 0.9\sin\psi)\)를 준 것이다. 두 face의 normal 사이의 각이 \(\psi\)이고, \(\psi\)가 변해도 다섯 edge의 길이는 그대로다(<a href="#fig-38-4-2">Figure 38.4.2</a>).</p>
+        (a) icosphere(<code>dgmesh.icosphere(level)</code>)는 icosahedron을 나눈 simplicial surface에 unit sphere 위의 점을 vertex 위치로 준 simplicial map이다. (b) <code>dgmesh.torus_mesh(2, 0.8, nu, nv)</code>는 \(u, v\) 격자를 삼각형으로 나눈 torus 모양의 simplicial surface(\(\chi = 0\))에 \(\mathbf{x}_{ij} = \mathbf{x}(2\pi i/n_u, 2\pi j/n_v)\)(<a href="../../notation.html#sec-examples">Notation</a>의 torus of revolution)를 준 것이다. (c) hinge: triangle 두 개 \((0, 1, 2)\), \((1, 0, 3)\)로 된 simplicial surface with boundary에 \(\mathbf{x}_0 = (0, 0, 0)\), \(\mathbf{x}_1 = (1, 0, 0)\), \(\mathbf{x}_2 = (0.5, 0.8, 0)\), \(\mathbf{x}_3(\psi) = (0.3, -0.9\cos\psi, 0.9\sin\psi)\)를 준 것이다. 두 face의 normal 사이의 각이 \(\psi\)이고, \(\psi\)가 변해도 다섯 edge의 길이는 그대로다(<a href="#fig-38-4-2">Figure 38.4.2</a>).</p>
       </div>
       <div class="thm nonexample" id="i-38-4-4">
         <p><span class="thm-head">Non-example 38.4.4</span> <span class="thm-name">(a map that is not simplicial)</span>.
@@ -102,12 +102,12 @@
       </div>
       <div class="thm proposition" id="i-38-4-6">
         <p><span class="thm-head">Proposition 38.4.6</span> <span class="thm-name">(the discrete differential is the integrated differential)</span>.
-        \(\mathbf{x}\)가 simplicial map이고 \(L(p) = \sum_mp^m\mathbf{x}_m\)이 그 linear extension이라 하자.</p>
+        \(\mathbf{x}\)가 simplicial map이고 \(\tilde{\mathbf{x}}(p) = \sum_mp^m\mathbf{x}_m\)이 그 linear extension이라 하자.</p>
         <ul>
-          <li>(a) \(\R^{n_0}\) 위의 \(\R^3\)-valued 1-form \(dL = \sum_m\mathbf{x}_m\,dp^m\)을 oriented edge \([e_i, e_j]\) 위에서 적분하면</li>
+          <li>(a) \(\R^{n_0}\) 위의 \(\R^3\)-valued 1-form \(d\tilde{\mathbf{x}} = \sum_m\mathbf{x}_m\,dp^m\)을 oriented edge \([e_i, e_j]\) 위에서 적분하면</li>
         </ul>
         <div class="equation" id="eq-38-4-3">
-        \[ \int_{[e_i, e_j]}dL = \mathbf{x}_j - \mathbf{x}_i = (d\mathbf{x})_{ij} \tag{38.4.3} \]
+        \[ \int_{[e_i, e_j]}d\tilde{\mathbf{x}} = \mathbf{x}_j - \mathbf{x}_i = (d\mathbf{x})_{ij} \tag{38.4.3} \]
         </div>
         <ul>
           <li>(b) oriented triangle \((i, j, k)\)마다 \((d\mathbf{x})_{ij} + (d\mathbf{x})_{jk} + (d\mathbf{x})_{ki} = 0\)이다.</li>
@@ -116,7 +116,7 @@
         </ul>
       </div>
       <div class="proof">
-        <p><span class="proof-head">Proof.</span> (a) 성분마다 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>을 함수 \(p^m\)에 쓰면 \(\int_{[e_i, e_j]}dp^m = p^m(e_j) - p^m(e_i) = \delta_{mj} - \delta_{mi}\)이다. 따라서 \(\int dL = \sum_m\mathbf{x}_m(\delta_{mj} - \delta_{mi}) = \mathbf{x}_j - \mathbf{x}_i\)이다. (b), (c)는 telescoping sum이다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-1">Proposition 37.4.1</a>과 같다). (d) \(\mathbf{w}_m = \mathbf{y}_m - \mathbf{x}_m\)이라 하면 \(d\mathbf{y} = d\mathbf{x}\)는 모든 edge \(ij\)에서 \(\mathbf{w}_i = \mathbf{w}_j\)라는 것이다. 1-skeleton이 connected이면 임의의 두 vertex가 edge의 열로 이어지므로 \(\mathbf{w}\)는 상수 vector다. 거꾸로 평행이동은 차이를 바꾸지 않는다.</p>
+        <p><span class="proof-head">Proof.</span> (a) 성분마다 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>을 함수 \(p^m\)에 쓰면 \(\int_{[e_i, e_j]}dp^m = p^m(e_j) - p^m(e_i) = \delta_{mj} - \delta_{mi}\)이다. 따라서 \(\int d\tilde{\mathbf{x}} = \sum_m\mathbf{x}_m(\delta_{mj} - \delta_{mi}) = \mathbf{x}_j - \mathbf{x}_i\)이다. (b), (c)는 telescoping sum이다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-1">Proposition 37.4.1</a>과 같다). (d) \(\mathbf{w}_m = \mathbf{y}_m - \mathbf{x}_m\)이라 하면 \(d\mathbf{y} = d\mathbf{x}\)는 모든 edge \(ij\)에서 \(\mathbf{w}_i = \mathbf{w}_j\)라는 것이다. 1-skeleton이 connected이면 임의의 두 vertex가 edge의 열로 이어지므로 \(\mathbf{w}\)는 상수 vector다. 거꾸로 평행이동은 차이를 바꾸지 않는다.</p>
       </div>
       <p>(a)는 \(d\mathbf{x}\)가 단순한 “차이”가 아니라 smooth \(d\mathbf{x}\)(정확히는 linear extension의 differential)의 de Rham image라는 것이다(<a href="../36-discrete-exterior-calculus/36-1-de-rham-map.html#i-36-1-1">Definition 36.1.1</a>, <a href="../36-discrete-exterior-calculus/36-1-de-rham-map.html#i-36-1-7">Example 36.1.7</a>(c)). triangle 안에서 \(\mathbf{x}\)는 affine이라 \(d\mathbf{x}\)가 상수이고, 그 상수 linear map은 그 triangle의 두 edge vector로 정해진다. 따라서 discrete differential은 simplicial map의 smooth 미분 정보를 하나도 버리지 않는다. (b)는 \(d_1d_0 = 0\)(<a href="../36-discrete-exterior-calculus/36-4-discrete-exterior-derivative.html#i-36-4-8">Theorem 36.4.8</a>)이고, (d)는 \(d_0\)의 kernel이 상수라는 것이다(<a href="../36-discrete-exterior-calculus/36-4-discrete-exterior-derivative.html#i-36-4-12">Lemma 36.4.12</a>).</p>
       <p><a href="#fig-38-4-1">Figure 38.4.1</a>(b)로 돌아가 보자. 파란 화살표 네 개가 vertex \(4\)에서의 \((d\mathbf{x})_{4j}\)다. 길이는 모두 \(\sqrt2\)이고, 이웃한 두 화살표의 cross product의 절반이 그 사이 face의 vector area \(A_f\mathbf{N}_f\)다(<a href="38-3-gauss-map-forms.html#ex-38-3-2">Exercise 38.3.2</a>). 이처럼 길이, 각, 넓이, normal은 모두 \(d\mathbf{x}\)에서 계산된다. 평행이동에 무관한 기하는 \(d\mathbf{x}\)가 전부 담고 있다는 것이 (d)다.</p>
@@ -142,7 +142,7 @@ def discrete_differential(V, F):
 
 def star_test(V, F, i, n):
     """sufficient test at an interior vertex i (Corollary 38.4.12): after projecting along n,
-    every triangle of the star turns counterclockwise and the angles at x_i add up to 2 pi."""
+    every triangle of the star turns counterclockwise (0 &lt; angle &lt; pi) and the angles at x_i add up to 2 pi."""
     n = n / np.linalg.norm(n)
     total = 0.0
     for tri in F[(F == i).any(axis=1)]:
@@ -150,7 +150,7 @@ def star_test(V, F, i, n):
         a, b = V[tri[(k + 1) % 3]] - V[i], V[tri[(k + 2) % 3]] - V[i]
         a, b = a - (a @ n) * n, b - (b @ n) * n
         angle = np.arctan2(np.cross(a, b) @ n, a @ b)
-        if angle &lt;= 0:
+        if not 0 &lt; angle &lt; np.pi:
             return False
         total += angle
     return bool(abs(total - 2 * np.pi) &lt; 1e-9)
@@ -195,7 +195,7 @@ print(sum(star_test(Vt, Ft, i, Vt[i] - core[i]) for i in range(len(Vt))), "of", 
       <div class="proof">
         <p class="proof-idea">Proof idea: star는 vertex를 꼭짓점으로 하는 원뿔이고 \(\mathbf{x}\)는 그 위에서 linear하다. 그래서 star 안의 어떤 두 점이 겹치면, 꼭짓점 쪽으로 똑같이 축소한 두 점도 겹친다. 겹침이 vertex 바로 옆까지 내려온다.</p>
         <p><span class="proof-head">Proof.</span> (i)⇒(ii)는 정의다.</p>
-        <p>(ii)⇒(iii): vertex \(i\)를 고정하자. \(p \in C_i\)이면 \(p \in \abs{\tau}\)인 \(\tau \ni i\)가 있고, \(\abs{\tau}\)는 \(e_i\)를 포함하는 convex set이므로 \(t \in [0, 1]\)에서 \(e_i + t(p - e_i) \in \abs{\tau} \subseteq C_i\)이다. 또 \(\mathbf{x}\)는 linear map \(L\)의 제한이므로</p>
+        <p>(ii)⇒(iii): vertex \(i\)를 고정하자. \(p \in C_i\)이면 \(p \in \abs{\tau}\)인 \(\tau \ni i\)가 있고, \(\abs{\tau}\)는 \(e_i\)를 포함하는 convex set이므로 \(t \in [0, 1]\)에서 \(e_i + t(p - e_i) \in \abs{\tau} \subseteq C_i\)이다. 또 \(\mathbf{x}\)는 linear map \(\tilde{\mathbf{x}}\)의 제한이므로</p>
         <div class="equation" id="eq-38-4-4">
         \[ \mathbf{x}\big(e_i + t(p - e_i)\big) = \mathbf{x}_i + t\big(\mathbf{x}(p) - \mathbf{x}_i\big) \tag{38.4.4} \]
         </div>
@@ -227,17 +227,17 @@ print(sum(star_test(Vt, Ft, i, Vt[i] - core[i]) for i in range(len(Vt))), "of", 
       <p>퇴화를 모두 막아도 충분하지 않다. 평면 위의 star에서는 정확한 판정법이 있다.</p>
       <div class="thm proposition" id="i-38-4-11">
         <p><span class="thm-head">Proposition 38.4.11</span> <span class="thm-name">(planar stars)</span>.
-        interior vertex \(i\)의 closed star의 vertex 위치가 모두 unit normal \(\mathbf{n}\)인 한 평면 위에 있다고 하자. star의 face를 \(\mathcal{K}\)의 orientation대로 \((i, j_k, j_{k+1})\)(\(k = 1, \dots, m\), \(j_{m+1} = j_1\))로 쓰고, \(\theta_k \in (-\pi, \pi]\)를 \(\mathbf{x}_{j_k} - \mathbf{x}_i\)에서 \(\mathbf{x}_{j_{k+1}} - \mathbf{x}_i\)까지 \(\mathbf{n}\) 둘레로 잰 signed angle이라 하자. \(\mathbf{x}|_{C_i}\)가 injective일 필요충분조건은 (\(\mathbf{n}\)을 필요하면 \(-\mathbf{n}\)으로 바꾸어) 모든 \(\theta_k \gt 0\)이고 \(\sum_k\theta_k = 2\pi\)인 것이다.</p>
+        interior vertex \(i\)의 closed star의 vertex 위치가 모두 unit normal \(\mathbf{n}\)인 한 평면 위에 있다고 하자. star의 face를 \(\mathcal{K}\)의 orientation대로 \((i, j_k, j_{k+1})\)(\(k = 1, \dots, m\), \(j_{m+1} = j_1\))로 쓰고, \(\theta_k \in (-\pi, \pi]\)를 \(\mathbf{x}_{j_k} - \mathbf{x}_i\)에서 \(\mathbf{x}_{j_{k+1}} - \mathbf{x}_i\)까지 \(\mathbf{n}\) 둘레로 잰 signed angle이라 하자. \(\mathbf{x}|_{C_i}\)가 injective일 필요충분조건은 (\(\mathbf{n}\)을 필요하면 \(-\mathbf{n}\)으로 바꾸어) 모든 \(k\)에서 \(0 \lt \theta_k \lt \pi\)이고 \(\sum_k\theta_k = 2\pi\)인 것이다.</p>
       </div>
       <div class="proof">
         <p class="proof-idea">Proof idea: 모든 triangle이 같은 방향으로 돌면 각 triangle은 \(\mathbf{x}_i\) 둘레의 한 부채꼴을 차지하고, 부채꼴들이 차례로 이어진다. 각의 합이 \(2\pi\)이면 원을 정확히 한 번 덮고, \(4\pi\)이면 두 번 덮는다.</p>
         <p><span class="proof-head">Proof.</span> link는 cycle \(j_1, \dots, j_m\)이고(<a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-2">Definition 33.4.2</a>) 이웃한 face \((i, j_{k-1}, j_k)\)와 \((i, j_k, j_{k+1})\)은 edge \(ij_k\)를 공유한다. \(d_k = \mathbf{x}_{j_k} - \mathbf{x}_i\)라 하자.</p>
-        <p>(⇐) \(\theta_k \in (0, \pi)\)이면 triangle \(k\)는 꼭짓점 \(\mathbf{x}_i\)에서 방향 \(d_k\)부터 \(d_{k+1}\)까지 반시계 방향으로 각 \(\theta_k\)인 닫힌 부채꼴 \(S_k\) 안에 있다. \(d_1\)의 각을 \(\phi_1\)로 두고 \(\phi_{k+1} = \phi_k + \theta_k\)라 하면 \(S_k\)는 각의 구간 \([\phi_k, \phi_{k+1}]\)이고, \(\sum\theta_k = 2\pi\)이므로 이 구간들은 원 둘레를 겹치지 않게 한 번 나눈다. 서로 다른 두 face의 image가 같은 점 \(y \neq \mathbf{x}_i\)를 가지면, 그 점의 방향은 두 구간에 모두 속하므로 두 face는 이웃이고 \(y\)는 공통 경계 방향 \(d_k\) 위에 있다. 각 triangle이 그 경계 반직선과 만나는 곳은 edge \([\mathbf{x}_i, \mathbf{x}_{j_k}]\)뿐이므로 두 원상이 모두 edge \(\abs{\{i, j_k\}}\) 위에 있고, edge 위에서 \(\mathbf{x}\)는 injective(길이 \(\neq 0\))이므로 원상이 같다. 한 face 안에서는 \(\mathbf{x}\)가 nondegenerate affine map이라 injective이다. \(y = \mathbf{x}_i\)의 원상은 \(e_i\) 하나뿐이다(다른 점은 \(\theta_k \gt 0\)인 부채꼴의 꼭짓점이 아닌 곳에 간다). 따라서 \(\mathbf{x}|_{C_i}\)는 injective다.</p>
-        <p>(⇒) injective이면 <a href="#i-38-4-10">Corollary 38.4.10</a>(b)에 의해 \(\theta_k \notin \{0, \pi\}\)이고, 이웃한 두 face의 \(\theta\)의 부호가 다르면 두 triangle이 공통 edge의 같은 쪽에 놓여 (c)에 모순이다. cycle을 따라가면 모든 부호가 같으므로 \(\mathbf{n}\)을 골라 모두 양수로 만든다. \(\phi_{m+1} - \phi_1 = \sum\theta_k\)이고 \(d_{m+1} = d_1\)이므로 합은 \(2\pi w\)(\(w\)는 양의 정수)다. \(w \ge 2\)이면 어떤 방향은 두 부채꼴의 안쪽에 들어가고, \(\mathbf{x}_i\)에 충분히 가까운 그 방향의 점은 두 face의 image에 모두 들어가므로 injective가 아니다. 따라서 \(w = 1\)이다.</p>
+        <p>(⇐) \(\theta_k \in (0, \pi)\)이면 triangle \(k\)는 퇴화하지 않고(\(\theta_k = \pi\)이면 \(\mathbf{x}_i\)가 맞은편 변 위에 놓여 triangle이 선분으로 퇴화하므로 이 조건이 필요하다) 꼭짓점 \(\mathbf{x}_i\)에서 방향 \(d_k\)부터 \(d_{k+1}\)까지 반시계 방향으로 각 \(\theta_k\)인 닫힌 부채꼴 \(S_k\) 안에 있다. \(d_1\)의 각을 \(\varphi_1\)로 두고 \(\varphi_{k+1} = \varphi_k + \theta_k\)라 하면 \(S_k\)는 각의 구간 \([\varphi_k, \varphi_{k+1}]\)이고, \(\sum\theta_k = 2\pi\)이므로 이 구간들은 원 둘레를 겹치지 않게 한 번 나눈다. 서로 다른 두 face의 image가 같은 점 \(y \neq \mathbf{x}_i\)를 가지면, 그 점의 방향은 두 구간에 모두 속하므로 두 face는 이웃이고 \(y\)는 공통 경계 방향 \(d_k\) 위에 있다. 각 triangle이 그 경계 반직선과 만나는 곳은 edge \([\mathbf{x}_i, \mathbf{x}_{j_k}]\)뿐이므로 두 원상이 모두 edge \(\abs{\{i, j_k\}}\) 위에 있고, edge 위에서 \(\mathbf{x}\)는 injective(길이 \(\neq 0\))이므로 원상이 같다. 한 face 안에서는 \(\mathbf{x}\)가 nondegenerate affine map이라 injective이다. \(y = \mathbf{x}_i\)의 원상은 \(e_i\) 하나뿐이다(다른 점은 \(\theta_k \gt 0\)인 부채꼴의 꼭짓점이 아닌 곳에 간다). 따라서 \(\mathbf{x}|_{C_i}\)는 injective다.</p>
+        <p>(⇒) injective이면 <a href="#i-38-4-10">Corollary 38.4.10</a>(b)에 의해 \(\theta_k \notin \{0, \pi\}\)이고, 이웃한 두 face의 \(\theta\)의 부호가 다르면 두 triangle이 공통 edge의 같은 쪽에 놓여 (c)에 모순이다. cycle을 따라가면 모든 부호가 같으므로 \(\mathbf{n}\)을 골라 모두 양수로 만든다. \(\varphi_{m+1} - \varphi_1 = \sum\theta_k\)이고 \(d_{m+1} = d_1\)이므로 합은 \(2\pi w\)(\(w\)는 양의 정수)다. \(w \ge 2\)이면 어떤 방향은 두 부채꼴의 안쪽에 들어가고, \(\mathbf{x}_i\)에 충분히 가까운 그 방향의 점은 두 face의 image에 모두 들어가므로 injective가 아니다. 따라서 \(w = 1\)이다.</p>
       </div>
       <div class="thm corollary" id="i-38-4-12">
         <p><span class="thm-head">Corollary 38.4.12</span> <span class="thm-name">(a sufficient test by projection)</span>.
-        interior vertex \(i\)와 unit vector \(\mathbf{n}\)에 대하여, star의 vertex 위치를 \(\mathbf{n}^\perp\)에 정사영한 것이 <a href="#i-38-4-11">Proposition 38.4.11</a>의 조건(모든 \(\theta_k \gt 0\), \(\sum\theta_k = 2\pi\))을 만족하면 \(\mathbf{x}|_{C_i}\)는 injective다.</p>
+        interior vertex \(i\)와 unit vector \(\mathbf{n}\)에 대하여, star의 vertex 위치를 \(\mathbf{n}^\perp\)에 정사영한 것이 <a href="#i-38-4-11">Proposition 38.4.11</a>의 조건(모든 \(0 \lt \theta_k \lt \pi\), \(\sum\theta_k = 2\pi\))을 만족하면 \(\mathbf{x}|_{C_i}\)는 injective다.</p>
       </div>
       <div class="proof">
         <p><span class="proof-head">Proof.</span> 정사영 \(\pi_{\mathbf{n}}\)과 \(\mathbf{x}\)의 합성은 vertex 위치가 \(\pi_{\mathbf{n}}(\mathbf{x}_m)\)인 simplicial map이다(linear map의 합성). <a href="#i-38-4-11">Proposition 38.4.11</a>에 의해 그것이 \(C_i\)에서 injective이므로 \(\mathbf{x}\)도 그렇다.</p>
@@ -253,7 +253,7 @@ print(sum(star_test(Vt, Ft, i, Vt[i] - core[i]) for i in range(len(Vt))), "of", 
       </div>
       <div class="thm nonexample" id="i-38-4-15">
         <p><span class="thm-head">Non-example 38.4.15</span> <span class="thm-name">(a branch point)</span>.
-        valence 5인 평면 star에서 link vertex \(k\)를 각 \(90^\circ + 144^\circ k\)(\(k = 0, \dots, 4\))의 단위원 위에 두자. 모든 face가 반시계 방향이고 \(\theta_k = 144^\circ\)이므로 퇴화도 fold도 없다. 그러나 \(\sum\theta_k = 720^\circ = 4\pi\)이므로 \(\mathbf{x}_i\) 근처의 모든 방향이 두 face에 덮인다. 예를 들어 vertex \(0\)에서 \(126^\circ\) 방향의 짧은 선분은 face \((0, 1, 2)\)(\(90^\circ\)–\(234^\circ\))와 face \((0, 3, 4)\)(\(18^\circ\)–\(162^\circ\))의 image 모두에 들어간다. 이 star의 link는 Chapter 37의 pentagram이다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-12">Example 37.4.12</a>(b)). pentagram은 regular discrete curve, 곧 곡선으로서는 locally injective이고 turning number가 \(2\)다. link가 regular라도 그것을 밑면으로 한 원뿔(star)은 꼭짓점에서 locally injective가 아닐 수 있다. 이런 점을 branch point라 한다.</p>
+        valence 5인 평면 star에서 가운데 vertex \(0\)을 원점에, link vertex \(k\)를 단위원 위의 각 \(90^\circ + 144^\circ(k - 1)\)(\(k = 1, \dots, 5\))에 두자. 모든 face가 반시계 방향이고 \(\theta_k = 144^\circ\)이므로 퇴화도 fold도 없다. 그러나 \(\sum\theta_k = 720^\circ = 4\pi\)이므로 \(\mathbf{x}_i\) 근처의 모든 방향이 두 face에 덮인다. 예를 들어 vertex \(0\)에서 \(126^\circ\) 방향의 짧은 선분은 face \((0, 1, 2)\)(\(90^\circ\)–\(234^\circ\))와 face \((0, 3, 4)\)(\(18^\circ\)–\(162^\circ\))의 image 모두에 들어간다. 이 star의 link는 Chapter 37의 pentagram이다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-12">Example 37.4.12</a>(b)). pentagram은 regular discrete curve, 곧 곡선으로서는 locally injective이고 turning number가 \(2\)다. link가 regular라도 그것을 밑면으로 한 원뿔(star)은 꼭짓점에서 locally injective가 아닐 수 있다. 이런 점을 branch point라 한다.</p>
       </div>
       <p><a href="#fig-38-4-3">Figure 38.4.3</a>에서 두 예를 보자. 왼쪽 (a)에서는 주황 triangle \((0, 2, 3)\)이 하늘색 triangle \((0, 1, 2)\) 위에 겹쳐 진하게 보인다. 오른쪽 (b)에서는 가운데 오각형 부분이 진하다. 그곳은 두 face가 겹쳐 덮은 곳이다. 두 그림 모두 edge 길이와 triangle 넓이는 멀쩡하다. 둘 다 vertex \(0\)의 star가 embedded가 아니므로 <a href="#i-38-4-9">Proposition 38.4.9</a>에 의해 discrete immersion이 아니다.</p>
       <figure class="dg-figure" id="fig-38-4-3">
@@ -331,7 +331,7 @@ print(sum(star_test(Vt, Ft, i, Vt[i] - core[i]) for i in range(len(Vt))), "of", 
         <p><span class="thm-head">Exercise 38.4.4</span> <span class="level">★★</span>
         octahedron(<a href="#fig-38-4-1">Figure 38.4.1</a>)의 vertex \(\mathbf{x}_0 = e_1\)의 star를 보자. (a) <a href="#i-38-4-12">Corollary 38.4.12</a>의 검사가 \(\mathbf{n} = e_1\)에서는 통과하고 \(\mathbf{n} = e_2\)에서는 실패함을 보여라. (b) 그런데도 이 star가 embedded임을 설명하고, 이 검사가 필요조건이 아님을 결론 지어라.</p>
         <details class="solution"><summary>Solution</summary>
-          <p>(a) \(\mathbf{x}_0\)의 이웃은 \(\pm e_2, \pm e_3\)이다. \(\mathbf{n} = e_1\)로 정사영하면 \(d_k = \mathbf{x}_{j_k} - e_1\)의 정사영은 \(\pm e_2, \pm e_3\)이고, link를 따라 \(90^\circ\)씩 같은 방향으로 네 번 돌아 합이 \(2\pi\)이다. \(\mathbf{n} = e_2\)로 정사영하면 이웃 \(\pm e_2\)의 \(d_k = \pm e_2 - e_1\)이 둘 다 \(-e_1\)로 가므로, 네 face의 정사영한 각이 \(45^\circ, -45^\circ, 45^\circ, -45^\circ\)가 되고 합은 \(0\)이다. 음수인 각이 있으므로 검사가 실패한다(<code>star_test</code>는 \(\theta \le 0\)인 face에서 <code>False</code>를 낸다). 정사영한 star는 반쪽 평면에 접혀 들어가 있다. (b) 이 star의 image는 꼭짓점 \(e_1\)에서 만나는 볼록한 사각뿔의 옆면 네 개이고, 그것은 \(\mathbf{n} = e_1\)의 검사가 보인 대로 embedded다. 같은 star가 어떤 \(\mathbf{n}\)에서는 통과하고 어떤 \(\mathbf{n}\)에서는 실패하므로, 실패가 non-embeddedness를 뜻하지 않는다. 곧 이 검사는 충분조건일 뿐이다.</p>
+          <p>(a) \(\mathbf{x}_0\)의 이웃은 \(\pm e_2, \pm e_3\)이다. \(\mathbf{n} = e_1\)로 정사영하면 \(d_k = \mathbf{x}_{j_k} - e_1\)의 정사영은 \(\pm e_2, \pm e_3\)이고, link를 따라 \(90^\circ\)씩 같은 방향으로 네 번 돌아 합이 \(2\pi\)이다. \(\mathbf{n} = e_2\)로 정사영하면 이웃 \(\pm e_2\)의 \(d_k = \pm e_2 - e_1\)이 둘 다 \(-e_1\)로 가므로, link를 \(e_2 \to e_3 \to -e_2 \to -e_3\) 순서(바깥쪽 orientation)로 돌 때 네 face의 정사영한 각이 \(45^\circ, -45^\circ, -45^\circ, 45^\circ\)가 되고 합은 \(0\)이다. 음수인 각이 있으므로 검사가 실패한다(<code>star_test</code>는 \(\theta \le 0\)인 face에서 <code>False</code>를 낸다). 정사영한 star는 반쪽 평면에 접혀 들어가 있다. (b) 이 star의 image는 꼭짓점 \(e_1\)에서 만나는 볼록한 사각뿔의 옆면 네 개이고, 그것은 \(\mathbf{n} = e_1\)의 검사가 보인 대로 embedded다. 같은 star가 어떤 \(\mathbf{n}\)에서는 통과하고 어떤 \(\mathbf{n}\)에서는 실패하므로, 실패가 non-embeddedness를 뜻하지 않는다. 곧 이 검사는 충분조건일 뿐이다.</p>
         </details>
       </div>
 
@@ -354,7 +354,7 @@ for amp in (0.2, 0.4, 0.6, 0.8):
 jitter 0.4 h: 0 of 81 interior stars fail
 jitter 0.6 h: 24 of 81 interior stars fail
 jitter 0.8 h: 45 of 81 interior stars fail</code></pre>
-          <p>mesh가 평면에 있으므로 <a href="#i-38-4-11">Proposition 38.4.11</a>에 의해 검사는 정확하다. 실패한 star는 embedded가 아니고, 그 vertex에서 mesh는 discrete immersion이 아니다. \(a \le 0.4\)이면 vertex가 이웃 edge를 넘어가지 못해 fold가 없고, \(a = 0.6\)부터 일부 triangle이 뒤집혀(<a href="#i-38-4-14">Non-example 38.4.14</a>의 fold) 실패한다. 한 triangle이 뒤집히면 그 세 vertex의 star가 모두 실패하므로 수가 빨리 늘어난다. verify는 실패한 star에서만 두 face가 실제로 넓이가 있는 영역에서 겹치는 것을 polygon clipping으로 따로 확인한다.</p>
+          <p>mesh가 평면에 있으므로 <a href="#i-38-4-11">Proposition 38.4.11</a>에 의해 검사는 정확하다. 실패한 star는 embedded가 아니고, 그 vertex에서 mesh는 discrete immersion이 아니다. 이 난수에서는 \(a \le 0.4\)이면 실패가 없고, \(a = 0.6\)부터 일부 triangle이 뒤집혀(<a href="#i-38-4-14">Non-example 38.4.14</a>의 fold) 실패한다. \(a \le 0.4\)에서 실패가 없는 것은 이 seed의 결과일 뿐이다. 세 vertex가 좌표마다 \(ah\)까지 움직일 때 직각이등변 triangle의 orientation 행렬식은 최악의 경우 \(h^2(1 - 4a)\)이므로, 어느 triangle도 뒤집히지 않는다고 보장되는 것은 \(a \lt \tfrac14\)일 때뿐이다. 한 triangle이 뒤집히면 그 세 vertex의 star가 모두 실패하므로 수가 빨리 늘어난다. verify는 실패한 star에서만 두 face가 실제로 넓이가 있는 영역에서 겹치는 것을 polygon clipping으로 따로 확인한다.</p>
         </details>
       </div>
     </section>

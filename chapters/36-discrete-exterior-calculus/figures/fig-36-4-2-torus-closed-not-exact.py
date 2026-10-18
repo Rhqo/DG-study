@@ -117,10 +117,13 @@ dgfig.save(fig, __file__)
 # interactive version
 import plotly.graph_objects as go  # noqa: E402
 
-traces = [dm.plotly_mesh(V, F, color="#D8D8D8", name="torus T_{2,0.8}"), dm.plotly_edges(V, F, color="#888888", width=1)]
-for verts, col, name in ((lon, BLUE, "longitude: <dv, c> = 2 pi"), (mer, ORANGE, "meridian: <du, c> = 2 pi")):
+traces = [dm.plotly_mesh(V, F, color="#D8D8D8", name="torus T<sub>2,0.8</sub>"),
+          dm.plotly_edges(V, F, color="#888888", width=1)]
+for verts, col, name in ((lon, BLUE, "longitude: \u27e8dv, c\u27e9 = 2\u03c0"),
+                         (mer, ORANGE, "meridian: \u27e8du, c\u27e9 = 2\u03c0")):
     P = V[verts + verts[:1]] * 1.01
     traces.append(go.Scatter3d(x=P[:, 0], y=P[:, 1], z=P[:, 2], mode="lines", line=dict(color=col, width=7),
                                name=name, hoverinfo="name"))
-dm.plotly_save(traces, __file__, "Torus mesh T_{2,0.8} (12 x 16): the longitude (blue) and meridian (orange) loops",
+dm.plotly_save(traces, __file__,
+               "Torus mesh T<sub>2,0.8</sub> (12 \u00d7 16): the longitude (blue) and meridian (orange) loops",
                "fig-36-4-2")

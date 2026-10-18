@@ -69,6 +69,27 @@ for name, (Vm, Fm) in (("icosphere(1)", dm.icosphere(1)), ("torus 8x12", dm.toru
     check(f"Proposition 36.5.5: lib dual_d0, dual_d1 agree and dual_d1 dual_d0 = 0 on {name}",
           np.array_equal(ch36.dual_d0(Fm), D1m.T) and np.array_equal(ch36.dual_d1(Fm, len(Vm)), -D0m.T)
           and not np.any(ch36.dual_d1(Fm, len(Vm)) @ ch36.dual_d0(Fm)))
+# with boundary (paragraph after Proposition 36.5.5): (36.5.1) holds on the rows of interior edges and interior vertices
+D0P = dd.d0(FP, len(VP))
+lrP = ch36.left_right_faces(FP)
+int_e = (lrP >= 0).all(1)
+bnd_v = set(np.unique(dm.boundary_edges(FP)).tolist())
+ok_d0 = all(D1P[f, e] == 1 and D1P[g, e] == -1 and np.count_nonzero(D1P[:, e]) == 2
+            for e, (g, f) in enumerate(lrP) if int_e[e])
+ok_d1 = True
+for v in range(len(VP)):
+    if v in bnd_v:
+        continue
+    fs = [f for f in range(len(FP)) if v in FP[f]]
+    fs.sort(key=lambda f: np.arctan2(*(VP[FP[f]].mean(0) - VP[v])[::-1]))   # counterclockwise around v
+    row = np.zeros(len(EP))
+    for a_, b_ in zip(fs, fs[1:] + fs[:1]):
+        (j,) = set(FP[a_].tolist()) & set(FP[b_].tolist()) - {v}
+        e = idxP[(min(v, j), max(v, j))]
+        row[e] += 1 if (lrP[e, 0], lrP[e, 1]) == (a_, b_) else -1        # e* runs right -> left
+    ok_d1 &= np.array_equal(row, -D0P[:, v])
+check("Proposition 36.5.5 (with boundary): d1^T on interior-edge rows, -d0^T on interior-vertex rows (planar patch)",
+      ok_d0 and ok_d1 and int_e.sum() < len(EP) and len(bnd_v) > 0)
 
 # ---------------------------------------------------------------- Example 36.5.7, Non-example 36.5.8
 ell = 1.7

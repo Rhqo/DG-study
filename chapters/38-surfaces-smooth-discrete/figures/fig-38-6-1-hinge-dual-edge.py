@@ -55,9 +55,9 @@ hf, hg = 0.5 * 0.4875, 0.5 * 2 / 3                        # h = (|e| / 2) cot(op
 assert np.allclose(chords, np.sqrt(hf ** 2 + hg ** 2 + 2 * hf * hg * np.cos(PSIS)))
 
 box = np.array([[0.0, -0.95, -0.2], [1.0, 0.85, 0.8]])          # common bounding box of the three hinges
-fig = plt.figure(figsize=(7.2, 3.4))
+fig = plt.figure(figsize=(7.2, 3.8))
 for k, (V, F, cf, cg, m, dual, chord) in enumerate(data):
-    ax = fig.add_axes([k / 3, 0.0, 1 / 3, 0.84], projection="3d")
+    ax = fig.add_axes([k / 3, 0.0, 1 / 3, 0.76], projection="3d")
     ax.view_init(elev=32, azim=-78)
     ax.set_axis_off()
     ax.add_collection3d(Poly3DCollection([V[F[0]]], facecolors=C["surface"], edgecolors="#555555", linewidths=0.7,
@@ -69,9 +69,10 @@ for k, (V, F, cf, cg, m, dual, chord) in enumerate(data):
     ax.plot(*np.array([cg, cf]).T, color=C["accent"], lw=1.6, ls="--", zorder=8)
     for p, lab, off in ((cf, r"$c_f$", (0.05, 0.0, 0.0)), (cg, r"$c_g$", (-0.13, -0.02, 0.02)),
                         (m, r"$m$", (0.0, -0.12, -0.08))):
-        dgfig.point3d(ax, p, lab, size=10, label_offset=off, fontsize=10)
+        dgfig.point3d(ax, p, lab, size=10, label_offset=off, fontsize=12)
     dgfig.equal_aspect(ax, box, zoom=1.6)
-    fig.text(k / 3 + 1 / 6, 0.95, rf"$\psi = {np.degrees(PSIS[k]):.0f}^\circ$", ha="center", fontsize=11)
-    fig.text(k / 3 + 1 / 6, 0.87, rf"$|e^\star| = {dual:.3f}$,  $|c_f - c_g| = {chord:.3f}$", ha="center",
-             fontsize=9.5)
+    # three panels: labels of 12-13 pt so that they stay readable at phone width (GUIDELINES 12.3)
+    fig.text(k / 3 + 1 / 6, 0.94, rf"$\psi = {np.degrees(PSIS[k]):.0f}^\circ$", ha="center", fontsize=13)
+    fig.text(k / 3 + 1 / 6, 0.86, rf"$|e^\star| = {dual:.3f}$", ha="center", fontsize=12, color=C["tangent"])
+    fig.text(k / 3 + 1 / 6, 0.79, rf"$|c_f - c_g| = {chord:.3f}$", ha="center", fontsize=12, color=C["accent"])
 dgfig.save(fig, __file__)

@@ -85,28 +85,28 @@ for ax in (axa, axb):
 y1, y0 = ytop + 0.36, ybot - 0.36
 loop = [(xs[0] + 0.2, ytop + H_ / 2 + 0.02), (xs[0] + 0.25, y1), (xs[1] - 0.25, y1), (xs[1] - 0.2, ytop + H_ / 2 + 0.02)]
 axa.plot(*np.array(loop).T, color=BLUE, lw=2.6, zorder=4)
-axa.add_patch(FancyArrowPatch((xs[1] + 0.32, ytop - H_ / 2 + 0.02), (xs[1] + 0.32, ybot + H_ / 2 - 0.02),
+axa.add_patch(FancyArrowPatch((xs[1] + 0.50, ytop - H_ / 2 + 0.02), (xs[1] + 0.50, ybot + H_ / 2 - 0.02),
                               arrowstyle="-|>", mutation_scale=15, color=BLUE, lw=2.6, zorder=4))
 axa.plot(*np.array([(xs[1] - 0.2, ybot - H_ / 2 - 0.02), (xs[1] - 0.25, y0), (xs[0] + 0.25, y0),
                     (xs[0] + 0.2, ybot - H_ / 2 - 0.02)]).T, color=BLUE, lw=2.6, zorder=4)
-axa.add_patch(FancyArrowPatch((xs[0] - 0.33, ybot + H_ / 2 - 0.02), (xs[0] - 0.33, ytop - H_ / 2 + 0.02),
+axa.add_patch(FancyArrowPatch((xs[0] - 0.50, ybot + H_ / 2 - 0.02), (xs[0] - 0.50, ytop - H_ / 2 + 0.02),
                               arrowstyle="-|>", mutation_scale=15, color=BLUE, lw=2.6, zorder=4))
 axa.text(0.95, y1 + 0.13, r"$d_0$", color=BLUE, fontsize=11, ha="center")
-axa.text(0.95, y0 - 0.17, r"$\tilde d_1 = -d_0^{T}$", color=BLUE, fontsize=11, ha="center")
+axa.text(0.95, y0 - 0.24, r"$\tilde d_1 = -d_0^{\mathsf{T}}$", color=BLUE, fontsize=11, ha="center")
 axa.set_title(r"(a) Laplacian: $\Delta \approx \star_0^{-1}\,\tilde d_1\,\star_1\,d_0 = \star_0^{-1}L$", fontsize=11.5,
               color="black")
 # (b) divergence and curl
-axb.add_patch(FancyArrowPatch((xs[1] + 0.32, ytop - H_ / 2 + 0.02), (xs[1] + 0.32, ybot + H_ / 2 - 0.02),
+axb.add_patch(FancyArrowPatch((xs[1] + 0.50, ytop - H_ / 2 + 0.02), (xs[1] + 0.50, ybot + H_ / 2 - 0.02),
                               arrowstyle="-|>", mutation_scale=15, color=ORANGE, lw=2.6, zorder=4))
 axb.plot(*np.array([(xs[1] - 0.2, ybot - H_ / 2 - 0.02), (xs[1] - 0.25, y0), (xs[0] + 0.25, y0),
                     (xs[0] + 0.2, ybot - H_ / 2 - 0.02)]).T, color=ORANGE, lw=2.6, zorder=4)
-axb.add_patch(FancyArrowPatch((xs[0] - 0.33, ybot + H_ / 2 - 0.02), (xs[0] - 0.33, ytop - H_ / 2 + 0.02),
+axb.add_patch(FancyArrowPatch((xs[0] - 0.50, ybot + H_ / 2 - 0.02), (xs[0] - 0.50, ytop - H_ / 2 + 0.02),
                               arrowstyle="-|>", mutation_scale=15, color=ORANGE, lw=2.6, zorder=4))
 axb.plot(*np.array([(xs[1] + 0.2, ytop + H_ / 2 + 0.02), (xs[1] + 0.25, y1), (xs[2] - 0.25, y1),
                     (xs[2] - 0.2, ytop + H_ / 2 + 0.02)]).T, color=GREEN, lw=2.6, zorder=4)
-axb.add_patch(FancyArrowPatch((xs[2] + 0.32, ytop - H_ / 2 + 0.02), (xs[2] + 0.32, ybot + H_ / 2 - 0.02),
+axb.add_patch(FancyArrowPatch((xs[2] + 0.50, ytop - H_ / 2 + 0.02), (xs[2] + 0.50, ybot + H_ / 2 - 0.02),
                               arrowstyle="-|>", mutation_scale=15, color=GREEN, lw=2.6, zorder=4))
-axb.text(0.95, y0 - 0.17, r"div $\approx \star_0^{-1}\tilde d_1\star_1 = -d_1^{*}$", color=ORANGE, fontsize=11,
+axb.text(0.95, y0 - 0.24, r"div $\approx \star_0^{-1}\tilde d_1\star_1 = -d_1^{*}$", color=ORANGE, fontsize=11,
          ha="center")
 axb.text(2.85, y1 + 0.15, r"curl $\approx \star_2 d_1$", color=GREEN, fontsize=11, ha="center")
 axb.set_title("(b) divergence and curl of a primal 1-form", fontsize=11)

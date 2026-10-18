@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>36.2 Chains and Cochains — DG Study</title>
   <meta name="dg-id" content="36.2">
-  <meta name="dg-status" content="draft">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-prereq" content="36.1, 33.3, 33.5, 1.3">
   <meta name="dg-refs" content="CMU-DDG L8; Hatcher02; Desbrun08">
   <meta name="dg-updated" content="2026-10-18">
@@ -51,7 +51,7 @@
     <section id="sec-motivation">
       <h2>Motivation</h2>
       <p><a href="36-1-de-rham-map.html">Section 36.1</a>은 smooth form을 simplex마다의 적분값으로 바꾸었다. 그런데 적분은 simplex 하나 위에서만 하는 것이 아니다. edge 여러 개를 이은 path, triangle 여러 개를 붙인 영역 위에서도 적분하고, 같은 edge를 두 번 지나거나 반대 방향으로 지나기도 한다. de Rham 상 \(\hat\alpha\)만 있으면 이런 적분은 모두 합으로 계산된다. path를 따라가며 edge 값을 더하되, 반대로 지나는 edge는 빼면 된다(<a href="36-1-de-rham-map.html#i-36-1-4">Proposition 36.1.4</a>).</p>
-      <p>이 계산을 깔끔하게 쓰려면 “적분할 영역”을 수처럼 더하고 뺄 수 있는 대상으로 만들어야 한다. 그것이 chain이다. 그러면 discrete form은 chain을 받아 수를 내는 linear map이 되고, 영역의 boundary를 취하는 연산 \(\partial\)와 form의 \(d\)가 서로의 dual로 짝을 이룬다. 이 짝이 Stokes's theorem의 discrete 판이고(<a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>), 그 바탕에 있는 조합적 사실이 이 절의 \(\partial\circ\partial = 0\)이다. Chapter 35는 이 증명을 이 절에 맡겼다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#sec-dd">Section 35.4</a>).</p>
+      <p>이 계산을 깔끔하게 쓰려면 “적분할 영역”을 수처럼 더하고 뺄 수 있는 대상으로 만들어야 한다. 그것이 chain이다. 그러면 discrete form은 chain을 받아 수를 내는 linear map이 되고, 영역의 boundary를 취하는 연산 \(\partial\)와 form의 \(d\)가 서로의 dual로 짝을 이룬다. 이 짝이 Stokes's theorem의 discrete 판이고(<a href="36-4-discrete-exterior-derivative.html">Section 36.4</a>), 그 바탕에 있는 조합적 사실이 이 절의 \(\partial\circ\partial = 0\)이다. Chapter 35는 box에서 이 사실을 면의 부호로 확인했고, simplex로 이루어진 chain에 대한 증명은 이 절에 맡겼다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#sec-dd">Section 35.4</a>).</p>
     </section>
 
     <section id="sec-chains">
@@ -136,7 +136,7 @@
 
       <div class="thm proposition" id="i-36-2-9">
         <p><span class="thm-head">Proposition 36.2.9</span> <span class="thm-name">(the matrices of the boundary operator)</span>.
-        2-complex \(\mathcal{K}\)의 vertex, edge, face에 face list의 orientation과 번호(§2.5)를 주고 \(C_k(\mathcal{K}) \cong \R^{n_k}\)로 보면, \(\partial_1\)의 행렬은 \((A_0^{\pm})^{\mathsf T}\)이고 \(\partial_2\)의 행렬은 \((A_1^{\pm})^{\mathsf T}\)이다. 여기서 \(A_0^{\pm}, A_1^{\pm}\)는 <a href="../33-combinatorial-surfaces/33-5-mesh-data-structures.html#i-33-5-6">Definition 33.5.6</a>의 signed incidence matrix이고, <code>dgdec.boundary1</code>, <code>dgdec.boundary2</code>가 이 행렬이다.</p>
+        2-complex \(\mathcal{K}\)의 vertex, edge, face에 face list의 orientation과 번호(<a href="../../notation.html#sec-ddg">Notation</a>)를 주고 \(C_k(\mathcal{K}) \cong \R^{n_k}\)로 보면, \(\partial_1\)의 행렬은 \((A_0^{\pm})^{\mathsf T}\)이고 \(\partial_2\)의 행렬은 \((A_1^{\pm})^{\mathsf T}\)이다. 여기서 \(A_0^{\pm}, A_1^{\pm}\)는 <a href="../33-combinatorial-surfaces/33-5-mesh-data-structures.html#i-33-5-6">Definition 33.5.6</a>의 signed incidence matrix이고, <code>dgdec.boundary1</code>, <code>dgdec.boundary2</code>가 이 행렬이다.</p>
       </div>
       <div class="proof">
         <p><span class="proof-head">Proof.</span> 행렬의 열 \(e\)는 기준 orientation의 \(e\)번째 simplex의 boundary다. edge \(e = [i, j]\)(\(i \lt j\))에서 \(\partial e = [j] - [i]\)이므로 열 \(e\)는 자리 \(j\)에 \(+1\), 자리 \(i\)에 \(-1\)이다. <a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-7">Proposition 33.3.7</a>에서 \(o([i,j], [j]) = +1\), \(o([i,j], [i]) = -1\)이므로 이것은 \(A_0^{\pm}\)의 행 \(e\)와 같다. triangle \(f = [v_0, v_1, v_2]\)에서 \(\partial f = \sum_m(-1)^m\tau_m\)이고, \(\tau_m\)은 edge \(e_m\)의 기준 orientation의 \(\pm1\)배다(두 vertex가 증가하는 순서이면 \(+1\)). 따라서 열 \(f\)의 자리 \(e_m\)은 \((-1)^m\cdot(\pm1)\)이고, 이것은 기준 orientation의 \(e_m\)에 대한 relative orientation \(o(f, e_m)\)(<a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-6">Definition 33.3.6</a>, <a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-7">Proposition 33.3.7</a>), 곧 \((A_1^{\pm})_{fe_m}\)이다. 나머지 자리는 둘 다 \(0\)이다.</p>
@@ -191,12 +191,12 @@ True True</code></pre>
       </div>
       <div class="thm nonexample" id="i-36-2-12">
         <p><span class="thm-head">Non-example 36.2.12</span> <span class="thm-name">(length of a chain)</span>.
-        \(c = \sum_rc_r\sigma_r\)에 \(\sum_r\abs{c_r}\,\ell(\sigma_r)\)(edge 길이 \(\ell\)의 가중합)를 주는 map은 cochain이 아니다. \(\abs{c_r}\) 때문에 linear가 아니다. 예를 들어 \(c\)와 \(-c\)에 같은 값을 주므로 \(c + (-c) = 0\)에 \(0\)이 아닌 값의 두 배를 주어야 하는 셈이다. 길이처럼 방향 없는 측정은 <a href="36-1-de-rham-map.html#i-36-1-8">Non-example 36.1.8</a>과 같은 이유로 cochain이 될 수 없다.</p>
+        \(c = \sum_rc_r\sigma_r\)에 \(\sum_r\abs{c_r}\,\ell(\sigma_r)\)(edge 길이 \(\ell\)의 가중합)를 주는 map은 cochain이 아니다. \(\abs{c_r}\) 때문에 linear가 아니다. 이 map을 \(\mu\)라 하면, linear라면 \(\mu(c) + \mu(-c) = \mu(0) = 0\)이어야 하는데, \(c \neq 0\)이면 \(\mu(c) = \mu(-c) \gt 0\)이다. 길이처럼 방향 없는 측정은 <a href="36-1-de-rham-map.html#i-36-1-8">Non-example 36.1.8</a>과 같은 이유로 cochain이 될 수 없다.</p>
       </div>
 
       <div class="thm proposition" id="i-36-2-13">
         <p><span class="thm-head">Proposition 36.2.13</span> <span class="thm-name">(discrete forms are cochains)</span>.
-        (a) discrete \(k\)-form \(\alpha \in \R^{n_k}\)(<a href="36-1-de-rham-map.html#i-36-1-6">Definition 36.1.6</a>)에 cochain \(c = \sum_rc_r\sigma_r \mapsto \sum_rc_r\alpha_r\)을 대응시키는 map은 isomorphism \(\R^{n_k} \cong C^k(\mathcal{K})\)이다. 이 cochain을 다시 \(\alpha\)로 쓰면, 모든 oriented \(k\)-simplex \(\sigma\)(어느 orientation이든)에서 \(\langle\alpha, \sigma\rangle = \alpha_\sigma\)이다.</p>
+        (a) discrete \(k\)-form \(\alpha \in \R^{n_k}\)(<a href="36-1-de-rham-map.html#i-36-1-6">Definition 36.1.6</a>)에 cochain \(c \mapsto \sum_rc_r\alpha_r\)(여기서 \(c = \sum_rc_r\sigma_r\)은 chain)을 대응시키는 map은 isomorphism \(\R^{n_k} \cong C^k(\mathcal{K})\)이다. 이 cochain을 다시 \(\alpha\)로 쓰면, 모든 oriented \(k\)-simplex \(\sigma\)(어느 orientation이든)에서 \(\langle\alpha, \sigma\rangle = \alpha_\sigma\)이다.</p>
         <p>(b) chain \(c = \sum_rc_r\sigma_r\) 위의 적분을 \(\int_c\alpha := \sum_rc_r\int_{\sigma_r}\alpha\)로 정하면, smooth \(k\)-form \(\alpha\)에 대하여</p>
         <div class="equation" id="eq-36-2-3">
         \[ \langle\hat\alpha, c\rangle = \int_c\alpha \tag{36.2.3} \]
@@ -224,7 +224,7 @@ True True</code></pre>
       <div class="thm example" id="i-36-2-15">
         <p><span class="thm-head">Example 36.2.15</span> <span class="thm-name">(a cycle that bounds and a cycle that does not)</span>.
         (a) <a href="#i-36-2-2">Example 36.2.2</a>(c)의 loop \(c - c'\)은 \(\partial[0, 3, 4]\)이므로 boundary이고, <a href="#i-36-2-2">Example 36.2.2</a>(d)의 정사각형 둘레도 \(\partial(\sum_ff)\)이다. (b) annulus \(1 \le r \le 2\)를 반지름 \(1, 1.5, 2\)의 세 원 위의 vertex 12개씩으로 나눈 mesh(반시계 방향 triangle 48개)에서 안쪽 원을 반시계 방향으로 한 바퀴 도는 1-chain \(z\)는 cycle이지만 boundary가 아니다.</p>
-        <p>증명. \(\R^2\setminus\{0\}\)의 1-form \(d\theta = (-y\,dx + x\,dy)/(x^2 + y^2)\)는 closed다(<a href="../35-exterior-calculus/35-2-exterior-derivative.html#i-35-2-11">Proposition 35.2.11</a>). triangle \(f\)마다 Stokes's theorem(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-11">Corollary 35.4.11</a>)과 <a href="#eq-36-2-3">(36.2.3)</a>에서 \(\langle\widehat{d\theta}, \partial f\rangle = \int_{\partial f}d\theta = \int_fd(d\theta) = 0\)이다. linearity로 모든 2-chain \(b\)에서 \(\langle\widehat{d\theta}, \partial b\rangle = 0\)이다. 그런데 안쪽 원의 edge 12개는 각각 원점에서 \(\pi/6\)의 각을 보므로 \(\langle\widehat{d\theta}, z\rangle = 12\cdot\pi/6 = 2\pi \neq 0\)이다. 따라서 \(z\)는 어떤 \(\partial b\)도 아니다.</p>
+        <p>증명. \(\R^2\setminus\{0\}\)의 1-form \(d\theta = (-y\,dx + x\,dy)/(x^2 + y^2)\)는 closed다(<a href="../35-exterior-calculus/35-2-exterior-derivative.html#i-35-2-11">Proposition 35.2.11</a>). triangle \(f\)마다 Stokes's theorem(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-11">Corollary 35.4.11</a>)과 <a href="#eq-36-2-3">(36.2.3)</a>에서 \(\langle\widehat{d\theta}, \partial f\rangle = \int_{\partial f}d\theta = \int_fd(d\theta) = 0\)이다. linearity로 모든 2-chain \(b\)에서 \(\langle\widehat{d\theta}, \partial b\rangle = 0\)이다. 그런데 안쪽 원의 edge 12개는 각각 원점에서 \(\pi/6\)의 각을 보므로 \(\langle\widehat{d\theta}, z\rangle = 12\cdot\pi/6 = 2\pi \neq 0\)이다. (edge 하나를 품고 원점을 품지 않는 half-plane 위에서는 각 \(\theta\)의 smooth한 branch가 있고 \(d\theta\)가 그 differential이므로, <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>에서 그 edge의 적분은 끝점의 각 빼기 시작점의 각, 곧 \(\pi/6\)이다.) 따라서 \(z\)는 어떤 \(\partial b\)도 아니다.</p>
         <p class="verified">Verification: <code>verify/v-36-2-chains-cochains.py</code></p>
       </div>
       <figure class="dg-figure" id="fig-36-2-2">
@@ -236,7 +236,7 @@ True True</code></pre>
 
       <aside class="box discrete">
         <p class="box-title">Smooth vs. Discrete: domains of integration</p>
-        <p><strong>Smooth.</strong> 적분의 영역은 orientation이 있는 곡선, 곡면 조각, manifold with boundary다. “boundary의 boundary가 비어 있다”는 기하적 사실이고, Chapter 35는 box와 simplex에서 그것을 그림으로 보았다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#fig-35-4-3">Figure 35.4.3</a>). <strong>Discrete.</strong> 적분의 영역은 chain, 곧 oriented simplex의 계수 있는 합이고, \(\partial\partial = 0\)은 부호를 세는 대수적 항등식이다(<a href="#i-36-2-8">Theorem 36.2.8</a>).</p>
+        <p><strong>Smooth.</strong> 적분의 영역은 orientation이 있는 곡선, 곡면 조각, manifold with boundary다. “boundary의 boundary가 비어 있다”는 기하적 사실이고, Chapter 35는 그것을 cube의 그림으로 보고(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#fig-35-4-3">Figure 35.4.3</a>) box에서 면의 부호로 확인했다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#sec-dd">Section 35.4</a>). <strong>Discrete.</strong> 적분의 영역은 chain, 곧 oriented simplex의 계수 있는 합이고, \(\partial\partial = 0\)은 부호를 세는 대수적 항등식이다(<a href="#i-36-2-8">Theorem 36.2.8</a>).</p>
         <ul>
           <li>정확히 보존하는 것: \(\partial\partial = 0\), 적분과 pairing의 linearity, de Rham map과 chain 위 적분의 관계 <a href="#eq-36-2-3">(36.2.3)</a>.</li>
           <li>달라지는 것: chain은 manifold일 필요가 없다. 같은 edge를 두 번 지나거나(계수 \(2\)), 서로 겹치거나, 지워질 수 있다. smooth 쪽의 적분 영역보다 넓은 개념이고, 그 덕에 “boundary를 취한다”가 행렬 곱 하나가 된다.</li>

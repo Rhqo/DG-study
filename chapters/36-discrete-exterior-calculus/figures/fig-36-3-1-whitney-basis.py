@@ -62,8 +62,8 @@ for ax, (a, b), name in zip(axes, pairs, names):
         ax.add_patch(FancyArrowPatch(p, p + scale * v, arrowstyle="-|>", mutation_scale=6, color=C["tangent"],
                                      lw=0.9, shrinkA=0, shrinkB=0, zorder=3))
     for v, off in zip(range(3), ([-0.08, -0.07], [0.06, -0.07], [0.0, 0.07])):
-        ax.text(*(T[v] + np.array(off)), rf"$x_{v}$", fontsize=11, ha="center", va="center")
-    ax.set_title(name, fontsize=12)
+        ax.text(*(T[v] + np.array(off)), rf"$x_{v}$", fontsize=12, ha="center", va="center")
+    ax.set_title(name, fontsize=13)
     ax.set_xlim(-0.2, 1.25)
     ax.set_ylim(-0.17, 1.05)
     ax.set_aspect("equal")

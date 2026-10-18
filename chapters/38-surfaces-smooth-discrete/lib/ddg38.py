@@ -222,7 +222,7 @@ def projected_star_angles(V, F, i, n):
 
 def star_passes(V, F, i, n, tol=1e-9):
     ang = projected_star_angles(V, F, i, n)
-    return bool(np.all(ang > 0) and abs(ang.sum() - 2 * np.pi) < tol)
+    return bool(np.all((ang > 0) & (ang < np.pi)) and abs(ang.sum() - 2 * np.pi) < tol)  # Prop 38.4.11
 
 
 def _clip(subject, clipper):

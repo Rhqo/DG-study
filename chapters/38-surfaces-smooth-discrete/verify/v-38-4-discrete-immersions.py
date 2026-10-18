@@ -2,6 +2,7 @@
 
 Run from the project root: PYTHONPATH=tools python3 chapters/38-surfaces-smooth-discrete/verify/v-38-4-discrete-immersions.py
 """
+import itertools
 import sys
 from pathlib import Path
 
@@ -168,5 +169,29 @@ check("Exercise 38.4.4(a): octahedron vertex 0 passes with n = e1 (four 90 deg a
 check("Exercise 38.4.4(a): fails with n = e2 (angles 45, -45, 45, -45 deg)",
       not star_test(Vo, Fo, 0, np.array([0, 1.0, 0]))
       and np.allclose(np.rad2deg(ddg38.projected_star_angles(Vo, Fo, 0, [0, 1, 0])), [45, -45, 45, -45]))
+# the same angles in link order e2 -> e3 -> -e2 -> -e3 (the order quoted in the solution)
+link_o = [2, 4, 3, 5]
+check("Exercise 38.4.4(a): face (0, 2, 4) is outward, so the link order is e2, e3, -e2, -e3",
+      any(list(t) in ([0, 2, 4], [2, 4, 0], [4, 0, 2]) for t in np.asarray(Fo)))
+e2 = np.array([0, 1.0, 0])
+prj = lambda v: v - (v @ e2) * e2
+ang_link = [np.degrees(np.arctan2(np.cross(prj(Vo[a] - Vo[0]), prj(Vo[b] - Vo[0])) @ e2,
+                                  prj(Vo[a] - Vo[0]) @ prj(Vo[b] - Vo[0]))) for a, b in zip(link_o, np.roll(link_o, -1))]
+check("Exercise 38.4.4(a): in link order the angles are 45, -45, -45, 45", np.allclose(ang_link, [45, -45, -45, 45]), ang_link)
+
+# Proposition 38.4.11 needs theta_k < pi: a star with a straight angle has a degenerate face but sum 2 pi
+Vd, Fd = ddg38.planar_star(np.radians([0.0, 180.0, 270.0]))
+th_d = ddg38.projected_star_angles(Vd, Fd, 0, ez)
+check("Prop 38.4.11: theta = (180, 90, 90) sums to 2 pi with all theta > 0, yet one face is degenerate",
+      np.isclose(th_d.sum(), 2 * np.pi) and np.all(th_d > 0) and np.isclose(dm.face_areas(Vd, Fd).min(), 0))
+check("Implementation 38.4: star_test rejects the straight angle", not star_test(Vd, Fd, 0, ez))
+
+# Exercise 38.4.5: worst-case orientation of a jittered right isosceles grid triangle is h^2 (1 - 4a)
+for a_j in (0.2, 0.25, 0.3, 0.4):
+    T0 = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
+    worst = min((Q[1, 0] - Q[0, 0]) * (Q[2, 1] - Q[0, 1]) - (Q[1, 1] - Q[0, 1]) * (Q[2, 0] - Q[0, 0])
+                for s in itertools.product((-1.0, 1.0), repeat=6)
+                for Q in [T0 + a_j * np.array(s).reshape(3, 2)])
+    close(f"Exercise 38.4.5: worst-case orientation determinant at jitter {a_j} h is 1 - 4a", worst, 1 - 4 * a_j, 1e-12)
 
 summary()

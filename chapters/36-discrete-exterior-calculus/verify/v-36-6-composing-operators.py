@@ -104,6 +104,19 @@ check("Proposition 36.6.9(b): -u^T L u = sum w_ij (u_j - u_i)^2", ok)
 ev = np.linalg.eigvalsh(-Lp)
 check("Proposition 36.6.9(c): Delaunay patch: -L PSD with a one-dimensional kernel (constants)",
       s1.min() > 0 and ev.min() > -1e-12 and (np.abs(ev) < 1e-10).sum() == 1)
+Vgm, Fgm = ch36.grid(4)
+wgm = dd.hodge1(Vgm, Fgm)
+evg = np.linalg.eigvalsh(-dm.cotan_laplacian(np.c_[Vgm, np.zeros(len(Vgm))], Fgm))
+check("Proposition 36.6.9 (remark): grid_mesh has zero diagonal weights, yet -L is PSD with kernel = constants",
+      np.abs(wgm).min() < 1e-12 and wgm.min() > -1e-12 and evg.min() > -1e-12 and (np.abs(evg) < 1e-10).sum() == 1)
+# (36.6.1): on a planar mesh, R(a)^T star_k R(b) equals the L2 inner product for constant forms (k = 0, 1, 2)
+area = dm.face_areas(V3, F).sum()
+a1, b1 = rng.normal(size=2), rng.normal(size=2)
+c0, c2 = rng.normal(size=2)
+check("(36.6.1): constant 0-, 1-, 2-forms on the planar patch: a^T star_k b = L2 inner product",
+      abs(c0 * c2 * s0.sum() - c0 * c2 * area) < 1e-12
+      and abs((D0 @ V @ a1) @ (s1 * (D0 @ V @ b1)) - (a1 @ b1) * area) < 1e-12
+      and abs((c0 / s2) @ (s2 * (c2 / s2)) - c0 * c2 * area) < 1e-10)     # R2(c dA)_f = c |f| = c / star2_f
 Vn, Fn = ch36.non_delaunay_pair()
 Ln = dm.cotan_laplacian(np.c_[Vn, np.zeros(4)], Fn)
 close("Example 36.6.10: non-Delaunay pair, w01 = -1.696, eigenvalues of -L = 0, 0.275, 3.607, 7.393",
@@ -166,6 +179,13 @@ w = rng.normal(size=len(F))
 beta = (ch36.dual_d0(F) @ w) / s1
 check("Exercise 36.6.4: star2 d1 d0 = 0 and div(star1^{-1} d~0 w) = 0",
       np.abs(s2[:, None] * (D1 @ D0)).max() < 1e-14 and np.abs(dt1 @ (s1 * beta)).max() < 1e-12)
+# (b) with w = psi(c_f) for an affine psi, beta = R1 of the 1-form of -J grad psi on interior edges (not +J grad psi)
+gpsi = np.array([0.7, -1.3])
+beta_psi = (ch36.dual_d0(F) @ (dd.circumcenters(V, F) @ gpsi)) / s1
+int_e = np.abs(D1).sum(0) == 2
+check("Exercise 36.6.4(b): star1^{-1} d~0 psi(c_f) = R1((-J grad psi)^flat) on interior edges, != R1((J grad psi)^flat)",
+      np.abs(beta_psi - D0 @ V @ (-J @ gpsi))[int_e].max() < 1e-12
+      and np.abs(beta_psi - D0 @ V @ (J @ gpsi))[int_e].max() > 0.1)
 ok = True
 for i in np.nonzero(interior)[0]:
     nb = [j for j in range(len(V)) if j != i and abs(Lp[i, j]) > 1e-14]

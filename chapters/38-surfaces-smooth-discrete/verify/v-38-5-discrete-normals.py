@@ -332,6 +332,32 @@ close("Exercise 38.5.4: arccos(8/sqrt 66) = 10.02", np.degrees(np.arccos(8 / np.
 close("Exercise 38.5.4: angle-weighted does not move", ddg38.vertex_normal(W, G, "angle")[7], diag, 1e-12)
 at7 = [g for g in G if 7 in g and np.allclose(dm.face_normals(W, g[None])[0], [1, 0, 0])]
 close("Exercise 38.5.4: two faces of area 2/3 in x = 1 at the corner", dm.face_areas(W, np.array(at7)), [2 / 3, 2 / 3], 1e-12)
+# R2 review: the mixed Voronoi vector-area normal is not subdivision invariant either (Prop 38.5.8(d))
+ang7 = dm.corner_angles(W, np.array(at7))
+check("Exercise 38.5.4: the two corner faces in x = 1 are obtuse at the barycenter (108.43 deg), acute at the corner",
+      np.allclose(np.sort(np.degrees(ang7.max(axis=1))), np.degrees(np.arccos(-1 / np.sqrt(10))), atol=1e-9)
+      and all(ang7[k, list(at7[k]).index(7)] < np.pi / 2 for k in range(2)), np.degrees(ang7))
+close("Exercise 38.5.4: mixed vector-area numerator at the corner is (1/3, 1, 1)",
+      ddg38.vector_area(W, G, "mixed")[7], np.array([1 / 3, 1, 1]), 1e-12)
+close("Exercise 38.5.4: mixed vector-area moves by arccos(7/sqrt 57) = 22.00 degrees",
+      ddg38.angle_deg(ddg38.vertex_normal(W, G, "vector-mixed")[7], diag), np.degrees(np.arccos(7 / np.sqrt(57))), 1e-9)
+close("Exercise 38.5.4: arccos(7/sqrt 57) = 22.00", np.degrees(np.arccos(7 / np.sqrt(57))), 22.00, 0.005)
+# Prop 38.5.8(c), Eq. (38.5.6): angle-weighted numerator = (2/eps^2) * vector area of the star inside B_eps(x_i)
+for (Vt_, Ft_, name) in ((VA, FA, "cube pattern A"), (W, G, "split cube")):
+    Ft_ = np.asarray(Ft_)
+    num = np.zeros(3)
+    eps = 0.05
+    for g in Ft_[(Ft_ == 7).any(axis=1)]:
+        k = list(g).index(7)
+        a, b = Vt_[g[(k + 1) % 3]] - Vt_[7], Vt_[g[(k + 2) % 3]] - Vt_[7]
+        th = np.arctan2(np.linalg.norm(np.cross(a, b)), a @ b)
+        sector = 0.5 * eps ** 2 * th                      # area of the face inside the ball
+        num += (2 / eps ** 2) * sector * dm.face_normals(Vt_, g[None])[0]
+    close(f"Eq (38.5.6): angle-weighted numerator = 2/eps^2 * sum of sector areas * N_f ({name})",
+          num / np.linalg.norm(num), ddg38.vertex_normal(Vt_, Ft_, "angle")[7], 1e-12)
+check("Prop 38.5.8(c): a flip (pattern A -> B) keeps the angle-weighted normal and moves uniform/area",
+      np.allclose(ddg38.vertex_normal(VA, FA, "angle")[7], ddg38.vertex_normal(VB, FB, "angle")[7])
+      and not np.allclose(ddg38.vertex_normal(VA, FA, "uniform")[7], ddg38.vertex_normal(VB, FB, "uniform")[7]))
 
 # ---------------------------------------------------------------- Exercise 38.5.1 (tetrahedron)
 Vtet = np.array([[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]], float)

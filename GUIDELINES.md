@@ -178,7 +178,7 @@ Track 2 「Discrete Differential Geometry」(32–45장)는 CMU 15-458/858 강�
   - 분량은 한 절에 30–50분이다.
 - **기호**: §6을 따른다. 아래는 Track 2가 **추가**하는 기호이며 §6을 바꾸지 않는다. Crane과 다른 곳에는 Conventions 상자를 둔다.
   - **mesh**: Chapter 31과 같다(notation.html).
-    - vertex \(i\)의 위치는 \(x_i\)다. edge \(ij\)의 맞은편 각은 \(\alpha_{ij}, \beta_{ij}\)다. angle defect는 \(\delta_i\)다.
+    - vertex \(i\)의 위치는 \(x_i\)다. mesh를 smooth immersion \(\mathbf{x}\)의 discrete 판(\(\R^3\)-valued 0-form)으로 볼 때는 굵게 \(\mathbf{x}_i\)로 써도 된다(Chapter 38). 한 장 안에서는 한 가지로 쓰고 첫 절의 Conventions 상자에 밝힌다. edge \(ij\)의 맞은편 각은 \(\alpha_{ij}, \beta_{ij}\)다. angle defect는 \(\delta_i\)다.
     - 개수는 \(n_0, n_1, n_2\)이고 \(\chi = n_0 - n_1 + n_2\)다.
     - cotan matrix는 \(L\)이고 mass matrix는 \(M\)이다. \(L_{ij} = \tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})\), \(L_{ii} = -\sum_{j} L_{ij}\)라서 \(-L\)이 positive semidefinite이고, \(M^{-1}L \approx \Delta = \divg\grad\)다.
   - **smooth immersion**: §6.3처럼 \(\mathbf{x}\)로 쓴다. 미분은 \(d\mathbf{x}\)(vector-valued 1-form)다. Crane은 \(f\)로 쓴다. 함수는 \(u, \varphi\) 등으로 쓴다.
