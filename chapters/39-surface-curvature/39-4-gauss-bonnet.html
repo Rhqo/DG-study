@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>39.4 The Gauss–Bonnet Theorem — DG Study</title>
+  <meta name="dg-id" content="39.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="39.2, 39.3, 37.2, 33.4, 5.6, 0.5">
+  <meta name="dg-refs" content="CMU-DDG L15; dC §4-5; Cr §5.5">
+  <meta name="dg-updated" content="2026-10-20">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">39. Curvature of Surfaces</a> ›
+    <span>39.4 The Gauss–Bonnet Theorem</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>39.4 The Gauss–Bonnet Theorem</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#dC">[dC §4-5]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr §5.5]</a>(discrete 판) · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slides 28–30</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>closed plane curve의 total curvature가 \(2\pi\)의 정수배라는 것에서 출발해, 닫힌 oriented surface의 Gauss–Bonnet theorem \(\int_SK\,dA = 2\pi\chi(S)\)를 정확히 진술하고 genus와 연결할 수 있다.</li>
+        <li>boundary가 있는 판 \(\int_SK\,dA + \int_{\partial S}\kappa_g\,ds + \sum_j\varepsilon_j = 2\pi\chi(S)\)를 진술하고, boundary의 orientation과 \(\kappa_g\)의 부호를 맞추어 계산할 수 있다.</li>
+        <li>surface of revolution의 cap에서 Gauss–Bonnet theorem을 완전히 증명하고, 일반적인 경우의 Proof sketch를 따라갈 수 있다.</li>
+        <li>“surface를 바꾸어도, boundary를 바꾸어도 total curvature가 맞추어진다”는 말의 뜻을 running example로 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Section 39.2: geodesic curvature \(\kappa_g\)와 Darboux frame <a href="39-2-principal-curvatures.html#i-39-2-4">Proposition 39.2.4</a>, circle of latitude <a href="39-2-principal-curvatures.html#i-39-2-6">Example 39.2.6</a>, 방향을 바꿀 때의 부호 <a href="39-2-principal-curvatures.html#ex-39-2-1">Exercise 39.2.1</a>. Section 39.3: \(K\)와 total curvature의 수치(Implementation 상자).</li>
+        <li>turning number(<a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-1">Example 37.2.1</a>, rotation index <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-3">Definition 5.6.3</a>), rotation index theorem <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a>, curvilinear polygon과 exterior angle <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-9">Definition 5.6.9</a>, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>.</li>
+        <li>Euler characteristic \(\chi = n_0 - n_1 + n_2\)와 genus(<a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#sec-counting">Section 33.4</a>, <a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#eq-33-4-1">(33.4.1)</a>), \(3n_2 = 2n_1\) <a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-19">Proposition 33.4.19</a>.</li>
+        <li>Tour: <a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>, <a href="../00-tour/0-5-intrinsic.html#i-0-5-7">Example 0.5.7</a>. surface of revolution의 principal curvature <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-12">Proposition 8.3.12</a>.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 39.3의 Implementation 상자에서 \(\int K\,dA/2\pi\)는 sphere와 ellipsoid에서 \(2\), torus에서 \(0\)이었다. ellipsoid는 sphere와 모양이 꽤 다르고 \(K\)의 분포도 다른데 같은 수가 나왔다. torus는 \(K\)가 큰 곳과 음수인 곳이 있는데 정확히 상쇄되었다. 이것이 우연인가?</p>
+      <p>곡선에서는 비슷한 일을 이미 보았다. closed plane curve의 total curvature \(\int\kappa_s\,ds\)는 언제나 \(2\pi\)의 정수배이고, 그 정수인 turning number는 곡선을 regular하게 변형해도 변하지 않았다(Chapter 37). 강의 슬라이드는 이 비교에서 출발해 surface의 판을 묻는다 <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slide 28. 답이 Gauss–Bonnet theorem이다. 이 절은 smooth 판을 진술하고, 증명은 특별한 경우에 완전하게, 일반적인 경우에 sketch로 한다. mesh의 판은 Chapter 40에서 정의와 함께 완전히 증명한다.</p>
+    </section>
+
+    <section id="sec-curves">
+      <h2>Total Curvature of Closed Curves</h2>
+      <p>먼저 곡선 쪽을 정리해 두자. arc length로 매개화한 closed regular plane curve \(\gamma\)(주기 \(L\))의 rotation index는 \(\operatorname{rot}(\gamma) = \tfrac{1}{2\pi}\int_0^L\kappa_s\,ds\)이고 정수다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-3">Definition 5.6.3</a>). Chapter 37은 이것을 turning number라 불렀다. 스스로 만나지 않고 반시계 방향으로 도는 곡선에서는 \(\int\kappa_s\,ds = 2\pi\)이다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-7">Theorem 5.6.7</a>, <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-12">Proposition 5.6.12</a>). 꼭짓점에서 꺾이는 곡선(curvilinear polygon)에서는 exterior angle \(\varepsilon_j\)를 더해 \(\int\kappa_s\,ds + \sum_j\varepsilon_j = 2\pi\)이다(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>).</p>
+      <div class="thm example" id="i-39-4-1">
+        <p><span class="thm-head">Example 39.4.1</span> <span class="thm-name">(plane domains)</span>.
+        반지름 \(r\)인 원은 \(\kappa_s = 1/r\)이고 길이가 \(2\pi r\)이므로 \(\int\kappa_s\,ds = 2\pi\)이다. flower curve \(r(t) = 1 + 0.3\cos 5t\)는 \(\kappa_s\)가 열 번 부호를 바꾸지만 \(\int\kappa_s\,ds = 2\pi\)이다(<a href="../37-curves-smooth-discrete/37-2-turning-number.html#i-37-2-1">Example 37.2.1</a>). 정사각형은 변에서 \(\kappa_s = 0\)이고 네 꼭짓점의 exterior angle이 \(\pi/2\)씩이라 합이 \(2\pi\)다. 경계가 얼마나 복잡하든 결과가 같다.</p>
+        <p class="verified">Verification: <code>verify/v-39-4-gauss-bonnet.py</code></p>
+      </div>
+      <p>이 식들을 다음과 같이 읽을 수 있다. 평면 영역 \(D\)에 normal \(\mathbf{N} = e_3\)을 주면 경계 곡선의 \(\kappa_s\)는 Section 39.2의 geodesic curvature \(\kappa_g\)와 같다(<a href="39-2-principal-curvatures.html#i-39-2-2">Example 39.2.2</a>(a)에서 \(\mathbf{N}\times\mathbf{t} = J\mathbf{t}\)). 그리고 평면에서 \(K = 0\)이다. 그러면 위 식은 “\(\int_DK\,dA + \int_{\partial D}\kappa_g\,ds + \sum\varepsilon_j = 2\pi\)”가 된다. 이것이 아래 Gauss–Bonnet theorem의 가장 간단한 경우다 <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slide 30.</p>
+    </section>
+
+    <section id="sec-closed">
+      <h2>The Gauss–Bonnet Theorem</h2>
+      <p>Euler characteristic은 Section 33.4에서 simplicial surface의 개수 \(\chi = n_0 - n_1 + n_2\)로 정의했다. smooth surface \(S\)에서는 \(S\)를 곡선 삼각형들로 나눈 <strong>triangulation</strong>(삼각분할)의 개수로 \(\chi(S)\)를 정한다. 모든 compact regular surface에 triangulation이 있다는 것과 \(\chi(S)\)가 triangulation에 무관하다는 것은 받아들인다(<a href="../10-gauss-bonnet/index.html#toc-10-3">Section 10.3</a> <span class="todo">[확인 필요: Chapter 10 미작성 — 참조 번호 확정 필요]</span>, mesh에서의 불변성은 <a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a> <span class="todo">[확인 필요: Chapter 40 미작성 — 참조 번호 확정 필요]</span>). connected이고 boundary가 없는 orientable surface의 손잡이의 개수 \(g\)를 <strong>genus</strong>(종수)라 하면 \(\chi = 2 - 2g\)이다(<a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#eq-33-4-1">(33.4.1)</a>).</p>
+      <div class="thm theorem" id="i-39-4-2">
+        <p><span class="thm-head">Theorem 39.4.2</span> <span class="thm-name">(Gauss–Bonnet theorem)</span>.
+        \(S\)가 boundary가 없는 compact oriented regular surface이면</p>
+        <div class="equation" id="eq-39-4-1">
+        \[ \int_SK\,dA = 2\pi\chi(S) \tag{39.4.1} \]
+        </div>
+        <p>이다. \(S\)가 connected이고 genus가 \(g\)이면 우변은 \(2\pi(2 - 2g)\)이다 <a class="cite" href="../../references.html#dC">[dC §4-5]</a>.</p>
+      </div>
+      <p>이 정리가 말하는 것. 왼쪽은 점마다의 굽음을 모은 기하적인 양이고, 오른쪽은 구멍의 개수만 세는 topological한 양이다. surface를 어떻게 구부리고 늘여도, 찢거나 붙이지 않는 한 \(\int K\,dA\)는 변하지 않는다. 어딘가를 더 볼록하게 만들면 다른 어딘가가 그만큼 오목해진다. <strong>Gauss–Bonnet theorem</strong>(가우스-보네 정리)의 이 판은 Tour의 <a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>(b)와 같고, 증명은 아래에서 sketch로 하며 완전한 증명은 Track 3의 <a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>에 있다 <span class="todo">[확인 필요: Chapter 10 미작성 — 참조 번호 확정 필요]</span>.</p>
+      <div class="thm example" id="i-39-4-3">
+        <p><span class="thm-head">Example 39.4.3</span> <span class="thm-name">(closed running examples)</span>.
+        (a) 반지름 \(r\)인 sphere: \(K = 1/r^2\)이고 넓이가 \(4\pi r^2\)이므로 \(\int K\,dA = 4\pi = 2\pi\cdot 2\)이다. icosahedron이 sphere의 triangulation이고 \(\chi = 12 - 30 + 20 = 2\)이다(<a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#sec-counting">Section 33.4</a>의 표). (b) ellipsoid \((2, 1.5, 1)\): 수치 적분으로 \(4\pi\)(<a href="39-3-gaussian-mean-curvature.html#code-39-3-1">Section 39.3의 Implementation</a>). (c) torus of revolution: \(K\,dA = \frac{\cos u}{r(R + r\cos u)}\cdot r(R + r\cos u)\,du\,dv\) \(= \cos u\,du\,dv\)이므로 \(\int K\,dA = \int_0^{2\pi}\!\int_0^{2\pi}\cos u\,du\,dv\) \(= 0 = 2\pi\chi(T^2)\)이다(genus \(1\)). 바깥쪽 절반 \(\abs{u} \le \pi/2\)는 \(+4\pi\), 안쪽 절반은 \(-4\pi\)를 준다. 바깥쪽 절반 하나만으로 sphere와 같은 \(4\pi\)인 것은 그 절반의 Gauss map이 \(S^2\)을 한 번 덮기 때문이다(<a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#fig-38-3-1">Figure 38.3.1</a>, <a href="39-3-gaussian-mean-curvature.html#ex-39-3-4">Exercise 39.3.4</a>).</p>
+        <p class="verified">Verification: <code>verify/v-39-4-gauss-bonnet.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-boundary">
+      <h2>Surfaces with Boundary</h2>
+      <p>boundary가 있으면 boundary 곡선이 surface 안에서 꺾이는 정도가 더해진다. \(S\)가 unit normal \(\mathbf{N}\)을 갖는 compact surface이고 그 boundary \(\partial S\)가 piecewise regular closed curve \(C_1, \dots, C_b\)로 이루어졌다고 하자. boundary를 걸을 때 surface가 왼쪽에 있도록, 곧 Darboux frame의 \(\mathbf{N}\times\mathbf{t}\)가 \(S\)의 안쪽을 향하도록 도는 방향을 positive orientation이라 한다. 이것은 Stokes's theorem의 orientation(바깥쪽 normal이 먼저, <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-5">Theorem 35.4.5</a>)과 같다. \(\kappa_g\)는 이 방향으로 잰다. 꼭짓점에서는 진행 방향이 tangent plane 안에서 \(\mathbf{N}\) 둘레로 꺾이는 부호 있는 각을 exterior angle \(\varepsilon_j \in (-\pi, \pi)\)라 한다(평면에서는 <a href="../05-space-curves/5-6-rotation-index.html#i-5-6-9">Definition 5.6.9</a>).</p>
+      <div class="thm theorem" id="i-39-4-4">
+        <p><span class="thm-head">Theorem 39.4.4</span> <span class="thm-name">(Gauss–Bonnet theorem with boundary)</span>.
+        위의 \(S\)에서 \(\partial S\)에 positive orientation을 주고 꼭짓점의 exterior angle을 \(\varepsilon_j\)라 하면</p>
+        <div class="equation" id="eq-39-4-2">
+        \[ \int_SK\,dA + \int_{\partial S}\kappa_g\,ds + \sum_j\varepsilon_j = 2\pi\chi(S) \tag{39.4.2} \]
+        </div>
+        <p>이다. \(S\)가 connected이고 orientable, genus \(g\), boundary loop \(b\)개이면 \(\chi(S) = 2 - 2g - b\)이다 <a class="cite" href="../../references.html#dC">[dC §4-5]</a>.</p>
+      </div>
+      <p>왼쪽의 세 항은 각각 넓이, 곡선, 점에 몰린 굽음이다. 강의 슬라이드는 이 식의 요점을 total curvature가 surface의 변형에도 boundary의 변형에도 흔들리지 않는다는 것으로 정리한다 <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slide 29. 정확히 말하면, boundary를 고정하고 그 근처의 surface를 그대로 둔 채 안쪽만 바꾸면 \(\int_{\partial S}\kappa_g\)가 그대로이므로 \(\int_SK\,dA\)도 그대로다. 거꾸로 boundary를 움직이면 \(\int K\,dA\)와 \(\int\kappa_g\,ds\)가 서로 주고받으며 합이 유지된다. 다음 예가 그것이다.</p>
+      <div class="thm example" id="i-39-4-5">
+        <p><span class="thm-head">Example 39.4.5</span> <span class="thm-name">(polar caps, the hemisphere, and a geodesic triangle)</span>.
+        unit sphere(바깥쪽 \(\mathbf{N}\))에서 colatitude \(\theta_0\)까지의 polar cap \(S_{\theta_0}\)은 disk이므로 \(\chi = 1\)이다. 경계 원을 \(\varphi\)가 커지는 방향으로 돌면 \(\mathbf{N}\times\mathbf{t}\)가 북쪽, 곧 cap의 안쪽을 향하므로 positive orientation이다(<a href="39-2-principal-curvatures.html#eq-39-2-1">(39.2.1)</a>). <a href="39-2-principal-curvatures.html#i-39-2-6">Example 39.2.6</a>의 \(\kappa_g = \cot\theta_0\)과 길이 \(2\pi\sin\theta_0\)에서</p>
+        <div class="equation" id="eq-39-4-3">
+        \[ \begin{aligned} &amp;\underbrace{2\pi(1 - \cos\theta_0)}_{\int K\,dA} + \underbrace{2\pi\cos\theta_0}_{\int\kappa_g\,ds} \\ &amp;\qquad = 2\pi = 2\pi\chi(S_{\theta_0}) \end{aligned} \tag{39.4.3} \]
+        </div>
+        <p>이다. cap의 넓이는 <a href="../07-first-fundamental-form/7-3-area.html#i-7-3-10">Example 7.3.10</a>이다. \(\theta_0 = \pi/2\)(hemisphere)이면 경계가 적도, 곧 geodesic이라 \(\kappa_g = 0\)이고 \(\int K\,dA = 2\pi\)가 혼자 \(2\pi\)를 낸다. \(\theta_0 \gt \pi/2\)이면 경계 원이 cap에서 보아 바깥으로 휘므로 \(\kappa_g \lt 0\)이고, 그만큼 넓이 항이 \(2\pi\)를 넘는다. Tour의 <a href="../00-tour/0-5-intrinsic.html#i-0-5-7">Example 0.5.7</a>에서 위도원을 따라 평행이동한 vector가 \(2\pi\cos\theta_0\) 돈 것이 이 식의 둘째 항이다. octant triangle(세 변이 대원의 호, 세 내각이 \(\pi/2\))은 \(\kappa_g = 0\)이고 세 exterior angle이 \(\pi - \pi/2 = \pi/2\)씩이므로 \(\int K\,dA = 2\pi - 3\pi/2 = \pi/2\)이고, 이것이 넓이 \(4\pi/8\)이다(<a href="../00-tour/0-5-intrinsic.html#i-0-5-8">Theorem 0.5.8</a>(a)).</p>
+        <p class="verified">Verification: <code>verify/v-39-4-gauss-bonnet.py</code></p>
+      </div>
+      <p><a href="#fig-39-4-1">Figure 39.4.1</a>은 이 주고받음을 보인다. 왼쪽 (a)의 sphere 위에서 하늘색이 \(\theta_0 = \pi/3\)인 cap이고, 아래의 검은 원은 \(\theta_0 = 2\pi/3\)인 cap의 경계다. 각 경계 원 위의 파랑 \(\mathbf{t}\)는 positive orientation의 진행 방향, 초록 \(\mathbf{N}\times\mathbf{t}\)는 cap의 안쪽(북쪽)이다. 오른쪽 (b)에서 \(\theta_0\)를 \(0\)에서 \(\pi\)까지 키우면 주홍 \(\int K\,dA\)는 \(0\)에서 \(4\pi\)로 올라가고 초록 \(\int\kappa_g\,ds\)는 \(2\pi\)에서 \(-2\pi\)로 내려가며, 검은 합은 언제나 \(2\pi\)다. 둘이 같아지는 \(\theta_0 = \pi/3\)에서 둘 다 \(\pi\)이고, \(\theta_0 = \pi/2\)에서 초록이 \(0\)을 지난다.</p>
+      <figure class="dg-figure" id="fig-39-4-1">
+        <img src="figures/fig-39-4-1-polar-caps.svg" alt="두 패널. (a) 반투명 회색 unit sphere의 위쪽에 하늘색 cap, 그 경계의 검은 원과 아래쪽의 또 다른 검은 원이 있고, 두 원 위의 점들에서 파란 화살표는 원을 따라, 초록 화살표는 북쪽을 향한다. (b) 가로축 θ0(0에서 π): 주홍 곡선이 0에서 4π로 올라가고, 초록 곡선이 2π에서 −2π로 내려가며, 검은 수평선이 2π에 있다. θ0 = π/3과 2π/3에 회색 점선이 있다.">
+        <figcaption><span class="fig-head">Figure 39.4.1.</span>
+        <em>무엇을</em>: unit sphere(\(\mathbf{N}\) 바깥쪽)의 polar cap \(\{\theta \le \theta_0\}\)에서 Gauss–Bonnet theorem with boundary. (a) \(\theta_0 = \pi/3\)(하늘색 cap)과 \(\theta_0 = 2\pi/3\)(경계만), (b) 세 양을 \(\theta_0\)의 함수로.
+        <em>읽는 법</em>: (a)의 파랑은 positive orientation의 \(\mathbf{t}\), 초록은 \(\mathbf{N}\times\mathbf{t}\)(cap의 안쪽), 길이 \(0.35\)로 그렸다. (b)의 주홍은 \(\int K\,dA = 2\pi(1 - \cos\theta_0)\), 초록은 \(\int\kappa_g\,ds = 2\pi\cos\theta_0\), 검정은 그 합이다. 회색 점선이 (a)의 두 \(\theta_0\)다.
+        <em>볼 것</em>: 합은 모든 \(\theta_0\)에서 \(2\pi = 2\pi\chi(\text{disk})\)이다. \(\theta_0 = 2\pi/3\)의 경계는 \(\kappa_g = \cot(2\pi/3) = -0.577 \lt 0\)이라 초록 값이 \(-\pi\)이고 주홍이 \(3\pi\)다. \(\theta_0 \to \pi\)이면 cap이 sphere 전체로 가고 \(\int K\,dA \to 4\pi\)다.
+        <em>본문과의 연결</em>: <a href="#eq-39-4-3">(39.4.3)</a>과 <a href="#i-39-4-4">Theorem 39.4.4</a>. \(\kappa_g\)는 <a href="39-2-principal-curvatures.html#i-39-2-6">Example 39.2.6</a>, 같은 수치가 Implementation 상자의 profile 공식으로도 나온다(verify).</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-revolution">
+      <h2>A Complete Proof for Caps of Surfaces of Revolution</h2>
+      <p>polar cap의 계산은 sphere에만 해당하는 것이 아니다. surface of revolution의 cap이면 어떤 모양이든 같은 계산이 된다. 일반적인 Gauss–Bonnet theorem의 증명에는 topology가 필요하지만, 이 경우는 미적분만으로 완전히 증명할 수 있다.</p>
+      <div class="thm proposition" id="i-39-4-6">
+        <p><span class="thm-head">Proposition 39.4.6</span> <span class="thm-name">(Gauss–Bonnet for caps of surfaces of revolution)</span>.
+        arc length로 매개화한 smooth profile \(\alpha(s) = (\rho(s), z(s))\), \(s \in [0, s_0]\)이 \(\rho(0) = 0\), \(\alpha'(0) = (1, 0)\), \((0, s_0]\)에서 \(\rho \gt 0\)을 만족하고, 그 surface of revolution \(\mathbf{x}(s, v) = (\rho(s)\cos v, \rho(s)\sin v, z(s))\)의 cap \(S = \{s \le s_0\}\)이 regular surface with boundary라 하자. \(\mathbf{N} = \mathbf{x}_s\times\mathbf{x}_v/\abs{\mathbf{x}_s\times\mathbf{x}_v}\)로 두고 경계 원 \(s = s_0\)을 \(v\)가 커지는 방향으로 돌면</p>
+        <div class="equation" id="eq-39-4-4">
+        \[ \begin{aligned} \int_SK\,dA &amp;= 2\pi\big(1 - \rho'(s_0)\big), \\ \int_{\partial S}\kappa_g\,ds &amp;= 2\pi\rho'(s_0) \end{aligned} \tag{39.4.4} \]
+        </div>
+        <p>이고, 따라서 \(\int_SK\,dA + \int_{\partial S}\kappa_g\,ds = 2\pi = 2\pi\chi(S)\)이다. 이 방향은 positive orientation이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: arc length profile에서 \(K = -\rho''/\rho\)이고 넓이 요소가 \(\rho\,ds\,dv\)이므로 \(K\,dA = -\rho''\,ds\,dv\)는 exact이다. 적분이 끝점의 \(\rho'\)만 남기고, 그 \(\rho'\)이 정확히 경계 원의 \(\kappa_g\)다.</p>
+        <p><span class="proof-head">Proof.</span> <em>Curvature.</em> \(\abs{\alpha'} = 1\)이므로 <a href="../08-gauss-map/8-3-principal-curvatures.html#eq-8-3-5">(8.3.5)</a>의 두 principal curvature는 \(\rho'z'' - \rho''z'\)와 \(z'/\rho\)이고, \(K = (\rho'z'' - \rho''z')z'/\rho\)이다. \(\rho'^2 + z'^2 = 1\)을 미분하면 \(\rho'\rho'' + z'z'' = 0\)이므로 \((\rho'z'' - \rho''z')z' = \rho'(z'z'') - \rho''z'^2\) \(= -\rho''\rho'^2 - \rho''z'^2 = -\rho''\)이다. 곧 \(K = -\rho''/\rho\)이다.</p>
+        <p><em>Area term.</em> \(\mathbf{x}_s = (\rho'\cos v, \rho'\sin v, z')\), \(\mathbf{x}_v = (-\rho\sin v, \rho\cos v, 0)\)이므로 \(E = 1\), \(F = 0\), \(G = \rho^2\)이고 \(dA = \rho\,ds\,dv\)이다. 극(\(s = 0\))은 넓이가 \(0\)인 한 점이므로 \((0, s_0]\times[0, 2\pi]\)에서 적분해도 된다. \(K\,dA = -\rho''\,ds\,dv\)이므로</p>
+        <p>\[ \begin{aligned} \int_SK\,dA &amp;= \int_0^{2\pi}\!\!\int_0^{s_0}(-\rho'')\,ds\,dv \\ &amp;= -2\pi\big(\rho'(s_0) - \rho'(0)\big) = 2\pi\big(1 - \rho'(s_0)\big) \end{aligned} \]</p>
+        <p>이다(\(\rho'(0) = 1\)).</p>
+        <p><em>Boundary term.</em> 경계 원 \(c(v) = \mathbf{x}(s_0, v)\)는 반지름 \(\rho_0 = \rho(s_0)\)인 원이고 arc length는 \(\rho_0v\)이다. \(\mathbf{t} = (-\sin v, \cos v, 0)\), \(\mathbf{t}' = -\tfrac{1}{\rho_0}(\cos v, \sin v, 0)\)이고, <a href="../07-first-fundamental-form/7-5-orientation.html#i-7-5-2">Example 7.5.2</a>(d)에서 \(\mathbf{N} = (-z'\cos v, -z'\sin v, \rho')\)이다. 그러면</p>
+        <p>\[ \mathbf{N}\times\mathbf{t} = (-\rho'\cos v,\ -\rho'\sin v,\ -z') = -\mathbf{x}_s \]</p>
+        <p>이므로(성분을 직접 계산한다) \(\kappa_g = \inner{\mathbf{t}'}{\mathbf{N}\times\mathbf{t}} = \rho'(s_0)/\rho_0\)이고, 길이 \(2\pi\rho_0\)을 곱하면 \(\int_{\partial S}\kappa_g\,ds = 2\pi\rho'(s_0)\)이다. 또 \(\mathbf{N}\times\mathbf{t} = -\mathbf{x}_s\)는 \(s\)가 줄어드는 쪽, 곧 cap의 안쪽을 향하므로 이 방향이 positive orientation이다. cap은 극을 중심으로 한 disk이므로 \(\chi(S) = 1\)이다.</p>
+      </div>
+      <p>무엇이 일어났는가. 넓이 항과 경계 항이 모두 경계에서의 \(\rho'(s_0)\), 곧 profile의 tangent가 축과 이루는 각의 sine만으로 정해졌다. cap 안에서 profile이 얼마나 출렁이든 상관이 없다. 이것이 “surface를 바꾸어도 total curvature가 변하지 않는다”의 가장 구체적인 모습이다. 끝점이 남극(\(\rho(s_0) = 0\), \(\rho'(s_0) = -1\))이면 cap이 닫힌 surface가 되고 \(\int K\,dA = 2\pi(1 - (-1)) = 4\pi\)이다. profile이 축과 만나지 않는 closed curve(torus)이면 \(\int K\,dA = -2\pi\oint\rho''\,ds = 0\)이다. <a href="#i-39-4-2">Theorem 39.4.2</a>의 두 경우를 이렇게 직접 얻는다.</p>
+      <div class="thm example" id="i-39-4-7">
+        <p><span class="thm-head">Example 39.4.7</span> <span class="thm-name">(a bumpy sphere)</span>.
+        \(\rho(t) = 1 + 0.2\cos 4t\)로 sphere를 부풀린 \(\mathbf{x}(t, v) = \rho(t)(\sin t\cos v, \sin t\sin v, \cos t)\)는 profile \((\rho(t)\sin t, \rho(t)\cos t)\)의 surface of revolution이다(\(\cos 4t\)는 \(\cos t\)의 다항식이라 극에서도 smooth하다). \(K\)는 \(-5.01\)에서 \(9.34\)(극에서의 값 \(3025/324\))까지 변하고 음수인 띠가 둘 있다. 그래도 북극에서 \(t_0\)까지의 cap에서 <a href="#eq-39-4-4">(39.4.4)</a>의 합은 늘 \(2\pi\)이고, 전체는 \(\int K\,dA = 4\pi\)다. 아래 Implementation 상자가 arc length가 아닌 parameter \(t\)로 두 항을 계산한다.</p>
+        <p class="verified">Verification: <code>verify/v-39-4-gauss-bonnet.py</code></p>
+      </div>
+      <p><a href="#fig-39-4-2">Figure 39.4.2</a>의 왼쪽 (a)는 bumpy sphere를 \(K\)로 칠한 것이다. 북극과 남극 근처와 적도의 넓은 띠가 빨강(\(K \gt 0\))이고, 그 사이의 좁은 두 띠가 파랑(\(K \lt 0\))이다. 오른쪽 (b)의 검은 곡선은 북극에서 \(t_0\)까지의 cap의 \(\int K\,dA\)다. 빨간 띠를 지날 때 빠르게 오르고, 파란 띠를 지날 때 내려간다. 회색 곡선(round sphere의 \(2\pi(1 - \cos t_0)\))과 모양이 전혀 다르지만, 둘 다 \(t_0 = \pi\)에서 \(4\pi\)에 닿는다. 주홍 점은 같은 값을 경계 항으로 계산한 \(2\pi - \int_{\partial S}\kappa_g\,ds\)이고, 검은 곡선 위에 정확히 놓인다.</p>
+      <figure class="dg-figure" id="fig-39-4-2">
+        <img src="figures/fig-39-4-2-bumpy-sphere.svg" alt="두 패널. (a) 위아래로 볼록한 두 혹과 넓은 적도 띠가 있는 회전체가 빨강과 파랑으로 칠해져 있다. 혹과 적도 띠 사이의 좁은 두 띠가 파랑이다. 아래에 −5에서 9까지의 색 막대 K. (b) 가로축 t0(0에서 π), 세로축 0에서 4π: 검은 곡선이 출렁이며 올라가 4π에 닿고, 회색 곡선은 매끄럽게 4π로 올라가며, 주홍 점들이 검은 곡선 위에 놓인다.">
+        <figcaption><span class="fig-head">Figure 39.4.2.</span>
+        <em>무엇을</em>: bumpy sphere \(\rho = 1 + 0.2\cos 4t\)(\(\mathbf{N}\) 바깥쪽). (a) \(K\)로 칠한 surface, (b) cap \(\{t \le t_0\}\)의 total curvature를 \(t_0\)의 함수로.
+        <em>읽는 법</em>: (a)의 색은 \(K\)(아래 색 막대, \(0\)이 흰색)다. (b)의 검정은 bumpy sphere의 \(\int_{t \le t_0}K\,dA\), 회색은 unit sphere의 같은 양 \(2\pi(1 - \cos t_0)\), 주홍 점은 bumpy sphere에서 경계 원의 \(\kappa_g\)로 계산한 \(2\pi - \int\kappa_g\,ds\)(13개의 \(t_0\))다.
+        <em>볼 것</em>: \(K\)는 \([-5.01, 9.34]\)에서 크게 변하고 검은 곡선은 두 번 내려가지만, 끝값은 회색과 같은 \(4\pi = 12.566\)이다. 주홍 점과 검은 곡선의 차이는 \(10^{-4}\)보다 작다.
+        <em>본문과의 연결</em>: <a href="#i-39-4-6">Proposition 39.4.6</a>, <a href="#i-39-4-7">Example 39.4.7</a>, <a href="#i-39-4-2">Theorem 39.4.2</a>. 돌려 볼 수 있는 <a href="figures/fig-39-4-2-bumpy-sphere-interactive.html">interactive version</a>은 같은 surface를 icosphere 위의 mesh로 그렸다.</figcaption>
+      </figure>
+      <div class="thm nonexample" id="i-39-4-8">
+        <p><span class="thm-head">Non-example 39.4.8</span> <span class="thm-name">(compactness matters)</span>.
+        catenoid \((\cosh v\cos u, \cosh v\sin u, v)\)(\(v \in \R\))는 cylinder와 homeomorphic이라 그 triangulation의 개수로는 \(\chi = 0\)일 것 같지만, compact가 아니다. 그리고 \(\int K\,dA = -2\pi\int_{-\infty}^{\infty}\operatorname{sech}^2v\,dv = -4\pi \neq 0\)이다(<a href="39-3-gaussian-mean-curvature.html#ex-39-3-6">Exercise 39.3.6</a>의 극한). Gauss map이 \(S^2\)에서 두 점을 뺀 것을 한 번 덮기 때문이다. compact하지 않은 surface에서는 무한히 먼 곳의 “boundary”가 total curvature를 가져간다.</p>
+        <p class="verified">Verification: <code>verify/v-39-4-gauss-bonnet.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-proof">
+      <h2>Proof Sketch of the General Theorem</h2>
+      <p>일반적인 경우의 증명은 두 단계다. 첫 단계는 미적분, 둘째 단계는 셈이다.</p>
+      <div class="proof">
+        <p><span class="proof-head">Proof sketch.</span> (<a href="#i-39-4-2">Theorem 39.4.2</a>와 <a href="#i-39-4-4">Theorem 39.4.4</a>) <em>1단계(local Gauss–Bonnet).</em> 한 좌표 근방 안에 들어가는 작은 곡선 삼각형 \(T\)(세 변이 regular curve, 꼭짓점의 내각 \(\phi_1, \phi_2, \phi_3\))에서</p>
+        <p>\[ \begin{aligned} &amp;\int_TK\,dA + \int_{\partial T}\kappa_g\,ds \\ &amp;\qquad + \sum_{a=1}^3(\pi - \phi_a) = 2\pi \end{aligned} \]</p>
+        <p>이다. 이것은 평면 곡선의 rotation index theorem(<a href="../05-space-curves/5-6-rotation-index.html#i-5-6-11">Theorem 5.6.11</a>)을 좌표 평면에서 쓰고, 좌표의 비틀림이 만드는 차이를 Green's theorem으로 넓이 적분 \(\int_TK\,dA\)로 바꾸어 얻는다 <a class="cite" href="../../references.html#dC">[dC §4-5]</a>. 이 단계는 여기서 증명하지 않는다.</p>
+        <p><em>2단계(합치기).</em> \(S\)를 이런 작은 삼각형 \(n_2\)개로 나누고(vertex \(n_0\)개, edge \(n_1\)개) 1단계의 식을 모두 더한다. 오른쪽은 \(2\pi n_2\)다. 왼쪽에서 \(\int K\,dA\)는 \(\int_SK\,dA\)가 된다. 안쪽 edge는 이웃한 두 삼각형이 반대 방향으로 지나므로 \(\kappa_g\)의 적분이 상쇄된다(<a href="39-2-principal-curvatures.html#ex-39-2-1">Exercise 39.2.1</a>(a)). 내각은 vertex마다 모여 합이 \(2\pi\)이므로 \(\sum(\pi - \phi) = 3\pi n_2 - 2\pi n_0\)이다. boundary가 없으면 \(3n_2 = 2n_1\)(<a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-19">Proposition 33.4.19</a>)이므로</p>
+        <p>\[ \begin{aligned} \int_SK\,dA &amp;= 2\pi n_2 - 3\pi n_2 + 2\pi n_0 \\ &amp;= 2\pi n_0 - \pi n_2 = 2\pi(n_0 - n_1 + n_2) \end{aligned} \]</p>
+        <p>이다. boundary가 있으면 boundary edge의 \(\kappa_g\)는 상쇄되지 않고 남고, boundary vertex의 내각의 합은 \(\pi - \varepsilon_j\)(꺾이지 않는 점에서는 \(\pi\))이며, \(3n_2 = 2n_1 - n_1^\partial\)을 쓰면 같은 셈으로 <a href="#eq-39-4-2">(39.4.2)</a>가 나온다.</p>
+      </div>
+      <p>2단계의 셈은 mesh 위에서 그대로 정확한 정리가 된다. 평평한 삼각형에서는 1단계가 “내각의 합이 \(\pi\)”라는 사실로 바뀌고 \(K\)와 \(\kappa_g\)가 모두 vertex의 angle defect로 옮겨 가기 때문이다. 그 정의와 완전한 증명은 <a href="../40-discrete-curvature-integral/index.html#toc-40-2">Section 40.2</a> <span class="todo">[확인 필요: Chapter 40 미작성 — 참조 번호 확정 필요]</span>에서 한다.</p>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: a theorem and an identity</p>
+        <ul>
+          <li>smooth: <a href="#eq-39-4-1">(39.4.1)</a>은 analysis(1단계)와 topology(triangulation의 존재와 \(\chi\)의 불변성)가 필요한 정리다.</li>
+          <li>discrete: triangle mesh에서는 vertex의 angle defect의 합이 \(2\pi\chi\)라는 것이 모든 mesh에서 정확히 성립하는 항등식이 되고, 증명은 위의 2단계뿐이다(<a href="../40-discrete-curvature-integral/index.html#toc-40-2">Section 40.2</a>). Chapter 31의 <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-4">Theorem 31.2.4</a>가 같은 진술을 Track 1 수준으로 소개했다.</li>
+          <li>무엇을 보존하는가: 합. vertex를 어떻게 움직여도(삼각형이 퇴화하지 않는 한) 합은 그대로다. 무엇을 잃는가: curvature가 점마다 어떻게 분포하는지는 mesh에 따라 다르다. 이 사실은 Chapter 40과 41에서 다시 다룬다.</li>
+        </ul>
+      </aside>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: both sides of Gauss–Bonnet for caps</p>
+<pre id="code-39-4-1"><code>import numpy as np
+
+def cap_terms(profile, t0, n=4000, h=1e-4):
+    """surface of revolution of the profile (r(t), z(t)), r(0) = 0, N = x_t x x_v/|...|: returns
+    (integral of K dA over t &lt;= t0, integral of kappa_g ds over the circle t = t0 traversed with v increasing)"""
+    d1 = lambda t: [(a - b) / (2 * h) for a, b in zip(profile(t + h), profile(t - h))]
+    d2 = lambda t: [(a - 2 * c + b) / h ** 2 for a, b, c in zip(profile(t + h), profile(t - h), profile(t))]
+    t = (np.arange(n) + 0.5) * t0 / n
+    (r, z), (r1, z1), (r2, z2) = profile(t), d1(t), d2(t)
+    speed = np.hypot(r1, z1)
+    K = (r1 * z2 - r2 * z1) * z1 / (r * speed ** 4)          # product of the two curvatures in (8.3.5)
+    area_term = 2 * np.pi * np.sum(K * r * speed) * t0 / n    # dA = r |alpha'| dt dv
+    r1b, z1b = d1(t0)
+    return area_term, 2 * np.pi * r1b / np.hypot(r1b, z1b)   # kappa_g = r'/(r |alpha'|), length 2 pi r
+
+bumpy = lambda t: ((1 + 0.2 * np.cos(4 * t)) * np.sin(t), (1 + 0.2 * np.cos(4 * t)) * np.cos(t))
+for t0 in (0.5, 1.0, np.pi / 2, 2.5):
+    A, B = cap_terms(bumpy, t0)
+    print(f"cap t &lt;= {t0:.4f}:  int K dA {A:+.5f}  int kappa_g ds {round(B, 5) + 0.0:+.5f}  sum/(2 pi) {(A + B) / (2 * np.pi):.5f}")
+print(f"whole bumpy sphere:  int K dA / (2 pi) = {cap_terms(bumpy, np.pi)[0] / (2 * np.pi):.5f}")
+torus = lambda t: (2 + 0.8 * np.cos(t), 0.8 * np.sin(t))
+print(f"whole torus:         int K dA / (2 pi) = {round(cap_terms(torus, 2 * np.pi)[0] / (2 * np.pi), 5) + 0.0:+.5f}")
+</code></pre>
+<pre id="out-39-4-1"><code>cap t &lt;= 0.5000:  int K dA +3.83614  int kappa_g ds +2.44705  sum/(2 pi) 1.00000
+cap t &lt;= 1.0000:  int K dA +0.47571  int kappa_g ds +5.80747  sum/(2 pi) 1.00000
+cap t &lt;= 1.5708:  int K dA +6.28319  int kappa_g ds +0.00000  sum/(2 pi) 1.00000
+cap t &lt;= 2.5000:  int K dA +9.00110  int kappa_g ds -2.71792  sum/(2 pi) 1.00000
+whole bumpy sphere:  int K dA / (2 pi) = 2.00000
+whole torus:         int K dA / (2 pi) = +0.00000</code></pre>
+        <p><code>cap_terms</code>는 arc length가 아닌 parameter \(t\)를 쓰므로 <a href="../08-gauss-map/8-3-principal-curvatures.html#eq-8-3-5">(8.3.5)</a>의 일반 판 \(K = (r'z'' - r''z')z'/(r\abs{\alpha'}^4)\)과 \(dA = r\abs{\alpha'}\,dt\,dv\)로 넓이 항을 중점 공식으로 계산하고, 경계 항은 \(\kappa_g = r'/(r\abs{\alpha'})\)에 길이 \(2\pi r\)를 곱한다(<a href="#i-39-4-6">Proposition 39.4.6</a>의 식을 arc length로 바꾼 것). 두 항은 서로 다른 데이터(안쪽 전체와 경계 한 곳)로 계산했는데 합이 \(2\pi\)다. \(t_0 = 1\)에서는 넓이 항이 \(0.48\)밖에 안 되고 경계 항이 나머지를 채운다. 경계 원이 음의 \(K\) 띠 근처에서 cap 쪽으로 크게 휘기 때문이다. \(t_0 = \pi/2\)(적도)에서는 경계가 geodesic이다.</p>
+        <p class="verified">Verification: <code>verify/v-39-4-gauss-bonnet.py</code>가 이 코드를 그대로 실행하고 출력과 정확한 값을 비교한다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">Looking ahead: Gauss–Bonnet on meshes and beyond</p>
+        <p>Chapter 40은 angle defect를 정의하고(<a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>) discrete Gauss–Bonnet theorem을 증명한다(<a href="../40-discrete-curvature-integral/index.html#toc-40-2">Section 40.2</a>). Chapter 45는 vector field의 singularity의 index의 합이 \(\chi\)라는 Poincaré–Hopf theorem의 discrete 판을 쓴다(<a href="../45-vector-field-design/index.html">Chapter 45</a>). Track 3에서는 Gauss–Bonnet theorem을 Riemannian geometry의 언어로 다시 본다(<a href="../26-gauss-bonnet-jacobi/index.html#toc-26-1">Section 26.1</a>).</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Chapter 10: local Gauss–Bonnet, geodesic triangle, triangulation과 \(\chi\), global Gauss–Bonnet(<a href="../10-gauss-bonnet/index.html#toc-10-1">Section 10.1</a>–<a href="../10-gauss-bonnet/index.html#toc-10-4">Section 10.4</a>).</li>
+          <li>Tour: <a href="../00-tour/0-5-intrinsic.html#sec-gauss-bonnet">Section 0.5</a>. Chapter 26: <a href="../26-gauss-bonnet-jacobi/index.html#toc-26-1">Section 26.1</a>.</li>
+          <li>교재와 강의: <a class="cite" href="../../references.html#dC">[dC §4-5]</a>, <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slides 28–30. 노트의 §3.4에는 smooth Gauss–Bonnet theorem이 없고, discrete 판은 <a class="cite" href="../../references.html#Cr">[Cr §5.5]</a>에 있다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>closed plane curve의 total curvature는 \(2\pi\cdot\operatorname{rot}\)이고, 평면 영역의 boundary에서는 \(\int\kappa_g\,ds + \sum\varepsilon_j = 2\pi\)이다.</li>
+        <li>boundary가 없는 compact oriented surface에서 \(\int_SK\,dA = 2\pi\chi(S) = 2\pi(2 - 2g)\)이다(<a href="#i-39-4-2">Theorem 39.4.2</a>). sphere와 ellipsoid는 \(4\pi\), torus는 \(0\)이다.</li>
+        <li>boundary가 있으면 positive orientation으로 잰 \(\int\kappa_g\,ds\)와 exterior angle을 더해 \(2\pi\chi(S)\)가 된다(<a href="#i-39-4-4">Theorem 39.4.4</a>). polar cap에서는 \(2\pi(1 - \cos\theta_0) + 2\pi\cos\theta_0 = 2\pi\)이다.</li>
+        <li>surface of revolution의 cap에서는 \(K\,dA = -\rho''\,ds\,dv\)라 정리가 미적분만으로 증명된다(<a href="#i-39-4-6">Proposition 39.4.6</a>). 일반적인 증명은 local Gauss–Bonnet과 triangulation의 셈이고, 그 셈은 mesh에서 정확한 항등식이 된다(Section 40.2).</li>
+        <li>compact가 아니면 정리가 성립하지 않는다(catenoid의 \(-4\pi\)).</li>
+      </ul>
+      <p class="next">다음 절에서는 지금까지의 양을 두 bilinear form으로 정리한다. first fundamental form과 second fundamental form은 surface를 rigid motion을 제외하고 정하고, mesh에서는 edge length와 bending angle이 그 역할을 한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-39-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 39.4.1</span> <span class="level">★</span>
+        (a) genus \(2\)인 닫힌 oriented surface의 \(\int K\,dA\)는? (b) sphere에서 서로 겹치지 않는 원판 세 개를 뺀 surface의 boundary가 모두 geodesic이고 꼭짓점이 없다면 \(\int K\,dA\)는? (c) genus \(g \ge 1\)인 닫힌 surface에서 모든 점이 \(K \gt 0\)일 수 있는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(\chi = 2 - 2\cdot 2 = -2\)이므로 \(-4\pi\)이다. (b) \(\chi = 2 - 0 - 3 = -1\)이고 \(\kappa_g = 0\), \(\varepsilon_j\)가 없으므로 \(\int K\,dA = -2\pi\)이다. (\(K \lt 0\)인 곳이 반드시 있다.) (c) 없다. \(K \gt 0\)이면 \(\int K\,dA \gt 0\)인데 \(2\pi(2 - 2g) \le 0\)이다. 곧 모든 점에서 \(K \gt 0\)인 닫힌 surface(ovaloid)는 genus \(0\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-4-2" data-level="1">
+        <p><span class="thm-head">Exercise 39.4.2</span> <span class="level">★</span>
+        unit sphere에서 북극과 적도 위의 두 점 \((1, 0, 0)\), \((\cos\alpha, \sin\alpha, 0)\)(\(0 \lt \alpha \lt \pi\))을 대원의 호로 이은 삼각형의 넓이를 <a href="#eq-39-4-2">(39.4.2)</a>로 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>세 변이 대원의 호이므로 \(\kappa_g = 0\)이다. 적도 위 두 꼭짓점의 내각은 meridian과 적도가 만나는 직각 \(\pi/2\)이고, 북극의 내각은 두 meridian 사이의 각 \(\alpha\)이다. exterior angle은 \(\pi - (\text{내각})\)이므로 합이 \(\pi/2 + \pi/2 + (\pi - \alpha) = 2\pi - \alpha\)이고, \(\chi = 1\)이므로 \(\int K\,dA = 2\pi - (2\pi - \alpha) = \alpha\)이다. \(K = 1\)이므로 넓이가 \(\alpha\)다. 직접 계산하면 넓이는 \(\int_0^\alpha\!\int_0^{\pi/2}\sin\theta\,d\theta\,d\varphi = \alpha\)로 같다. \(\alpha = \pi/2\)이 octant triangle이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-4-3" data-level="2">
+        <p><span class="thm-head">Exercise 39.4.3</span> <span class="level">★★</span>
+        반지름이 \(\rho_1 \lt \rho_2\)인 두 원 사이의 cone의 띠(frustum) \(\{(\rho\cos v, \rho\sin v, h(\rho_2 - \rho)) : \rho_1 \le \rho \le \rho_2\}\)(\(h \gt 0\))는 \(K = 0\)이고 annulus라 \(\chi = 0\)이다. <a href="#i-39-4-6">Proposition 39.4.6</a>의 증명에서 쓴 \(\kappa_g = \rho'/\rho\)(arc length profile)로 두 경계 원의 \(\int\kappa_g\,ds\)를 각각 구하고, <a href="#i-39-4-4">Theorem 39.4.4</a>가 성립함을 확인하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>profile을 \(\rho\)가 커지는 방향의 arc length \(s\)로 매개화하면 \(\rho' = 1/\sqrt{1 + h^2}\)로 상수다. 한 경계 원은 \(v\)가 커지는 방향, 다른 하나는 반대 방향이 positive orientation이다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>profile \(\alpha(s) = (\rho(s), z(s))\)는 직선이고 \(\rho' = c := 1/\sqrt{1 + h^2}\)이다. <a href="#i-39-4-6">Proposition 39.4.6</a>의 증명에서 \(v\)가 커지는 방향으로 돈 원 \(s = s_*\)는 \(\kappa_g = \rho'/\rho\), \(\mathbf{N}\times\mathbf{t} = -\mathbf{x}_s\)(\(s\)가 줄어드는 쪽)이었다. 띠는 \(s\)가 \(\rho_1\)과 \(\rho_2\)에 해당하는 값 사이에 있으므로, 바깥 원 \(\rho = \rho_2\)는 \(v\)가 커지는 방향이 positive(안쪽이 \(s\)가 줄어드는 쪽)이고 \(\int\kappa_g\,ds = \tfrac{c}{\rho_2}\cdot2\pi\rho_2 = 2\pi c\)이다. 안쪽 원 \(\rho = \rho_1\)은 반대 방향이 positive이므로 \(\kappa_g\)의 부호가 바뀌어(<a href="39-2-principal-curvatures.html#ex-39-2-1">Exercise 39.2.1</a>(a)) \(\int\kappa_g\,ds = -2\pi c\)이다. 합은 \(0\)이고 \(\int K\,dA = 0\), 꼭짓점이 없으므로 \(0 = 2\pi\chi\)이다. 두 경계 원이 모두 \(c \neq 0\)만큼 휘어 있지만 정확히 상쇄된다. cone의 띠를 펼치면 평면의 annulus 조각(부채꼴 띠)이 되는데, 두 호의 \(\kappa_g\)가 거기서도 상쇄되는 것과 같다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-4-4" data-level="1">
+        <p><span class="thm-head">Exercise 39.4.4</span> <span class="level">★</span>
+        참인지 거짓인지 말하고 이유를 써라. (a) unit sphere 위의 simple closed curve가 둘러싼 영역 \(R\)의 넓이를 \(A\)라 하면, \(R\)에 대해 positive orientation으로 잰 \(\int\kappa_g\,ds\)는 \(2\pi - A\)이다(꼭짓점은 없다). (b) closed surface를 늘이고 구부리면(찢거나 붙이지 않고) \(\int K\,dA\)가 바뀔 수 있다. (c) <a href="#eq-39-4-2">(39.4.2)</a>에서 boundary의 방향을 거꾸로 잡으면 등식이 그대로 성립한다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. \(R\)은 disk이므로 \(\chi = 1\)이고, \(K = 1\)에서 \(\int_RK\,dA = A\)이므로 \(\int\kappa_g\,ds = 2\pi - A\)이다(<a href="#eq-39-4-3">(39.4.3)</a>가 그 예). (b) 거짓. 그런 변형에서 \(S\)는 homeomorphic하게 남으므로 \(\chi\)가 같고, <a href="#eq-39-4-1">(39.4.1)</a>에서 \(\int K\,dA\)가 같다. (c) 거짓. 방향을 뒤집으면 \(\kappa_g\)와 exterior angle의 부호가 모두 바뀌어 \(\int K\,dA - \int\kappa_g\,ds - \sum\varepsilon_j\)가 되고, 일반적으로 \(2\pi\chi\)가 아니다. 예: polar cap에서 \(2\pi(1 - \cos\theta_0) - 2\pi\cos\theta_0 \neq 2\pi\)(\(\theta_0 \neq \pi/2\)).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-4-5" data-level="1">
+        <p><span class="thm-head">Exercise 39.4.5</span> <span class="level">★</span>
+        <strong>Coding.</strong> torus of revolution \((R, r) = (2, 0.8)\)의 띠 \(\{u_1 \le u \le u_2\}\), \((u_1, u_2) = (-1, 2)\)에서 <a href="#i-39-4-4">Theorem 39.4.4</a>를 확인하여라. Implementation 상자의 <code>cap_terms</code>를 profile \((2 + 0.8\cos t, 0.8\sin t)\)에 쓰고, 두 경계 원의 positive orientation을 정하여라. 넓이 항을 닫힌 꼴 \(2\pi(\sin u_2 - \sin u_1)\)과 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-39-4-5"><code>u1, u2 = -1.0, 2.0
+A1, B1 = cap_terms(torus, u1)
+A2, B2 = cap_terms(torus, u2)
+area_term = A2 - A1                    # K dA over the band u1 &lt;= u &lt;= u2
+boundary_term = B2 - B1                # circle u = u2 with v increasing, circle u = u1 with v decreasing
+print(f"int K dA {area_term:+.5f}   exact 2 pi (sin u2 - sin u1) {2 * np.pi * (np.sin(u2) - np.sin(u1)):+.5f}")
+print(f"int kappa_g ds {boundary_term:+.5f}   sum {round(area_term + boundary_term, 5) + 0.0:+.5f} = 2 pi chi(annulus) = 0")
+</code></pre>
+<pre id="out-ex-39-4-5"><code>int K dA +11.00040   exact 2 pi (sin u2 - sin u1) +11.00040
+int kappa_g ds -11.00040   sum +0.00000 = 2 pi chi(annulus) = 0</code></pre>
+          <p><code>cap_terms(torus, u)</code>의 넓이 항은 \(\int_0^u\)이므로(넓이 항은 \(r(0) = 0\)을 쓰지 않는다) 차 \(A_2 - A_1\)이 띠의 \(\int K\,dA\)다. torus에서 \(K\,dA = \cos u\,du\,dv\)이므로 정확한 값은 \(2\pi(\sin 2 + \sin 1) = 11.0004\)이다. 경계 항: \(v\)가 커지는 방향으로 돈 원 \(u = u_*\)의 \(\mathbf{N}\times\mathbf{t}\)는 \(u\)가 줄어드는 쪽을 향한다(<a href="#i-39-4-6">Proposition 39.4.6</a>의 증명과 같은 계산, 또는 <a href="39-2-principal-curvatures.html#ex-39-2-4">Exercise 39.2.4</a>). 그러므로 위쪽 원 \(u = u_2\)는 \(v\)가 커지는 방향이 positive이고(\(B_2\)), 아래쪽 원 \(u = u_1\)은 반대 방향이 positive라서 부호를 바꾼 \(-B_1\)이다. 합이 \(0 = 2\pi\chi\)(annulus, \(\chi = 2 - 0 - 2 = 0\))다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="39-3-gaussian-mean-curvature.html">← 39.3 Gaussian and Mean Curvature</a>
+    <a rel="next" href="39-5-fundamental-theorem.html">39.5 Fundamental Forms and the Fundamental Theorem of Surfaces →</a>
+  </nav>
+</body>
+</html>

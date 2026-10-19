@@ -976,3 +976,29 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
   - 작업은 이 worktree에서 메인 세션(dg-study-main)이 이어 간다. fork 세션은 끝났다(pid 없음).
   - scratch는 `/tmp/claude-1000/-home-kbh2-DG-study/254ed245-19c9-4bfc-b5ae-fb83871f1e12/scratchpad/`다. 공개 절차의 clean_build.sh도 여기로 옮겨 쓴다.
   - 진행: W4(39, 42) → W5(40, 43) → W6(41, 44) → W7(45) → Track 2 통합 검토. push는 검토와 check_all을 통과한 단위마다 한다(§13).
+  - 사용자 지시: "일단은 이번 사용량 한도까지만 진행해줘. 자동으로 시작하는건 하지 말자." 자동 재개 cron f51f4b63을 지웠다. 한도에 걸리면 그 자리에서 멈추고, 다시 시작은 사용자가 지시할 때 한다.
+- 2026-10-20: **39장 작성 완료(draft).** 5절, 그림 12개(interactive 3개), verify 245 checks, todo 17.
+  - 규약: vertex는 굵은 𝐱_i. W의 행렬 𝖶 = 𝗀⁻¹𝗁, Crane의 S = −𝖶. Darboux frame (𝐭, 𝐍×𝐭, 𝐍)
+  - bending angle(Def 39.5.5)은 θ_ij = atan2(⟨𝐍_f×𝐍_g, ê_ij⟩, ⟨𝐍_f, 𝐍_g⟩)이다. f는 i→j로 지나는 face이고, Def 31.2.5·dgmesh와 같은 부호다.
+  - 작성자는 슬라이드와 노트 사이에서 κ_n·II의 부호가 섞여 있다고 보고했다(검토에서 원문 대조).
+  - 통합: terms 15개, references Knoppel15
+  - 39 검토 agent(1명)와 40 작성 agent를 띄웠다. 지금 도는 것: 42 작성, 39 검토, 40 작성
+- 2026-10-20: **39장 reviewed.** 원문 대조 결과 작성자의 부호 주장은 모두 맞았다. 39장은 공개했다.
+  - 고친 수학 오류
+    - 39.3 상자: H의 edge 몫은 −½θ_ijℓ_ij다. vertex 둘레에서 적분한 것은 H𝐍이 아니라 2H𝐍이다.
+    - 39.5 상자: θ_ij ≈ ∫(−κ_n)
+    - Thm 39.5.10 뒤 문단: 쓰이지 않는 것은 길이가 아니라 bending angle이다.
+    - θ = 0일 때의 조건은 Σα ∈ 2πℤ다.
+    - Prop 39.5.6(b) 증명의 orientation 빈틈
+    - Fig 39.5.3 따라 읽기
+  - 그 밖에: 폰 폭에서 넘치던 인라인 수식 24개를 나눴다. 첫 등장 번역어, Knoppel15 cite, Fig 39.4.1·39.4.2의 범례
+  - 볼록 다면체(바깥 normal)에서 θ_ij > 0이고 dihedral angle은 π − |θ|다. 40장 작성자에게 보냈다.
+  - **바로잡음**: Track 3 9장·10장은 아직 planned다. 39·40장 작성/검토 프롬프트에 "쓰여 있다"고 적은 것은 틀렸다. 39장의 9.x·10.x todo 6개는 해당 장 index의 toc 항목으로 링크한 채 남긴다(Track 3 작성 때 확정).
+  - 남은 todo 17개(40, 41, 44장 11개, Track 3 6개), REVIEW 0
+  - 통합
+    - notation 4행
+    - 37·38장에서 39장 toc 앵커로 가던 링크 9곳을 실제 절로 바꿨다. 38.5는 Def 39.5.5로 바꿨다.
+    - 루트 index의 39를 Reviewed로 바꿨다.
+  - 검토자 제안(Track 2 통합 검토 때)
+    - style.css: 인라인 mjx-container의 폰 폭 overflow. 38.3에도 8개 이상 있다.
+    - shot.mjs에 인라인 수식 overflow 검사(예시: scratch rev39/py/shot_inline.mjs)

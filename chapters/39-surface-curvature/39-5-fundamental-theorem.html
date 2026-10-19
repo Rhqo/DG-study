@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>39.5 Fundamental Forms and the Fundamental Theorem of Surfaces — DG Study</title>
+  <meta name="dg-id" content="39.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="39.1, 39.2, 38.2, 38.4, 38.5, 38.6, 37.4, 37.5, 33.4, 31.2">
+  <meta name="dg-refs" content="Cr §3.4.2, §3.5.2; CMU-DDG L15; dC §4-3; Wang12">
+  <meta name="dg-updated" content="2026-10-20">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">39. Curvature of Surfaces</a> ›
+    <span>39.5 Fundamental Forms and the Fundamental Theorem of Surfaces</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>39.5 Fundamental Forms and the Fundamental Theorem of Surfaces</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §3.4.2]</a>,
+        <a class="cite" href="../../references.html#Cr">[Cr §3.5.2]</a>,
+        <a class="cite" href="../../references.html#dC">[dC §4-3]</a>,
+        <a class="cite" href="../../references.html#Wang12">[Wang12]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slides 33–37</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>first fundamental form과 second fundamental form을 \(d\mathbf{x}\)와 \(d\mathbf{N}\)으로 쓰고, II가 normal 방향 offset에서 I이 변하는 빠르기임을 증명할 수 있다.</li>
+        <li>fundamental theorem of surfaces(Bonnet)를 정확히 진술하고, plane curve의 fundamental theorem과 closing condition에 비추어 설명할 수 있다.</li>
+        <li>simplicial surface의 interior edge에서 bending angle을 정의하고 그 부호를 판정할 수 있다.</li>
+        <li>edge length와 bending angle이 discrete immersion을 proper rigid motion을 제외하고 정한다는 fundamental theorem of discrete surfaces를 증명하고 구현하며, vertex마다의 compatibility 조건을 확인할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Section 39.1–39.2: <a href="39-1-weingarten-map.html#eq-39-1-2">(39.1.2)</a>, <a href="39-1-weingarten-map.html#i-39-1-5">Proposition 39.1.5</a>, <a href="39-1-weingarten-map.html#ex-39-1-3">Exercise 39.1.3</a>(parallel surface), normal curvature <a href="39-2-principal-curvatures.html#i-39-2-5">Proposition 39.2.5</a>.</li>
+        <li>Chapter 38: induced metric <a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-1">Definition 38.2.1</a>, discrete immersion <a href="../38-surfaces-smooth-discrete/38-4-discrete-immersions.html#i-38-4-7">Definition 38.4.7</a>, <a href="../38-surfaces-smooth-discrete/38-4-discrete-immersions.html#i-38-4-10">Corollary 38.4.10</a>, discrete Gauss map <a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-1">Definition 38.5.1</a>, hinge <a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-4">Example 38.6.4</a>, dimpled icosahedron <a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-15">Non-example 38.6.15</a>.</li>
+        <li>Chapter 37: fundamental theorem of discrete plane curves와 space curves <a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-6">Theorem 37.4.6</a>, <a href="../37-curves-smooth-discrete/37-5-discrete-space-curves.html#i-37-5-8">Theorem 37.5.8</a>, closing condition <a href="../37-curves-smooth-discrete/37-1-plane-curves.html#i-37-1-7">Proposition 37.1.7</a>.</li>
+        <li>Chapter 33: orientation과 consistent orientation(<a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-14">Definition 33.4.14</a>), edge-connectedness <a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-15">Lemma 33.4.15</a>. Track 1: bending angle <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-5">Definition 31.2.5</a>.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Chapter 38은 질문 하나를 남겼다. mesh의 edge length만으로는 모양이 정해지지 않는다. hinge는 길이를 지킨 채 접히고(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-4">Example 38.6.4</a>), dimpled icosahedron은 icosahedron과 모든 edge length가 같은데 모양이 다르다(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-15">Non-example 38.6.15</a>). 무엇을 더해야 모양이 정해지는가? smooth surface에서도 같은 일이 있다. 평면과 cylinder는 국소적으로 같은 metric을 갖는다.</p>
+      <p>곡선에서는 답을 이미 보았다. plane curve는 길이와 꺾이는 각으로, space curve는 거기에 비틀림까지 주면 rigid motion을 제외하고 정해졌다(Chapter 37). 이 절은 surface의 판을 다룬다. metric이 “길이”의 자리라면, “꺾이는 정도”의 자리는 Section 39.1–39.4의 \(W\), 곧 second fundamental form이다. mesh에서는 edge length와 이웃한 두 face가 꺾이는 각, 곧 bending angle이 그 둘이다.</p>
+    </section>
+
+    <section id="sec-forms">
+      <h2>The First and Second Fundamental Forms</h2>
+      <p>immersion \(\mathbf{x}\colon U \to \R^3\)과 Gauss map \(\mathbf{N}\)에 대하여, 점마다 \(\R^2\) 위의 세 symmetric bilinear form을 다음과 같이 둔다.</p>
+      <div class="equation" id="eq-39-5-1">
+      \[ \begin{aligned} \mathrm{I}(X, Y) &amp;= \inner{d\mathbf{x}(X)}{d\mathbf{x}(Y)} = g(X, Y), \\ \mathrm{II}(X, Y) &amp;= g(\mathsf{W}X, Y) \\ &amp;= -\inner{d\mathbf{N}(X)}{d\mathbf{x}(Y)}, \\ \mathrm{III}(X, Y) &amp;= \inner{d\mathbf{N}(X)}{d\mathbf{N}(Y)} \\ &amp;= g(\mathsf{W}X, \mathsf{W}Y) \end{aligned} \tag{39.5.1} \]
+      </div>
+      <p>I은 <strong>first fundamental form</strong>(제1기본형식), 곧 induced metric이다(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-1">Definition 38.2.1</a>, <a href="../07-first-fundamental-form/7-1-first-fundamental-form.html#i-7-1-1">Definition 7.1.1</a>). II는 <strong>second fundamental form</strong>(제2기본형식)이다(<a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-1">Definition 8.2.1</a>). 둘째 등호는 <a href="39-1-weingarten-map.html#eq-39-1-2">(39.1.2)</a>이고, II가 symmetric이라는 것은 <a href="39-1-weingarten-map.html#i-39-1-5">Proposition 39.1.5</a>다. 행렬로는 I이 \(\mathsf{g} = \begin{pmatrix} E &amp; F \\ F &amp; G \end{pmatrix}\), II가 \(\mathsf{h} = \begin{pmatrix} L &amp; M \\ M &amp; N \end{pmatrix}\)이다. 셋째 III을 <strong>third fundamental form</strong>(제3기본형식)이라 부르기도 한다. 새로운 대상은 하나도 없다. 노트도 강조하듯 I과 II는 \(\mathbf{x}\)와 \(\mathbf{N}\)이라는 두 map의 differential을 다시 적은 것이다 <a class="cite" href="../../references.html#Cr">[Cr §3.4.2]</a>. 예를 들어 normal curvature는 \(\kappa_n(X) = \mathrm{II}(X, X)/\mathrm{I}(X, X)\)이다(<a href="39-2-principal-curvatures.html#i-39-2-5">Proposition 39.2.5</a>).</p>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: the sign of II in the notes and slides</p>
+        <ul>
+          <li>노트의 §3.4.2는 \(\mathrm{II}(X, Y) := -g(SX, Y)\) \(= -dN(X)\cdot df(Y)\)로 정의한다 <a class="cite" href="../../references.html#Cr">[Cr §3.4.2]</a>. Crane의 \(S\)는 \(-\mathsf{W}\)이므로(Section 39.1의 Conventions 상자) 이것은 같은 \(\mathbf{N}\)에서 이 study set의 II와 같은 값이다.</li>
+          <li>노트의 §3.5.2는 \(\mathrm{II}(u, v) = g(Su, v)\)로 쓰고 <a class="cite" href="../../references.html#Cr">[Cr §3.5.2]</a>, 강의 슬라이드는 \(\mathrm{II}(X, Y) := \inner{dN(X)}{df(Y)}\)로 쓰며 \(\kappa_N = \mathrm{II}/\mathrm{I}\)라 적는다 <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slide 33. 이 둘은 이 study set의 II와 부호가 반대이고, slide 17의 \(\kappa_N\)과 서로 맞는다.</li>
+          <li>같은 §3.5.2는 성분을 \(e = N\cdot f_{xx}\), \(f = N\cdot f_{xy}\), \(g = N\cdot f_{yy}\)로 적는데, 이것은 이 study set의 \(L, M, N\)과 같은 값이다(do Carmo와 같은 문자, <a href="../../notation.html#sec-comparison">Notation and Conventions</a>). 노트도 이 계산이 “부호를 빼면” 앞의 식과 같다고 덧붙인다. 곧 노트 안에서도 II의 부호가 두 가지로 쓰인다. 식을 옮길 때는 \(\kappa_n\)의 부호로 확인한다. 이 study set에서는 바깥쪽 normal의 sphere가 \(\mathrm{II} = -\tfrac1r\mathrm{I}\)이다.</li>
+        </ul>
+      </aside>
+      <aside class="box warning">
+        <p class="box-title">Warning: three meanings of L, M, N</p>
+        <p>second fundamental form의 coefficient \(L, M, N\)(이탤릭)은 Track 2의 cotan matrix \(L\)과 mass matrix \(M\), 그리고 unit normal \(\mathbf{N}\)(굵은 글씨)과 다르다. 이 장에서 \(L, M, N\)은 언제나 coefficient이고, cotan matrix와 mass matrix는 쓰지 않는다. 같은 식에 둘이 나와야 하는 Chapter 40–42에서는 coefficient 대신 \(\mathrm{II}\)나 \(\mathsf{h}\)로 쓴다.</p>
+      </aside>
+
+      <p>II의 기하적인 뜻 하나는 이미 보았다. 방향마다의 normal curvature다. 다른 뜻은 surface를 normal 방향으로 밀 때 나타난다.</p>
+      <div class="thm proposition" id="i-39-5-1">
+        <p><span class="thm-head">Proposition 39.5.1</span> <span class="thm-name">(II is the rate of change of I under normal offsets)</span>.
+        immersion \(\mathbf{x}\)와 Gauss map \(\mathbf{N}\)에 대하여 \(\mathbf{x}_t = \mathbf{x} + t\mathbf{N}\)이라 하고, \(\mathbf{x}_t\)의 first fundamental form을 \(\mathrm{I}_t(X, Y) = \inner{d\mathbf{x}_t(X)}{d\mathbf{x}_t(Y)}\)로 두자. 그러면 모든 \(t\)에서</p>
+        <div class="equation" id="eq-39-5-2">
+        \[ \begin{aligned} \mathrm{I}_t &amp;= \mathrm{I} - 2t\,\mathrm{II} + t^2\,\mathrm{III}, \\ \frac{d}{dt}\Big|_{t=0}\mathrm{I}_t &amp;= -2\,\mathrm{II} \end{aligned} \tag{39.5.2} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(d\mathbf{x}_t = d\mathbf{x} + t\,d\mathbf{N}\)이므로 bilinearity로</p>
+        <p>\[ \begin{aligned} \mathrm{I}_t(X, Y) &amp;= \inner{d\mathbf{x}(X)}{d\mathbf{x}(Y)} \\ &amp;\quad + t\big(\inner{d\mathbf{x}(X)}{d\mathbf{N}(Y)} + \inner{d\mathbf{N}(X)}{d\mathbf{x}(Y)}\big) \\ &amp;\quad + t^2\inner{d\mathbf{N}(X)}{d\mathbf{N}(Y)} \end{aligned} \]</p>
+        <p>이다. 가운데 괄호의 둘째 항은 \(-\mathrm{II}(X, Y)\)이고, 첫째 항은 <a href="39-1-weingarten-map.html#i-39-1-5">Proposition 39.1.5</a>에 의해 \(\inner{d\mathbf{N}(Y)}{d\mathbf{x}(X)} = -\mathrm{II}(Y, X) = -\mathrm{II}(X, Y)\)이다. 그러므로 괄호는 \(-2\,\mathrm{II}(X, Y)\)이고, 셋째 항이 \(\mathrm{III}(X, Y)\)이다. \(t\)에 대한 이차식이므로 \(t = 0\)에서의 미분은 일차항의 coefficient다.</p>
+      </div>
+      <p>식에 \(\mathbf{x}_t\)가 immersion이라는 조건은 필요 없다. \(\mathrm{I}_t\)가 degenerate가 되는 \(t\)가 <a href="39-1-weingarten-map.html#ex-39-1-3">Exercise 39.1.3</a>의 focal point다. plane curve에서 offset의 속도가 \((1 - \varepsilon\kappa_s)\mathbf{t}\)였던 것(<a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-4">Proposition 32.2.4</a>의 증명)이 이 식의 1차원 판이다. 길이의 제곱으로 쓰면 \((1 - \varepsilon\kappa_s)^2 = 1 - 2\varepsilon\kappa_s + \varepsilon^2\kappa_s^2\)이다. 넓이 요소의 변화는 \(\det(I_2 - t\mathsf{W}) = 1 - 2tH + t^2K\)배이고, 그것을 적분한 Steiner formula는 <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-6">Proposition 31.2.6</a>(Track 1)과 <a href="../40-discrete-curvature-integral/index.html#toc-40-4">Section 40.4</a> <span class="todo">[확인 필요: Chapter 40 미작성 — 참조 번호 확정 필요]</span>에서 다룬다.</p>
+      <p><a href="#fig-39-5-1">Figure 39.5.1</a>은 두 surface를 ruling에 수직으로 자른 단면이다. 왼쪽 (a)의 평면은 \(\mathrm{II} = 0\)이다. 주홍 normal 방향으로 \(t = 0.6\)만큼 민 주황 점선 위에서 파란 조각의 길이가 \(1\) 그대로다. 오른쪽 (b)는 반지름 \(1\)인 cylinder다. 같은 parameter 폭 \(du = 1\)의 조각이 밀기 전에는 길이 \(1\), 바깥으로 \(0.6\) 민 뒤에는 \(1.6\)이다. 곧 \(\mathrm{I}_t(\partial_u, \partial_u) = 1.6^2 = 1 - 2(0.6)(-1) + 0.6^2\)이다. 바깥쪽 normal이라 \(\mathrm{II}(\partial_u, \partial_u) = L = -r = -1\)이고, 그래서 밀면 길어진다.</p>
+      <figure class="dg-figure" id="fig-39-5-1">
+        <img src="figures/fig-39-5-1-offset-forms.svg" alt="두 패널. (a) 검은 수평선과 그 위의 주황 점선(평행하게 민 선), 위를 향하는 주홍 화살표들, 두 선 위에 같은 길이 1의 파란 굵은 조각. (b) 검은 반원 호와 더 큰 주황 점선 호, 바깥을 향하는 주홍 화살표들, 안쪽 호 위의 파란 조각(길이 1)과 바깥 호 위의 더 긴 파란 조각(길이 1.6), 중심에서 두 반지름이 각 du를 표시한다.">
+        <figcaption><span class="fig-head">Figure 39.5.1.</span>
+        <em>무엇을</em>: 평면과 반지름 \(r = 1\)인 cylinder를 normal 방향으로 \(t = 0.6\)만큼 민 offset의 단면(ruling에 수직). 두 surface는 좌표 \((u, v)\)에서 같은 \(\mathrm{I} = r^2du^2 + dv^2\)을 갖는다(<a href="#i-39-5-2">Example 39.5.2</a>).
+        <em>읽는 법</em>: 검은 선이 원래 surface, 주황 점선이 offset, 주홍 화살표가 unit normal(길이 \(0.32\)로 그림), 파란 굵은 조각이 같은 parameter 폭(평면에서 길이 \(1\), cylinder에서 \(du = 1\))의 원래 조각과 그 offset이다.
+        <em>볼 것</em>: (a)에서는 길이가 \(1 \to 1\)로 그대로이고(\(\mathrm{II} = 0\)), (b)에서는 \(r\,du = 1 \to (r + t)\,du = 1.6\)이다(\(\mathrm{II} = -r\,du^2\), \(\mathrm{III} = du^2\)). \(1.6^2 = 1 + 2(0.6) + 0.6^2\)이 <a href="#eq-39-5-2">(39.5.2)</a>이다.
+        <em>본문과의 연결</em>: <a href="#i-39-5-1">Proposition 39.5.1</a>과 <a href="#i-39-5-2">Example 39.5.2</a>. I이 같아도 II가 다르면 offset의 I이 달라진다.</figcaption>
+      </figure>
+      <div class="thm example" id="i-39-5-2">
+        <p><span class="thm-head">Example 39.5.2</span> <span class="thm-name">(same I, different II: the plane and the cylinder)</span>.
+        \(\mathbf{y}(u, v) = (ru, v, 0)\)(평면)과 cylinder \(\mathbf{x}(u, v) = (r\cos u, r\sin u, v)\)(\(\mathbf{N}\) 바깥쪽)을 보자. \(\mathbf{y}_u = (r, 0, 0)\), \(\mathbf{y}_v = (0, 1, 0)\)이므로 \(\mathbf{N}_{\mathbf{y}} = \mathbf{y}_u\times\mathbf{y}_v/\abs{\cdots} = (0, 0, 1)\)이고, 둘 다</p>
+        <p>\[ \mathrm{I} = r^2\,du^2 + dv^2 \]</p>
+        <p>이다(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-3">Example 38.2.3</a>). 그러나 평면은 \(\mathbf{N}\)이 상수라 \(\mathrm{II} = 0\)이고, cylinder는 \(\mathrm{II} = L\,du^2 = -r\,du^2\)이다(<a href="39-1-weingarten-map.html#i-39-1-3">Example 39.1.3</a>(b)의 \(\mathsf{W} = \diag(-1/r, 0)\)에 \(\mathsf{g}\)를 곱한다). 아래 <a href="#i-39-5-3">Proposition 39.5.3</a>에 의해 rigid motion은 II를 보존하므로 둘을 잇는 rigid motion은 없다. 곧 I만으로는 surface가 정해지지 않는다.</p>
+        <p class="verified">Verification: <code>verify/v-39-5-fundamental-theorem.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-bonnet">
+      <h2>The Fundamental Theorem of Surfaces</h2>
+      <div class="thm proposition" id="i-39-5-3">
+        <p><span class="thm-head">Proposition 39.5.3</span> <span class="thm-name">(rigid motions preserve I and II)</span>.
+        \(\rho(p) = Ap + c\)(\(A\)는 orthogonal matrix)이고 \(\mathbf{y} = \rho\circ\mathbf{x}\)라 하자. 그러면 \(\mathrm{I}_{\mathbf{y}} = \mathrm{I}_{\mathbf{x}}\)이고, \(\mathrm{II}_{\mathbf{y}} = \det A\cdot\mathrm{II}_{\mathbf{x}}\)이다(각자의 Gauss map으로 계산). 특히 \(\det A = 1\)이면 II도 같다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(d\mathbf{y} = A\,d\mathbf{x}\)이고 \(A\)는 inner product를 보존하므로 \(\mathrm{I}_{\mathbf{y}} = \mathrm{I}_{\mathbf{x}}\)이다. orthogonal matrix \(A\)와 vector \(v, w, z\)에 대하여 \(\inner{Av\times Aw}{Az} = \det[Av\ Aw\ Az]\) \(= \det A\,\inner{v\times w}{z}\) \(= \inner{(\det A)A(v\times w)}{Az}\)이므로 \(Av\times Aw = (\det A)A(v\times w)\)이다. 그래서 \(\mathbf{y}_u\times\mathbf{y}_v = (\det A)A(\mathbf{x}_u\times\mathbf{x}_v)\), 곧 \(\mathbf{N}_{\mathbf{y}} = (\det A)A\mathbf{N}_{\mathbf{x}}\)이다. 그러면 \(\mathrm{II}_{\mathbf{y}}(X, Y) = -\inner{(\det A)A\,d\mathbf{N}_{\mathbf{x}}(X)}{A\,d\mathbf{x}(Y)}\) \(= (\det A)\,\mathrm{II}_{\mathbf{x}}(X, Y)\)이다.</p>
+      </div>
+      <p>거꾸로 I과 II가 같으면 rigid motion으로 옮길 수 있는가? 그리고 아무 I과 II를 주어도 그런 surface가 있는가?</p>
+      <div class="thm theorem" id="i-39-5-4">
+        <p><span class="thm-head">Theorem 39.5.4</span> <span class="thm-name">(fundamental theorem of surfaces, Bonnet)</span>.
+        (a) \(U \subseteq \R^2\)가 connected open set이고 \(\mathbf{x}, \mathbf{y}\colon U \to \R^3\)이 immersion이며 각자의 Gauss map으로 계산한 \(\mathrm{I}\)과 \(\mathrm{II}\)가 모든 점에서 같으면, \(\det A = 1\)인 orthogonal matrix \(A\)와 \(c \in \R^3\)이 있어 \(\mathbf{y} = A\mathbf{x} + c\)이다.
+        (b) \(V \subseteq \R^2\)의 open set에서 smooth function \(E, F, G, L, M, N\)이 \(E \gt 0\), \(EG - F^2 \gt 0\)이고 Gauss equation과 Codazzi–Mainardi equations(<a href="../09-intrinsic-geometry/index.html#toc-9-2">Section 9.2</a> <span class="todo">[확인 필요: Chapter 9 미작성 — 참조 번호 확정 필요]</span>)를 만족하면, 각 \(q \in V\)의 근방 \(U\)에서 first fundamental form과 second fundamental form의 coefficient가 이 함수들인 immersion이 있다 <a class="cite" href="../../references.html#dC">[dC §4-3]</a>.</p>
+        <p>이 정리는 진술만 한다. 증명은 frame \((\mathbf{x}_u, \mathbf{x}_v, \mathbf{N})\)이 만족하는 linear PDE system을 적분하는 것이고, (b)의 조건은 그 system이 적분 가능할 조건이다 <a class="cite" href="../../references.html#dC">[dC §4-3]</a>.</p>
+      </div>
+      <p>이 정리를 plane curve의 경우와 비교해 보자 <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slide 34. plane curve는 signed curvature가 rigid motion을 제외하고 곡선을 정하고, 아무 함수 \(\kappa_s\)나 주어도 국소적으로는 그런 곡선이 있다(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-10">Theorem 4.4.10</a>). 조건은 곡선을 닫을 때만 생긴다. \(\int\kappa_s \in 2\pi\Z\)와 \(\int\mathbf{t} = 0\)이다(<a href="../37-curves-smooth-discrete/37-1-plane-curves.html#i-37-1-7">Proposition 37.1.7</a>). surface에서는 국소적으로도 조건이 있다. 그중 하나가 Gauss equation, 곧 “\(\det\mathsf{h}/\det\mathsf{g}\)가 \(E, F, G\)만으로 계산한 \(K\)와 같아야 한다”는 Theorema Egregium이다(Section 39.3). 길이 데이터(I)와 꺾임 데이터(II)가 서로 맞물려야 한다. 아래의 mesh 판에서는 이 조건이 vertex마다의 조건으로 정확히 나타난다.</p>
+    </section>
+
+    <section id="sec-bending">
+      <h2>Bending Angles</h2>
+      <p>mesh에서 I에 해당하는 것은 edge length다(Section 38.6에서 edge length가 \(\star\)와 \(L\)을 정했다). II에 해당하는 것은 normal의 변화이고, discrete Gauss map은 face마다 상수이므로 그 변화는 edge에서 normal이 도는 각뿐이다(Section 39.1의 Smooth vs. Discrete 상자). 그 각에 부호를 붙인다.</p>
+      <div class="thm definition" id="i-39-5-5">
+        <p><span class="thm-head">Definition 39.5.5</span> <span class="thm-name">(bending angle)</span>.
+        \(\mathcal{K}\)가 orientation을 갖는 simplicial surface이고 \(\mathbf{x}\)가 그 discrete immersion(<a href="../38-surfaces-smooth-discrete/38-4-discrete-immersions.html#i-38-4-7">Definition 38.4.7</a>)이라 하자. interior edge \(\{i, j\}\)를 공유하는 두 face 가운데 orientation이 \(i \to j\)로 지나는 것을 \(f = (i, j, k)\), 다른 것(\(j \to i\)로 지나는 것)을 \(g = (j, i, l)\)이라 하고, \(\hat e_{ij} = (\mathbf{x}_j - \mathbf{x}_i)/\ell_{ij}\)라 하자. face normal \(\mathbf{N}_f, \mathbf{N}_g\)(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-1">Definition 38.5.1</a>)에 대하여</p>
+        <div class="equation" id="eq-39-5-3">
+        \[ \begin{aligned} \theta_{ij} &amp;:= \operatorname{atan2}\big(\inner{\mathbf{N}_f\times\mathbf{N}_g}{\hat e_{ij}},\ \inner{\mathbf{N}_f}{\mathbf{N}_g}\big) \\ &amp;\in (-\pi, \pi) \end{aligned} \tag{39.5.3} \]
+        </div>
+        <p>를 edge \(ij\)의 <dfn>bending angle</dfn>(굽힘각)이라 한다. 곧 \(\mathbf{N}_g = R(\hat e_{ij}, \theta_{ij})\,\mathbf{N}_f\)이다. 여기서 \(R(\mathbf{a}, \theta)\)는 unit vector \(\mathbf{a}\) 둘레로 오른손 규칙에 따라 각 \(\theta\)만큼 도는 회전이다.</p>
+      </div>
+      <p>정의가 잘 되었는지 확인하자. 두 face가 edge를 공유하므로 \(\mathbf{N}_g \neq -\mathbf{N}_f\)이고(<a href="../38-surfaces-smooth-discrete/38-4-discrete-immersions.html#i-38-4-10">Corollary 38.4.10</a>(c)), 그래서 \(\theta_{ij} \neq \pm\pi\)이다. \(\mathbf{N}_f\)와 \(\mathbf{N}_g\)는 둘 다 \(\hat e_{ij}\)에 수직이므로 \(\mathbf{N}_f\times\mathbf{N}_g\)는 \(\hat e_{ij}\)에 평행하고, atan2의 두 인자가 \(\sin\theta_{ij}\)와 \(\cos\theta_{ij}\)다. 그래서 \(\mathbf{N}_g = R(\hat e_{ij}, \theta_{ij})\mathbf{N}_f\)이다. \(i\)와 \(j\)를 바꾸어도 값이 같다. \(\hat e_{ji} = -\hat e_{ij}\)이고 \(f\)와 \(g\)의 역할이 바뀌어 \(\mathbf{N}_g\times\mathbf{N}_f = -\mathbf{N}_f\times\mathbf{N}_g\)이기 때문이다. 공용 구현은 <code>dgmesh.edge_bending_angles</code>이고 같은 식이다.</p>
+      <div class="thm proposition" id="i-39-5-6">
+        <p><span class="thm-head">Proposition 39.5.6</span> <span class="thm-name">(the sign of the bending angle)</span>.
+        <a href="#i-39-5-5">Definition 39.5.5</a>의 기호로 다음이 성립한다.</p>
+        <ul>
+          <li>(a) \(\theta_{ij} \gt 0\)일 필요충분조건은 \(\inner{\mathbf{N}_f}{\mathbf{x}_l - \mathbf{x}_i} \lt 0\), 곧 \(g\)의 꼭짓점이 \(f\)의 평면에서 보아 \(\mathbf{N}_f\)의 반대쪽에 있는 것이다. surface가 normal의 반대쪽으로 꺾이는 edge(convex edge)에서 양수이고, normal 쪽으로 꺾이면 음수, 평평하면 \(0\)이다.</li>
+          <li>(b) \(\abs{\theta_{ij}}\)는 두 normal 사이의 각이고, 두 face가 edge에서 이루는 각(dihedral angle)은 \(\pi - \abs{\theta_{ij}}\)이다.</li>
+          <li>(c) \(\mathcal{K}\)의 orientation을 뒤집으면 모든 \(\theta_{ij}\)가 \(-\theta_{ij}\)가 된다. \(\mathbf{x}\)에 \(\det A = -1\)인 orthogonal map(반사)을 합성해도 그렇다.</li>
+        </ul>
+        <p>따라서 이 정의는 Track 1의 <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-5">Definition 31.2.5</a>와 같은 양, 같은 부호다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \(\mathbf{x}_l - \mathbf{x}_i\)는 \(g\)의 평면 안에 있고, 그 평면의 orthonormal basis로 \((\hat e_{ij}, \hat e_{ij}\times\mathbf{N}_g)\)를 쓸 수 있으므로(\(\hat e_{ij} \perp \mathbf{N}_g\)) \(\mathbf{x}_l - \mathbf{x}_i = a\,\hat e_{ij} + b\,(\hat e_{ij}\times\mathbf{N}_g)\)라 쓰자. \(b\)의 부호는 \(g = (j, i, l)\)의 orientation이 정한다. \(\mathbf{x}_l - \mathbf{x}_j = (a - \ell_{ij})\hat e_{ij} + b\,(\hat e_{ij}\times\mathbf{N}_g)\)이므로</p>
+        <p>\[ (\mathbf{x}_i - \mathbf{x}_j)\times(\mathbf{x}_l - \mathbf{x}_j) = -\ell_{ij}\,b\;\hat e_{ij}\times(\hat e_{ij}\times\mathbf{N}_g) = \ell_{ij}\,b\,\mathbf{N}_g \]</p>
+        <p>이고(\(\hat e_{ij}\perp\mathbf{N}_g\)이므로 \(\hat e\times(\hat e\times\mathbf{N}_g) = -\mathbf{N}_g\)), 이것이 \(\mathbf{N}_g\)의 양수배이므로 \(b \gt 0\)이다. 그러면 \(\inner{\mathbf{N}_f}{\mathbf{x}_l - \mathbf{x}_i} = b\inner{\mathbf{N}_f}{\hat e_{ij}\times\mathbf{N}_g}\) \(= b\inner{\hat e_{ij}}{\mathbf{N}_g\times\mathbf{N}_f} = -b\sin\theta_{ij}\)이다. \(\theta_{ij} \in (-\pi, \pi)\)이므로 \(\sin\theta_{ij} \gt 0 \iff \theta_{ij} \gt 0\)이다. (b) \(\cos\theta_{ij} = \inner{\mathbf{N}_f}{\mathbf{N}_g}\)이므로 \(\abs{\theta_{ij}}\)는 두 normal 사이의 각이다. edge에 수직인 평면에서 두 face는 edge에서 나가는 두 반직선이고, \(g\)의 반직선 방향은 (a)의 \(\hat e_{ij}\times\mathbf{N}_g\)(\(b \gt 0\))이므로 \(\mathbf{N}_g\)는 그 방향을 \(\hat e_{ij}\) 둘레로 \(-90^\circ\) 돌린 것이다. 같은 계산을 \(f = (i, j, k)\)에 하면 \(\mathbf{N}_f\)는 \(f\)의 반직선 방향을 \(+90^\circ\) 돌린 것이다. \(f\)의 반직선에서 \(g\)의 반직선까지 \(\hat e_{ij}\) 둘레로 잰 각을 \(\varphi \in (0, 2\pi)\)라 하면 \(\mathbf{N}_f\)에서 \(\mathbf{N}_g\)까지의 각은 \(\varphi - \pi \in (-\pi, \pi)\), 곧 \(\theta_{ij} = \varphi - \pi\)이다. 두 반직선 사이의 각은 \(\min(\varphi, 2\pi - \varphi) = \pi - \abs{\varphi - \pi} = \pi - \abs{\theta_{ij}}\)이다. (c) orientation을 뒤집으면 모든 \(\mathbf{N}\)이 부호를 바꾸고 \(i \to j\)로 지나는 face가 \(g\)가 되므로 \(\operatorname{atan2}(\inner{(-\mathbf{N}_g)\times(-\mathbf{N}_f)}{\hat e_{ij}}, \cdot) = -\theta_{ij}\)이다. 반사 \(A\)에서는 <a href="#i-39-5-3">Proposition 39.5.3</a>의 증명처럼 \(\mathbf{N}_f \mapsto -A\mathbf{N}_f\), \(\hat e \mapsto A\hat e\)이고 \(\inner{A\mathbf{N}_f\times A\mathbf{N}_g}{A\hat e} = -\inner{\mathbf{N}_f\times\mathbf{N}_g}{\hat e}\)이므로 역시 부호가 바뀐다.</p>
+      </div>
+      <p><a href="#fig-39-5-2">Figure 39.5.2</a>는 edge에 수직인 단면이다. 가운데 원 속의 점이 화면에서 나오는 \(\hat e_{ij}\)다. 오른쪽으로 뻗은 것이 \(f\), 왼쪽이 \(g\)이고, 주홍 화살표가 두 face normal이다. edge 위의 짧은 점선은 두 normal을 edge로 옮겨 그린 것이고, 주황 호가 \(\mathbf{N}_f\)에서 \(\mathbf{N}_g\)까지 \(\hat e_{ij}\) 둘레로 반시계 방향(오른손 규칙)으로 잰 \(\theta_{ij}\)다. (a)에서는 \(g\)가 \(\mathbf{N}_f\)의 아래쪽으로 꺾여 \(\theta_{ij} = +0.6\)이고, (b)에서는 위쪽으로 꺾여 \(-0.6\)이다.</p>
+      <figure class="dg-figure" id="fig-39-5-2">
+        <img src="figures/fig-39-5-2-bending-angle.svg" alt="두 패널. 각 패널 가운데에 원 속의 점(화면에서 나오는 edge 방향)이 있고, 오른쪽으로 수평한 선분 f, 왼쪽으로 비스듬한 선분 g가 있다. f 위에서 주홍 화살표가 위로, g 위에서 주홍 화살표가 g에 수직으로 나간다. edge에서 주황 호가 두 normal 사이를 잇는다. (a) g가 왼쪽 아래로 꺾이고 theta = +0.6, (b) g가 왼쪽 위로 꺾이고 theta = −0.6.">
+        <figcaption><span class="fig-head">Figure 39.5.2.</span>
+        <em>무엇을</em>: interior edge \(ij\)에 수직인 단면에서 본 bending angle. \(\mathbb{R}^3\)의 실제 두 triangle(\(f = (i, j, k)\), \(g = (j, i, l)\))을 \(\hat e_{ij}\)가 화면에서 나오도록 놓고 그렸다. (a) \(\theta_{ij} = +0.6\), (b) \(\theta_{ij} = -0.6\).
+        <em>읽는 법</em>: 검은 선분이 두 face의 단면, 주홍 화살표가 \(\mathbf{N}_f\)와 \(\mathbf{N}_g\), 주홍 점선이 같은 normal을 edge로 옮긴 것, 주황 호가 \(\mathbf{N}_f\)에서 \(\mathbf{N}_g\)로의 회전(\(\hat e_{ij}\) 둘레의 오른손 규칙)이다.
+        <em>볼 것</em>: (a)에서 \(g\)는 \(\mathbf{N}_f\)의 반대쪽(아래)으로 꺾이고 \(\theta_{ij} \gt 0\)이다(convex). (b)에서는 \(\mathbf{N}_f\) 쪽(위)으로 꺾이고 \(\theta_{ij} \lt 0\)이다(concave). <code>dgmesh.edge_bending_angles</code>가 두 경우 정확히 \(\pm 0.6\)을 준다.
+        <em>본문과의 연결</em>: <a href="#i-39-5-5">Definition 39.5.5</a>와 <a href="#i-39-5-6">Proposition 39.5.6</a>(a).</figcaption>
+      </figure>
+      <div class="thm example" id="i-39-5-7">
+        <p><span class="thm-head">Example 39.5.7</span> <span class="thm-name">(bending angles of the examples)</span>.
+        바깥쪽 orientation의 볼록 다면체는 모든 edge가 convex이므로 \(\theta_{ij} \gt 0\)이고 \(\theta_{ij} = \pi - (\text{dihedral angle})\)이다. regular tetrahedron은 \(\pi - \arccos\tfrac13 = 1.9106\), octahedron은 \(\pi - \arccos(-\tfrac13) = 1.2310\), icosahedron은 \(0.7297\)이다. 대각선으로 나눈 cube(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-9">Example 38.5.9</a>의 cube)는 원래 모서리에서 \(\pi/2\), 대각선에서 \(0\)이다. hinge(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-4">Example 38.6.4</a>)에서 둘째 face를 \(\psi\)만큼 normal 쪽으로 접으면 \(\theta = -\psi\)다. dimpled icosahedron(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-15">Non-example 38.6.15</a>)은 icosahedron과 30개의 edge length가 모두 같지만, 움푹 들어간 vertex에서 나가는 다섯 edge는 \(\theta = -0.7297\), 그 link의 다섯 edge는 \(\theta = 2.0344\)로 바뀐다. 나머지 스무 edge는 \(0.7297\) 그대로다. edge length가 구별하지 못한 두 모양을 bending angle이 구별한다.</p>
+        <p class="verified">Verification: <code>verify/v-39-5-fundamental-theorem.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-39-5-8">
+        <p><span class="thm-head">Non-example 39.5.8</span> <span class="thm-name">(unsigned angles and boundary edges)</span>.
+        (a) boundary edge에는 face가 하나뿐이라 bending angle이 없다. (b) orientation이 없는 simplicial surface(Möbius band, <a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-14">Definition 33.4.14</a>)에서는 “\(i \to j\)로 지나는 face”를 모든 edge에서 일관되게 고를 수 없으므로 부호를 정할 수 없다. (c) 부호를 버린 \(\abs{\theta_{ij}}\)로는 거울상을 구별하지 못한다. hinge에서 둘째 face를 위로 \(\psi\) 접은 것과 아래로 \(\psi\) 접은 것은 edge length와 \(\abs\theta = \psi\)가 같지만, 첫 face의 세 vertex를 고정하는 proper rigid motion은 identity뿐이므로 하나를 다른 하나로 옮길 수 없다. 둘은 \(\theta = -\psi\)와 \(+\psi\)로 구별된다.</p>
+      </div>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: fundamental forms on a mesh</p>
+        <ul>
+          <li>smooth: \(\mathrm{I} = \inner{d\mathbf{x}}{d\mathbf{x}}\)과 \(\mathrm{II} = -\inner{d\mathbf{N}}{d\mathbf{x}}\)는 점마다의 bilinear form이고, Gauss–Codazzi equations를 만족하면 surface를 rigid motion을 제외하고 정한다(<a href="#i-39-5-4">Theorem 39.5.4</a>).</li>
+          <li>discrete: edge length \(\ell_{ij}\)가 I의 역할을, bending angle \(\theta_{ij}\)가 II의 역할을 한다. 대략 말하면 \(\theta_{ij}\)는 edge를 가로지르는 방향으로 normal이 도는 총량이므로, smooth surface를 잘게 sampling한 mesh에서는 그 방향의 \(-\kappa_n\)을 이웃 face 사이의 거리만큼 적분한 것에 가깝다(바깥쪽 normal의 sphere에서 \(\kappa_n \lt 0 \lt \theta_{ij}\)이다. 근사이고 정리는 아니다).</li>
+          <li>무엇을 보존하는가: 결정성. edge length와 bending angle이 모든 mesh를 proper rigid motion을 제외하고 정확히 정하고(<a href="#i-39-5-10">Theorem 39.5.10</a>), compatibility도 vertex마다의 유한한 조건으로 정확히 적힌다(<a href="#i-39-5-11">Proposition 39.5.11</a>). 무엇을 잃는가: 점마다의 II와 principal direction. 또 Gauss–Codazzi equations에 해당하는 조건이 미분방정식이 아니라 회전의 곱이 되어, smooth 식과 항 하나하나를 대응시키기는 어렵다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-discrete-theorem">
+      <h2>The Fundamental Theorem of Discrete Surfaces</h2>
+      <p>강의 슬라이드의 착상은 이렇다. 각 triangle을 edge length로 만들고, bending angle로 이웃끼리 붙인다 <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slide 35. 이것을 정리로 만들려면 한 단계를 정확히 해 두면 된다.</p>
+      <div class="thm lemma" id="i-39-5-9">
+        <p><span class="thm-head">Lemma 39.5.9</span> <span class="thm-name">(a triangle from its lengths and its normal)</span>.
+        서로 다른 두 점 \(\mathbf{p}_i, \mathbf{p}_j\), \(\hat e = (\mathbf{p}_j - \mathbf{p}_i)/\ell_{ij}\)(\(\ell_{ij} = \abs{\mathbf{p}_j - \mathbf{p}_i}\))에 수직인 unit vector \(\mathbf{n}\), 그리고 \(\ell_{ij}, \ell_{ik}, \ell_{jk}\)가 strict triangle inequality를 만족하는 양수 \(\ell_{ik}, \ell_{jk}\)가 주어졌다고 하자. \(\abs{\mathbf{p}_k - \mathbf{p}_i} = \ell_{ik}\), \(\abs{\mathbf{p}_k - \mathbf{p}_j} = \ell_{jk}\)이고 \((\mathbf{p}_j - \mathbf{p}_i)\times(\mathbf{p}_k - \mathbf{p}_i)\)가 \(\mathbf{n}\)의 양수배인 점 \(\mathbf{p}_k\)는 꼭 하나 있고</p>
+        <div class="equation" id="eq-39-5-4">
+        \[ \begin{aligned} \mathbf{p}_k &amp;= \mathbf{p}_i + a\,\hat e + h\,\mathbf{n}\times\hat e, \\ a &amp;= \frac{\ell_{ik}^2 - \ell_{jk}^2 + \ell_{ij}^2}{2\ell_{ij}}, \\ h &amp;= \sqrt{\ell_{ik}^2 - a^2} \gt 0 \end{aligned} \tag{39.5.4} \]
+        </div>
+        <p>이다. 이 점을 \(\operatorname{apex}(\mathbf{p}_i, \mathbf{p}_j, \mathbf{n})\)로 쓰자(길이는 생략). \(\rho(\mathbf{p}) = A\mathbf{p} + \mathbf{c}\)가 \(\det A = 1\)인 rigid motion이면 \(\operatorname{apex}(\rho\mathbf{p}_i, \rho\mathbf{p}_j, A\mathbf{n}) = \rho\big(\operatorname{apex}(\mathbf{p}_i, \mathbf{p}_j, \mathbf{n})\big)\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \((\mathbf{p}_j - \mathbf{p}_i)\times(\mathbf{p}_k - \mathbf{p}_i)\)가 \(\mathbf{n}\)에 평행하면 \(\mathbf{p}_k - \mathbf{p}_i\)는 \(\mathbf{n}\)에 수직이므로(cross product는 두 인자에 수직) orthonormal basis \((\hat e, \mathbf{n}\times\hat e)\)로 \(\mathbf{p}_k - \mathbf{p}_i = a\hat e + h\,\mathbf{n}\times\hat e\)라 쓸 수 있다. 두 거리 조건은 \(a^2 + h^2 = \ell_{ik}^2\), \((a - \ell_{ij})^2 + h^2 = \ell_{jk}^2\)이고, 빼면 \(a\)가 <a href="#eq-39-5-4">(39.5.4)</a>로 정해지며 \(h^2 = \ell_{ik}^2 - a^2\)이다. strict triangle inequality는 세 길이의 triangle이 퇴화하지 않는다는 것이므로 \(h^2 \gt 0\)이다(\(h\)는 \(\mathbf{p}_k\)에서 직선 \(\mathbf{p}_i\mathbf{p}_j\)까지의 거리다). 마지막으로 \(\ell_{ij}\hat e\times(a\hat e + h\,\mathbf{n}\times\hat e)\) \(= \ell_{ij}h\,\hat e\times(\mathbf{n}\times\hat e) = \ell_{ij}h\,\mathbf{n}\)이므로 양수배 조건은 \(h \gt 0\)과 같고, 이것이 \(h\)의 부호를 정한다. 등변성: \(A\)는 inner product를 보존하고 \(\det A = 1\)이면 \(A\mathbf{n}\times A\hat e = A(\mathbf{n}\times\hat e)\)이므로(<a href="#i-39-5-3">Proposition 39.5.3</a>의 증명), \(\rho\)로 옮긴 자료에 공식을 쓰면 \(A\mathbf{p}_i + \mathbf{c} + aA\hat e + hA(\mathbf{n}\times\hat e) = \rho(\mathbf{p}_k)\)이다.</p>
+      </div>
+      <div class="thm theorem" id="i-39-5-10">
+        <p><span class="thm-head">Theorem 39.5.10</span> <span class="thm-name">(fundamental theorem of discrete surfaces)</span>.
+        \(\mathcal{K}\)가 1-skeleton이 connected이고 orientation을 갖는 simplicial surface(boundary가 있어도 된다)이고, \(\mathbf{x}, \mathbf{y}\)가 \(\mathcal{K}\)의 discrete immersion이라 하자. 모든 edge에서 길이가 같고(\(\ell^{\mathbf{x}}_{ij} = \ell^{\mathbf{y}}_{ij}\)) 모든 interior edge에서 bending angle이 같으면(\(\theta^{\mathbf{x}}_{ij} = \theta^{\mathbf{y}}_{ij}\)), 모든 vertex에서 \(\mathbf{y}_i = A\mathbf{x}_i + \mathbf{c}\)인 \(\det A = 1\)의 orthogonal matrix \(A\)와 \(\mathbf{c} \in \R^3\)이 꼭 하나 있다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: 한 face에서 두 mesh를 맞추는 rigid motion을 잡는다. 이웃 face의 normal은 bending angle로, 셋째 vertex는 <a href="#i-39-5-9">Lemma 39.5.9</a>로 정해지고, 두 규칙이 rigid motion과 바꿀 수 있으므로 맞춘 상태가 이웃으로 번진다.</p>
+        <p><span class="proof-head">Proof.</span> <em>유일성.</em> 한 face의 세 vertex는 한 직선 위에 있지 않다(<a href="../38-surfaces-smooth-discrete/38-4-discrete-immersions.html#i-38-4-10">Corollary 38.4.10</a>(b)). 두 rigid motion이 세 점에서 같으면 linear part가 두 일차독립 vector \(\mathbf{x}_j - \mathbf{x}_i\), \(\mathbf{x}_k - \mathbf{x}_i\)에서 같고, 둘 다 \(\det = 1\)이라 그 cross product에서도 같으므로 linear part가 같고, 따라서 \(\mathbf{c}\)도 같다.</p>
+        <p><em>존재.</em> face \(f_0 = (i, j, k)\)를 하나 고정하자. \(\mathbf{x}\)에 대해 \(F^{\mathbf{x}} = [\hat e^{\mathbf{x}}_{ij},\ \mathbf{N}^{\mathbf{x}}_{f_0}\times\hat e^{\mathbf{x}}_{ij},\ \mathbf{N}^{\mathbf{x}}_{f_0}]\)는 positively oriented orthonormal basis를 열로 갖는 행렬이고(<a href="39-2-principal-curvatures.html#i-39-2-1">Definition 39.2.1</a> 뒤와 같은 계산), \(\mathbf{y}\)에 대한 \(F^{\mathbf{y}}\)도 그렇다. \(A = F^{\mathbf{y}}(F^{\mathbf{x}})^{\mathsf T}\)는 \(\det A = 1\)인 orthogonal matrix이고, \(\mathbf{c} = \mathbf{y}_i - A\mathbf{x}_i\), \(\rho(\mathbf{p}) = A\mathbf{p} + \mathbf{c}\)로 둔다. 그러면 \(A\hat e^{\mathbf{x}}_{ij} = \hat e^{\mathbf{y}}_{ij}\), \(A\mathbf{N}^{\mathbf{x}}_{f_0} = \mathbf{N}^{\mathbf{y}}_{f_0}\)이고 \(\ell_{ij}\)가 같으므로 \(\rho(\mathbf{x}_j) = \mathbf{y}_j\)이며, <a href="#i-39-5-9">Lemma 39.5.9</a>(\(f_0\)의 normal과 길이로 \(\mathbf{x}_k = \operatorname{apex}(\mathbf{x}_i, \mathbf{x}_j, \mathbf{N}^{\mathbf{x}}_{f_0})\))의 유일성과 등변성에서 \(\rho(\mathbf{x}_k) = \mathbf{y}_k\)이다.</p>
+        <p>face \(f\)가 “좋다”는 것을 \(\rho\)가 \(f\)의 세 vertex를 \(\mathbf{y}\)의 것으로 보내고 \(A\mathbf{N}^{\mathbf{x}}_f = \mathbf{N}^{\mathbf{y}}_f\)인 것으로 정하자. \(f_0\)는 좋다. 좋은 face \(f\)와 interior edge \(ij\)를 공유하는 face \(g\)를 보자. \(f\)가 \(i \to j\)로 지난다고 하면(아니면 \(i, j\)의 이름을 바꾼다) \(g = (j, i, l)\)이고, <a href="#i-39-5-5">Definition 39.5.5</a>에서 \(\mathbf{N}_g = R(\hat e_{ij}, \theta_{ij})\mathbf{N}_f\)이다. \(\det A = 1\)인 \(A\)에 대해 \(R(A\hat e, \theta)A = AR(\hat e, \theta)\)이므로(축을 돌린 회전)</p>
+        <p>\[ \begin{aligned} \mathbf{N}^{\mathbf{y}}_g &amp;= R(\hat e^{\mathbf{y}}_{ij}, \theta_{ij})\mathbf{N}^{\mathbf{y}}_f = R(A\hat e^{\mathbf{x}}_{ij}, \theta_{ij})A\mathbf{N}^{\mathbf{x}}_f \\ &amp;= AR(\hat e^{\mathbf{x}}_{ij}, \theta_{ij})\mathbf{N}^{\mathbf{x}}_f = A\mathbf{N}^{\mathbf{x}}_g \end{aligned} \]</p>
+        <p>이다(\(\hat e^{\mathbf{y}}_{ij} = A\hat e^{\mathbf{x}}_{ij}\)는 \(\rho\)가 \(\mathbf{x}_i, \mathbf{x}_j\)를 \(\mathbf{y}_i, \mathbf{y}_j\)로 보내기 때문이다). 또 face \(g = (j, i, l)\)에 <a href="#i-39-5-9">Lemma 39.5.9</a>를 쓰면 \(\mathbf{x}_l = \operatorname{apex}(\mathbf{x}_j, \mathbf{x}_i, \mathbf{N}^{\mathbf{x}}_g)\), \(\mathbf{y}_l = \operatorname{apex}(\mathbf{y}_j, \mathbf{y}_i, \mathbf{N}^{\mathbf{y}}_g)\)이고 길이가 같으므로, 등변성에서 \(\mathbf{y}_l = \operatorname{apex}(\rho\mathbf{x}_j, \rho\mathbf{x}_i, A\mathbf{N}^{\mathbf{x}}_g) = \rho(\mathbf{x}_l)\)이다. 곧 \(g\)도 좋다. <a href="../33-combinatorial-surfaces/33-4-simplicial-manifolds.html#i-33-4-15">Lemma 33.4.15</a>에 의해 임의의 face는 \(f_0\)에서 edge를 공유하는 face의 열로 닿으므로 모든 face가 좋다. 모든 vertex는 어떤 face에 속하므로(pure) 모든 vertex에서 \(\mathbf{y}_i = \rho(\mathbf{x}_i)\)이다.</p>
+      </div>
+      <p>증명에 쓰인 bending angle은 face를 하나씩 붙여 갈 때 지난 edge들의 것뿐이다. 그런 edge는 dual graph의 spanning tree를 이루고 \(n_2 - 1\)개다. 나머지 edge의 bending angle은 쓰이지 않았으므로, 실제 mesh에서 온 자료가 아니면 서로 맞지 않을 수 있다. 수를 세어 보아도 그렇다. 닫힌 sphere 꼴의 mesh에서 자료는 \(n_1 + n_1 = 6n_0 - 12\)개이고, rigid motion을 뺀 vertex 위치는 \(3n_0 - 6\)개의 수다. 자료가 미지수의 두 배이므로 아무 \((\ell, \theta)\)나 mesh에서 오지는 않는다. 다음 명제가 그 조건을 vertex마다 적는다.</p>
+      <div class="thm proposition" id="i-39-5-11">
+        <p><span class="thm-head">Proposition 39.5.11</span> <span class="thm-name">(compatibility at a vertex)</span>.
+        <a href="#i-39-5-10">Theorem 39.5.10</a>의 \(\mathbf{x}\)에서 interior vertex \(i\)의 link vertex를 orientation 순서로 \(j_1, \dots, j_m\)(face가 \((i, j_k, j_{k+1})\), \(j_{m+1} = j_1\))이라 하고, face \((i, j_k, j_{k+1})\)의 \(i\)에서의 corner angle을 \(\alpha_k\)(edge length에서 law of cosines로 정해진다)라 하자. \(R_z(\alpha)\), \(R_x(\theta)\)를 좌표축 \(z\), \(x\) 둘레의 회전 행렬이라 하면</p>
+        <div class="equation" id="eq-39-5-5">
+        \[ \prod_{k=1}^{m} R_z(\alpha_k)\,R_x\big(-\theta_{ij_{k+1}}\big) = I_3 \tag{39.5.5} \]
+        </div>
+        <p>이다. 거꾸로(진술만 한다) \(\mathcal{K}\)가 disk나 sphere이고, 모든 face에서 strict triangle inequality를 만족하는 양수 \(\ell_{ij}\)와 interior edge의 수 \(\theta_{ij} \in (-\pi, \pi)\)가 모든 interior vertex에서 <a href="#eq-39-5-5">(39.5.5)</a>를 만족하면, edge length와 bending angle이 이것인 simplicial map이 있다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (필요성) \(f_k = (i, j_k, j_{k+1})\)이라 하고, positively oriented orthonormal basis를 열로 갖는 행렬 \(F_k = [\hat e_{ij_k},\ \mathbf{N}_{f_k}\times\hat e_{ij_k},\ \mathbf{N}_{f_k}]\)를 생각하자. 일반적으로 이런 행렬 \(F = [\mathbf{f}_1\ \mathbf{f}_2\ \mathbf{f}_3]\)에서 \(R(\mathbf{f}_3, \alpha)F = FR_z(\alpha)\), \(R(\mathbf{f}_1, \theta)F = FR_x(\theta)\)이다(\(F\)로 좌표를 바꾸면 축이 \(e_3\), \(e_1\)이 된다). face \(f_k\) 안에서 \(\hat e_{ij_{k+1}}\)은 \(\hat e_{ij_k}\)를 \(\mathbf{N}_{f_k}\) 둘레로 \(\alpha_k\)만큼 돌린 것이다(face의 orientation이 \((i, j_k, j_{k+1})\)이므로 \(\hat e_{ij_k}\times\hat e_{ij_{k+1}}\)이 \(\mathbf{N}_{f_k}\)의 양수배). 그래서 \(G_k = [\hat e_{ij_{k+1}},\ \mathbf{N}_{f_k}\times\hat e_{ij_{k+1}},\ \mathbf{N}_{f_k}]\) \(= R(\mathbf{N}_{f_k}, \alpha_k)F_k = F_kR_z(\alpha_k)\)이다. edge \(ij_{k+1}\)을 \(i \to j_{k+1}\)로 지나는 face는 \(f_{k+1}\)이므로 정의에서 \(\mathbf{N}_{f_k} = R(\hat e_{ij_{k+1}}, \theta_{ij_{k+1}})\mathbf{N}_{f_{k+1}}\), 곧 \(\mathbf{N}_{f_{k+1}} = R(\hat e_{ij_{k+1}}, -\theta_{ij_{k+1}})\mathbf{N}_{f_k}\)이고, 그래서 \(F_{k+1} = R(\hat e_{ij_{k+1}}, -\theta_{ij_{k+1}})G_k = G_kR_x(-\theta_{ij_{k+1}})\)이다. 한 바퀴 돌면 \(F_{m+1} = F_1\)이므로 \(F_1 = F_1\prod_kR_z(\alpha_k)R_x(-\theta_{ij_{k+1}})\)이고, \(F_1\)이 invertible이라 <a href="#eq-39-5-5">(39.5.5)</a>이다.</p>
+        <p>(충분성의 Proof sketch.) face를 dual graph의 path를 따라 하나씩 붙이면(<a href="#i-39-5-9">Lemma 39.5.9</a>) 각 face의 frame과 위치가 정해진다. 두 path가 한 vertex를 한 바퀴 도는 것만큼 다르면 결과의 차이는 <a href="#eq-39-5-5">(39.5.5)</a>의 곱이고(vertex를 도는 회전은 그 vertex를 고정하므로 위치도 맞는다), disk와 sphere에서는 dual graph의 모든 닫힌 path가 vertex를 도는 path들로 분해된다. 그래서 결과가 path에 무관하다. torus처럼 handle이 있으면 handle을 도는 path에서 회전과 평행이동이 모두 맞아야 한다는 조건이 더 필요하다. 이런 discrete fundamental form에서 실제로 mesh를 복원하는 문제는 강의 슬라이드가 인용하는 Wang, Liu, Tong의 연구가 다룬다 <a class="cite" href="../../references.html#Wang12">[Wang12]</a>.</p>
+      </div>
+      <p>회전의 곱은 smooth의 Gauss–Codazzi equations에 해당한다. 모든 \(\theta = 0\)이면 <a href="#eq-39-5-5">(39.5.5)</a>는 \(R_z(\sum_k\alpha_k) = I_3\), 곧 corner angle의 합이 \(2\pi\)의 배수라는 조건이 된다. star가 평면 위에 한 겹으로 펼쳐지는 vertex라면 그 합이 \(2\pi\), 곧 angle defect가 \(0\)이다. 곧 compatibility 조건 안에 Gaussian curvature가 들어 있다(<a href="../40-discrete-curvature-integral/index.html#toc-40-1">Section 40.1</a>).</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: rebuilding a mesh from lengths and bending angles</p>
+<pre id="code-39-5-1"><code>import numpy as np
+import dgmesh as dm
+
+def rotate(v, a, t):
+    """rotate v about the unit axis a by the angle t (right-hand rule)"""
+    return v * np.cos(t) + np.cross(a, v) * np.sin(t) + a * (a @ v) * (1 - np.cos(t))
+
+def apex(xi, xj, n, lik, ljk):
+    """x_k with |x_k - x_i| = lik, |x_k - x_j| = ljk such that the face (i, j, k) has unit normal n"""
+    lij = np.linalg.norm(xj - xi)
+    e, a = (xj - xi) / lij, (lik ** 2 - ljk ** 2 + lij ** 2) / (2 * lij)
+    return xi + a * e + np.sqrt(max(lik ** 2 - a ** 2, 0.0)) * np.cross(n, e)
+
+def reconstruct(F, ell, theta):
+    """vertex positions from edge lengths and bending angles (dicts on sorted edges), gluing faces from F[0]"""
+    L = lambda a, b: ell[min(a, b), max(a, b)]
+    face = {(f[c], f[(c + 1) % 3]): g for g, f in enumerate(F.tolist()) for c in range(3)}
+    i, j, k = F[0].tolist()
+    X, N, todo = {i: np.zeros(3), j: np.array([L(i, j), 0.0, 0.0])}, {0: np.array([0.0, 0.0, 1.0])}, [0]
+    X[k] = apex(X[i], X[j], N[0], L(i, k), L(j, k))
+    while todo:
+        f = todo.pop()
+        for a, b in zip(F[f].tolist(), np.roll(F[f], -1).tolist()):
+            g = face.get((b, a))                       # the face across the edge a -> b of f
+            if g is not None and g not in N:
+                N[g] = rotate(N[f], (X[b] - X[a]) / np.linalg.norm(X[b] - X[a]), theta[min(a, b), max(a, b)])
+                c = (set(F[g].tolist()) - {a, b}).pop()
+                X.setdefault(c, apex(X[b], X[a], N[g], L(b, c), L(a, c)))
+                todo.append(g)
+    return np.array([X[v] for v in range(len(X))])
+</code></pre>
+<pre id="code-39-5-2"><code>dist = lambda P: np.linalg.norm(P[:, None] - P[None], axis=2)
+V0, F0 = dm.icosahedron()
+nb = sorted({v for f in F0.tolist() if 0 in f for v in f} - {0})
+W0 = V0.copy()
+W0[0] -= 2 * (V0[0] @ V0[0] - (V0[nb] @ V0[0]).mean()) * V0[0]      # reflect x_0 in the plane of its link
+meshes = [("icosphere(1)", *dm.icosphere(1)), ("torus_mesh(2, 0.8, 8, 16)", *dm.torus_mesh(2, 0.8, 8, 16)),
+          ("icosahedron", V0, F0), ("dimpled icosahedron", W0, F0)]
+for name, V, F in meshes:
+    b = dm.edge_bending_angles(V, F)
+    ell, theta = {e: l for e, (t, l) in b.items()}, {e: t for e, (t, l) in b.items()}
+    Y = reconstruct(F, ell, theta)
+    th = np.array(list(theta.values()))
+    print(f"{name:26s} rebuilt up to rigid motion: {np.abs(dist(Y) - dist(V)).max() &lt; 1e-9}  "
+          f"volume {dm.signed_volume(Y, F):7.4f}  bending angles in [{th.min():+.4f}, {th.max():+.4f}]")
+V, F = dm.icosphere(1)
+b = dm.edge_bending_angles(V, F)
+ell, theta = {e: l for e, (t, l) in b.items()}, {e: t for e, (t, l) in b.items()}
+theta[next(iter(theta))] += 0.05                       # one bending angle changed: incompatible data
+Y = reconstruct(F, ell, theta)
+print(f"icosphere(1), one angle + 0.05: largest edge length error {max(abs(np.linalg.norm(Y[j] - Y[i]) - l) for (i, j), l in ell.items()):.4f}")
+</code></pre>
+<pre id="out-39-5-2"><code>icosphere(1)               rebuilt up to rigid motion: True  volume  3.6587  bending angles in [+0.3147, +0.3920]
+torus_mesh(2, 0.8, 8, 16)  rebuilt up to rigid motion: True  volume 22.1674  bending angles in [-0.3635, +0.7992]
+icosahedron                rebuilt up to rigid motion: True  volume  2.5362  bending angles in [+0.7297, +0.7297]
+dimpled icosahedron        rebuilt up to rigid motion: True  volume  1.8352  bending angles in [-0.7297, +2.0344]
+icosphere(1), one angle + 0.05: largest edge length error 0.0317</code></pre>
+        <p><code>reconstruct</code>는 증명을 그대로 따른다. face 0을 \(xy\)평면에 놓고(normal \(e_3\)), stack에서 face를 꺼낼 때마다 아직 놓지 않은 이웃 face \(g\)의 normal을 공유 edge 둘레로 \(\theta\)만큼 돌려 정하고(<a href="#eq-39-5-3">(39.5.3)</a>), 셋째 vertex를 <code>apex</code>(<a href="#eq-39-5-4">(39.5.4)</a>)로 놓는다. 이미 놓인 vertex는 다시 놓지 않는다. 둘째 블록은 네 mesh를 자기 \((\ell, \theta)\)에서 다시 만든다. 모든 거리가 원래와 같고 부피의 부호도 같으므로 proper rigid motion만큼만 다르다. icosahedron과 dimpled icosahedron은 같은 edge length에서 서로 다른 모양(부피 \(2.5362\)와 \(1.8352\))으로 돌아온다. bending angle의 범위가 다르기 때문이다. 마지막 줄은 bending angle 하나만 \(0.05\) 바꾼 자료다. 그런 mesh는 없으므로 다시 만든 mesh에서 어떤 edge의 길이가 \(0.0317\)만큼 틀린다.</p>
+        <p class="verified">Verification: <code>verify/v-39-5-fundamental-theorem.py</code>가 두 블록을 그대로 실행하고 출력과 비교하며, 다시 만든 mesh와 원래 mesh의 rigid alignment 오차를 따로 확인한다.</p>
+      </aside>
+      <p><a href="#fig-39-5-3">Figure 39.5.3</a>은 이 과정을 icosphere(1)에서 본 것이다. 왼쪽 (a)는 처음 24개의 face를 놓은 상태다. 진한 파랑(먼저 놓은 face, 숫자 \(1\)이 face 0)에서 옅은 파랑(나중에 놓은 face) 순으로 칠했고, 회색 윤곽이 완성된 모양이다. face가 이웃에서 이웃으로 붙어 나가는 것을 보자. 오른쪽 (b)는 60번째 face를 붙일 때 지난 edge 하나의 bending angle을 \(0.3\) 늘린 자료로 만든 결과다. 그 뒤에 놓인 face는 하늘색이다. 그 face들과 함께 처음 놓인 vertex 가운데 3개가 제자리에서 벗어나고, 주황 굵은 edge 14개의 길이가 주어진 값과 다르다. 바꾼 edge 자체의 길이는 맞는다. 자료가 맞지 않으면 어긋남이 붙이는 순서에 따라 엉뚱한 곳에서 드러난다.</p>
+      <figure class="dg-figure" id="fig-39-5-3">
+        <img src="figures/fig-39-5-3-reconstruction.svg" alt="두 패널. (a) 회색 윤곽의 icosphere 위에 진한 파랑에서 옅은 파랑까지 칠한 triangle 24개가 위쪽에서 아래로 이어 붙어 있고, 맨 처음 face에 숫자 1이 있다. (b) 회색과 하늘색 face로 된 icosphere 모양 위에 주황 굵은 edge 여러 개가 이웃한 vertex 몇 개의 둘레에 모여 있다.">
+        <figcaption><span class="fig-head">Figure 39.5.3.</span>
+        <em>무엇을</em>: icosphere(1)(vertex 42개, face 80개)을 그 edge length와 bending angle로 다시 만드는 과정(Implementation 상자의 <code>reconstruct</code>와 같은 algorithm). (a) 처음 놓인 24개의 face, (b) bending angle 하나를 바꾼 자료로 만든 결과.
+        <em>읽는 법</em>: (a)의 파란 face는 놓인 순서대로 진한 색에서 옅은 색으로, 회색 윤곽은 완성된 mesh다(원래 mesh와 rigid motion으로 맞추어 그렸다). (b)에서는 60번째 face를 놓을 때 지난 edge의 \(\theta\)를 \(0.3\) 늘렸다. 하늘색은 그 뒤에 놓인 face, 주황 굵은 선은 다시 만든 길이가 주어진 길이와 \(10^{-6}\) 넘게 다른 edge다.
+        <em>볼 것</em>: (a)의 완성본은 원래 mesh와 \(10^{-12}\) 안에서 같다. (b)에서는 vertex 3개가 움직이고 edge 14개의 길이가 틀린다. 바꾼 edge의 길이는 맞는다.
+        <em>본문과의 연결</em>: <a href="#i-39-5-10">Theorem 39.5.10</a>의 증명과 <a href="#i-39-5-11">Proposition 39.5.11</a>. (b)를 돌려 볼 수 있는 <a href="figures/fig-39-5-3-reconstruction-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: discrete curves, and the question of Chapter 38</p>
+        <p>Chapter 37의 fundamental theorem of discrete space curves는 edge length, curvature angle, torsion angle에서 곡선을 회전을 차례로 곱해 만들었다(<a href="../37-curves-smooth-discrete/37-5-discrete-space-curves.html#i-37-5-8">Theorem 37.5.8</a>). 곡선에서는 자료가 서로 독립이라 아무 값이나 실현되었고, 닫힌 곡선에서만 closing condition이 생겼다(<a href="../37-curves-smooth-discrete/37-4-discrete-plane-curves.html#i-37-4-7">Theorem 37.4.7</a>). surface에서는 face를 붙이는 길이 하나가 아니라 여럿이라, 각 vertex 둘레에서 이미 closing condition <a href="#eq-39-5-5">(39.5.5)</a>가 생긴다. Chapter 38이 남긴 질문, 곧 edge length에 무엇을 더해야 모양이 정해지는가의 답은 bending angle이다. normal만으로도 flat edge가 없으면 scale과 평행이동을 빼고 정해졌는데(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-8">Theorem 38.6.8</a>), 여기서는 길이가 있으므로 scale까지 정해진다. Track 1의 <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-5">Definition 31.2.5</a>는 bending angle을 mean curvature의 이산판으로 소개했다. 이 절은 같은 양을 정의하고 모양을 정하는 자료로 읽었다.</p>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">Looking ahead: bending angles in Chapters 40 and 41</p>
+        <p>bending angle은 다음 장들에서 계속 쓰인다. convex polyhedron을 \(\varepsilon\)만큼 둥글게 부풀릴 때 edge가 더하는 넓이가 \(\varepsilon\theta_{ij}\ell_{ij}\)이고, 그래서 total mean curvature가 \(-\tfrac12\sum\theta_{ij}\ell_{ij}\)가 된다(<a href="../40-discrete-curvature-integral/index.html#toc-40-4">Section 40.4</a>). vertex를 움직일 때 \(\sum_{ij}\ell_{ij}\,d\theta_{ij} = 0\)이라는 Schläfli formula는 mean curvature의 gradient를 계산하는 열쇠다(<a href="../41-discrete-curvature-variational/index.html#toc-41-2">Section 41.2</a>). 여기서는 정의만 하고, 두 결과는 그 절들에서 증명한다.</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Chapter 9: Gauss equation과 Codazzi–Mainardi equations(<a href="../09-intrinsic-geometry/index.html#toc-9-2">Section 9.2</a>). Chapter 8: coefficient \(L, M, N\)(<a href="../08-gauss-map/index.html#toc-8-5">Section 8.5</a>).</li>
+          <li>교재: Bonnet theorem <a class="cite" href="../../references.html#dC">[dC §4-3]</a>.</li>
+          <li>노트와 강의: <a class="cite" href="../../references.html#Cr">[Cr §3.4.2]</a>, <a class="cite" href="../../references.html#Cr">[Cr §3.5.2]</a>, <a class="cite" href="../../references.html#CMU-DDG-L15">[CMU-DDG L15]</a> slides 33–37. discrete fundamental form에서의 복원 <a class="cite" href="../../references.html#Wang12">[Wang12]</a>.</li>
+          <li>Track 1: <a href="../31-meshes/31-2-discrete-curvature.html#sec-mean-curvature">Section 31.2</a>(bending angle과 Steiner formula).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(\mathrm{I} = \inner{d\mathbf{x}}{d\mathbf{x}}\), \(\mathrm{II} = -\inner{d\mathbf{N}}{d\mathbf{x}}\)이고, normal 방향 offset에서 \(\mathrm{I}_t = \mathrm{I} - 2t\,\mathrm{II} + t^2\mathrm{III}\)이다(<a href="#i-39-5-1">Proposition 39.5.1</a>). 노트의 §3.4.2는 같은 부호, §3.5.2와 slide 33은 반대 부호의 II를 쓴다.</li>
+        <li>proper rigid motion은 I과 II를 보존하고, 거꾸로 I과 II가 같은 connected immersion은 proper rigid motion만큼 다르다. 주어진 I, II가 실현될 조건은 Gauss–Codazzi equations다(<a href="#i-39-5-4">Theorem 39.5.4</a>). 평면과 cylinder는 I이 같고 II가 다르다.</li>
+        <li>bending angle \(\theta_{ij}\)는 \(\mathbf{N}_g = R(\hat e_{ij}, \theta_{ij})\mathbf{N}_f\)로 정하고, convex edge에서 양수다(<a href="#i-39-5-5">Definition 39.5.5</a>, <a href="#i-39-5-6">Proposition 39.5.6</a>).</li>
+        <li>edge length와 bending angle은 connected oriented mesh를 proper rigid motion을 제외하고 정한다. 증명은 triangle을 하나씩 붙이는 것이다(<a href="#i-39-5-10">Theorem 39.5.10</a>). 자료가 mesh에서 오려면 vertex마다 \(\prod R_z(\alpha_k)R_x(-\theta_{ij_{k+1}}) = I_3\)이어야 한다(<a href="#i-39-5-11">Proposition 39.5.11</a>).</li>
+      </ul>
+      <p class="next">다음 장에서는 smooth curvature를 vertex와 edge 둘레에서 적분해 discrete curvature를 만든다. polyhedral surface의 curvature는 vertex와 edge에 몰려 있다. 어떻게 정의해야 Gauss–Bonnet theorem이 근사가 아니라 정확히 성립하는가?</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-39-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 39.5.1</span> <span class="level">★</span>
+        반지름 \(r\)인 sphere(\(\mathbf{N}\) 바깥쪽)의 \((\theta, \varphi)\) 좌표에서 I, II, III을 구하고, <a href="#eq-39-5-2">(39.5.2)</a>가 offset \(\mathbf{x}_t = (1 + t/r)\mathbf{x}\)의 first fundamental form과 같음을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathrm{I} = r^2\,d\theta^2 + r^2\sin^2\theta\,d\varphi^2\)이다. \(\mathsf{W} = -\tfrac1rI_2\)이므로 \(\mathrm{II} = g(\mathsf{W}\cdot, \cdot) = -\tfrac1r\mathrm{I}\) \(= -r\,d\theta^2 - r\sin^2\theta\,d\varphi^2\)(곧 \(L = -r\), \(N = -r\sin^2\theta\), running example의 값)이고, \(\mathrm{III} = g(\mathsf{W}\cdot, \mathsf{W}\cdot) = \tfrac{1}{r^2}\mathrm{I}\)이다. 그러면 \(\mathrm{I} - 2t\,\mathrm{II} + t^2\mathrm{III}\) \(= (1 + \tfrac{2t}{r} + \tfrac{t^2}{r^2})\mathrm{I} = (1 + t/r)^2\,\mathrm{I}\)이다. 한편 \(\mathbf{N} = \mathbf{x}/r\)이므로 \(\mathbf{x}_t = (1 + t/r)\mathbf{x}\)이고 \(d\mathbf{x}_t = (1 + t/r)\,d\mathbf{x}\)라 \(\mathrm{I}_t = (1 + t/r)^2\mathrm{I}\)이다. 같다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-5-2" data-level="2">
+        <p><span class="thm-head">Exercise 39.5.2</span> <span class="level">★★</span>
+        \(\mathrm{III} - 2H\,\mathrm{II} + K\,\mathrm{I} = 0\)임을 보여라. 이것을 쓰면 <a href="#eq-39-5-2">(39.5.2)</a>를 I과 II만으로 어떻게 쓸 수 있는가? torus of revolution에서 확인하여라.</p>
+        <details class="hint"><summary>Hint</summary><p>\(2\times2\) 행렬의 Cayley–Hamilton theorem \(\mathsf{W}^2 - (\tr\mathsf{W})\mathsf{W} + (\det\mathsf{W})I_2 = 0\)에 \(g(\cdot\,, Y)\)를 씌운다.</p></details>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathsf{W}\)가 self-adjoint이므로 \(\mathrm{III}(X, Y) = g(\mathsf{W}X, \mathsf{W}Y) = g(\mathsf{W}^2X, Y)\)이다. Cayley–Hamilton에서 \(\mathsf{W}^2 = 2H\mathsf{W} - KI_2\)이므로 \(\mathrm{III}(X, Y) = 2H\,g(\mathsf{W}X, Y) - K\,g(X, Y)\) \(= 2H\,\mathrm{II}(X, Y) - K\,\mathrm{I}(X, Y)\)이다. 그러면 \(\mathrm{I}_t = (1 - Kt^2)\,\mathrm{I} - 2t(1 - Ht)\,\mathrm{II}\)이다. torus(\(\mathbf{x}_u\times\mathbf{x}_v\), 안쪽)에서 \(\mathsf{W} = \diag(\kappa_1, \kappa_2)\), \(\mathsf{g} = \diag(r^2, \rho^2)\)(\(\rho = R + r\cos u\))이므로 \(\mathrm{III} = \diag(\kappa_1^2r^2, \kappa_2^2\rho^2)\)이고, \(2H\kappa_i - K = (\kappa_1 + \kappa_2)\kappa_i - \kappa_1\kappa_2 = \kappa_i^2\)이므로 성분마다 맞는다. verify가 기호로 확인한다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-5-3" data-level="1">
+        <p><span class="thm-head">Exercise 39.5.3</span> <span class="level">★</span>
+        regular tetrahedron의 dihedral angle은 \(\arccos\tfrac13\), octahedron은 \(\arccos(-\tfrac13)\)이다. 바깥쪽 orientation에서 두 다면체의 bending angle과 \(\tfrac12\sum_{ij}\theta_{ij}\ell_{ij}\)(edge length \(\ell\))을 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-39-5-6">Proposition 39.5.6</a>(b)에서 \(\theta = \pi - (\text{dihedral angle})\)이고 convex이므로 양수다. tetrahedron: \(\theta = \pi - \arccos\tfrac13 = 1.9106\), edge 6개이므로 \(\tfrac12\sum\theta\ell = 3\cdot1.9106\,\ell = 5.7319\,\ell\). octahedron: \(\theta = \pi - \arccos(-\tfrac13) = \arccos\tfrac13 = 1.2310\), edge 12개이므로 \(\tfrac12\sum\theta\ell = 6\cdot1.2310\,\ell = 7.3858\,\ell\). 두 값은 Section 40.4에서 total mean curvature의 크기로 읽힌다(Track 1의 <a href="../31-meshes/31-2-discrete-curvature.html#eq-31-2-6">(31.2.6)</a>).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-5-4" data-level="2">
+        <p><span class="thm-head">Exercise 39.5.4</span> <span class="level">★★</span>
+        discrete immersion \(\mathbf{x}\)와 그 거울상 \(\mathbf{y} = A\mathbf{x}\)(\(A = \diag(1, 1, -1)\))는 edge length가 같고 bending angle이 \(\theta^{\mathbf{y}} = -\theta^{\mathbf{x}}\)이다(<a href="#i-39-5-6">Proposition 39.5.6</a>(c)). 이것과 <a href="#i-39-5-10">Theorem 39.5.10</a>을 써서, 모든 bending angle이 \(0\)이 아닌 mesh는 자기 거울상과 \(\mathcal{K}\)의 vertex 이름을 지킨 채 proper rigid motion으로 겹칠 수 없음을 보여라. 평평한 mesh는 어떤가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathbf{y} = \rho\circ\mathbf{x}\)인 proper rigid motion \(\rho\)가 있으면 <a href="#i-39-5-3">Proposition 39.5.3</a>(또는 bending angle의 정의)에서 \(\theta^{\mathbf{y}} = \theta^{\mathbf{x}}\)이다. 그런데 \(\theta^{\mathbf{y}} = -\theta^{\mathbf{x}}\)이므로 모든 interior edge에서 \(\theta^{\mathbf{x}} = 0\)이어야 한다. 그러므로 bending angle이 하나라도 \(0\)이 아니면 겹칠 수 없다. 거꾸로 모든 \(\theta = 0\)이면(connected이면 mesh가 한 평면에 놓인다) \(\mathbf{x}\)와 \(\mathbf{y}\)는 같은 \((\ell, \theta)\)를 가지므로 <a href="#i-39-5-10">Theorem 39.5.10</a>에 의해 proper rigid motion으로 겹친다. 실제로 평면 도형은 그 평면 안의 직선을 축으로 \(\pi\)만큼 돌리면 거울상과 겹친다. 이것이 <a href="#i-39-5-10">Theorem 39.5.10</a>이 \(\det A = 1\)만 주는 이유다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-5-5" data-level="1">
+        <p><span class="thm-head">Exercise 39.5.5</span> <span class="level">★</span>
+        참인지 거짓인지 말하고 이유를 써라. (a) 닫힌 mesh는 edge length만으로 rigid motion을 제외하고 정해진다. (b) 닫힌 mesh는 bending angle만으로 rigid motion을 제외하고 정해진다. (c) <code>reconstruct</code>는 \(n_2 - 1\)개의 bending angle만 쓴다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 거짓. dimpled icosahedron과 icosahedron(<a href="#i-39-5-7">Example 39.5.7</a>). (b) 거짓. mesh를 \(\lambda \gt 0\)배하면 normal이 그대로이므로 모든 bending angle이 같고 모양은 다르다(크기). <a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-8">Theorem 38.6.8</a>은 flat edge가 없을 때 normal이 scale과 평행이동을 빼고 정한다고 했다. (c) 참. face를 하나 놓을 때마다 지난 edge 하나의 \(\theta\)만 쓰고, face 0을 뺀 \(n_2 - 1\)개의 face를 놓는다. 그 edge들이 dual graph의 spanning tree를 이룬다. 나머지 \(\theta\)는 쓰이지 않으므로, 맞지 않는 자료를 주면 Implementation 상자의 마지막 줄처럼 다른 곳의 길이가 틀린다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-39-5-6" data-level="1">
+        <p><span class="thm-head">Exercise 39.5.6</span> <span class="level">★</span>
+        <strong>Coding.</strong> [<a href="#i-39-5-11">Proposition 39.5.11</a> 확인] icosphere(1)의 모든 vertex에서 <a href="#eq-39-5-5">(39.5.5)</a>의 곱을 계산하여 \(I_3\)임을 확인하여라. 그다음 bending angle 하나를 \(0.05\) 바꾸고, 곱이 \(I_3\)이 아닌 vertex가 어디인지 출력하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-39-5-6"><code>def star(F, i):
+    """link vertices j_1, ..., j_m of the interior vertex i; the faces around i are (i, j_k, j_{k+1})"""
+    nxt = {f[(f.index(i) + 1) % 3]: f[(f.index(i) + 2) % 3] for f in F.tolist() if i in f}
+    seq = [next(iter(nxt))]
+    while nxt[seq[-1]] != seq[0]:
+        seq.append(nxt[seq[-1]])
+    return seq
+
+Rz = lambda a: np.array([[np.cos(a), -np.sin(a), 0], [np.sin(a), np.cos(a), 0], [0, 0, 1]])
+Rx = lambda a: np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+
+def holonomy(F, ell, theta, i):
+    """product of Rz(corner angle) Rx(-bending angle) around the vertex i (39.5.5)"""
+    L = lambda a, b: ell[min(a, b), max(a, b)]
+    s, P = star(F, i), np.eye(3)
+    for j, jn in zip(s, s[1:] + s[:1]):
+        alpha = np.arccos((L(i, j) ** 2 + L(i, jn) ** 2 - L(j, jn) ** 2) / (2 * L(i, j) * L(i, jn)))
+        P = P @ Rz(alpha) @ Rx(-theta[min(i, jn), max(i, jn)])
+    return P
+
+V, F = dm.icosphere(1)
+b = dm.edge_bending_angles(V, F)
+ell, theta = {e: l for e, (t, l) in b.items()}, {e: t for e, (t, l) in b.items()}
+dev = lambda: np.array([np.abs(holonomy(F, ell, theta, i) - np.eye(3)).max() for i in range(len(V))])
+print(f"from the mesh: largest deviation from I is below 1e-12: {dev().max() &lt; 1e-12}")
+e0 = next(iter(theta))
+theta[e0] += 0.05
+d = dev()
+print(f"after changing theta at edge {tuple(int(x) for x in e0)}: vertices with deviation > 1e-9: {np.flatnonzero(d > 1e-9).tolist()}, largest {d.max():.4f}")
+</code></pre>
+<pre id="out-ex-39-5-6"><code>from the mesh: largest deviation from I is below 1e-12: True
+after changing theta at edge (0, 12): vertices with deviation > 1e-9: [0, 12], largest 0.0500</code></pre>
+          <p>mesh에서 읽은 자료는 42개의 vertex 모두에서 곱이 \(I_3\)이다(<a href="#i-39-5-11">Proposition 39.5.11</a>의 필요성). edge \((0, 12)\)의 각을 바꾸면 그 edge의 두 끝 vertex \(0\)과 \(12\)에서만 곱이 \(I_3\)에서 벗어난다. 각 vertex의 곱에는 그 vertex에서 나가는 edge의 \(\theta\)만 들어가기 때문이다. 벗어나는 크기 \(0.05\)는 바꾼 양과 같다(곱의 한 인자가 \(R_x(-0.05)\)만큼 달라지고 나머지는 회전이라 행렬 성분의 최대 변화가 \(\sin 0.05\)에 가깝다). Implementation 상자의 <code>reconstruct</code>는 이런 자료에서도 무엇인가를 만들지만, 그 결과가 주어진 자료를 만족하지 않는다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="39-4-gauss-bonnet.html">← 39.4 The Gauss–Bonnet Theorem</a>
+    <a rel="next" href="../40-discrete-curvature-integral/index.html">40. Discrete Curvature I: The Integral Viewpoint →</a>
+  </nav>
+</body>
+</html>
