@@ -970,3 +970,9 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
        - dgsym.EXAMPLES에 ellipse·flower 넣기
     4. 애니메이션 단계(§12.8)
     5. 제안(사용자 승인 필요): GUIDELINES §6.6에 표면 위 1-form ⋆의 Crane 비교 행
+- 2026-10-20: **재개(사용자 지시): "GUIDELINES §6.6에 '곡면 위 1-form Hodge star의 Crane 비교' 행을 추가하자. DDG 39장부터 이어서 해줘."**
+  - §6.6 행을 넣었다(사용자 승인). Cr §4.1.3·§7.3·§7.4 원문과 대조했다(PDF 52, 127, 129쪽). 범례 "✓"에 Cr을 더했다.
+  - 1-form에서 Cr §7.3의 ⋆α(X) = α(JX)는 우리 ⋆와 부호가 반대다. 0·2-form은 같다. inner product ∫⋆α∧β(Cr)와 ∫α∧⋆β(우리)는 같은 값이다.
+  - 작업은 이 worktree에서 메인 세션(dg-study-main)이 이어 간다. fork 세션은 끝났다(pid 없음).
+  - scratch는 `/tmp/claude-1000/-home-kbh2-DG-study/254ed245-19c9-4bfc-b5ae-fb83871f1e12/scratchpad/`다. 공개 절차의 clean_build.sh도 여기로 옮겨 쓴다.
+  - 진행: W4(39, 42) → W5(40, 43) → W6(41, 44) → W7(45) → Track 2 통합 검토. push는 검토와 check_all을 통과한 단위마다 한다(§13).
