@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>40.3 Curvature Normals — DG Study</title>
+  <meta name="dg-id" content="40.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="40.1, 40.2, 39.1, 39.3, 39.5, 38.3, 38.5, 38.6, 36.5, 36.6, 35.5">
+  <meta name="dg-refs" content="CMU-DDG L16; Cr §5.2.1; Meyer03">
+  <meta name="dg-updated" content="2026-10-20">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">40. Discrete Curvature I: The Integral Viewpoint</a> ›
+    <span>40.3 Curvature Normals</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>40.3 Curvature Normals</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §5.2.1]</a>,
+        <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slides 19–26</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>area normal \(\mathbf{N}\,dA\), mean curvature normal \(2H\mathbf{N}\,dA\), Gauss curvature normal \(K\mathbf{N}\,dA\)를 \(d\mathbf{x}\)와 \(d\mathbf{N}\)의 wedge로 쓰고, 이 study set의 부호(\(W = -d\mathbf{N}\))로 증명할 수 있다.</li>
+        <li>세 2-form을 vertex의 dual cell 위에서 Stokes's theorem으로 적분해, mean curvature normal에서 cotan formula \((L\mathbf{x})_i\)가, Gauss curvature normal에서 \(\tfrac12\sum_j\theta_{ij}(\mathbf{x}_i - \mathbf{x}_j)/\ell_{ij}\)가 나오는 과정을 따라갈 수 있다.</li>
+        <li>\(\Delta\mathbf{x} = 2H\mathbf{N}\)을 유도하고, Laplace–Beltrami operator를 이산화한 \(L\mathbf{x}\)가 Stokes로 얻은 vector와 정확히 같은 이유(dual edge 위의 \(\star d\mathbf{x} = -\mathbf{N}\times d\mathbf{x}\))를 설명할 수 있다.</li>
+        <li>강의 슬라이드와 노트의 식을 이 study set의 부호로 옮길 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Section 40.1–40.2: angle defect와 Gauss image <a href="40-1-angle-defect.html#i-40-1-7">Proposition 40.1.7</a>, 이 장의 기호(<a href="40-1-angle-defect.html#sec-quantities">Section 40.1</a>의 Conventions 상자).</li>
+        <li>Chapter 38: area normal <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-5">Proposition 38.3.5</a>, \(\star d\mathbf{x} = -\mathbf{N}\times d\mathbf{x}\) <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-6">Proposition 38.3.6</a>, vector area <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-11">Theorem 38.3.11</a>, discrete vector area <a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-4">Definition 38.5.4</a>, <a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-5">Proposition 38.5.5</a>, discrete Laplace–Beltrami operator <a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-2">Definition 38.6.2</a>.</li>
+        <li>Chapter 36: dual orientation <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-1">Remark 36.5.1</a>, circumcentric dual <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-6">Definition 36.5.6</a>, <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-9">Lemma 36.5.9</a>, cotan formula <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-10">Theorem 36.5.10</a>, cotan Laplacian <a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-6">Definition 36.6.6</a>.</li>
+        <li>Chapter 39: \(-d\mathbf{N} = d\mathbf{x}\circ\mathsf{W}\) <a href="../39-surface-curvature/39-1-weingarten-map.html#i-39-1-2">Proposition 39.1.2</a>, \(K = \det\mathsf{W}\), \(H = \tfrac12\tr\mathsf{W}\) <a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#eq-39-3-1">(39.3.1)</a>, mean curvature vector <a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#i-39-3-1">Proposition 39.3.1</a>, bending angle <a href="../39-surface-curvature/39-5-fundamental-theorem.html#i-39-5-5">Definition 39.5.5</a>. Chapter 35: vector-valued form의 wedge <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-12">Definition 35.5.12</a>, <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-13">Proposition 35.5.13</a>, <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-16">Proposition 35.5.16</a>.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 40.1–40.2는 Gaussian curvature를 vertex마다의 수 \(\delta_i\)로 만들었다. mean curvature는 그렇게 하기 어렵다. \(H\)는 normal의 방향을 바꾸면 부호가 바뀌는데(<a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#i-39-3-1">Proposition 39.3.1</a>), mesh의 vertex에는 normal이 하나로 정해져 있지 않다(Section 38.5). 그러나 vector \(H\mathbf{N}\)은 normal의 선택에 무관했다. 그래서 수 대신 vector를 적분하자. Section 38.5에서 \(\mathbf{N}\,dA\)를 dual cell 위에서 적분해 discrete vector area를 얻었다(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-4">Definition 38.5.4</a>). 강의 슬라이드는 \(\mathbf{N}\,dA\)가 surface에 자연스럽게 붙는 세 \(\R^3\)-valued 2-form 가운데 하나라고 말한다 <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slide 20. 나머지 둘이 mean curvature와 Gaussian curvature를 담고, 같은 방법으로 적분하면 cotan formula와 bending angle의 식이 나온다.</p>
+    </section>
+
+    <section id="sec-smooth">
+      <h2>Three Curvature Normals</h2>
+      <p>\(\R^3\)-valued 1-form의 wedge는 cross product로 만든다. 1-form끼리는 \((\alpha\wedge\beta)(u, v) = \alpha(u)\times\beta(v) - \alpha(v)\times\beta(u)\)이고, \(\alpha\wedge\beta = \beta\wedge\alpha\)이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#eq-35-5-5">(35.5.5)</a>, <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-13">Proposition 35.5.13</a>). immersion \(\mathbf{x}\)와 그 Gauss map \(\mathbf{N}\)에서 만들 수 있는 wedge는 \(d\mathbf{x}\wedge d\mathbf{x}\), \(d\mathbf{x}\wedge d\mathbf{N}\), \(d\mathbf{N}\wedge d\mathbf{N}\)의 셋이다.</p>
+
+      <div class="thm proposition" id="i-40-3-1">
+        <p><span class="thm-head">Proposition 40.3.1</span> <span class="thm-name">(three curvature normals)</span>.
+        immersion \(\mathbf{x}\colon U \to \R^3\)과 그 Gauss map \(\mathbf{N}\), area form \(dA\)(<a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#eq-38-3-5">(38.3.5)</a>)에 대하여</p>
+        <div class="equation" id="eq-40-3-1">
+        \[ \begin{aligned} \tfrac12\,d\mathbf{x}\wedge d\mathbf{x} &= \mathbf{N}\,dA, \\ d\mathbf{x}\wedge d\mathbf{N} &= -2H\,\mathbf{N}\,dA, \\ \tfrac12\,d\mathbf{N}\wedge d\mathbf{N} &= K\,\mathbf{N}\,dA \end{aligned} \tag{40.3.1} \]
+        </div>
+        <p>이다. 여기서 \(H = \tfrac12\tr\mathsf{W}\), \(K = \det\mathsf{W}\)이고 \(-d\mathbf{N} = d\mathbf{x}\circ\mathsf{W}\)이다(<a href="../39-surface-curvature/39-1-weingarten-map.html#i-39-1-2">Proposition 39.1.2</a>).</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: 점마다 induced metric에 대한 orthonormal basis를 잡으면 \(d\mathbf{x}\)는 tangent plane의 orthonormal frame이 되고 \(d\mathbf{N}\)은 그 frame에서 행렬 \(-\mathsf{W}\)가 된다. 두 wedge는 그 행렬의 trace와 determinant를 꺼낸다.</p>
+        <p><span class="proof-head">Proof.</span> 첫 식은 <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-5">Proposition 38.3.5</a>다. 점 \(q\)를 고정하고 \((\R^2, g_q)\)의 positively oriented orthonormal basis \((e_1, e_2)\)를 잡자. \(a = d\mathbf{x}(e_1)\), \(b = d\mathbf{x}(e_2)\)는 orthonormal이고 \(a\times b = \mathbf{N}\)이며(<a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-6">Proposition 38.3.6</a>의 증명), \(dA(e_1, e_2) = 1\)이다. \(\mathsf{W}\)의 이 basis에 대한 행렬을 \((w_{kl})\)이라 하면 \(\mathsf{W}e_1 = w_{11}e_1 + w_{21}e_2\), \(\mathsf{W}e_2 = w_{12}e_1 + w_{22}e_2\)이므로 \(d\mathbf{N}(e_1) = -(w_{11}a + w_{21}b)\), \(d\mathbf{N}(e_2) = -(w_{12}a + w_{22}b)\)이다. <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#eq-35-5-5">(35.5.5)</a>에서</p>
+        <p>\[ \begin{aligned} (d\mathbf{x}\wedge d\mathbf{N})(e_1, e_2) &= a\times d\mathbf{N}(e_2) - b\times d\mathbf{N}(e_1) \\ &= -w_{22}\,a\times b + w_{11}\,b\times a \\ &= -(w_{11} + w_{22})\,\mathbf{N}, \\ (d\mathbf{N}\wedge d\mathbf{N})(e_1, e_2) &= 2\,d\mathbf{N}(e_1)\times d\mathbf{N}(e_2) \\ &= 2(w_{11}w_{22} - w_{21}w_{12})\,\mathbf{N} \end{aligned} \]</p>
+        <p>이다(\(a\times a = b\times b = 0\)). trace와 determinant는 basis에 무관하므로 \(w_{11} + w_{22} = \tr\mathsf{W} = 2H\), \(w_{11}w_{22} - w_{21}w_{12} = \det\mathsf{W} = K\)이다. \(\R^2\) 위의 2-form은 한 basis에서의 값으로 정해지므로 둘째, 셋째 식이 성립한다.</p>
+      </div>
+      <p>셋째 식은 Chapter 39가 넓이 비율로 말한 것(<a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#sec-classification">Section 39.3</a>, \(\mathbf{N}_u\times\mathbf{N}_v = K\,\mathbf{x}_u\times\mathbf{x}_v\))을 2-form으로 쓴 것이다. \(\tfrac12\,d\mathbf{N}\wedge d\mathbf{N}\)은 Gauss map의 상의 “vector area”이고, 그 크기가 \(\abs{K}\)배의 넓이다. 둘째 식의 \(d\mathbf{x}\wedge d\mathbf{N}\)은 위치와 normal을 섞은 넓이라서, offset의 넓이를 다루는 Section 40.4의 Steiner formula에서 다시 나온다. 강의 슬라이드는 이 셋을 “mixed area”라고 부른다 <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slide 20.</p>
+
+      <div class="thm example" id="i-40-3-2">
+        <p><span class="thm-head">Example 40.3.2</span> <span class="thm-name">(sphere and cylinder)</span>.
+        (a) unit sphere(\(\mathbf{N} = \mathbf{x}\), 바깥쪽)에서는 \(d\mathbf{N} = d\mathbf{x}\)이므로 \(d\mathbf{x}\wedge d\mathbf{N} = d\mathbf{x}\wedge d\mathbf{x} = 2\mathbf{N}\,dA\)이다. <a href="#eq-40-3-1">(40.3.1)</a>의 둘째 식과 맞대면 \(-2H = 2\), 곧 \(H = -1\)이고, 셋째 식에서 \(K = 1\)이다. (b) 반지름 \(r\)인 cylinder(바깥쪽)에서는 \(d\mathbf{N} = \tfrac1r\mathbf{x}_u\,du\)(<a href="../39-surface-curvature/39-1-weingarten-map.html#i-39-1-3">Example 39.1.3</a>(b))이므로</p>
+        <p>\[ \begin{aligned} (d\mathbf{x}\wedge d\mathbf{N})(\partial_u, \partial_v) &= \mathbf{x}_u\times d\mathbf{N}(\partial_v) \\ &\quad - \mathbf{x}_v\times d\mathbf{N}(\partial_u) \\ &= -\tfrac1r\mathbf{x}_v\times\mathbf{x}_u = \tfrac1r\mathbf{x}_u\times\mathbf{x}_v \end{aligned} \]</p>
+        <p>이다. 이것은 \(-2H\mathbf{N}\,dA(\partial_u, \partial_v)\)에 \(H = -\tfrac{1}{2r}\)을 넣은 값이다. \(d\mathbf{N}\)이 한 방향뿐이라 \(d\mathbf{N}\wedge d\mathbf{N} = 0\), 곧 \(K = 0\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-40-3-curvature-normals.py</code></p>
+      </div>
+
+      <p><strong>Derivation</strong> (\(\Delta\mathbf{x} = 2H\mathbf{N}\)). surface 위의 Laplace–Beltrami operator는 함수 \(u\)에 대해 \(d(\star du) = (\Delta u)\,dA\)를 만족한다(\(\Delta = \star d\star d\). 정의는 <a href="../42-laplace-beltrami/42-1-laplacian-definitions.html#eq-42-1-4">(42.1.4)</a>, Tour의 <a href="../00-tour/0-4-curvature.html#eq-0-4-3">(0.4.3)</a>, Track 3의 <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>). 이것을 \(\mathbf{x}\)의 세 성분에 쓰자. <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#eq-38-3-7">(38.3.7)</a>의 \(\star d\mathbf{x} = -\mathbf{N}\times d\mathbf{x} = -\mathbf{N}\wedge d\mathbf{x}\)(0-form과 1-form의 cross product wedge)에 <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-16">Proposition 35.5.16</a>, <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-13">Proposition 35.5.13</a>, <a href="#eq-40-3-1">(40.3.1)</a>을 차례로 쓰면</p>
+      <div class="equation" id="eq-40-3-2">
+      \[ \begin{aligned} (\Delta\mathbf{x})\,dA &= d(\star d\mathbf{x}) = -d\mathbf{N}\wedge d\mathbf{x} \\ &= -d\mathbf{x}\wedge d\mathbf{N} = 2H\,\mathbf{N}\,dA \end{aligned} \tag{40.3.2} \]
+      </div>
+      <p>이고, 따라서 \(\Delta\mathbf{x} = 2H\mathbf{N}\)이다. 좌표를 쓰지 않은 유도다. conformal coordinates에서 직접 계산해도 같다(<a href="#ex-40-3-3">Exercise 40.3.3</a>). <a href="#eq-40-3-2">(40.3.2)</a>가 이 절의 열쇠다. \(\int\Delta\mathbf{x}\,dA\)와 \(\int2H\mathbf{N}\,dA\)는 같은 1-form \(\star d\mathbf{x} = -\mathbf{N}\times d\mathbf{x}\)의 경계 적분이다. 아래에서 보듯 mesh에서도 그렇다.</p>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: the sign of the mean curvature normal</p>
+        <p>이 study set은 \(W = -d\mathbf{N}\), \(H = \tfrac12\tr W\), \(\Delta = \divg\grad\)이다(<a href="../../notation.html#sec-ddg">Notation and Conventions</a>). 바깥쪽 \(\mathbf{N}\)인 반지름 \(r\)의 sphere에서 \(H = -1/r\)이므로 \(\Delta\mathbf{x} = 2H\mathbf{N} = -\tfrac2r\mathbf{N}\)은 중심을 향한다. 그래서 mesh의 \((L\mathbf{x})_i \approx \int_{C_i}2H\mathbf{N}\,dA\)도 볼록한 곳에서 안쪽을 향한다(unit sphere에서 \((L\mathbf{x})_i/A_i \approx -2\mathbf{x}_i\)).</p>
+        <p>Crane은 shape operator를 \(df(SX) = dN(X)\)로 정하고 그 eigenvalue의 평균을 \(H\)라 한다 <a class="cite" href="../../references.html#Cr">[Cr §3.4.1]</a>. 같은 \(\mathbf{N}\)에서 Crane의 \(H\)는 이 study set의 \(-H\)이고, 바깥쪽 normal의 sphere에서 \(+1/r\)이다(<a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html">Section 39.3</a>의 Conventions 상자). 그런데 노트 §5.2.1과 강의 슬라이드는 \(\Delta f = 2HN\)이라 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §5.2.1]</a> <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slide 24. 노트의 \(\Delta\)는 좌표식 \(\tfrac{1}{\sqrt{\abs g}}\partial_i(\sqrt{\abs g}\,g^{ij}\partial_j)\)로 쓴 \(\divg\grad\)이므로, 이 식은 이 study set의 \(H\)로 읽어야 맞는다. Crane 자신의 \(H\)로 읽으면 \(\Delta f = -2HN\)이다(unit sphere에서 \(\Delta f = -2f\)이고 Crane의 \(HN = f\)). 슬라이드 안에서도 두 부호가 섞여 있다. slide 20–21의 \(\tfrac12df\wedge dN = HN\,dA\)는 Crane의 \(H\)로 맞고(이 study set에서는 \(\tfrac12d\mathbf{x}\wedge d\mathbf{N} = -H\mathbf{N}\,dA\)), slide 23의 \((HN)_i := \tfrac12\sum(\cot\alpha_{ij} + \cot\beta_{ij})(f_i - f_j)\)는 이 study set의 \(-(L\mathbf{x})_i = \int_{C_i}df\wedge dN\)이다. 곧 Crane의 \(H\)로 \(\int_{C_i}2HN\,dA\)이고 바깥쪽을 향한다(slide 23의 첫 등식은 slide 20의 \(\tfrac12\)을 빼고 쓴다). slide 24의 \((\Delta f)_i = \tfrac12\sum(\cot\alpha_{ij} + \cot\beta_{ij})(f_j - f_i)\)는 \((L\mathbf{x})_i\)와 같다.</p>
+        <p>Gauss curvature normal에는 부호 문제가 하나 더 있다. slide 25는 \((KN)_i := \tfrac12\sum_j\tfrac{\varphi_{ij}}{\ell_{ij}}(f_j - f_i)\)로 적는데(\(\varphi_{ij}\)는 이 장의 \(\theta_{ij}\)와 같다, <a href="40-1-angle-defect.html#sec-quantities">Section 40.1</a>), 바깥쪽 orientation의 볼록한 vertex에서 이 vector는 안쪽을 향한다. \(K \gt 0\)이고 \(\mathbf{N}\)이 바깥쪽이면 \(K\mathbf{N}\)은 바깥쪽이어야 하므로, \(\partial C_i\)를 positive orientation으로 돌아 계산하면 부호가 반대인 \(\tfrac12\sum_j\tfrac{\theta_{ij}}{\ell_{ij}}(\mathbf{x}_i - \mathbf{x}_j)\)가 나온다(<a href="#i-40-3-10">Theorem 40.3.10</a>). verify가 unit sphere의 icosphere에서 \((K\mathbf{N})_i/A_i \approx +\mathbf{x}_i\)를 확인한다. slide 26의 요약표도 slide 25와 같은 \((f_j - f_i)\)로 적혀 있어서 같은 부호 차이가 있다. 이 차이는 Crane의 \(H\) 부호와 무관하다. \(\varphi_{ij} = \theta_{ij}\)이고 \(K\)는 normal의 방향과 부호 convention에 무관하므로, Crane 자신의 기호로 읽어도 바깥쪽 normal의 볼록한 vertex에서 \(K\mathbf{N}\)은 바깥쪽이어야 한다. slide 25의 계산에서 어긋나는 곳은 대원 호 위의 \(N\times T\)를 \(+e_{ij}/\ell_{ij}\)로 둔 단계다. 같은 slide의 그림처럼 호가 \(N_{jil}\)에서 \(N_{ijk}\)로 가면 \(N\times T = -e_{ij}/\ell_{ij}\)이다(<a href="#i-40-3-10">Theorem 40.3.10</a>의 증명).</p>
+      </aside>
+    </section>
+
+    <section id="sec-dual-cells">
+      <h2>Integrating over Dual Cells</h2>
+      <p>mesh에서 세 2-form을 점마다 쓸 수는 없다. face 안에서는 \(d\mathbf{N} = 0\)이고 edge와 vertex에서는 \(\mathbf{N}\)이 끊긴다. 그러나 셋 모두 exact다. <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-16">Proposition 35.5.16</a>과 <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-13">Proposition 35.5.13</a>에서</p>
+      <p>\[ \begin{aligned} d\big(\tfrac12\mathbf{x}\wedge d\mathbf{x}\big) &= \tfrac12\,d\mathbf{x}\wedge d\mathbf{x}, \\ d(\mathbf{N}\wedge d\mathbf{x}) &= d\mathbf{x}\wedge d\mathbf{N}, \\ d\big(\tfrac12\mathbf{N}\wedge d\mathbf{N}\big) &= \tfrac12\,d\mathbf{N}\wedge d\mathbf{N} \end{aligned} \]</p>
+      <p>이다. smooth surface의 영역 \(C\)에서는 Stokes's theorem으로 \(\int_C\) 넓이 적분을 \(\oint_{\partial C}\) 경계 적분으로 바꿀 수 있다(<a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-11">Theorem 38.3.11</a>과 같은 증명). mesh에서는 거꾸로 경계 적분을 정의로 삼는다. vertex \(i\)의 dual cell \(C_i\)의 경계 \(\partial C_i\)는 face 안을 지나고 edge를 한 점에서 가로지르므로, 그 위에서는 \(\mathbf{x}\)와 face normal이 모두 뜻을 가진다. 이 절에서 \(\partial C_i\)는 \(\mathbf{x}_i\) 둘레를 positive orientation(\(\mathbf{N}\) 쪽에서 보아 반시계 방향)으로 돈다. 곧 face \(f = (i, j, k)\) 안에서는 edge \(ij\)의 중점 \(m_{ij}\)에서 dual vertex를 거쳐 \(m_{ik}\)로 간다.</p>
+      <p>첫째 form은 이미 했다. \(\tfrac12\oint_{\partial C_i}\mathbf{x}\times d\mathbf{x}\)는 경계 polygon의 vector area이고, barycentric cell에서 \(\tfrac13\sum_{f\ni i}A_f\mathbf{N}_f\)인 discrete vector area \(\mathbf{A}_i\)다(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-5">Proposition 38.5.5</a>). 강의 슬라이드는 같은 값을 star의 경계(link)로 계산한다 <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slide 22. 이제 둘째 form이다.</p>
+
+      <div class="thm definition" id="i-40-3-3">
+        <p><span class="thm-head">Definition 40.3.3</span> <span class="thm-name">(discrete mean curvature normal)</span>.
+        discrete immersion \(\mathbf{x}\)의 vertex \(i\)에서 cotan Laplacian \(L\)(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-6">Definition 36.6.6</a>)을 \(\mathbf{x}\)의 세 성분에 쓴</p>
+        <div class="equation" id="eq-40-3-3">
+        \[ \begin{aligned} (L\mathbf{x})_i = \frac12\sum_{j\sim i}&\big(\cot\alpha_{ij} + \cot\beta_{ij}\big) \\ &\cdot(\mathbf{x}_j - \mathbf{x}_i) \end{aligned} \tag{40.3.3} \]
+        </div>
+        <p>를 \(i\)의 <dfn>discrete mean curvature normal</dfn>(이산 평균곡률 법벡터)이라 한다. 이것은 integrated 값이고, 점마다의 값은 dual area로 나눈 \((\Delta_h\mathbf{x})_i = (L\mathbf{x})_i/A_i\)(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-2">Definition 38.6.2</a>)다.</p>
+      </div>
+      <p>이 정의가 \(\int_{C_i}2H\mathbf{N}\,dA\)의 discrete 판이라는 것이 다음 정리다. \(L\) 자체는 Chapter 36에서 이미 정의했다. 여기서 정의하는 것은 그것을 \(\mathbf{x}\)에 쓴 vector에 붙이는 이름과 해석이다.</p>
+
+      <div class="thm theorem" id="i-40-3-4">
+        <p><span class="thm-head">Theorem 40.3.4</span> <span class="thm-name">(the mean curvature normal from Stokes)</span>.
+        interior vertex \(i\)의 circumcentric dual cell \(C_i\)(<a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-6">Definition 36.5.6</a>)의 경계를 positive orientation으로 돌고, face \(f\)의 조각 \([m_{ij}, c_f]\), \([c_f, m_{ik}]\) 위에서는 \(\mathbf{N} = \mathbf{N}_f\)로 두자(circumcenter \(c_f\)가 \(f\) 밖에 있어도 그렇게 센다). 그러면</p>
+        <div class="equation" id="eq-40-3-4">
+        \[ -\oint_{\partial C_i}\mathbf{N}\times d\mathbf{x} = (L\mathbf{x})_i \tag{40.3.4} \]
+        </div>
+        <p>이다. 같은 등식이 face마다 \(m_{ij}\)에서 그 face의 평면 안의 경로로 \(m_{ik}\)에 가는 모든 dual cell(barycentric, mixed Voronoi)에서 성립한다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(\mathbf{N}\times\)는 face 안에서 \(90^\circ\) 회전이다. dual edge의 두 조각은 edge에 수직이므로 \(\mathbf{N}\times\)로 돌리면 edge에 평행해지고, 그 길이의 합이 dual edge의 길이, 곧 cotan formula다 <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slide 23.</p>
+        <p><span class="proof-head">Proof.</span> \(\partial C_i\)를 edge \(ij\) 근처의 두 조각씩 묶는다. edge \(ij\)를 \(i \to j\)로 지나는 face를 \(f = (i, j, k)\), \(j \to i\)로 지나는 face를 \(g\)라 하면, \(\mathbf{x}_i\) 둘레를 positive orientation으로 돌 때 \(g\)에서 \(f\)로 넘어가며 \(m_{ij}\)를 지난다. 그 두 조각 \([c_g, m_{ij}] + [m_{ij}, c_f]\)는 dual edge \(e^\star_{ij}\)이고 방향도 <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-1">Remark 36.5.1</a>과 같다. <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-9">Lemma 36.5.9</a>에서 \(c_f - m_{ij}\)는 \(f\)의 평면 안에서 \(e_{ij}\)에 수직이고, 부호 있는 길이가 \(h_{f,ij} = \tfrac{\ell_{ij}}{2}\cot\alpha_{ij}\)(\(\alpha_{ij}\)는 \(f\)의 \(k\)에서의 각)이며, 양의 방향은 \(f\)의 안쪽이다. \(f\)가 edge를 \(i \to j\)로 지나므로 그 안쪽은 \(\mathbf{N}_f\times\hat e_{ij}\) 방향이다. 곧 \(c_f - m_{ij} = h_{f,ij}\,\mathbf{N}_f\times\hat e_{ij}\)이고</p>
+        <p>\[ \begin{aligned} \mathbf{N}_f\times(c_f - m_{ij}) &= h_{f,ij}\,\mathbf{N}_f\times(\mathbf{N}_f\times\hat e_{ij}) \\ &= -h_{f,ij}\,\hat e_{ij} \end{aligned} \]</p>
+        <p>이다(\(\hat e_{ij}\perp\mathbf{N}_f\)). \(g\)는 edge를 \(j \to i\)로 지나므로 그 안쪽은 \(-\mathbf{N}_g\times\hat e_{ij}\) 방향이고, \(c_g - m_{ij} = -h_{g,ij}\,\mathbf{N}_g\times\hat e_{ij}\)(\(h_{g,ij} = \tfrac{\ell_{ij}}{2}\cot\beta_{ij}\))이다. 그러면 \(\mathbf{N}_g\times(m_{ij} - c_g) = h_{g,ij}\,\mathbf{N}_g\times(\mathbf{N}_g\times\hat e_{ij})\), 곧 \(-h_{g,ij}\,\hat e_{ij}\)이다. 조각 위에서 \(\mathbf{N}\)이 상수이므로 \(\int\mathbf{N}\times d\mathbf{x}\)는 \(\mathbf{N}\times(\text{끝점} - \text{시작점})\)이고, 두 조각을 더하면</p>
+        <p>\[ \begin{aligned} \int_{e^\star_{ij}}\mathbf{N}\times d\mathbf{x} &= -(h_{f,ij} + h_{g,ij})\,\hat e_{ij} = -\frac{\abs{e^\star_{ij}}}{\ell_{ij}}\,e_{ij} \\ &= -\tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})\,e_{ij} \end{aligned} \]</p>
+        <p>이다(<a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-10">Theorem 36.5.10</a>). \(j\)에 대해 더하고 부호를 바꾸면 <a href="#eq-40-3-4">(40.3.4)</a>이다. 마지막 문장: 조각을 face마다 묶으면, face \(f = (i, j, k)\) 안의 경로의 기여는 \(\mathbf{N}_f\times(m_{ik} - m_{ij}) = \tfrac12\mathbf{N}_f\times(\mathbf{x}_k - \mathbf{x}_j)\)이고, 이것은 경로가 \(f\)의 평면 안에서 어떻게 가든 양 끝점만으로 정해진다. 그러므로 그런 dual cell은 모두 circumcentric cell과 같은 값을 준다.</p>
+      </div>
+      <p>smooth surface에서는 <a href="#eq-40-3-1">(40.3.1)</a>과 Stokes's theorem에서 \(-\oint_{\partial C}\mathbf{N}\times d\mathbf{x} = -\int_Cd\mathbf{x}\wedge d\mathbf{N} = \int_C2H\mathbf{N}\,dA\)이다. 그래서 <a href="#eq-40-3-4">(40.3.4)</a>는 “mesh의 \(\int_{C_i}2H\mathbf{N}\,dA\)”를 smooth와 같은 경계 적분으로 계산한 값이 \((L\mathbf{x})_i\)라는 뜻이다. 증명의 마지막 문장에서, 그 값은 dual cell의 모양에 무관하고 edge의 중점만 본다. dual cell의 선택이 들어오는 곳은 점마다의 값 \((L\mathbf{x})_i/A_i\)의 분모뿐이다. 마지막 식의 \(\tfrac12\mathbf{N}_f\times(\mathbf{x}_k - \mathbf{x}_j)\)는 triangle의 넓이를 \(\mathbf{x}_i\)로 미분한 것과 같은 vector이고, 그래서 \(-(L\mathbf{x})_i\)가 mesh의 넓이의 gradient가 된다. 그 증명은 <a href="../41-discrete-curvature-variational/index.html#toc-41-2">Section 41.2</a> <span class="todo">[확인 필요: Chapter 41 미작성 — 참조 번호 확정 필요]</span>의 일이다.</p>
+
+      <div class="thm proposition" id="i-40-3-5">
+        <p><span class="thm-head">Proposition 40.3.5</span> <span class="thm-name">(the Laplace–Beltrami route gives the same vector)</span>.
+        interior edge \(e = ij\)(\(i \to j\)로 방향을 준다)의 circumcentric dual edge \(e^\star\)(<a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-1">Remark 36.5.1</a>의 방향) 위에서 \(\mathbf{N}\)을 각 조각의 face normal로 두면</p>
+        <p>\[ (\star_1d_0\mathbf{x})_e = -\int_{e^\star}\mathbf{N}\times d\mathbf{x} \]</p>
+        <p>이다. 곧 \(\star d\mathbf{x} = -\mathbf{N}\times d\mathbf{x}\)(<a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-6">Proposition 38.3.6</a>)가 mesh의 dual edge 위에서 정확히 성립한다. 따라서 \(\Delta = \star d\star d\)를 DEC로 이산화한 \((L\mathbf{x})_i = (\tilde d_1\star_1d_0\mathbf{x})_i\)(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-6">Definition 36.6.6</a>)와 <a href="#i-40-3-4">Theorem 40.3.4</a>의 \(-\oint_{\partial C_i}\mathbf{N}\times d\mathbf{x}\)는 같은 vector다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 왼쪽은 <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-14">Definition 36.5.14</a>에서 \(\tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})(\mathbf{x}_j - \mathbf{x}_i)\)이고, 오른쪽은 <a href="#i-40-3-4">Theorem 40.3.4</a>의 증명의 마지막 식에 부호를 바꾼 것이다. 둘째 문장: <a href="#eq-40-3-2">(40.3.2)</a>에서 \(\int_{C_i}\Delta\mathbf{x}\,dA = \oint_{\partial C_i}\star d\mathbf{x}\)를 DEC로 쓰면, \(\star_1d_0\mathbf{x}\)는 dual edge마다 \(\star d\mathbf{x}\)의 적분이고 \(\tilde d_1\)은 그것을 dual cell의 경계를 따라 더한다(discrete Stokes, <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-5">Proposition 36.5.5</a>). positive orientation의 \(\partial C_i\)는 vertex \(i\)에서 나가는 edge \(i \to j\)의 dual edge를 그 방향대로 지나므로(<a href="#i-40-3-4">Theorem 40.3.4</a>의 증명), \((\tilde d_1\star_1d_0\mathbf{x})_i\)는 \(\sum_j\tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})(\mathbf{x}_j - \mathbf{x}_i) = (L\mathbf{x})_i\)이고, 첫 문장에서 이것은 \(-\oint_{\partial C_i}\mathbf{N}\times d\mathbf{x}\)와 같다.</p>
+      </div>
+      <p>강의 슬라이드는 두 길(Stokes와 Laplace–Beltrami)이 같은 cotan formula에 닿는 것을 “remarkable”한 일로 소개한다 <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slides 23–24, <a class="cite" href="../../references.html#Cr">[Cr §5.2.1]</a>. <a href="#i-40-3-5">Proposition 40.3.5</a>가 그 이유다. smooth에서 두 적분이 같은 1-form \(\star d\mathbf{x} = -\mathbf{N}\times d\mathbf{x}\)의 경계 적분이었고(<a href="#eq-40-3-2">(40.3.2)</a>), mesh에서도 그 1-form의 dual edge 적분이 두 방법에서 같은 수이기 때문이다.</p>
+      <p>같은 vector를 bending angle로도 쓸 수 있다. 면마다 묶은 식을 edge마다 다시 묶으면 된다.</p>
+
+      <div class="thm proposition" id="i-40-3-6">
+        <p><span class="thm-head">Proposition 40.3.6</span> <span class="thm-name">(edge form of the mean curvature normal)</span>.
+        boundary가 없는 discrete immersion의 vertex \(i\)에서 edge \(ij\)의 bending angle을 \(\theta_{ij}\)(<a href="../39-surface-curvature/39-5-fundamental-theorem.html#i-39-5-5">Definition 39.5.5</a>), 두 face normal의 이등분 unit vector를 \(\bar{\mathbf{N}}_{ij} = (\mathbf{N}_f + \mathbf{N}_g)/\abs{\mathbf{N}_f + \mathbf{N}_g}\)라 하면</p>
+        <div class="equation" id="eq-40-3-5">
+        \[ (L\mathbf{x})_i = -\sum_{j\sim i}\ell_{ij}\sin\frac{\theta_{ij}}{2}\,\bar{\mathbf{N}}_{ij} \tag{40.3.5} \]
+        </div>
+        <p>이다. 특히 \((L\mathbf{x})_i\)에는 bending angle이 \(0\)인 edge(flat edge)가 기여하지 않는다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="#i-40-3-4">Theorem 40.3.4</a>의 증명의 마지막 문장에서</p>
+        <p>\[ \begin{aligned} -(L\mathbf{x})_i &= \sum_{f\ni i}\tfrac12\mathbf{N}_f\times(\mathbf{x}_k - \mathbf{x}_j) \\ &= \sum_{f\ni i}\big(\tfrac12\mathbf{N}_f\times e_{ik} - \tfrac12\mathbf{N}_f\times e_{ij}\big) \end{aligned} \]</p>
+        <p>이다(\(f = (i, j, k)\)). edge \(ij\)는 그것을 \(i \to j\)로 지나는 face \(f\)에서 \(-\tfrac12\mathbf{N}_f\times e_{ij}\)로, \(j \to i\)로 지나는 face \(g = (i, l, j)\)에서 \(+\tfrac12\mathbf{N}_g\times e_{ij}\)로 한 번씩 나오므로 \(-(L\mathbf{x})_i = \sum_j\tfrac{\ell_{ij}}{2}(\mathbf{N}_g - \mathbf{N}_f)\times\hat e_{ij}\)이다. <a href="../39-surface-curvature/39-5-fundamental-theorem.html#i-39-5-5">Definition 39.5.5</a>에서 \(\mathbf{N}_g = R(\hat e_{ij}, \theta)\mathbf{N}_f\), 곧 \(\mathbf{N}_g = \cos\theta\,\mathbf{N}_f + \sin\theta\,\hat e_{ij}\times\mathbf{N}_f\)(\(\theta = \theta_{ij}\))이다. \(w = \hat e_{ij}\times\mathbf{N}_f\)라 하면 \(\mathbf{N}_f\times\hat e_{ij} = -w\), \(w\times\hat e_{ij} = \mathbf{N}_f\)이므로</p>
+        <p>\[ \begin{aligned} (\mathbf{N}_g - \mathbf{N}_f)\times\hat e_{ij} &= (1 - \cos\theta)\,w + \sin\theta\,\mathbf{N}_f \\ &= 2\sin\tfrac\theta2\big(\cos\tfrac\theta2\,\mathbf{N}_f + \sin\tfrac\theta2\,w\big) \end{aligned} \]</p>
+        <p>이다. 괄호는 \(R(\hat e_{ij}, \tfrac\theta2)\mathbf{N}_f\), 곧 \(\mathbf{N}_f\)와 \(\mathbf{N}_g\)의 이등분 unit vector \(\bar{\mathbf{N}}_{ij}\)다(\(\abs\theta \lt \pi\)라 \(\mathbf{N}_f + \mathbf{N}_g \neq 0\)). 더하고 부호를 바꾸면 <a href="#eq-40-3-5">(40.3.5)</a>이다.</p>
+      </div>
+      <p><a href="#eq-40-3-5">(40.3.5)</a>에서 \(\ell_{ij}\sin(\theta_{ij}/2)\)는 edge 하나가 내는 mean curvature의 크기다. Chapter 32에서 plane curve의 꺾인 vertex가 길이의 gradient로 \(\kappa^B = 2\sin(\theta/2)\)를 냈던 것과 같은 꼴이다(<a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-6">Proposition 32.3.6</a>). Section 40.4의 Steiner formula는 같은 edge에 \(\tfrac12\ell_{ij}\theta_{ij}\)를 준다. curve에서 turning angle \(\kappa^A = \theta\)와 \(\kappa^B\)가 달랐던 것처럼, 두 정의는 \(\theta\)가 작을 때만 같다.</p>
+
+      <div class="thm example" id="i-40-3-7">
+        <p><span class="thm-head">Example 40.3.7</span> <span class="thm-name">(the running examples)</span>.
+        (a) unit sphere의 <code>icosphere(3)</code>에서 \((L\mathbf{x})_i/A_i + 2\mathbf{x}_i\)의 성분은 모두 절댓값이 \(0.0150\) 이하이다(mixed area. icosphere에는 obtuse triangle이 없어 circumcentric area와 같다). level 1에서는 반올림 오차 수준이고, level 2–4에서 \(0.0284, 0.0150, 0.0076\)으로 준다. 이 수는 <a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-6">Example 38.6.6</a>의 \(\Delta_hz\)와 같은 계산이다. (b) octahedron의 vertex \(e_3\)에서 \((L\mathbf{x})_i = -\tfrac{4}{\sqrt3}e_3\)이다(<a href="#ex-40-3-1">Exercise 40.3.1</a>). (c) unit cube의 corner \((1, 1, 1)\)에서는 대각선을 어떻게 긋든 \((L\mathbf{x})_i = -(1, 1, 1)\)이다. <a href="#eq-40-3-5">(40.3.5)</a>에서 대각선은 \(\theta = 0\)이라 빠지고, cube의 edge 셋이 \(\ell\sin\tfrac\pi4\cdot\bar{\mathbf{N}} = \tfrac{1}{\sqrt2}\cdot\tfrac{1}{\sqrt2}(1, 1, 0)\) 등을 주기 때문이다. cotan weight는 대각선의 방향에 따라 바뀌지만 합은 바뀌지 않는다. (d) saddle \(z = x^2 - y^2\)의 grid mesh에서 원점의 \((L\mathbf{x})_i\)는 정확히 \(0\)이다(\(H = 0\)). (e) <code>torus_mesh(2, 0.8, 24, 48)</code>에서 \(H_i = \inner{(L\mathbf{x})_i}{\mathbf{N}_i}/(2A_i)\)(\(\mathbf{N}_i\)는 바깥쪽 area-weighted vertex normal)는 정확한 \(H(u)\)와 \(0.0029\) 안에서 같다(<a href="#ex-40-3-6">Exercise 40.3.6</a>).</p>
+        <p class="verified">Verification: <code>verify/v-40-3-curvature-normals.py</code></p>
+      </div>
+
+      <div class="thm nonexample" id="i-40-3-8">
+        <p><span class="thm-head">Non-example 40.3.8</span> <span class="thm-name">(the uniform Laplacian)</span>.
+        cotan weight 대신 이웃의 평균과의 차이 \(\tfrac{1}{\deg i}\sum_j\mathbf{x}_j - \mathbf{x}_i\)(uniform Laplacian, <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-smoothing">Section 31.3</a>)를 쓰면 mean curvature normal이 되지 않는다. \([0, 1]^2\)의 \(7\times7\) planar grid에서 interior vertex를 \(\pm0.04\)까지 무작위로 옮기면(평면 안에서, seed 2), surface는 평면이라 \(H = 0\)인데 uniform Laplacian은 interior vertex에서 길이가 \(0.057\)까지인 평면 방향의 vector를 준다. \((L\mathbf{x})_i\)는 \(10^{-15}\) 이하로 \(0\)이다. cotan weight가 \(-0.36\)인 edge가 있어도 그렇다(affine 함수를 정확히 재현하는 linear precision, <a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-11">Proposition 36.6.11</a>(b)). uniform weight는 metric을 보지 않으므로, 평평한 mesh의 vertex를 평면 안에서 움직이는 것을 “휘었다”고 잘못 읽는다.</p>
+        <p class="verified">Verification: <code>verify/v-40-3-curvature-normals.py</code></p>
+      </div>
+
+      <p>이제 셋째 form \(\tfrac12d\mathbf{N}\wedge d\mathbf{N} = d(\tfrac12\mathbf{N}\wedge d\mathbf{N})\)이다. \(\mathbf{N}\times d\mathbf{N}\)은 \(\mathbf{N}\)이 변하는 곳에서만 \(0\)이 아니다. \(\partial C_i\)의 face 조각 위에서는 \(\mathbf{N}\)이 상수라 기여가 없고, 모든 기여는 \(\partial C_i\)가 edge를 건너는 점에서 나온다. 그곳에서 \(\mathbf{N}\)이 \(\mathbf{N}_f\)에서 \(\mathbf{N}_g\)로 갑자기 바뀌는데, 그 사이를 Section 38.5처럼 대원 호로 이어 준다(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-2">Proposition 38.5.2</a>). edge를 아주 조금 둥글게 깎은 surface의 normal이 지나는 길이다 <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slide 25. mean curvature normal에서는 이 보간이 필요 없었다. 건너는 점에서 \(d\mathbf{x} = 0\)이기 때문이다.</p>
+
+      <div class="thm definition" id="i-40-3-9">
+        <p><span class="thm-head">Definition 40.3.9</span> <span class="thm-name">(discrete Gauss curvature normal)</span>.
+        boundary가 없는 discrete immersion의 vertex \(i\)에서</p>
+        <div class="equation" id="eq-40-3-6">
+        \[ \begin{aligned} (K\mathbf{N})_i &:= \frac12\sum_{j\sim i}\frac{\theta_{ij}}{\ell_{ij}}(\mathbf{x}_i - \mathbf{x}_j) \\ &= -\frac12\sum_{j\sim i}\theta_{ij}\,\hat e_{ij} \end{aligned} \tag{40.3.6} \]
+        </div>
+        <p>를 \(i\)의 <dfn>discrete Gauss curvature normal</dfn>(이산 가우스 곡률 법벡터)이라 한다. integrated 값이고, 점마다의 값은 \((K\mathbf{N})_i/A_i\)다.</p>
+      </div>
+
+      <div class="thm theorem" id="i-40-3-10">
+        <p><span class="thm-head">Theorem 40.3.10</span> <span class="thm-name">(the Gauss curvature normal from Stokes)</span>.
+        (a) dual cell \(C_i\)의 경계가 face 안을 지나며 각 edge \(ij\)를 한 번 가로지르고, 그 위의 \(\mathbf{N}\)이 face 안에서는 face normal이며 edge를 건널 때 두 face normal을 잇는 짧은 대원 호를 따라간다고 하자. 그러면 \(\tfrac12\oint_{\partial C_i}\mathbf{N}\times d\mathbf{N} = (K\mathbf{N})_i\)이다. (b) \(i\)가 convex vertex(Section 40.1)이면 \((K\mathbf{N})_i = \int_{P_i}u\,dA(u)\)이다. 여기서 \(P_i \subseteq S^2\)는 Gauss image(<a href="40-1-angle-defect.html#i-40-1-7">Proposition 40.1.7</a>)이고 \(u\)는 \(S^2\)의 점이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) face 조각 위에서는 \(d\mathbf{N} = 0\)이다. positive orientation으로 \(\mathbf{x}_i\) 둘레를 돌 때 edge \(ij\)에서 \(g\)(\(j \to i\)로 지나는 face)에서 \(f\)(\(i \to j\)로 지나는 face)로 넘어간다(<a href="#i-40-3-4">Theorem 40.3.4</a>의 증명). <a href="../39-surface-curvature/39-5-fundamental-theorem.html#i-39-5-5">Definition 39.5.5</a>에서 \(\mathbf{N}_g = R(\hat e_{ij}, \theta)\mathbf{N}_f\)이므로 \(\mathbf{N}_f = R(\hat e_{ij}, -\theta)\mathbf{N}_g\)이고, 대원 호는 \(\mathbf{N}(t) = R(\hat e_{ij}, -t)\mathbf{N}_g\), \(t\)는 \(0\)에서 \(\theta\)까지(\(\theta \lt 0\)이면 감소)다. \(\mathbf{N}'(t) = -\hat e_{ij}\times\mathbf{N}(t)\)이고 \(\mathbf{N}\perp\hat e_{ij}\)이므로 \(\mathbf{N}\times\mathbf{N}' = -\mathbf{N}\times(\hat e_{ij}\times\mathbf{N}) = -\hat e_{ij}\)이다. 그러므로 그 호 위의 적분은 \(\int_0^\theta(-\hat e_{ij})\,dt = -\theta_{ij}\hat e_{ij}\)이고, \(j\)에 대해 더해 \(\tfrac12\)을 곱하면 <a href="#eq-40-3-6">(40.3.6)</a>이다. (b) unit sphere 자체에 <a href="#eq-40-3-1">(40.3.1)</a>의 셋째 식을 쓰면(\(\mathbf{x} = \mathbf{N} = u\), \(K = 1\)) \(\tfrac12du\wedge du = u\,dA\)이고, \(d(\tfrac12u\wedge du) = \tfrac12du\wedge du\)이다. convex spherical polygon \(P_i\)는 중심 방향의 tangent plane으로의 central projection으로 평면의 convex polygon과 대응하므로 Stokes's theorem을 쓸 수 있고, \(\int_{P_i}u\,dA = \tfrac12\oint_{\partial P_i}u\times du\)이다. <a href="40-1-angle-defect.html#i-40-1-7">Proposition 40.1.7</a>(a)에서 \(\partial P_i\)를 positive orientation으로 도는 것은 \(\mathbf{N}_1 \to \mathbf{N}_2 \to \cdots\)이고, 이것은 (a)에서 \(\partial C_i\)를 따라 \(\mathbf{N}\)이 지나는 길과 같다. 그러므로 두 경계 적분이 같다.</p>
+      </div>
+      <p>(b)는 Section 40.1과 짝을 이룬다. Gauss image \(P_i\)의 넓이는 angle defect \(\delta_i\)였고, \(P_i\)의 vector area는 Gauss curvature normal이다. smooth surface에서 \(\int_RK\mathbf{N}\,dA\)는 Gauss image의 vector area이고 \(\int_RK\,dA\)는 그 넓이인 것과 같다. vector area의 크기는 넓이보다 작으므로 \(\abs{(K\mathbf{N})_i} \le \delta_i\)이고, \(P_i\)가 작을수록 비가 \(1\)에 가깝다(unit sphere의 icosphere에서 level 1, 4의 최소 비가 \(0.975\), \(0.9995\)).</p>
+
+      <div class="thm example" id="i-40-3-11">
+        <p><span class="thm-head">Example 40.3.11</span> <span class="thm-name">(Gauss curvature normals)</span>.
+        (a) unit cube의 corner \((1, 1, 1)\)에서 bending angle이 \(\tfrac\pi2\)인 edge 셋의 \(\mathbf{x}_i - \mathbf{x}_j\)가 \(e_1, e_2, e_3\)이고(대각선은 \(\theta = 0\)), \((K\mathbf{N})_i = \tfrac\pi4(1, 1, 1)\)이다. 크기 \(\tfrac{\sqrt3\pi}{4} = 1.360\)은 \(\delta_i = \tfrac\pi2 = 1.571\)보다 작다. 이것은 octant triangle의 vector area \(\int u\,dA\)와 같다(<a href="#ex-40-3-2">Exercise 40.3.2</a>). (b) unit sphere의 <code>icosphere(level)</code>에서 \((K\mathbf{N})_i/A_i - \mathbf{x}_i\)의 성분의 절댓값의 최댓값은 level 1–4에서 \(0.0527, 0.0174, 0.0064, 0.0028\)이다. (c) <a href="40-1-angle-defect.html#fig-40-1-1">Figure 40.1.1</a>의 convex star에서 \((K\mathbf{N})_i = (-0.0109, -0.0020, 0.7777)\)이고 \(\delta_i = 0.8363\)이다. saddle star(<code>saddle_star(0.35)</code>)에서는 bending angle이 \(\pm1.0394\)로 번갈아 나오고 \((K\mathbf{N})_i = (0, 0, -1.0301)\)로 아래를 향한다. 이 vertex의 \(\delta_i = -1.0837 \lt 0\)이고 area normal은 위를 향하므로, \(K\mathbf{N}\)이 \(K \lt 0\)일 때 \(\mathbf{N}\)의 반대쪽인 것과 맞는다. (d) saddle grid의 원점에서 \((K\mathbf{N})_i/A_i\)는 \(17\times17\)에서 \(-3.949\,e_3\), \(33\times33\)에서 \(-3.987\,e_3\)으로 \(K\mathbf{N} = -4e_3\)에 다가간다.</p>
+        <p class="verified">Verification: <code>verify/v-40-3-curvature-normals.py</code></p>
+      </div>
+
+      <p><a href="#fig-40-3-1">Figure 40.3.1</a>은 세 normal을 한 vertex에서 비교한다. 왼쪽 (a)는 <a href="40-1-angle-defect.html#fig-40-1-1">Figure 40.1.1</a>의 convex star다. 가는 파란 화살표 여섯 개가 \(\tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})(\mathbf{x}_j - \mathbf{x}_i)\)이고, 그 합이 주황 화살표 \((L\mathbf{x})_i\)(절반 길이)다. 주황은 아래, 곧 star가 휘어 들어가는 쪽을 향한다. 주홍 \(\mathbf{A}_i\)(vector area)와 초록 \((K\mathbf{N})_i\)는 위를 향한다. 오른쪽 (b)의 saddle star에서는 파란 여섯 개가 대칭으로 상쇄되어 \((L\mathbf{x})_i = 0\)이고, 초록 \((K\mathbf{N})_i\)가 주홍 \(\mathbf{A}_i\)와 반대로 아래를 향한다. mean curvature normal은 normal의 선택에 무관한 “휘어 들어가는 쪽”이고, Gauss curvature normal은 \(K\)의 부호에 따라 normal과 같은 쪽이거나 반대쪽이다.</p>
+      <figure class="dg-figure" id="fig-40-3-1">
+        <img src="figures/fig-40-3-1-three-normals.svg" alt="두 패널. (a) 위로 볼록한 회색 star의 꼭짓점에서 주홍 화살표와 초록 화살표가 나란히 위로, 주황 화살표가 아래로 나가고, 가는 파란 화살표 여섯 개가 edge를 따라 나간다. (b) 높낮이가 번갈아 바뀌는 saddle 모양의 star의 꼭짓점에서 주홍 화살표는 위로, 초록 화살표는 아래로 나가고, 파란 화살표 여섯 개가 edge를 따라 대칭으로 나간다. (L x)_i = 0이라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 40.3.1.</span>
+        <em>무엇을</em>: 한 vertex의 세 discrete curvature normal. (a) <a href="40-1-angle-defect.html#fig-40-1-1">Figure 40.1.1</a>의 convex star(\(\delta_i = 0.836\)), (b) saddle star \(\mathbf{x}_i = 0\), link \((\cos t_k, \sin t_k, 0.35(-1)^k)\)(\(\delta_i = -1.084\)).
+        <em>읽는 법</em>: 주홍은 discrete vector area \(\mathbf{A}_i = \tfrac13\sum A_f\mathbf{N}_f\), 주황은 \((L\mathbf{x})_i\)를 절반 길이로 그린 것, 초록은 \((K\mathbf{N})_i\), 가는 파랑은 \(\tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})(\mathbf{x}_j - \mathbf{x}_i)\)(실제 길이)다. 주홍과 초록은 겹치지 않도록 \(\mathbf{x}_i\)에서 옆으로 \(0.07\sqrt2\)씩 옮겨 그렸다.
+        <em>볼 것</em>: (a) \(\mathbf{A}_i = (-0.026, 0.026, 0.770)\), \((L\mathbf{x})_i = (0.035, -0.022, -1.623)\), \((K\mathbf{N})_i = (-0.011, -0.002, 0.778)\). 파란 여섯 개를 이어 붙이면 주황의 두 배가 된다. (b) \(\mathbf{A}_i = (0, 0, 0.866)\), \((L\mathbf{x})_i = 0\), \((K\mathbf{N})_i = (0, 0, -1.030)\).
+        <em>본문과의 연결</em>: <a href="#i-40-3-4">Theorem 40.3.4</a>, <a href="#i-40-3-10">Theorem 40.3.10</a>, <a href="#i-40-3-11">Example 40.3.11</a>(c).</figcaption>
+      </figure>
+
+      <p><a href="#fig-40-3-2">Figure 40.3.2</a>는 같은 비교를 torus 전체에서 한다. 두 패널 모두 <code>torus_mesh(2, 0.8, 24, 48)</code>의 meridian \(v = 0\) 위의 vertex 24개를 \(xz\) 평면에서 본 것이고, 검은 다각형이 관의 단면이다. 왼쪽 (a)의 주황 화살표 \((L\mathbf{x})_i/A_i\)는 모두 관의 중심(회색 점)을 향한다. 바깥쪽(\(x = 2.8\))에서 길이 \(1.606\), 안쪽(\(x = 1.2\))에서 \(0.422\)이고, 이것은 \(2\abs{H}\)의 \(1.607\), \(0.417\)과 맞는다. 오른쪽 (b)의 초록 화살표 \((K\mathbf{N})_i/A_i\)는 바깥쪽 절반에서 바깥으로, 안쪽 절반에서 안으로 향하고, 꼭대기와 바닥(회색 원, \(K = 0\))에서 \(0\)이 된다. Chapter 39의 <a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#fig-39-3-1">Figure 39.3.1</a>에서 \(H\mathbf{N}\)이 방향을 바꾸지 않고 \(K\)가 부호를 바꾸던 것이 mesh에서 그대로 보인다.</p>
+      <figure class="dg-figure" id="fig-40-3-2">
+        <img src="figures/fig-40-3-2-torus-normals.svg" alt="두 패널. 각 패널에 xz 평면의 원(관의 단면)과 그 위의 점 24개, 가운데 회색 점이 있다. (a) 주황 화살표들이 모두 원의 중심 쪽을 향하고 오른쪽(바깥쪽)에서 길다. (b) 초록 화살표들이 오른쪽 절반에서는 바깥으로, 왼쪽 절반에서는 안으로 향하고, 위와 아래의 회색 원 근처에서는 거의 없다.">
+        <figcaption><span class="fig-head">Figure 40.3.2.</span>
+        <em>무엇을</em>: <code>torus_mesh(2, 0.8, 24, 48)</code>(face는 바깥쪽)의 meridian \(v = 0\) 위의 vertex 24개에서 (a) 점마다의 mean curvature normal \((L\mathbf{x})_i/A_i\), (b) 점마다의 Gauss curvature normal \((K\mathbf{N})_i/A_i\). \(A_i\)는 mixed area다.
+        <em>읽는 법</em>: 검은 다각형이 meridian, 회색 점이 관의 중심 \((2, 0)\), 회색 원이 \(K = 0\)인 \(u = \pm\tfrac\pi2\)의 점이다. (a)의 주황 화살표는 실제 길이의 \(\tfrac14\), (b)의 초록 화살표는 \(\tfrac12\)로 그렸다.
+        <em>볼 것</em>: (a)의 화살표는 모두 중심을 향하고, 정확한 \(2H\mathbf{N}\)(\(H = -\tfrac{R + 2r\cos u}{2r(R + r\cos u)}\), 바깥쪽 \(\mathbf{N}\))과 성분마다 \(0.0085\) 안에서 같다. (b)는 \(u = 0\)에서 바깥으로 \(0.448\)(\(K = 0.446\)), \(u = \pi\)에서 안으로 \(1.030\)(\(K = -1.042\))이고, 정확한 \(K\mathbf{N}\)과 성분마다 \(0.0112\) 안에서 같다.
+        <em>본문과의 연결</em>: <a href="#i-40-3-4">Theorem 40.3.4</a>, <a href="#i-40-3-10">Theorem 40.3.10</a>, <a href="#i-40-3-7">Example 40.3.7</a>(e). 전체 torus를 돌려 볼 수 있는 <a href="figures/fig-40-3-2-torus-normals-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: three curvature normals</p>
+        <ul>
+          <li><strong>area normal</strong>: smooth \(\tfrac12d\mathbf{x}\wedge d\mathbf{x} = \mathbf{N}\,dA\), 경계 위의 1-form \(\tfrac12\mathbf{x}\times d\mathbf{x}\), discrete \(\mathbf{A}_i = \tfrac13\sum_{f\ni i}A_f\mathbf{N}_f\)(barycentric cell). 경계 위에서 위치만 쓴다.</li>
+          <li><strong>mean curvature normal</strong>: smooth \(-d\mathbf{x}\wedge d\mathbf{N} = 2H\mathbf{N}\,dA\), 경계 위의 1-form \(-\mathbf{N}\times d\mathbf{x} = \star d\mathbf{x}\), discrete \((L\mathbf{x})_i = \tfrac12\sum_jw_{ij}(\mathbf{x}_j - \mathbf{x}_i)\)(\(w_{ij} = \cot\alpha_{ij} + \cot\beta_{ij}\)). 경계 위에서 face normal을 쓴다.</li>
+          <li><strong>Gauss curvature normal</strong>: smooth \(\tfrac12d\mathbf{N}\wedge d\mathbf{N} = K\mathbf{N}\,dA\), 경계 위의 1-form \(\tfrac12\mathbf{N}\times d\mathbf{N}\), discrete \((K\mathbf{N})_i = \tfrac12\sum_j\tfrac{\theta_{ij}}{\ell_{ij}}(\mathbf{x}_i - \mathbf{x}_j)\). 경계 위에서 face normal과 edge를 건너는 대원 호를 쓴다.</li>
+        </ul>
+        <p><strong>무엇을 보존하는가</strong>: Stokes's theorem. 세 vector는 smooth의 세 2-form을 dual cell 위에서 적분한 값을, smooth와 같은 경계 적분으로 정확히 계산한 것이다. 그래서 닫힌 mesh에서 \(\sum_i(L\mathbf{x})_i = 0\), \(\sum_i(K\mathbf{N})_i = 0\)이 smooth의 \(\int2H\mathbf{N}\,dA = \int K\mathbf{N}\,dA = 0\)처럼 정확히 성립한다(<a href="#ex-40-3-4">Exercise 40.3.4</a>). mean curvature normal은 경계가 edge의 중점을 지나기만 하면 dual cell의 모양에 무관하고, Laplace–Beltrami operator의 DEC 판과도 같다(<a href="#i-40-3-5">Proposition 40.3.5</a>). <strong>무엇을 잃는가</strong>: 점마다의 값과 정확한 방향. \(A_i\)로 나눈 값은 dual area의 선택에 달려 있고, \((L\mathbf{x})_i\)에는 접선 성분이 조금 섞인다(torus mesh에서 크기의 \(0.75\%\)까지). area normal의 방향, \((L\mathbf{x})_i\)의 방향, \((K\mathbf{N})_i\)의 방향은 서로 조금씩 다르다.</p>
+      </aside>
+
+      <div class="thm remark" id="i-40-3-12">
+        <p><span class="thm-head">Remark 40.3.12</span> <span class="thm-name">(scalar curvatures from vectors)</span>.
+        vector를 vertex normal \(\mathbf{N}_i\)에 사영하면 scalar curvature가 나온다. \(\inner{(L\mathbf{x})_i}{\mathbf{N}_i}/(2A_i)\)는 \(H_i\)의 한 정의이고(<code>dgdec.mean_curvature</code>), \(\inner{(K\mathbf{N})_i}{\mathbf{N}_i}/A_i\)는 angle defect와 다른 \(K_i\)의 정의다(\(\abs{(K\mathbf{N})_i} \le \delta_i\)이므로 조금 작다). 어느 normal에 사영하느냐에 따라 값과 부호가 달라진다. 여러 정의의 비교는 <a href="../41-discrete-curvature-variational/index.html#toc-41-3">Section 41.3</a> <span class="todo">[확인 필요: Chapter 41 미작성 — 참조 번호 확정 필요]</span>에서 한다. 세 vector가 volume, area, total mean curvature의 gradient라는 것도 Chapter 41이 증명한다.</p>
+      </div>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: the three curvature normals</p>
+<pre id="code-40-3-1"><code>import numpy as np
+import dgmesh as dm
+def curvature_normals(V, F):
+    """discrete vector area A_i (barycentric), mean curvature normal (L x)_i, Gauss curvature normal (K N)_i"""
+    cross = np.cross(V[F[:, 1]] - V[F[:, 0]], V[F[:, 2]] - V[F[:, 0]])      # 2 A_f N_f
+    An, Lx, KN = np.zeros_like(V), np.zeros_like(V), np.zeros_like(V)
+    for c in range(3):
+        np.add.at(An, F[:, c], cross / 6)                                      # (1/3) A_f N_f, Proposition 38.5.5
+    for (i, j), w in dm.cotan_weights(V, F).items():                           # w = (cot a + cot b) / 2
+        Lx[i] += w * (V[j] - V[i])
+        Lx[j] += w * (V[i] - V[j])
+    for (i, j), (theta, ell) in dm.edge_bending_angles(V, F).items():          # Definition 39.5.5
+        KN[i] += 0.5 * theta * (V[i] - V[j]) / ell
+        KN[j] += 0.5 * theta * (V[j] - V[i]) / ell
+    return An, Lx, KN
+V, F = dm.icosphere(3)
+An, Lx, KN = curvature_normals(V, F)
+A = dm.mass_voronoi(V, F)
+cos = lambda P: np.sum(P * V, 1) / np.linalg.norm(P, axis=1)                  # V[i] is the outward unit normal
+print(f"icosphere(3): |(L x)_i / A_i + 2 x_i| &lt;= {np.abs(Lx / A[:, None] + 2 * V).max():.4f}, "
+      f"|(K N)_i / A_i - x_i| &lt;= {np.abs(KN / A[:, None] - V).max():.4f}")
+print(f"  min cosine with x_i: A_i {cos(An).min():.6f}, -(L x)_i {(-cos(Lx)).min():.6f}, (K N)_i {cos(KN).min():.6f}")
+print(f"  sums over the closed mesh vanish: {np.abs(Lx.sum(0)).max() &lt; 1e-12} {np.abs(KN.sum(0)).max() &lt; 1e-12}")
+s = np.linspace(-0.5, 0.5, 33)
+V, F = dm.grid_mesh(s, s)
+V[:, 2] = V[:, 0] ** 2 - V[:, 1] ** 2                                         # the saddle z = x^2 - y^2
+o = int(np.argmin(np.linalg.norm(V, axis=1)))
+An, Lx, KN = curvature_normals(V, F)
+print(f"saddle origin: (L x)_i = 0: {np.abs(Lx[o]).max() &lt; 1e-12}, (K N)_i / A_i = {np.round(KN[o] / dm.mass_voronoi(V, F)[o], 4) + 0.0}")
+</code></pre>
+<pre id="out-40-3-1"><code>icosphere(3): |(L x)_i / A_i + 2 x_i| &lt;= 0.0150, |(K N)_i / A_i - x_i| &lt;= 0.0064
+  min cosine with x_i: A_i 0.999930, -(L x)_i 0.999965, (K N)_i 0.999985
+  sums over the closed mesh vanish: True True
+saddle origin: (L x)_i = 0: True, (K N)_i / A_i = [ 0.     0.    -3.987]</code></pre>
+        <p><code>curvature_normals</code>는 표의 셋째 줄을 그대로 쓴다. vector area는 face마다 \(2A_f\mathbf{N}_f\)의 \(\tfrac16\)을 세 vertex에 준다. mean curvature normal은 edge마다 cotan weight \(w_{ij}\)(<code>dgmesh.cotan_weights</code>)로 \(w_{ij}(\mathbf{x}_j - \mathbf{x}_i)\)를 \(i\)에, 그 반대를 \(j\)에 더한다. Gauss curvature normal은 interior edge마다 bending angle(<code>dgmesh.edge_bending_angles</code>, <a href="../39-surface-curvature/39-5-fundamental-theorem.html#i-39-5-5">Definition 39.5.5</a>와 같은 부호)로 <a href="#eq-40-3-6">(40.3.6)</a>의 항을 더한다. 출력의 첫 줄은 unit sphere에서 \((L\mathbf{x})_i \approx -2\mathbf{x}_iA_i\)(안쪽)와 \((K\mathbf{N})_i \approx +\mathbf{x}_iA_i\)(바깥쪽)를 확인하고(두 수는 차이의 성분의 절댓값의 최댓값이다), 둘째 줄은 세 vector가 모두 normal 방향 \(\pm\mathbf{x}_i\)와 \(10^{-4}\) 수준으로 평행함을 보인다. 넷째 줄은 saddle의 원점에서 \(H = 0\), \(K\mathbf{N} \approx -4e_3\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-40-3-curvature-normals.py</code>가 이 코드를 그대로 실행하고 출력과 비교하며, 경계 적분(<a href="#eq-40-3-4">(40.3.4)</a>, <a href="#i-40-3-10">Theorem 40.3.10</a>)을 dual cell의 조각마다 따로 계산해 같음을 확인한다.</p>
+      </aside>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: Section 31.3 and the Tour</p>
+        <p>Tour의 <a href="../00-tour/0-4-curvature.html#eq-0-4-3">(0.4.3)</a>은 \(\Delta_S\mathbf{x} = 2H\mathbf{N}\)과 그 cotan 근사를 소개했고, Chapter 31은 cotan Laplacian을 넓이의 gradient로 얻어 mean curvature normal로 썼다(<a href="../31-meshes/31-3-cotangent-laplacian.html#sec-mean-curvature-normal">Section 31.3</a>, <a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-5">Proposition 31.3.5</a>). 이 절이 새로 한 것은 같은 vector를 적분의 관점에서 얻은 것이다. \(2H\mathbf{N}\,dA\)를 \(-d\mathbf{x}\wedge d\mathbf{N}\)으로 쓰고 dual cell에서 Stokes's theorem을 쓰면 cotan formula가 나오고, Laplace–Beltrami operator의 DEC 판도 dual edge에서 같은 수를 준다. 또 Gaussian curvature에도 vector 판이 있고, 그것이 Gauss image의 vector area라는 것을 보였다.</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Track 1: <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-mean-curvature-normal">Section 31.3</a>(<a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-5">Proposition 31.3.5</a>), Tour <a href="../00-tour/0-4-curvature.html">Section 0.4</a>.</li>
+          <li>mixed Voronoi area와 mesh 위의 curvature 연산자: <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>.</li>
+          <li>노트와 강의: <a class="cite" href="../../references.html#Cr">[Cr §5.2.1]</a>, <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slides 19–26.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(\tfrac12d\mathbf{x}\wedge d\mathbf{x} = \mathbf{N}\,dA\), \(d\mathbf{x}\wedge d\mathbf{N} = -2H\mathbf{N}\,dA\), \(\tfrac12d\mathbf{N}\wedge d\mathbf{N} = K\mathbf{N}\,dA\)이다(<a href="#i-40-3-1">Proposition 40.3.1</a>). 여기서 \(\Delta\mathbf{x} = 2H\mathbf{N}\)이 한 줄로 나온다(<a href="#eq-40-3-2">(40.3.2)</a>).</li>
+        <li>dual cell의 경계에서 \(-\oint\mathbf{N}\times d\mathbf{x}\)를 계산하면 cotan formula \((L\mathbf{x})_i\)가 나오고, 값은 경계가 edge의 중점을 지나기만 하면 dual cell에 무관하다(<a href="#i-40-3-4">Theorem 40.3.4</a>). DEC Laplacian도 같은 값이다(<a href="#i-40-3-5">Proposition 40.3.5</a>).</li>
+        <li>\((L\mathbf{x})_i = -\sum_j\ell_{ij}\sin(\theta_{ij}/2)\bar{\mathbf{N}}_{ij}\)이고 flat edge는 기여하지 않는다(<a href="#i-40-3-6">Proposition 40.3.6</a>).</li>
+        <li>normal을 edge에서 대원 호로 이어 \(\tfrac12\oint\mathbf{N}\times d\mathbf{N}\)을 계산하면 \((K\mathbf{N})_i = \tfrac12\sum_j\theta_{ij}(\mathbf{x}_i - \mathbf{x}_j)/\ell_{ij}\)이고, convex vertex에서 이것은 Gauss image의 vector area다(<a href="#i-40-3-10">Theorem 40.3.10</a>).</li>
+        <li>이 study set에서 \((L\mathbf{x})_i\)는 볼록한 곳에서 안쪽을 향한다. Crane의 \(\Delta f = 2HN\)은 이 study set의 \(H\)로 읽어야 맞고, slide 25의 \((KN)_i\)는 부호가 반대다(Conventions 상자).</li>
+      </ul>
+      <p class="next">다음 절에서는 전혀 다른 출발점에서 같은 curvature들을 다시 얻는다. surface를 normal 방향으로 \(\varepsilon\)만큼 부풀리면 넓이와 부피가 \(\varepsilon\)의 다항식이 되고(Steiner formula), convex polyhedron을 둥글게 부풀리면 그 다항식의 coefficient에서 bending angle과 angle defect가 나온다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-40-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 40.3.1</span> <span class="level">★</span>
+        octahedron \(\mathbf{x}_m = \pm e_k\)의 vertex \(e_3\)에서 \((L\mathbf{x})_i\)를 (a) <a href="#eq-40-3-3">(40.3.3)</a>, (b) <a href="#eq-40-3-5">(40.3.5)</a>로 각각 구하여라. (c) \((K\mathbf{N})_i\)를 구하고 \(\delta_i\)와 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 모든 face가 정삼각형이라 모든 각이 \(\tfrac\pi3\)이고 \(\cot\tfrac\pi3 = \tfrac{1}{\sqrt3}\)이다. 이웃 넷 \(\pm e_1, \pm e_2\)에서 \((L\mathbf{x})_i = \tfrac12\sum_j\tfrac{2}{\sqrt3}(\mathbf{x}_j - e_3)\)이고, 이것은 \(\tfrac{1}{\sqrt3}(0 - 4e_3) = -\tfrac{4}{\sqrt3}e_3 = -2.3094\,e_3\)이다. (b) edge 길이는 \(\sqrt2\), bending angle은 \(\theta = \pi - \arccos(-\tfrac13) = \arccos\tfrac13\)이므로 \(\sin\tfrac\theta2 = \sqrt{(1 - \tfrac13)/2} = \tfrac{1}{\sqrt3}\)이다. edge \(e_3e_1\)의 두 face normal \((1, \pm1, 1)/\sqrt3\)의 이등분은 \((1, 0, 1)/\sqrt2\)이고, 네 edge의 이등분을 더하면 \((0, 0, 4)/\sqrt2\)이다. 따라서 \((L\mathbf{x})_i = -\sqrt2\cdot\tfrac{1}{\sqrt3}\cdot\tfrac{4}{\sqrt2}e_3 = -\tfrac{4}{\sqrt3}e_3\)로 같다. (c) \((K\mathbf{N})_i = \tfrac12\sum_j\tfrac{\theta}{\sqrt2}(e_3 - \mathbf{x}_j)\)이고, 이것은 \(\tfrac{\theta}{2\sqrt2}\cdot4e_3 = \sqrt2\arccos\tfrac13\,e_3 = 1.7408\,e_3\)이다. \(\delta_i = \tfrac{2\pi}{3} = 2.0944\)보다 작다. Gauss image(내각 \(\tfrac{2\pi}{3}\)인 spherical quadrilateral, <a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-3">Example 38.5.3</a>)가 작지 않아서 vector area와 넓이의 차이가 크다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-40-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 40.3.2</span> <span class="level">★</span>
+        꼭짓점이 \(e_1, e_2, e_3\)인 octant triangle \(T \subseteq S^2\)에서 \(\int_Tu\,dA(u)\)를 직접 적분해 \(\tfrac\pi4(1, 1, 1)\)임을 보이고, unit cube의 corner의 \((K\mathbf{N})_i\)와 같음을 확인하여라(<a href="#i-40-3-10">Theorem 40.3.10</a>(b)).</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>sphere의 표준 좌표, 곧 colatitude \(\theta\)와 longitude \(\varphi\)로 \(u = (\sin\theta\cos\varphi, \sin\theta\sin\varphi, \cos\theta)\), \(dA = \sin\theta\,d\theta\,d\varphi\), \(T = \{0 \le \theta, \varphi \le \tfrac\pi2\}\)이다. \(z\) 성분은 \(\int_0^{\pi/2}\!\int_0^{\pi/2}\cos\theta\sin\theta\,d\theta\,d\varphi = \tfrac\pi2\cdot\tfrac12 = \tfrac\pi4\)이고, \(x\) 성분은 \(\int_0^{\pi/2}\cos\varphi\,d\varphi\int_0^{\pi/2}\sin^2\theta\,d\theta = 1\cdot\tfrac\pi4\)이다. 대칭으로 \(y\) 성분도 \(\tfrac\pi4\)이다. cube의 corner \((1, 1, 1)\)에서는 <a href="#i-40-3-11">Example 40.3.11</a>(a)의 \(\tfrac12\cdot\tfrac\pi2\cdot(e_1 + e_2 + e_3) = \tfrac\pi4(1, 1, 1)\)이므로 같다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-40-3-3" data-level="2">
+        <p><span class="thm-head">Exercise 40.3.3</span> <span class="level">★★</span>
+        [<a class="cite" href="../../references.html#Cr">Cr §5.2.1</a> 변형] conformal coordinates(\(E = G = e^{2\mu}\), \(F = 0\))에서 Laplace–Beltrami operator는 \(\Delta u = e^{-2\mu}(u_{uu} + u_{vv})\)이다(<a href="../42-laplace-beltrami/42-1-laplacian-definitions.html#i-42-1-10">Proposition 42.1.10</a>(b)). (a) \(\mathbf{x}_{uu} + \mathbf{x}_{vv}\)의 접선 성분이 \(0\)이고 normal 성분이 \(2e^{2\mu}H\)임을 보여 \(\Delta\mathbf{x} = 2H\mathbf{N}\)을 다시 얻어라. (b) Mercator 좌표 \(\mathbf{x}(\varphi, t) = (\operatorname{sech}t\cos\varphi, \operatorname{sech}t\sin\varphi, \tanh t)\)의 unit sphere와 catenoid \((\cosh v\cos u, \cosh v\sin u, v)\)에서 직접 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(E = G\), \(F = 0\)을 미분하면 \(\inner{\mathbf{x}_{uu}}{\mathbf{x}_u} = \tfrac12E_u\), \(\inner{\mathbf{x}_{vv}}{\mathbf{x}_u} = F_v - \inner{\mathbf{x}_v}{\mathbf{x}_{uv}} = -\tfrac12G_u\)이므로 \(\inner{\mathbf{x}_{uu} + \mathbf{x}_{vv}}{\mathbf{x}_u} = \tfrac12(E - G)_u = 0\)이고, 같은 방법으로 \(\mathbf{x}_v\)와의 inner product도 \(0\)이다. normal 성분은 \(\inner{\mathbf{x}_{uu} + \mathbf{x}_{vv}}{\mathbf{N}} = L + N\)이고, <a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#eq-39-3-1">(39.3.1)</a>에서 \(H = \tfrac{EN + GL}{2EG} = \tfrac{L + N}{2e^{2\mu}}\)이다. 따라서 \(\Delta\mathbf{x} = e^{-2\mu}(L + N)\mathbf{N} = 2H\mathbf{N}\)이다. (b) Mercator: \((\operatorname{sech})'' = \operatorname{sech}(\tanh^2 - \operatorname{sech}^2)\), \((\tanh)'' = -2\operatorname{sech}^2\tanh\)이므로 \(\mathbf{x}_{\varphi\varphi} + \mathbf{x}_{tt} = -2\operatorname{sech}^2t\,\mathbf{x}\)이고, \(e^{2\mu} = \operatorname{sech}^2t\)로 나누면 \(\Delta\mathbf{x} = -2\mathbf{x}\)이다. 바깥쪽 \(\mathbf{N} = \mathbf{x}\), \(H = -1\)에서 \(2H\mathbf{N}\)과 같다. catenoid: \(\mathbf{x}_{uu} = (-\cosh v\cos u, -\cosh v\sin u, 0)\), \(\mathbf{x}_{vv} = (\cosh v\cos u, \cosh v\sin u, 0)\)이라 합이 \(0\)이고, \(H = 0\)(<a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#i-39-3-3">Example 39.3.3</a>)과 맞는다. 이 좌표는 \(E = G = \cosh^2v\), \(F = 0\)인 conformal coordinates다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-40-3-4" data-level="2">
+        <p><span class="thm-head">Exercise 40.3.4</span> <span class="level">★★</span>
+        (a) 닫힌 mesh에서 \(\sum_i(L\mathbf{x})_i = 0\), \(\sum_i(K\mathbf{N})_i = 0\)임을 보여라. (b) boundary가 없는 compact surface에서 \(\int2H\mathbf{N}\,dA = 0\), \(\int K\mathbf{N}\,dA = 0\)임을 <a href="#eq-40-3-1">(40.3.1)</a>로 보여라(하나의 parametrization으로 덮을 수 있다고 하거나, 조각의 경계 적분이 상쇄된다고 하자). (c) 닫힌 mesh에서 \(\sum_i\mathbf{A}_i\)는 무엇인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(\sum_i(L\mathbf{x})_i = \mathbf{1}^{\mathsf T}L\mathbf{x}\)이고 \(L\)은 symmetric이며 \(L\mathbf{1} = 0\)이므로(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-9">Proposition 36.6.9</a>(a)) \(\mathbf{1}^{\mathsf T}L = 0\)이다. edge마다 보면 \(w_{ij}(\mathbf{x}_j - \mathbf{x}_i)\)와 \(w_{ij}(\mathbf{x}_i - \mathbf{x}_j)\)가 상쇄된다. \((K\mathbf{N})_i\)도 edge \(ij\)가 \(i\)에 \(\tfrac12\theta_{ij}(\mathbf{x}_i - \mathbf{x}_j)/\ell_{ij}\), \(j\)에 그 반대를 주므로 합이 \(0\)이다. (b) \(2H\mathbf{N}\,dA = -d(\mathbf{N}\wedge d\mathbf{x})\), \(K\mathbf{N}\,dA = d(\tfrac12\mathbf{N}\wedge d\mathbf{N})\)이 exact이므로, Stokes's theorem에서 boundary가 없는 surface 위의 적분은 \(0\)이다(조각으로 나누면 이웃한 조각의 경계 적분이 반대 방향이라 상쇄된다. <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-12">Corollary 38.3.12</a>와 같은 논증). 앞의 것은 \(\int\Delta\mathbf{x}\,dA = 0\)이기도 하다. (c) \(\sum_i\mathbf{A}_i = \sum_fA_f\mathbf{N}_f = 0\)이다(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-5">Proposition 38.5.5</a>(c)). 세 경우 모두 \(\oint_{\partial C_i}\)들이 이웃한 dual cell에서 상쇄된다는 같은 이유다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-40-3-5" data-level="1">
+        <p><span class="thm-head">Exercise 40.3.5</span> <span class="level">★</span>
+        참인지 거짓인지 말하고 이유를 써라. (a) 바깥쪽 orientation의 볼록한 mesh에서 \((L\mathbf{x})_i\)는 바깥쪽을 향한다. (b) mesh의 orientation을 뒤집으면 \((K\mathbf{N})_i\)의 부호가 바뀐다. (c) mesh의 orientation을 뒤집으면 \((L\mathbf{x})_i\)의 부호가 바뀐다. (d) 한 정사각형을 대각선으로 나누는 방향을 바꾸면 cube corner의 \((L\mathbf{x})_i\)가 바뀐다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 거짓. \((L\mathbf{x})_i \approx 2H\mathbf{N}A_i\)이고 바깥쪽 \(\mathbf{N}\)의 볼록한 곳에서 \(H \lt 0\)이라 안쪽을 향한다(Conventions 상자, unit sphere에서 \(\approx -2\mathbf{x}_iA_i\)). (b) 참. orientation을 뒤집으면 모든 bending angle의 부호가 바뀌고(<a href="../39-surface-curvature/39-5-fundamental-theorem.html#i-39-5-6">Proposition 39.5.6</a>(c)) \(\ell_{ij}\)와 \(\mathbf{x}\)는 그대로이므로 \((K\mathbf{N})_i\)가 \(-(K\mathbf{N})_i\)가 된다. \(K\)는 그대로이고 \(\mathbf{N}\)이 뒤집힌 것과 맞는다. (c) 거짓. cotan weight는 각만으로 정해지므로(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-1">Proposition 38.6.1</a>) \((L\mathbf{x})_i\)는 orientation에 무관하다. smooth의 \(H\mathbf{N}\)이 normal의 선택에 무관한 것(<a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#i-39-3-1">Proposition 39.3.1</a>)과 같다. (d) 거짓. 개별 cotan weight는 바뀌지만, <a href="#eq-40-3-5">(40.3.5)</a>에서 대각선은 flat edge라 기여가 없고 cube의 edge의 \(\ell\), \(\theta\), \(\bar{\mathbf{N}}\)은 그대로다(<a href="#i-40-3-7">Example 40.3.7</a>(c)).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-40-3-6" data-level="1">
+        <p><span class="thm-head">Exercise 40.3.6</span> <span class="level">★</span>
+        <strong>Coding.</strong> Implementation 상자의 <code>curvature_normals</code>로 <code>torus_mesh(2, 0.8, 24, 48)</code>에서 \(H_i = \inner{(L\mathbf{x})_i}{\mathbf{N}_i}/(2A_i)\)와 \(\inner{(K\mathbf{N})_i}{\mathbf{N}_i}/A_i\)(\(\mathbf{N}_i\)는 바깥쪽 area-weighted vertex normal, \(A_i\)는 mixed area)를 구해 정확한 \(H\), \(K\)와 비교하여라. \(\delta_i/A_i\)와도 비교하고, \((L\mathbf{x})_i\)의 접선 성분의 비율의 최댓값을 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-40-3-6"><code>V, F = dm.torus_mesh(2, 0.8, 24, 48)
+An, Lx, KN = curvature_normals(V, F)
+A, N = dm.mass_voronoi(V, F), dm.vertex_normals(V, F, kind="area")          # outward unit vertex normals
+u = np.arctan2(V[:, 2], np.linalg.norm(V[:, :2], axis=1) - 2)
+H_exact = -(2 + 1.6 * np.cos(u)) / (1.6 * (2 + 0.8 * np.cos(u)))              # outward N
+K_exact = np.cos(u) / (0.8 * (2 + 0.8 * np.cos(u)))
+H = np.sum(Lx * N, 1) / (2 * A)                                                # (L x)_i ~ 2 H N A_i
+KG = np.sum(KN * N, 1) / A                                                     # (K N)_i ~ K N A_i
+print(f"max |H_i - H| = {np.abs(H - H_exact).max():.4f}, H in [{H.min():.4f}, {H.max():.4f}]")
+print(f"max |&lt;(K N)_i, N_i&gt; / A_i - K| = {np.abs(KG - K_exact).max():.4f}, max |delta_i / A_i - K| = "
+      f"{np.abs(dm.angle_defect(V, F) / A - K_exact).max():.4f}")
+print(f"tangential part of (L x)_i at most {np.abs(np.linalg.norm(np.cross(Lx, N), axis=1) / np.linalg.norm(Lx, axis=1)).max():.4f}")
+</code></pre>
+<pre id="out-ex-40-3-6"><code>max |H_i - H| = 0.0029, H in [-0.8029, -0.2112]
+max |&lt;(K N)_i, N_i&gt; / A_i - K| = 0.0112, max |delta_i / A_i - K| = 0.0075
+tangential part of (L x)_i at most 0.0075</code></pre>
+          <p>바깥쪽 normal에서 정확한 \(H\)는 바깥 적도의 \(-0.8036\)부터 안쪽 적도의 \(-0.2083\)까지이고, \(H_i\)는 그 범위를 \(0.0029\) 안에서 따라간다. Gaussian curvature는 두 정의가 모두 \(0.01\) 수준이고 이 mesh에서는 angle defect가 조금 더 정확하다. \((L\mathbf{x})_i\)는 vertex normal과 거의 평행하지만 크기의 \(0.75\%\)까지 접선 성분이 있다. 이 접선 성분 때문에 \((L\mathbf{x})_i\)를 \(\mathbf{N}_i\)에 사영하는 방법과 \(\abs{(L\mathbf{x})_i}\)를 쓰는 방법은 조금 다른 \(H_i\)를 준다(<a href="#i-40-3-12">Remark 40.3.12</a>).</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="40-2-discrete-gauss-bonnet.html">← 40.2 The Discrete Gauss–Bonnet Theorem</a>
+    <a rel="next" href="40-4-steiner-mollified.html">40.4 Steiner's Formula and Mollified Polyhedra →</a>
+  </nav>
+</body>
+</html>

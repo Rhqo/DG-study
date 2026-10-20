@@ -1051,3 +1051,63 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - 36.6(305행)의 "boundary 항을 포함한 양"에 Prop 42.5.9 링크
     - 장 lib/ch42.py의 helper를 tools/로 옮길지 검토한다(galerkin_mass, stiffness, whitney1_mass, cholesky/chol_solve, solve_closed_poisson, jittered_sphere, disk_mesh, implicit_mcf). run_printed는 dgcode로 옮긴다.
     - 이산화·꺾은선 같은 한국어 용어의 통일(통합 검토)
+- 2026-10-20: **40장 작성 완료(draft).** 4절, 그림 9개(interactive 3개), verify 381 checks, todo 12
+  - 확정한 부호
+    - 볼록 다면체(바깥 normal)에서 θ_ij ≥ 0이다.
+    - H_ij = −½ℓθ, H_i = −¼Σℓθ
+    - (L𝐱)_i = −∮𝐍×d𝐱
+    - **(K𝐍)_i = ½Σθ_ij(𝐱_i − 𝐱_j)/ℓ_ij이고 바깥쪽을 향한다. toc-note의 식은 부호가 반대였다.**
+    - Steiner: dA_ε = (1 − 2εH + ε²K)dA
+  - 작성자의 Crane 주장(검토에서 대조): slide 25의 (f_j − f_i), slide 23의 ½, Cr §5.2.1의 Δf = 2HN
+  - 다른 장의 todo와 링크를 40장 항목으로 확정할 목록은 scratch todo40-map.md에 있다(39장 13곳, 38장 9곳, 36·35·33·32장, 42.4). 40장 검토가 끝난 뒤 통합 때 반영한다.
+  - 도구: shot.mjs는 inline 수식 넘침을 잡지 못한다. 검토자와 작성자가 각각 검사 스크립트를 만들었다(scratch rev39/py/shot_inline.mjs, ch40/shot-inline.mjs). tools에 넣을지는 통합 검토 때 정한다.
+  - 통합: terms 17개
+  - 40 검토 agent(1명)와 41 작성 agent를 띄웠다. 지금 도는 것은 4개다: 40 검토, 41 작성, 43 작성, 44 작성.
+- 2026-10-20: **43장 작성 완료(draft).** 5절, 그림 13개(interactive 2개), verify 234 checks, todo 0
+  - 확정한 부호
+    - ⋆α = −α∘J이므로 holomorphic ⇔ ⋆dz = −i dz다.
+    - E_C = ¼‖⋆dz + i dz‖² = E_D − 𝒜, 𝒜 = ½∮Im(z̄dz)
+    - discrete: 𝖤_C = −½L − 𝖠. boundary 방향은 dgmesh.boundary_loop를 따른다. LSCM과 10⁻¹³ 안에서 일치한다.
+    - 바깥쪽 𝐍에서 stereographic σ는 antiholomorphic이다.
+  - 다른 장의 링크를 43장 항목으로 확정할 목록은 scratch todo40-map.md에 덧붙였다.
+  - GUIDELINES §3.5 기준 예제 여정의 43장 칸을 제안받았다. §3.5는 §6·§7이 아니지만, 통합 검토 때 함께 넣는다.
+  - 통합: terms 14개(기존 7개는 이미 있었다)
+  - 43 검토 agent를 띄웠다. 지금 도는 것: 40 검토, 41 작성, 43 검토, 44 작성
+- 2026-10-20: 다시 사용량 한도(20:20 초기화)로 네 agent(40·43 검토, 41·44 작성)가 멈췄다. 사용자 지시("계속 진행해줘")로 모두 재개했다.
+- 2026-10-20: **40장 reviewed, 공개.** 작성자의 Crane 주장을 원문과 대조했고 모두 맞았다.
+  - slide 25의 (f_j − f_i)는 Crane 자신의 규약으로 읽어도 부호가 반대다.
+  - slide 23은 ½을 빠뜨렸다.
+  - slide 37의 +2tH는 Crane의 H로는 맞다.
+  - 검토가 고친 것
+    - index toc-note의 KN 부호. 본문은 원래 맞았다.
+    - Non-example 40.3.8의 0.050 → 0.057
+    - 오차 지표 표기: norm이 아니라 성분의 최댓값이다.
+    - Prop 40.2.12 증명의 빈틈("한 번 덮는다")
+    - 40.4 기호 충돌: H_f → 𝓗_f, π(y) → pr(y)
+    - Ex 40.3.2의 φ/θ 규약
+    - slide 7·12의 번역 문장
+    - Track 3 todo 5개
+  - 통합
+    - 39장(8곳)과 42.4의 Chapter 40 todo 9개를 정확한 항목으로 확정했다.
+    - 32–39장에서 40장 toc 앵커로 가던 링크 29곳을 실제 절로 바꿨다.
+    - notation 3행. 루트 index의 40을 Reviewed로 바꿨다.
+  - 남은 todo 7개: 41장 5개, 45장 1개, 3D signed Steiner formula 1개
+- 2026-10-20: **43장 reviewed, 40장과 함께 공개.** 작성자의 Crane 주장(Cr §7.3–7.5, 인쇄 126–129쪽)은 모두 맞았다. Mullen08과 Springborn08은 저자 공개 PDF로 확인했다.
+  - 검토가 고친 것
+    - Example 43.1.6의 추론: 명제에서 나오는 것은 "모든 face에서 similarity일 수는 없다"뿐이다. 최솟값 0.190을 수치로 더했다.
+    - rigidity의 반사
+    - LSCM 일치 정밀도는 10⁻¹²다.
+    - Fig 43.5.2의 기울기는 1.76–1.91이다.
+    - M^{-1/2} 대칭화의 출처는 Prop 31.4.2다.
+    - Track 3에 대한 단정을 약하게 썼다.
+    - 슬라이드·노트 번역 문장 6곳
+    - 400px 가로 스크롤
+  - 통합
+    - 42.6의 Chapter 43 todo를 Thm 43.4.6으로 확정했다.
+    - 38.2·38.3·38.6의 링크를 Def 43.3.1, Def 43.3.12, Remark 43.5.13으로 바꿨다.
+    - notation 3행. 루트 index의 43을 Reviewed로 바꿨다.
+  - 나중에(통합 검토)
+    - Track 3 21·24장 toc-note에 conformal change 공식 K̃ = e^{−2μ}(K − Δμ)를 넣을지 정한다.
+    - shot.mjs에 documentElement.scrollWidth 검사를 넣는다. 숨은 보조 MathML이 가로 스크롤을 만든다.
+    - 43.5의 행렬 K = 𝖤_C + bbᵀ: 42장은 행렬에 K를 피했다.
+    - GUIDELINES §3.5 43장 칸

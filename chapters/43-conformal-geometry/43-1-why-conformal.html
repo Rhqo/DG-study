@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>43.1 Why Conformal? — DG Study</title>
+  <meta name="dg-id" content="43.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="42.6, 38.2, 31.6, 7.4, 0.5">
+  <meta name="dg-refs" content="Cr ch7; CMU-DDG L19-20">
+  <meta name="dg-updated" content="2026-10-20">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">43. Conformal Geometry</a> ›
+    <span>43.1 Why Conformal?</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>43.1 Why Conformal?</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr ch7]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L19-20">[CMU-DDG L19–20]</a> slides 3–21</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>휜 곡면의 지도에서 무엇을 보존할지 골라야 하는 이유를 Theorema Egregium으로 설명하고, conformal map을 “작은 원을 작은 원으로 보내는 map”으로 읽을 수 있다.</li>
+        <li>conformal map이 계산과 이론에서 유리한 이유를 area-preserving map과 비교해 말할 수 있다.</li>
+        <li>triangle mesh에서 모든 face의 각을 정확히 보존하는 piecewise linear map은 하나의 similarity뿐임을 증명하고, 그래서 conformality의 discrete 판이 여럿 필요하다는 것을 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-1">Definition 7.4.1</a>: conformal map, <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-5">Theorem 7.4.5</a>: 각의 보존</li>
+        <li><a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-7">Definition 38.2.7</a>: conformal coordinates와 conformal factor \(e^{2\mu}\), <a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-8">Proposition 38.2.8</a>: 원이 원으로</li>
+        <li><a href="../42-laplace-beltrami/42-6-implicit-mcf.html#i-42-6-6">Theorem 42.6.6</a>의 증명과 <a href="../42-laplace-beltrami/42-6-implicit-mcf.html#ex-42-6-6">Exercise 42.6.6</a>: Dirichlet energy와 넓이의 차이</li>
+        <li><a href="../00-tour/0-5-intrinsic.html#i-0-5-3">Corollary 0.5.3</a>: 왜곡 없는 sphere의 지도는 없다</li>
+        <li><a href="../31-meshes/31-6-parametrization-texture.html#i-31-6-1">Definition 31.6.1</a>: UV map과 singular value, <a href="../31-meshes/31-6-parametrization-texture.html#i-31-6-4">Proposition 31.6.4</a>: 평면의 angle 합</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Chapter 42는 mesh 위의 Dirichlet energy에서 한 가지를 남기고 끝났다. 곡면 mesh에서 다른 위치로 가는 piecewise linear map의 Dirichlet energy는 언제나 image의 넓이 이상이고, 그 차이 \(\sum_fA_f\tfrac12(\sigma_1 - \sigma_2)^2\)은 face마다 map이 각을 얼마나 깨는지를 잰다(<a href="../42-laplace-beltrami/42-6-implicit-mcf.html#ex-42-6-6">Exercise 42.6.6</a>). 차이가 \(0\)인 것은 모든 face가 similarity로 옮겨질 때, 곧 map이 각을 보존할 때뿐이다. 그렇다면 각을 보존하는 map은 왜 그렇게 특별하고, 그 차이를 최소화하면 무엇을 얻는가? 이 장은 이 질문에 답한다.</p>
+      <p>출발점은 오래된 문제다. 둥근 지구를 평평한 종이에 옮기고 싶다. Section 0.5는 Theorema Egregium 때문에 sphere의 어떤 조각도 길이를 보존하며 평면에 펼 수 없다고 했다(<a href="../00-tour/0-5-intrinsic.html#i-0-5-3">Corollary 0.5.3</a>). 길이를 모두 지킬 수 없으면 무엇을 지킬지 골라야 한다. 각을 지키면 conformal map, 넓이를 지키면 area-preserving map이다. 둘을 동시에 지키면 길이를 지키는 것이 되므로(<a href="../00-tour/0-5-intrinsic.html#ex-0-5-1">Exercise 0.5.1</a>), 휜 곡면에서는 하나만 고를 수 있다. 강의 슬라이드는 이 장의 출발점을 지도 만들기로 잡고, 각을 정확히 지키는 지도는 언제나 만들 수 있다는 것을 강조한다 <a class="cite" href="../../references.html#CMU-DDG-L19-20">[CMU-DDG L19–20]</a> slides 5–7.</p>
+      <p>이 절은 세 가지를 한다. conformal map을 다시 불러와 그림으로 읽고, 왜 하필 각인지 정리하고, triangle mesh에서는 “각을 정확히 보존한다”는 조건이 너무 강하다는 것을 증명한다. 마지막 사실 때문에 이 장의 나머지는 각의 보존을 <em>정확히</em> 요구하는 대신 그 위반을 에너지로 재고 최소화한다.</p>
+    </section>
+
+    <aside class="box convention">
+      <p class="box-title">Conventions: symbols of this chapter</p>
+      <p><strong>곡면과 mesh.</strong> smooth surface는 \(S\), 그 매개화는 \(\mathbf{x}\)다. mesh의 vertex 위치는 Chapter 38–42처럼 굵게 \(\mathbf{x}_i\)로 쓰고, 평면 mesh의 vertex는 복소수 \(p_i \in \mathbb{C}\)로 쓴다. cotan matrix는 \(L\)(\(-L\)이 positive semidefinite, <a href="../../notation.html#sec-ddg">Notation and Conventions</a>), mass matrix는 \(M\)이다. face의 넓이는 \(A_f\), 곡면의 넓이는 \(A\)다.</p>
+      <p><strong>복소수.</strong> 허수 단위는 똑바로 선 \(\mathrm{i}\)로 쓰고, vertex의 index \(i\)(이탤릭)와 구분한다. 평면 \(\R^2\)와 \(\mathbb{C}\)를 \((x, y) \leftrightarrow x + \mathrm{i}y\)로 같게 본다. 곡면에서 평면으로 가는 map은 \(z = u + \mathrm{i}v\colon S \to \mathbb{C}\)로 쓰고(Crane의 노트와 같다), mesh에서는 vertex마다의 값 \(z \in \mathbb{C}^{n_0}\)이다. 평면의 열린집합에서 평면으로 가는 map은 \(f = u + \mathrm{i}v\)로 쓴다. first fundamental form의 계수 \(F\)와 겹치지 않도록 map을 대문자 \(F\)로 쓰지 않는다(<a href="../../notation.html#sec-conflicts">Symbol Conflicts</a>). 코드의 <code>F</code>는 face 배열이다.</p>
+      <p><strong>배율과 singular value.</strong> conformal map의 길이 배율은 \(e^{\mu}\)로 쓰고 넓이 배율은 \(e^{2\mu}\)다(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-7">Definition 38.2.7</a>). <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-1">Definition 7.4.1</a>의 \(\lambda\)가 \(e^{\mu}\)이고, 이 장의 \(\lambda\)는 <a href="43-5-discrete-conformal.html">Section 43.5</a>의 eigenvalue다. map의 differential의 singular value는 \(\sigma_1 \ge \sigma_2\)로 쓴다. 곡면에서 평면으로 가는 방향의 값이므로 Section 31.6의 \(\sigma_i\)(UV에서 곡면으로 가는 방향)와는 역수 관계이고, 비 \(\sigma_1/\sigma_2\)는 같다. 첨자 없는 \(\sigma\)는 stereographic projection이다(<a href="../../notation.html#sec-examples">Running Examples</a>).</p>
+      <p><strong>넓이.</strong> map의 image의 signed area는 \(\mathcal{A}(z)\)로 쓴다(<a href="43-4-conformal-energy.html">Section 43.4</a>). 넓이 \(A\), \(A_f\)와 다르고, Section 42.2의 비교 함수 모임 \(\mathcal{A}_g\)와도 관계없다. 1-form의 Hodge star와 Crane의 노트의 부호 차이는 <a href="43-4-conformal-energy.html">Section 43.4</a>의 Conventions 상자에 모았다.</p>
+    </aside>
+
+    <section id="sec-mapmaking">
+      <h2>The Mapmaking Problem</h2>
+      <p>먼저 정의를 상기하자. 곡면 사이의 diffeomorphism \(\varphi\colon S_1 \to S_2\)는 모든 점에서 differential이 inner product를 양수 배율의 제곱만큼 늘이면 <strong>conformal map</strong>(등각사상)이다(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-1">Definition 7.4.1</a>). 곧 어떤 smooth 함수 \(\mu\)가 있어</p>
+      <div class="equation" id="eq-43-1-1">
+      \[ \begin{aligned} &\inner{d\varphi_p(X)}{d\varphi_p(Y)} = e^{2\mu(p)}\inner{X}{Y}, \\ &X, Y \in T_pS_1 \end{aligned} \tag{43.1.1} \]
+      </div>
+      <p>이다. diffeomorphism을 요구하지 않으면 local conformal map이다. 이 조건은 곡선 사이의 각을 보존하는 것과 같고(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-5">Theorem 7.4.5</a>), 한 점에서 보면 differential이 단위원을 원으로 보내는 것과 같다(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-8">Proposition 38.2.8</a>(iii)). 그래서 conformal map은 “작은 원을 작은 원으로 보내는 map”이다. 원의 크기는 바뀌어도(배율 \(e^{\mu}\)) 모양은 바뀌지 않는다. 지도에서는 지도 위의 작은 영역이 실제 땅의 모양과 닮은꼴이라는 뜻이다.</p>
+
+      <div class="thm example" id="i-43-1-1">
+        <p><span class="thm-head">Example 43.1.1</span> <span class="thm-name">(two conformal maps of the sphere)</span>.
+        unit sphere의 running example에서 두 conformal map을 상기하자. (a) Mercator projection \((\theta, \varphi) \mapsto (\varphi, t)\), \(t = \log\cot(\theta/2)\)의 inverse는 induced metric이 \(\operatorname{sech}^2t\,(d\varphi^2 + dt^2)\)인 conformal coordinates다(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-10">Example 38.2.10</a>, <a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-10">Example 7.4.10</a>). 곧 sphere에서 지도로 갈 때 길이가 \(\cosh t = 1/\sin\theta\)배 된다. 적도(\(\theta = \pi/2\))에서 \(1\)배이고, 북위 \(60^\circ\)(\(\theta = \pi/6\))에서 \(2\)배이므로 넓이는 \(4\)배다. (b) 북극에서의 stereographic projection \(\sigma\)(§7)의 inverse는 \(e^{\mu} = 2/(1 + \abs{w}^2)\)인 conformal coordinates다(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-9">Example 38.2.9</a>, \(r = 1\)). 따라서 \(\sigma\)의 길이 배율은 \((1 + \abs{\sigma}^2)/2\)이다. 남극(\(\sigma = 0\))에서 \(\tfrac12\), 적도(\(\abs{\sigma} = 1\))에서 \(1\)이고, 북극에 가까워지면 끝없이 커진다. 두 지도 모두 각은 정확히 지키고 넓이를 크게 바꾼다. 어느 쪽도 sphere 전체를 하나의 평면 영역으로 덮지 못한다는 것도 같다(Mercator는 두 극과 경선 하나, stereographic은 북극을 뺀다).</p>
+        <p class="verified">Verification: <code>verify/v-43-1-why-conformal.py</code></p>
+      </div>
+
+      <p>conformal map이 무엇을 지키고 무엇을 버리는지는 area-preserving map과 나란히 놓으면 잘 보인다. <a href="#fig-43-1-1">Figure 43.1.1</a>을 보자. 두 패널 모두 unit disk 안의 같은 위치에 같은 크기의 작은 원(반지름 \(0.045\)) 49개를 놓고 map으로 옮긴 결과다. 왼쪽 (a)의 map \(f(z) = z + 0.3z^2\)에서는 모든 원이 원으로 간다. 대신 크기가 왼쪽 끝에서는 \(0.4\)배, 오른쪽 끝에서는 \(1.6\)배로 다르다. 오른쪽 (b)의 twist는 원을 길쭉한 ellipse로 만든다. 대신 모든 ellipse의 넓이가 원래 원의 넓이와 같다. (a)의 \(f\)가 conformal이라는 것은 <a href="43-2-cauchy-riemann.html">Section 43.2</a>에서 Cauchy–Riemann equations로 확인한다. 여기서는 그림으로 받아들이자.</p>
+
+      <figure class="dg-figure" id="fig-43-1-1">
+        <img src="figures/fig-43-1-1-circles.svg" alt="두 패널. 각 패널에 unit disk의 polar grid(반지름 0.2 간격의 원과 30도 간격의 반지름 선)를 map으로 옮긴 회색 곡선과, 격자점에 놓인 작은 원 49개의 image(하늘색으로 칠하고 파랑 테두리)가 있다. (a) 제목 conformal z + 0.3z^2. 바깥 경계가 왼쪽이 오목하고 오른쪽이 부푼 모양이다. 작은 image는 모두 원이고 왼쪽 끝은 작고(small 주석) 오른쪽 끝은 크다(large 주석). (b) 제목 area-preserving twist. 바깥 경계는 원 그대로이고 반지름 선이 소용돌이처럼 휘었다. 중심 근처의 image는 원에 가깝고 바깥으로 갈수록 가늘고 긴 ellipse가 되며 아래쪽에 stretched 주석이 있다.">
+        <figcaption><span class="fig-head">Figure 43.1.1.</span> conformal map은 작은 원의 모양을, area-preserving map은 넓이를 지킨다. <em>무엇을</em>: unit disk의 중심과 polar grid의 점 \(\rho e^{\mathrm{i}k\pi/6}\)(\(\rho = 0.2, 0.4, 0.6, 0.8\), \(k = 0, \dots, 11\))에 놓은 반지름 \(\varepsilon = 0.045\)인 원을 (a) \(f(z) = z + 0.3z^2\)과 (b) twist \(T(\rho e^{\mathrm{i}\vartheta}) = \rho e^{\mathrm{i}(\vartheta + 1.2\rho^2)}\)으로 옮겼다. <em>읽는 법</em>: 회색 곡선은 원 \(\rho = 0.2, \dots, 1\)과 \(30^\circ\) 간격의 반지름 선의 image, 하늘색 도형이 작은 원의 image다. <em>볼 것</em>: (a)의 image는 모두 원이다(각 image와 같은 2차 moment를 갖는 ellipse의 축의 비가 \(1.0044\) 이하). 반지름은 \(\abs{f'} = \abs{1 + 0.6z}\)배이고, 이 값이 \(0.4\)(왼쪽 끝)에서 \(1.6\)(오른쪽 끝)까지 변한다. (b)의 image는 모두 넓이가 \(\pi\varepsilon^2\)(비 \(0.9999\))이지만 축의 비가 \(\rho = 0.4\)에서 \(1.46\), \(\rho = 0.8\)에서 \(4.09\)이다. <em>본문과의 연결</em>: <a href="#eq-43-1-1">(43.1.1)</a>, <a href="#i-43-1-3">Non-example 43.1.3</a>.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-why">
+      <h2>Why Angles?</h2>
+      <p>넓이를 지키는 것도 각을 지키는 것만큼 자연스러워 보인다. 그런데 기하 처리와 해석에서는 conformal map이 압도적으로 많이 쓰인다. 강의 슬라이드는 그 이유를 품질, 단순함, 효율, 보장의 넷으로 정리한다 <a class="cite" href="../../references.html#CMU-DDG-L19-20">[CMU-DDG L19–20]</a> slides 11–16. 각각이 이 장의 어디에서 정확한 진술이 되는지 함께 적는다.</p>
+
+      <div class="thm remark" id="i-43-1-2">
+        <p><span class="thm-head">Remark 43.1.2</span> <span class="thm-name">(what conformality buys)</span>.
+        (a) <em>품질.</em> 각을 보존한다는 조건 하나가 강한 정칙성을 준다. 평면에서 orientation을 지키는 conformal map은 holomorphic function이고(<a href="43-2-cauchy-riemann.html">Section 43.2</a>), complex differentiable이기만 하면 저절로 \(C^\infty\)다(진술만 한다, <a href="43-2-cauchy-riemann.html">Section 43.2</a>). 배율의 로그 \(\mu = \log\abs{f'}\)은 harmonic function이어서(<a href="43-2-cauchy-riemann.html#ex-43-2-4">Exercise 43.2.4</a>에서 증명한다) 왜곡이 고르게 퍼지고, 상수가 아니면 안쪽에서 최댓값과 최솟값을 갖지 않는다(<a href="../42-laplace-beltrami/42-2-dirichlet-poisson.html#i-42-2-9">Corollary 42.2.9</a>).</p>
+        <p>(b) <em>단순함.</em> conformal coordinates에서는 metric이 함수 하나 \(\mu\)로 정해지고, Laplace–Beltrami operator가 \(e^{-2\mu}(\partial_u^2 + \partial_v^2)\)가 된다(<a href="../42-laplace-beltrami/42-1-laplacian-definitions.html#i-42-1-10">Proposition 42.1.10</a>(b)). Gaussian curvature가 \(0\)이 아닌 곳에는 평면 영역에서 오는 isometric parametrization이 없지만(sphere는 <a href="../00-tour/0-5-intrinsic.html#i-0-5-3">Corollary 0.5.3</a>) conformal coordinates는 언제나 국소적으로 있으므로(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-12">Theorem 38.2.12</a>), 이 공식은 어느 곡면에서나 쓸 수 있다.</p>
+        <p>(c) <em>효율.</em> conformal map을 찾는 문제는 선형계나 eigenproblem 하나로 풀린다(<a href="43-5-discrete-conformal.html">Section 43.5</a>). 더 복잡한 조건(왜곡의 상한, 국소적 injectivity)을 붙인 map은 대개 비선형 최적화가 필요하다.</p>
+        <p>(d) <em>보장.</em> 이론이 잘 알려져 있다. Riemann mapping theorem(리만 사상 정리)에 따르면 disk 모양의 곡면은 언제나 disk로 conformal하게 펼 수 있고, uniformization theorem(균일화 정리)에 따르면 닫힌 곡면은 세 가지 표준 기하 중 하나로 바꿀 수 있다. 둘 다 <a href="43-3-conformal-surfaces.html">Section 43.3</a>에서 진술한다.</p>
+      </div>
+
+      <p>area-preserving map은 (a)와 (d)의 반대편에 있다. 다음 예가 그것을 보여 준다.</p>
+
+      <div class="thm nonexample" id="i-43-1-3">
+        <p><span class="thm-head">Non-example 43.1.3</span> <span class="thm-name">(an area-preserving twist)</span>.
+        smooth 함수 \(\tau\colon [0, 1] \to \R\)에 대해 unit disk의 map \(T(\rho e^{\mathrm{i}\vartheta}) = \rho e^{\mathrm{i}(\vartheta + \tau(\rho))}\)를 보자(\(\tau\)가 \(0\) 근처에서 상수이면 원점에서도 smooth하다). polar coordinates의 orthonormal frame \((e_\rho, e_\vartheta)\)에서 \(T\)는 \(\rho\)를 그대로 두고 각을 \(\tau(\rho)\)만큼 돌리므로, \(e_\rho\) 방향으로 \(h\)만큼 움직이면 image는 반지름 방향으로 \(h\), 원 방향으로 \(\rho\tau'(\rho)h\)만큼 움직인다. 곧 image 점의 frame에서 differential의 행렬은</p>
+        <div class="equation" id="eq-43-1-2">
+        \[ DT = \begin{pmatrix} 1 & 0 \\ s & 1 \end{pmatrix}, \qquad s = \rho\,\tau'(\rho) \tag{43.1.2} \]
+        </div>
+        <p>인 shear다. \(\det DT = 1\)이므로 \(T\)는 넓이를 보존한다. 그러나 singular value는 \(\sigma_{1,2} = \tfrac12\big(\sqrt{s^2 + 4} \pm s\big)\)이고, \(s \ne 0\)이면 \(\sigma_1 \ne \sigma_2\)이므로 각을 보존하지 않는다. <a href="#fig-43-1-1">Figure 43.1.1</a>(b)는 \(\tau(\rho) = 1.2\rho^2\)이고, \(\rho = 0.8\)에서 \(s = 1.536\), \(\sigma_1/\sigma_2 = \sigma_1^2 = 4.12\)이다(작은 원으로 잰 값 \(4.09\)). \(\tau\)를 아무 smooth 함수로 바꾸어도 넓이는 보존되므로, area-preserving map은 함수 하나만큼의 자유도를 가진 이런 twist만으로도 무한히 많다. 더 일반적으로 divergence가 \(0\)인 모든 vector field의 flow가 area-preserving이다. 반면 unit disk에서 자기 자신으로 가는 orientation을 지키는 conformal diffeomorphism은 실수 parameter 세 개로 정해지는 Möbius transformation뿐이다(<a href="43-2-cauchy-riemann.html">Section 43.2</a>에서 보는 변환이고, 이 사실 자체는 진술만 한다). 강의 슬라이드도 같은 대비를 든다 <a class="cite" href="../../references.html#CMU-DDG-L19-20">[CMU-DDG L19–20]</a> slide 14.</p>
+        <p class="verified">Verification: <code>verify/v-43-1-why-conformal.py</code></p>
+      </div>
+
+      <p>conformal map의 자유도가 이렇게 작다는 것은 약점이 아니라 장점이다. 조건이 강할수록 답이 하나로 모이고, 계산도 그 구조를 쓸 수 있다. 다만 그 강함이 discrete 세계에서는 문제가 된다. 다음 절에서 보듯이 mesh에서는 너무 강해서 답이 거의 없어진다.</p>
+    </section>
+
+    <section id="sec-rigidity">
+      <h2>Exact Angle Preservation on a Mesh Is Too Rigid</h2>
+      <p>mesh 위의 map은 vertex마다 평면의 점 \(z_i \in \mathbb{C}\)를 정하고 face 안은 linear하게 채운 piecewise linear map이다(Section 31.6의 UV map). 가장 직접적인 discrete 판은 “모든 face에서 각을 정확히 보존한다”이다. face 하나의 affine map이 각을 보존하는 것은 그 map이 similarity, 곧 orthogonal map(rotation 또는 반사)과 양수 배율과 translation의 합성인 것과 같다(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-4">Proposition 7.4.4</a>). face의 orientation을 지키는 similarity로 제한하면 이것은 image triangle이 원래 triangle과 같은 방향의 닮은꼴이라는 뜻이다. 식으로 쓰자. face \(f = (i, j, k)\)를 그 평면의 positively oriented orthonormal frame에서 복소수 \(p_i, p_j, p_k\)로 쓰면(Section 31.6과 같은 face frame), orientation을 지키는 similarity는 \(p \mapsto ap + b\)(\(a \in \mathbb{C}\setminus\{0\}\))이고, 세 image가 그 꼴이라는 조건은</p>
+      <div class="equation" id="eq-43-1-3">
+      \[ z_k - z_i = \frac{p_k - p_i}{p_j - p_i}\,(z_j - z_i), \qquad z_j \ne z_i \tag{43.1.3} \]
+      </div>
+      <p>이다. \(a = (z_j - z_i)/(p_j - p_i)\), \(b = z_i - ap_i\)로 두면 \(z_i, z_j\)가 맞고, <a href="#eq-43-1-3">(43.1.3)</a>이 \(z_k\)도 맞춘다. 거꾸로 \(z = ap + b\)이면 <a href="#eq-43-1-3">(43.1.3)</a>이 바로 나온다. 핵심은 <a href="#eq-43-1-3">(43.1.3)</a>의 오른쪽이 \(z_i, z_j\)만으로 정해진다는 것이다. edge 하나의 image가 정해지면 그 edge를 가진 face의 셋째 vertex가 강제된다.</p>
+
+      <div class="thm proposition" id="i-43-1-4">
+        <p><span class="thm-head">Proposition 43.1.4</span> <span class="thm-name">(rigidity of angle-preserving piecewise linear maps)</span>.
+        oriented triangle mesh의 어느 두 face도 edge를 공유하는 face들의 사슬로 이어진다고 하자(connected manifold mesh는 이 조건을 만족한다). piecewise linear map \(z\)가 모든 face에서 orientation을 지키는 similarity이면</p>
+        <p>(a) 모든 face의 배율 \(\abs{a_f}\)이 같다.</p>
+        <p>(b) \(z\)는 한 edge의 image \(z_i, z_j\)로 완전히 정해진다. 특히 한 face의 image가 전체를 정한다.</p>
+        <p>(c) mesh가 평면 안에 있고(vertex \(p_i \in \mathbb{C}\), face가 모두 counterclockwise), 모든 face에서 같은 frame을 쓰면 \(z\)는 하나의 similarity \(z_i = ap_i + b\)의 제한이다.</p>
+      </div>
+
+      <div class="proof">
+        <p class="proof-idea">Proof idea: 이웃한 두 face는 edge 하나, 곧 점 두 개를 공유한다. orientation을 지키는 similarity는 두 점의 image로 정해진다.</p>
+        <p><span class="proof-head">Proof.</span> face \(f\)에서 \(z = a_fp + b_f\)라 하자(\(p\)는 \(f\)의 face frame 좌표, \(a_f \ne 0\)). (a) 이웃한 face \(f, g\)가 edge \(ij\)를 공유하면 \(\abs{z_j - z_i} = \abs{a_f}\ell_{ij} = \abs{a_g}\ell_{ij}\)이다(similarity는 길이를 \(\abs{a}\)배 한다, \(\ell_{ij}\)는 mesh의 edge 길이). \(\ell_{ij} \gt 0\)이므로 \(\abs{a_f} = \abs{a_g}\)이고, 가정의 사슬을 따라가면 모든 face에서 같다. (b) \(z\)와 \(z'\)이 둘 다 가정을 만족하고 edge \(ij\)에서 \(z_i = z'_i\), \(z_j = z'_j\)라 하자. edge \(ij\)를 가진 face \(f = (i, j, k)\)에서 <a href="#eq-43-1-3">(43.1.3)</a>의 오른쪽이 같으므로 \(z_k = z'_k\)이고, \(f\)의 세 vertex에서 둘이 같다. \(f\)와 edge를 공유하는 face \(g\)는 그 edge의 두 vertex 값이 같으므로 같은 논법으로 셋째 vertex도 같다. 가정의 사슬을 따라 모든 face, 따라서 모든 vertex에서 \(z = z'\)이다. (c) 평면 mesh에서 모든 face가 같은 좌표 \(p\)를 쓰므로, 이웃한 face \(f, g\)의 similarity \(a_fp + b_f\)와 \(a_gp + b_g\)는 공유 edge의 두 점 \(p_i \ne p_j\)에서 같다. 두 식을 빼면 \((a_f - a_g)p_i + (b_f - b_g) = 0\)이고 \((a_f - a_g)p_j + (b_f - b_g) = 0\)이므로 \(a_f = a_g\), \(b_f = b_g\)이다. 사슬을 따라 모든 face의 \((a_f, b_f)\)가 같다.</p>
+      </div>
+
+      <p><a href="#fig-43-1-2">Figure 43.1.2</a>가 이 증명을 그대로 보여 준다. 왼쪽 (a)는 vertex 9개, face 9개인 평면 mesh이고, 주황 face \(T_0 = (p_0, p_1, p_2)\)에서 출발한다. 숫자는 edge를 공유하는 face를 너비 우선으로 따라갈 때 각 face에 도착하는 순서다. 오른쪽 (b)에서는 \(T_0\)의 image만 정해 주었다(\(0.75\)배, \(35^\circ\) 회전, 이동). 그다음 face 1은 \(T_0\)와 공유하는 edge의 두 image가 이미 있으므로 <a href="#eq-43-1-3">(43.1.3)</a>으로 셋째 vertex가 강제되고, 2, 3, …도 차례로 강제된다. 마지막 face 8에 이르기까지 선택의 여지가 한 번도 없다. 결과는 (a) 전체를 한꺼번에 돌리고 줄인 것과 정확히 같다.</p>
+
+      <figure class="dg-figure" id="fig-43-1-2">
+        <img src="figures/fig-43-1-2-rigidity.svg" alt="두 패널. (a) 제목 mesh, start face T_0. 하늘색 triangle 9개로 된 평면 mesh이고 가운데 vertex p_0에서 오른쪽 p_1, 위쪽 p_2로 이어진 triangle T_0가 주황이다. 나머지 face에 숫자 1부터 8이 적혀 있다. (b) 제목 forced image a p + b. 같은 mesh를 0.75배로 줄이고 반시계 방향으로 35도 돌린 모양이며 주황 T_0의 꼭짓점에 z_0, z_1, z_2가 적혀 있고 face마다 (a)와 같은 숫자가 있다.">
+        <figcaption><span class="fig-head">Figure 43.1.2.</span> face마다 각을 정확히 보존하는 piecewise linear map은 한 face로 정해진다. <em>무엇을</em>: 평면 mesh(vertex \(p_0 = 0\), \(p_1 = 1\), \(p_2 = 0.45 + 0.85\mathrm{i}\), … 9개, counterclockwise face 9개)와, \(T_0\)의 image를 \(z = ap + b\)(\(a = 0.75e^{\mathrm{i}35^\circ}\), \(b = 3.2 + 0.4\mathrm{i}\))로 정한 뒤 <a href="#eq-43-1-3">(43.1.3)</a>으로 나머지를 차례로 정한 image. <em>읽는 법</em>: 주황이 출발 face \(T_0\), 하늘색 face의 숫자는 너비 우선 탐색에서 그 face가 정해지는 순서다(두 패널에서 같다). <em>볼 것</em>: (b)는 (a)를 한 similarity로 옮긴 것과 vertex마다 \(10^{-15}\) 안에서 같다. 중간에 고를 수 있는 것이 없으므로, \(T_0\)의 image를 정하는 순간 map 전체가 정해진다. <em>본문과의 연결</em>: <a href="#i-43-1-4">Proposition 43.1.4</a>(b)(c), <a href="#eq-43-1-3">(43.1.3)</a>.</figcaption>
+      </figure>
+
+      <p>평면 mesh에서는 그래도 similarity라는 답이 하나 있다. 곡면 mesh에서는 대개 답이 아예 없다. 한 vertex 둘레를 돌며 face를 하나씩 강제로 펴 보면 이유가 보인다.</p>
+
+      <div class="thm corollary" id="i-43-1-5">
+        <p><span class="thm-head">Corollary 43.1.5</span> <span class="thm-name">(angle defects obstruct exact angle preservation)</span>.
+        <a href="#i-43-1-4">Proposition 43.1.4</a>의 map \(z\)가 있으면, mesh의 모든 interior vertex \(i\)에서 angle defect \(\delta_i = 2\pi - \sum_f\theta_i^f\)(<a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-1">Definition 40.1.1</a>)는 \(2\pi\)의 정수배다. 따라서 \(\delta_i \notin 2\pi\Z\)인 interior vertex가 하나라도 있는 mesh에는 모든 face에서 각을 보존하는 piecewise linear map이 없다.</p>
+      </div>
+
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> interior vertex \(i\)의 이웃을 둘레 순서로 \(j_1, \dots, j_m\)이라 하고(index는 \(m\)을 법으로 센다), face \((i, j_k, j_{k+1})\)의 \(i\)에서의 corner angle을 \(\theta_k\)라 하자. 이 face에서 \(z\)는 orientation을 지키는 similarity이므로, <a href="#eq-43-1-3">(43.1.3)</a>을 \(j_k\)와 \(j_{k+1}\)에 쓰면 \(w_k := z_{j_k} - z_i\)에 대하여 \(w_{k+1}/w_k = (\ell_{ij_{k+1}}/\ell_{ij_k})\,e^{\mathrm{i}\theta_k}\)이다(face frame에서 \(p_{j_{k+1}} - p_i\)는 \(p_{j_k} - p_i\)를 \(\theta_k\)만큼 돌리고 길이의 비를 곱한 것이다). \(k = 1, \dots, m\)에 대해 곱하면 왼쪽은 \(w_{m+1}/w_1 = 1\)이고 오른쪽은 \(e^{\mathrm{i}\sum_k\theta_k}\)이다(길이의 비는 곱하면 \(1\)이다). 따라서 \(\sum_k\theta_k = 2\pi - \delta_i \in 2\pi\Z\)이다.</p>
+      </div>
+
+      <p>이 증명은 vertex 둘레에서 face를 하나씩 평면에 펼치는 과정을 식으로 쓴 것이다. 그림은 Section 31.2에 이미 있다. <a href="../31-meshes/31-2-discrete-curvature.html#fig-31-2-2">Figure 31.2.2</a>의 아랫줄이 같은 연결의 세 star를 차례로 펼친 것이고, \(\delta \gt 0\)인 cone에서는 마지막 edge와 처음 edge 사이에 틈이, \(\delta = 0\)인 평면에서는 정확한 맞물림이, \(\delta \lt 0\)인 saddle에서는 겹침이 생긴다. 그 그림의 펼침은 길이를 보존하지만, 증명의 식에서 보듯이 face마다 similarity를 허용해도 배율은 edge를 따라 전해지므로(<a href="#i-43-1-4">Proposition 43.1.4</a>(a)) 그림이 달라지지 않는다. 틈이나 겹침의 각이 정확히 \(\abs{\delta_i}\)이고, 그것이 \(2\pi\)의 배수가 아니면 처음 edge의 image로 돌아올 수 없다.</p>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: Section 31.6</p>
+        <p><a href="../31-meshes/31-6-parametrization-texture.html#i-31-6-4">Proposition 31.6.4</a>는 같은 결론을 UV map의 angle 합으로 얻었다. UV map이 vertex 근처에서 one-to-one이면 둘레의 UV angle 합이 \(2\pi\)이므로, angle을 하나도 바꾸지 않으려면 \(\delta_i = 0\)이어야 한다. 무엇이 새로워졌는가: one-to-one을 가정하지 않으면 조건은 \(\delta_i \in 2\pi\Z\)로 약해지고(둘레를 두 번 감는 펼침도 있다), 평면 mesh에서조차 답이 similarity 하나로 줄어든다는 것(<a href="#i-43-1-4">Proposition 43.1.4</a>)이 함께 보인다. 31.6은 그래서 곡면을 잘랐고(seam), 이 장은 정확한 보존을 포기하고 위반을 최소화한다.</p>
+      </aside>
+
+      <p>그렇다면 정확히 conformal한 map을 sample한 piecewise linear map은 얼마나 conformal한가? 다음 예는 답이 “거의 그렇다”임을 보인다. discrete 조건이 rigid한 것이지, conformal map이 mesh로 잘 근사되지 않는 것은 아니다.</p>
+
+      <div class="thm example" id="i-43-1-6">
+        <p><span class="thm-head">Example 43.1.6</span> <span class="thm-name">(sampling a conformal map on a grid)</span>.
+        local conformal map \((x, y) \mapsto e^x(\cos y, \sin y)\)(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-2">Example 7.4.2</a>(c), 복소수로 \(z = e^{x + \mathrm{i}y}\))을 unit square의 grid mesh(<code>dgmesh.grid_mesh</code>, 한 변에 \(n\)칸)의 vertex에서 sample해 piecewise linear map을 만들자. <a href="#i-43-1-4">Proposition 43.1.4</a>(c)에 따라 이 map이 모든 face에서 정확한 similarity일 수는 없다(그랬다면 전체가 하나의 similarity여서 \(e^{x+\mathrm{i}y}\)의 sample일 수 없다). 실제로는 어느 face에서도 similarity가 아니다(\(n = 4\)에서 face마다의 \(\sigma_1/\sigma_2 - 1\)의 최솟값이 \(0.190\)이다). 그러나 face마다의 \(\sigma_1/\sigma_2 - 1\)의 최댓값은 \(n = 4, 8, 16, 32\)에서 \(0.198\), \(0.093\), \(0.045\), \(0.022\)로 \(n\)에 반비례해 준다. 각의 오차는 mesh 크기에 비례하는 1차 오차다. <a href="43-5-discrete-conformal.html">Section 43.5</a>는 이 “거의”를 에너지로 재고 최소화한다.</p>
+        <p class="verified">Verification: <code>verify/v-43-1-why-conformal.py</code></p>
+      </div>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: many characterizations, many discretizations</p>
+        <p>smooth 세계에서는 아래 왼쪽 열의 성질들이 모두 같은 map(orientation을 지키는 conformal map)을 정한다. 각 성질을 mesh로 옮기면 서로 다른 discrete 이론이 나오고, 각 이론은 다른 것을 정확히 지킨다 <a class="cite" href="../../references.html#CMU-DDG-L19-20">[CMU-DDG L19–20]</a> slides 19–20.</p>
+        <table>
+          <tr><th>smooth 특징</th><th>discrete 판</th><th>정확히 지키는 것</th></tr>
+          <tr><td>face마다 각의 보존</td><td>corner angle을 맞춘다</td><td>각. 그러나 <a href="#i-43-1-4">Proposition 43.1.4</a>와 <a href="#i-43-1-5">Corollary 43.1.5</a> 때문에 그대로는 답이 없어 angle을 변수로 푸는 방법(angle based flattening)이 된다</td></tr>
+          <tr><td>Cauchy–Riemann equations</td><td>face마다의 위반을 최소제곱으로 줄인다(LSCM <a class="cite" href="../../references.html#Levy02">[Levy02]</a>)</td><td>선형성. 이 장의 <a href="43-5-discrete-conformal.html">Section 43.5</a></td></tr>
+          <tr><td>Dirichlet energy와 넓이(Chapter 42)</td><td>\(E_D - \mathcal{A}\)의 최소화(DCP <a class="cite" href="../../references.html#Desbrun02">[Desbrun02]</a>)와 그 eigenproblem 판 <a class="cite" href="../../references.html#Mullen08">[Mullen08]</a></td><td>smooth의 \(E_C = E_D - \mathcal{A}\)가 mesh에서 정확히 성립(<a href="43-5-discrete-conformal.html">Section 43.5</a>)</td></tr>
+          <tr><td>metric의 배율 \(e^{2\mu}\)</td><td>vertex마다의 배율로 edge 길이를 바꾼다 <a class="cite" href="../../references.html#Springborn08">[Springborn08]</a></td><td>edge 길이의 cross ratio(<a href="43-5-discrete-conformal.html">Section 43.5</a>의 끝)</td></tr>
+          <tr><td>작은 원을 원으로</td><td>circle packing, circle pattern</td><td>원(대신 triangle의 각은 바뀐다)</td></tr>
+        </table>
+        <p>무엇을 잃는가: 어느 판도 smooth conformal map의 모든 성질을 한꺼번에 지키지 못한다. 선형 방법(둘째·셋째 줄)은 빠르지만 triangle이 정확히 닮은꼴로 가지 않고, 비선형 방법은 더 많은 것을 지키는 대신 계산이 무겁다. 이 장은 둘째와 셋째 줄을 구현한다.</p>
+      </aside>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: texture maps and map projections</p>
+        <p>복원한 mesh에 texture를 입히는 UV map은 곡면을 잘라 평면에 펴는 map이다(<a href="../31-meshes/31-6-parametrization-texture.html">Section 31.6</a>). conformal UV map에서는 정사각형 texel이 곡면 위에서도 (크기만 다른) 정사각형으로 보여 texture가 찌그러지지 않는다. 대신 넓이가 바뀌므로 texel 밀도가 곳에 따라 달라진다(<a href="../31-meshes/31-6-parametrization-texture.html#fig-31-6-2">Figure 31.6.2</a>의 cap 실험). 같은 선택이 360° 영상과 지도의 projection에도 있다. Mercator는 conformal이고 equirectangular image는 conformal도 area-preserving도 아니다(<a href="../00-tour/0-5-intrinsic.html#i-0-5-3">Section 0.5</a>의 In computer vision 상자).</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>conformal map의 정의, 각의 보존, \(E, F, G\)에 의한 판정, stereographic·Mercator projection: <a href="../07-first-fundamental-form/7-4-conformal-maps.html">Section 7.4</a>.</li>
+          <li>Tour: isometry와 conformal map은 <a href="../00-tour/0-3-surfaces.html#sec-isometry">Section 0.3</a>, 왜곡 없는 지도가 없는 이유는 <a href="../00-tour/0-5-intrinsic.html">Section 0.5</a>.</li>
+          <li>곡면을 잘라야 펼 수 있는 이유와 seam의 trade-off: <a href="../31-meshes/31-6-parametrization-texture.html#sec-why-cut">Section 31.6</a>.</li>
+          <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L19-20">[CMU-DDG L19–20]</a> slides 3–21, <a class="cite" href="../../references.html#Cr">[Cr ch7]</a>의 서두.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>휜 곡면은 길이를 보존하며 펼 수 없으므로 각과 넓이 가운데 하나를 고른다. conformal map은 작은 원을 크기만 다른 원으로 보내는 map이다(<a href="#eq-43-1-1">(43.1.1)</a>, <a href="#i-43-1-1">Example 43.1.1</a>).</li>
+        <li>area-preserving map은 shear를 허용하므로 자유도가 거대하고(<a href="#i-43-1-3">Non-example 43.1.3</a>), conformal map은 강한 정칙성, 간단한 좌표 공식, 선형 계산, 존재 정리를 준다(<a href="#i-43-1-2">Remark 43.1.2</a>).</li>
+        <li>mesh에서 모든 face의 각을 정확히 보존하는 piecewise linear map은 한 edge의 image로 정해지고, 평면 mesh에서는 하나의 similarity뿐이다(<a href="#i-43-1-4">Proposition 43.1.4</a>). 곡면 mesh에서는 \(\delta_i \notin 2\pi\Z\)인 vertex 하나가 그런 map을 막는다(<a href="#i-43-1-5">Corollary 43.1.5</a>).</li>
+        <li>smooth conformal map을 sample하면 face마다의 각의 오차는 mesh 크기에 비례해 준다(<a href="#i-43-1-6">Example 43.1.6</a>). 그래서 정확한 보존 대신 위반을 재고 최소화한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 평면에서 평면으로 가는 가장 단순한 경우로 돌아가, 복소수의 곱셈이 rotation과 scaling이라는 것에서 출발해 conformal map을 Cauchy–Riemann equations와 holomorphic function으로 특징짓는다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-43-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 43.1.1</span> <span class="level">★</span>
+        unit sphere의 Mercator 지도에서 colatitude \(\theta\)인 점 둘레의 넓이 배율(지도의 넓이 / sphere의 넓이)을 구하여라. 북위 \(45^\circ\)와 \(75^\circ\)에서 각각 얼마인가? 같은 점에서 Lambert의 cylindrical equal-area projection(<a href="../00-tour/0-5-intrinsic.html#i-0-5-3">Section 0.5</a>)은 북쪽 방향과 동쪽 방향의 길이를 각각 몇 배로 바꾸는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-43-1-1">Example 43.1.1</a>(a)에서 길이 배율이 \(1/\sin\theta\)이므로 넓이 배율은 \(1/\sin^2\theta\)이다. 북위 \(45^\circ\)는 \(\theta = 45^\circ\)이므로 \(2\), 북위 \(75^\circ\)는 \(\theta = 15^\circ\)이므로 \(1/\sin^215^\circ = 14.93\)이다. Lambert projection \((\theta, \varphi) \mapsto (\varphi, \cos\theta)\)에서 동쪽(\(\varphi\) 방향) 단위 길이는 sphere에서 \(\sin\theta\,d\varphi\)이고 지도에서 \(d\varphi\)이므로 \(1/\sin\theta\)배, 북쪽(\(-\theta\) 방향) 단위 길이는 sphere에서 \(d\theta\)이고 지도에서 \(\abs{d\cos\theta} = \sin\theta\,d\theta\)이므로 \(\sin\theta\)배다. 곱이 \(1\)이라 넓이는 보존되지만 두 방향의 비가 \(1/\sin^2\theta\)라 원이 ellipse가 된다(북위 \(75^\circ\)에서 비가 \(14.93\)).</p>
+          <p class="verified">Verification: <code>verify/v-43-1-why-conformal.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-43-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 43.1.2</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. “<a href="#i-43-1-4">Proposition 43.1.4</a>(c)에서 orientation을 지킨다는 가정을 빼고 ‘모든 face에서 similarity(반사도 허용)’로 바꾸어도 결론은 그대로다.”</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>거짓이다. 평면 mesh를 직선 \(\operatorname{Im}p = 0\)을 따라 두 쪽으로 나누어, 위쪽 face에는 항등 map을, 아래쪽 face에는 그 직선에 대한 반사 \(p \mapsto \bar p\)를 쓰자(예: 실수축 위에 vertex의 줄이 있는 grid mesh). 직선 위의 vertex에서 두 map이 같으므로 piecewise linear map이 잘 정의되고, 각 face에서 similarity(아래쪽은 orientation을 뒤집는다)이다. 그러나 전체는 하나의 similarity가 아니라 종이를 접은 것(fold)이다. 증명이 어디서 깨지는지 보면, <a href="#eq-43-1-3">(43.1.3)</a>은 orientation을 지키는 similarity의 식이다. 반사를 허용하면 공유 edge의 image가 정해져도 셋째 vertex의 후보가 두 개(edge에 대해 대칭)이므로 강제되지 않는다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-43-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 43.1.3</span> <span class="level">★</span>
+        북극에서의 stereographic projection \(\sigma\)가 unit sphere의 넓이를 몇 배로 바꾸는지 \(\sigma\)의 크기의 함수로 써라. 이 배율을 써서 남반구의 넓이 \(2\pi\)를 그 image(unit disk) 위의 적분으로 다시 계산하고, image의 넓이 \(\pi\)와 비교해 평균 배율을 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-43-1-1">Example 43.1.1</a>(b)에서 길이 배율이 \((1 + \abs{\sigma}^2)/2\)이므로 넓이 배율은 \((1 + \abs{\sigma}^2)^2/4\)이다. 거꾸로 평면의 넓이 요소 \(dA_{\mathbb{C}}\)에 대응하는 sphere의 넓이는 \(e^{2\mu}dA_{\mathbb{C}} = 4\,dA_{\mathbb{C}}/(1 + \abs{w}^2)^2\)이다. 남반구는 \(\abs{w} \lt 1\)에 대응하므로 sphere의 넓이는 \(\int_0^{2\pi}\int_0^1\tfrac{4\rho}{(1 + \rho^2)^2}\,d\rho\,d\vartheta = 2\pi\big[-\tfrac{2}{1 + \rho^2}\big]_0^1 = 2\pi\)이고, 이것은 남반구의 넓이와 같다. image의 넓이는 \(\pi\)이므로 평균 배율은 \(\tfrac12\)이고, 남극에서 \(\tfrac14\), 적도에서 \(1\) 사이의 값이다.</p>
+          <p class="verified">Verification: <code>verify/v-43-1-why-conformal.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-43-1-4" data-level="2">
+        <p><span class="thm-head">Exercise 43.1.4</span> <span class="level">★★</span>
+        <a href="#i-43-1-3">Non-example 43.1.3</a>의 twist \(T\)가 conformal인 것은 \(\tau\)가 상수일 때뿐임을 보여라. 또 \(\tau(\rho) = c\rho^2\)일 때 \(\rho\)에서의 \(\sigma_1/\sigma_2\)를 \(c\rho^2\)의 함수로 쓰고, \(\rho \to 0\)과 \(\rho \to \infty\)의 행동을 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-43-1-2">(43.1.2)</a>에서 \(DT\)는 \(s = \rho\tau'(\rho)\)인 shear이고 \(DT^{\mathsf T}DT = \begin{pmatrix} 1 + s^2 & s \\ s & 1 \end{pmatrix}\)이다. 각을 보존하려면 이것이 단위행렬의 양수배여야 하므로(<a href="../07-first-fundamental-form/7-4-conformal-maps.html#i-7-4-4">Proposition 7.4.4</a>) 비대각 성분 \(s = 0\)이어야 한다. 모든 \(\rho \gt 0\)에서 \(\rho\tau'(\rho) = 0\)이면 \(\tau' = 0\)이므로 \(\tau\)가 상수이고, 이때 \(T\)는 rotation이다. 거꾸로 상수 \(\tau\)이면 \(s = 0\)이다. \(\tau = c\rho^2\)이면 \(s = 2c\rho^2\)이고 \(\sigma_1\sigma_2 = 1\), \(\sigma_1 = \tfrac12(s + \sqrt{s^2 + 4})\)이므로 \(\sigma_1/\sigma_2 = \sigma_1^2\)이고, 이것은 \(\tfrac14\big(2c\rho^2 + \sqrt{4c^2\rho^4 + 4}\big)^2\), 곧 \(\big(c\rho^2 + \sqrt{c^2\rho^4 + 1}\big)^2\)이다. \(\rho \to 0\)이면 \(1 + 2c\rho^2 + O(\rho^4)\)로 \(1\)에 가깝고, \(\rho\)가 크면 \(4c^2\rho^4\)처럼 커진다. \(c = 1.2\)(\(\tau = 1.2\rho^2\)), \(\rho = 0.8\)이면 \((0.768 + \sqrt{1.5898})^2 = 4.12\)로 <a href="#fig-43-1-1">Figure 43.1.1</a>의 값과 같다.</p>
+          <p class="verified">Verification: <code>verify/v-43-1-why-conformal.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-43-1-5" data-level="2">
+        <p><span class="thm-head">Exercise 43.1.5</span> <span class="level">★★</span>
+        <strong>Coding.</strong> <a href="#i-43-1-6">Example 43.1.6</a>의 실험을 \(z = e^{x + \mathrm{i}y}\)와 \(z = (x + 1 + \mathrm{i}y)^2\)에 대해 \(n = 4, 8, 16, 32\)로 되풀이하여라. face마다 \(\sigma_1/\sigma_2 - 1\)의 최댓값과, face마다 \(A_f\tfrac12(\sigma_1 - \sigma_2)^2\)을 더한 값(<a href="../42-laplace-beltrami/42-6-implicit-mcf.html#ex-42-6-6">Exercise 42.6.6</a>의 차이를 평면에서 잰 것)을 출력하여라. 두 양은 각각 \(n\)의 몇 제곱으로 줄어드는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-43-1-5"><code>import numpy as np
+import dgmesh as dm
+
+def face_ratios_and_gap(V, F, z):
+    """per face: sigma1/sigma2 of the affine map face -&gt; image, and A_f * (sigma1 - sigma2)^2 / 2."""
+    ratio, gap = [], 0.0
+    for tri in F:
+        P = (V[tri[1:], :2] - V[tri[0], :2]).T                    # 2 x 2: face edges (planar mesh)
+        d = z[tri[1:]] - z[tri[0]]
+        J = np.stack([d.real, d.imag]) @ np.linalg.inv(P)        # differential of the face map
+        s1, s2 = np.linalg.svd(J, compute_uv=False)
+        ratio.append(s1 / s2)
+        gap += 0.5 * abs(np.linalg.det(P)) * 0.5 * (s1 - s2) ** 2
+    return max(ratio), gap
+
+for name, f in (("exp", np.exp), ("square", lambda w: (w + 1) ** 2)):
+    for n in (4, 8, 16, 32):
+        xs = np.linspace(0, 1, n + 1)
+        V, F = dm.grid_mesh(xs, xs)
+        r, g = face_ratios_and_gap(V, F, f(V[:, 0] + 1j * V[:, 1]))
+        print(f"{name:6s} n={n:2d}  max ratio - 1 = {r - 1:.4f}  gap = {g:.3e}")</code></pre>
+          <pre id="out-ex-43-1-5"><code>exp    n= 4  max ratio - 1 = 0.1984  gap = 4.957e-02
+exp    n= 8  max ratio - 1 = 0.0935  gap = 1.246e-02
+exp    n=16  max ratio - 1 = 0.0454  gap = 3.118e-03
+exp    n=32  max ratio - 1 = 0.0224  gap = 7.798e-04
+square n= 4  max ratio - 1 = 0.1785  gap = 6.250e-02
+square n= 8  max ratio - 1 = 0.0892  gap = 1.562e-02
+square n=16  max ratio - 1 = 0.0444  gap = 3.906e-03
+square n=32  max ratio - 1 = 0.0222  gap = 9.766e-04</code></pre>
+          <p>\(n\)을 두 배로 하면 \(\sigma_1/\sigma_2 - 1\)은 약 \(\tfrac12\)배, 차이(gap)는 약 \(\tfrac14\)배가 된다. 곧 각의 오차는 mesh 크기 \(h = 1/n\)에 비례하고, 그 제곱을 넓이로 적분한 양은 \(h^2\)에 비례한다. 각 face에서 \(\sigma_1 - \sigma_2\)가 \(O(h)\)이고 넓이의 합이 \(O(1)\)이기 때문이다. \((w + 1)^2\)의 gap은 \(1/n^2\)과 정확히 같은 값을 보인다(\(n = 4\)에서 \(0.0625\)). 이 양이 <a href="43-5-discrete-conformal.html">Section 43.5</a>의 discrete conformal energy이고, <a href="43-4-conformal-energy.html">Section 43.4</a>는 그 smooth 판을 정의한다.</p>
+          <p class="verified">Verification: <code>verify/v-43-1-why-conformal.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 43. Conformal Geometry</a>
+    <a rel="next" href="43-2-cauchy-riemann.html">43.2 Complex Numbers and the Cauchy–Riemann Equations →</a>
+  </nav>
+</body>
+</html>
