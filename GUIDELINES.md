@@ -1860,7 +1860,12 @@ window.MathJax = {
 - **HTML 페이지를 눈으로 확인할 때**: `node tools/shot.mjs /절대경로/페이지.html out.png [폭]`
   - `google-chrome --screenshot`은 MathJax 조판을 기다리지 않아 수식이 원문 TeX로 찍힌다(01장 파일럿에서 확인).
   - `tools/shot.mjs`는 DevTools 프로토콜로 `MathJax.startup.promise`를 기다린 뒤 전체 페이지를 찍는다. MathJax 오류 개수와 **넘치는 디스플레이 수식의 id**도 출력한다.
-  - 폰 폭은 `400`으로 확인한다. 네트워크가 필요하다(MathJax CDN).
+  - 다음 두 가지도 출력한다(2026-10-21).
+    - `overflowing inline`: 문단(p, li, div, td, figcaption 등)의 오른쪽 끝을 넘는 inline 수식. id와 TeX 앞부분을 보여 준다.
+    - `page width: W / 폭`: 문서 폭이 창 폭보다 크면 `HORIZONTAL SCROLL`을 붙인다. MathJax의 숨은 보조 MathML 때문에 수식은 넘치지 않아 보여도 페이지가 넓어지는 경우가 있다.
+  - out 자리에 `-`를 주면 캡처하지 않고 검사만 한다. 여러 페이지를 훑을 때 쓴다.
+  - 폰 폭은 `400`으로 확인한다. 목표는 넘치는 디스플레이·inline 수식 0개, `page width: 400 / 400`이다. 긴 inline 수식은 관계 기호에서 둘로 나누거나 display로 바꾸고, 긴 display 수식은 `aligned`로 나눈다. 네트워크가 필요하다(MathJax CDN).
+  - interactive 그림(`dgmesh.plotly_save`)은 viewport meta를 넣는다. 좁은 화면에서는 제목을 줄바꿈하고, 장면이 잘리지 않게 camera를 물리고, colorbar를 가늘게 하는 script도 붙인다(2026-10-21).
 - **sympy 양수 가정**: 구면의 sin θ, 원환면의 R + r cos u처럼 양수임을 알려 줘야 sqrt(sin²θ) 같은 식이 남지 않는다. `dgsym.EXAMPLES[…]["positive"]`에 들어 있다.
 
 - `google-chrome --headless=new --screenshot --window-size=W,H`는 창 높이에서 약 87px을 잘라낸다(2026-10-08 검토에서 확인). 그림 아래쪽이 잘린 것처럼 보이므로 높이를 넉넉히 주거나 `tools/shot.mjs`를 쓴다.

@@ -1144,3 +1144,79 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - 44 toc-note의 Polthier 문구
     - notation 3행, terms(averaged boundary condition 포함). 루트 index의 44를 Reviewed로 바꿨다.
   - 남은 todo 2개(Chapter 45)
+- 2026-10-21: 세 번째 사용량 한도(01:40 초기화)로 41·45 작성 agent가 멈췄다. 사용자 지시("계속 진행")로 둘 다 재개했다.
+- 2026-10-21: **사용자 지시: "Track3 관련 작업은 진행하지 마."**
+  - Track 3(Part I–III, 4–26장) 파일은 수정하지 않는다(지금까지도 수정하지 않았다).
+  - 43장 검토가 제안한 "Track 3 21·24장 toc-note에 conformal change 공식 추가"는 하지 않는다. 할 일 목록에서 뺀다.
+  - Track 2 본문에서 Track 3 장으로 가는 기존 링크(toc 앵커)는 Track 2 내용이므로 그대로 둔다.
+- 2026-10-21: **45장 작성 완료(draft).** 4절, 그림 9개(interactive 4개), verify 207 checks, todo 1(Chapter 41)
+  - 확정한 부호
+    - 반시계 dual cell 둘레의 holonomy는 +δ_i(mod 2π)다.
+    - trivial connection: −d_0ᵀξ = −δ + 2πk, Σk = χ
+    - Crane Ex 8.6의 회전 방향은 어느 ⋆로 읽느냐에 따라 달라진다(Conventions 상자).
+    - connection angle은 ξ로 쓴다.
+  - Warning: torus_mesh는 모든 대각선에서 ⋆_1 = 0이고, genus2_mesh에는 음수 ⋆_1이 있다. 세 조각 분해의 예는 flat torus로 했다.
+  - 다른 장의 Chapter 45 todo 확정 목록은 scratch todo45-map.md에 있다(44장 2곳, 40.2, 42.1, 42.6 + 선택 항목).
+  - 통합: terms 15개
+  - 45 검토 agent를 띄웠다. 지금 도는 것: 41 작성, 45 검토
+- 2026-10-21: **41장 작성 완료(draft).** 5절, 그림 13개(interactive 4개), verify 377 checks, todo 4
+  - 확정한 부호
+    - ∇A = −(L𝐱)_i, ∇(½Σℓθ) = (K𝐍)_i
+    - discrete flow는 mixed A_i로 나눈다. MCF는 (L𝐱)_i/A_i다.
+    - GCF는 −∫H dA의 흐름이고 dV/dt = −2πχ다.
+    - grad W = (ΔH + 2H(H² − K))𝐍
+    - discrete dA/dt = −4W_h는 정확한 등식이다.
+  - 작성자의 Crane 주장(검토에서 대조): Cr Ex 5.4의 부호, slide 23·16, slide 36·38의 update 부호
+  - 다른 장의 Chapter 41 todo 확정 목록은 scratch todo41-map.md에 있다(39장 2곳, 40장 5곳, 42장 3곳, 45 index).
+  - 통합: terms 10개, references Huisken84·Grayson89·MarquesNeves14
+  - 41 검토 agent를 띄웠다. 지금 도는 것: 41 검토, 45 검토
+- 2026-10-21: **사용자 지시: "track2를 완벽하게 끝내는걸 목표로 해줘."** Track 2 완료 기준은 다음과 같다(Track 3은 건드리지 않는다).
+  - A. 장 단위
+    - 41·45장 검토, 통합, 공개
+    - 다른 장의 Chapter 41·45 todo를 정확한 항목으로 확정한다(scratch todo41-map.md, todo45-map.md).
+    - 남은 todo를 모두 확정한다. 확정할 수 없는 것은 진술을 확인된 범위로 줄이고 todo를 지운다. 대상: 40.4 3D signed Steiner, Hildebrandt06 2곳
+  - B. 도구
+    - shot.mjs에 inline 수식 넘침 검사와 documentElement.scrollWidth 검사를 넣는다. 32–45장 전체를 400px에서 훑어 고친다(38.3에 8개 이상 알려져 있다).
+    - plotly_save의 400px 잘림을 고치고 interactive 그림을 다시 만든다.
+    - dgsym.EXAMPLES에 ellipse와 flower를 넣는다.
+    - (선택) 여러 장의 lib에 중복된 helper를 tools로 옮긴다. run_printed는 dgcode로, dual helper·tree-cotree·transport는 dgdec로. verify 출력이 바이트 단위로 같아야 한다.
+  - C. Track 2 통합 검토(§15.6의 3단계, 32–45 전체)
+    - §3.1 줄기(T1–T6)
+    - Track 2의 §3.4 호환성 명제
+    - §3.5 기준 예제의 여정. 43장 칸을 넣는다.
+    - 장 사이의 흐름, Builds on/Leads to, 기호와 용어의 일관성
+    - 남은 REVIEW 2개: 37.6 Fig 37.6.1(a), 37.1 Looking ahead → Looking back
+    - 한국어 용어 통일: 곡면, 이산화, 꺾은선 등
+    - 43.5의 행렬 K
+    - root index의 Track 2 표, notation #sec-ddg, glossary #sec-glossary-ddg의 완결성
+  - D. Track 1 → Track 2 연결: Tour 0.8 Where to Go Next와 31장 index·절에서 DDG로 가는 링크
+  - E. 애니메이션 단계(§12.8): 각 장 작성자의 제안에서 골라 Tour·31장 수준으로 만든다. 렌더는 taskset -c 0-7로 하고 한 번에 하나씩 돌린다.
+  - F. 마무리: PLAN 기록, check_all 전체, 공개. final 상태는 사용자 확인 뒤에만 붙인다.
+- 2026-10-21: **B(도구) 진행**
+  - shot.mjs에 inline 수식 넘침 검사, 문서 폭 검사(HORIZONTAL SCROLL), 검사만 하는 `-` 모드를 넣었다. GUIDELINES 부록 E에 적었다.
+  - 32–44장의 공개된 76페이지를 400px로 훑었다(scratch sweep400-a.txt). 34페이지에 넘침 또는 가로 스크롤이 있었고, 대부분 32–38장이다.
+    - 휴대폰 폭 정리 agent 3명에게 맡겼다: P1 32–34, P2 35·36·42, P3 37–38.
+  - dgmesh.plotly_save
+    - viewport meta, 문서 제목, 여백을 넣는다.
+    - 좁은 화면 script: 제목 줄바꿈과 위치, camera를 물리기, 가는 colorbar
+    - 39.4.2로 400px·900px을 확인했다. 기존 interactive HTML은 check_all이 그림을 다시 만들 때 함께 갱신된다. SVG는 바이트 단위로 같았다.
+  - 지금 도는 것: 41 검토, 45 검토, P1, P2, P3
+  - dgsym.EXAMPLES에 ellipse와 flower를 넣었다(§2.5 기준 평면곡선, 기대값은 극좌표 곡률 공식). self-test 84 PASS. ddg32.CURVES와 값이 같다(차이 0).
+    - ddg32가 EXAMPLES를 쓰게 바꾸는 것은 P1(32장)이 끝난 뒤에 한다.
+  - D 조사: Track 1에서 Track 2로 가는 링크는 Tour 0.8, 31 index, 31.1 세 곳뿐이다.
+    - 31.2(angle defect, Gauss–Bonnet, bending angle, Steiner), 31.3(cotan, area gradient), 31.4(heat method), 31.6(LSCM)과 Tour 0.4·0.5·0.7에 Go deeper(Track 2) 링크가 필요하다.
+    - agent 수에 여유가 생기면 맡긴다.
+- 2026-10-21: **45장 reviewed, 공개.** 큰 수학 오류는 없었다.
+  - 검토가 고친 것
+    - Prop 45.3.6의 회전 부호: R(ê, −θ)이고 hinge의 θ_e = −ψ다.
+    - 사실 오류 3개(Ex 45.3.11, Ex 45.4.14의 vertex, Def 45.4.1 뒤 문장)
+    - 원문 전재 4곳: Cr §8.1.2 문장, Algorithm 4의 bag, Ex 8.11, §8.4 문단
+    - Conventions 상자에 Crane §8.4의 d_0ᵀφ 대응을 더했다.
+    - ψ 기호 충돌 → λ
+  - 원문 대조: 작성자의 Crane·Crane10 주장은 맞았다. eq (6)은 Crane10이 아니라 노트 §8.4에 있다(본문 수정).
+  - 통합
+    - 40.2, 44.5, 44 index의 Chapter 45 todo를 확정했다(Thm 45.3.10·Cor 45.3.12, Def 45.3.2, Def 45.3.2·Prop 45.3.6).
+    - 42.1·42.6의 todo는 P2(42장 휴대폰 폭)가 끝난 뒤에 확정한다.
+    - notation 3행, terms 26개(45장 15 + 11). 루트 index의 45를 Reviewed로 바꿨다.
+  - 남은 todo: 45 index의 Chapter 41 링크
+  - 검토 판단 요청: Track 2의 "곡면"/"surface" 표기가 장마다 다르다(42·43·45는 곡면, 39·40·44는 surface). 통합 검토 C에서 통일한다.

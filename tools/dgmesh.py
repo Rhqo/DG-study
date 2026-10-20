@@ -787,8 +787,56 @@ def plotly_save(traces, script_file, title, div_id):
                       title=dict(text=title, x=0.5, font=dict(size=13)))
     out = pathlib.Path(script_file).with_name(pathlib.Path(script_file).stem + "-interactive.html")
     fig.write_html(out, include_plotlyjs="cdn", full_html=True, div_id=div_id, config={"displaylogo": False})
+    out.write_text(_plotly_mobile_patch(out.read_text(encoding="utf-8"), title), encoding="utf-8")
     print(f"saved {out}")
     return out
+
+
+_PLOTLY_NARROW_JS = """<script>
+(function () {
+  // 좁은 화면(휴대폰): 제목을 줄바꿈하고, 장면이 좌우로 잘리지 않게 camera를 물리고, colorbar를 가늘게 한다.
+  var gd = document.querySelector('.plotly-graph-div');
+  if (!gd || !window.Plotly) return;
+  var title0 = null, eye0 = null;
+  function fit() {
+    if (!gd.layout) return;
+    if (title0 === null) title0 = (gd.layout.title && gd.layout.title.text) || '';
+    var w = window.innerWidth, narrow = w < 700, per = Math.max(24, Math.floor(w / 7.5));
+    var lines = [''];
+    title0.split(' ').forEach(function (word) {
+      var cur = lines[lines.length - 1];
+      if (narrow && cur && (cur + ' ' + word).length > per) lines.push(word); else lines[lines.length - 1] = cur ? cur + ' ' + word : word;
+    });
+    var cam = gd._fullLayout && gd._fullLayout.scene && gd._fullLayout.scene.camera;
+    if (eye0 === null && cam) eye0 = {x: cam.eye.x, y: cam.eye.y, z: cam.eye.z};
+    var k = narrow ? Math.min(2.2, 700 / w) : 1, H = (gd._fullLayout && gd._fullLayout.height) || 450;
+    var upd = {'title.text': lines.join('<br>'), 'margin.t': (narrow ? 40 : 22) + 18 * lines.length};
+    if (narrow) { upd['title.yref'] = 'container'; upd['title.yanchor'] = 'top'; upd['title.y'] = 1 - 34 / H; }
+    if (eye0) upd['scene.camera.eye'] = {x: eye0.x * k, y: eye0.y * k, z: eye0.z * k};
+    Plotly.relayout(gd, upd);
+    var idx = [];
+    gd.data.forEach(function (t, i) { if (t.showscale !== false && (t.colorscale || t.colorbar)) idx.push(i); });
+    if (idx.length) Plotly.restyle(gd, {'colorbar.thickness': narrow ? 10 : 30, 'colorbar.len': narrow ? 0.6 : 1}, idx);
+  }
+  if (gd.layout) fit(); else gd.addEventListener('plotly_afterplot', fit, {once: true});
+  window.addEventListener('resize', fit);
+})();
+</script>"""
+
+
+def _plotly_mobile_patch(html, title):
+    """write_html 결과에 viewport·문서 제목·여백을 넣고, 좁은 화면에서 제목과 camera를 맞추는 script를 붙인다.
+    두 번 적용해도 결과가 같다(이미 patch된 파일은 그대로 둔다)."""
+    if 'name="viewport"' in html:
+        return html
+    import html as _html
+    import re as _re
+    plain = _re.sub(r"<[^>]+>", " ", title).strip()
+    head = ('<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />'
+            f'<title>{_html.escape(plain)}</title>'
+            '<style>html, body { margin: 0; height: 100%; background: #fff; }</style>')
+    html = html.replace('<head><meta charset="utf-8" />', head, 1)
+    return html.replace("</body>", _PLOTLY_NARROW_JS + "\n</body>", 1)
 
 
 def cotan_apply(V, F, X):

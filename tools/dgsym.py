@@ -308,6 +308,28 @@ def _examples():
         expected=dict(kappa=a / (a ** 2 + b ** 2), tau=b / (a ** 2 + b ** 2)),
     )
 
+    # Track 2의 기준 평면곡선 (GUIDELINES §2.5). 32·37장의 lib가 같은 식을 쓴다.
+    ex["ellipse"] = dict(
+        kind="curve", name="타원 (2cos t, sin t)", params=(), coords=(t,),
+        domain={t: (0, 2 * sp.pi)},
+        expr=sp.Matrix([2 * sp.cos(t), sp.sin(t), 0]),
+        positive=(),
+        note="반시계 방향. 장축 끝 (±2, 0)에서 κ = 2, 단축 끝에서 κ = 1/4",
+        expected=dict(kappa_s=2 / (4 * sp.sin(t) ** 2 + sp.cos(t) ** 2) ** sp.Rational(3, 2), tau=sp.Integer(0)),
+    )
+
+    _fr = 1 + sp.Rational(3, 10) * sp.cos(5 * t)
+    _fr1, _fr2 = _fr.diff(t), _fr.diff(t, 2)
+    ex["flower"] = dict(
+        kind="curve", name="꽃 곡선 r(t) = 1 + 0.3 cos 5t", params=(), coords=(t,),
+        domain={t: (0, 2 * sp.pi)},
+        expr=sp.Matrix([_fr * sp.cos(t), _fr * sp.sin(t), 0]),
+        positive=(),
+        note="반시계 방향. 극좌표 곡률 공식으로 κ_s의 부호가 열 번 바뀐다(inflection 10개)",
+        expected=dict(kappa_s=(_fr ** 2 + 2 * _fr1 ** 2 - _fr * _fr2) / (_fr ** 2 + _fr1 ** 2) ** sp.Rational(3, 2),
+                      tau=sp.Integer(0)),
+    )
+
     ex["sphere"] = dict(
         kind="surface", name="구면 S²(r)", params=(r,), coords=(th, ph),
         domain={th: (0, sp.pi), ph: (0, 2 * sp.pi), r: (0.5, 2)},
@@ -503,6 +525,14 @@ def _selftest():
                 continue
             direct = rp["phi"](j).subs(dict(zip(X, rp["psi"](i))))
             sym_equal(f"§7 ℝℙ²: φ_{j}∘φ_{i}⁻¹", direct, rp["transition"](i, j), {u: (0.3, 2.0) for u in U})
+
+    # Track 2 기준 평면곡선: 부호곡률과 τ = 0
+    for key in ("ellipse", "flower"):
+        e = ex[key]
+        (t,) = e["coords"]
+        sym_equal(f"§2.5 {e['name']}: κ_s", signed_curvature(e["expr"], t), e["expected"]["kappa_s"], e["domain"])
+        _, tau = curvature_torsion(e["expr"], t)
+        sym_equal(f"§2.5 {e['name']}: τ", tau, e["expected"]["tau"], e["domain"])
 
     # 부호곡률: 반시계 방향 원은 +1/r, 시계 방향 원은 −1/r (n_s = J t 규약)
     e = ex["circle"]

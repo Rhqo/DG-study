@@ -1,6 +1,7 @@
-// usage: node tools/shot.mjs <절대경로.html> <out.png> [폭=900]
+// usage: node tools/shot.mjs <절대경로.html> <out.png | -> [폭=900]
 // headless Chrome을 DevTools 프로토콜로 띄워 MathJax 조판(MathJax.startup.promise)이 끝난 뒤 전체 페이지를 캡처한다.
-// 넘치는 디스플레이 수식이 있으면 경고를 출력한다. (GUIDELINES.md 부록 E)
+// out 자리에 -를 주면 캡처하지 않고 검사만 한다.
+// 넘치는 디스플레이 수식, 문단 밖으로 넘치는 inline 수식, 페이지 가로 스크롤(문서 폭 > 창 폭)을 출력한다. (GUIDELINES.md 부록 E)
 import { spawn } from "node:child_process";
 import { writeFileSync } from "node:fs";
 
@@ -58,6 +59,19 @@ const ovExpr = `JSON.stringify(Array.from(document.querySelectorAll('mjx-contain
 }).map(e => { const p = e.closest('[id]'); return (p ? p.id : '?'); }))`;
 const ov = await send("Runtime.evaluate", { expression: ovExpr, returnByValue: true });
 console.log("overflowing displays:", ov.result.result.value);
+const inExpr = `JSON.stringify(Array.from(MathJax.startup.document.math).filter(it => !it.display && it.typesetRoot).filter(it => {
+  const e = it.typesetRoot; const r = e.getBoundingClientRect(); if (r.width === 0) return false;
+  const blk = e.parentElement.closest('p, li, div, td, figcaption, dd, summary') || document.body;
+  return r.right > blk.getBoundingClientRect().right + 1;
+}).map(it => { const p = it.typesetRoot.closest('[id]'); return (p ? p.id : '?') + ' :: ' + it.math.slice(0, 90); }))`;
+const inl = await send("Runtime.evaluate", { expression: inExpr, returnByValue: true });
+console.log("overflowing inline:", inl.result.result.value);
+const sw = await send("Runtime.evaluate", { expression: "document.documentElement.scrollWidth", returnByValue: true });
+console.log(`page width: ${sw.result.result.value} / ${width}${sw.result.result.value > width ? "  HORIZONTAL SCROLL" : ""}`);
+if (out === "-") {
+  console.log(`mathjax ${ok ? "done" : "TIMEOUT"}, containers ${cnt.result.result.value}, errors ${errs.result.result.value}`);
+  ws.close(); chrome.kill("SIGKILL"); process.exit(0);
+}
 const m = await send("Page.getLayoutMetrics");
 const h = Math.ceil(m.result.cssContentSize.height);
 await send("Emulation.setDeviceMetricsOverride", { width, height: h, deviceScaleFactor: 1, mobile: false });
