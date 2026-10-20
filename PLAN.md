@@ -1111,3 +1111,36 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - shot.mjs에 documentElement.scrollWidth 검사를 넣는다. 숨은 보조 MathML이 가로 스크롤을 만든다.
     - 43.5의 행렬 K = 𝖤_C + bbᵀ: 42장은 행렬에 K를 피했다.
     - GUIDELINES §3.5 43장 칸
+- 2026-10-20: **44장 작성 완료(draft).** 6절, 그림 18개(interactive 4개), verify 292 checks, todo 5
+  - 확정한 부호
+    - κ_g는 왼쪽으로 꺾이면 양수다(39.2와 같고, 슬라이드는 반대).
+    - discrete: π − θ_l = κ_g + δ/2. Thm 44.3.9에서 곡선 위 vertex의 defect는 절반만 센다.
+    - heat method: (M − tL)u = δ_γ, X = −∇u/|∇u|, Lφ = b, t = m·ℓ̄²(h를 쓰지 않는다)
+  - Prop 44.4.12는 위 경계만 증명했다. 계약은 등호였다. 검토 R2가 판단한다.
+  - 다른 장 todo 확정 후보: 39.2의 todo 2개 → Remark 44.1.1, Def 44.3.2. 42.6의 todo → Def 44.6.4
+  - 통합: terms 15개, references Varadhan67·Amenta98
+  - 44 검토 R1(44.1–44.3)·R2(44.4–44.6, index)와 45 작성 agent를 띄웠다. 지금 도는 것: 41 작성, 44 R1, 44 R2, 45 작성
+- 2026-10-20: **44 R2(44.4–44.6, index) 완료.**
+  - 고친 수학
+    - Prop 44.4.12: 등호는 0 < δ ≤ π에서만 성립한다. δ > π이면 inj^Δ = r₀ sin(δ/2)다. (b)를 증명했다.
+    - Prop 44.6.5(c): Σb_i = 0은 boundary가 있어도 성립한다.
+    - Ex 44.5.4: ψ₀ > 64.62°(엄격한 부등호)
+    - Ex 44.4.5(b)의 정의역
+  - 원문 대조: Crane13 원문은 L_C가 우리 L과 같은 부호다. 초안은 반대로 불렀고, 이것을 고쳤다. averaged boundary condition은 Crane13 §3.4에서 확인했다. todo 2개를 지웠다.
+  - 수치 4곳, 영상 추정 문장 제거, slide 57·58 표기 차이
+  - Example 44.4.8과 Fig 44.4.1이 slide 45·47의 구성과 닮아서 배치를 바꾸라고 R2에게 다시 보냈다.
+- 2026-10-20: **44장 reviewed, 공개.** R1(44.1–44.3)
+  - 고친 수학
+    - Ex 44.3.10·Fig 44.3.1: 펼친 방향이 안쪽이어서 κ_g의 부호가 반대였다. 바깥에서 본 방향으로 다시 그렸다.
+    - (44.2.1): 음수 a, b
+    - Thm 44.3.9 증명의 빈틈
+    - Remark 44.2.8의 cut locus 정의(Lee-IRM p.308)
+    - 증명 보강 5곳, 과장된 진술 정리
+  - 저작권: Example 44.1.4·Fig 44.1.2가 slide 8과 같은 배치였다. 새 예로 바꿨다.
+  - Polthier98은 저자 공개 preprint로 대조했다. Polthier의 κ_g는 우리 값의 2π/Θ_i배다. todo를 지웠다.
+  - 통합
+    - 39.2의 todo 2개를 Remark 44.1.1과 Def 44.3.2로, 42.6의 todo를 Def 44.6.4로 확정했다.
+    - 39·42 index의 toc 앵커 링크 3곳
+    - 44 toc-note의 Polthier 문구
+    - notation 3행, terms(averaged boundary condition 포함). 루트 index의 44를 Reviewed로 바꿨다.
+  - 남은 todo 2개(Chapter 45)
