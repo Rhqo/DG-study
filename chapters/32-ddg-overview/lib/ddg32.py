@@ -9,7 +9,7 @@ Import from a figure or verify script of this chapter with::
 The discrete curvatures themselves come from tools/dgdec.py (the canonical implementation); this module only adds
 what Chapter 32 needs on top of it:
 
-- the running plane curves of GUIDELINES 2.5 that are not (yet) in dgsym.EXAMPLES: the ellipse (2 cos t, sin t) and
+- the running plane curves of GUIDELINES 2.5, taken from dgsym.EXAMPLES: the ellipse (2 cos t, sin t) and
   the flower curve r(t) = 1 + 0.3 cos 5t, as sympy expressions and numpy samplers, with their signed curvature
   computed by dgsym.signed_curvature (n_s = J t, counterclockwise positive);
 - fixed test polygons: the regular n-gon, the unevenly sampled circle UNEVEN_DEG, the jittered flower polygon;
@@ -49,10 +49,11 @@ KIND_STYLE = {
 # running curves (GUIDELINES 2.5): sympy expressions and numeric versions
 # ---------------------------------------------------------------------------
 
-T_SYM = sp.symbols("t", real=True)
-ELLIPSE_EXPR = sp.Matrix([2 * sp.cos(T_SYM), sp.sin(T_SYM)])
-FLOWER_R = 1 + sp.Rational(3, 10) * sp.cos(5 * T_SYM)
-FLOWER_EXPR = sp.Matrix([FLOWER_R * sp.cos(T_SYM), FLOWER_R * sp.sin(T_SYM)])
+# the ellipse and the flower curve are defined once, in dgsym.EXAMPLES (GUIDELINES 3.6); here as plane curves
+T_SYM = dgsym.EXAMPLES["ellipse"]["coords"][0]
+ELLIPSE_EXPR = sp.Matrix(list(dgsym.EXAMPLES["ellipse"]["expr"][:2]))
+FLOWER_R = dgsym.EXAMPLES["flower"]["radius"]
+FLOWER_EXPR = sp.Matrix(list(dgsym.EXAMPLES["flower"]["expr"][:2]))
 # convex limacon, used only in Section 32.4 to show that the smooth flow can move a centroid (asymmetric curve)
 LIMACON_R = 1 + sp.Rational(2, 5) * sp.cos(T_SYM)
 LIMACON_EXPR = sp.Matrix([LIMACON_R * sp.cos(T_SYM), LIMACON_R * sp.sin(T_SYM)])

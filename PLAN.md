@@ -1220,3 +1220,8 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - notation 3행, terms 26개(45장 15 + 11). 루트 index의 45를 Reviewed로 바꿨다.
   - 남은 todo: 45 index의 Chapter 41 링크
   - 검토 판단 요청: Track 2의 "곡면"/"surface" 표기가 장마다 다르다(42·43·45는 곡면, 39·40·44는 surface). 통합 검토 C에서 통일한다.
+  - Track 1 → Track 2 링크 agent(D)를 띄웠다. 범위는 00-tour와 27–31장이다.
+- 2026-10-21: **P1(32–34장) 휴대폰 폭 정리 완료.** 12페이지에서 inline 44개와 display 30개를 나눴다(aligned, gathered).
+  - 18페이지 모두 400px에서 넘침 0이고 page width는 400이다. check_all 32·33·34 OK
+  - 숨은 보조 MathML이 페이지를 넓히던 곳도 더 잘게 나눠 해결했다.
+  - ddg32.CURVES의 ellipse와 flower를 dgsym.EXAMPLES에서 가져오게 했다(EXAMPLES["flower"]["radius"]를 더했다). 32장 그림 SVG는 바이트 단위로 같다. ddg37도 P3가 끝나면 같은 방식으로 바꾼다.

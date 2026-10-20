@@ -326,6 +326,7 @@ def _examples():
         expr=sp.Matrix([_fr * sp.cos(t), _fr * sp.sin(t), 0]),
         positive=(),
         note="반시계 방향. 극좌표 곡률 공식으로 κ_s의 부호가 열 번 바뀐다(inflection 10개)",
+        radius=_fr,
         expected=dict(kappa_s=(_fr ** 2 + 2 * _fr1 ** 2 - _fr * _fr2) / (_fr ** 2 + _fr1 ** 2) ** sp.Rational(3, 2),
                       tau=sp.Integer(0)),
     )
