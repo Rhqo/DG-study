@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>42.3 Discretization via FEM — DG Study</title>
+  <meta name="dg-id" content="42.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="42.1, 42.2, 36.3, 36.6">
+  <meta name="dg-refs" content="Cr §6.2; Cr §6.5; CMU-DDG L18; Dziuk88; Hildebrandt06; Wardetzky07">
+  <meta name="dg-updated" content="2026-10-20">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">42. The Laplace–Beltrami Operator</a> ›
+    <span>42.3 Discretization via FEM</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>42.3 Discretization via FEM</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §6.2, §6.5]</a>,
+        <a class="cite" href="../../references.html#Dziuk88">[Dziuk88]</a>,
+        <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>,
+        <a class="cite" href="../../references.html#Wardetzky07">[Wardetzky07]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 27</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>Poisson equation의 weak form을 Green's identity로 유도하고, piecewise linear 함수 공간에서 Galerkin 방정식을 세울 수 있다.</li>
+        <li>triangle 하나에서 hat function gradient의 inner product가 \(-\tfrac12\cot\theta\)임을 obtuse한 경우까지 증명하고, stiffness matrix가 모든 triangle mesh에서 \(-L = d_0^{\mathsf T}\star_1d_0\)임을 보일 수 있다.</li>
+        <li>\(-u^{\mathsf T}Lu = \int\abs{\grad W_0u}^2\,dA\)에서 \(-L\)이 Delaunay가 아닌 mesh에서도 positive semidefinite이고 kernel이 상수임을 증명할 수 있다.</li>
+        <li>Galerkin mass matrix와 lumped mass matrix를 계산하고, linear system \(Lu = Mf\)를 세워 sphere 위의 Poisson 문제를 풀고 수렴을 확인할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="42-1-laplacian-definitions.html#i-42-1-12">Proposition 42.1.12</a>: Green's first identity, <a href="42-2-dirichlet-poisson.html#i-42-2-13">Proposition 42.2.13</a>: Poisson equation의 변분 형태</li>
+        <li><a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#i-36-3-1">Definition 36.3.1</a>, <a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#i-36-3-2">Proposition 36.3.2</a>: hat function과 그 gradient, <a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#i-36-3-8">Definition 36.3.8</a>: \(W_0u = \sum_iu_i\varphi_i\)</li>
+        <li><a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-6">Definition 36.6.6</a>, <a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-7">Proposition 36.6.7</a>, <a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-9">Proposition 36.6.9</a>: cotan Laplacian과 Delaunay mesh에서의 positive semidefiniteness</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="42-2-dirichlet-poisson.html">Section 42.2</a>는 Poisson equation을 energy \(E_D(u) + \int fu\,dA\)의 최소화로 썼다. 이 형태의 장점은 second derivative가 없다는 것이다. 그렇다면 mesh 위의 piecewise linear 함수, 곧 triangle 안에서 affine이고 edge에서 꺾이는 함수도 이 energy에 넣을 수 있다. 이런 함수의 Laplacian은 점마다 정의되지 않지만 gradient는 triangle마다 상수로 정해지기 때문이다.</p>
+      <p>이것이 <strong>finite element method</strong>(유한요소법, FEM)의 생각이다. 무한 차원의 함수 공간 대신, 몇 개의 basis 함수로 펼쳐지는 유한 차원 공간에서 가장 좋은 근사를 찾는다. basis는 Chapter 36의 hat function \(\varphi_i\)를 쓴다. Chapter 36은 같은 \(L\)을 DEC의 합성으로 정의했고, Delaunay mesh에서만 \(-L\)이 positive semidefinite임을 보였으며, 일반 mesh의 증명과 “FEM에서 출발해도 같은 행렬이 나오는 것은 우연인가”라는 질문을 이 장에 남겼다(<a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>의 Leads to). 이 절이 그 둘에 답한다.</p>
+    </section>
+
+    <section id="sec-weak">
+      <h2>The Weak Form and the Galerkin Method</h2>
+      <p>이 절에서 \(S\)는 boundary 없는 compact oriented surface다. boundary는 <a href="42-5-boundary-conditions.html">Section 42.5</a>에서 다룬다.</p>
+      <div class="thm proposition" id="i-42-3-1">
+        <p><span class="thm-head">Proposition 42.3.1</span> <span class="thm-name">(weak form of the Poisson equation)</span>.
+        smooth 함수 \(u, f\)에 대하여 \(\Delta u = f\)인 것과, 모든 smooth 함수 \(v\)에 대하여</p>
+        <div class="equation" id="eq-42-3-1">
+        \[ \int_S\inner{\grad u}{\grad v}\,dA = -\int_Sf\,v\,dA \tag{42.3.1} \]
+        </div>
+        <p>인 것은 동치다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>(boundary 항 없음)에서 \(\int\inner{\grad u}{\grad v} = -\int v\,\Delta u\)이므로 <a href="#eq-42-3-1">(42.3.1)</a>은 \(\int(\Delta u - f)v\,dA = 0\)과 같다. \(\Delta u = f\)이면 성립하고, 모든 \(v\)에서 성립하면 <a href="42-2-dirichlet-poisson.html#i-42-2-4">Theorem 42.2.4</a>의 증명과 같은 논법(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-7">Lemma 35.5.7</a>)으로 \(\Delta u - f = 0\)이다.</p>
+      </div>
+      <p><a href="#eq-42-3-1">(42.3.1)</a>을 Poisson equation의 <strong>weak form</strong>(약형식)이라 하고, \(v\)를 <strong>test function</strong>(시험함수)이라 부른다. “방정식이 성립한다”를 “모든 test function으로 재어도 양변이 같다”로 바꾼 것이다. 이 형태에는 \(u\)의 first derivative만 나온다. 또 <a href="42-2-dirichlet-poisson.html#i-42-2-13">Proposition 42.2.13</a>의 \(J\)의 first variation이 정확히 <a href="#eq-42-3-1">(42.3.1)</a>이므로, weak form은 “energy의 critical point”의 다른 이름이다.</p>
+      <p>이제 \(S\)를 triangle mesh \(\abs{\mathcal{K}}\)로 바꾸고, 함수를 piecewise linear 함수 공간 \(V_h := \Span\{\varphi_1, \dots, \varphi_{n_0}\}\)으로 제한한다. 각 triangle 위에서 함수는 affine이므로 gradient는 triangle의 평면 안의 상수 vector이고, edge 위에서는 정의되지 않지만 넓이가 \(0\)이라 적분에 영향이 없다. <strong>Galerkin method</strong>(갈레르킨 방법)는 해와 test function을 모두 \(V_h\)에서 고른다. \(f\)의 vertex 값을 \(f \in \R^{n_0}\)로 쓰고 \(W_0f\)로 interpolate하면, 미지수 \(u \in \R^{n_0}\)에 대한 방정식은</p>
+      <div class="equation" id="eq-42-3-2">
+      \[ \begin{aligned} &\int_{\abs{\mathcal{K}}}\inner{\grad W_0u}{\grad\varphi_i}\,dA \\ &\qquad = -\int_{\abs{\mathcal{K}}}(W_0f)\,\varphi_i\,dA \\ &\qquad (i = 1, \dots, n_0) \end{aligned} \tag{42.3.2} \]
+      </div>
+      <p>이다. test function이 \(n_0\)개이고 미지수도 \(n_0\)개다. 양변은 \(u\)와 \(f\)에 대해 linear이므로 이것은 \(n_0\times n_0\) linear system이고, 남은 일은 그 행렬의 성분을 계산하는 것이다 <a class="cite" href="../../references.html#Cr">[Cr §6.2]</a>.</p>
+    </section>
+
+    <section id="sec-stiffness">
+      <h2>The Stiffness Matrix Is the Cotan Laplacian</h2>
+      <p>먼저 triangle 하나에서 계산한다. triangle의 평면에 orthonormal frame을 잡고 vertex 순서 \((i, j, k)\)가 반시계 방향이 되게 orient하면 <a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#i-36-3-2">Proposition 36.3.2</a>(d)를 그대로 쓸 수 있다. \(\R^3\) 안의 triangle에서는 그 평면의 \(+90^\circ\) 회전 \(J\)가 \(\mathbf{N}_f\times\)이다(<code>dgdec.barycentric_gradients</code>). Chapter 36의 \(\nabla\varphi_i\)를 이 장에서는 \(\grad\varphi_i\)로 쓴다.</p>
+      <div class="thm lemma" id="i-42-3-2">
+        <p><span class="thm-head">Lemma 42.3.2</span> <span class="thm-name">(one triangle)</span>.
+        넓이가 \(A_f \gt 0\)인 triangle \(f\)의 vertex를 \(i, j, k\), 내각을 \(\theta_i, \theta_j, \theta_k\)라 하자. \(f\) 위에서</p>
+        <div class="equation" id="eq-42-3-3">
+        \[ \begin{aligned} A_f\inner{\grad\varphi_i}{\grad\varphi_j} &= -\tfrac12\cot\theta_k, \\ A_f\abs{\grad\varphi_i}^2 &= \frac{\cot\theta_j + \cot\theta_k}{2} \end{aligned} \tag{42.3.3} \]
+        </div>
+        <p>이다. 각이 obtuse여도 그대로 성립한다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: 두 gradient는 맞은편 edge를 \(90^\circ\) 돌린 것이므로, 그 inner product는 \(\theta_k\)를 끼고 있는 두 edge의 inner product다. 넓이로 나누면 cosine과 sine의 비, 곧 cotangent가 남는다.</p>
+        <p><span class="proof-head">Proof.</span> <a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#eq-36-3-1">(36.3.1)</a>에서 \(\grad\varphi_i = J(\mathbf{x}_k - \mathbf{x}_j)/(2A_f)\), \(\grad\varphi_j = J(\mathbf{x}_i - \mathbf{x}_k)/(2A_f)\)이고 \(J\)는 isometry이므로</p>
+        <p>\[ \begin{aligned} \inner{\grad\varphi_i}{\grad\varphi_j} &= \frac{\inner{\mathbf{x}_k - \mathbf{x}_j}{\mathbf{x}_i - \mathbf{x}_k}}{4A_f^2} = -\frac{\inner{\mathbf{a}}{\mathbf{b}}}{4A_f^2}, \\ \mathbf{a} &= \mathbf{x}_i - \mathbf{x}_k,\ \ \mathbf{b} = \mathbf{x}_j - \mathbf{x}_k \end{aligned} \]</p>
+        <p>이다. \(\theta_k\)는 \(\mathbf{a}\)와 \(\mathbf{b}\) 사이의 각이므로 \(\inner{\mathbf{a}}{\mathbf{b}} = \abs{\mathbf{a}}\abs{\mathbf{b}}\cos\theta_k\)이고 \(2A_f = \abs{\mathbf{a}}\abs{\mathbf{b}}\sin\theta_k\)이다(\(\sin\theta_k \gt 0\)). 따라서 \(A_f\inner{\grad\varphi_i}{\grad\varphi_j}\) \(= -\abs{\mathbf{a}}\abs{\mathbf{b}}\cos\theta_k/(4A_f) = -\tfrac12\cot\theta_k\)이다. 이 계산은 \(\cos\theta_k\)의 부호를 가정하지 않으므로 obtuse한 각에도 성립한다. 둘째 식은 \(\grad\varphi_i + \grad\varphi_j + \grad\varphi_k = 0\)(<a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#eq-36-3-1">(36.3.1)</a>)에서 \(\abs{\grad\varphi_i}^2\) \(= -\inner{\grad\varphi_i}{\grad\varphi_j} - \inner{\grad\varphi_i}{\grad\varphi_k}\)이고, 첫 식을 두 번 쓰면 된다(\(\inner{\grad\varphi_i}{\grad\varphi_k}\)의 맞은편 각은 \(\theta_j\)).</p>
+      </div>
+      <div class="thm definition" id="i-42-3-3">
+        <p><span class="thm-head">Definition 42.3.3</span> <span class="thm-name">(stiffness matrix)</span>.
+        triangle mesh의 hat function \(\varphi_1, \dots, \varphi_{n_0}\)에 대하여</p>
+        <div class="equation" id="eq-42-3-4">
+        \[ \begin{aligned} a_{ij} &\mathrel{:=} \int_{\abs{\mathcal{K}}}\inner{\grad\varphi_i}{\grad\varphi_j}\,dA \\ &= \sum_{f}A_f\inner{\grad\varphi_i|_f}{\grad\varphi_j|_f} \end{aligned} \tag{42.3.4} \]
+        </div>
+        <p>를 성분으로 하는 \(n_0\times n_0\) 행렬 \((a_{ij})\)를 <dfn>stiffness matrix</dfn>(강성 행렬)라 한다. 합은 모든 face에 대한 것이고, \(i\)나 \(j\)를 vertex로 갖지 않는 face에서는 항이 \(0\)이다.</p>
+      </div>
+      <p>예를 들어 triangle 하나 \((0, 0), (1, 0), (0, 1)\)로 된 mesh에서는 각이 \(90^\circ, 45^\circ, 45^\circ\)이므로 \((a_{ij}) = \tfrac12\begin{pmatrix}2&-1&-1\\-1&1&0\\-1&0&1\end{pmatrix}\)이다(<a href="#ex-42-3-1">Exercise 42.3.1</a>). 이름은 탄성체의 FEM에서 왔다. 그곳에서 이 행렬은 변위와 복원력을 잇는 “강성”이다.</p>
+      <div class="thm nonexample" id="i-42-3-4">
+        <p><span class="thm-head">Non-example 42.3.4</span> <span class="thm-name">(the strong form sees nothing)</span>.
+        stiffness matrix 대신 Poisson equation을 그대로, 곧 \(\int(\Delta W_0u)\varphi_i\,dA\)로 이산화하려 하면 실패한다. \(W_0u\)는 각 triangle의 안쪽에서 affine이므로 점마다의 \(\Delta W_0u\)는 face의 안쪽에서 \(0\)이고, 그 적분은 모든 \(u\)에서 \(0\)이다. \(W_0u\)의 “휘어짐”은 모두 edge 위의 꺾임에 몰려 있고, 점마다의 Laplacian은 그것을 보지 못한다. weak form은 Green's identity로 미분 하나를 test function으로 옮겨 이 문제를 피한다. 꺾임의 양을 직접 재는 다른 길이 <a href="42-4-dec.html">Section 42.4</a>의 dual cell 위의 flux다.</p>
+      </div>
+
+      <figure class="dg-figure" id="fig-42-3-1">
+        <img src="figures/fig-42-3-1-edge-stencil.svg" alt="두 패널. 각 패널에 굵은 검은 공유 edge x_i x_j와 그 위의 회색 triangle f(꼭짓점 x_k), 아래의 하늘색 triangle g(꼭짓점 x_l)가 있다. 맞은편 각은 주황 숫자로 적혀 있다: (a) 75도와 84도, (b) 75도와 141도. 오른쪽에는 face마다 한 점에서 나가는 파란 화살표(grad φ_i)와 초록 화살표(grad φ_j)가 그려져 있고 그 아래에 수가 적혀 있다. (a)에서 f와 g 모두 두 화살표가 둔각을 이루고 수는 -0.135와 -0.050이다. 제목은 a_ij = -0.185. (b)에서 f는 같고 g의 두 화살표는 예각을 이루며 수는 +0.627이다. 제목은 a_ij = +0.492.">
+        <figcaption><span class="fig-head">Figure 42.3.1.</span>
+        edge \(ij\)의 stiffness 성분은 이웃한 두 triangle에서 하나씩 온다. <em>무엇을</em>: 공유 edge \(\mathbf{x}_i = (0, 0)\), \(\mathbf{x}_j = (2, 0)\), 위의 triangle \(f\)의 \(\mathbf{x}_k = (0.9, 1.3)\), 아래 triangle \(g\)의 (a) \(\mathbf{x}_l = (1.1, -1.1)\), (b) \(\mathbf{x}_l = (1.0, -0.35)\). <em>읽는 법</em>: 주황 수는 edge의 맞은편 각이다. 오른쪽의 두 화살표 묶음은 각 face 위의 \(\grad\varphi_i\)(파랑)와 \(\grad\varphi_j\)(초록)이고, 방향은 정확하며 길이는 face마다 긴 쪽을 같게 맞추었다. 그 아래 수가 그 face의 기여 \(A_f\inner{\grad\varphi_i}{\grad\varphi_j} = -\tfrac12\cot\theta\)이다. 제목의 \(a_{ij}\)는 두 기여의 합이다. <em>볼 것</em>: 두 gradient 사이의 각은 맞은편 각의 보각 \(\pi - \theta\)이다. 맞은편 각이 acute이면(\(75^\circ, 84^\circ\)) 두 화살표가 둔각을 이루어 기여가 음수이고(\(-0.135\), \(-0.050\)), (b)처럼 \(141^\circ\)로 obtuse이면 예각을 이루어 양수다(\(+0.627\)). 그래서 (a)는 \(a_{ij} = -0.185\), 곧 cotan weight \(L_{ij} = 0.185 \gt 0\)이고, (b)는 \(a_{ij} = +0.492\), 곧 \(L_{ij} = -0.492\)인 non-Delaunay edge다(\(75^\circ + 141^\circ \gt 180^\circ\)). <em>본문과의 연결</em>: <a href="#i-42-3-2">Lemma 42.3.2</a>, <a href="#i-42-3-5">Theorem 42.3.5</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-42-3-1">Figure 42.3.1</a>의 오른쪽 화살표 묶음을 보자. \(\grad\varphi_i\)는 \(\mathbf{x}_i\)의 맞은편 edge에 수직이고 \(\mathbf{x}_i\) 쪽을 향하며, \(\grad\varphi_j\)도 마찬가지다. 그래서 두 화살표 사이의 각은 그 face에서 edge \(ij\)의 맞은편 각 \(\theta\)의 보각이다. (a)의 두 face와 (b)의 \(f\)에서 \(\theta\)가 acute이므로 화살표가 서로 벌어지고(inner product 음수), (b)의 납작한 \(g\)에서는 \(\theta = 141^\circ\)라 화살표가 거의 같은 쪽을 향한다(inner product 양수, 그것도 크다). stiffness 성분은 이 둘을 더한 것이고, (b)에서는 양수 쪽이 이겨 cotan weight가 음수가 된다. 아래 정리가 이 계산을 mesh 전체로 확장한다.</p>
+      <div class="thm theorem" id="i-42-3-5">
+        <p><span class="thm-head">Theorem 42.3.5</span> <span class="thm-name">(FEM and DEC give the same matrix)</span>.
+        모든 triangle mesh(곡면 mesh여도, boundary가 있어도, Delaunay가 아니어도 된다)에서</p>
+        <div class="equation" id="eq-42-3-5">
+        \[ (a_{ij}) = -L = d_0^{\mathsf T}\star_1d_0 \tag{42.3.5} \]
+        </div>
+        <p>이다. 여기서 \(L\)은 <a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-6">Definition 36.6.6</a>의 cotan Laplacian이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(i \ne j\)라 하자. \(\varphi_i\varphi_j\)의 gradient 곱이 \(0\)이 아닌 face는 \(i\)와 \(j\)를 모두 vertex로 갖는 face, 곧 edge \(\{i, j\}\)를 포함하는 face뿐이다. \(\{i, j\}\)가 edge가 아니면 그런 face가 없어 \(a_{ij} = 0 = L_{ij}\)이다. edge이면 그것을 포함하는 face는 둘(boundary edge면 하나)이고, <a href="#i-42-3-2">Lemma 42.3.2</a>에서 각 face의 기여는 그 face에서 edge의 맞은편 각 \(\alpha_{ij}\) 또는 \(\beta_{ij}\)의 \(-\tfrac12\cot\)이다. 따라서 \(a_{ij} = -\tfrac12(\cot\alpha_{ij} + \cot\beta_{ij}) = -L_{ij}\)이다(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-7">Proposition 36.6.7</a>, boundary edge는 한 항). 대각 성분은 \(\sum_j\varphi_j = 1\)에서 \(\sum_j\grad\varphi_j = 0\)이므로 \(a_{ii} = -\sum_{j\ne i}a_{ij} = \sum_{j\sim i}L_{ij} = -L_{ii}\)이다. 마지막 등호 \(-L = d_0^{\mathsf T}\star_1d_0\)는 정의 <a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#eq-36-6-3">(36.6.3)</a>이다.</p>
+      </div>
+      <p>이 정리가 말하는 것: “piecewise linear 함수의 Dirichlet energy를 정확히 계산한다”(FEM)와 “\(d\)와 \(\star\)를 행렬로 바꾸어 합성한다”(DEC)는 전혀 다른 출발점인데 같은 행렬을 준다. 우연이 아닌 이유는 <a href="42-4-dec.html">Section 42.4</a>에서 본다. 둘 다 결국 “triangle마다 gradient가 상수인 함수의 flux를 정확히 잰다”는 같은 계산을 하기 때문이다. Delaunay 조건은 어디에도 쓰이지 않았다. 그래서 다음 결과가 Chapter 36의 가정을 없앤다.</p>
+      <div class="thm corollary" id="i-42-3-6">
+        <p><span class="thm-head">Corollary 42.3.6</span> <span class="thm-name">(\(-L\) is positive semidefinite on every mesh)</span>.
+        모든 triangle mesh와 모든 \(u \in \R^{n_0}\)에 대하여</p>
+        <div class="equation" id="eq-42-3-6">
+        \[ \begin{aligned} -u^{\mathsf T}Lu &= \int_{\abs{\mathcal{K}}}\abs{\grad W_0u}^2\,dA \\ &= 2E_D(W_0u) \ge 0 \end{aligned} \tag{42.3.6} \]
+        </div>
+        <p>이다. 따라서 \(-L\)은 symmetric positive semidefinite이고, mesh가 connected이면 \(\ker L = \Span\{\mathbf{1}\}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 각 face에서 \(\grad W_0u = \sum_iu_i\grad\varphi_i\)이므로 \(\int\abs{\grad W_0u}^2 = \sum_{i,j}u_iu_ja_{ij} = u^{\mathsf T}(-L)u\)이다(<a href="#i-42-3-5">Theorem 42.3.5</a>). 값이 \(0\)이면 모든 face에서 \(\grad W_0u = 0\)이므로 \(W_0u\)는 각 face 위에서 상수이고, face의 세 vertex 값이 같다. 이웃한 face는 vertex를 공유하므로, mesh의 edge를 따라가면(connected) 모든 vertex 값이 같다. 거꾸로 상수 \(u\)는 \(\grad W_0u = 0\)을 준다. \(-L\)이 symmetric positive semidefinite이므로 \(Lu = 0\)과 \(u^{\mathsf T}Lu = 0\)은 동치이고(eigenvector로 전개하면 된다), 따라서 \(\ker L\)은 상수들이다.</p>
+      </div>
+      <p>cotan weight가 음수인 edge가 있어도 <a href="#eq-42-3-6">(42.3.6)</a>의 오른쪽은 적분이므로 음수가 될 수 없다. Chapter 36의 증명(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-9">Proposition 36.6.9</a>)은 \(-u^{\mathsf T}Lu = \sum w_{ij}(u_j - u_i)^2\)의 각 항이 \(0\) 이상이라는 것을 썼고, 그래서 Delaunay가 필요했다. 여기서는 edge마다 나누지 않고 face마다 묶어서 본다. 한 face 안에서 세 edge의 항을 더하면 \(A_f\abs{\grad W_0u}^2 \ge 0\)이 되어, 한 항이 음수여도 face 단위로는 언제나 \(0\) 이상이다.</p>
+      <div class="thm example" id="i-42-3-7">
+        <p><span class="thm-head">Example 42.3.7</span> <span class="thm-name">(a mesh with obtuse triangles)</span>.
+        <code>lib/ch42.jittered_sphere(3, s=0.15, seed=42)</code>는 icosphere(3)의 vertex를 평균 edge 길이의 \(0.15\)배 정도 접선 방향으로 흔든 뒤 unit sphere로 되돌린 mesh다(vertex 642개). triangle 1280개 가운데 168개가 obtuse이고, edge 1920개 가운데 31개의 cotan weight가 음수다(가장 작은 값 \(-0.499\)). 그래도 \(-L\)의 eigenvalue는 \(0\)(한 번), \(0.0388, \dots\)로 모두 \(0\) 이상이고, 임의의 \(u\)에서 <a href="#eq-42-3-6">(42.3.6)</a>의 양변이 반올림 오차 안에서 같다(Implementation 상자). Chapter 36의 non-Delaunay pair(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-10">Example 36.6.10</a>)도 같은 이유로 positive semidefinite였다.</p>
+        <p class="verified">Verification: <code>verify/v-42-3-fem.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-mass">
+      <h2>Mass Matrices and the Linear System</h2>
+      <p><a href="#eq-42-3-2">(42.3.2)</a>의 오른쪽에는 \(\varphi_i\)와 \(\varphi_j\)의 곱의 적분이 나온다.</p>
+      <div class="thm definition" id="i-42-3-8">
+        <p><span class="thm-head">Definition 42.3.8</span> <span class="thm-name">(mass matrix)</span>.
+        \(M^{\mathrm{G}}_{ij} := \int_{\abs{\mathcal{K}}}\varphi_i\varphi_j\,dA\)를 성분으로 하는 \(n_0\times n_0\) 행렬 \(M^{\mathrm{G}}\)를 (Galerkin, 또는 consistent) <dfn>mass matrix</dfn>(질량 행렬)라 한다. 모든 \(u, v \in \R^{n_0}\)에서 \(u^{\mathsf T}M^{\mathrm{G}}v = \int(W_0u)(W_0v)\,dA\)이다.</p>
+      </div>
+      <div class="thm proposition" id="i-42-3-9">
+        <p><span class="thm-head">Proposition 42.3.9</span> <span class="thm-name">(entries of the mass matrix)</span>.
+        face \(f\)의 vertex \(i, j\)(같아도 된다)에 대하여 \(\int_f\varphi_i\varphi_j\,dA = \tfrac{A_f}{12}(1 + \delta_{ij})\)이다. 따라서 \(M^{\mathrm{G}}_{ij}\)는 edge \(\{i, j\}\)를 포함하는 face의 넓이의 합의 \(\tfrac1{12}\), \(M^{\mathrm{G}}_{ii}\)는 \(i\)를 포함하는 face의 넓이의 합의 \(\tfrac16\)이고, 나머지는 \(0\)이다. \(M^{\mathrm{G}}\)는 symmetric positive definite이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> face \(f\)의 평면에 좌표를 잡고 reference triangle \(T = \{(s, t) : s, t \ge 0,\ s + t \le 1\}\)에서 \(f\)로 가는 affine map \((s, t) \mapsto \mathbf{x}_i + s(\mathbf{x}_j - \mathbf{x}_i) + t(\mathbf{x}_k - \mathbf{x}_i)\)를 쓰자. 이 map의 Jacobian의 절댓값은 \(2A_f\)이고(넓이 \(\tfrac12\)인 \(T\)를 넓이 \(A_f\)로 보낸다), hat function은 barycentric coordinates \(\varphi_i = 1 - s - t\), \(\varphi_j = s\), \(\varphi_k = t\)가 된다. 변수변환 공식으로 \(\int_f\varphi_j\varphi_k\,dA = 2A_f\int_Tst\,ds\,dt\) \(= 2A_f\cdot\tfrac1{24} = \tfrac{A_f}{12}\), \(\int_f\varphi_j^2\,dA = 2A_f\int_Ts^2\,ds\,dt = 2A_f\cdot\tfrac1{12} = \tfrac{A_f}{6}\)이다(\(\int_0^1\!\int_0^{1-s}st\,dt\,ds = \int_0^1s\tfrac{(1-s)^2}{2}ds = \tfrac1{24}\), \(\int_0^1s^2(1 - s)\,ds = \tfrac1{12}\)). 대칭성으로 다른 쌍도 같다. 합의 규칙은 <a href="#i-42-3-5">Theorem 42.3.5</a>의 증명과 같다. 마지막으로 \(v \ne 0\)이면 \(W_0v\)는 어떤 vertex에서 \(0\)이 아닌 continuous 함수이므로 \(v^{\mathsf T}M^{\mathrm{G}}v = \int(W_0v)^2\,dA \gt 0\)이다.</p>
+      </div>
+      <div class="thm nonexample" id="i-42-3-10">
+        <p><span class="thm-head">Non-example 42.3.10</span> <span class="thm-name">(the identity is not a mass matrix)</span>.
+        \(\int u^2\,dA\)를 \(u^{\mathsf T}u = \sum_iu_i^2\)로 바꾸면 넓이를 잃는다. 상수 \(u = \mathbf{1}\)에서 \(u^{\mathsf T}u = n_0\)는 mesh를 세분할 때마다 약 4배가 되지만 \(\int1\,dA\)는 넓이로 그대로다. unit sphere의 icosphere(1)–(3)에서 \(\mathbf{1}^{\mathsf T}M^{\mathrm{G}}\mathbf{1}\)은 \(11.67, 12.33, 12.51\)로 \(4\pi = 12.57\)에 가까워지고, \(n_0\)는 \(42, 162, 642\)다. 함수의 값(0-form)과 넓이 위의 적분(2-form)을 잇는 것이 mass matrix, 곧 \(\star_0\)의 역할이다(<a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-4">Non-example 36.5.4</a>).</p>
+      </div>
+      <p>\(M^{\mathrm{G}}\)는 대각 행렬이 아니다. 실제 계산에서는 흔히 행의 합을 대각에 모은 행렬을 쓴다.</p>
+      <div class="thm definition" id="i-42-3-11">
+        <p><span class="thm-head">Definition 42.3.11</span> <span class="thm-name">(lumped mass matrix)</span>.
+        \(M_{ii} := \sum_jM^{\mathrm{G}}_{ij}\)를 대각 성분으로 하는 대각 행렬 \(M\)을 <dfn>lumped mass matrix</dfn>(집중 질량 행렬)라 한다.</p>
+      </div>
+      <div class="thm proposition" id="i-42-3-12">
+        <p><span class="thm-head">Proposition 42.3.12</span> <span class="thm-name">(lumping gives the barycentric dual area)</span>.
+        \(M_{ii} = \int\varphi_i\,dA = \tfrac13\sum_{f\ni i}A_f\)이다. 곧 lumped mass matrix는 barycentric dual cell의 넓이로 만든 diagonal Hodge star \(\star_0^{\mathrm{bary}}\)(<a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-17">Remark 36.5.17</a>(a), <code>dgmesh.mass_barycentric</code>)와 같다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(\sum_j\varphi_j = 1\)(<a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#i-36-3-2">Proposition 36.3.2</a>(c))이므로 \(\sum_jM^{\mathrm{G}}_{ij} = \int\varphi_i\sum_j\varphi_j = \int\varphi_i\)이다. face \(f \ni i\)마다 <a href="#i-42-3-9">Proposition 42.3.9</a>에서 \(\tfrac{A_f}{12}(2 + 1 + 1) = \tfrac{A_f}{3}\)이다.</p>
+      </div>
+      <p>lumping은 근사다. face 하나의 local matrix \(\tfrac{A_f}{12}(I_3 + \mathbf{1}\mathbf{1}^{\mathsf T})\)의 eigenvalue는 \(\tfrac{A_f}{3}\)(\(\mathbf{1}\) 방향)과 \(\tfrac{A_f}{12}\)(두 번)이고, lumped matrix \(\tfrac{A_f}{3}I_3\)는 앞의 것만 맞춘다. 그래서 두 행렬은 상수 함수의 적분(\(\mathbf{1}^{\mathsf T}M\mathbf{1} = \mathbf{1}^{\mathsf T}M^{\mathrm{G}}\mathbf{1}\) = 넓이)은 같게 주지만 진동하는 함수에서는 다르다(<a href="#ex-42-3-4">Exercise 42.3.4</a>). 대신 대각 행렬이라 \(M^{-1}\)이 쉽고, \(M^{-1}L\)을 vertex마다의 Laplacian 근사로 읽을 수 있다. 그 \(M\)을 다른 dual area로 바꾸는 것이 <a href="42-4-dec.html">Section 42.4</a>의 DEC 관점이다.</p>
+      <div class="thm proposition" id="i-42-3-13">
+        <p><span class="thm-head">Proposition 42.3.13</span> <span class="thm-name">(the Galerkin system)</span>.
+        <a href="#eq-42-3-2">(42.3.2)</a>는</p>
+        <div class="equation" id="eq-42-3-7">
+        \[ Lu = M^{\mathrm{G}}f \tag{42.3.7} \]
+        </div>
+        <p>와 같다. 오른쪽의 \(M^{\mathrm{G}}\)를 lumped mass matrix로 바꾼 것이 \(Lu = Mf\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 왼쪽은 \(\int\inner{\sum_ju_j\grad\varphi_j}{\grad\varphi_i}\) \(= \sum_ja_{ij}u_j = -(Lu)_i\)이고(<a href="#i-42-3-5">Theorem 42.3.5</a>), 오른쪽은 \(-\int\sum_jf_j\varphi_j\varphi_i = -(M^{\mathrm{G}}f)_i\)이다. 양변에 \(-1\)을 곱한다.</p>
+      </div>
+      <p>부호를 보자. \(L \approx M\Delta\)이므로 \(Lu = Mf\)는 \(\Delta u = f\)의 양변을 dual cell에서 적분한 것으로 읽힌다(<a href="42-4-dec.html">Section 42.4</a>). 닫힌 mesh에서는 \(L\)의 kernel이 상수이므로 smooth의 경우처럼 \(\mathbf{1}^{\mathsf T}Mf = 0\)일 때만 풀리고 해는 상수 차이로 유일하다. 그 처리는 <a href="42-6-implicit-mcf.html">Section 42.6</a>에서 정리하고, 아래 예는 그 방법을 미리 쓴다.</p>
+      <div class="thm example" id="i-42-3-14">
+        <p><span class="thm-head">Example 42.3.14</span> <span class="thm-name">(recovering \(z\) on the sphere)</span>.
+        unit sphere에서 \(\Delta z = -2z\)이므로(<a href="42-1-laplacian-definitions.html#i-42-1-11">Example 42.1.11</a>) Poisson equation \(\Delta u = -2z\)의 해는 \(z\)(+ 상수)다. icosphere(level)에서 \(f_i = -2z_i\)로 \(Lu = M^{\mathrm{G}}f\)와 \(Lu = Mf\)(lumped)를 풀고, 해와 \(z\)를 각각 넓이 가중 평균이 \(0\)이 되게 맞춘 뒤 넓이 가중 RMS 오차를 쟀다. level 1–4(평균 edge 길이 \(0.58\)에서 \(0.075\))에서 Galerkin mass는 \(4.9\times10^{-2}\), \(1.3\times10^{-2}\), \(3.3\times10^{-3}\), \(8.3\times10^{-4}\), lumped mass는 \(3.6\times10^{-3}\), \(7.7\times10^{-4}\), \(1.7\times10^{-4}\), \(4.1\times10^{-5}\)이다. 둘 다 edge 길이가 반이 될 때마다 약 \(\tfrac14\)로 준다. vertex를 흔든 mesh(<a href="#i-42-3-7">Example 42.3.7</a>의 방법, level 1–4)에서도 같다(<a href="#fig-42-3-2">Figure 42.3.2</a>).</p>
+        <p class="verified">Verification: <code>verify/v-42-3-fem.py</code></p>
+      </div>
+      <figure class="dg-figure" id="fig-42-3-2">
+        <img src="figures/fig-42-3-2-poisson-sphere.svg" alt="log–log 그래프. 가로축 mean edge length(0.08에서 0.6), 세로축 RMS error(1e-4에서 5e-2). 파란 선 두 개(Galerkin M^G, 실선 regular, 점선 jittered)가 위쪽에서 거의 겹쳐 오른쪽 위 약 5e-2에서 왼쪽 아래 약 9e-4로 내려간다. 주황 선 두 개(lumped M)는 그 아래에 있고 실선은 3.6e-3에서 4e-5로, 점선은 9e-3에서 9e-5로 내려간다. 회색 점선은 기울기 2의 기준선이다.">
+        <figcaption><span class="fig-head">Figure 42.3.2.</span>
+        sphere 위의 piecewise linear FEM은 edge 길이의 제곱으로 수렴한다. <em>무엇을</em>: unit sphere의 Poisson equation \(\Delta u = -2z\)(해 \(z\))를 icosphere(1)–(4)(실선)와 vertex를 흔든 jittered sphere(점선, <code>ch42.jittered_sphere</code>, \(s = 0.15\), seed 42)에서 Galerkin mass \(Lu = M^{\mathrm{G}}f\)(파랑)와 lumped mass \(Lu = Mf\)(주황)로 푼 것. <em>읽는 법</em>: 가로축은 평균 edge 길이 \(\bar\ell\), 세로축은 vertex에서의 넓이 가중 RMS 오차(log–log)다. 회색 점선은 기울기 \(2\)다. <em>볼 것</em>: 네 선 모두 기울기가 약 \(2\)(맞춘 기울기 \(2.00, 2.13, 1.97, 2.44\))다. jittered mesh에는 obtuse triangle과 음수 cotan weight가 있지만 수렴이 깨지지 않는다. 이 예에서는 lumped mass의 오차가 Galerkin보다 5–20배 작다. 이것은 이 두 문제(sphere와 <a href="#ex-42-3-6">Exercise 42.3.6</a>의 torus)에서 관찰한 것이고, 어느 쪽이 더 정확하다는 일반적인 보장은 아니다. <em>본문과의 연결</em>: <a href="#i-42-3-13">Proposition 42.3.13</a>, <a href="#i-42-3-14">Example 42.3.14</a>, <a href="#i-42-3-15">Remark 42.3.15</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-42-3-2">Figure 42.3.2</a>에서 먼저 볼 것은 네 선이 모두 평행하게 내려간다는 것이다. mesh가 불규칙해도, cotan weight가 음수여도, mass matrix를 lumping해도 해는 같은 차수로 수렴한다. 다음으로 파란 선과 주황 선의 간격을 보자. 같은 \(L\)을 쓰므로 차이는 오른쪽 \(M\)에서만 온다. 이 오차에는 이산화 오차 말고도 기하 오차가 들어 있다. mesh는 sphere에 내접한 다면체라 넓이가 \(4\pi\)보다 작고(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-6">Example 38.6.6</a>(a)), 우리는 다면체 위의 해를 sphere 위의 \(z\)와 비교하고 있다. 두 mass matrix가 이 기하 오차와 어떻게 상호작용하는지는 문제에 따라 다르다.</p>
+      <div class="thm remark" id="i-42-3-15">
+        <p><span class="thm-head">Remark 42.3.15</span> <span class="thm-name">(convergence)</span>.
+        piecewise linear FEM의 표준 오차 이론은 smooth한 해와 모양이 고른(shape-regular) mesh에서 해의 L2 오차가 \(O(\bar\ell^2)\), gradient의 오차가 \(O(\bar\ell)\)임을 보인다. 곡면에서는 mesh가 곡면을 근사하는 기하 오차가 더해지는데, vertex가 곡면 위에 있는 triangle mesh에서는 그 오차도 같은 차수라서 위의 차수가 그대로 성립한다 <a class="cite" href="../../references.html#Dziuk88">[Dziuk88]</a>(진술만 한다). polyhedral surface가 smooth surface에 수렴할 때 metric과 기하량이 어떤 조건에서 함께 수렴하는지는 <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>이 다룬다 <span class="todo">[확인 필요: Hildebrandt06의 정확한 가정과 결론(normal의 수렴이 필요한지, Laplace–Beltrami operator가 어떤 norm으로 수렴하는지)은 원문으로 확인하지 못했다]</span>. 이 수렴은 해와 energy의 수렴이다. vertex마다의 \(M^{-1}Lu\)가 \(\Delta u\)에 수렴한다는 보장은 아니며, 실제로 그렇지 않은 예가 있다(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-6">Example 38.6.6</a>(c), <a href="42-4-dec.html">Section 42.4</a>). 또 exact solution이 \(V_h\)에 들어 있으면(예: 평면 영역의 affine 함수) Galerkin 해가 그것을 정확히 재현한다. 평면 grid의 경우는 <a href="42-5-boundary-conditions.html">Section 42.5</a>에서 boundary 조건과 함께 본다.</p>
+      </div>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: assembling the stiffness and mass matrices face by face</p>
+        <p>face마다 \(3\times3\) local matrix를 만들고 global matrix의 해당 자리에 더한다. <a href="#i-42-3-2">Lemma 42.3.2</a>를 edge vector로 쓰면 \(A_f\inner{\grad\varphi_a}{\grad\varphi_b} = \inner{\mathbf{e}_a}{\mathbf{e}_b}/(4A_f)\)이다(\(\mathbf{e}_a\)는 corner \(a\)의 맞은편 edge vector. 두 gradient가 같은 회전 \(J/(2A_f)\)로 얻어지므로 edge의 방향을 일관되게만 잡으면 된다). mass는 <a href="#i-42-3-9">Proposition 42.3.9</a>의 local matrix다. 행렬은 dense numpy로 두고 <code>np.add.at</code>으로 같은 자리의 기여를 모두 더한다(scipy의 sparse 조립과 같은 일을 한다).</p>
+        <pre id="code-42-3-1"><code>import numpy as np
+import dgmesh as dm
+import ch42
+
+def fem_matrices(V, F):
+    """P1 stiffness a_ij = int &lt;grad phi_i, grad phi_j&gt; dA and Galerkin mass M^G_ij = int phi_i phi_j dA."""
+    P = V[F]                                              # (n2, 3, 3): the corners of every face
+    e = np.roll(P, 1, axis=1) - np.roll(P, -1, axis=1)    # e[:, c] = x_{c+2} - x_{c+1}, the edge opposite corner c
+    A = 0.5 * np.linalg.norm(np.cross(P[:, 1] - P[:, 0], P[:, 2] - P[:, 0]), axis=1)
+    Kf = np.einsum("fad,fbd-&gt;fab", e, e) / (4 * A)[:, None, None]       # A &lt;grad phi_a, grad phi_b&gt;, Lemma 42.3.2
+    Mf = A[:, None, None] * (np.ones((3, 3)) + np.eye(3)) / 12          # Proposition 42.3.9
+    rows, cols = np.repeat(F, 3, axis=1).ravel(), np.tile(F, (1, 3)).ravel()
+    stiff, MG = np.zeros((len(V), len(V))), np.zeros((len(V), len(V)))
+    np.add.at(stiff, (rows, cols), Kf.ravel())                          # sum over the faces
+    np.add.at(MG, (rows, cols), Mf.ravel())
+    return stiff, MG
+
+V, F = ch42.jittered_sphere(3, s=0.15, seed=42)           # obtuse triangles, some negative cotan weights
+stiff, MG = fem_matrices(V, F)
+L = dm.cotan_laplacian(V, F)
+w = np.array(list(dm.cotan_weights(V, F).values()))
+print("negative weights:", (w &lt; 0).sum(), " min weight:", round(w.min(), 3))
+print("stiffness = -L:", np.abs(stiff + L).max() &lt; 1e-12)
+print("row sums of M^G = barycentric areas:", np.allclose(MG.sum(1), dm.mass_barycentric(V, F)))
+lam = np.linalg.eigvalsh(stiff)
+print("eigenvalues of -L:", np.round(lam[:3], 6) + 0.0)
+u = np.random.default_rng(0).normal(size=len(V))
+print("u^T(-L)u = int |grad W0 u|^2:", np.isclose(u @ stiff @ u, dm.dirichlet_energy(V, F, u)))</code></pre>
+        <pre id="out-42-3-1"><code>negative weights: 31  min weight: -0.499
+stiffness = -L: True
+row sums of M^G = barycentric areas: True
+eigenvalues of -L: [0.       0.038807 0.038885]
+u^T(-L)u = int |grad W0 u|^2: True</code></pre>
+        <p>음수 cotan weight가 31개인 mesh에서 face마다 조립한 stiffness matrix가 \(-L\)과 같고(<a href="#i-42-3-5">Theorem 42.3.5</a>), 가장 작은 eigenvalue가 \(0\)(상수)이며 나머지는 양수다(<a href="#i-42-3-6">Corollary 42.3.6</a>). 마지막 줄은 <a href="#eq-42-3-6">(42.3.6)</a>을 <code>dgmesh.dirichlet_energy</code>(각 face에서 gradient를 직접 계산해 적분한다)와 비교한다. <code>ch42</code>는 이 장의 <code>lib/ch42.py</code>다.</p>
+        <p class="verified">Verification: <code>verify/v-42-3-fem.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: signs in the FEM derivation of the notes</p>
+        <ul>
+          <li>이 study set: stiffness matrix \((a_{ij}) = -L\)은 positive semidefinite이고, Galerkin system은 \(Lu = M^{\mathrm{G}}f\), lumping하면 \(Lu = Mf\)다.</li>
+          <li>Cr §6.2는 mesh 위에서 Green's identity를 쓰면서 \(\langle\Delta u, \varphi_j\rangle\) \(= \sum_k\langle\nabla u, \nabla\varphi_j\rangle_{\sigma_k} + (\text{boundary})\)로 마이너스를 빠뜨리고, \(A_{ij} := \langle\nabla\varphi_i, \nabla\varphi_j\rangle\)로 \(Ax = b\)(\(b_i = \langle f, \varphi_i\rangle\))를 푼다 <a class="cite" href="../../references.html#Cr">[Cr §6.2]</a>(인쇄 105–106쪽). 같은 노트 §6.1의 Green's identity(마이너스가 있다)대로라면 \(-Ax = b\)이고, \(A = -L\)이므로 이것이 \(Lu = M^{\mathrm{G}}f\)다. 같은 절 끝의 cotan formula \((\Delta u)_i = \tfrac12\sum_j(\cot\alpha_j + \cot\beta_j)(u_j - u_i)\)와 Cr §6.5의 식 \(Lu = M\rho\)는 이 study set의 부호와 같다.</li>
+          <li>Cr §6.5는 \(L\)(negative semidefinite 쪽, cotan formula)이 FEM에서 흔히 stiffness matrix라 불린다고 적는다. FEM 문헌에서는 보통 positive semidefinite인 \((a_{ij}) = -L\)을 그렇게 부르고, 이 study set도 그렇다. 또 노트의 \((\Delta u)_i\)는 dual cell 위에서 적분한 값(이 study set의 \((Lu)_i\))이다. 점마다의 값은 \((M^{-1}Lu)_i\)다(<a href="42-4-dec.html">Section 42.4</a>).</li>
+          <li>이 절에서 stiffness matrix에 문자를 주지 않고 성분 \(a_{ij}\)로만 쓴다. \(K\)는 Gaussian curvature다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <aside class="box discrete">
+      <p class="box-title">Smooth vs. Discrete: the weak form</p>
+      <p><strong>Smooth.</strong> \(\Delta u = f\) ⇔ 모든 test function \(v\)에서 \(\int\inner{\grad u}{\grad v} = -\int fv\). <strong>Discrete.</strong> test function과 해를 \(V_h = \Span\{\varphi_i\}\)로 제한하면 \(Lu = M^{\mathrm{G}}f\)이고, stiffness matrix는 \(-L\)이다.</p>
+      <ul>
+        <li>정확히 보존하는 것: \(V_h\)의 함수에 대해서는 energy가 정확하다(\(-u^{\mathsf T}Lu = \int\abs{\grad W_0u}^2\)). 그래서 symmetric, \(L\mathbf{1} = 0\), 모든 mesh에서의 positive semidefiniteness, connected mesh의 kernel이 smooth와 같다. \(V_h\)에 들어 있는 해(평면의 affine 함수)는 정확히 재현된다.</li>
+        <li>잃는 것: \(V_h\) 밖의 함수는 근사뿐이고, 오차는 해와 energy의 의미로 \(O(\bar\ell^2)\), \(O(\bar\ell)\)이다. 점마다의 \(M^{-1}Lu\)는 수렴하지 않을 수 있다. mass matrix를 lumping하면 진동하는 함수의 L2 norm이 달라진다.</li>
+      </ul>
+    </aside>
+
+    <aside class="box backward">
+      <p class="box-title">Looking back</p>
+      <p>Chapter 31은 같은 계산을 Derivation으로 했다. triangle 하나의 식(<a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-1">Lemma 31.3.1</a>)을 높이와 각으로 읽고, Dirichlet energy의 cotan formula(<a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-2">Proposition 31.3.2</a>)와 \(-L\)의 positive semidefiniteness(<a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-4">Proposition 31.3.4</a>(b))를 얻었다. 무엇이 새로워졌는가: <a href="#i-42-3-2">Lemma 42.3.2</a>는 obtuse한 각까지 부호를 따로 따지지 않는 증명이고, <a href="#i-42-3-5">Theorem 42.3.5</a>는 FEM의 행렬이 Chapter 36의 DEC 합성 \(d_0^{\mathsf T}\star_1d_0\)와 성분까지 같음을 보였으며, <a href="#i-42-3-6">Corollary 42.3.6</a>은 Chapter 36이 Delaunay mesh에서만 증명한 성질(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-9">Proposition 36.6.9</a>)을 모든 mesh로 넓혔다. mass matrix도 새로 나왔다. Chapter 31은 \(M\)을 “vertex의 넓이 몫”으로 소개하고 barycentric area와 mixed Voronoi area를 함께 들었다(<a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-3">Definition 31.3.3</a>). 그 가운데 barycentric area가 Galerkin mass matrix를 lumping한 것이다(<a href="#i-42-3-12">Proposition 42.3.12</a>). mixed Voronoi area는 <a href="42-4-dec.html">Section 42.4</a>에서 DEC의 관점으로 다룬다.</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>piecewise linear 함수와 Dirichlet energy(Track 1): <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-pl-functions">Section 31.3</a>. 곡면 위 piecewise linear FEM의 오차: <a class="cite" href="../../references.html#Dziuk88">[Dziuk88]</a>. polyhedral surface 위의 양의 수렴: <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>. discrete Laplacian이 동시에 가질 수 없는 성질: <a class="cite" href="../../references.html#Wardetzky07">[Wardetzky07]</a>.</li>
+        <li>노트: <a class="cite" href="../../references.html#Cr">[Cr §6.2]</a>(Exercises 6.5–6.8이 <a href="#i-42-3-2">Lemma 42.3.2</a>를 조각으로 나눈 것이다).</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>weak form \(\int\inner{\grad u}{\grad v} = -\int fv\)(모든 \(v\))는 first derivative만 쓰므로 piecewise linear 함수에 쓸 수 있다. Galerkin method는 해와 test function을 hat function의 span에서 고른다(<a href="#i-42-3-1">Proposition 42.3.1</a>).</li>
+        <li>triangle 하나에서 \(A_f\inner{\grad\varphi_i}{\grad\varphi_j} = -\tfrac12\cot\theta_k\)이고, 이것을 더한 stiffness matrix는 모든 mesh에서 정확히 \(-L = d_0^{\mathsf T}\star_1d_0\)이다. FEM과 DEC가 같은 행렬을 준다(<a href="#i-42-3-2">Lemma 42.3.2</a>, <a href="#i-42-3-5">Theorem 42.3.5</a>).</li>
+        <li>\(-u^{\mathsf T}Lu = \int\abs{\grad W_0u}^2\)이므로 \(-L\)은 Delaunay가 아닌 mesh에서도 positive semidefinite이고 connected mesh에서 kernel은 상수다(<a href="#i-42-3-6">Corollary 42.3.6</a>).</li>
+        <li>mass matrix \(M^{\mathrm{G}}_{ij} = \int\varphi_i\varphi_j\)는 face마다 \(\tfrac{A_f}{12}(1 + \delta_{ij})\)이고, lumping하면 barycentric dual area다. Poisson equation은 \(Lu = M^{\mathrm{G}}f\) 또는 \(Lu = Mf\)이며, sphere에서 해가 \(O(\bar\ell^2)\)로 수렴한다(<a href="#i-42-3-9">Proposition 42.3.9</a>, <a href="#i-42-3-12">Proposition 42.3.12</a>, <a href="#i-42-3-14">Example 42.3.14</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 같은 \(L\)을 DEC의 관점에서, 곧 \(\Delta u\)를 vertex의 dual cell 위에서 적분하고 Stokes's theorem으로 boundary flux로 바꾸어 다시 얻는다. 그 관점에서는 \(L\)이 “적분한 Laplacian”이고 점마다의 값을 얻으려면 dual cell의 넓이로 나누어야 하는데, 그 넓이를 고르는 방법이 여럿이다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-42-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 42.3.1</span> <span class="level">★</span>
+        triangle 하나 \(\mathbf{x}_0 = (0, 0)\), \(\mathbf{x}_1 = (1, 0)\), \(\mathbf{x}_2 = (0, 1)\)로 된 mesh의 stiffness matrix와 mass matrix \(M^{\mathrm{G}}\), lumped mass matrix \(M\)을 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>각은 \(\theta_0 = 90^\circ\), \(\theta_1 = \theta_2 = 45^\circ\)이고 \(A = \tfrac12\)이다. <a href="#eq-42-3-3">(42.3.3)</a>에서 \(a_{01} = -\tfrac12\cot\theta_2 = -\tfrac12\), \(a_{02} = -\tfrac12\cot\theta_1 = -\tfrac12\), \(a_{12} = -\tfrac12\cot\theta_0 = 0\)이고 대각은 행의 합이 \(0\)이 되게 \(a_{00} = 1\), \(a_{11} = a_{22} = \tfrac12\)이다. 곧 \((a_{ij}) = \tfrac12\begin{pmatrix}2&-1&-1\\-1&1&0\\-1&0&1\end{pmatrix}\)이다. 직접 확인하면 \(\grad\varphi_0 = (-1, -1)\), \(\grad\varphi_1 = (1, 0)\), \(\grad\varphi_2 = (0, 1)\)(<a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#i-36-3-3">Example 36.3.3</a>(a))이므로 \(a_{00} = \tfrac12\cdot2 = 1\), \(a_{01} = \tfrac12\cdot(-1)\), \(a_{12} = 0\)으로 같다. \(M^{\mathrm{G}} = \tfrac{1}{24}\begin{pmatrix}2&1&1\\1&2&1\\1&1&2\end{pmatrix}\), \(M = \tfrac16I_3\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-42-3-fem.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 42.3.2</span> <span class="level">★</span>
+        stiffness matrix의 행의 합이 \(0\)임을 \(\sum_i\varphi_i = 1\)로 보이고, 이것이 smooth의 어느 사실(<a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>)에 대응하는지 말하여라. 또 \(\mathbf{1}^{\mathsf T}M^{\mathrm{G}}\mathbf{1}\)이 mesh의 넓이임을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\sum_ja_{ij} = \int\inner{\grad\varphi_i}{\grad\sum_j\varphi_j}\) \(= \int\inner{\grad\varphi_i}{\grad 1} = 0\)이다. 곧 \(L\mathbf{1} = 0\)이고, smooth에서 상수가 harmonic이라는 것(kernel이 상수, <a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>(d))에 대응한다. symmetric이므로 열의 합도 \(0\)이고, 이것은 \(\int\Delta u = 0\)(<a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>(b))의 discrete 판 \(\mathbf{1}^{\mathsf T}Lu = 0\)이다. \(\mathbf{1}^{\mathsf T}M^{\mathrm{G}}\mathbf{1} = \int(\sum_i\varphi_i)^2 = \int1 = \) 넓이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-3-3" data-level="1">
+        <p><span class="thm-head">Exercise 42.3.3</span> <span class="level">★</span>
+        참인지 거짓인지 판별하고 이유를 써라. (a) non-Delaunay edge가 있으면 \(-L\)에 음수 eigenvalue가 생긴다. (b) stiffness matrix의 off-diagonal 성분은 모두 \(0\) 이하다. (c) Galerkin mass matrix의 성분은 모두 \(0\) 이상이다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 거짓. <a href="#i-42-3-6">Corollary 42.3.6</a>에 의해 \(-L\)은 모든 mesh에서 positive semidefinite다(<a href="#i-42-3-7">Example 42.3.7</a>). (b) 거짓. off-diagonal 성분은 \(a_{ij} = -L_{ij} = -\tfrac12(\cot\alpha + \cot\beta)\)이고 non-Delaunay edge에서 양수다(<a href="#fig-42-3-1">Figure 42.3.1</a>(b)의 \(+0.492\)). (c) 참. <a href="#i-42-3-9">Proposition 42.3.9</a>에서 각 성분은 넓이의 합에 양수를 곱한 것이다. hat function이 모두 \(0\) 이상이므로 \(\int\varphi_i\varphi_j \ge 0\)이기도 하다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-3-4" data-level="2">
+        <p><span class="thm-head">Exercise 42.3.4</span> <span class="level">★★</span>
+        모든 \(v \in \R^{n_0}\)에 대하여 \(\tfrac14v^{\mathsf T}Mv \le v^{\mathsf T}M^{\mathrm{G}}v \le v^{\mathsf T}Mv\)임을 보여라(\(M\)은 lumped). 양쪽 등호는 각각 어떤 \(v\)에서 성립하는가? (힌트: face 하나의 local matrix로 나누어 본다.)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>두 quadratic form은 face마다의 합이다: \(v^{\mathsf T}M^{\mathrm{G}}v = \sum_fv_f^{\mathsf T}\tfrac{A_f}{12}(I_3 + \mathbf{1}\mathbf{1}^{\mathsf T})v_f\), \(v^{\mathsf T}Mv = \sum_fv_f^{\mathsf T}\tfrac{A_f}{3}v_f\)(\(v_f\)는 face의 세 vertex 값). \(I_3 + \mathbf{1}\mathbf{1}^{\mathsf T}\)의 eigenvalue는 \(4\)(\(\mathbf{1}\))와 \(1\)(\(\mathbf{1}^\perp\), 두 번)이므로 \(\tfrac{A_f}{12}\abs{v_f}^2 \le v_f^{\mathsf T}\tfrac{A_f}{12}(I + \mathbf{1}\mathbf{1}^{\mathsf T})v_f \le \tfrac{A_f}{3}\abs{v_f}^2\)이다. face에 대해 더하면 된다. 오른쪽 등호는 모든 face에서 \(v_f \parallel \mathbf{1}\), 곧 connected mesh에서 \(v\)가 상수일 때다. 왼쪽 등호는 모든 face에서 \(v_f \perp \mathbf{1}\)(세 값의 합이 \(0\))일 때인데, 예를 들어 정삼각형 grid를 세 색으로 칠할 수 있으면 색마다 \(1, -1, 0\)을 주어 얻는다. 곧 lumping은 가장 빨리 진동하는 함수의 \(\int v^2\)를 최대 4배 크게 잰다.</p>
+          <p class="verified">Verification: <code>verify/v-42-3-fem.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-3-5" data-level="2">
+        <p><span class="thm-head">Exercise 42.3.5</span> <span class="level">★★</span>
+        <strong>Coding.</strong> icosphere(2)와 (3)에서 generalized eigenproblem \(-L\varphi = \lambda M^{\mathrm{G}}\varphi\)(Galerkin)와 \(-L\varphi = \lambda M\varphi\)(lumped)의 가장 작은 eigenvalue 16개를 구해 \(\ell = 1, 2, 3\)의 묶음(3, 5, 7개)의 평균을 \(\ell(\ell + 1) = 2, 6, 12\)와 비교하여라. Galerkin eigenvalue가 polyhedral surface 자신의 Laplacian eigenvalue의 upper bound라는 것을 min-max principle로 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-42-3-5"><code>import numpy as np
+import dgmesh as dm
+import ch42
+
+for level in (2, 3):
+    V, F = dm.icosphere(level)
+    L = dm.cotan_laplacian(V, F)
+    C = np.linalg.cholesky(ch42.galerkin_mass(V, F))       # M^G = C C^T
+    Ci = np.linalg.inv(C)
+    lam_G = np.linalg.eigvalsh(Ci @ (-L) @ Ci.T)[:16]      # -L phi = lambda M^G phi
+    s = 1 / np.sqrt(dm.mass_barycentric(V, F))
+    lam_M = np.linalg.eigvalsh(-(s[:, None] * L * s[None, :]))[:16]   # lumped (barycentric) mass
+    for name, lam in (("galerkin", lam_G), ("lumped", lam_M)):
+        print(level, name, [round(float(lam[a:b].mean()), 3) for a, b in ((1, 4), (4, 9), (9, 16))])</code></pre>
+          <pre id="out-ex-42-3-5"><code>2 galerkin [2.046, 6.282, 13.002]
+2 lumped [2.0, 5.864, 11.332]
+3 galerkin [2.012, 6.07, 12.246]
+3 lumped [2.0, 5.966, 11.83]</code></pre>
+          <p>\(M^{\mathrm{G}} = CC^{\mathsf T}\)(<a href="#i-42-3-9">Proposition 42.3.9</a>에서 positive definite)이면 \(\psi = C^{\mathsf T}\varphi\)로 바꾸어 symmetric matrix \(C^{-1}(-L)C^{-\mathsf T}\)의 보통 eigenproblem이 된다. Galerkin eigenvalue는 \(2.046, 6.282, 13.002\)(level 2)로 정확한 값보다 크고, level 3에서 \(2.012, 6.070, 12.246\)으로 위에서 다가온다. lumped는 \(5.864, 11.332\)처럼 아래에서 다가온다(\(\ell = 1\)은 거의 정확하다). 설명: polyhedral surface \(\abs{\mathcal{K}}\)의 \(k\)번째 eigenvalue는 min-max principle에 의해 \(k\)차원 부분공간 위에서 Rayleigh quotient \(\int\abs{\grad v}^2/\int v^2\)의 최댓값을 최소화한 값이다. \(V_h\) 안의 함수에서는 이 quotient가 정확히 \(v^{\mathsf T}(-L)v/v^{\mathsf T}M^{\mathrm{G}}v\)이므로(<a href="#eq-42-3-6">(42.3.6)</a>, <a href="#i-42-3-8">Definition 42.3.8</a>), 부분공간을 \(V_h\) 안에서만 고르는 Galerkin eigenvalue는 그 최소화의 범위가 좁아 더 크다. lumped mass는 분모를 \(v^{\mathsf T}Mv \ge v^{\mathsf T}M^{\mathrm{G}}v\)(<a href="#ex-42-3-4">Exercise 42.3.4</a>)로 바꾸어 quotient를 줄이므로 이 보장이 없다. 두 값 모두 sphere의 \(\ell(\ell + 1)\)과 비교할 때는 기하 오차가 섞인다.</p>
+          <p class="verified">Verification: <code>verify/v-42-3-fem.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-3-6" data-level="2">
+        <p><span class="thm-head">Exercise 42.3.6</span> <span class="level">★★</span>
+        torus of revolution \(T_{2,0.8}\)에서 Poisson equation \(\Delta u = f\), \(f = -\dfrac{\sin u\,(R + 2r\cos u)}{r(R + r\cos u)}\)(해는 높이 \(z\), <a href="42-1-laplacian-definitions.html#ex-42-1-6">Exercise 42.1.6</a>)를 <code>torus_mesh(2, 0.8, n_u, n_v)</code>에서 Galerkin mass와 lumped mass로 풀고, \((n_u, n_v) = (12, 24), (16, 32), (24, 48)\)에서 넓이 가중 RMS 오차를 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-42-3-14">Example 42.3.14</a>와 같은 방법(평균 제거, 넓이 가중 평균이 \(0\)이 되게 맞추기)으로 풀면 오차는 Galerkin \(3.2\times10^{-2}, 1.8\times10^{-2}, 8.1\times10^{-3}\), lumped(barycentric) \(7.1\times10^{-3}, 4.1\times10^{-3}, 1.8\times10^{-3}\)이다. 평균 edge 길이는 \(0.536, 0.403, 0.269\)이므로 둘 다 \(\bar\ell^2\)에 비례해 준다(\(0.536/0.269 \approx 2\)일 때 약 \(\tfrac14\)). sphere와 마찬가지로 lumped 쪽의 오차가 약 4배 작다. torus_mesh는 obtuse triangle 1152개와 음수 cotan weight 574개를 가진 mesh(\(24\times48\))인데도 수렴은 깨지지 않는다.</p>
+          <p class="verified">Verification: <code>verify/v-42-3-fem.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="42-2-dirichlet-poisson.html">← 42.2 Dirichlet Energy, Harmonic Functions, and the Poisson Equation</a>
+    <a rel="next" href="42-4-dec.html">42.4 Discretization via DEC →</a>
+  </nav>
+</body>
+</html>

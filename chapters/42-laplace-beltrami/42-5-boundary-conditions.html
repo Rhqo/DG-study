@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>42.5 Boundary Conditions — DG Study</title>
+  <meta name="dg-id" content="42.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="42.1, 42.3, 42.4, 36.5, 33.6">
+  <meta name="dg-refs" content="Cr §6.7; CMU-DDG L18; Tutte63; Floater05">
+  <meta name="dg-updated" content="2026-10-20">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">42. The Laplace–Beltrami Operator</a> ›
+    <span>42.5 Boundary Conditions</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>42.5 Boundary Conditions</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §6.7]</a>,
+        <a class="cite" href="../../references.html#Tutte63">[Tutte63]</a>,
+        <a class="cite" href="../../references.html#Floater05">[Floater05]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 43–51</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>Dirichlet boundary condition과 Neumann boundary condition을 정의하고, 1차원과 2차원의 예로 해의 존재와 유일성이 어떻게 다른지 설명할 수 있다.</li>
+        <li>Dirichlet 문제를 알려진 값을 오른쪽으로 옮겨 크기를 줄인 linear system으로 풀고, 그 행렬이 positive definite임을 증명할 수 있다.</li>
+        <li>Neumann condition이 weak form의 natural boundary condition임을 보이고, 0이 아닌 Neumann 값을 boundary edge 위의 적분으로 오른쪽에 넣을 수 있다.</li>
+        <li>boundary vertex의 잘린 dual cell로 Chapter 36이 남긴 dual \(d\)의 boundary 행 문제를 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="42-1-laplacian-definitions.html#i-42-1-12">Proposition 42.1.12</a>: boundary 항이 있는 Green's first identity</li>
+        <li><a href="42-3-fem.html#i-42-3-1">Proposition 42.3.1</a>, <a href="42-3-fem.html#i-42-3-6">Corollary 42.3.6</a>: weak form, \(-u^{\mathsf T}Lu = \int\abs{\grad W_0u}^2\)</li>
+        <li><a href="42-4-dec.html#i-42-4-1">Proposition 42.4.1</a>: dual cell을 빠져나가는 flux</li>
+        <li><a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-5">Proposition 36.5.5</a>와 그 뒤의 boundary 행에 대한 문단, <a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-4">Non-example 33.6.4</a>(c): 잘린 dual cell</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>지금까지는 대부분 boundary 없는 곡면에서 일했다. 그런데 실제 문제의 영역에는 대개 boundary가 있다. 평면의 영역은 반드시 boundary를 갖고, 3D scan은 구멍이 난 곡면이며, texture parametrization은 곡면을 잘라 disk로 만든 뒤 평면에 편다(<a href="../31-meshes/31-6-parametrization-texture.html">Section 31.6</a>). boundary가 있으면 Green's identity(<a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>)에 boundary 항 \(\oint v\inner{\grad u}{\mathbf{n}}\,ds\)가 남고, 해를 정하려면 boundary에서 무엇인가를 정해 주어야 한다. Laplace equation에서는 그것이 해 전체를 정한다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 44.</p>
+      <p>mesh 쪽에도 미뤄 둔 문제가 있다. Chapter 36은 boundary가 있는 mesh에서 dual exterior derivative \(\tilde d_1 = -d_0^{\mathsf T}\)가 interior vertex의 행에서만 증명된다는 것을 확인하고, boundary 행은 정의로 채택한 뒤 그 처리를 이 절로 넘겼다(<a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-5">Proposition 36.5.5</a> 뒤의 문단). boundary vertex의 dual cell은 잘려 있어서 그 boundary의 일부가 dual edge가 아니라 mesh의 boundary이기 때문이다. 이 절의 끝에서 그 빠진 부분이 정확히 Neumann boundary condition의 자리임을 본다.</p>
+    </section>
+
+    <section id="sec-definitions">
+      <h2>Dirichlet and Neumann Conditions</h2>
+      <p>이 절에서 \(S\)는 boundary \(\partial S \ne \emptyset\)가 있는 compact oriented surface(평면 영역 포함)이고, \(\mathbf{n}\)은 \(\partial S\)의 outward conormal(<a href="42-1-laplacian-definitions.html#i-42-1-12">Proposition 42.1.12</a> 앞)이다. 평면 영역에서는 보통의 outward unit normal이다.</p>
+      <div class="thm definition" id="i-42-5-1">
+        <p><span class="thm-head">Definition 42.5.1</span> <span class="thm-name">(Dirichlet boundary condition)</span>.
+        \(\partial S\) 위의 함수 \(g\)에 대하여 조건</p>
+        <div class="equation" id="eq-42-5-1">
+        \[ u|_{\partial S} = g \tag{42.5.1} \]
+        </div>
+        <p>를 <dfn>Dirichlet boundary condition</dfn>(디리클레 경계조건)이라 한다. Poisson equation \(\Delta u = f\)와 함께 준 문제를 Dirichlet problem이라 부른다.</p>
+      </div>
+      <div class="thm definition" id="i-42-5-2">
+        <p><span class="thm-head">Definition 42.5.2</span> <span class="thm-name">(Neumann boundary condition)</span>.
+        \(\partial S\) 위의 함수 \(g\)에 대하여 조건</p>
+        <div class="equation" id="eq-42-5-2">
+        \[ \inner{\grad u}{\mathbf{n}} = g \quad \text{on } \partial S \tag{42.5.2} \]
+        </div>
+        <p>를 <dfn>Neumann boundary condition</dfn>(노이만 경계조건)이라 한다. 왼쪽은 boundary에서 바깥쪽으로 잰 directional derivative이고, 흔히 \(\partial u/\partial\mathbf{n}\)이라 쓴다.</p>
+      </div>
+      <p>Dirichlet은 값을, Neumann은 바깥 방향의 기울기를 고정한다. 열의 언어로는 Dirichlet은 boundary의 온도를 정하는 것이고, Neumann은 boundary를 통해 들어오거나 나가는 열의 양을 정하는 것이다(\(g \gt 0\)이면 \(\grad u\)가 바깥을 향하므로, heat flux \(-\grad u\)는 안쪽으로 들어온다). \(\partial S\)를 둘로 나누어 한쪽에 Dirichlet, 다른 쪽에 Neumann을 주면 <strong>mixed boundary condition</strong>(혼합 경계조건)이고, 값과 기울기의 linear combination을 주는 Robin condition도 있다(slide 44). 두 조건을 같은 곳에 함께 주는 것은 너무 많다. unit disk에서 Laplace equation에 \(u = 0\)과 \(\inner{\grad u}{\mathbf{n}} = 1\)을 함께 주면 해가 없다. 앞의 조건만으로 해가 \(u = 0\)으로 정해지기 때문이다(아래 <a href="#i-42-5-4">Proposition 42.5.4</a>(a)).</p>
+      <div class="thm example" id="i-42-5-3">
+        <p><span class="thm-head">Example 42.5.3</span> <span class="thm-name">(one dimension)</span>.
+        \([0, 1]\)에서 \(u'' = 1\)을 보자. 해는 모두 \(u = \tfrac{x^2}{2} + c_1x + c_0\)이다. (a) Dirichlet \(u(0) = a\), \(u(1) = b\)는 \(c_0 = a\), \(c_1 = b - a - \tfrac12\)로 해를 하나 정한다. (b) Neumann: 바깥 방향은 \(x = 0\)에서 \(-x\), \(x = 1\)에서 \(+x\)이므로 조건은 \(-u'(0) = g_0\), \(u'(1) = g_1\)이다. \(u' = x + c_1\)이므로 \(-c_1 = g_0\)과 \(1 + c_1 = g_1\)이 함께 성립해야 하고, 이것은 \(g_0 + g_1 = 1 = \int_0^1u''\,dx\)일 때만 가능하다. 그때 \(c_0\)는 자유이므로 해는 상수 차이로만 정해진다. 예를 들어 \(g_0 = g_1 = \tfrac12\)이면 \(u = \tfrac12(x^2 - x) + c\)이고, \(g_0 = g_1 = 1\)이면 해가 없다(<a href="#fig-42-5-1">Figure 42.5.1</a>). Laplace equation \(u'' = 0\)이면 해가 직선이라, 두 점의 값은 언제나 맞출 수 있지만 두 끝의 기울기는 같을 때만 맞출 수 있다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 48–49.</p>
+        <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code></p>
+      </div>
+      <figure class="dg-figure" id="fig-42-5-1">
+        <img src="figures/fig-42-5-1-boundary-1d.svg" alt="두 패널. 가로축 x(0에서 1), 세로축 u(x). (a) 제목 Dirichlet: u(0) = a, u(1) = b. 세 포물선(파랑, 초록, 주황)이 양 끝의 점(같은 색)을 지난다: 파랑은 0에서 0으로, 초록은 0에서 0.4로, 주황은 0.3에서 -0.1로. (b) 제목 Neumann. 같은 모양의 포물선 세 개가 위아래로 옮긴 꼴로 겹쳐 있고, 각 곡선의 양 끝에 같은 기울기를 나타내는 짧은 검은 선분이 있다. 가운데 위에 -u'(0) = u'(1) = 1/2와 u + c: not unique라 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 42.5.1.</span>
+        같은 방정식, 다른 boundary condition. <em>무엇을</em>: \([0, 1]\)에서 \(u'' = 1\)의 해. (a) Dirichlet \((a, b) = (0, 0), (0, 0.4), (0.3, -0.1)\), (b) Neumann \(-u'(0) = u'(1) = \tfrac12\)의 해 \(u = \tfrac12(x^2 - x) + c\)(\(c = -0.15, 0, 0.15\)). <em>읽는 법</em>: (a)의 점은 정해 준 boundary 값이다. (b)의 짧은 검은 선분은 정해 준 기울기(바깥 방향 derivative \(\tfrac12\))를 나타낸다. 색은 서로 다른 해를 구별한다. <em>볼 것</em>: (a)에서는 boundary 값을 어떻게 고르든 해가 정확히 하나다. (b)에서는 세 곡선이 모두 같은 기울기 조건을 만족하는 해이고, 서로 상수만큼 떨어져 있다. 기울기를 \(g_0 + g_1 \ne 1\)로 고르면 그런 곡선이 하나도 없다. <em>본문과의 연결</em>: <a href="#i-42-5-3">Example 42.5.3</a>, <a href="#i-42-5-4">Proposition 42.5.4</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-42-5-1">Figure 42.5.1</a>의 (b)를 보자. 세 곡선은 모양이 같고 높이만 다르다. Neumann 조건과 방정식은 \(u\)의 derivative만 보므로 상수를 더해도 그대로다. 기울기의 조건도 아무렇게나 줄 수 없다. 곡선의 기울기는 왼쪽 끝의 \(-\tfrac12\)에서 오른쪽 끝의 \(+\tfrac12\)로 정확히 \(\int u'' = 1\)만큼 바뀌어야 하기 때문이다. 같은 일이 2차원에서는 divergence theorem으로 일어난다.</p>
+      <div class="thm proposition" id="i-42-5-4">
+        <p><span class="thm-head">Proposition 42.5.4</span> <span class="thm-name">(uniqueness and compatibility)</span>.
+        \(S\)가 connected라 하자. (a) \(\Delta u = f\), \(u|_{\partial S} = g\)의 smooth한 해는 많아야 하나다. (b) \(\Delta u = f\), \(\inner{\grad u}{\mathbf{n}} = g\)가 smooth한 해를 가지면</p>
+        <div class="equation" id="eq-42-5-3">
+        \[ \int_Sf\,dA = \oint_{\partial S}g\,ds \tag{42.5.3} \]
+        </div>
+        <p>이고, 두 해의 차는 상수다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) 두 해의 차 \(w\)는 \(\Delta w = 0\), \(w|_{\partial S} = 0\)이다. <a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>을 \(u = v = w\)로 쓰면 \(0 = -\int\abs{\grad w}^2 + 0\)이므로 \(w\)는 상수이고(<a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>(d)의 증명), boundary에서 \(0\)이므로 \(w = 0\)이다. (b) <a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>을 \(v = 1\)로 쓰면 \(\int\Delta u = \oint\inner{\grad u}{\mathbf{n}}\), 곧 \(\int f = \oint g\)이다. 두 해의 차 \(w\)는 \(\Delta w = 0\), \(\inner{\grad w}{\mathbf{n}} = 0\)이므로 <a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>에서 \(\int\abs{\grad w}^2 = 0\)이고 상수다.</p>
+      </div>
+      <p><a href="#eq-42-5-3">(42.5.3)</a>은 “들어오는 것과 나가는 것이 같아야 한다”는 보존 법칙이다 <a class="cite" href="../../references.html#Cr">[Cr §6.7]</a>. 안쪽의 원천 \(f\)의 총량이 boundary로 빠져나가는 flux와 같아야 평형 상태가 있다. 닫힌 곡면의 조건 \(\int f = 0\)(<a href="42-2-dirichlet-poisson.html#i-42-2-11">Proposition 42.2.11</a>)은 boundary가 없는 특수한 경우다. 존재 쪽, 곧 Dirichlet problem은 언제나(적당한 regularity 아래) 해가 있고 Neumann problem은 <a href="#eq-42-5-3">(42.5.3)</a>이면 해가 있다는 것은 진술만 한다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 50–51.</p>
+      <div class="thm example" id="i-42-5-5">
+        <p><span class="thm-head">Example 42.5.5</span> <span class="thm-name">(the unit disk)</span>.
+        unit circle에서 \(\mathbf{n} = (\cos\vartheta, \sin\vartheta)\)이므로 \(\inner{\grad u}{\mathbf{n}} = \partial_ru\)이다. (a) Laplace equation에 Neumann 값 \(g = \cos\vartheta\)를 주면 \(\oint g = 0\)이고 해는 \(u = x + c\)다(\(\partial_r(r\cos\vartheta) = \cos\vartheta\)). (b) \(g = 1\)이면 \(\oint g = 2\pi \ne 0\)이므로 Laplace equation의 해가 없다. 그러나 \(\Delta u = 2\)로 원천을 넣으면 \(\int2\,dA = 2\pi = \oint1\)이 되어 \(u = \tfrac{r^2}{2} + c\)가 해다(\(\Delta\tfrac{r^2}{2} = 2\), \(\partial_r\tfrac{r^2}{2} = 1\)). (c) Dirichlet 값 \(g = \cos 2\vartheta\)의 해는 \(x^2 - y^2\) 하나뿐이다(<a href="42-2-dirichlet-poisson.html#i-42-2-6">Example 42.2.6</a>).</p>
+        <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code></p>
+      </div>
+      <p>Neumann condition은 weak form에서 특별한 자리를 갖는다. Green's identity의 boundary 항이 그대로 Neumann 값이기 때문이다.</p>
+      <div class="thm proposition" id="i-42-5-6">
+        <p><span class="thm-head">Proposition 42.5.6</span> <span class="thm-name">(weak form with Neumann data)</span>.
+        smooth 함수 \(u, f\)와 \(\partial S\) 위의 \(g\)에 대하여 “\(\Delta u = f\)이고 \(\inner{\grad u}{\mathbf{n}} = g\)”인 것과, 모든 smooth 함수 \(v\)에 대하여</p>
+        <div class="equation" id="eq-42-5-4">
+        \[ \begin{aligned} \int_S\inner{\grad u}{\grad v}\,dA &= -\int_Sfv\,dA \\ &\quad + \oint_{\partial S}gv\,ds \end{aligned} \tag{42.5.4} \]
+        </div>
+        <p>인 것은 동치다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>에서 \(\int\inner{\grad u}{\grad v}\) \(= -\int v\,\Delta u + \oint v\inner{\grad u}{\mathbf{n}}\)이므로 <a href="#eq-42-5-4">(42.5.4)</a>는 \(\int(\Delta u - f)v\,dA = \oint(\inner{\grad u}{\mathbf{n}} - g)v\,ds\)와 같다. 조건이 성립하면 양변이 \(0\)이다. 거꾸로 이 식이 모든 \(v\)에서 성립하면, 먼저 boundary 근처에서 \(0\)인 \(v\)만 써서 <a href="42-2-dirichlet-poisson.html#i-42-2-4">Theorem 42.2.4</a>의 증명과 같은 논법으로 \(\Delta u = f\)를 얻는다. 그러면 모든 \(v\)에서 \(\oint(\inner{\grad u}{\mathbf{n}} - g)v\,ds = 0\)이고, \(\partial S\) 위의 임의의 smooth 함수는 \(S\) 위의 smooth 함수로 넓힐 수 있으므로(진술만 한다) 같은 논법을 \(\partial S\) 위에서 써서 \(\inner{\grad u}{\mathbf{n}} = g\)이다.</p>
+      </div>
+      <p>이 명제의 요점은 <a href="#eq-42-5-4">(42.5.4)</a>에서 \(v\)를 boundary에서 제한하지 않는다는 것이다. Dirichlet condition은 해의 모임에 걸어야 하는 조건(essential condition)이고, Neumann condition은 weak form에 boundary 적분 하나를 더하는 것으로 저절로 들어간다(natural condition). 특히 \(g = 0\)이면 weak form은 boundary가 없을 때의 <a href="42-3-fem.html#eq-42-3-1">(42.3.1)</a>과 글자 그대로 같다.</p>
+    </section>
+
+    <section id="sec-discrete">
+      <h2>Boundary Conditions on a Mesh</h2>
+      <p>vertex를 interior vertex \(I\)와 boundary vertex \(B\)로 나누고, 행렬과 vector를 block으로 쓰자 <a class="cite" href="../../references.html#Cr">[Cr §6.7.1]</a>.</p>
+      <p>\[ L = \begin{pmatrix}L_{II} & L_{IB}\\ L_{BI} & L_{BB}\end{pmatrix},\qquad u = \begin{pmatrix}u_I\\ u_B\end{pmatrix},\qquad L_{BI} = L_{IB}^{\mathsf T}. \]</p>
+      <p><strong>Dirichlet.</strong> \(u_B = g\)는 알고 있다. interior vertex의 식만 쓰면 \(L_{II}u_I + L_{IB}g = (Mf)_I\)이므로</p>
+      <div class="equation" id="eq-42-5-5">
+      \[ L_{II}\,u_I = (Mf)_I - L_{IB}\,g \tag{42.5.5} \]
+      </div>
+      <p>를 푼다. 알려진 boundary 값은 이웃한 interior vertex의 오른쪽으로 옮겨 간다. boundary vertex의 식은 쓰지 않는다. 그 값은 이미 정해졌기 때문이다.</p>
+      <div class="thm proposition" id="i-42-5-7">
+        <p><span class="thm-head">Proposition 42.5.7</span> <span class="thm-name">(the reduced Dirichlet matrix)</span>.
+        mesh가 connected이고 boundary vertex와 interior vertex가 모두 하나 이상 있으면 \(-L_{II}\)는 symmetric positive definite이다. 따라서 <a href="#eq-42-5-5">(42.5.5)</a>는 모든 \(f, g\)에서 해가 정확히 하나이고, Cholesky factorization으로 풀 수 있다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(-L_{II}\)는 symmetric matrix \(-L\)의 principal submatrix이므로 symmetric이다. \(u_I \ne 0\)이라 하고 \(\tilde u\)를 \(I\)에서 \(u_I\), \(B\)에서 \(0\)인 vector라 하면 \(u_I^{\mathsf T}(-L_{II})u_I = \tilde u^{\mathsf T}(-L)\tilde u \ge 0\)이다(<a href="42-3-fem.html#i-42-3-6">Corollary 42.3.6</a>). 등호이면 <a href="42-3-fem.html#i-42-3-6">Corollary 42.3.6</a>에서 \(\tilde u\)는 상수인데, boundary vertex에서 \(0\)이므로 \(\tilde u = 0\)이 되어 \(u_I \ne 0\)에 어긋난다. 따라서 \(u_I^{\mathsf T}(-L_{II})u_I \gt 0\)이다.</p>
+      </div>
+      <p>증명에는 cotan weight의 부호가 전혀 쓰이지 않았다. non-Delaunay edge가 있는 mesh에서도 Dirichlet problem은 언제나 하나의 해를 갖는다. 이것은 smooth의 <a href="#i-42-5-4">Proposition 42.5.4</a>(a)와 같은 구조다. 이 linear system 대신 같은 해를 주는 더 큰 linear system \(\begin{pmatrix}L_{II} & L_{IB}\\ 0 & I\end{pmatrix}u = \begin{pmatrix}(Mf)_I\\ g\end{pmatrix}\)로 풀 수도 있지만 symmetric이 아니다 <a class="cite" href="../../references.html#Cr">[Cr §6.7.1]</a>.</p>
+      <p><strong>Neumann.</strong> <a href="#eq-42-5-4">(42.5.4)</a>를 Section 42.3처럼 \(V_h\)로 제한하되, test function을 boundary vertex의 hat function까지 모두 쓴다. \(i\)번째 식은 \(\sum_ja_{ij}u_j = -\int(W_0f)\varphi_i + \oint g\varphi_i\,ds\), 곧</p>
+      <div class="equation" id="eq-42-5-6">
+      \[ Lu = M^{\mathrm{G}}f - b_g, \qquad (b_g)_i := \oint_{\partial S}g\,\varphi_i\,ds \tag{42.5.6} \]
+      </div>
+      <p>이다(lumping하면 \(M^{\mathrm{G}}\)를 \(M\)으로). \(\varphi_i\)는 boundary vertex에서만 boundary 위에 걸치므로 \(b_g\)는 boundary vertex에서만 \(0\)이 아니다. \(g\)가 boundary edge \(e\)마다 상수 \(g_e\)이면 \(\int_e\varphi_i\,ds = \abs{e}/2\)이므로 \((b_g)_i = \tfrac12(g_{e}\abs{e} + g_{e'}\abs{e'})\)(\(e, e'\)는 \(i\)에서 만나는 두 boundary edge)이다. Crane의 노트는 이것을 boundary edge마다의 flux의 절반씩을 더한 것으로 설명한다 <a class="cite" href="../../references.html#Cr">[Cr §6.7.2]</a>.</p>
+      <div class="thm proposition" id="i-42-5-8">
+        <p><span class="thm-head">Proposition 42.5.8</span> <span class="thm-name">(zero Neumann is what you get for free)</span>.
+        boundary가 있는 mesh에서 Chapter 36의 \(L\)(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-6">Definition 36.6.6</a>. boundary edge의 weight는 \(\tfrac12\cot\alpha\) 하나)을 모든 vertex에서 그대로 써서 \(Lu = M^{\mathrm{G}}f\)를 세우는 것은, \(V_h\) 위의 Galerkin method로 Neumann 값 \(g = 0\)의 문제를 푸는 것과 같다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="42-3-fem.html#i-42-3-5">Theorem 42.3.5</a>는 boundary가 있는 mesh에서도 stiffness matrix가 \(-L\)이라고 말한다. 따라서 <a href="#eq-42-5-6">(42.5.6)</a>에서 \(g = 0\)으로 두면 \(Lu = M^{\mathrm{G}}f\)이고, <a href="#eq-42-5-4">(42.5.4)</a>의 \(g = 0\)인 Galerkin 판이 바로 이것이다(<a href="#i-42-5-6">Proposition 42.5.6</a>).</p>
+      </div>
+      <p>곧 boundary 처리를 “잊어버리면” 자동으로 zero Neumann condition이 된다. 이것은 편리하지만 함정이기도 하다. 의도하지 않은 boundary condition이 조용히 들어가 있기 때문이다. 예를 들어 boundary가 있는 mesh에서 heat equation을 그대로 풀면 열이 boundary를 통해 빠져나가지 못한다(단열 boundary).</p>
+      <p>DEC의 쪽에서 같은 결론을 보자. Crane의 노트도 Neumann condition을 boundary에서 잘린 dual cell 위의 divergence theorem으로 유도한다 <a class="cite" href="../../references.html#Cr">[Cr §6.7.2]</a>. <a href="#fig-42-5-2">Figure 42.5.2</a>는 boundary vertex의 circumcentric dual cell이다.</p>
+      <figure class="dg-figure" id="fig-42-5-2">
+        <img src="figures/fig-42-5-2-clipped-cell.svg" alt="평면 mesh의 일부. 아래쪽 검은 가로선이 boundary ∂S다. boundary 위의 vertex x_0과 양옆의 boundary vertex x_4, x_1, 위쪽의 interior vertex x_3, x_2가 회색 triangle 셋을 이룬다. x_0의 dual cell C_0가 연한 주황으로 칠해져 있고, 위쪽 boundary는 주황 꺾은선(edge 중점과 circumcenter를 잇는 dual edge 조각)이다. 아래쪽 boundary는 x_0 양옆의 boundary edge의 절반 두 개로, 굵은 주홍 선이며 아래로 향하는 주홍 화살표 n이 두 개 있다.">
+        <figcaption><span class="fig-head">Figure 42.5.2.</span>
+        boundary vertex의 dual cell은 boundary에서 잘린다. <em>무엇을</em>: boundary 위의 vertex \(\mathbf{x}_0 = (0, 0)\), boundary 이웃 \(\mathbf{x}_1 = (1, 0)\), \(\mathbf{x}_4 = (-1, 0)\), interior 이웃 \(\mathbf{x}_2 = (0.45, 0.85)\), \(\mathbf{x}_3 = (-0.5, 0.8)\)와 face \((0, 1, 2), (0, 2, 3), (0, 3, 4)\)(모두 acute). <em>읽는 법</em>: 연한 주황 영역이 circumcentric dual cell \(C_0\), 주황 꺾은선과 점이 dual edge 조각과 circumcenter다. 굵은 주홍 선은 \(\partial C_0\) 가운데 mesh의 boundary \(\partial S\) 위에 놓인 부분(두 boundary edge의 절반씩)이고, 주홍 화살표는 그곳의 outward conormal \(\mathbf{n}\)이다. <em>볼 것</em>: \(\partial C_0\)는 dual edge(주황)와 boundary 조각(주홍) 두 종류로 되어 있다. \(u = 2x + 3y\)(affine)에서 주황 조각을 지나는 flux는 \((Lu)_0 = 3.000\)이고 주홍 조각을 지나는 flux는 \(\int\inner{\grad u}{\mathbf{n}}\,ds = -3 \cdot 1 = -3.000\)이다. 둘의 합 \(0\)이 \(\int_{C_0}\Delta u\,dA = 0\)이다. <em>본문과의 연결</em>: <a href="#i-42-5-9">Proposition 42.5.9</a>, <a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-4">Non-example 33.6.4</a>(c).</figcaption>
+      </figure>
+      <p><a href="#fig-42-5-2">Figure 42.5.2</a>에서 \(C_0\)의 boundary를 한 바퀴 돌아 보자. 위쪽의 주황 꺾은선은 interior vertex에서와 똑같이 edge 중점과 circumcenter를 잇는다. 아래쪽에서는 다음 dual edge가 없으므로 mesh의 boundary를 따라 \(\mathbf{x}_0\)를 지나 돌아온다. 이 주홍 부분은 dual edge가 아니므로 \(d_0^{\mathsf T}\star_1d_0\)의 어떤 항에도 나타나지 않는다. affine \(u\)에서 \(\Delta u = 0\)인데 \((Lu)_0 = 3 \ne 0\)인 것은 이 때문이다. 빠진 flux가 정확히 주홍 부분을 지나는 \(-3\)이다.</p>
+      <div class="thm proposition" id="i-42-5-9">
+        <p><span class="thm-head">Proposition 42.5.9</span> <span class="thm-name">(the boundary rows of the dual derivative)</span>.
+        boundary vertex \(i\)의 circumcentric dual cell \(C_i\)의 boundary는 dual edge 조각들 \(\Gamma_i^\star\)와 \(i\)에서 만나는 두 boundary edge의 절반들 \(\Gamma_i^\partial = C_i \cap \partial S\)로 나뉜다. (a) 모든 \(u \in \R^{n_0}\)에 대하여 \(\int_{\Gamma_i^\star}\star dW_0u = (Lu)_i\)이다. (b) 따라서 smooth한 \(u\)에 대한 divergence theorem \(\int_{C_i}\Delta u = \int_{\Gamma_i^\star}\inner{\grad u}{\mathbf{n}} + \int_{\Gamma_i^\partial}\inner{\grad u}{\mathbf{n}}\)을 이산화하면, 첫 항이 \((Lu)_i\), 둘째 항이 Neumann 값의 적분 \(\int_{\Gamma_i^\partial}g\,ds\)가 되어 \((Lu)_i + \int_{\Gamma_i^\partial}g\,ds \approx A_if_i\)이다. \(g\)가 boundary edge마다 상수이면 \(\int_{\Gamma_i^\partial}g\,ds = (b_g)_i\)이고, 이 식은 <a href="#eq-42-5-6">(42.5.6)</a>을 lumping한 \(Lu = Mf - b_g\)와 같다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) <a href="42-4-dec.html#i-42-4-1">Proposition 42.4.1</a>의 증명은 face마다 dual edge 조각 \([m_{ij}, c_f]\), \([c_f, m_{ik}]\)의 적분을 계산했고, 그것은 vertex가 interior인지와 무관하다. boundary vertex에서는 face들이 고리가 아니라 줄을 이루므로, 그 조각들을 모두 더하면 interior edge는 두 번, boundary edge는 한 번 나온다. boundary edge의 한 항은 \(h_{f,e}(u_j - u_i)/\abs{e}\) \(= \tfrac12\cot\alpha\,(u_j - u_i) = L_{ij}(u_j - u_i)\)이므로(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-7">Proposition 36.6.7</a>의 boundary edge) 합은 \((Lu)_i\)이다. 이 조각들과 두 boundary 반쪽이 함께 \(C_i\)의 oriented boundary를 이룬다는 것은 <a href="42-4-dec.html#sec-flux">Section 42.4</a>의 chain의 계산에서 face마다의 \([\mathbf{x}_i, m_{ij}]\) 조각이 interior edge에서는 지워지고 boundary edge에서만 남는다는 것이다. (b)의 첫 문장은 divergence theorem을 \(C_i\)의 두 boundary 부분으로 나눈 것이고, 나머지는 (a)와 \(\Gamma_i^\partial\)가 두 boundary edge의 절반씩이라는 것에서 나온다.</p>
+      </div>
+      <p>이것이 Chapter 36이 남긴 문제의 답이다. Chapter 36은 boundary vertex의 행에서도 \(\tilde d_1 := -d_0^{\mathsf T}\)로 두었다(<a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-5">Proposition 36.5.5</a> 뒤). 이 정의는 dual cell의 boundary 가운데 dual edge 부분 \(\Gamma_i^\star\)만 세는 “잘린” \(d\)이고, 빠진 \(\Gamma_i^\partial\)의 항은 오류가 아니라 boundary condition이 들어갈 자리다. 거기에 아무것도 넣지 않으면 zero Neumann(<a href="#i-42-5-8">Proposition 42.5.8</a>)이고, Neumann 값을 넣으면 \(-b_g\)가 오른쪽에 생기며, Dirichlet이면 그 행의 식을 아예 버리고 값을 정한다. FEM(test function)과 DEC(dual cell)가 boundary에서도 같은 linear system을 준다. <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-5">Proposition 36.5.5</a> 뒤의 문단이 함께 넘긴 \(\tilde d_0 = d_1^{\mathsf T}\)의 boundary edge 행(dual edge가 dual vertex가 아닌 중점에서 끝난다)은 face 위의 dual 0-form에 작용하는 것이라, vertex 위의 함수만 다루는 이 장의 linear system에는 나타나지 않는다.</p>
+      <div class="thm proposition" id="i-42-5-10">
+        <p><span class="thm-head">Proposition 42.5.10</span> <span class="thm-name">(discrete compatibility)</span>.
+        boundary가 있는 connected mesh에서 \(Lu = b\)가 해를 가질 필요충분조건은 \(\mathbf{1}^{\mathsf T}b = 0\)이고, 해는 상수 차이로 유일하다. \(b = M^{\mathrm{G}}f - b_g\)이면 \(\mathbf{1}^{\mathsf T}b = \int W_0f\,dA - \oint g\,ds\)이므로, 이 조건은 smooth의 <a href="#eq-42-5-3">(42.5.3)</a>을 \(W_0f\)에 대해 정확히 쓴 것이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(L\)은 symmetric이고 \(\ker L = \Span\{\mathbf{1}\}\)이다(<a href="42-3-fem.html#i-42-3-6">Corollary 42.3.6</a>). symmetric matrix의 image는 kernel의 orthogonal complement이므로 \(b \in \im L\)과 \(\mathbf{1}^{\mathsf T}b = 0\)은 동치이고, 두 해의 차는 kernel에 있다. \(\sum_i\varphi_i = 1\)이므로 \(\mathbf{1}^{\mathsf T}M^{\mathrm{G}}f = \int W_0f\)이고 \(\mathbf{1}^{\mathsf T}b_g = \oint g\sum_i\varphi_i\,ds = \oint g\,ds\)이다.</p>
+      </div>
+      <p>실제 데이터에서는 \(\int f\)와 \(\oint g\)가 반올림이나 측정 오차로 조금 다를 수 있다. 그때 많은 linear solver는 경고 없이 least squares 해를 돌려준다 <a class="cite" href="../../references.html#Cr">[Cr §6.7.2]</a>. 해를 구한 뒤 residual \(\abs{Lu - b}\)를 확인하거나, 미리 \(\mathbf{1}^{\mathsf T}b\)를 계산해 두는 것이 안전하다. 아래 Implementation은 그 값을 돌려준다.</p>
+      <div class="thm example" id="i-42-5-11">
+        <p><span class="thm-head">Example 42.5.11</span> <span class="thm-name">(a Dirichlet problem on the square)</span>.
+        unit square의 <code>dgmesh.grid_mesh</code>(\(n\times n\)칸)에서 boundary 값을 harmonic 함수 \(u = x^2 - y^2\)로 주고 Laplace equation을 풀면, discrete 해는 모든 vertex에서 \(x^2 - y^2\)와 반올림 오차 안에서 같다. 이 grid의 \(L\)이 5점 stencil이고 \(x^2 - y^2\)에서 interior의 \((Lu)_i\)가 정확히 \(0\)이기 때문이다(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-8">Example 36.6.8</a>(b), <a href="#ex-42-5-3">Exercise 42.5.3</a>). interior vertex를 최대 \(0.2/n\)씩 흔들면(seed 7, 음수 cotan weight가 \(n = 32\)에서 508개) 정확함은 사라지고 최대 오차가 \(8.8\times10^{-4}\), \(3.1\times10^{-4}\), \(1.1\times10^{-4}\), \(3.3\times10^{-5}\)(\(n = 8, \dots, 64\)), RMS 오차가 \(2.8\times10^{-4}\)에서 \(5.7\times10^{-6}\)으로 준다(<a href="#fig-42-5-3">Figure 42.5.3</a>(a)).</p>
+        <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code></p>
+      </div>
+      <div class="thm example" id="i-42-5-12">
+        <p><span class="thm-head">Example 42.5.12</span> <span class="thm-name">(a Neumann problem on a disk-like mesh)</span>.
+        <code>ch42.disk_mesh(n)</code>는 \([-1, 1]^2\)의 grid에서 무게중심이 unit disk 안에 있는 face만 남긴 mesh다(boundary는 계단 모양의 다각형). (a) \(\Delta u = 0\)에 다각형 boundary의 Neumann 값 \(g = \inner{(1, 0)}{\mathbf{n}} = n_x\)를 주면 discrete 해는 \(x\)(+ 상수)와 반올림 오차 안에서 같다. \(x\)는 \(V_h\)에 들어 있고, 모든 \(v \in V_h\)에서 <a href="#eq-42-5-4">(42.5.4)</a>가 정확히 성립하기 때문이다. (b) \(\Delta u = 2\), \(g = \inner{\mathbf{x}}{\mathbf{n}}\)이면 정확한 해는 \(\tfrac{r^2}{2}\)(+ 상수)이고, discrete 해의 최대 오차는 \(6.9\times10^{-3}, 1.7\times10^{-3}, 4.3\times10^{-4}\)(\(n = 8, 16, 32\))로 2차 수렴한다. 두 경우 모두 \(\mathbf{1}^{\mathsf T}b\)는 반올림 오차 안에서 \(0\)이다. 다각형 위에서 \(\int2\,dA = \oint\inner{\mathbf{x}}{\mathbf{n}}\,ds = 2\times\)넓이가 정확히 성립하기 때문이다(<a href="#fig-42-5-3">Figure 42.5.3</a>(b)).</p>
+        <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code></p>
+      </div>
+      <figure class="dg-figure" id="fig-42-5-3">
+        <img src="figures/fig-42-5-3-boundary-convergence.svg" alt="두 log–log 패널, 세로축 error. (a) 제목 Dirichlet, jittered square. 가로축 grid spacing h = 1/n(1/64, 1/32, 1/16, 1/8). 파란 max 선이 9e-4에서 3e-5로, 주황 RMS 선이 3e-4에서 6e-6으로 내려가고 회색 점선 slope 2와 거의 평행하다. (b) 제목 Neumann, disk, u = r^2/2. 가로축 h = 2/n(2/32, 2/16, 2/8). 파란 max 선이 7e-3에서 4e-4로, 주황 RMS 선이 5e-3에서 3e-4로 회색 점선과 평행하게 내려간다.">
+        <figcaption><span class="fig-head">Figure 42.5.3.</span>
+        boundary가 있는 mesh의 Dirichlet 문제와 Neumann 문제의 수렴. <em>무엇을</em>: (a) unit square에서 boundary 값 \(x^2 - y^2\)의 Laplace equation을 interior vertex를 흔든 grid(<a href="#i-42-5-11">Example 42.5.11</a>)에서 푼 것. (b) <code>ch42.disk_mesh(n)</code>에서 \(\Delta u = 2\), \(\inner{\grad u}{\mathbf{n}} = \inner{\mathbf{x}}{\mathbf{n}}\)(정확한 해 \(r^2/2\))를 \(Lu = Mf - b_g\)로 푼 것(<a href="#i-42-5-12">Example 42.5.12</a>(b)). 둘 다 lumped(barycentric) mass이고, \(b_g\)는 boundary edge마다 4점 Gauss rule로 적분했다. <em>읽는 법</em>: 파랑은 vertex에서의 최대 오차, 주황은 넓이 가중 RMS 오차, 회색 점선은 기울기 2다. 가로축은 grid 간격이다. <em>볼 것</em>: 두 문제 모두 오차가 간격의 제곱에 가깝게 준다(맞춘 기울기: (a) 최대 1.59, RMS 1.86, (b) 둘 다 2.00). (a)의 최대 오차가 조금 느린 것은 흔든 mesh의 가장 나쁜 vertex가 결정하기 때문이다. 흔들지 않은 grid의 (a)와 \(u = x\)인 (b)는 정확하므로 그리지 않았다. <em>본문과의 연결</em>: <a href="#eq-42-5-5">(42.5.5)</a>, <a href="#eq-42-5-6">(42.5.6)</a>, <a href="#i-42-5-7">Proposition 42.5.7</a>, <a href="#i-42-5-10">Proposition 42.5.10</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-42-5-3">Figure 42.5.3</a>의 두 패널은 boundary condition의 종류가 달라도 같은 차수로 수렴한다는 것을 보여 준다. (b)의 mesh는 boundary가 원이 아니라 계단 모양 다각형이라는 데 주의하자. 우리는 그 다각형 위의 Neumann 문제를 정확한 해 \(r^2/2\)와 함께 만들어 비교했다. boundary가 원인 문제를 계단 다각형으로 푸는 것은 boundary 자체를 근사하는 별도의 오차를 낸다.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: Dirichlet and Neumann problems on a planar mesh</p>
+        <pre id="code-42-5-1"><code>import numpy as np
+import dgmesh as dm
+import ch42
+
+def solve(V, F, f, dirichlet=None, neumann=None):
+    """Delta u = f with u = dirichlet(p) or &lt;grad u, n&gt; = neumann(p, n) on the boundary (planar, ccw faces)."""
+    L, m = dm.cotan_laplacian(V, F), dm.mass_barycentric(V, F)
+    b, loop = m * f(V), dm.boundary_loop(F)                    # M f; boundary vertices in face order
+    if dirichlet is not None:                                  # known values go to the right-hand side
+        I, u = np.setdiff1d(np.arange(len(V)), loop), np.zeros(len(V))
+        u[loop] = dirichlet(V[loop])
+        u[I] = np.linalg.solve(L[np.ix_(I, I)], b[I] - L[np.ix_(I, loop)] @ u[loop])
+        return u, 0.0
+    for a, c in zip(loop, np.roll(loop, -1)):                  # b_i -= int g phi_i (midpoint rule on each edge)
+        e = V[c] - V[a]
+        half = neumann(0.5 * (V[a] + V[c]), np.array([e[1], -e[0], 0.0]) / np.linalg.norm(e)) * np.linalg.norm(e) / 2
+        b[[a, c]] -= half                                      # outward conormal: right of the boundary edge
+    compat = b.sum()                                           # must vanish (Proposition 42.5.10)
+    return np.linalg.solve(-L + np.outer(m, m), -(b - m * compat / m.sum())), compat   # mean 0, Section 42.6
+
+for n in (8, 16, 32):
+    xs = np.linspace(0, 1, n + 1)
+    V, F = dm.grid_mesh(xs, xs)
+    ud, _ = solve(V, F, lambda P: 0 * P[:, 0], dirichlet=lambda P: P[:, 0] ** 2 - P[:, 1] ** 2)
+    Vd, Fd = ch42.disk_mesh(n)
+    un, compat = solve(Vd, Fd, lambda P: 2 + 0 * P[:, 0], neumann=lambda p, nn: p @ nn)   # exact r^2/2 + c
+    ex, m = 0.5 * (Vd[:, 0] ** 2 + Vd[:, 1] ** 2), dm.mass_barycentric(Vd, Fd)
+    err = np.abs(un - (ex - m @ ex / m.sum())).max()
+    print(n, "Dirichlet exact:", np.abs(ud - (V[:, 0] ** 2 - V[:, 1] ** 2)).max() &lt; 1e-12,
+          f" Neumann error {err:.2e}", " compatible:", abs(compat) &lt; 1e-12)</code></pre>
+        <pre id="out-42-5-1"><code>8 Dirichlet exact: True  Neumann error 6.94e-03  compatible: True
+16 Dirichlet exact: True  Neumann error 1.74e-03  compatible: True
+32 Dirichlet exact: True  Neumann error 4.34e-04  compatible: True</code></pre>
+        <p>Dirichlet은 <a href="#eq-42-5-5">(42.5.5)</a>를 그대로 푼다. Neumann은 boundary loop의 edge마다 \(\int_eg\varphi_a\,ds\)와 \(\int_eg\varphi_c\,ds\)를 midpoint rule(\(g\)가 edge에서 상수라 보고 반씩)로 \(b\)에서 빼고(<a href="#eq-42-5-6">(42.5.6)</a>), \(\mathbf{1}^{\mathsf T}b\)를 확인한 뒤 평균을 \(0\)으로 고정한 해를 구한다. 마지막 줄의 행렬 \(-L + mm^{\mathsf T}\)과 그 뜻은 <a href="42-6-implicit-mcf.html">Section 42.6</a>에서 증명한다. 오차의 수가 <a href="#i-42-5-12">Example 42.5.12</a>(4점 Gauss rule)와 같은 것은 \(g = \inner{\mathbf{x}}{\mathbf{n}}\)가 각 edge에서 상수이기 때문이다(직선 edge 위에서 \(\inner{\mathbf{x}}{\mathbf{n}}\)은 원점에서 그 직선까지의 거리다).</p>
+        <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+      </aside>
+    </section>
+
+    <aside class="box convention">
+      <p class="box-title">Conventions: boundary data</p>
+      <ul>
+        <li>이 study set: \(\mathbf{n}\)은 outward conormal이고 Neumann 값은 \(g = \inner{\grad u}{\mathbf{n}}\)이다. linear system은 \(Lu = Mf - b_g\), \((b_g)_i = \oint g\varphi_i\,ds\)다. Dirichlet 값과 Neumann 값을 같은 문자 \(g\)로 쓰고, 둘이 함께 나오면 \(g_D, g_N\)으로 구별한다. 이 장에서 \(\mathbf{n}\)이 Frenet frame의 principal normal과 함께 나오는 일은 없다.</li>
+        <li>Crane의 노트는 같은 outward \(n\)으로 Neumann 값을 \(h\)라 쓰고, linear system을 \(Lu = \begin{pmatrix}b_I\\ b_B - h\end{pmatrix}\)(\(h\)는 boundary vertex마다 적분한 Neumann 값)로 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §6.7.2]</a>. 부호와 내용이 이 절의 <a href="#eq-42-5-6">(42.5.6)</a>와 같다. 이 장의 \(h\)는 Section 42.6의 time step이다.</li>
+        <li>강의 슬라이드의 1차원 그림은 Laplace equation \(u'' = 0\)으로 Dirichlet(언제나 풀린다)과 Neumann(두 끝의 기울기가 같아야 한다)을 비교한다(slides 48–49). 이 절의 <a href="#i-42-5-3">Example 42.5.3</a>은 원천이 있는 \(u'' = 1\)로 compatibility 조건 자체를 보인다.</li>
+      </ul>
+    </aside>
+
+    <aside class="box discrete">
+      <p class="box-title">Smooth vs. Discrete: boundary conditions</p>
+      <p><strong>Smooth.</strong> Dirichlet은 해의 모임에 거는 조건이고, Neumann은 weak form에 boundary 적분 \(\oint gv\)를 더해 저절로 들어간다. Neumann problem은 \(\int f = \oint g\)일 때만 풀린다. <strong>Discrete.</strong> Dirichlet은 boundary 행을 버리고 값을 오른쪽으로 옮기며(\(L_{II}u_I = (Mf)_I - L_{IB}g\)), Neumann은 boundary vertex의 오른쪽에 \(-b_g\)를 더한다. 아무것도 하지 않으면 zero Neumann이다.</p>
+      <ul>
+        <li>정확히 보존하는 것: Dirichlet의 유일한 해(\(-L_{II}\)는 모든 mesh에서 positive definite), Neumann의 compatibility 구조(\(\mathbf{1}^{\mathsf T}b = \int W_0f - \oint g\))와 상수 차이의 유일성, \(V_h\)에 들어 있는 해의 재현.</li>
+        <li>잃는 것: boundary의 모양(계단 다각형과 원은 다르다), maximum principle(음수 weight가 있으면 Dirichlet 해가 boundary 값의 범위를 넘을 수 있다, <a href="../31-meshes/31-3-cotangent-laplacian.html#fig-31-3-2">Figure 31.3.2</a>(c)).</li>
+      </ul>
+    </aside>
+
+    <aside class="box backward">
+      <p class="box-title">Looking back: fixed boundaries and Tutte embeddings</p>
+      <p>Chapter 31은 disk 모양 mesh의 boundary를 원 위에 고정하고 interior vertex를 이웃의 가중 평균으로 정하는 parametrization을 다루었다(<a href="../31-meshes/31-6-parametrization-texture.html#sec-guarantees">Section 31.6</a>). 이것은 UV 좌표의 두 성분 각각에 대한 Dirichlet problem이다. weight가 cotan이면 <a href="#eq-42-5-5">(42.5.5)</a>의 Laplace equation(discrete harmonic map, <code>dgmesh.fixed_boundary_map(V, F, "cotan")</code>)이고, weight가 모두 \(1\)이면 <a href="42-1-laplacian-definitions.html#i-42-1-6">Definition 42.1.6</a>의 graph Laplacian에 대한 Dirichlet problem(Tutte's barycentric map)이다. 무엇이 새로워졌는가: 두 map 모두 \(-L_{II}\)(또는 \(-(L_G)_{II}\))가 positive definite이라 언제나 하나로 정해진다는 것(<a href="#i-42-5-7">Proposition 42.5.7</a>)을 이 절이 증명했다. 그러나 뒤집힌 triangle이 없다는 보장(<a href="../31-meshes/31-6-parametrization-texture.html#i-31-6-5">Theorem 31.6.5</a> <a class="cite" href="../../references.html#Tutte63">[Tutte63]</a>, <a class="cite" href="../../references.html#Floater05">[Floater05]</a>)은 weight가 모두 양수이고 boundary를 convex polygon 위에 놓을 때의 정리이고, 그것은 positive definiteness가 아니라 maximum principle 쪽의 성질이다.</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>divergence theorem과 Stokes's theorem의 일반론: <a href="../18-integration-stokes/index.html#toc-18-5">Section 18.5</a>.</li>
+        <li>boundary를 고정한 parametrization과 bijectivity: <a href="../31-meshes/31-6-parametrization-texture.html">Section 31.6</a>, <a class="cite" href="../../references.html#Floater05">[Floater05]</a>.</li>
+        <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 43–51, <a class="cite" href="../../references.html#Cr">[Cr §6.7]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>Dirichlet condition은 boundary 값을, Neumann condition은 바깥 방향의 기울기 \(\inner{\grad u}{\mathbf{n}}\)를 정한다. Dirichlet problem의 해는 많아야 하나이고, Neumann problem은 \(\int f = \oint g\)일 때만 풀리며 해는 상수 차이로 유일하다(<a href="#i-42-5-1">Definition 42.5.1</a>, <a href="#i-42-5-2">Definition 42.5.2</a>, <a href="#i-42-5-4">Proposition 42.5.4</a>).</li>
+        <li>Neumann condition은 weak form의 boundary 적분으로 들어가는 natural condition이다(<a href="#i-42-5-6">Proposition 42.5.6</a>).</li>
+        <li>mesh에서 Dirichlet은 \(L_{II}u_I = (Mf)_I - L_{IB}g\)이고, \(-L_{II}\)는 Delaunay가 아닌 mesh에서도 positive definite이다. Neumann은 \(Lu = Mf - b_g\)이고, 아무것도 하지 않으면 zero Neumann이다(<a href="#i-42-5-7">Proposition 42.5.7</a>, <a href="#i-42-5-8">Proposition 42.5.8</a>).</li>
+        <li>boundary vertex의 dual cell은 dual edge 부분과 boundary 부분으로 나뉘고, \((Lu)_i\)는 앞의 flux만 잰다. Chapter 36의 \(\tilde d_1 := -d_0^{\mathsf T}\)의 boundary 행은 그 잘린 \(d\)이고, 빠진 boundary 부분이 Neumann 값의 자리다(<a href="#i-42-5-9">Proposition 42.5.9</a>).</li>
+        <li>discrete Neumann problem은 \(\mathbf{1}^{\mathsf T}b = \int W_0f - \oint g = 0\)일 때만 풀린다(<a href="#i-42-5-10">Proposition 42.5.10</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 boundary 없는 곡면으로 돌아가 이 장의 도구로 실제 계산을 한다. 점 원천의 potential을 구하는 Poisson 문제, heat equation의 implicit time step, 그리고 mesh의 위치 자체를 Laplacian으로 움직이는 implicit mean curvature flow다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-42-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 42.5.1</span> <span class="level">★</span>
+        \([0, 1]\)에서 \(u'' = 1\), \(u(0) = 0\), \(u'(1) = 0\)(\(x = 1\)에서 Neumann, \(x = 0\)에서 Dirichlet인 mixed condition)의 해를 구하여라. 해가 하나뿐인 이유를 <a href="#i-42-5-4">Proposition 42.5.4</a>의 증명처럼 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(u = \tfrac{x^2}{2} + c_1x + c_0\)에서 \(u(0) = c_0 = 0\), \(u'(1) = 1 + c_1 = 0\)이므로 \(u = \tfrac{x^2}{2} - x\)이다. 두 해의 차 \(w\)는 \(w'' = 0\), \(w(0) = 0\), \(w'(1) = 0\)이고 \(\int_0^1w'^2 = [ww']_0^1 - \int ww'' = 0\)이므로 \(w' = 0\), 곧 \(w\)는 상수이고 \(w(0) = 0\)이라 \(w = 0\)이다. Dirichlet 조건이 한 점에라도 있으면 상수의 자유도가 사라진다.</p>
+          <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-5-2" data-level="1">
+        <p><span class="thm-head">Exercise 42.5.2</span> <span class="level">★</span>
+        unit disk의 Laplace equation에 Neumann 값 (a) \(g = \cos^2\vartheta\), (b) \(g = \cos2\vartheta\)를 줄 때 해가 있는지 판별하고, 있으면 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(\oint\cos^2\vartheta\,d\vartheta = \pi \ne 0\)이므로 <a href="#eq-42-5-3">(42.5.3)</a>(\(f = 0\))을 어겨 해가 없다. (b) \(\oint\cos2\vartheta\,d\vartheta = 0\)이고, \(u = \tfrac12r^2\cos2\vartheta = \tfrac12(x^2 - y^2)\)은 harmonic이며 \(\partial_ru = r\cos2\vartheta = \cos2\vartheta\)(\(r = 1\))이다. 해는 \(\tfrac12(x^2 - y^2) + c\)다. (a)의 \(\cos^2\vartheta = \tfrac12 + \tfrac12\cos2\vartheta\)에서 평균 \(\tfrac12\)을 빼면 (b)의 절반이 된다.</p>
+          <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-5-3" data-level="1">
+        <p><span class="thm-head">Exercise 42.5.3</span> <span class="level">★</span>
+        <a href="#i-42-5-11">Example 42.5.11</a>에서 <code>grid_mesh</code>의 discrete 해가 \(x^2 - y^2\)와 정확히 같은 이유를 설명하여라. \(x^2 + y^2\)를 boundary 값으로 준 Laplace equation에서도 그런가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(u^* = x^2 - y^2\)의 vertex 값은 boundary에서 주어진 값과 같고, interior vertex에서 \((Lu^*)_i = (2\ell^2) - (2\ell^2) = 0\)이다(5점 stencil, <a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-8">Example 36.6.8</a>(b)). 곧 \(u^*\)가 <a href="#eq-42-5-5">(42.5.5)</a>(\(f = 0\))의 해이고, <a href="#i-42-5-7">Proposition 42.5.7</a>에 의해 해는 하나뿐이므로 discrete 해가 \(u^*\)다. \(x^2 + y^2\)는 smooth에서 harmonic이 아니므로(\(\Delta = 4\)) boundary 값이 같은 harmonic 함수는 \(x^2 + y^2\)와 다르고, discrete 해도 그것을 따른다. 이 경우 \(x^2 + y^2\)에서 \((Lu)_i = 4\ell^2 \ne 0\)이므로 \(x^2 + y^2\)는 discrete 해가 아니다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-5-4" data-level="2">
+        <p><span class="thm-head">Exercise 42.5.4</span> <span class="level">★★</span>
+        (discrete Dirichlet principle) <a href="#eq-42-5-5">(42.5.5)</a>(\(f = 0\))의 해 \(u\)가 \(u_B = g\)인 모든 \(w \in \R^{n_0}\) 가운데 \(-\tfrac12w^{\mathsf T}Lw = E_D(W_0w)\)를 최소로 하는 유일한 것임을 보여라. smooth의 어느 정리에 대응하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(w = u + v\), \(v_B = 0\)으로 쓰면 \(-\tfrac12w^{\mathsf T}Lw = -\tfrac12u^{\mathsf T}Lu - v^{\mathsf T}Lu - \tfrac12v^{\mathsf T}Lv\)이다(\(L\)은 symmetric). \(v\)는 \(I\)에서만 \(0\)이 아니므로 \(v^{\mathsf T}Lu = v_I^{\mathsf T}(L_{II}u_I + L_{IB}g) = 0\)이다(해의 정의). 따라서 \(-\tfrac12w^{\mathsf T}Lw = -\tfrac12u^{\mathsf T}Lu + \tfrac12v_I^{\mathsf T}(-L_{II})v_I\)이고, <a href="#i-42-5-7">Proposition 42.5.7</a>에서 마지막 항은 \(v_I \ne 0\)이면 양수다. 이것은 <a href="42-2-dirichlet-poisson.html#i-42-2-4">Theorem 42.2.4</a>(b)의 energy splitting \(E_D(w) = E_D(u) + E_D(w - u)\)의 discrete 판이다(<a href="42-3-fem.html#eq-42-3-6">(42.3.6)</a>로 \(\tfrac12v^{\mathsf T}(-L)v = E_D(W_0v)\)).</p>
+          <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-5-5" data-level="2">
+        <p><span class="thm-head">Exercise 42.5.5</span> <span class="level">★★</span>
+        boundary가 있는 mesh에서 Neumann 값을 무시하고(\(b_g = 0\)) \(Lu = Mf\)를 풀면 실제로는 어떤 문제를 푼 것인가? \(\mathbf{1}^{\mathsf T}Mf \ne 0\)이면 무슨 일이 일어나는가? unit square의 grid에서 \(f = 1\)로 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-42-5-8">Proposition 42.5.8</a>에 의해 zero Neumann problem \(\Delta u = f\), \(\inner{\grad u}{\mathbf{n}} = 0\)을 푼 것이다(단열 boundary). <a href="#i-42-5-10">Proposition 42.5.10</a>에 의해 \(\mathbf{1}^{\mathsf T}Mf \ne 0\)이면 해가 없다. smooth에서도 \(\int f \ne 0 = \oint g\)이므로 <a href="#eq-42-5-3">(42.5.3)</a>을 어긴다. \(f = 1\)이면 \(\mathbf{1}^{\mathsf T}Mf = \) 넓이 \(= 1 \ne 0\)이다. 열원이 고르게 있는데 열이 빠져나갈 곳이 없으니 평형 상태가 없다. 이런 linear system을 least squares solver에 넘기면 오류 없이 무엇인가가 나오므로 \(\mathbf{1}^{\mathsf T}b\)를 확인해야 한다. 정말 원하는 것이 “평균을 뺀 문제”라면 \(f - \bar f\)로 바꾸어 풀 수 있다(<a href="42-2-dirichlet-poisson.html#i-42-2-11">Proposition 42.2.11</a>(d)와 같은 trick).</p>
+          <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-5-6" data-level="2">
+        <p><span class="thm-head">Exercise 42.5.6</span> <span class="level">★★</span>
+        <strong>Coding.</strong> icosphere(level)에서 무게중심의 \(z\)가 양수인 face만 남긴 반구 mesh(<code>dgmesh.submesh</code>)에서 Dirichlet problem \(\Delta u = -2z\), \(u|_{\partial S} = z\)(정확한 해 \(z\))를 barycentric mass와 mixed Voronoi mass로 풀고, level 2, 3, 4의 최대 오차를 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-42-5-6"><code>import numpy as np
+import dgmesh as dm
+
+for level in (2, 3, 4):
+    V0, F0 = dm.icosphere(level)
+    V, F, _ = dm.submesh(V0, F0, V0[F0].mean(1)[:, 2] &gt; 0)        # faces whose centroid has z &gt; 0
+    L, z = dm.cotan_laplacian(V, F), V[:, 2]
+    B = np.array(dm.boundary_vertices(F))
+    I = np.setdiff1d(np.arange(len(V)), B)
+    row = [level, len(V), len(B)]
+    for kind, m in (("bary", dm.mass_barycentric(V, F)), ("mixed", dm.mass_voronoi(V, F))):
+        u = z.copy()                                              # Dirichlet values: z on the boundary
+        u[I] = np.linalg.solve(L[np.ix_(I, I)], m[I] * (-2 * z[I]) - L[np.ix_(I, B)] @ z[B])
+        row.append(f"{kind} {np.abs(u - z).max():.2e}")
+    print(*row)</code></pre>
+          <pre id="out-ex-42-5-6"><code>2 89 24 bary 4.27e-03 mixed 7.25e-04
+3 337 48 bary 1.49e-03 mixed 1.89e-04
+4 1313 96 bary 4.74e-04 mixed 4.58e-05</code></pre>
+          <p>열은 level, vertex 수, boundary vertex 수, 두 mass의 최대 오차다. 둘 다 수렴하고, mixed의 오차가 6–10배 작다. level 3에서 4로 갈 때 barycentric은 \(3.1\)배, mixed는 \(4.1\)배 준다. boundary는 적도 근처의 톱니 모양 곡선이지만 Dirichlet 값을 정확한 \(z\)로 주었으므로 boundary의 모양은 오차를 만들지 않는다. 이 반구 mesh에서 \(-L_{II}\)는 <a href="#i-42-5-7">Proposition 42.5.7</a>대로 positive definite이다(verify).</p>
+          <p class="verified">Verification: <code>verify/v-42-5-boundary-conditions.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="42-4-dec.html">← 42.4 Discretization via DEC</a>
+    <a rel="next" href="42-6-implicit-mcf.html">42.6 Poisson Problems and Implicit Mean Curvature Flow →</a>
+  </nav>
+</body>
+</html>

@@ -1002,3 +1002,52 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
   - 검토자 제안(Track 2 통합 검토 때)
     - style.css: 인라인 mjx-container의 폰 폭 overflow. 38.3에도 8개 이상 있다.
     - shot.mjs에 인라인 수식 overflow 검사(예시: scratch rev39/py/shot_inline.mjs)
+- 2026-10-20: **42장 작성 완료(draft).** 6절, 그림 15개(interactive 3개), verify 322 checks, todo 11
+  - 규약
+    - E_D(u) = −½uᵀLu, Poisson은 Lu = Mf
+    - graph Laplacian L_G는 Δ와 같은 부호다(D − A = −L_G).
+    - 닫힌 mesh Poisson은 (−L + aaᵀ)u = −b(a = M𝟏)다.
+    - Neumann 데이터는 g_N이다(h는 time step).
+    - implicit MCF의 M은 mixed나 barycentric이다.
+  - 새 결과
+    - Cor 42.3.6: 모든 mesh에서 −L은 PSD다.
+    - Prop 42.5.9: 36장이 남긴 dual d의 경계 행
+    - Thm 42.6.6: semi-implicit step은 넓이를 늘리지 않는다.
+    - Prop 42.4.8: d_0ᵀM_1d_0 = −L
+  - 다른 장에서 `#toc-42-x`로 건 링크의 정확한 항목은 작성자 보고에 있다(36.5, 36.6, 37.6, 38.2, 35.2, 35.5, 33.1, 36.3). 검토가 끝나면 확정한다.
+  - 통합: terms 11개, references Dziuk88
+  - 42 검토 R1(42.1–42.3)과 R2(42.4–42.6, index), 43·44 작성 agent를 띄웠다. 지금 도는 것은 5개다: 40 작성, 42 R1, 42 R2, 43 작성, 44 작성.
+  - 39장의 Track 3 todo 6개: 32–38장은 planned인 Track 3 장을 todo 없이 toc 앵커로 링크했다. 다음 통합 때 같은 방식으로 정리한다.
+- 2026-10-20: 사용량 한도(8:50 초기화)로 다섯 agent(40·43·44 작성, 42 R1·R2)가 멈췄다. 사용자 지시("계속 진행해줘")로 SendMessage를 보내 모두 재개했다.
+- 2026-10-20: **42 R1(42.1–42.3) 완료, reviewed.** 원문 대조에서 작성자의 Crane 주장은 모두 맞았다. Cr §6.2가 Green's identity의 마이너스를 빠뜨린 것도 원문으로 확인했다.
+  - 고친 것
+    - Ex 42.1.6: non-Delaunay edge의 위치와 원인
+    - 42.3 Looking back: Def 31.3.3의 M 중 lumped Galerkin mass와 같은 것은 barycentric뿐이다.
+    - Remark 42.1.14의 connected 가정, Dirichlet problem의 존재 조건, discrete maximum principle의 과장
+    - Prop 42.1.16(a): 곡면의 경우를 추가했다.
+  - **저작권 수정**
+    - 42.2 History 상자는 slide 37의 Kline 인용을 문장 단위로 옮긴 것이었다. 새로 썼다.
+    - 42.2 Motivation의 둘째 문단은 slide 34의 bullet을 그대로 따랐다. 새로 썼다.
+    - Non-example 42.2.3이 slide 34–36과 같은 배치여서 unit square 0/1 판으로 바꿨다.
+  - 인라인 수식 28개를 나눴다.
+  - Hildebrandt06: 원문을 확인할 수 없어 진술을 약하게 쓰고 todo로 남겼다.
+  - **Track 2 통합 검토 때 정할 것**: 한국어 "곡면"이 Track 2 본문에 많이 남아 있다(38장 76개, 42.1–42.3 41개, 39장 4개). terms.tsv는 surface다. "닫힌 곡면", "곡면 위" 같은 구문을 장 전체에서 통일할지 정한다.
+- 2026-10-20: **42 R2(42.4–42.6) 완료. 42장 reviewed, 공개.**
+  - R2가 고친 것
+    - Ex 42.4.2: cos θ₂의 부호. 146.6°가 맞다.
+    - Fig 42.6.2 뒤 설명: 얼린 속도 2r_{k+1}/r_k²
+    - Ex 42.6.4: 최대 배율은 0.987이다.
+    - Kazhdan12 원문(arXiv 1203.6819)을 확인했다. 증명은 없고 genus 0에서 수치로 보였다. 본문 진술을 그 범위로 맞췄다.
+    - Ex 42.4.5: circumcentric이 정확한 이유. 꼭짓점이 구 위에 있으면 C_i의 radial projection 넓이가 δ_i다.
+    - Prop 42.5.9와 36.5의 연결
+    - 인라인 수식 10곳
+  - 통합
+    - "선형계"를 linear system으로 바꿨다(3곳). heat equation의 번역어는 첫 등장(42.1)에만 남겼다.
+    - 32–38장에서 42장 toc 앵커로 가던 링크 32곳을 실제 절로 바꿨다.
+    - notation 5행. 루트 index와 장 dg-status를 reviewed로 바꿨다.
+    - 39장의 Track 3 todo 6개를 지웠다(todo 11개가 남는다).
+  - 남은 todo 9개: 40.1(Ex 42.4.5. 40장이 공개되면 확정), 41.2·41.5, 43.4, 44.6, 45.1, Hildebrandt06
+  - 나중에
+    - 36.6(305행)의 "boundary 항을 포함한 양"에 Prop 42.5.9 링크
+    - 장 lib/ch42.py의 helper를 tools/로 옮길지 검토한다(galerkin_mass, stiffness, whitney1_mass, cholesky/chol_solve, solve_closed_poisson, jittered_sphere, disk_mesh, implicit_mcf). run_printed는 dgcode로 옮긴다.
+    - 이산화·꺾은선 같은 한국어 용어의 통일(통합 검토)

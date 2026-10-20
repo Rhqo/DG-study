@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>42.1 Many Definitions of the Laplacian — DG Study</title>
+  <meta name="dg-id" content="42.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="35.2, 35.4, 35.5, 36.6, 38.2, 38.3, 38.6">
+  <meta name="dg-refs" content="Cr §6.1; Cr §4.6.6; Cr §7.4; CMU-DDG L18">
+  <meta name="dg-updated" content="2026-10-20">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">42. The Laplace–Beltrami Operator</a> ›
+    <span>42.1 Many Definitions of the Laplacian</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>42.1 Many Definitions of the Laplacian</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §6.1, §4.6.6]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 3–30</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>\(\R^n\)에서 Laplacian의 네 가지 표현(second partial derivative의 합, Hessian의 trace, \(\divg\grad\), \(\star d\star d\))이 같음을 말하고, “평균과의 차이” 표현을 Taylor 전개로 증명할 수 있다.</li>
+        <li>graph Laplacian을 정의하고, 그것이 Laplacian의 discrete 판이 되는 경우와 되지 않는 경우를 구별할 수 있다.</li>
+        <li>곡면 위의 Laplace–Beltrami operator를 \(\star d\star d\)로 쓰고, conformal coordinates에서 \(\Delta = e^{-2\mu}(\partial_u^2 + \partial_v^2)\)를 유도하며 unit sphere의 \(\Delta z = -2z\)를 계산할 수 있다.</li>
+        <li>Green's first identity를 Stokes's theorem으로 증명하고, 닫힌 곡면에서 \(\Delta\)가 self-adjoint이고 negative semidefinite이며 kernel이 상수임을 보일 수 있다. Hodge Laplacian과의 부호 관계를 말할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../35-exterior-calculus/35-2-exterior-derivative.html#i-35-2-12">Proposition 35.2.12</a>: \(\R^n\)에서 \(\divg X = \star d\star X^\flat\), \(\Delta f = \star d\star df\)</li>
+        <li><a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-5">Theorem 35.4.5</a>: Stokes's theorem, <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-1">Proposition 35.5.1</a>: \(\alpha\wedge\star\beta = \inner{\alpha}{\beta}\,dV\)</li>
+        <li><a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-6">Definition 35.5.6</a>, <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-8">Theorem 35.5.8</a>: codifferential \(d^*\)와 \(d^*df = -\Delta f\)</li>
+        <li><a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-7">Definition 38.2.7</a>: conformal coordinates \(g = e^{2\mu}(du^2 + dv^2)\), <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-6">Proposition 38.3.6</a>: 곡면 위의 Hodge star</li>
+        <li><a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-6">Definition 36.6.6</a>: cotan Laplacian \(L\), <a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-2">Definition 38.6.2</a>: discrete Laplace–Beltrami operator \(\star_0^{-1}L\)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Chapter 41은 mesh의 넓이를 vertex 위치로 미분해 \(-L\mathbf{x}\)를 얻었고, mean curvature flow를 \(\partial_t\mathbf{x} = \Delta\mathbf{x}\)로 썼다(<a href="../41-discrete-curvature-variational/index.html#toc-41-2">Section 41.2</a>, <a href="../41-discrete-curvature-variational/index.html#toc-41-5">Section 41.5</a> <span class="todo">[확인 필요: Chapter 41 미작성 — 참조 번호 확정 필요]</span>). 그 앞에서도 같은 행렬이 여러 번 나왔다. Chapter 36은 \(L = -d_0^{\mathsf T}\star_1d_0\)를 \(d\)와 \(\star\)의 합성으로 정의했고(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-6">Definition 36.6.6</a>), Chapter 38은 \(\star_0^{-1}L\)을 곡면 위의 Laplace–Beltrami operator의 discrete 판이라 불렀다(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-2">Definition 38.6.2</a>). 남은 질문은 이것이다. smooth \(\Delta\)는 그 자체로 무엇이고, mesh 위의 cotan matrix가 왜 “올바른” 이산화인가?</p>
+      <p>이 장은 이 질문에 답한다. 이 절은 smooth 쪽을 정리한다. Laplacian에는 겉보기에 전혀 다른 정의가 여럿 있다. 미분의 합, 평균과의 차이, gradient의 divergence, Dirichlet energy의 gradient 등이다. 이것들이 같은 operator라는 것을 보이고, 각 정의가 어떤 discrete 판으로 이어지는지 표시해 둔다. Section 42.3과 Section 42.4는 그중 둘(Dirichlet energy와 \(\star d\star d\))에서 출발해 같은 \(L\)을 얻는다.</p>
+      <p>Laplacian은 물리와 기하의 기본 방정식에 계속 나온다. <strong>heat equation</strong>(열 방정식) \(\partial_tu = \Delta u\)는 열의 확산을, wave equation \(\partial_t^2u = \Delta u\)는 진동을, Laplace equation \(\Delta u = 0\)은 평형 상태를 나타낸다. geometry processing에서도 smoothing(Section 42.6), parametrization(Chapter 43), 거리 계산(Chapter 44), vector field 분해(Chapter 45)가 모두 Laplacian으로 만든 linear system을 푼다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 3–5.</p>
+    </section>
+
+    <aside class="box convention">
+      <p class="box-title">Conventions: the sign of the Laplacian, and the symbols of this chapter</p>
+      <ul>
+        <li><strong>이 study set의 부호.</strong> \(\Delta = \divg\grad\)(<a href="../../notation.html#sec-riemannian">Notation and Conventions</a>)이다. \(\R^n\)에서 \(\Delta u = \sum_i\partial^2u/\partial(x^i)^2\)이고, 닫힌 곡면에서 \(\int u\,\Delta u\,dA \le 0\), 곧 \(\Delta\)는 negative semidefinite다(<a href="#i-42-1-13">Corollary 42.1.13</a>). mesh에서는 \(L_{ij} = \tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})\), \(L_{ii} = -\sum_jL_{ij}\)이고 \(-L\)이 positive semidefinite이며 \(M^{-1}L \approx \Delta\)다(<a href="../../notation.html#sec-ddg">Notation and Conventions</a>). Hodge Laplacian \(dd^* + d^*d\)는 함수에서 \(-\Delta\)다(<a href="#i-42-1-16">Proposition 42.1.16</a>).</li>
+        <li><strong>Crane의 노트.</strong> Cr §4.6.6은 \(\Delta := \nabla\cdot\nabla = \star d\star d\)로 쓰고, \(k\)-form에는 \(\star d\star d + d\star d\star\)를 쓰며, \(\delta := \star d\star\)로 \(\Delta = \delta d + d\delta\)라 쓰는 관례도 소개한다 <a class="cite" href="../../references.html#Cr">[Cr §4.6.6]</a>. 함수에서 이것은 이 study set의 \(\Delta\)와 같다. 곡면(\(n = 2\))에서는 \(\delta = -d^*\)이므로 \(\delta d + d\delta = -(dd^* + d^*d)\)다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#sec-codifferential">Section 35.5</a>의 Conventions 상자). \(n = 3\)의 1-form에서는 \(\delta d + d\delta\)가 \((\operatorname{curl}\operatorname{curl}X + \grad\divg X)^\flat\)이 되어 어느 부호로도 성분별 Laplacian이 아니다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#ex-35-5-6">Exercise 35.5.6</a>).</li>
+        <li><strong>Cr §6.1의 부호는 섞여 있다.</strong> Cr §6.1은 Green's first identity를 \(\langle\Delta f, g\rangle = -\langle\nabla f, \nabla g\rangle + \langle N\cdot\nabla f, g\rangle_\partial\)로 쓰는데, 이것은 이 study set의 부호와 같다. 그런데 같은 절은 이어서 \(\Delta\)가 “positive-semidefinite”, 곧 \(\langle\Delta\varphi, \varphi\rangle \ge 0\)이라고 쓰고, 바로 뒤의 Exercise 6.4는 \(\Delta\)가 negative-semidefinite임을 보이라고 한다 <a class="cite" href="../../references.html#Cr">[Cr §6.1]</a>(인쇄 103쪽). Green's identity를 따르면 negative semidefinite가 맞다. 강의 슬라이드도 \(\Delta = \star d\star d\)(slide 25)와 “\(-\langle\Delta u, u\rangle\)가 convex”(slide 28)를 쓰면서 “Laplacian은 positive-semidefinite matrix처럼 행동한다”고 요약한다(slide 28). 부호를 빼고 “semidefinite라 최솟값 문제로 다룰 수 있다”는 뜻으로 읽는다.</li>
+        <li><strong>Cr §7.4.</strong> Exercise 7.6은 \(\Delta = -\star d\star d\)라 쓰고 \(\langle\!\langle du, dv\rangle\!\rangle = \langle\!\langle\Delta u, v\rangle\!\rangle\)를 보이라고 한다 <a class="cite" href="../../references.html#Cr">[Cr §7.4]</a>(인쇄 128쪽). 이 identity는 \(\Delta\)가 \(-\divg\grad\)일 때 성립하므로, 그 절의 \(\Delta\)는 이 study set의 \(-\Delta\)다. 식 \(-\star d\star d\)를 Cr §4의 \(\star\)(이 study set과 같다)로 읽으면 실제로 \(-\Delta\)다. Cr §7.3의 \(\star\)(1-form에서 부호가 반대, <a href="../../notation.html#sec-comparison">Notation and Conventions</a>)로 읽으면 \(\star d\star d\)의 부호가 바뀌어 \(+\Delta\)가 되므로, 그 절의 부호는 식이 아니라 identity로 판단한다(verify에서 \(\R^2\)의 두 \(\star\)로 확인했다). 같은 절의 Dirichlet energy \(E_D(z) = \tfrac12\langle\!\langle\Delta z, z\rangle\!\rangle\)도 그 부호다(<a href="42-2-dirichlet-poisson.html">Section 42.2</a>의 Conventions 상자).</li>
+        <li><strong>graph Laplacian.</strong> 이 절의 \(L_G\)(<a href="#i-42-1-6">Definition 42.1.6</a>)는 \(\Delta\) 쪽 부호다. 흔히 쓰는 \(D - A\)(degree matrix − adjacency matrix)는 \(-L_G\)이고 positive semidefinite다. 강의 슬라이드의 graph Laplacian은 이웃 평균에서 자기 값을 뺀 \((Lu)_i = \tfrac{1}{\deg(i)}\sum_{j}u_j - u_i\)로, 이 절의 \(L_G\)를 degree로 나눈 것(Chapter 31의 uniform Laplacian)이다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 11.</li>
+        <li><strong>이 장의 기호.</strong> smooth surface는 \(S\)로 쓴다(mass matrix \(M\)과 구분한다). vertex 위치는 Chapter 38처럼 굵게 \(\mathbf{x}_i\)로 쓴다. \(C_i\)는 vertex \(i\)의 dual cell이다(Section 38.4에서는 closed star였다). mesh 크기는 평균 edge 길이 \(\bar\ell\), time step은 \(h\)다(Section 42.6). Gaussian curvature \(K\)와 겹치지 않도록 stiffness matrix에 문자 \(K\)를 쓰지 않는다(Section 42.3). vertex 값 \(u \in \R^{n_0}\)의 piecewise linear interpolation은 \(W_0u = \sum_iu_i\varphi_i\)(<a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#i-36-3-8">Definition 36.3.8</a>)로 쓴다.</li>
+      </ul>
+    </aside>
+
+    <section id="sec-euclidean">
+      <h2>The Laplacian in \(\R^n\)</h2>
+      <p>\(\R^n\)에서 출발한다. 이 study set의 규약(<a href="../../notation.html#sec-riemannian">Notation and Conventions</a>)에 따라 \(\Delta u := \divg(\grad u)\)이고, 이것이 <strong>Laplacian</strong>(라플라시안)이다. Riemannian manifold 위의 일반적인 정의는 Track 3의 <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>이 맡는다. 먼저 이미 아는 표현들을 한자리에 모으자.</p>
+      <div class="thm proposition" id="i-42-1-1">
+        <p><span class="thm-head">Proposition 42.1.1</span> <span class="thm-name">(four formulas in Euclidean space)</span>.
+        \(U \subseteq \R^n\)이 open set이고 \(u \in C^\infty(U)\)이면, 표준 좌표 \((x^1, \dots, x^n)\)에서</p>
+        <div class="equation" id="eq-42-1-1">
+        \[ \begin{aligned} \Delta u &= \divg\grad u = \sum_{i=1}^n\frac{\partial^2u}{\partial(x^i)^2} \\ &= \tr\Hess u = \star d\star du \end{aligned} \tag{42.1.1} \]
+        </div>
+        <p>이다. 여기서 \(\Hess u\)는 second partial derivative의 행렬 \(\big(\partial_i\partial_ju\big)_{ij}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 표준 좌표에서 \(\grad u = (\partial_1u, \dots, \partial_nu)\)이고 \(\divg X = \sum_i\partial_iX^i\)이므로 첫 등호와 둘째 등호가 나온다. 셋째는 trace가 대각 성분의 합이라는 것이다. 넷째는 <a href="../35-exterior-calculus/35-2-exterior-derivative.html#i-35-2-12">Proposition 35.2.12</a>(b)다.</p>
+      </div>
+      <p>네 식은 같은 operator지만 하는 일이 다르게 보인다. \(\sum\partial_i^2\)는 축마다 휘는 정도를 더한 것이고, \(\tr\Hess u\)는 best quadratic approximation \(u(p) + \inner{\grad u}{v} + \tfrac12v^{\mathsf T}(\Hess u)v\)의 이차 부분이 모든 방향에서 휘는 정도, 곧 second directional derivative \(\omega^{\mathsf T}(\Hess u)\omega\)(\(\abs{\omega} = 1\))를 평균한 것의 \(n\)배다(아래 증명의 계산). \(\divg\grad\)는 gradient field가 얼마나 퍼져 나가는지를 재고, \(\star d\star d\)는 같은 것을 \(d\)와 \(\star\)로 나눈 것이다. 다음 명제의 다섯째 표현은 미분을 전혀 쓰지 않는다.</p>
+      <div class="thm proposition" id="i-42-1-2">
+        <p><span class="thm-head">Proposition 42.1.2</span> <span class="thm-name">(the Laplacian as deviation from the average)</span>.
+        \(U \subseteq \R^n\)이 open set, \(u \in C^\infty(U)\), \(p \in U\)이고, \(\varepsilon \gt 0\)이 \(\overline{B_\varepsilon(p)} \subseteq U\)를 만족한다고 하자. \(\bar u_\varepsilon(p)\)를 sphere \(\partial B_\varepsilon(p)\) 위에서 \(u\)의 평균(\(n = 1\)이면 두 점 \(p \pm \varepsilon\)의 평균)이라 하면</p>
+        <div class="equation" id="eq-42-1-2">
+        \[ \begin{aligned} \bar u_\varepsilon(p) - u(p) &= \frac{\varepsilon^2}{2n}\,\Delta u(p) + O(\varepsilon^3), \\ \Delta u(p) &= \lim_{\varepsilon\to0}\frac{2n}{\varepsilon^2}\big(\bar u_\varepsilon(p) - u(p)\big) \end{aligned} \tag{42.1.2} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: Taylor 전개를 sphere 위에서 평균하면 1차 항은 대칭 때문에 사라지고, 2차 항에서는 Hessian의 대각 성분만 같은 무게 \(1/n\)으로 남는다.</p>
+        <p><span class="proof-head">Proof.</span> 단위 vector \(\omega\)에 대해 Taylor's theorem으로</p>
+        <p>\[ \begin{aligned} u(p + \varepsilon\omega) &= u(p) + \varepsilon\sum_i\partial_iu(p)\,\omega^i \\ &\quad + \frac{\varepsilon^2}{2}\sum_{i,j}\partial_i\partial_ju(p)\,\omega^i\omega^j + R(\varepsilon, \omega), \end{aligned} \]</p>
+        <p>이고 \(\abs{R} \le C\varepsilon^3\)이다. 여기서 \(C\)는 \(\overline{B_\varepsilon(p)}\) 위의 third partial derivative의 최댓값으로 정해지는 상수로 \(\omega\)에 무관하다. 양변을 unit sphere 위에서 평균하자(넓이 측도는 orthogonal transformation에 대해 불변이다). \(\omega \mapsto -\omega\)에 대한 대칭으로 \(\overline{\omega^i} = 0\)이다. \(i \ne j\)이면 \(\omega^i\)의 부호만 바꾸는 reflection으로 \(\overline{\omega^i\omega^j} = 0\)이다. 좌표를 바꾸는 permutation으로 \(\overline{(\omega^1)^2} = \cdots = \overline{(\omega^n)^2}\)이고 합이 \(\overline{\abs{\omega}^2} = 1\)이므로 각각 \(1/n\)이다. 따라서 \(\bar u_\varepsilon(p) = u(p) + \tfrac{\varepsilon^2}{2n}\sum_i\partial_i^2u(p) + O(\varepsilon^3)\)이고, <a href="#eq-42-1-1">(42.1.1)</a>로 \(\sum_i\partial_i^2u = \Delta u\)이다. \(n = 1\)에서 “unit sphere”는 두 점 \(\pm1\)이고 같은 계산이 그대로 성립한다.</p>
+      </div>
+      <p>이 명제가 말하는 것은 간단하다. \(\Delta u(p) \gt 0\)이면 \(u(p)\)는 둘레의 평균보다 작고, \(\Delta u(p) \lt 0\)이면 크다. Laplacian은 “이웃과 얼마나 다른가”를 잰다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 14. heat equation \(\partial_tu = \Delta u\)는 이 해석에서 “값이 이웃의 평균 쪽으로 움직인다”는 뜻이 되고, Laplace equation \(\Delta u = 0\)은 “모든 점의 값이 이웃의 평균과 같다”는 뜻이 된다(<a href="42-2-dirichlet-poisson.html">Section 42.2</a>의 mean value property).</p>
+
+      <figure class="dg-figure" id="fig-42-1-1">
+        <img src="figures/fig-42-1-1-mean-value.svg" alt="두 패널. (a) 검은 곡선 u(x) = sin 2x + 0.3x^2(0 ≤ x ≤ 3.2). x = 0.75 근처는 위로 볼록한 봉우리이고 x = 2.3 근처는 아래로 볼록한 골짜기다. 두 점마다 양옆 x ± 0.45의 두 점을 잇는 주황 선분과 그 중점(주황 사각형)이 있고, 곡선 위의 검은 점에서 주황 사각형으로 가는 파란 화살표가 있다. 봉우리에서는 화살표가 아래를 향하고 u'' < 0이라 적혀 있으며, 골짜기에서는 위를 향하고 u'' > 0이라 적혀 있다. (b) 가로축 반지름 ε(0.02에서 1, log 눈금), 세로축 Q(ε). 주황 수평선은 4에서 u = x^2 + y^2, 초록 수평선은 0에서 u = x^2 - y^2이다. 파란 곡선 u = e^x sin 2y는 작은 ε에서 회색 점선 Δu(p) = -3.408에 붙어 있다가 ε = 1에서 -2.82까지 올라간다.">
+        <figcaption><span class="fig-head">Figure 42.1.1.</span>
+        Laplacian은 둘레의 평균과 중심 값의 차이다. <em>무엇을</em>: (a) 1차원 함수 \(u(x) = \sin 2x + 0.3x^2\)에서 \(x_1 = 0.75\)(\(u'' = -3.39\))와 \(x_0 = 2.3\)(\(u'' = 4.58\))의 이웃 평균 \(\tfrac12(u(x - \varepsilon) + u(x + \varepsilon))\), \(\varepsilon = 0.45\). (b) 평면의 점 \(p = (0.3, 0.5)\)에서 \(Q(\varepsilon) = \tfrac{4}{\varepsilon^2}\big(\bar u_\varepsilon(p) - u(p)\big)\)(<a href="#eq-42-1-2">(42.1.2)</a>의 \(n = 2\))를 세 함수에 대해 그린 것. <em>읽는 법</em>: (a)의 검은 곡선이 \(u\), 주황 선분은 두 이웃을 잇는 chord이고 주황 사각형이 그 중점(이웃의 평균), 파란 화살표는 \(u(x)\)에서 평균까지의 차이다. (b)의 가로축은 원의 반지름(log 눈금), 세로축은 \(Q\)이고, 색은 함수를 구별한다(주황 \(x^2 + y^2\), 초록 \(x^2 - y^2\), 파랑 \(e^x\sin 2y\)). 회색 점선은 \(e^x\sin 2y\)의 \(\Delta u(p) = -3e^{0.3}\sin 1 = -3.408\)이다. <em>볼 것</em>: (a)에서 \(u'' \gt 0\)인 골짜기의 화살표는 위로(평균이 더 크다), \(u'' \lt 0\)인 봉우리의 화살표는 아래로 향한다. (b)에서 \(x^2 + y^2\)는 모든 \(\varepsilon\)에서 정확히 \(4 = \Delta u\)이고, harmonic인 \(x^2 - y^2\)는 정확히 \(0\)이다. \(e^x\sin 2y\)는 \(\varepsilon = 1\)에서 \(-2.82\), \(\varepsilon = 0.1\)에서 \(-3.401\)이고, 차이가 \(\varepsilon^2\)에 비례해 준다(기울기 2.00). <em>본문과의 연결</em>: <a href="#i-42-1-2">Proposition 42.1.2</a>, <a href="#i-42-1-3">Example 42.1.3</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-42-1-1">Figure 42.1.1</a>의 (a)부터 보자. 봉우리 근처의 검은 점은 양옆 두 점보다 높아서, 두 점의 평균(주황 사각형)이 그 아래에 있다. 골짜기에서는 반대다. 화살표의 방향이 곧 \(u''\)의 부호다. (b)는 같은 생각을 평면에서 정량적으로 확인한다. 세로축의 양 \(Q(\varepsilon)\)은 <a href="#eq-42-1-2">(42.1.2)</a>의 극한 앞의 식이고, \(\varepsilon \to 0\)인 왼쪽 끝에서 세 곡선이 모두 각자의 \(\Delta u(p)\)에 닿는다. 두 다항식은 처음부터 정확히 그 값이라는 점이 눈에 띈다. 이것을 다음 예에서 계산한다.</p>
+      <div class="thm example" id="i-42-1-3">
+        <p><span class="thm-head">Example 42.1.3</span> <span class="thm-name">(three functions in the plane)</span>.
+        \(n = 2\)이고 원의 점을 \(p + \varepsilon(\cos t, \sin t)\)로 쓰자. 평균은 \(\tfrac{1}{2\pi}\int_0^{2\pi}\cdots\,dt\)이고 \(\overline{\cos t} = \overline{\sin t} = \overline{\cos t\sin t} = 0\), \(\overline{\cos^2t} = \overline{\sin^2t} = \tfrac12\)이다. (a) \(u = x^2 + y^2\)이면 \(u(p + \varepsilon(\cos t, \sin t))\) \(= \abs{p}^2 + 2\varepsilon\inner{p}{(\cos t, \sin t)} + \varepsilon^2\)이므로 \(\bar u_\varepsilon(p) - u(p) = \varepsilon^2\)이고 \(Q(\varepsilon) = 4 = \Delta u\)가 모든 \(\varepsilon\)에서 정확하다. (b) \(u = x^2 - y^2\)이면 \(\varepsilon^2(\overline{\cos^2t} - \overline{\sin^2t}) = 0\)이므로 \(\bar u_\varepsilon = u(p)\)이고 \(Q = 0 = \Delta u\)이다. (c) \(u = e^x\sin 2y\)는 \(\Delta u = e^x\sin 2y - 4e^x\sin 2y = -3u\)이므로 \(p = (0.3, 0.5)\)에서 \(\Delta u(p) = -3e^{0.3}\sin 1 = -3.4076\)이다. 3차 이상의 항이 있으므로 \(Q(\varepsilon)\)은 극한에서만 이 값이 된다(<a href="#fig-42-1-1">Figure 42.1.1</a>(b)).</p>
+        <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-42-1-4">
+        <p><span class="thm-head">Non-example 42.1.4</span> <span class="thm-name">(second derivatives in other coordinates)</span>.
+        <a href="#eq-42-1-1">(42.1.1)</a>의 \(\sum_i\partial_i^2\)는 표준 좌표(orthonormal coordinates)에서만 Laplacian이다. polar coordinates \((r, \theta)\)에서 \(\partial_r^2 + \partial_\theta^2\)를 계산하면 \(u = r^2 = x^2 + y^2\)에 \(2\)를 주지만 \(\Delta u = 4\)이고, \(u = r\cos\theta = x\)에 \(-r\cos\theta\)를 주지만 \(\Delta x = 0\)이다. “축마다의 second derivative를 더한다”는 정의는 좌표를 바꾸면 깨진다. 반면 \(\divg\grad\), \(\star d\star d\), 평균과의 차이는 좌표 없이 정의되므로 곡면으로 옮길 수 있다. 좌표가 conformal이면 고쳐 쓴 공식이 간단하다(<a href="#i-42-1-10">Proposition 42.1.10</a>, <a href="#ex-42-1-1">Exercise 42.1.1</a>).</p>
+      </div>
+      <div class="thm remark" id="i-42-1-5">
+        <p><span class="thm-head">Remark 42.1.5</span> <span class="thm-name">(one dimension: convexity and curvature)</span>.
+        \(n = 1\)에서 <a href="#eq-42-1-2">(42.1.2)</a>는 \(u''(x)\) \(= \lim_{\varepsilon\to0}\big(u(x + \varepsilon) - 2u(x) + u(x - \varepsilon)\big)/\varepsilon^2\), 곧 second difference다. \(u'' \gt 0\)은 국소적으로 convex(chord가 graph 위에 있다)라는 뜻이다. 또 graph \((x, u(x))\)의 signed curvature(<a href="../04-curves/4-4-signed-curvature.html#i-4-4-2">Definition 4.4.2</a>)는 \(u''/(1 + u'^2)^{3/2}\)이므로, \(u' = 0\)인 점에서 \(u''\)는 graph의 curvature 그 자체다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 8–9. Laplacian은 “함수의 graph가 얼마나 휘었는가”를 기울기가 작을 때 1차까지 잰 양이다.</p>
+      </div>
+    </section>
+
+    <section id="sec-graph">
+      <h2>Graph Laplacians</h2>
+      <p>평균과의 차이라는 해석은 미분이 없는 곳에서도 쓸 수 있다. 점들이 edge로 이어져 있기만 하면 된다.</p>
+      <div class="thm definition" id="i-42-1-6">
+        <p><span class="thm-head">Definition 42.1.6</span> <span class="thm-name">(graph Laplacian)</span>.
+        finite graph \(G\)(vertex \(1, \dots, n\))의 각 edge \(\{i, j\}\)에 weight \(w_{ij} = w_{ji} \in \R\)가 주어졌다고 하자. \(u \in \R^n\)에 대하여</p>
+        <div class="equation" id="eq-42-1-3">
+        \[ (L_Gu)_i := \sum_{j\sim i}w_{ij}\,(u_j - u_i) \tag{42.1.3} \]
+        </div>
+        <p>로 정한 \(n \times n\) 행렬 \(L_G\)를 \(G\)의 <dfn>graph Laplacian</dfn>(그래프 라플라시안)이라 한다. 성분으로는 \((L_G)_{ij} = w_{ij}\)(\(i \sim j\)), \((L_G)_{ii} = -\sum_{j\sim i}w_{ij}\), 나머지는 \(0\)이다.</p>
+      </div>
+      <p>정의에서 바로 \(L_G\)는 symmetric이고 행의 합이 \(0\)이다. 모든 \(w_{ij} \gt 0\)이면 \(-u^{\mathsf T}L_Gu = \sum_{\{i,j\}}w_{ij}(u_j - u_i)^2 \ge 0\)이므로 \(-L_G\)는 positive semidefinite다(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-9">Proposition 36.6.9</a>와 같은 계산). \(w = 1\)일 때 \(-L_G = D - A\)(degree matrix − adjacency matrix)이고, 이것이 흔히 쓰는 부호다(위의 Conventions 상자). \(L_G\)의 \(i\)번째 행을 weight의 합으로 나누면 “이웃의 가중 평균 − 자기 값”이 되어 <a href="#i-42-1-2">Proposition 42.1.2</a>의 \(\bar u_\varepsilon - u\)의 discrete 판이다. \(w = 1\)로 그렇게 나눈 것이 <a href="../31-meshes/31-3-cotangent-laplacian.html#sec-smoothing">Section 31.3</a>의 uniform Laplacian이다.</p>
+      <div class="thm example" id="i-42-1-7">
+        <p><span class="thm-head">Example 42.1.7</span> <span class="thm-name">(graph Laplacians that are Laplacians)</span>.
+        (a) 간격 \(h\)인 1차원 grid(path graph)에 \(w = 1/h^2\)를 주면 \((L_Gu)_i = (u_{i+1} - 2u_i + u_{i-1})/h^2\)이고, \(u_i = u(ih)\)이면 <a href="#i-42-1-5">Remark 42.1.5</a>에 의해 \(u''(ih)\)로 수렴한다. 같은 grid를 원으로 닫으면(cycle graph) \(-L_G\)의 eigenvalue가 원의 \(-d^2/d\vartheta^2\)의 eigenvalue \(k^2\)에 가까워진다(<a href="#ex-42-1-3">Exercise 42.1.3</a>). (b) triangle mesh의 vertex와 edge로 된 graph에 cotan weight \(w_{ij} = \tfrac12(\cot\alpha_{ij} + \cot\beta_{ij})\)를 주면 \(L_G\)가 바로 cotan Laplacian \(L\)이다(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-7">Proposition 36.6.7</a>). 이 weight는 음수일 수도 있다. 그래서 Definition은 weight의 부호를 제한하지 않았다.</p>
+      </div>
+      <div class="thm nonexample" id="i-42-1-8">
+        <p><span class="thm-head">Non-example 42.1.8</span> <span class="thm-name">(weights that ignore the metric)</span>.
+        같은 mesh의 graph에 \(w = 1\)을 주면 기하를 전혀 보지 않는 operator가 된다. 정삼각형 grid에서 \(d_0^{\mathsf T}d_0 = -L_G\)를 \(x^2\)에 쓰면 가운데 vertex에서 \(-3\ell^2\)이고, mesh를 세분하면 \(0\)으로 간다(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-5">Non-example 36.6.5</a>). 넓이로 나누어 크기를 맞추어도 일반 mesh에서는 vertex를 surface를 따라 미끄러뜨린다(<a href="../31-meshes/31-3-cotangent-laplacian.html#fig-31-3-4">Figure 31.3.4</a>). graph Laplacian이 Laplacian의 이산화가 되려면 weight가 metric을 담아야 한다. 그것을 정하는 두 방법이 Section 42.3(FEM)과 Section 42.4(DEC)다.</p>
+      </div>
+      <div class="thm remark" id="i-42-1-9">
+        <p><span class="thm-head">Remark 42.1.9</span> <span class="thm-name">(random walks)</span>.
+        간격 \(h\)인 grid \(h\Z^n\) 위에서 한 걸음마다 \(2n\)개의 이웃 \(x \pm he_i\) 가운데 하나로 같은 확률로 옮겨 가는 random walk \(X_k\)를 생각하자. 한 걸음 뒤 \(u\)의 기댓값의 변화는 \(\mathbb{E}[u(X_1)] - u(x)\) \(= \tfrac{1}{2n}\sum_{i,\pm}\big(u(x \pm he_i) - u(x)\big)\)이고, 이것은 \(w = 1/(2n)\)인 graph Laplacian이다. <a href="#i-42-1-2">Proposition 42.1.2</a>의 증명에서 unit sphere 대신 \(2n\)개의 점 \(\pm e_i\)를 써도 \(\overline{\omega^i\omega^j} = \delta_{ij}/n\)이 그대로이므로 이 값은 \(\tfrac{h^2}{2n}\Delta u(x) + O(h^3)\)이다. 걸음 수와 \(h\)를 함께 극한으로 보내면 Brownian motion이 되고, Laplacian은 그 평균값이 시간에 따라 변하는 속도를 정한다(진술만 한다. 정확한 극한과 상수는 확률론의 주제다) <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 26.</p>
+      </div>
+    </section>
+
+    <section id="sec-surfaces">
+      <h2>The Laplace–Beltrami Operator</h2>
+      <p>이제 휘어진 곡면으로 간다. 곡면 \(S\)를 매개화 \(\mathbf{x}\colon U \to \R^3\)으로 보면 parameter 평면에는 induced metric \(g\)가 있고(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-1">Definition 38.2.1</a>), 그 \(g\)로 정한 Hodge star \(\star\)가 있다(<a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-6">Proposition 38.3.6</a>: 1-form에서 \((\star\alpha)(X) = -\alpha(X')\), \(X'\)은 \(g\)에 대한 \(+90^\circ\) 회전, 2-form에서 \(\star(f\,dA) = f\)). <a href="#eq-42-1-1">(42.1.1)</a>의 마지막 표현은 \(d\)와 \(\star\)만 쓰므로 그대로 옮길 수 있다. 곡면 위에서</p>
+      <div class="equation" id="eq-42-1-4">
+      \[ \Delta u := \star d\star du \tag{42.1.4} \]
+      </div>
+      <p>를 \(u\)의 <strong>Laplace–Beltrami operator</strong>(라플라스-벨트라미 연산자)라 부른다. 평면(\(g = du^2 + dv^2\))에서는 <a href="#eq-42-1-1">(42.1.1)</a>과 같다. \(\star\)가 좌표 없이 정의된 연산(<a href="../34-exterior-algebra/34-2-hodge-star.html#i-34-2-5">Definition 34.2.5</a>)이고 \(d\)도 좌표와 무관하므로, \(\Delta u\)는 매개화의 선택에 의존하지 않는다. 또 \(g\)만 쓰고 \(\mathbf{x}\)의 나머지 정보는 쓰지 않으므로 isometry로 보존된다. discrete 쪽에서 이에 대응하는 것이 “edge length가 같으면 \(L\)이 같다”(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-3">Corollary 38.6.3</a>)였다. gradient와 divergence도 곡면 위에서 \(\grad u = (du)^\sharp\)(\(g\)에 대한 sharp, <a href="../34-exterior-algebra/34-3-covectors-sharp-flat.html">Section 34.3</a>), \(\divg X = \star d\star X^\flat\)로 정하면 \(\Delta = \divg\grad\)가 그대로 성립한다. 엄밀한 일반론은 <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>에 있다.</p>
+      <div class="thm proposition" id="i-42-1-10">
+        <p><span class="thm-head">Proposition 42.1.10</span> <span class="thm-name">(the Laplace–Beltrami operator in coordinates)</span>.
+        immersion \(\mathbf{x}\colon U \to \R^3\)의 induced metric 행렬을 \(\mathsf{g} = (g_{ab})\), 역행렬을 \((g^{ab})\)라 하자. (a) 일반 좌표에서</p>
+        <div class="equation" id="eq-42-1-5">
+        \[ \Delta u = \frac{1}{\sqrt{\det\mathsf{g}}}\sum_{a,b=1}^2\partial_a\Big(\sqrt{\det\mathsf{g}}\;g^{ab}\,\partial_bu\Big) \tag{42.1.5} \]
+        </div>
+        <p>이다. (b) 특히 \((u, v)\)가 conformal coordinates, 곧 \(g = e^{2\mu}(du^2 + dv^2)\)이면(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-7">Definition 38.2.7</a>)</p>
+        <div class="equation" id="eq-42-1-6">
+        \[ \Delta f = e^{-2\mu}\big(\partial_u^2f + \partial_v^2f\big) \tag{42.1.6} \]
+        </div>
+        <p>이다(함수를 \(f\)로 썼다. \(u\)는 좌표다).</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a)는 진술만 한다. 같은 계산을 일반 Riemannian manifold에서 하는 것이 <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>이고, Chapter 38은 이 식으로 sphere의 \(\Delta z\)를 계산했다(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#ex-38-6-2">Exercise 38.6.2</a>).</p>
+        <p>(b)를 <a href="#eq-42-1-4">(42.1.4)</a>에서 직접 유도하자. 점마다 \(\mathsf{g} = e^{2\mu}I_2\)이므로 \(g\)에 대한 \(+90^\circ\) 회전은 보통의 회전 \(J\)와 같다. \(JX\)는 \(X\)와 \(g\)-길이가 같고 \(g\)-orthogonal이며 \((X, JX)\)가 positively oriented이기 때문이다. 따라서 <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-6">Proposition 38.3.6</a>(b)에서 1-form의 \(\star\)는 평면의 것과 같다: \(\star du = dv\), \(\star dv = -du\)(\(\star du(X) = -du(JX) = X^2 = dv(X)\)이고 \(\star dv\)도 같은 계산이다). 넓이 형식은 \(dA = \sqrt{\det\mathsf{g}}\,du\wedge dv = e^{2\mu}\,du\wedge dv\)이므로 2-form에서는 \(\star(h\,du\wedge dv) = \star(he^{-2\mu}\,dA) = e^{-2\mu}h\)다. 이제 \(df = f_u\,du + f_v\,dv\)이므로</p>
+        <p>\[ \begin{aligned} \star df &= f_u\,dv - f_v\,du, \\ d\star df &= (f_{uu} + f_{vv})\,du\wedge dv, \\ \star d\star df &= e^{-2\mu}(f_{uu} + f_{vv}) \end{aligned} \]</p>
+        <p>이다.</p>
+      </div>
+      <p>(b)의 증명에서 두 가지를 읽을 수 있다. 첫째, 2차원에서 1-form의 \(\star\)는 metric의 conformal 배율 \(e^{2\mu}\)에 의존하지 않는다. 각만 보기 때문이다. 둘째, metric의 배율은 마지막 \(\star\)(넓이로 나누기)에서 한 번만 들어온다. discrete 판으로 옮기면 앞의 것이 \(\star_1\)(cotan, 각만의 함수)이고 뒤의 것이 \(\star_0^{-1}\)(dual area로 나누기)이다(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#fig-36-6-1">Figure 36.6.1</a>). 강의 슬라이드는 이것을 “0-form Hodge star는 넓이, 1-form Hodge star는 conformal structure”라고 요약한다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 25. Crane의 노트가 \(d\star d\)를 conformal Laplacian이라 부르는 것도 같은 이유다 <a class="cite" href="../../references.html#Cr">[Cr §6.3]</a>.</p>
+      <div class="thm example" id="i-42-1-11">
+        <p><span class="thm-head">Example 42.1.11</span> <span class="thm-name">(the unit sphere in Mercator coordinates)</span>.
+        unit sphere의 Mercator coordinates \(\mathbf{x}(\varphi, t) = (\operatorname{sech}t\cos\varphi, \operatorname{sech}t\sin\varphi, \tanh t)\)은 \(\mu = -\log\cosh t\)인 conformal coordinates다(<a href="../38-surfaces-smooth-discrete/38-2-induced-metric.html#i-38-2-10">Example 38.2.10</a>, \(r = 1\)). 높이 함수 \(z = \tanh t\)에 대해 \(\partial_\varphi^2z = 0\), \(\partial_t z = \operatorname{sech}^2t\), \(\partial_t^2z = -2\operatorname{sech}^2t\tanh t\)이고 \(e^{-2\mu} = \cosh^2t\)이므로 <a href="#eq-42-1-6">(42.1.6)</a>에서</p>
+        <p>\[ \Delta z = \cosh^2t\cdot\big(-2\operatorname{sech}^2t\tanh t\big) = -2\tanh t = -2z \]</p>
+        <p>이다. 같은 결과를 Chapter 38은 \((\theta, \varphi)\) 좌표와 <a href="#eq-42-1-5">(42.1.5)</a>로 얻었다(<a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#ex-38-6-2">Exercise 38.6.2</a>). 좌표가 달라도 같은 값인 것이 \(\Delta\)가 좌표에 무관하다는 뜻이다. \(x, y\)도 \(\Delta x = -2x\), \(\Delta y = -2y\)이고, 이것은 mean curvature normal \(\Delta\mathbf{x} = 2H\mathbf{N}\)(<a href="../00-tour/0-4-curvature.html#eq-0-4-3">(0.4.3)</a>)에 바깥쪽 \(\mathbf{N} = \mathbf{x}\), \(H = -1\)을 넣은 것과 같다.</p>
+        <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code></p>
+      </div>
+      <figure class="dg-figure" id="fig-42-1-2">
+        <img src="figures/fig-42-1-2-mercator.svg" alt="두 패널. (a) 가로축 t(-2.6에서 2.6). 검은 곡선 z = tanh t는 -1에서 1로 올라간다. 회색 점선 ∂_t^2 z는 t = -0.66 근처에서 0.77의 봉우리, t = 0.66 근처에서 -0.77의 골짜기를 갖고 양 끝에서 0으로 줄어든다. 파란 곡선 e^{-2μ}∂_t^2 z = -2z는 2에서 -2로 내려가며 검은 곡선을 -2배한 모양이다. (b) unit sphere를 옆에서 본 그림. 주황 선은 위도선(t = -2.4부터 2.4까지 0.8 간격)과 30도 간격의 경도선이다. 칸의 색은 적도 근처가 진한 파랑, 극 근처가 옅은 파랑이고, 극으로 갈수록 칸의 높이가 작아진다.">
+        <figcaption><span class="fig-head">Figure 42.1.2.</span>
+        conformal coordinates에서 Laplace–Beltrami operator는 평면의 Laplacian을 넓이 배율로 나눈 것이다. <em>무엇을</em>: unit sphere의 Mercator coordinates \((\varphi, t)\), \(e^{-2\mu} = \cosh^2t\), 높이 \(z = \tanh t\). <em>읽는 법</em>: (a)의 가로축은 \(t\)이다. 검정은 \(z\), 회색 점선은 parameter 평면에서의 second derivative \(\partial_t^2z\)(평면의 Laplacian, \(z\)가 \(\varphi\)에 무관하므로), 파랑은 그것에 \(e^{-2\mu}\)를 곱한 \(\Delta z\)다. (b)는 sphere 위의 Mercator grid로, 주황 선이 \(t = -2.4, -1.6, \dots, 2.4\)와 \(\varphi = 0^\circ, 30^\circ, \dots\)이다. 칸의 색은 넓이 배율 \(e^{2\mu} = \operatorname{sech}^2t\)(진할수록 크다)이다. <em>볼 것</em>: (a)에서 회색 곡선은 \(\abs{t}\)가 크면 \(0\)으로 줄어들지만(\(t = 1\)에서 \(-0.640\)), 배율 \(\cosh^2t\)(\(t = 1\)에서 \(2.381\))를 곱한 파란 곡선은 정확히 \(-2z\)(\(t = 1\)에서 \(-1.523\))다. (b)에서 parameter 평면의 같은 칸(\(0.8\times30^\circ\))이 극으로 갈수록 작아진다. 평면의 미분이 작게 보이는 만큼 넓이도 작아서, 넓이로 나누면 둘이 상쇄된다. <em>본문과의 연결</em>: <a href="#i-42-1-10">Proposition 42.1.10</a>(b), <a href="#i-42-1-11">Example 42.1.11</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-42-1-2">Figure 42.1.2</a>의 (a)에서 회색과 파랑을 비교하자. parameter 평면만 보면 극 근처(\(\abs{t}\)가 큰 곳)에서 \(z\)가 거의 휘지 않아 회색 곡선이 \(0\)에 가깝다. 그러나 (b)에서 보듯이 그곳의 parameter 칸은 sphere 위에서 아주 작은 넓이만 덮는다. <a href="#eq-42-1-6">(42.1.6)</a>의 \(e^{-2\mu}\)는 그 넓이로 나누는 일을 하고, 그 결과 파란 곡선이 \(-2z\)가 된다. sphere는 모든 점이 같으므로 \(\Delta z\)가 \(z\) 자신의 상수배라는 것은 자연스럽다. 좌표가 그 대칭을 감추고 있었을 뿐이다.</p>
+    </section>
+
+    <section id="sec-properties">
+      <h2>Basic Properties</h2>
+      <p>정의를 여러 개 가졌으니, 이제 어느 정의로도 보이는 성질을 정리한다. 모두 다음 identity에서 나온다. 아래에서 \(S\)는 compact oriented surface이고 boundary \(\partial S\)가 있을 수 있다. boundary에는 Stokes orientation을 주고, \(\mathbf{n}\)은 \(\partial S\)에서 \(S\)에 접하고 \(\partial S\)에 수직이며 바깥을 향하는 unit vector(outward conormal)다. 이 \(\mathbf{n}\)은 Frenet frame의 principal normal과 다르다(이 장에서 둘이 함께 나오지 않는다).</p>
+      <div class="thm proposition" id="i-42-1-12">
+        <p><span class="thm-head">Proposition 42.1.12</span> <span class="thm-name">(Green's first identity)</span>.
+        \(u, v\)가 \(S\)를 포함하는 open set 위의 smooth 함수이면</p>
+        <div class="equation" id="eq-42-1-7">
+        \[ \begin{aligned} \int_Sv\,\Delta u\,dA &= -\int_S\inner{\grad u}{\grad v}\,dA \\ &\quad + \oint_{\partial S}v\,\inner{\grad u}{\mathbf{n}}\,ds \end{aligned} \tag{42.1.7} \]
+        </div>
+        <p>이다. \(\partial S = \emptyset\)이면 마지막 항이 없다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: 1-form \(v\star du\)에 Stokes's theorem을 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §6.1]</a>. \(d\)가 \(v\)에 걸리면 \(\inner{du}{dv}\), \(\star du\)에 걸리면 \(\Delta u\)가 나온다.</p>
+        <p><span class="proof-head">Proof.</span> product rule(<a href="../35-exterior-calculus/35-2-exterior-derivative.html#i-35-2-4">Theorem 35.2.4</a>)로 \(d(v\star du) = dv\wedge\star du + v\,d\star du\)이다. 첫 항은 점마다 \(\inner{dv}{du}\,dA = \inner{\grad u}{\grad v}\,dA\)이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-1">Proposition 35.5.1</a>을 inner product space \((\R^2, g_q)\)에서 쓴 것, sharp는 isometry). 둘째 항에서 \(d\star du\)는 2-form이고 \(\star(d\star du) = \Delta u\)이므로 \(d\star du = \Delta u\,dA\)이다. 따라서 \(d(v\star du) = \big(\inner{\grad u}{\grad v} + v\Delta u\big)\,dA\)이고, <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-5">Theorem 35.4.5</a>에서 그 적분은 \(\oint_{\partial S}v\star du\)이다. 남은 것은 boundary 위에서 \(\star du\)를 읽는 것이다. \(\partial S\)의 unit tangent \(T\)가 Stokes orientation을 따르면 \((\mathbf{n}, T)\)가 positively oriented orthonormal basis이므로(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-1">Definition 35.4.1</a>) \(T\)를 \(+90^\circ\) 돌린 것은 \(-\mathbf{n}\)이다. <a href="../38-surfaces-smooth-discrete/38-3-gauss-map-forms.html#i-38-3-6">Proposition 38.3.6</a>(b)에서 \((\star du)(T) = -du(-\mathbf{n}) = \inner{\grad u}{\mathbf{n}}\)이므로 \(\oint_{\partial S}v\star du = \oint_{\partial S}v\inner{\grad u}{\mathbf{n}}\,ds\)이다.</p>
+      </div>
+      <div class="thm corollary" id="i-42-1-13">
+        <p><span class="thm-head">Corollary 42.1.13</span> <span class="thm-name">(the Laplacian on a closed surface)</span>.
+        \(S\)가 boundary 없는 compact oriented surface이고 \(u, v\)가 smooth이면</p>
+        <ul>
+          <li>(a) (self-adjoint) \(\int_Sv\,\Delta u\,dA = \int_Su\,\Delta v\,dA\),</li>
+          <li>(b) \(\int_S\Delta u\,dA = 0\),</li>
+          <li>(c) (negative semidefinite) \(\int_Su\,\Delta u\,dA = -\int_S\abs{\grad u}^2\,dA \le 0\),</li>
+          <li>(d) \(S\)가 connected이면 \(\Delta u = 0\)과 \(u\)가 상수인 것은 동치다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> <a href="#eq-42-1-7">(42.1.7)</a>에서 boundary 항이 없다. (a) 오른쪽 \(-\int\inner{\grad u}{\grad v}\)가 \(u, v\)에 대해 대칭이다. (b) \(v = 1\)로 둔다(\(\grad 1 = 0\)). (c) \(v = u\)로 둔다. (d) 상수의 \(du\)는 \(0\)이므로 \(\Delta u = 0\)이다. 거꾸로 \(\Delta u = 0\)이면 (c)에서 \(\int\abs{\grad u}^2\,dA = 0\)이고, 적분하는 함수가 continuous이고 \(0\) 이상이므로 \(\grad u = 0\), 곧 \(du = 0\)이 어디서나 성립한다. connected surface의 두 점은 piecewise \(C^1\) 곡선으로 이을 수 있고(connected manifold는 path-connected다, <a href="../03-topology-basics/index.html">Chapter 3</a>), 그 곡선을 따라 \(u\)의 차는 \(\int du = 0\)이다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-6">Proposition 35.4.6</a>).</p>
+      </div>
+      <p>(c)가 Laplacian의 부호를 정한다. \(\Delta\)는 무한 차원의 negative semidefinite matrix처럼 행동하고, \(-\Delta\)가 positive semidefinite다. (d)는 kernel이 상수라는 것, 곧 matrix로 말하면 “rank가 하나 모자란다”는 것이다. discrete 판은 \(L\mathbf{1} = 0\), \(-L\)이 positive semidefinite, connected mesh에서 \(\ker L = \Span\{\mathbf{1}\}\)이다. Chapter 36은 이것을 Delaunay mesh에서만 증명했고(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#i-36-6-9">Proposition 36.6.9</a>), 모든 mesh에서의 증명이 <a href="42-3-fem.html">Section 42.3</a>이다. (b)는 Poisson equation을 풀 수 있는 조건이 된다(<a href="42-2-dirichlet-poisson.html">Section 42.2</a>).</p>
+      <div class="thm remark" id="i-42-1-14">
+        <p><span class="thm-head">Remark 42.1.14</span> <span class="thm-name">(spectrum)</span>.
+        \(\Delta\varphi = -\lambda\varphi\)를 만족하는 \(0\)이 아닌 \(\varphi\)를 eigenfunction이라 하자. 닫힌 곡면에서 <a href="#i-42-1-13">Corollary 42.1.13</a>(c)로 \(\lambda\int\varphi^2 = \int\abs{\grad\varphi}^2 \ge 0\)이므로 \(\lambda \ge 0\)이고, 곡면이 connected이면 (d)에서 \(\lambda = 0\)은 상수뿐이다. (a)에서 \(\lambda \ne \lambda'\)인 두 eigenfunction은 \(\int\varphi\varphi'\,dA = 0\)이다(<a href="#ex-42-1-4">Exercise 42.1.4</a>). connected인 닫힌 곡면에서 \(\lambda\)는 \(0 = \lambda_0 \lt \lambda_1 \le \lambda_2 \le \cdots \to \infty\)인 discrete한 수열이고 eigenfunction이 \(L^2\)의 orthonormal basis를 이룬다는 것은 elliptic operator의 spectral theorem이다(진술만 한다) <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 29–30. unit sphere에서 \(\lambda = \ell(\ell + 1)\)이고 중복도가 \(2\ell + 1\)이다(<a href="../29-gaussian-splatting/29-6-spherical-harmonics.html#i-29-6-1">Proposition 29.6.1</a>). mesh에서는 generalized eigenproblem \(-L\varphi = \lambda M\varphi\)(<a href="../31-meshes/31-4-spectral-geometry.html#i-31-4-1">Definition 31.4.1</a>)를 풀고, icosphere에서 이 값들이 다시 보였다(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#ex-36-6-6">Exercise 36.6.6</a>). Section 42.3에서 \(M\)을 바꾸어 이 값이 어떻게 달라지는지 본다.</p>
+      </div>
+    </section>
+
+    <section id="sec-hodge">
+      <h2>The Hodge Laplacian</h2>
+      <p>Chapter 35는 codifferential \(d^*\)를 L2 inner product에 대한 \(d\)의 adjoint로 정의했다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-6">Definition 35.5.6</a>). \(d\)와 \(d^*\)를 두 순서로 합성해 더하면 모든 degree의 form에 쓸 수 있는 Laplacian이 나온다.</p>
+      <div class="thm definition" id="i-42-1-15">
+        <p><span class="thm-head">Definition 42.1.15</span> <span class="thm-name">(Hodge Laplacian)</span>.
+        open set \(U \subseteq \R^n\)과 \(0 \le k \le n\)에 대하여</p>
+        <div class="equation" id="eq-42-1-8">
+        \[ \Delta_H := dd^* + d^*d\colon \Omega^k(U) \to \Omega^k(U) \tag{42.1.8} \]
+        </div>
+        <p>를 <dfn>Hodge Laplacian</dfn>(호지 라플라시안)이라 한다(\(k = 0\)이면 \(d^* = 0\)이므로 \(\Delta_H = d^*d\), \(k = n\)이면 \(d = 0\)이므로 \(\Delta_H = dd^*\)이다). 곡면에서는 같은 식을 <a href="#eq-42-1-4">(42.1.4)</a>의 \(\star\)와 \(d^* = -\star d\star\)(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-8">Theorem 35.5.8</a>(c)의 2차원 식)로 쓴다.</p>
+      </div>
+      <div class="thm proposition" id="i-42-1-16">
+        <p><span class="thm-head">Proposition 42.1.16</span> <span class="thm-name">(the Hodge Laplacian and the Laplacian)</span>.
+        (a) 함수에서 \(\Delta_Hf = -\Delta f\)이다. (b) \(\R^2\)의 1-form에서 \(\Delta_H(a\,dx + b\,dy) = -(\Delta a\,dx + \Delta b\,dy)\)이다. (c) \(\alpha \in \Omega^k_c(U)\)이면 \(\langle\!\langle\Delta_H\alpha, \alpha\rangle\!\rangle = \norm{d\alpha}^2 + \norm{d^*\alpha}^2 \ge 0\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \(\R^n\)에서는 <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-8">Theorem 35.5.8</a>(b)다. 곡면에서는 \(d^* = -\star d\star\)와 <a href="#eq-42-1-4">(42.1.4)</a>에서 \(\Delta_Hf = d^*df = -\star d\star df = -\Delta f\)이다. (b) \(n = 2\)에서 \(d^* = -\star d\star\)이므로 \(\Delta_H = -(\star d\star d + d\star d\star)\)이다. \(\star dx = dy\), \(\star dy = -dx\), \(\star(dx\wedge dy) = 1\)로 \(\alpha = a\,dx + b\,dy\)에 대해 계산하면 \(d\alpha = (b_x - a_y)\,dx\wedge dy\)이고 \(\star d\star d\alpha = \star d(b_x - a_y)\) \(= (b_{xx} - a_{xy})\,dy - (b_{xy} - a_{yy})\,dx\)이다. 또 \(\star\alpha = a\,dy - b\,dx\), \(d\star\alpha = (a_x + b_y)\,dx\wedge dy\)이므로 \(d\star d\star\alpha = (a_{xx} + b_{xy})\,dx + (a_{xy} + b_{yy})\,dy\)이다. 더하면 \((a_{xx} + a_{yy})\,dx + (b_{xx} + b_{yy})\,dy\)이다. (c) \(\alpha\)와 \(d^*\alpha\), \(d\alpha\)는 compact support를 가지므로 <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#eq-35-5-3">(35.5.3)</a>을 두 번 써서 \(\langle\!\langle dd^*\alpha, \alpha\rangle\!\rangle = \langle\!\langle d^*\alpha, d^*\alpha\rangle\!\rangle\), \(\langle\!\langle d^*d\alpha, \alpha\rangle\!\rangle = \langle\!\langle d\alpha, d\alpha\rangle\!\rangle\)이다(L2 inner product는 symmetric이다).</p>
+      </div>
+      <p>(a)와 (c)가 부호의 사정을 요약한다. Hodge Laplacian은 positive semidefinite 쪽이고, 함수에서는 이 study set의 \(\Delta\)의 \(-1\)배다. 두 부호가 모두 문헌에서 “Laplacian”이라 불린다(위의 Conventions 상자). (b)는 평면에서 Hodge Laplacian이 성분마다의 \(-\Delta\)라는 뜻이다. 곡면에서는 그렇지 않고 curvature가 들어간 항이 생긴다(Weitzenböck formula, Go deeper).</p>
+      <div class="thm example" id="i-42-1-17">
+        <p><span class="thm-head">Example 42.1.17</span> <span class="thm-name">(a 1-form that the Hodge Laplacian kills)</span>.
+        \(\R^2\setminus\{0\}\)의 \(d\theta\)는 \(d(d\theta) = 0\)이고 \(d^*(d\theta) = 0\)이다(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-9">Example 35.5.9</a>(b)). 따라서 \(\Delta_H(d\theta) = d(d^*d\theta) + d^*(dd\theta) = 0\)이다. <a href="#i-42-1-16">Proposition 42.1.16</a>(b)로도 확인할 수 있다. \(d\theta = (-y\,dx + x\,dy)/(x^2 + y^2)\)의 두 coefficient \(-y/r^2\), \(x/r^2\)는 직접 미분하면 각각 harmonic이다(예: \(\partial_x^2(x/r^2) = (2x^3 - 6xy^2)/r^6 = -\partial_y^2(x/r^2)\)). 반면 \(d\theta\)는 어떤 함수의 \(d\)도 아니다(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-7">Corollary 35.4.7</a>). 이렇게 \(d\alpha = 0\), \(d^*\alpha = 0\)인 1-form이 Chapter 45의 harmonic 1-form이다(<a href="../45-vector-field-design/index.html#toc-45-1">Section 45.1</a> <span class="todo">[확인 필요: Chapter 45 미작성 — 참조 번호 확정 필요]</span>).</p>
+        <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code></p>
+      </div>
+    </section>
+
+    <aside class="box discrete">
+      <p class="box-title">Smooth vs. Discrete: one operator, several routes</p>
+      <p><strong>Smooth.</strong> \(\Delta = \sum\partial_i^2 = \tr\Hess = \divg\grad = \star d\star d\) = 평균과의 차이 = (Section 42.2에서) Dirichlet energy의 gradient의 \(-1\)배. 모두 같은 operator다. <strong>Discrete.</strong> 각 표현이 서로 다른 이산화로 이어진다.</p>
+      <ul>
+        <li>\(\sum\partial_i^2\): 정사각형 grid의 finite difference. orthonormal 좌표가 필요하므로 곡면이나 불규칙한 mesh에는 쓸 수 없다(<a href="#i-42-1-4">Non-example 42.1.4</a>).</li>
+        <li>평균과의 차이: graph Laplacian. weight가 metric을 담지 않으면 수렴하지 않는다(<a href="#i-42-1-8">Non-example 42.1.8</a>).</li>
+        <li>\(\star d\star d\): DEC. \(\star_0^{-1}\tilde d_1\star_1d_0 = \star_0^{-1}L\)(<a href="42-4-dec.html">Section 42.4</a>).</li>
+        <li>Dirichlet energy: FEM. piecewise linear 함수의 energy가 \(-\tfrac12u^{\mathsf T}Lu\)(<a href="42-3-fem.html">Section 42.3</a>).</li>
+      </ul>
+      <p>정확히 보존하는 것: 마지막 두 길은 같은 \(L\)을 주고, symmetric, \(L\mathbf{1} = 0\), \(-L\)의 positive semidefiniteness를 정확히 지킨다. 잃는 것: 점마다의 값(\(\star_0\)의 선택에 따라 수렴하지 않을 수 있다, <a href="../38-surfaces-smooth-discrete/38-6-dec-curved-surfaces.html#i-38-6-6">Example 38.6.6</a>(c))과, non-Delaunay mesh에서의 maximum principle이다.</p>
+    </aside>
+
+    <aside class="box backward">
+      <p class="box-title">Looking back</p>
+      <p>Tour의 <a href="../00-tour/0-8-riemannian.html#sec-metric">Section 0.8</a>은 metric이 있으면 \(\Delta = \divg\grad\)가 정의된다고만 말했고, Chapter 31은 cotan Laplacian을 Dirichlet energy에서 얻어 그 성질을 Derivation으로 보였다(<a href="../31-meshes/31-3-cotangent-laplacian.html#i-31-3-3">Definition 31.3.3</a>). Chapter 35–36은 \(\R^n\)의 \(\star d\star d\)와 그 DEC 판을 만들었다. 무엇이 새로워졌는가: 곡면 위의 \(\Delta\)를 \(\star d\star d\)로 정하고, 여러 정의가 같은 operator임을 보였으며, 부호와 kernel을 Green's identity 하나로 증명했다. 이 절의 결과 가운데 Track 2의 뒤에서 다시 쓰는 것은 <a href="#eq-42-1-7">(42.1.7)</a>과 <a href="#i-42-1-13">Corollary 42.1.13</a>이다.</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>Riemannian manifold의 volume form, divergence theorem, \(\Delta = \divg\grad\)의 일반론과 좌표 공식 <a href="#eq-42-1-5">(42.1.5)</a>: <a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>. Tour: <a href="../00-tour/0-8-riemannian.html#sec-metric">Section 0.8</a>.</li>
+        <li>Laplacian의 spectrum과 mesh 위의 Fourier basis: <a href="../31-meshes/31-4-spectral-geometry.html#sec-eigenproblem">Section 31.4</a>. 1-form의 Hodge Laplacian과 curvature(Weitzenböck formula)는 Riemannian geometry의 주제이고 이 study set의 범위 밖이다.</li>
+        <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 3–30, <a class="cite" href="../../references.html#Cr">[Cr §6.1, §4.6.6]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(\R^n\)에서 \(\Delta = \sum\partial_i^2 = \tr\Hess = \divg\grad = \star d\star d\)이고, \(\Delta u(p) = \lim\tfrac{2n}{\varepsilon^2}(\bar u_\varepsilon(p) - u(p))\), 곧 둘레 평균과의 차이다(<a href="#i-42-1-1">Proposition 42.1.1</a>, <a href="#i-42-1-2">Proposition 42.1.2</a>).</li>
+        <li>graph Laplacian \((L_Gu)_i = \sum_jw_{ij}(u_j - u_i)\)은 평균과의 차이의 discrete 판이다. cotan weight를 주면 \(L\)이 되고, metric을 모르는 weight로는 Laplacian에 수렴하지 않는다(<a href="#i-42-1-6">Definition 42.1.6</a>).</li>
+        <li>곡면 위에서 \(\Delta = \star d\star d\)이고, conformal coordinates에서 \(\Delta = e^{-2\mu}(\partial_u^2 + \partial_v^2)\)이다. 1-form의 \(\star\)는 각만, 마지막 \(\star\)는 넓이만 본다. unit sphere에서 \(\Delta z = -2z\)이다(<a href="#i-42-1-10">Proposition 42.1.10</a>, <a href="#i-42-1-11">Example 42.1.11</a>).</li>
+        <li>Green's first identity에서 닫힌 곡면의 \(\Delta\)는 self-adjoint, negative semidefinite이고, connected이면 kernel이 상수다(<a href="#i-42-1-12">Proposition 42.1.12</a>, <a href="#i-42-1-13">Corollary 42.1.13</a>).</li>
+        <li>Hodge Laplacian \(dd^* + d^*d\)는 positive semidefinite 쪽이고 함수에서 \(-\Delta\)다(<a href="#i-42-1-16">Proposition 42.1.16</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 남은 정의, 곧 Laplacian을 Dirichlet energy의 gradient로 보는 관점을 다룬다. boundary 값만 주어진 함수를 “가장 매끄럽게” 채우는 문제가 Laplace equation이 되고, 오른쪽에 원천을 넣으면 Poisson equation이 된다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-42-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 42.1.1</span> <span class="level">★</span>
+        \(\R^2\setminus\{0\}\)의 log-polar coordinates \((s, t)\), \((x, y) = (e^s\cos t, e^s\sin t)\)이 \(\mu = s\)인 conformal coordinates임을 보이고, <a href="#eq-42-1-6">(42.1.6)</a>로 \(\Delta(x^2 + y^2)\)와 \(\Delta\log r\)을 계산하여라. <a href="#i-42-1-4">Non-example 42.1.4</a>의 polar coordinates와 무엇이 다른가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathbf{x}_s = e^s(\cos t, \sin t)\), \(\mathbf{x}_t = e^s(-\sin t, \cos t)\)이므로 \(E = G = e^{2s}\), \(F = 0\), 곧 \(g = e^{2s}(ds^2 + dt^2)\)이다. \(x^2 + y^2 = e^{2s}\)이므로 \(\Delta = e^{-2s}\partial_s^2(e^{2s}) = e^{-2s}\cdot4e^{2s} = 4\)이고, \(\log r = s\)이므로 \(\Delta\log r = e^{-2s}\cdot\partial_s^2s = 0\)이다(\(\log r\)은 harmonic이다). polar coordinates \((r, \theta)\)는 \(g = dr^2 + r^2d\theta^2\)로 \(E \ne G\)라 conformal이 아니고, 그래서 \(\partial_r^2 + \partial_\theta^2\)에 배율 하나를 곱하는 것으로 고칠 수 없다. log-polar는 \(\theta\) 방향의 배율 \(r\)을 \(s\) 방향에도 똑같이 주도록 \(r\)을 \(e^s\)로 바꾼 것이다.</p>
+          <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 42.1.2</span> <span class="level">★</span>
+        \(u = ax^2 + bxy + cy^2 + \ell(x, y)\)(\(\ell\)은 affine)이면 모든 \(p\)와 \(\varepsilon \gt 0\)에서 \(\tfrac{4}{\varepsilon^2}(\bar u_\varepsilon(p) - u(p)) = 2(a + c) = \Delta u\)임을 보여라. 3차 다항식 \(u = x^3\)에서는 어떤가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>원의 점 \(p + \varepsilon(\cos t, \sin t)\)에서 \(u\)를 \(p\) 둘레로 전개하면 \(u(p)\) + (1차 항) + \(\varepsilon^2(a\cos^2t + b\cos t\sin t + c\sin^2t)\)이다. 이차식은 2차 Taylor 전개가 정확하기 때문이다. 1차 항과 \(\cos t\sin t\)의 평균은 \(0\), \(\cos^2t\)와 \(\sin^2t\)의 평균은 \(\tfrac12\)이므로 \(\bar u_\varepsilon(p) - u(p) = \tfrac{\varepsilon^2}{2}(a + c)\)이고, \(\tfrac{4}{\varepsilon^2}\)를 곱하면 \(2(a + c) = u_{xx} + u_{yy}\)이다. \(u = x^3\)이면 \((p_1 + \varepsilon\cos t)^3\)의 평균은 \(p_1^3 + 3p_1\varepsilon^2\cdot\tfrac12 + \varepsilon^3\overline{\cos^3t} = p_1^3 + \tfrac32p_1\varepsilon^2\)이다(\(\overline{\cos t} = \overline{\cos^3t} = 0\)). 따라서 이 경우에도 \(\tfrac{4}{\varepsilon^2}(\cdots) = 6p_1 = \Delta(x^3)\)이 모든 \(\varepsilon\)에서 정확하다. 홀수 차수의 항은 대칭으로 평균이 사라지므로, 오차가 처음 나타나는 것은 4차 항이다(<a href="#i-42-1-2">Proposition 42.1.2</a>의 \(O(\varepsilon^3)\)은 실제로 \(O(\varepsilon^4)\)이고, \(Q\)의 오차는 \(O(\varepsilon^2)\)이다. <a href="#fig-42-1-1">Figure 42.1.1</a>(b)의 기울기 2).</p>
+          <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-1-3" data-level="2">
+        <p><span class="thm-head">Exercise 42.1.3</span> <span class="level">★★</span>
+        <strong>Coding.</strong> \(n\)개의 vertex로 된 cycle graph에 \(w = 1/h^2\)(\(h = 2\pi/n\))를 준 graph Laplacian \(L_G\)를 만들고, \(-L_G\)의 가장 작은 eigenvalue 9개를 \(n = 16, 64\)에서 구하여라. 원 위의 \(-d^2/d\vartheta^2\)의 eigenvalue \(k^2\)(\(k = 0, 1, 2, \dots\), \(k \ge 1\)이면 중복도 2)와 비교하고, 정확한 값 \(\tfrac{4}{h^2}\sin^2\tfrac{\pi k}{n}\)을 확인하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <pre id="code-ex-42-1-3"><code>import numpy as np
+
+def cycle_laplacian(n):
+    h = 2 * np.pi / n
+    LG = np.zeros((n, n))
+    for i in range(n):
+        for j in ((i + 1) % n, (i - 1) % n):
+            LG[i, j] += 1 / h ** 2                  # w_ij = 1 / h^2, Definition 42.1.6
+            LG[i, i] -= 1 / h ** 2
+    return LG, h
+
+for n in (16, 64):
+    LG, h = cycle_laplacian(n)
+    lam = np.sort(np.linalg.eigvalsh(-LG))[:9]
+    exact = (4 / h ** 2) * np.sin(np.pi * np.array([0, 1, 1, 2, 2, 3, 3, 4, 4]) / n) ** 2
+    print(n, np.round(lam, 4) + 0.0, np.abs(lam - exact).max() &lt; 1e-9)</code></pre>
+          <pre id="out-ex-42-1-3"><code>16 [ 0.      0.9872  0.9872  3.7986  3.7986  8.006   8.006  12.9691 12.9691] True
+64 [ 0.      0.9992  0.9992  3.9872  3.9872  8.9351  8.9351 15.7954 15.7954] True</code></pre>
+          <p>\(u_j = e^{\mathrm{i}kjh}\)를 넣으면 \((L_Gu)_j = \tfrac{1}{h^2}(e^{\mathrm{i}kh} - 2 + e^{-\mathrm{i}kh})u_j\) \(= -\tfrac{4}{h^2}\sin^2\tfrac{kh}{2}u_j\)이므로 eigenvalue는 \(\tfrac{4}{h^2}\sin^2\tfrac{\pi k}{n}\)이고, \(\cos kjh\)와 \(\sin kjh\)가 같은 값을 주어 중복도가 2다. \(h \to 0\)이면 \(\tfrac{4}{h^2}\sin^2\tfrac{kh}{2} \to k^2\)이다. 표에서 \(n = 64\)이면 \(k = 1, 2, 3\)이 \(0.999, 3.987, 8.935\)로 \(1, 4, 9\)에 가깝고, 같은 \(n\)에서 \(k\)가 클수록(파장이 짧을수록) 상대 오차가 커진다. 이 graph의 weight \(1/h^2\)는 원의 metric(간격)을 담고 있으므로 수렴한다(<a href="#i-42-1-7">Example 42.1.7</a>(a)).</p>
+          <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-1-4" data-level="1">
+        <p><span class="thm-head">Exercise 42.1.4</span> <span class="level">★</span>
+        닫힌 곡면에서 \(\Delta\varphi = -\lambda\varphi\), \(\Delta\varphi' = -\lambda'\varphi'\)이고 \(\lambda \ne \lambda'\)이면 \(\int_S\varphi\varphi'\,dA = 0\)임을 보여라. unit sphere의 \(z\)와 \(z^2 - \tfrac13\)으로 확인하여라(\(\Delta(z^2 - \tfrac13) = -6(z^2 - \tfrac13)\)).</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-42-1-13">Corollary 42.1.13</a>(a)에서 \(-\lambda\int\varphi'\varphi = \int\varphi'\Delta\varphi = \int\varphi\Delta\varphi' = -\lambda'\int\varphi\varphi'\)이므로 \((\lambda - \lambda')\int\varphi\varphi' = 0\)이다. sphere에서 \(z\)는 \(\lambda = 2\)(<a href="#i-42-1-11">Example 42.1.11</a>), \(z^2 - \tfrac13\)은 \(\lambda = 6\)이다. \(\int z(z^2 - \tfrac13)\,dA\)는 \(z \mapsto -z\)에 대해 홀함수의 적분이라 \(0\)이다. \(\Delta(z^2 - \tfrac13)\)은 <a href="#eq-42-1-5">(42.1.5)</a>의 \((\theta, \varphi)\) 공식으로 \(f = \cos^2\theta\)에 대해 \(\tfrac{1}{\sin\theta}\partial_\theta(\sin\theta\cdot(-2\cos\theta\sin\theta))\) \(= \tfrac{-2}{\sin\theta}(2\sin\theta\cos^2\theta - \sin^3\theta)\) \(= -4\cos^2\theta + 2\sin^2\theta = 2 - 6\cos^2\theta\)이고, 이것은 \(-6(z^2 - \tfrac13)\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-1-5" data-level="2">
+        <p><span class="thm-head">Exercise 42.1.5</span> <span class="level">★★</span>
+        \(\R^2\)의 2-form에서 \(\Delta_H(f\,dx\wedge dy) = -(\Delta f)\,dx\wedge dy\)임을 보여라. 함수 \(f\), 1-form, 2-form 모두에서 \(\Delta_H\)가 성분의 \(-\Delta\)라는 것은 \(\R^2\)의 \(\star\)가 \(\Delta_H\)와 교환한다는 것(\(\star\Delta_H = \Delta_H\star\))과 어떤 관계인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>2-form에서는 \(d = 0\)이므로 \(\Delta_H = dd^* = -d\star d\star\)이다. \(\star(f\,dx\wedge dy) = f\), \(d\star d(f) = d(f_x\,dy - f_y\,dx)\) \(= (f_{xx} + f_{yy})\,dx\wedge dy\)이므로 \(\Delta_H(f\,dx\wedge dy) = -(\Delta f)\,dx\wedge dy\)이다. 관계: \(\star\)는 함수와 2-form, 1-form끼리를 서로 보낸다. \(\Delta_H\)가 \(\star\)와 교환하면 함수에서의 식 \(\Delta_Hf = -\Delta f\)(<a href="#i-42-1-16">Proposition 42.1.16</a>(a))에 \(\star\)를 걸어 \(\Delta_H(f\,dx\wedge dy) = \star\Delta_Hf = -(\Delta f)\,dx\wedge dy\)가 바로 나온다. 실제로 \(n = 2\)에서 \(d^* = -\star d\star\)와 \(\star\star = \pm1\)로 \(\star(dd^* + d^*d) = (dd^* + d^*d)\star\)가 성립한다(degree마다 부호를 세면 된다).</p>
+          <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-1-6" data-level="2">
+        <p><span class="thm-head">Exercise 42.1.6</span> <span class="level">★★</span>
+        <strong>Coding.</strong> torus of revolution \(T_{R,r}\)의 높이 \(z = r\sin u\)에 대해 <a href="#eq-42-1-5">(42.1.5)</a>로 \(\Delta z = -\dfrac{\sin u\,(R + 2r\cos u)}{r(R + r\cos u)}\)를 보이고, <code>dgmesh.torus_mesh(2, 0.8, nu, nv)</code>에서 \(\star_0^{-1}Lz\)(mixed \(\star_0\), <a href="42-4-dec.html#i-42-4-4">Definition 42.4.4</a>)와 비교하여라. \((n_u, n_v) = (12, 24), (24, 48)\)에서 최대 오차는 어떻게 줄어드는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathsf{g} = \diag(r^2, \rho^2)\), \(\rho = R + r\cos u\)(<a href="../../notation.html#sec-examples">Notation and Conventions</a>)이므로 \(\sqrt{\det\mathsf{g}} = r\rho\)이고 <a href="#eq-42-1-5">(42.1.5)</a>는 \(\Delta f = \tfrac{1}{r\rho}\partial_u\big(\tfrac{\rho}{r}f_u\big) + \tfrac{1}{\rho^2}f_{vv}\)이다. \(f = r\sin u\)이면 \(\tfrac{\rho}{r}f_u = \rho\cos u\)이고 \(\partial_u(\rho\cos u) = -r\sin u\cos u - \rho\sin u\) \(= -\sin u\,(R + 2r\cos u)\)이므로 식이 나온다. 바깥쪽 \(\mathbf{N}\)의 \(H = -\tfrac{R + 2r\cos u}{2r\rho}\)와 \(N_z = \sin u\)로 \(2HN_z\)와 같다는 것도 확인할 수 있다(\(\Delta\mathbf{x} = 2H\mathbf{N}\)).</p>
+          <pre id="code-ex-42-1-6"><code>import numpy as np
+import dgmesh as dm
+import dgdec as dd
+
+R, r = 2.0, 0.8
+for nu, nv in ((12, 24), (24, 48)):
+    V, F = dm.torus_mesh(R, r, nu, nv)
+    L = dm.cotan_laplacian(V, F)
+    u = np.arctan2(V[:, 2], np.hypot(V[:, 0], V[:, 1]) - R)       # tube angle of each vertex
+    exact = -np.sin(u) * (R + 2 * r * np.cos(u)) / (r * (R + r * np.cos(u)))
+    lap = L @ V[:, 2] / dd.dual_areas(V, F, "mixed")             # star0^{-1} L z
+    print(nu, nv, f"{np.abs(lap - exact).max():.2e}", (dd.hodge1(V, F) &lt; 0).sum())</code></pre>
+          <pre id="out-ex-42-1-6"><code>12 24 2.95e-02 150
+24 48 7.95e-03 574</code></pre>
+          <p>격자를 두 배로 촘촘하게 하면 최대 오차가 약 \(\tfrac14\)(\(2.95\times10^{-2} \to 7.95\times10^{-3}\))로 준다. 마지막 열은 음수 cotan weight의 개수다. 음수 weight는 모두 칸을 나누는 대각선 edge에 있고 torus 전체에 고르게 퍼져 있다. torus_mesh의 칸은 사다리꼴이고 모든 칸을 같은 방향의 대각선으로 나누므로 triangle의 절반이 obtuse이기 때문이다. 이렇게 non-Delaunay edge가 많아도 이 규칙적인 격자에서는 점마다의 값이 수렴한다. 불규칙한 mesh에서는 그렇지 않을 수 있다(<a href="42-4-dec.html">Section 42.4</a>).</p>
+          <p class="verified">Verification: <code>verify/v-42-1-laplacian-definitions.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 42. The Laplace–Beltrami Operator</a>
+    <a rel="next" href="42-2-dirichlet-poisson.html">42.2 Dirichlet Energy, Harmonic Functions, and the Poisson Equation →</a>
+  </nav>
+</body>
+</html>

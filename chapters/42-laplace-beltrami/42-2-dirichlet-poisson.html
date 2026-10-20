@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>42.2 Dirichlet Energy, Harmonic Functions, and the Poisson Equation — DG Study</title>
+  <meta name="dg-id" content="42.2">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="42.1, 35.4, 35.5">
+  <meta name="dg-refs" content="Cr §6.1; Cr §6.5; Cr §7.4; CMU-DDG L18">
+  <meta name="dg-updated" content="2026-10-20">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">42. The Laplace–Beltrami Operator</a> ›
+    <span>42.2 Dirichlet Energy, Harmonic Functions, and the Poisson Equation</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>42.2 Dirichlet Energy, Harmonic Functions, and the Poisson Equation</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §6.1, §6.5, §7.4]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 31–42</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>Dirichlet energy를 정의하고, boundary 값을 고정했을 때 그 critical point가 harmonic function임(Dirichlet's principle)을 first variation과 Green's identity로 증명할 수 있다.</li>
+        <li>harmonic function의 mean value property와 maximum principle을 평면에서 증명하고, 닫힌 곡면에는 상수가 아닌 harmonic function이 없음을 설명할 수 있다.</li>
+        <li>닫힌 곡면에서 Poisson equation \(\Delta u = f\)가 풀릴 조건 \(\int_Sf\,dA = 0\)과 해의 유일성(상수 차이)을 증명하고, 평균을 빼는 trick의 뜻을 말할 수 있다.</li>
+        <li>Poisson equation을 \(E_D(u) + \int fu\,dA\)의 최소화로 보고, discrete 1차원 판을 구현할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="42-1-laplacian-definitions.html#i-42-1-12">Proposition 42.1.12</a>: Green's first identity, <a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>: 닫힌 곡면에서 \(\Delta\)의 성질</li>
+        <li><a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-12">Proposition 35.4.12</a>(b): 평면의 divergence theorem</li>
+        <li><a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-2">Definition 35.5.2</a>: L2 inner product, <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-7">Lemma 35.5.7</a>: test function으로 함수를 판별하기</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="42-1-laplacian-definitions.html">Section 42.1</a>은 Laplacian의 여러 정의를 모았지만 하나를 남겨 두었다. Laplacian은 어떤 energy의 gradient다. 이것을 보려면 먼저 그 energy가 왜 자연스러운지 알아야 한다. 그 출발점은 interpolation problem이다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 32–33. 영역의 boundary에서만 값이 주어졌을 때, 또는 몇 점에서만 값을 알 때, 나머지를 어떻게 채우는가? 온도를 boundary에서만 쟀을 때 안쪽의 온도, 몇 개의 vertex에만 색을 칠했을 때 mesh 전체의 색, scattered data의 interpolation이 모두 이 문제다.</p>
+      <p>답은 “가장 매끄럽게” 채운 함수이고, 그 말을 수로 정하는 것이 이 절의 일이다. 1차원에서는 답이 분명하다. 두 끝 값만 주어지면 두 점을 잇는 직선을 고른다. 직선은 기울기가 어디서나 같아서, 어느 한 곳도 필요 이상으로 가파르지 않다. 2차원에서도 같은 생각을 쓴다. 함수가 곳곳에서 얼마나 가파른지를 영역 전체에서 더한 양을 만들고, boundary 값을 지키는 함수 가운데 그 양이 가장 작은 것을 고른다.</p>
+    </section>
+
+    <section id="sec-energy">
+      <h2>Dirichlet Energy and Dirichlet's Principle</h2>
+      <p>이 절에서 \(S\)는 compact oriented surface이고 boundary가 있을 수 있다. 평면의 bounded domain(예: unit disk, 정사각형)도 \(S\)로 둘 수 있다(정사각형처럼 모서리가 있는 경우의 Stokes's theorem은 <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-8">Theorem 35.4.8</a>). 함수는 \(S\)를 포함하는 open set에서 smooth라고 둔다.</p>
+      <div class="thm definition" id="i-42-2-1">
+        <p><span class="thm-head">Definition 42.2.1</span> <span class="thm-name">(Dirichlet energy)</span>.
+        smooth 함수 \(u\)에 대하여</p>
+        <div class="equation" id="eq-42-2-1">
+        \[ E_D(u) := \frac12\int_S\abs{\grad u}^2\,dA = \frac12\norm{du}^2 \tag{42.2.1} \]
+        </div>
+        <p>를 \(u\)의 <dfn>Dirichlet energy</dfn>(디리클레 에너지)라 한다. 둘째 식의 \(\norm{\cdot}\)는 1-form의 L2 norm(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-2">Definition 35.5.2</a>)이다.</p>
+      </div>
+      <p>\(E_D(u) \ge 0\)이고, connected \(S\)에서 \(E_D(u) = 0\)은 \(u\)가 상수라는 것과 같다(<a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>(d)의 증명). integrand \(\abs{\grad u}^2\)는 값이 빨리 변하는 곳에서 크다. 그래서 \(E_D\)는 “상수에서 얼마나 벗어났는가”를 재는 가장 단순한 2차식이다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 35.</p>
+      <div class="thm example" id="i-42-2-2">
+        <p><span class="thm-head">Example 42.2.2</span> <span class="thm-name">(energies of the running examples)</span>.
+        (a) unit disk \(B\)에서 \(u = x\)는 \(\abs{\grad u} = 1\)이므로 \(E_D = \tfrac12\cdot\pi = \tfrac{\pi}{2}\)이다. (b) saddle의 높이 \(u = x^2 - y^2\)는 \(\norm{du}_B^2 = 2\pi\)이므로(<a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-4">Example 35.5.4</a>(b)) \(E_D = \pi\)이다. (c) unit sphere의 \(z\)는 \(\grad z\)가 \(e_3\)의 tangent 성분 \(e_3 - z\mathbf{x}\)이므로 \(\abs{\grad z}^2 = 1 - z^2\)이고 \(E_D = \tfrac12\int(1 - z^2)\,dA = \tfrac12(4\pi - \tfrac{4\pi}{3}) = \tfrac{4\pi}{3}\)이다. Green's identity로도 \(-\tfrac12\int z\,\Delta z\,dA = \int z^2\,dA = \tfrac{4\pi}{3}\)이다(<a href="42-1-laplacian-definitions.html#i-42-1-11">Example 42.1.11</a>).</p>
+        <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code></p>
+      </div>
+      <div class="thm nonexample" id="i-42-2-3">
+        <p><span class="thm-head">Non-example 42.2.3</span> <span class="thm-name">(a jump has infinite energy)</span>.
+        unit square \([0, 1]^2\)에서 왼쪽 변의 값을 \(0\), 오른쪽 변의 값을 \(1\)로 정하고(위아래 변의 값은 정하지 않는다) \(x = \tfrac12\)에서 값이 \(0\)에서 \(1\)로 뛰는 조각별 상수 함수로 채우면, 그 함수는 미분할 수 없어 \(E_D\)가 정의되지 않는다. 뛰는 곳을 폭 \(2\delta\)의 ramp \(u_\delta = \min\big(1, \max(0, \tfrac12 + (x - \tfrac12)/(2\delta))\big)\)로 바꾸면 \(\abs{\grad u_\delta}^2 = 1/(4\delta^2)\)인 띠의 넓이가 \(2\delta\)이므로 \(E_D(u_\delta) = \tfrac12\cdot\tfrac{2\delta}{4\delta^2} = \tfrac{1}{4\delta}\)이고, 뛰는 것에 가까워질수록(\(\delta \to 0\)) energy가 끝없이 커진다(ramp는 piecewise smooth라 위의 적분이 그대로 뜻을 갖는다). 반면 \(u = x\)도 왼쪽 변에서 \(0\), 오른쪽 변에서 \(1\)이고 \(E_D = \tfrac12\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code></p>
+      </div>
+      <p>이제 boundary 값 \(g\)를 고정하고 \(E_D\)를 최소화하자. 비교할 함수의 모임을 \(\mathcal{A}_g := \{u : u|_{\partial S} = g\}\)라 하면, \(u \in \mathcal{A}_g\)이고 \(v|_{\partial S} = 0\)인 \(v\)에 대해 \(u + tv \in \mathcal{A}_g\)이다. 이런 \(v\)가 “허용되는 변화”다.</p>
+      <div class="thm theorem" id="i-42-2-4">
+        <p><span class="thm-head">Theorem 42.2.4</span> <span class="thm-name">(Dirichlet's principle)</span>.
+        \(S\)가 connected이고 \(\partial S \ne \emptyset\)이며 \(g\)가 \(\partial S\) 위의 함수라 하자.</p>
+        <ul>
+          <li>(a) \(u \in \mathcal{A}_g\)가 \(E_D\)의 critical point, 곧 \(v|_{\partial S} = 0\)인 모든 smooth \(v\)에서 \(\tfrac{d}{dt}E_D(u + tv)\big|_{t=0} = 0\)인 것은 \(S\)의 interior에서 \(\Delta u = 0\)인 것과 같다.</li>
+          <li>(b) \(u \in \mathcal{A}_g\)가 \(\Delta u = 0\)을 만족하면 모든 \(w \in \mathcal{A}_g\)에 대하여</li>
+        </ul>
+        <div class="equation" id="eq-42-2-2">
+        \[ E_D(w) = E_D(u) + E_D(w - u) \tag{42.2.2} \]
+        </div>
+        <p>이다. 따라서 \(u\)는 \(\mathcal{A}_g\)에서 \(E_D\)의 유일한 최솟점이다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(E_D\)는 2차식이므로 \(E_D(u + tv)\)는 \(t\)의 2차 다항식이고, 1차 계수를 Green's identity로 \(-\int v\,\Delta u\)로 바꾼다. 허용되는 \(v\)가 boundary에서 \(0\)이므로 boundary 항이 사라진다.</p>
+        <p><span class="proof-head">Proof.</span> \(\abs{\grad(u + tv)}^2\) \(= \abs{\grad u}^2 + 2t\inner{\grad u}{\grad v}\) \(+ t^2\abs{\grad v}^2\)이므로</p>
+        <div class="equation" id="eq-42-2-3">
+        \[ \begin{aligned} E_D(u + tv) &= E_D(u) + t^2E_D(v) \\ &\quad + t\int_S\inner{\grad u}{\grad v}\,dA \end{aligned} \tag{42.2.3} \]
+        </div>
+        <p>이다. <a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>을 \(u\)와 \(v\)에 쓰면 \(v|_{\partial S} = 0\)이므로 \(\int_S\inner{\grad u}{\grad v}\,dA = -\int_Sv\,\Delta u\,dA\)이다. (a) \(\Delta u = 0\)이면 1차 계수가 \(0\)이다. 거꾸로 1차 계수가 모든 허용되는 \(v\)에서 \(0\)이면, 특히 interior의 작은 coordinate disk 안에 support를 갖는 모든 \(v\)에서 \(\int v\,\Delta u\,dA = 0\)이다. <a href="../35-exterior-calculus/35-5-inner-products-vector-valued-forms.html#i-35-5-7">Lemma 35.5.7</a>과 같은 논법(bump function \(v\)를 \(\Delta u\)의 부호가 일정한 작은 disk에 둔다)으로 continuous 함수 \(\Delta u\)는 interior의 모든 점에서 \(0\)이다. (b) \(v = w - u\)는 \(\partial S\)에서 \(0\)이다. \(t = 1\)에서 <a href="#eq-42-2-3">(42.2.3)</a>의 1차 항은 \(-\int v\,\Delta u = 0\)이므로 <a href="#eq-42-2-2">(42.2.2)</a>이다. \(E_D(w - u) \ge 0\)이므로 \(E_D(w) \ge E_D(u)\)이고, 등호이면 \(E_D(w - u) = 0\)이라 \(w - u\)가 상수이며(connected), \(\partial S\)에서 \(0\)이므로 \(w = u\)이다.</p>
+      </div>
+      <p>이 정리가 말하는 것: boundary 값을 정했을 때 가장 매끄러운 함수는 Laplace equation의 해이고, 거꾸로 Laplace equation의 해는 가장 매끄러운 함수다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 36. 이 대응을 <strong>Dirichlet's principle</strong>(디리클레 원리)이라 부른다. <a href="#eq-42-2-3">(42.2.3)</a>을 gradient의 언어로 읽으면 \(E_D\)의 L2 gradient는 \(-\Delta u\)이다. 곧 \(-\Delta\)는 Dirichlet energy의 gradient이고, <a href="42-1-laplacian-definitions.html">Section 42.1</a>에서 남겨 둔 마지막 정의가 이것이다.</p>
+      <p>정리는 harmonic인 \(u \in \mathcal{A}_g\)가 <em>있으면</em> 그것이 최솟점이라고 말한다. 그런 \(u\)가 있다는 것, 곧 Dirichlet problem의 해의 존재는 이 정리가 주지 않는다. boundary가 매끄럽고 \(g\)가 smooth이면 boundary까지 smooth한 해가 있다는 것은 사실이지만, 그 증명에는 함수 공간의 해석학이 필요하므로 진술만 한다(Go deeper). 아래 History 상자는 왜 이 구별이 중요했는지 보여 준다.</p>
+
+      <figure class="dg-figure" id="fig-42-2-1">
+        <img src="figures/fig-42-2-1-interpolation.svg" alt="두 개의 정사각형 패널. 두 패널 모두 위쪽 변이 굵은 파란 선이고 g = sin πx라 적혀 있으며, 아래에 g = 0이라 적혀 있다. 칸은 값이 클수록 진한 파랑으로 칠해져 있고 검은 등고선 다섯 개가 그려져 있다. (a) 제목 harmonic u, E_D = 0.7883. 진한 부분이 위쪽 변에 붙어 있고 아래로 갈수록 빨리 옅어진다. 등고선은 위쪽 가운데를 중심으로 한 U자 모양이다. (b) 제목 blend w = y sin πx, E_D = 1.0725. 진한 부분이 더 아래까지 내려오고, 등고선이 양옆 변 근처에서 거의 세로로 아래까지 내려간다.">
+        <figcaption><span class="fig-head">Figure 42.2.1.</span>
+        같은 boundary 값의 두 interpolant와 Dirichlet energy. <em>무엇을</em>: unit square의 boundary 값 \(g = \sin\pi x\)(위쪽 변 \(y = 1\)), \(g = 0\)(나머지 세 변)을 채운 (a) harmonic interpolant \(u = \sin(\pi x)\sinh(\pi y)/\sinh\pi\)와 (b) 단순한 blend \(w = y\sin\pi x\). <em>읽는 법</em>: 색은 함수 값(흰색 \(0\), 진할수록 \(1\)에 가깝다), 검은 곡선은 값이 \(0.1, 0.3, 0.5, 0.7, 0.9\)인 level set, 굵은 파란 선은 \(g\)가 \(0\)이 아닌 변이다. 제목 아래의 수가 \(E_D\)다. <em>볼 것</em>: 두 함수는 boundary에서 같지만 \(E_D(u) = \tfrac{\pi}{4}\coth\pi = 0.7883\)이 \(E_D(w) = \tfrac{\pi^2}{12} + \tfrac14 = 1.0725\)보다 작다. 차이 \(0.2841\)는 정확히 \(E_D(w - u)\)이다. (b)의 등고선은 옆 변 근처에서 세로로 촘촘해 gradient가 크고, (a)는 boundary 값이 \(0\)인 세 변 쪽으로 빨리 \(0\)이 되어 그런 곳이 없다. <code>dgmesh.grid_mesh</code>(\(32\times32\)칸)에서 cotan Laplacian으로 푼 discrete harmonic interpolant는 \(u\)와 vertex에서 \(2.8\times10^{-4}\) 안에서 같고, 그 discrete energy \(-\tfrac12u^{\mathsf T}Lu\)는 \(0.7890\)이다. <em>본문과의 연결</em>: <a href="#i-42-2-4">Theorem 42.2.4</a>, <a href="#eq-42-2-2">(42.2.2)</a>, <a href="#ex-42-2-6">Exercise 42.2.6</a>.</figcaption>
+      </figure>
+      <p><a href="#fig-42-2-1">Figure 42.2.1</a>의 두 패널을 비교하자. 위쪽 변에서는 두 함수 모두 \(\sin\pi x\)이고 나머지 변에서는 \(0\)이다. 차이는 안쪽에 있다. (b)의 blend는 위에서 아래로 일정한 비율로 값을 줄이므로, 아래쪽 변 근처에도 값이 남아 있고 양옆 변에서는 값이 급하게 \(0\)으로 떨어진다. (a)의 harmonic 함수는 “이웃의 평균” 조건(<a href="42-1-laplacian-definitions.html#i-42-1-2">Proposition 42.1.2</a>) 때문에 \(0\)인 세 변의 영향을 고르게 받아, 위쪽 변에서 멀어질수록 지수적으로(\(\sinh\pi y\)) 줄어든다. energy의 차이 \(0.2841\)는 <a href="#eq-42-2-2">(42.2.2)</a>대로 두 함수의 차이 자체의 energy와 같다. mesh 위의 discrete 판은 <a href="42-5-boundary-conditions.html">Section 42.5</a>에서 Dirichlet boundary condition으로 다시 만난다.</p>
+
+      <aside class="box history">
+        <p class="box-title">History: Dirichlet's principle and Weierstrass's objection</p>
+        <p>이 원리의 역사는 “최솟값의 후보가 있다”와 “최솟점이 있다”가 다른 말이라는 것을 보여 준다. 19세기 potential theory에서 Green, Dirichlet, Thomson(Kelvin) 등은 energy가 \(0\) 이상이라는 것을 최솟점이 있다는 근거로 썼고, Riemann의 complex function theory도 이 근거 위에 섰다. 1870년 Weierstrass의 비판이 그 근거를 무너뜨렸고, 최솟점의 존재는 20세기 초 Hilbert의 연구에 와서야 엄밀하게 세워졌다. 강의 슬라이드는 이 역사를 Kline의 수학사 책의 한 대목으로 소개한다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 37.</p>
+        <p>문제를 보이는 데 흔히 쓰이는 예는 다음 1차원 energy다. \(J(\varphi) = \int_{-1}^1x^2\varphi'(x)^2\,dx\)를 \(\varphi(-1) = -1\), \(\varphi(1) = 1\)인 \(C^1\) 함수에서 최소화하자. \(J \ge 0\)이고, \(\varphi_\varepsilon(x) = \arctan(x/\varepsilon)/\arctan(1/\varepsilon)\)은 \(J(\varphi_\varepsilon) \to 0\)을 준다(<a href="#fig-42-2-2">Figure 42.2.2</a>). 그런데 \(J(\varphi) = 0\)이면 \(x \ne 0\)에서 \(\varphi' = 0\)이고 \(\varphi\)가 continuous이므로 상수여서 boundary 값을 만족할 수 없다. 하한 \(0\)은 있지만 그 하한을 주는 함수는 없다. integrand의 무게 \(x^2\)가 \(x = 0\)에서 사라져, 값이 그곳에서 공짜로 뛸 수 있기 때문이다. Dirichlet energy에는 이런 퇴화가 없고, 그래서 Hilbert 이후의 이론에서 최솟점이 존재한다.</p>
+      </aside>
+      <figure class="dg-figure" id="fig-42-2-2">
+        <img src="figures/fig-42-2-2-weierstrass.svg" alt="두 패널. (a) 가로축 x(-1에서 1), 세로축 φ_ε(x). 세 곡선이 모두 (-1, -1)과 (1, 1)의 검은 점을 지난다. 주황 ε = 0.5는 완만한 S자, 초록 ε = 0.1은 가운데에서 가파르고, 파랑 ε = 0.02는 거의 계단처럼 x = 0에서 -1 근처에서 1 근처로 뛴다. (b) log–log 그래프. 가로축 ε(0.001에서 1), 세로축 J(φ_ε). 파란 곡선이 왼쪽 아래로 직선처럼 내려가고 회색 점선 2ε/π와 거의 겹친다.">
+        <figcaption><span class="fig-head">Figure 42.2.2.</span>
+        하한이 있지만 최솟점이 없는 energy. <em>무엇을</em>: \(J(\varphi) = \int_{-1}^1x^2\varphi'^2\,dx\)와 boundary 값 \(\varphi(\pm1) = \pm1\)을 만족하는 \(\varphi_\varepsilon = \arctan(x/\varepsilon)/\arctan(1/\varepsilon)\). <em>읽는 법</em>: (a)는 \(\varepsilon = 0.5\)(주황), \(0.1\)(초록), \(0.02\)(파랑)의 \(\varphi_\varepsilon\)이고 검은 점이 boundary 값이다. (b)는 \(J(\varphi_\varepsilon)\) \(= \big(\varepsilon\arctan(1/\varepsilon) - \varepsilon^2/(1 + \varepsilon^2)\big)/\arctan(1/\varepsilon)^2\)(파랑)와 작은 \(\varepsilon\)의 근사 \(2\varepsilon/\pi\)(회색 점선)를 log–log 축에 그린 것이다. <em>볼 것</em>: \(\varepsilon\)이 작을수록 \(\varphi_\varepsilon\)은 계단에 가까워지고 energy는 \(J = 0.288, 0.063, 0.013\)(\(\varepsilon = 0.5, 0.1, 0.02\))으로 \(0\)에 간다. 극한인 계단 함수는 \(C^1\)이 아니고 boundary 값을 만족하는 \(C^1\) 함수 가운데 \(J = 0\)인 것은 없다. <em>본문과의 연결</em>: History 상자, <a href="#i-42-2-4">Theorem 42.2.4</a> 뒤의 존재 문제.</figcaption>
+      </figure>
+      <p><a href="#fig-42-2-2">Figure 42.2.2</a>의 (a)에서 파란 곡선이 거의 계단이라는 것을 보자. Dirichlet energy였다면 계단은 energy가 무한대인 최악의 함수였다(<a href="#i-42-2-3">Non-example 42.2.3</a>). 이 energy에서는 \(x = 0\) 근처의 무게 \(x^2\)가 작아서 계단이 오히려 최선에 가깝다. (b)의 파란 직선은 기울기 \(1\)로 내려가며 \(0\)에 닿지 않는다.</p>
+    </section>
+
+    <section id="sec-harmonic">
+      <h2>Harmonic Functions</h2>
+      <div class="thm definition" id="i-42-2-5">
+        <p><span class="thm-head">Definition 42.2.5</span> <span class="thm-name">(harmonic function)</span>.
+        open set \(U \subseteq \R^n\) 또는 곡면의 interior에서 smooth 함수 \(u\)가 \(\Delta u = 0\)을 만족하면 \(u\)를 <dfn>harmonic function</dfn>(조화함수)이라 한다.</p>
+      </div>
+      <div class="thm example" id="i-42-2-6">
+        <p><span class="thm-head">Example 42.2.6</span> <span class="thm-name">(harmonic functions in the plane)</span>.
+        affine 함수, \(x^2 - y^2\), \(xy\), \(x^3 - 3xy^2\)은 \(\R^2\)에서 harmonic이고, \(\log r\)은 \(\R^2\setminus\{0\}\)에서 harmonic이다(<a href="42-1-laplacian-definitions.html#ex-42-1-1">Exercise 42.1.1</a>). unit disk에서 boundary 값 \(\cos\vartheta\)(\(\vartheta\)는 polar angle)의 harmonic extension은 \(u = x\)다. \(x\)는 harmonic이고 unit circle에서 \(\cos\vartheta\)이며, <a href="#i-42-2-4">Theorem 42.2.4</a>(b)에 의해 이런 함수는 하나뿐이다. 같은 이유로 boundary 값 \(\cos 2\vartheta\)의 harmonic extension은 \(x^2 - y^2 = r^2\cos 2\vartheta\)이다(<a href="#ex-42-2-1">Exercise 42.2.1</a>).</p>
+      </div>
+      <div class="thm nonexample" id="i-42-2-7">
+        <p><span class="thm-head">Non-example 42.2.7</span> <span class="thm-name">(closed surfaces have no interesting harmonic functions)</span>.
+        boundary 없는 compact connected surface에서 harmonic function은 상수뿐이다(<a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>(d)). 이것을 energy로 말하면 \(\Delta u = 0\)일 때 \(E_D(u) = -\tfrac12\int u\,\Delta u\,dA = 0\)이기 때문이다. 예를 들어 unit sphere의 \(z\)는 \(\R^3\)의 함수로는 harmonic(linear)이지만 sphere 위에서는 \(\Delta z = -2z \ne 0\)이다. 닫힌 곡면 위에서 상수가 아닌 함수를 만들려면 boundary 조건이나 원천(아래의 Poisson equation)이 필요하다 <a class="cite" href="../../references.html#Cr">[Cr §6.1]</a>.</p>
+      </div>
+      <p>harmonic function의 가장 기본적인 성질은 <a href="42-1-laplacian-definitions.html#i-42-1-2">Proposition 42.1.2</a>의 극한이 \(0\)이라는 것을 넘어, 평균이 <em>정확히</em> 중심 값이라는 것, 곧 <strong>mean value property</strong>(평균값 성질)이다(<a href="42-1-laplacian-definitions.html#fig-42-1-1">Figure 42.1.1</a>(b)의 초록 직선).</p>
+      <div class="thm proposition" id="i-42-2-8">
+        <p><span class="thm-head">Proposition 42.2.8</span> <span class="thm-name">(mean value property in the plane)</span>.
+        \(U \subseteq \R^2\)가 open set이고 \(u\)가 \(U\)에서 harmonic이며 closed disk \(\overline{B_\varepsilon(p)} \subseteq U\)이면</p>
+        <div class="equation" id="eq-42-2-4">
+        \[ u(p) = \frac{1}{2\pi}\int_0^{2\pi}u\big(p + \varepsilon(\cos t, \sin t)\big)\,dt \tag{42.2.4} \]
+        </div>
+        <p>이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(0 \lt s \le \varepsilon\)에 대해 \(m(s)\)를 반지름 \(s\)인 원 위의 평균(오른쪽 식에서 \(\varepsilon\)을 \(s\)로 바꾼 것)이라 하자. \(u\)가 smooth이므로 적분 안에서 미분할 수 있고, \(\omega(t) = (\cos t, \sin t)\)는 원 \(\partial B_s(p)\)의 outward unit normal이므로</p>
+        <p>\[ \begin{aligned} m'(s) &= \frac{1}{2\pi}\int_0^{2\pi}\inner{\grad u(p + s\omega)}{\omega}\,dt \\ &= \frac{1}{2\pi s}\oint_{\partial B_s(p)}\inner{\grad u}{\mathbf{n}}\,ds' \\ &= \frac{1}{2\pi s}\int_{B_s(p)}\Delta u\,dA = 0 \end{aligned} \]</p>
+        <p>이다(\(ds' = s\,dt\), 셋째 등호는 divergence theorem <a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-12">Proposition 35.4.12</a>(b)). 따라서 \(m\)은 상수이고, \(u\)가 continuous이므로 \(s \to 0\)에서 \(m(s) \to u(p)\)이다. 그러므로 \(m(\varepsilon) = u(p)\)이다.</p>
+      </div>
+      <div class="thm corollary" id="i-42-2-9">
+        <p><span class="thm-head">Corollary 42.2.9</span> <span class="thm-name">(maximum principle in the plane)</span>.
+        \(U \subseteq \R^2\)가 bounded connected open set이고 \(u\)가 \(U\)에서 harmonic이며 \(\overline U\)에서 continuous라 하자. (a) \(u\)가 \(U\)의 한 점에서 \(\overline U\) 위의 최댓값을 가지면 \(u\)는 상수다. (b) 따라서 \(\max_{\overline U}u = \max_{\partial U}u\)이고, 최솟값도 같다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \(m = \max_{\overline U}u\)라 하고 \(A = \{p \in U : u(p) = m\}\)이라 하자. \(A\)는 \(u\)의 continuity로 \(U\) 안에서 closed이다. \(p \in A\)이고 \(\overline{B_\varepsilon(p)} \subseteq U\)이면, 반지름 \(s \le \varepsilon\)인 모든 원에서 <a href="#eq-42-2-4">(42.2.4)</a>로 평균이 \(m\)이고 \(u \le m\)이므로, continuous 함수 \(m - u \ge 0\)의 원 위 적분이 \(0\)이 되어 원 위에서 \(u = m\)이다. 따라서 \(B_\varepsilon(p) \subseteq A\)이고 \(A\)는 open이다. \(U\)가 connected이고 \(A \ne \emptyset\)이므로 \(A = U\)이다. (b) \(\overline U\)는 compact이므로 \(u\)는 최댓값을 갖는다(extreme value theorem, <a href="../03-topology-basics/3-6-compactness.html#i-3-6-10">Theorem 3.6.10</a>). 그 점이 \(U\)에 있으면 (a)에 의해 \(u\)가 상수이고, 어느 경우든 최댓값이 \(\partial U\)에서도 나온다. 최솟값은 \(-u\)에 쓴다.</p>
+      </div>
+      <p>이 성질을 <strong>maximum principle</strong>(최대 원리)이라 부른다. harmonic function은 안쪽에 봉우리나 골짜기를 만들지 않는다. 온도의 평형 상태에서 가장 뜨거운 곳은 boundary에 있다는 물리적 직관과 같다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 38. 곡면 위에서도 maximum principle은 성립하지만(elliptic operator의 maximum principle, 진술만 한다), mean value property는 곡률 때문에 정확하지 않다. mesh 위에서는 사정이 다르다. cotan weight가 모두 양수이면 discrete harmonic function의 값이 이웃의 convex combination이 되어 maximum principle이 성립하고, non-Delaunay edge의 음수 weight는 그것을 깰 수 있다(<a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#ex-36-6-5">Exercise 36.6.5</a>, <a href="../31-meshes/31-3-cotangent-laplacian.html#fig-31-3-2">Figure 31.3.2</a>(c)).</p>
+    </section>
+
+    <section id="sec-poisson">
+      <h2>The Poisson Equation</h2>
+      <p>평형 상태의 온도가 Laplace equation이었다면, 안쪽에 열원이 있을 때의 평형 상태는 다음 방정식이다.</p>
+      <div class="thm definition" id="i-42-2-10">
+        <p><span class="thm-head">Definition 42.2.10</span> <span class="thm-name">(Poisson equation)</span>.
+        주어진 함수 \(f\)에 대하여</p>
+        <div class="equation" id="eq-42-2-5">
+        \[ \Delta u = f \tag{42.2.5} \]
+        </div>
+        <p>를 <dfn>Poisson equation</dfn>(푸아송 방정식)이라 한다. \(f = 0\)이면 Laplace equation이다.</p>
+      </div>
+      <p>물리에서 \(f\)는 질량이나 전하의 밀도이고 \(u\)는 그 potential이다. geometry processing에서는 smoothing, vector field의 integration(<a href="../31-meshes/31-5-fields-to-meshes.html#sec-poisson">Section 31.5</a>의 Poisson reconstruction), 거리 계산(Chapter 44)이 이 방정식을 푼다 <a class="cite" href="../../references.html#Cr">[Cr §6.1]</a>. boundary가 있으면 boundary 조건을 함께 주어야 하고, 그것은 <a href="42-5-boundary-conditions.html">Section 42.5</a>의 주제다. 여기서는 boundary 없는 곡면을 본다.</p>
+      <div class="thm proposition" id="i-42-2-11">
+        <p><span class="thm-head">Proposition 42.2.11</span> <span class="thm-name">(the Poisson equation on a closed surface)</span>.
+        \(S\)가 boundary 없는 compact connected oriented surface이고 \(\abs{S}\)가 그 넓이, \(f\)가 smooth 함수라 하자.</p>
+        <ul>
+          <li>(a) <a href="#eq-42-2-5">(42.2.5)</a>가 smooth한 해를 가지면 \(\int_Sf\,dA = 0\)이다.</li>
+          <li>(b) 두 해의 차는 상수다.</li>
+          <li>(c) \(\int_Sf\,dA = 0\)이면 smooth한 해가 있다.</li>
+          <li>(d) \(\bar f := \tfrac{1}{\abs{S}}\int_Sf\,dA\)라 하면 \(f - \bar f\)는 상수 함수들과 L2-orthogonal이고, \(\Delta u = f - \bar f\)는 언제나 풀린다.</li>
+        </ul>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) <a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>(b)로 \(\int f = \int\Delta u = 0\)이다. (b) 두 해의 차 \(w\)는 \(\Delta w = 0\)이므로 <a href="42-1-laplacian-definitions.html#i-42-1-13">Corollary 42.1.13</a>(d)에 의해 상수다. (c)는 진술만 한다. 증명에는 elliptic equation의 이론(Fredholm alternative)이 필요하다. (d) \(\int(f - \bar f)\cdot c\,dA = c\big(\int f - \bar f\abs{S}\big) = 0\)이다. 해의 존재는 (c)다.</p>
+      </div>
+      <p>(a)와 (b)는 matrix의 언어로 보면 당연하다. \(\Delta\)는 self-adjoint이고 kernel이 상수이므로, image는 kernel의 orthogonal complement, 곧 평균이 \(0\)인 함수들이다. (d)의 \(f - \bar f\)는 \(f\)를 그 부분공간으로 orthogonal projection한 것이다. 물리적으로는 “열원과 같은 양의 흡수를 곡면 전체에 고르게 뿌린 것”이다. 닫힌 곡면에서는 열이 빠져나갈 곳이 없으므로, 들어온 열이 \(0\)이 아니면 평형 상태가 없다. 다만 평균을 빼는 것은 문제를 바꾸는 일이다. 원래 문제의 \(f\)에 상수 성분이 의미가 있다면(예: 실제로 그만큼의 열원이 있다면) 평균을 빼서 얻은 해는 원래 질문의 답이 아니다. 이 trick은 문제의 뜻에 맞는지 확인하고 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §6.1]</a>.</p>
+      <div class="thm example" id="i-42-2-12">
+        <p><span class="thm-head">Example 42.2.12</span> <span class="thm-name">(Poisson problems on the unit sphere)</span>.
+        (a) \(\Delta u = z\): \(\int z\,dA = 0\)이고 \(\Delta z = -2z\)(<a href="42-1-laplacian-definitions.html#i-42-1-11">Example 42.1.11</a>)이므로 \(u = -\tfrac{z}{2} + c\)가 모든 해다. (b) \(\Delta u = 1\)은 해가 없다(\(\int1\,dA = 4\pi\)). (c) \(\Delta u = 1 + z\)는 \(\bar f = 1\)이므로 평균을 빼면 (a)가 된다. mesh 위에서 같은 문제를 푸는 것이 <a href="42-3-fem.html">Section 42.3</a>과 <a href="42-6-implicit-mcf.html">Section 42.6</a>이다.</p>
+        <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code></p>
+      </div>
+      <p>Poisson equation도 energy의 최소화로 쓸 수 있다. Dirichlet energy에 \(f\)와의 inner product를 더한다.</p>
+      <div class="thm proposition" id="i-42-2-13">
+        <p><span class="thm-head">Proposition 42.2.13</span> <span class="thm-name">(the variational form of the Poisson equation)</span>.
+        \(S\)가 <a href="#i-42-2-11">Proposition 42.2.11</a>과 같고</p>
+        <div class="equation" id="eq-42-2-6">
+        \[ J(u) := E_D(u) + \int_Sfu\,dA \tag{42.2.6} \]
+        </div>
+        <p>라 하자. (a) \(\int_Sf\,dA \ne 0\)이면 \(J\)는 아래로 유계가 아니다. (b) \(\int_Sf\,dA = 0\)이면 \(u\)가 \(J\)의 critical point인 것과 \(\Delta u = f\)는 동치이고, 이때 모든 \(v\)에서 \(J(u + v) = J(u) + E_D(v) \ge J(u)\)이며 최솟값은 \(J(u) = -E_D(u) = \tfrac12\int_Sfu\,dA\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) 상수 \(c\)에서 \(J(c) = c\int f\,dA\)이고, \(c\)의 부호를 맞추어 \(\abs{c}\)를 키우면 \(-\infty\)로 간다. (b) <a href="#eq-42-2-3">(42.2.3)</a>과 <a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>(boundary 항 없음)에서 \(J(u + tv)\) \(= J(u) + t\int(f - \Delta u)v\,dA + t^2E_D(v)\)이다. 1차 계수가 모든 \(v\)에서 \(0\)인 것은 <a href="#i-42-2-4">Theorem 42.2.4</a>(a)의 증명과 같은 논법으로 \(\Delta u = f\)와 동치이고, 그때 \(t = 1\)로 두면 \(J(u + v) = J(u) + E_D(v)\)이다. 마지막으로 \(\int fu = \int u\,\Delta u = -2E_D(u)\)이므로 \(J(u) = E_D(u) - 2E_D(u)\) \(= -E_D(u) = \tfrac12\int fu\)이다.</p>
+      </div>
+      <p>부호를 확인하자. \(f \gt 0\)인 곳에서 \(\int fu\)를 줄이려면 \(u\)가 작아져야 하므로 해는 \(f\)가 큰 곳에서 움푹 들어간다. 실제로 \(\Delta u = f \gt 0\)인 곳은 <a href="42-1-laplacian-definitions.html#i-42-1-2">Proposition 42.1.2</a>에 의해 둘레보다 값이 작은 곳이다. 강의 슬라이드가 쓰는 다른 변분 문제, 곧 vector field \(X\)에 가장 잘 맞는 gradient를 찾는 \(\min_u\int\abs{\grad u - X}^2\)도 같은 계산으로 \(\Delta u = \divg X\)를 준다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 42. 이것이 Poisson reconstruction의 식이었다(<a href="../31-meshes/31-5-fields-to-meshes.html#i-31-5-2">Proposition 31.5.2</a>).</p>
+      <div class="thm remark" id="i-42-2-14">
+        <p><span class="thm-head">Remark 42.2.14</span> <span class="thm-name">(Green's function)</span>.
+        평면에서 \(G(x) = \tfrac{1}{2\pi}\log\abs{x}\)는 \(x \ne 0\)에서 harmonic이고, 원점을 둘러싼 모든 원을 지나는 flux \(\oint\inner{\grad G}{\mathbf{n}}\,ds\)가 \(1\)이다(<a href="#ex-42-2-2">Exercise 42.2.2</a>). divergence theorem으로 읽으면 “\(\Delta G\)는 원점에 몰린 총량 \(1\)의 원천”이고, 그래서 \(G\)를 Laplacian의 <strong>Green's function</strong>(그린 함수, fundamental solution)이라 부른다. 원천이 여러 점에 있으면 \(G\)를 옮겨 더하면 되고, 원천이 밀도 \(f\)로 퍼져 있으면 \(u(x) = \int G(x - y)f(y)\,dy\)가 Poisson equation의 해다(compact support인 \(f\)에서, 진술만 한다) <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 41. 닫힌 곡면에서는 원천의 총량이 \(0\)이어야 하므로(<a href="#i-42-2-11">Proposition 42.2.11</a>(a)) 한 점의 원천에 곡면 전체의 고른 흡수 \(-1/\abs{S}\)를 더한 것이 Green's function을 정한다. unit sphere의 경우를 <a href="42-6-implicit-mcf.html">Section 42.6</a>에서 정확한 식과 mesh 위의 해로 비교한다.</p>
+      </div>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: the Dirichlet energy and the Poisson equation in the sources</p>
+        <ul>
+          <li>이 study set: \(E_D(u) = \tfrac12\int\abs{\grad u}^2\,dA\). Green's identity로 boundary 항이 없을 때(닫힌 곡면, 또는 \(\partial S\)에서 \(u = 0\)이나 \(\inner{\grad u}{\mathbf{n}} = 0\)) \(E_D(u) = -\tfrac12\langle\!\langle\Delta u, u\rangle\!\rangle\)이다. Poisson equation은 \(\Delta u = f\)다.</li>
+          <li>강의 슬라이드는 \(E_D(u) := \tfrac12\int\abs{\nabla u}^2\,dA\)로 같은 정의를 쓰지만(slide 35), 다음 슬라이드는 “Dirichlet energy를 Laplacian으로 쓰라”는 연습에 \(E_D(u) = \int_\Omega u\Delta u\,dA\)라고 적는다(slide 36). Green's identity에 따르면 이 study set의 부호로는 \(-\tfrac12\int u\Delta u\,dA\)(+ boundary 항)이다. 또 Poisson equation을 열원 \(f\)가 있는 heat equation \(\partial_tu = \Delta u + f\)의 평형으로 소개해 \(\Delta u = -f\)로 쓴다(slide 40) <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a>. 이 장의 \(f\)는 그 \(-f\)다.</li>
+          <li>Crane의 노트는 Poisson equation을 \(\Delta\varphi = \rho\)로 쓰고(이 study set과 같은 부호, <a class="cite" href="../../references.html#Cr">[Cr §6.1]</a>), conformal parameterization 절에서는 \(E_D(z) := \tfrac12\langle\!\langle\Delta z, z\rangle\!\rangle\)로 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §7.4]</a>(Exercise 7.8, 인쇄 128쪽). 그 절의 \(\Delta\)는 이 study set의 \(-\Delta\)이므로(<a href="42-1-laplacian-definitions.html">Section 42.1</a>의 Conventions 상자) 두 식은 같은 값이다. <a href="../43-conformal-geometry/index.html">Chapter 43</a>에서 그 절의 식을 옮길 때는 \(\Delta\)의 부호를 바꾸어 읽는다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <aside class="box discrete">
+      <p class="box-title">Smooth vs. Discrete: energy, harmonicity, and Poisson</p>
+      <p><strong>Smooth.</strong> \(E_D(u) = \tfrac12\int\abs{\grad u}^2\), harmonic = \(E_D\)의 critical point = mean value property, Poisson equation \(\Delta u = f\)는 \(\int f = 0\)일 때만 풀린다. <strong>Discrete.</strong> piecewise linear 함수 \(W_0u\)의 Dirichlet energy는 정확히 \(-\tfrac12u^{\mathsf T}Lu\)이고(<a href="42-3-fem.html">Section 42.3</a>), discrete harmonic은 interior vertex에서 \((Lu)_i = 0\), 곧 \(u_i\)가 cotan weight로 가중한 이웃의 평균이라는 것이다. Poisson equation은 \(Lu = Mf\)가 되고 \(\mathbf{1}^{\mathsf T}Mf = 0\)일 때 풀린다(<a href="42-6-implicit-mcf.html">Section 42.6</a>).</p>
+      <ul>
+        <li>정확히 보존하는 것: energy와 \(L\)의 관계, kernel이 상수, 풀릴 조건과 해의 유일성(상수 차이)의 구조.</li>
+        <li>잃는 것: weight가 음수이면 “가중 평균”이 convex combination이 아니어서 maximum principle이 깨질 수 있다. mean value property는 mesh에서 어느 원 위에서도 정확하지 않다.</li>
+      </ul>
+    </aside>
+
+    <aside class="box application">
+      <p class="box-title">In computer vision: interpolation and editing by Laplace and Poisson equations</p>
+      <p>Poisson image editing은 붙여 넣을 영역의 boundary에서 바깥 이미지의 값을 고정하고, 안쪽에서는 원본 patch의 gradient에 가장 잘 맞는 함수를 \(\Delta u = \divg X\)로 구한다 <a class="cite" href="../../references.html#Perez03">[Perez03]</a>(Tour의 <a href="../00-tour/0-7-forms.html">Section 0.7</a>). 이것은 boundary 값을 고정한 <a href="#i-42-2-13">Proposition 42.2.13</a>의 변분 문제다. 같은 생각을 graph에 쓰면 값이 알려진 몇 vertex에서 나머지를 harmonic하게 채우는 semi-supervised learning이 되고, mesh에서는 몇 vertex에 준 색이나 weight를 퍼뜨리는 harmonic interpolation이 된다 <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slide 32. 3D reconstruction의 Poisson surface reconstruction은 normal field를 integration하는 Poisson 문제다(<a href="../31-meshes/31-5-fields-to-meshes.html#sec-poisson">Section 31.5</a>).</p>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>Dirichlet problem의 해의 존재, maximum principle, Green's function의 일반론은 PDE 교재의 주제다. 이 study set에서는 Riemannian manifold의 divergence theorem까지(<a href="../21-riemannian-metrics/index.html#toc-21-6">Section 21.6</a>) 다룬다.</li>
+        <li>Track 1: Poisson reconstruction <a href="../31-meshes/31-5-fields-to-meshes.html#sec-poisson">Section 31.5</a>, Poisson image editing <a href="../00-tour/0-7-forms.html">Section 0.7</a>.</li>
+        <li>강의와 노트: <a class="cite" href="../../references.html#CMU-DDG-L18">[CMU-DDG L18]</a> slides 31–42, <a class="cite" href="../../references.html#Cr">[Cr §6.1, §6.5]</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>Dirichlet energy \(E_D(u) = \tfrac12\int\abs{\grad u}^2\,dA\)는 함수가 상수에서 벗어난 정도를 잰다. 값이 뛰는 함수는 energy가 무한대다(<a href="#i-42-2-1">Definition 42.2.1</a>, <a href="#i-42-2-3">Non-example 42.2.3</a>).</li>
+        <li>boundary 값을 고정하면 \(E_D\)의 critical point는 harmonic function이고, harmonic function은 유일한 최솟점이다. \(-\Delta\)는 \(E_D\)의 gradient다(<a href="#i-42-2-4">Theorem 42.2.4</a>). 최솟점의 존재는 별도의 문제다(History 상자).</li>
+        <li>평면의 harmonic function은 원 위의 평균이 정확히 중심 값이고, 안쪽에서 최댓값을 갖지 않는다. 닫힌 곡면의 harmonic function은 상수뿐이다(<a href="#i-42-2-8">Proposition 42.2.8</a>, <a href="#i-42-2-9">Corollary 42.2.9</a>, <a href="#i-42-2-7">Non-example 42.2.7</a>).</li>
+        <li>닫힌 곡면의 Poisson equation \(\Delta u = f\)는 \(\int f = 0\)일 때 풀리고 해는 상수 차이로 유일하다. 평균을 빼는 것은 \(f\)를 풀 수 있는 부분공간에 projection하는 것이다. 해는 \(E_D(u) + \int fu\)의 최솟점이다(<a href="#i-42-2-11">Proposition 42.2.11</a>, <a href="#i-42-2-13">Proposition 42.2.13</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 이 변분 문제를 mesh 위에서 푼다. 함수를 piecewise linear 함수로 제한하고 Dirichlet energy를 정확히 계산하면 cotan Laplacian이 다시 나오고, 이번에는 모든 mesh에서 \(-L\)이 positive semidefinite라는 것까지 증명된다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-42-2-1" data-level="1">
+        <p><span class="thm-head">Exercise 42.2.1</span> <span class="level">★</span>
+        unit disk에서 boundary 값 \(\cos 2\vartheta\)의 harmonic extension이 \(x^2 - y^2\)임을 보이고, 그 Dirichlet energy를 polar coordinates로 계산하여라. 같은 boundary 값을 갖는 \(w = r\cos 2\vartheta\)(원점에서 smooth가 아니지만 Lipschitz)의 energy와 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(x^2 - y^2 = r^2(\cos^2\vartheta - \sin^2\vartheta) = r^2\cos 2\vartheta\)이므로 \(r = 1\)에서 \(\cos 2\vartheta\)이고, harmonic이다(\(2 - 2 = 0\)). <a href="#i-42-2-4">Theorem 42.2.4</a>(b)로 유일하다. \(\abs{\grad u}^2 = u_r^2 + u_\vartheta^2/r^2\) \(= 4r^2\cos^22\vartheta + 4r^2\sin^22\vartheta = 4r^2\)이므로 \(E_D = \tfrac12\int_0^{2\pi}\!\int_0^14r^2\,r\,dr\,d\vartheta = \tfrac12\cdot2\pi = \pi\)이다(<a href="#i-42-2-2">Example 42.2.2</a>(b)와 같다). \(w = r\cos 2\vartheta\)이면 \(\abs{\grad w}^2 = \cos^22\vartheta + 4\sin^22\vartheta\)이므로 \(E_D(w)\) \(= \tfrac12\int_0^1r\,dr\int_0^{2\pi}(\cos^22\vartheta + 4\sin^22\vartheta)\,d\vartheta\) \(= \tfrac12\cdot\tfrac12\cdot5\pi = \tfrac{5\pi}{4}\)이고, harmonic extension의 \(\pi\)보다 크다. 차이 \(\tfrac{\pi}{4}\)는 <a href="#eq-42-2-2">(42.2.2)</a>에 의해 \(E_D(w - u)\)다(Lipschitz 함수에서도 같은 계산이 성립한다).</p>
+          <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-2-2" data-level="1">
+        <p><span class="thm-head">Exercise 42.2.2</span> <span class="level">★</span>
+        \(G = \tfrac{1}{2\pi}\log r\)이 \(\R^2\setminus\{0\}\)에서 harmonic이고, 원점을 중심으로 한 모든 원에서 \(\oint\inner{\grad G}{\mathbf{n}}\,ds = 1\)임을 보여라. 원점을 둘러싸지 않는 원에서는 이 값이 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>harmonic은 <a href="42-1-laplacian-definitions.html#ex-42-1-1">Exercise 42.1.1</a>이다. \(\grad G = \tfrac{1}{2\pi r}\hat r\)이고 반지름 \(\rho\)인 원의 outward normal은 \(\hat r\)이므로 flux는 \(\tfrac{1}{2\pi\rho}\cdot2\pi\rho = 1\)이며 \(\rho\)에 무관하다. 원점을 둘러싸지 않는 원 \(C\)는 \(G\)가 smooth한 disk의 boundary이므로 divergence theorem(<a href="../35-exterior-calculus/35-4-stokes-theorem.html#i-35-4-12">Proposition 35.4.12</a>(b))으로 flux가 \(\int\Delta G\,dA = 0\)이다. 곧 “원천”은 원점에만 있고 그 총량이 \(1\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-2-3" data-level="1">
+        <p><span class="thm-head">Exercise 42.2.3</span> <span class="level">★</span>
+        unit sphere에서 다음 Poisson equation 가운데 풀리는 것을 고르고 해를 구하여라. (a) \(\Delta u = x\), (b) \(\Delta u = x + 1\), (c) \(\Delta u = z^2\), (d) \(\Delta u = z^2 - \tfrac13\). (\(\Delta(z^2 - \tfrac13) = -6(z^2 - \tfrac13)\), <a href="42-1-laplacian-definitions.html#ex-42-1-4">Exercise 42.1.4</a>.)</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(\int x\,dA = 0\)이고 \(\Delta x = -2x\)이므로 \(u = -\tfrac{x}{2} + c\). (b) \(\int(x + 1) = 4\pi \ne 0\)이므로 풀리지 않는다. 평균 \(1\)을 빼면 (a)다. (c) \(\int z^2\,dA = \tfrac{4\pi}{3} \ne 0\)이므로 풀리지 않는다. (d) \(z^2 - \tfrac13\)은 평균이 \(0\)이고(\(\tfrac{4\pi}{3} - \tfrac{4\pi}{3}\)), \(u = -\tfrac16(z^2 - \tfrac13) + c\)이다. (c)의 평균을 빼면 (d)가 된다.</p>
+          <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-2-4" data-level="2">
+        <p><span class="thm-head">Exercise 42.2.4</span> <span class="level">★★</span>
+        unit sphere에서 \(f = z\)일 때 <a href="#eq-42-2-6">(42.2.6)</a>의 \(J\)를 최소로 하는 \(u\)와 최솟값을 구하고, \(J(u) = -E_D(u) = \tfrac12\int fu\,dA\)를 직접 확인하여라. \(u + \varepsilon x\)에서 \(J\)는 얼마나 커지는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>최솟점은 \(\Delta u = z\)의 해 \(u = -\tfrac{z}{2} + c\)다(<a href="#i-42-2-12">Example 42.2.12</a>(a)). \(E_D(-\tfrac z2) = \tfrac14E_D(z) = \tfrac14\cdot\tfrac{4\pi}{3} = \tfrac{\pi}{3}\)(<a href="#i-42-2-2">Example 42.2.2</a>(c))이고, \(\int fu = -\tfrac12\int z^2 = -\tfrac{2\pi}{3}\)(상수 \(c\)는 \(\int z = 0\)이라 기여하지 않는다)이므로 \(J = \tfrac{\pi}{3} - \tfrac{2\pi}{3} = -\tfrac{\pi}{3}\)이다. \(-E_D(u) = -\tfrac{\pi}{3}\), \(\tfrac12\int fu = -\tfrac{\pi}{3}\)으로 셋이 같다. <a href="#i-42-2-13">Proposition 42.2.13</a>(b)에서 \(J(u + \varepsilon x) = J(u) + \varepsilon^2E_D(x) = -\tfrac{\pi}{3} + \tfrac{4\pi}{3}\varepsilon^2\)이다(\(E_D(x) = E_D(z)\)는 대칭).</p>
+          <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-2-5" data-level="2">
+        <p><span class="thm-head">Exercise 42.2.5</span> <span class="level">★★</span>
+        <strong>Coding.</strong> \([0, 1]\)을 \(N\)등분한 점 \(x_k = k/N\)(\(h = 1/N\))에서 \(u_0 = u_N = 0\)으로 두고, <a href="#eq-42-2-6">(42.2.6)</a>의 1차원 discrete 판 \(J_h(u) = \tfrac12\sum_{k}(u_{k+1} - u_k)^2/h + h\sum_kf_ku_k\)(\(f = -\pi^2\sin\pi x\))를 최소화하여라. 최소화의 조건이 discrete Poisson equation \((u_{k+1} - 2u_k + u_{k-1})/h^2 = f_k\)임을 확인하고, 정확한 해 \(u = \sin\pi x\)와의 오차와 \(J_h\)의 최솟값을 \(N = 8, 16, 32\)에서 구하여라. smooth의 최솟값은 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(J_h\)의 첫 sum의 Hessian은 \(\tfrac1h\)tridiag\((-1, 2, -1)\)이고 둘째 sum의 gradient는 \(hf\)이므로, \(\partial J_h/\partial u_k = \tfrac1h(2u_k - u_{k-1} - u_{k+1}) + hf_k = 0\)이 최소화의 조건이고 \(-h\)로 나누면 discrete Poisson equation이다. smooth에서 \(\Delta u = f\)의 해는 \(\sin\pi x\)이고, <a href="#i-42-2-13">Proposition 42.2.13</a>(b)와 같은 계산(boundary에서 \(u = 0\)이라 boundary 항이 없다)으로 최솟값은 \(-E_D(u) = -\tfrac12\int_0^1\pi^2\cos^2\pi x\,dx\) \(= -\tfrac{\pi^2}{4} = -2.4674\)이다.</p>
+          <pre id="code-ex-42-2-5"><code>import numpy as np
+
+def solve_1d(N):
+    """minimize (1/2) sum (u_{k+1} - u_k)^2 / h + h sum f_k u_k with u_0 = u_N = 0, f = -pi^2 sin(pi x)."""
+    h = 1.0 / N
+    x = np.linspace(0, 1, N + 1)
+    f = -np.pi ** 2 * np.sin(np.pi * x)
+    A = (2 * np.eye(N - 1) - np.eye(N - 1, k=1) - np.eye(N - 1, k=-1)) / h   # Hessian of the first sum
+    u = np.zeros(N + 1)
+    u[1:-1] = np.linalg.solve(A, -h * f[1:-1])            # gradient A u + h f = 0
+    J = 0.5 * np.sum(np.diff(u) ** 2) / h + h * np.sum(f[1:-1] * u[1:-1])
+    return x, u, J
+
+for N in (8, 16, 32):
+    x, u, J = solve_1d(N)
+    second = (u[2:] - 2 * u[1:-1] + u[:-2]) * N ** 2      # discrete u'' at the interior nodes
+    print(N, f"{np.abs(u - np.sin(np.pi * x)).max():.2e}", f"{J:.4f}",
+          np.allclose(second, -np.pi ** 2 * np.sin(np.pi * x[1:-1])))
+print(f"{-np.pi ** 2 / 4:.4f}")</code></pre>
+          <pre id="out-ex-42-2-5"><code>8 1.30e-02 -2.4994 True
+16 3.22e-03 -2.4753 True
+32 8.04e-04 -2.4694 True
+-2.4674</code></pre>
+          <p>마지막 열의 <code>True</code>가 최소화의 조건이 discrete Poisson equation이라는 것을 확인한다. 오차는 \(N\)을 두 배로 할 때마다 약 \(\tfrac14\)로 준다(2차 수렴). \(J_h\)의 최솟값 \(-2.4994, -2.4753, -2.4694\)는 smooth의 \(-\tfrac{\pi^2}{4} = -2.4674\)에 다가간다. 이 1차원 문제의 오차가 <a href="../36-discrete-exterior-calculus/36-6-composing-operators.html#code-36-6-1">Section 36.6</a>의 Implementation 상자(정사각형의 Poisson 문제)의 오차와 같은 것(\(1.30\times10^{-2}\) 등)은 우연이 아니다. 그 문제의 해는 \(\sin\pi x\sin\pi y\)이고, grid의 5점 차분은 변수를 분리하면 이 1차원 차분 둘의 합이 되기 때문이다.</p>
+          <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code>가 이 코드를 그대로 실행하고 출력을 비교한다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-42-2-6" data-level="2">
+        <p><span class="thm-head">Exercise 42.2.6</span> <span class="level">★★</span>
+        <a href="#fig-42-2-1">Figure 42.2.1</a>의 harmonic interpolant \(u = \sin(\pi x)\sinh(\pi y)/\sinh\pi\)에 대해 Green's identity로 \(E_D(u) = \tfrac12\oint_{\partial S}u\inner{\grad u}{\mathbf{n}}\,ds = \tfrac{\pi}{4}\coth\pi\)를 보이고, blend \(w = y\sin\pi x\)의 \(E_D(w) = \tfrac{\pi^2}{12} + \tfrac14\)를 계산하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\Delta u = 0\)이므로 <a href="42-1-laplacian-definitions.html#eq-42-1-7">(42.1.7)</a>을 \(v = u\)로 쓰면 \(\int\abs{\grad u}^2 = \oint u\inner{\grad u}{\mathbf{n}}\,ds\)이다. boundary에서 \(u \ne 0\)인 것은 위쪽 변뿐이고, 거기서 \(\mathbf{n} = e_2\), \(u = \sin\pi x\), \(\partial_yu = \pi\sin\pi x\coth\pi\)이므로 \(E_D(u) = \tfrac12\int_0^1\pi\coth\pi\sin^2\pi x\,dx\) \(= \tfrac{\pi}{4}\coth\pi = 0.7883\)이다. \(w\)는 \(w_x = \pi y\cos\pi x\), \(w_y = \sin\pi x\)이므로 \(E_D(w)\) \(= \tfrac12\big(\pi^2\int_0^1y^2\,dy\int_0^1\cos^2\pi x\,dx\) \(+ \int_0^1\sin^2\pi x\,dx\big)\) \(= \tfrac12\big(\tfrac{\pi^2}{6} + \tfrac12\big)\) \(= \tfrac{\pi^2}{12} + \tfrac14 = 1.0725\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-42-2-dirichlet-poisson.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="42-1-laplacian-definitions.html">← 42.1 Many Definitions of the Laplacian</a>
+    <a rel="next" href="42-3-fem.html">42.3 Discretization via FEM →</a>
+  </nav>
+</body>
+</html>
