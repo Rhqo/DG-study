@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>41.3 A Panorama of Discrete Curvatures — DG Study</title>
+  <meta name="dg-id" content="41.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="41.2, 40.1, 40.3, 40.4, 39.3, 38.5, 32.3">
+  <meta name="dg-refs" content="CMU-DDG L17; Cr §5.4; Max99; Meyer03">
+  <meta name="dg-updated" content="2026-10-21">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">41. Discrete Curvature II: The Variational Viewpoint</a> ›
+    <span>41.3 A Panorama of Discrete Curvatures</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>41.3 A Panorama of Discrete Curvatures</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §5.4]</a>,
+        <a class="cite" href="../../references.html#Max99">[Max99]</a>,
+        <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L17">[CMU-DDG L17]</a> slides 4–7, 28–30</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>vector curvature(vector area, mean curvature normal, Gauss curvature normal)를 vertex normal에 사영해 scalar curvature를 만들고, 어느 normal을 쓰느냐에 따라 부호와 값이 어떻게 달라지는지 설명할 수 있다.</li>
+        <li>discrete \(H\)와 \(K\)에서 discrete principal curvature를 만들고, \(H^2 \lt K\)일 때의 clamp와 umbilical point 근처에서의 불안정성을 설명할 수 있다.</li>
+        <li>sphere-inscribed normal을 정의하고, vertex와 이웃이 한 sphere 위에 있으면 그것이 정확한 normal임을 증명할 수 있다.</li>
+        <li>여러 discrete curvature가 각각 무엇을 정확히 보존하는지 표로 비교하고, Chapter 32의 plane curve와 대응시킬 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Section 41.2: area gradient <a href="41-2-gradients.html#i-41-2-7">Theorem 41.2.7</a>, total mean curvature의 gradient <a href="41-2-gradients.html#i-41-2-11">Theorem 41.2.11</a>.</li>
+        <li>Chapter 40: discrete Gaussian curvature <a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-12">Definition 40.1.12</a>, quadric fitting과의 비교 <a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-15">Remark 40.1.15</a>, 세 curvature normal과 그 사영 <a href="../40-discrete-curvature-integral/40-3-curvature-normals.html#i-40-3-12">Remark 40.3.12</a>, discrete mean curvature <a href="../40-discrete-curvature-integral/40-4-steiner-mollified.html#i-40-4-14">Definition 40.4.14</a>.</li>
+        <li>Chapter 38–39: vertex normal <a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-6">Definition 38.5.6</a>, <a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-8">Proposition 38.5.8</a>. \(\kappa_{1,2} = H \pm \sqrt{H^2 - K}\) <a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#eq-39-3-1">(39.3.1)</a>, \(H\mathbf{N}\)이 normal의 선택에 무관하다는 것 <a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#i-39-3-1">Proposition 39.3.1</a>.</li>
+        <li>plane curve의 네 discrete curvature와 비교표: <a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-5">Definition 32.3.5</a>와 <a href="../32-ddg-overview/index.html#toc-32-3">Section 32.3</a>의 표.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 41.2로 사슬이 완성되었다. 부피, 넓이, total mean curvature의 gradient가 각각 vector area, mean curvature normal, Gauss curvature normal이다. 그 결과 우리 손에는 vertex마다의 curvature가 여럿 있다. vector 셋(\(\mathbf{A}_i\), \((L\mathbf{x})_i\), \((K\mathbf{N})_i\))과 scalar 둘(angle defect \(\delta_i\), edge의 \(H_{ij}\))이 있고, vertex normal도 Section 38.5에서 넷을 만들었다. Section 40.3은 vector를 normal에 사영하면 scalar가 된다고만 말하고 비교를 이 절로 미뤘다(<a href="../40-discrete-curvature-integral/40-3-curvature-normals.html#i-40-3-12">Remark 40.3.12</a>). 이 절은 그 전체를 한자리에 놓는다. 무엇을 쓰는가는 Chapter 32의 결론과 같은 질문으로 정해진다. 무엇을 정확히 지켜야 하는가?</p>
+    </section>
+
+    <section id="sec-projections">
+      <h2>From Vectors to Numbers</h2>
+      <p>smooth surface에서 mean curvature vector \(H\mathbf{N}\)은 normal의 선택에 무관하지만 \(H\)는 아니다(<a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#i-39-3-1">Proposition 39.3.1</a>). 수 \(H\)를 얻으려면 normal을 하나 골라 vector를 그 normal에 사영해야 한다. mesh에서도 같다. 다만 mesh에는 vertex normal이 여럿 있다. vertex normal \(\mathbf{N}_i^w\)(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-6">Definition 38.5.6</a>, \(w\)는 uniform, area, angle 등)와 dual area \(A_i\)에 대하여</p>
+      <div class="equation" id="eq-41-3-1">
+      \[ \begin{aligned} H_i^w &:= \frac{\inner{(L\mathbf{x})_i}{\mathbf{N}_i^w}}{2A_i}, \\ K_i^w &:= \frac{\inner{(K\mathbf{N})_i}{\mathbf{N}_i^w}}{A_i} \end{aligned} \tag{41.3.1} \]
+      </div>
+      <p>라 쓰자. <code>dgdec.mean_curvature</code>는 area-weighted normal과 mixed area를 쓴 \(H_i^A\)다. 이 장에서 따로 말하지 않으면 \(H_i\)는 이것이고, \(K_i\)는 angle defect의 \(\delta_i/A_i\)(<a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-12">Definition 40.1.12</a>)다.</p>
+
+      <div class="thm proposition" id="i-41-3-1">
+        <p><span class="thm-head">Proposition 41.3.1</span> <span class="thm-name">(scalar curvatures as projections)</span>.
+        interior vertex \(i\)에서 다음이 성립한다. (a) mesh의 orientation을 뒤집으면 \(H_i^w\)와 \(H_{ij}\)는 부호가 바뀌고, \(K_i^w\)와 \(\delta_i\)는 그대로다. (b) \(\abs{H_i^w} \le \abs{(L\mathbf{x})_i}/(2A_i)\)이고, 등호는 \(\mathbf{N}_i^w\)가 \((L\mathbf{x})_i\)에 평행할 때뿐이다. (c) 두 vertex normal \(\mathbf{N}_i^w\), \(\mathbf{N}_i^{w'}\)에 대하여 \(\abs{H_i^w - H_i^{w'}} \le \tfrac{\abs{(L\mathbf{x})_i}}{2A_i}\abs{\mathbf{N}_i^w - \mathbf{N}_i^{w'}}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) cotan weight와 dual area는 각과 길이만으로 정해지므로 \((L\mathbf{x})_i\)는 orientation에 무관하다. face normal은 모두 부호가 바뀌고 가중치(1, 넓이, 각)는 그대로이므로 \(\mathbf{N}_i^w\)는 \(-\mathbf{N}_i^w\)가 되고, \(H_i^w\)의 부호가 바뀐다. bending angle은 부호가 바뀌므로(<a href="../39-surface-curvature/39-5-fundamental-theorem.html#i-39-5-6">Proposition 39.5.6</a>(c)) \((K\mathbf{N})_i\)와 \(H_{ij} = -\tfrac12\ell_{ij}\theta_{ij}\)의 부호가 바뀐다. 그래서 \(K_i^w\)는 부호가 두 번 바뀌어 그대로다. \(\delta_i\)는 corner angle만으로 정해진다. (b), (c)는 Cauchy–Schwarz inequality다(\(\abs{\mathbf{N}_i^w} = 1\)).</p>
+      </div>
+      <p>(a)는 smooth의 사정과 같다. mean curvature의 부호는 normal을 고른 결과이고 vector 자체에는 없다. Gaussian curvature의 부호는 normal과 무관하다. 다만 discrete에서는 길이 둘이다. angle defect \(\delta_i\)는 normal 없이 edge length만으로 부호까지 정해지고, \(K_i^w\)는 normal을 하나 골라야 계산되지만 그 결과는 orientation에 무관하다. (c)는 normal들이 서로 가까우면 \(H_i^w\)들도 가깝다는 뜻이다. 거꾸로 \((L\mathbf{x})_i\)가 거의 tangent이면, 곧 \(H\)가 작은데 tangential 오차가 그만큼 있으면, normal을 바꾸는 것만으로 \(H_i^w\)의 부호가 바뀔 수 있다(<a href="#ex-41-3-6">Exercise 41.3.6</a>).</p>
+
+      <div class="thm example" id="i-41-3-2">
+        <p><span class="thm-head">Example 41.3.2</span> <span class="thm-name">(a cube corner and the torus)</span>.
+        (a) unit cube \([0, 1]^3\)을 12개의 triangle로 나누되 \(x = 1\) 정사각형의 대각선만 corner \((1, 0, 0)\)을 지나게 하자(그 corner에 triangle 넷). 대각선과 무관하게 \((L\mathbf{x})_i = -(1, -1, -1)\)이고(<a href="../40-discrete-curvature-integral/40-3-curvature-normals.html#i-40-3-7">Example 40.3.7</a>(c)의 대칭판), mixed area는 \(A_i = 0.75\)다. uniform과 area-weighted normal은 \((2, -1, -1)/\sqrt6\)이고 angle-weighted와 sphere-inscribed normal(아래 <a href="#i-41-3-6">Definition 41.3.6</a>)은 \((1, -1, -1)/\sqrt3\)이다(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-9">Example 38.5.9</a>와 같은 상황). 그래서 \(H_i^U = H_i^A = -1.0887\), \(H_i^\theta = -1.1547\)이고, 비는 두 normal 사이의 각 \(19.47^\circ\)의 cosine \(0.9428\)이다. (b) <code>torus_mesh(2, 0.8, 24, 48)</code>에서는 \(H_i^U, H_i^A, H_i^\theta\), sphere-inscribed normal로 사영한 값, 그리고 \(-\abs{(L\mathbf{x})_i}/(2A_i)\)가 vertex마다 \(2.4\times10^{-5}\) 안에서 같고, 모두 정확한 \(H\)와 \(0.0029\) 안에서 같다. 규칙적인 mesh에서는 normal의 선택이 \(H\)에 거의 영향을 주지 않는다.</p>
+        <p class="verified">Verification: <code>verify/v-41-3-panorama.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-principal">
+      <h2>Discrete Principal Curvatures</h2>
+      <p>smooth surface에서 principal curvature는 \(\lambda^2 - 2H\lambda + K = 0\)의 두 근 \(\kappa_{1,2} = H \pm \sqrt{H^2 - K}\)이다(<a href="../39-surface-curvature/39-3-gaussian-mean-curvature.html#eq-39-3-1">(39.3.1)</a>). discrete \(H_i\)와 \(K_i\)를 이 식에 넣으면 principal curvature의 discrete 판이 생긴다. 강의 슬라이드는 Steiner의 \(H_i\)와 angle defect를 같은 dual area로 나누어 넣는다 <a class="cite" href="../../references.html#CMU-DDG-L17">[CMU-DDG L17]</a> slide 6. 문제가 하나 있다. smooth에서는 \(H^2 - K = \tfrac14(\kappa_1 - \kappa_2)^2 \ge 0\)이지만, 두 discrete 양은 서로 다른 근사라서 \(H_i^2 - K_i\)가 음수일 수 있다.</p>
+
+      <div class="thm definition" id="i-41-3-3">
+        <p><span class="thm-head">Definition 41.3.3</span> <span class="thm-name">(discrete principal curvatures)</span>.
+        interior vertex \(i\)에서 점마다의 discrete mean curvature \(H_i\)와 discrete Gaussian curvature \(K_i\)를 하나씩 골랐을 때</p>
+        <div class="equation" id="eq-41-3-2">
+        \[ \begin{aligned} \kappa_{1,i} &:= H_i + \sqrt{(H_i^2 - K_i)_+}, \\ \kappa_{2,i} &:= H_i - \sqrt{(H_i^2 - K_i)_+} \end{aligned} \tag{41.3.2} \]
+        </div>
+        <p>를 \(i\)의 <dfn>discrete principal curvatures</dfn>(이산 주곡률)라 한다. 여기서 \(s_+ = \max(s, 0)\)이다. \(H_i^2 \lt K_i\)이면 \(\kappa_{1,i} = \kappa_{2,i} = H_i\)가 되는데, 이것을 clamp라 부른다. 이 장의 기본값은 \(H_i = H_i^A\), \(K_i = \delta_i/A_i\)(mixed area)다.</p>
+      </div>
+      <p>예: saddle \(z = x^2 - y^2\)의 grid mesh(\([-0.5, 0.5]^2\), \(17\times17\))의 원점에서 \(H_i = 0\), \(K_i = -3.9536\)이므로 \(\kappa_{1,2} = \pm1.988\)이다. 정확한 값은 \(\pm2\)다. 비예: 이 정의는 principal direction을 주지 않는다. \(H_i\)와 \(K_i\)는 수 두 개이고, 방향의 정보는 그 안에 없다. 방향이 필요하면 shape operator 자체를 근사해야 한다(예: one-ring에 quadric을 맞추기, <a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-15">Remark 40.1.15</a>).</p>
+
+      <div class="thm proposition" id="i-41-3-4">
+        <p><span class="thm-head">Proposition 41.3.4</span> <span class="thm-name">(stability of the principal curvatures)</span>.
+        \(\kappa_\pm(H, K) := H \pm \sqrt{(H^2 - K)_+}\)라 하자. (a) \(\kappa_\pm\)는 \(\R^2\) 전체에서 연속이고, \(H^2 \ge K\)이면 \(\lambda^2 - 2H\lambda + K\)의 두 근이다. (b) 모든 \((H, K)\), \((H', K')\)에서</p>
+        <p>\[ \begin{aligned} &\abs{\kappa_\pm(H', K') - \kappa_\pm(H, K)} \\ &\quad \le \abs{H' - H} + \sqrt{\abs{(H'^2 - K') - (H^2 - K)}} \end{aligned} \]</p>
+        <p>이다. 특히 discrete \(H_i, K_i\)가 smooth 값에 수렴하면 <a href="#eq-41-3-2">(41.3.2)</a>도 smooth principal curvature에 수렴한다. 그러나 umbilical point(\(H^2 = K\)) 근처에서는 \(H\), \(K\)의 오차가 \(\varepsilon\)일 때 principal curvature의 오차가 \(\sqrt\varepsilon\)의 크기일 수 있다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 먼저 모든 실수 \(a, b\)에서 \(\abs{\sqrt{a_+} - \sqrt{b_+}} \le \sqrt{\abs{a - b}}\)임을 보이자. \(a, b \ge 0\)이면 \(\abs{\sqrt a - \sqrt b} \le \sqrt a + \sqrt b\)이므로 \((\sqrt a - \sqrt b)^2\)은 \(\abs{\sqrt a - \sqrt b}(\sqrt a + \sqrt b) = \abs{a - b}\) 이하다. \(a \lt 0 \le b\)이면 왼쪽은 \(\sqrt b \le \sqrt{b - a}\)이고, 둘 다 음수이면 왼쪽이 \(0\)이다. (a) \(s \mapsto \sqrt{s_+}\)와 \((H, K) \mapsto H^2 - K\)가 연속이므로 합성도 연속이고, \(H^2 \ge K\)에서는 근의 공식이다. (b) triangle inequality와 위의 부등식(\(a = H'^2 - K'\), \(b = H^2 - K\))에서 바로 나온다. 마지막 문장: \(H^2 = K\)에서 \(H'^2 - K' = \varepsilon \gt 0\)이면 \(\kappa_+ - \kappa_- = 2\sqrt\varepsilon\)이다.</p>
+      </div>
+      <p>clamp는 수렴에 해가 없다. smooth에서는 언제나 \(H^2 - K \ge 0\)이고 \(\kappa_\pm\)가 연속이기 때문이다. 해가 되는 것은 제곱근이다. 오차를 \(\sqrt{\ }\)가 키운다. sphere처럼 모든 점이 umbilical인 곳에서 이것이 가장 잘 보인다.</p>
+
+      <div class="thm example" id="i-41-3-5">
+        <p><span class="thm-head">Example 41.3.5</span> <span class="thm-name">(torus, sphere, saddle)</span>.
+        (a) <code>torus_mesh(2, 0.8, 24, 48)</code>(바깥쪽 normal)의 정확한 principal curvature는 \(\kappa_1 = -\cos u/(R + r\cos u)\)(범위 \([-0.357, 0.833]\))과 \(\kappa_2 = -1/r = -1.25\)다. 이 torus에는 umbilical point가 없다(\(H^2 - K \ge 0.199\)). discrete 값은 clamp 없이 \(0.0059\)와 \(0.0051\) 안에서 정확한 값과 같다. (b) unit sphere의 <code>icosphere(level)</code>에서는 모든 vertex에서 \(H_i^2 \lt K_i\)이다. \(K_i = \delta_i/A_i\)는 \(1\)보다 조금 크고(mesh가 sphere 안쪽에 있어서다, <a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-13">Example 40.1.13</a>(a)) \(\abs{H_i}\)는 \(1\)에 더 가깝기 때문이다. 그래서 clamp가 모든 vertex에 걸려 \(\kappa_{1,i} = \kappa_{2,i} = H_i\)이다. clamp 대신 \(\sqrt{\abs{H_i^2 - K_i}}\)를 썼다면 두 principal curvature가 level 1–4에서 \(0.565, 0.283, 0.148, 0.075\)만큼 벌어졌을 것이다. 같은 level에서 \(\max\abs{K_i - 1}\)은 \(0.080, 0.020, 0.0055, 0.0014\)이다. (c) saddle grid의 원점은 위의 \(\pm1.988\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-41-3-panorama.py</code></p>
+      </div>
+      <p><a href="#fig-41-3-1">Figure 41.3.1</a>의 왼쪽 (a)는 torus의 모든 vertex를 \(u\)에 대해 찍은 것이다. 파란 동그라미 \(\kappa_{1,i}\)가 검은 곡선 \(-\cos u/(R + r\cos u)\)를 따라가고, 주홍 사각형 \(\kappa_{2,i}\)가 수평선 \(-1/r\) 위에 놓인다. 바깥쪽 적도(\(u = 0\))에서 \(\kappa_1 = -0.357\)이고, 안쪽 적도(\(u = \pm\pi\))에서 \(+0.833\)으로 부호가 바뀐다. 오른쪽 (b)는 sphere에서의 경고다. 파란 실선(\(K_i\)의 오차)은 level마다 약 \(\tfrac14\)로 주는데, 주홍 점선(제곱근이 만들 가짜 벌어짐)은 약 \(\tfrac12\)로만 준다. 기울기가 절반이다. 이것이 <a href="#i-41-3-4">Proposition 41.3.4</a>(b)의 \(\sqrt{\ }\)다.</p>
+      <figure class="dg-figure" id="fig-41-3-1">
+        <img src="figures/fig-41-3-1-principal-curvatures.svg" alt="두 패널. (a) 가로축 u(−π에서 π), 세로축 curvature. 파란 동그라미가 검은 곡선을 따라 u = 0에서 −0.36, 양 끝에서 0.83인 그릇 모양을 그리고, 주홍 사각형이 −1.25의 검은 수평선 위에 줄지어 있다. (b) 가로축 icosphere level 1에서 4, 세로축 log 눈금. 파란 실선 동그라미가 0.08에서 0.0014로 가파르게, 주홍 점선 사각형이 0.56에서 0.075로 완만하게 내려간다.">
+        <figcaption><span class="fig-head">Figure 41.3.1.</span>
+        <em>무엇을</em>: discrete principal curvatures(<a href="#i-41-3-3">Definition 41.3.3</a>, \(H_i = H_i^A\), \(K_i = \delta_i/A_i\), mixed area). (a) <code>torus_mesh(2, 0.8, 24, 48)</code>의 vertex 1152개, (b) unit sphere의 <code>icosphere(level)</code>, level 1–4.
+        <em>읽는 법</em>: (a) 파란 동그라미가 \(\kappa_{1,i}\), 주홍 사각형이 \(\kappa_{2,i}\), 검은 선이 정확한 \(\kappa_1 = -\cos u/(R + r\cos u)\)와 \(\kappa_2 = -1/r\)(바깥쪽 normal)이다. (b) 세로축은 log 눈금이고 파란 실선이 \(\max_i\abs{K_i - 1}\), 주홍 점선이 clamp 없이 \(\sqrt{\abs{H_i^2 - K_i}}\)를 썼을 때의 벌어짐 \(2\sqrt{\max_i\abs{H_i^2 - K_i}}\)이다.
+        <em>볼 것</em>: (a) 점들이 곡선에서 \(0.006\) 안에 있다. (b) 모든 vertex에서 \(H_i^2 \lt K_i\)라 clamp가 걸린다. 가짜 벌어짐은 \(0.565 \to 0.075\)로, \(K_i\)의 오차 \(0.080 \to 0.0014\)보다 훨씬 크고 천천히 준다.
+        <em>본문과의 연결</em>: <a href="#i-41-3-4">Proposition 41.3.4</a>, <a href="#i-41-3-5">Example 41.3.5</a>. torus를 \(\kappa_{1,i}\)로 칠한 <a href="figures/fig-41-3-1-principal-curvatures-interactive.html">interactive version</a>이 있다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-normals">
+      <h2>Other Vertex Normals</h2>
+      <p>Section 38.5는 vertex normal을 넷 정의하고 각각이 무엇을 지키는지 증명했다(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-8">Proposition 38.5.8</a>). uniform은 계산이 가장 쉽고, area-weighted는 Section 41.2에서 부피의 gradient의 방향이 되었으며, angle-weighted는 triangulation에 무관하다. Crane의 노트는 여기에 하나를 더한다 <a class="cite" href="../../references.html#Cr">[Cr §5.4]</a>. 목표는 sphere 위의 점들에서 정확한 normal을 주는 것이다. unit sphere에서는 normal이 위치 자체이므로, vertex와 이웃이 sphere 위에 있으면 그 sphere의 반지름 방향이 “정답”이다.</p>
+
+      <div class="thm definition" id="i-41-3-6">
+        <p><span class="thm-head">Definition 41.3.6</span> <span class="thm-name">(sphere-inscribed normal)</span>.
+        interior vertex \(i\)의 link가 orientation 순서로 \(j_1, \dots, j_m\)(\(j_{m+1} = j_1\))이고 \(e_k = \mathbf{x}_{j_k} - \mathbf{x}_i\)일 때</p>
+        <div class="equation" id="eq-41-3-3">
+        \[ \mathbf{N}_i^S := \frac{\mathbf{S}_i}{\abs{\mathbf{S}_i}}, \qquad \mathbf{S}_i = \sum_{k=1}^m\frac{e_k\times e_{k+1}}{\abs{e_k}^2\abs{e_{k+1}}^2} \tag{41.3.3} \]
+        </div>
+        <p>를 \(i\)의 <dfn>sphere-inscribed normal</dfn>(구면 내접 법벡터)이라 한다(\(\mathbf{S}_i \neq 0\)일 때) <a class="cite" href="../../references.html#Max99">[Max99]</a>.</p>
+      </div>
+      <p>\(e_k\times e_{k+1}\)은 face \((i, j_k, j_{k+1})\)의 \(2A_f\mathbf{N}_f\)이므로, \(\mathbf{N}_i^S\)는 face normal에 \(2A_f/(\abs{e_k}^2\abs{e_{k+1}}^2)\)의 가중치를 준 것이다. 짧은 edge의 face일수록 가중치가 크다. 왜 이 가중치인가? 다음 정리가 답이다.</p>
+
+      <div class="thm theorem" id="i-41-3-7">
+        <p><span class="thm-head">Theorem 41.3.7</span> <span class="thm-name">(the sphere-inscribed normal is exact on spheres)</span>.
+        \(\mathbf{x}_i\)와 그 link의 모든 vertex가 중심 \(\mathbf{c}\)인 한 sphere 위에 있으면 \(\mathbf{S}_i\)는 \(\mathbf{x}_i - \mathbf{c}\)에 평행하다. 따라서 \(\mathbf{S}_i \neq 0\)이면 \(\mathbf{N}_i^S = \pm(\mathbf{x}_i - \mathbf{c})/\abs{\mathbf{x}_i - \mathbf{c}}\)이다. link의 간격이나 배치에는 조건이 없다.</p>
+      </div>
+      <div class="proof">
+        <p class="proof-idea">Proof idea: \(\mathbf{x}_i\)를 중심으로 하는 inversion \(e \mapsto e/\abs e^2\)은 \(\mathbf{x}_i\)를 지나는 sphere를 평면으로 보낸다. \(\mathbf{S}_i\)는 그 평면에 놓인 polygon의 vector area의 두 배이므로 평면에 수직이다.</p>
+        <p><span class="proof-head">Proof.</span> \(\mathbf{n} = \mathbf{x}_i - \mathbf{c}\)라 하자. \(\abs{\mathbf{x}_{j_k} - \mathbf{c}}^2 = \abs{e_k + \mathbf{n}}^2 = \abs{\mathbf{n}}^2\)이므로 \(\abs{e_k}^2 + 2\inner{e_k}{\mathbf{n}} = 0\)이다. \(a_k = e_k/\abs{e_k}^2\)라 하면 이것은 \(\inner{a_k}{\mathbf{n}} = -\tfrac12\)이다. 곧 모든 \(a_k\)가 \(\mathbf{n}\)에 수직인 한 평면 위에 있다. \(a_k = b_k - c\,\mathbf{n}\)(\(c = 1/(2\abs{\mathbf{n}}^2)\), \(b_k \perp \mathbf{n}\))으로 쓰면</p>
+        <p>\[ a_k\times a_{k+1} = b_k\times b_{k+1} - c\,(b_k - b_{k+1})\times\mathbf{n} \]</p>
+        <p>이다(\(\mathbf{n}\times\mathbf{n} = 0\)). \(k\)에 대해 더하면 \(\sum_k(b_k - b_{k+1}) = 0\)(순환하는 합)이라 둘째 항이 사라지고, \(\mathbf{S}_i = \sum_ka_k\times a_{k+1} = \sum_kb_k\times b_{k+1}\)이다. \(b_k\)들이 모두 \(\mathbf{n}\)에 수직인 평면에 있으므로 각 \(b_k\times b_{k+1}\)은 \(\mathbf{n}\)에 평행하다.</p>
+      </div>
+      <p>부호 \(\pm\)는 inversion한 link polygon \((b_k)\)가 \(\mathbf{n}\) 둘레를 어느 방향으로 도는지로 정해진다. link가 바깥쪽 normal에 대해 반시계 방향으로 돌고 star가 그 방향에서 보아 볼록에 가까우면 \(+\)다. 아래의 jittered sphere에서는 모든 vertex에서 \(+\)였다. 이 정리는 Chapter 32의 osculating circle의 surface판이다. plane curve에서 \(\kappa^D_i\)는 세 점을 지나는 원의 곡률이라 원 위에서 정확했다(<a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-8">Proposition 32.3.8</a>). 여기서는 sphere 위에서 normal이 정확하다.</p>
+
+      <div class="thm example" id="i-41-3-8">
+        <p><span class="thm-head">Example 41.3.8</span> <span class="thm-name">(four normals compared)</span>.
+        (a) unit sphere의 <code>icosphere(3)</code>에서 정확한 normal과의 최대 각은 uniform \(0.47^\circ\), area-weighted \(0.68^\circ\), angle-weighted \(0.30^\circ\)이고 sphere-inscribed는 반올림 오차(\(10^{-13}\) 도 이하)다. (b) 같은 mesh의 vertex를 평균 edge 길이의 \(0.15\)배 크기로 무작위로 접선 방향으로 흔든 뒤 sphere로 되돌리면(seed 7, triangle의 \(13\%\)가 obtuse) 앞의 셋은 \(3.27^\circ\), \(5.43^\circ\), \(2.19^\circ\)로 나빠지지만 sphere-inscribed는 여전히 반올림 오차다. (c) profile이 \((2 + 0.8\cos t + 0.2\cos2t,\ 0.6\sin t)\)인 surface of revolution을 <code>torus_mesh</code>와 같은 \(24\times48\) 격자로 덮으면 sphere-inscribed normal의 최대 오차가 \(3.90^\circ\)로 넷 가운데 가장 크다(나머지는 \(2.18^\circ\), \(1.70^\circ\), \(2.48^\circ\)). vertex의 이웃이 sphere 위에 있지 않으면 정확할 이유가 없다. 한편 <code>torus_mesh(2, 0.8, nu, nv)</code> 자체에서는 sphere-inscribed normal이 반올림 오차 안에서 정확했다. one-ring이 sphere 위에 있지 않은데도 그렇다는 것은 수치로 본 관찰이고, 이 절은 그 이유를 다루지 않는다.</p>
+        <p class="verified">Verification: <code>verify/v-41-3-panorama.py</code></p>
+      </div>
+      <p><a href="#fig-41-3-2">Figure 41.3.2</a>는 vertex마다의 오차를 큰 것부터 늘어놓은 것이다. 왼쪽 (a)의 jittered sphere에서 세 곡선(uniform, area, angle)은 \(0.1^\circ\)–\(5^\circ\) 사이에 있고, 주홍 sphere-inscribed는 그림의 바닥(\(10^{-12}\))에 붙어 있다. 오른쪽 (b)의 울퉁불퉁한 surface of revolution에서는 주홍 곡선도 다른 곡선과 같은 높이로 올라온다. 계단 모양은 회전 대칭 때문에 같은 \(t\)의 vertex 48개가 같은 오차를 갖기 때문이고, 오른쪽 끝에서 모든 곡선이 바닥으로 떨어지는 것은 \(t = 0, \pi\)(\(z \to -z\) 대칭면 위)의 vertex에서 넷 다 대칭으로 정확하기 때문이다.</p>
+      <figure class="dg-figure" id="fig-41-3-2">
+        <img src="figures/fig-41-3-2-vertex-normals.svg" alt="두 패널. 세로축은 각도(log 눈금, 1e-12에서 30도). (a) 파랑, 초록 점선, 주황 곡선이 왼쪽 5도 근처에서 오른쪽 0.1도 근처로 완만히 내려가고, 주홍 선은 바닥 1e-12에 평평하게 붙어 있다. (b) 네 곡선이 모두 계단 모양으로 4도 근처에서 0.05도 근처까지 내려가다가 오른쪽 끝에서 함께 바닥으로 떨어진다.">
+        <figcaption><span class="fig-head">Figure 41.3.2.</span>
+        <em>무엇을</em>: vertex normal과 정확한 unit normal 사이의 각(도), vertex마다 계산해 큰 것부터 정렬한 것. (a) jittered sphere(<code>icosphere(3)</code>, 접선 방향 jitter 평균 edge 길이의 \(0.15\)배, seed 7, sphere로 되돌림), (b) profile \((2 + 0.8\cos t + 0.2\cos2t,\ 0.6\sin t)\)의 surface of revolution, \(24\times48\) 격자.
+        <em>읽는 법</em>: 가로축은 정렬한 vertex의 순위를 vertex 수로 나눈 값(0이 가장 나쁜 vertex, 1이 가장 좋은 vertex), 세로축은 각의 log 눈금이다. 파랑이 uniform, 초록 점선이 area-weighted, 주황이 angle-weighted, 주홍이 sphere-inscribed normal이다. \(10^{-12}\) 아래의 값은 \(10^{-12}\)에 그렸다.
+        <em>볼 것</em>: (a)에서 최대 오차는 \(3.27^\circ\), \(5.43^\circ\), \(2.19^\circ\)이고 sphere-inscribed는 \(2\times10^{-13}\) 도다. (b)에서는 sphere-inscribed의 최대 오차가 \(3.90^\circ\)로 오히려 가장 크다.
+        <em>본문과의 연결</em>: <a href="#i-41-3-7">Theorem 41.3.7</a>, <a href="#i-41-3-8">Example 41.3.8</a>.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-table">
+      <h2>What Each Definition Preserves</h2>
+      <p>이 장과 앞 장에서 만든 discrete curvature를 정리하면 다음 표다. “지키는 것”은 증명한 정확한 등식이나 성질이고, “잃는 것”은 수치나 반례로 확인한 것이다.</p>
+      <table>
+        <thead>
+          <tr><th>definition</th><th>keeps exactly</th><th>loses</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>angle defect \(\delta_i\), \(K_i = \delta_i/A_i\)</td><td>Gauss–Bonnet \(\sum\delta_i = 2\pi\chi\), intrinsic(edge length만), \(\nabla\sum\delta_i = 0\)</td><td>점마다의 수렴(<a href="41-4-convergence.html#sec-subdivided">Section 41.4</a>), \(A_i\)의 선택에 따른 값</td></tr>
+          <tr><td>\(K_i^w = \inner{(K\mathbf{N})_i}{\mathbf{N}_i^w}/A_i\)</td><td>\((K\mathbf{N})_i = \nabla\tfrac12\sum\ell\theta\), dual cell 위의 Stokes</td><td>Gauss–Bonnet(합이 \(2\pi\chi\)가 아니다), normal이 필요하다</td></tr>
+          <tr><td>quadric fitting의 \(K\)</td><td>국소 이차 곡면의 \(K\)</td><td>Gauss–Bonnet(<a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-15">Remark 40.1.15</a>), 계산 비용</td></tr>
+          <tr><td>Steiner \(H_{ij} = -\tfrac12\ell_{ij}\theta_{ij}\)</td><td>convex polyhedron의 Steiner polynomial, \(\mathcal{H} = \sum H_{ij}\)</td><td>방향, nonconvex에서의 offset 해석</td></tr>
+          <tr><td>cotan \(H_i^w\)</td><td>\((L\mathbf{x})_i = -\nabla A\), Stokes, DEC Laplacian과의 일치</td><td>부호를 정하는 normal의 선택</td></tr>
+          <tr><td>\(\kappa_{1,2}\) from \(H_i, K_i\)</td><td>\(\kappa_1 + \kappa_2 = 2H_i\)(clamp가 없을 때 \(\kappa_1\kappa_2 = K_i\))</td><td>umbilical point 근처의 정확도, principal direction</td></tr>
+          <tr><td>normal: uniform</td><td>계산이 가장 쉽다</td><td>triangulation에 의존</td></tr>
+          <tr><td>normal: area-weighted</td><td>\(\nabla V\)의 방향</td><td>triangulation에 의존</td></tr>
+          <tr><td>normal: angle-weighted</td><td>triangulation에 무관</td><td>gradient 해석이 없다</td></tr>
+          <tr><td>normal: sphere-inscribed</td><td>sphere 위의 one-ring에서 정확</td><td>짧은 edge에 민감, gradient 해석이 없다</td></tr>
+        </tbody>
+      </table>
+      <p>Chapter 32는 plane curve에서 같은 놀이를 했다. curvature 하나에 discrete 판이 넷이었고, 각각이 smooth 특징 하나만 정확히 지켰다(<a href="../32-ddg-overview/32-3-four-discrete-curvatures.html#i-32-3-5">Definition 32.3.5</a>와 그 뒤의 표). surface에서도 대응이 거의 그대로다.</p>
+      <table>
+        <thead>
+          <tr><th>plane curve (Chapter 32)</th><th>surface (Chapters 40–41)</th><th>exact property</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>(A) turning angle \(\kappa^A_i\)</td><td>angle defect \(\delta_i\)</td><td>total curvature: \(2\pi\operatorname{rot}\), \(2\pi\chi\)</td></tr>
+          <tr><td>(B) length variation \(\kappa^B_i\)</td><td>\((L\mathbf{x})_i = -\nabla A\)</td><td>길이의 gradient, 넓이의 gradient</td></tr>
+          <tr><td>(C) Steiner \(\kappa^C_i\)</td><td>\(H_{ij} = -\tfrac12\ell_{ij}\theta_{ij}\)</td><td>offset의 길이, offset의 부피와 넓이</td></tr>
+          <tr><td>(D) osculating circle \(\kappa^D_i\)</td><td>sphere-inscribed normal</td><td>circle, sphere 위에서 정확</td></tr>
+        </tbody>
+      </table>
+      <p>C의 대응은 조금 다르다. curve의 Steiner curvature \(\kappa^C = 2\tan(\theta/2)\)는 offset edge를 늘여 잇는(mitered) offset에서 나왔고, surface의 \(H_{ij}\)는 원호로 잇는 Minkowski sum에서 나왔다. curve에서 원호로 잇는 offset이 주는 것은 turning angle 자체였다(<a href="../40-discrete-curvature-integral/40-4-steiner-mollified.html">Section 40.4</a>의 Looking back 상자). 강의 슬라이드의 요약도 같은 그림을 그린다. scalar curvature는 polyhedron을 부풀려 적분해서, vector curvature는 dual cell 위의 적분으로 얻고, 두 쪽은 Gauss–Bonnet과 Schläfli formula로 gradient의 관계에 묶인다 <a class="cite" href="../../references.html#CMU-DDG-L17">[CMU-DDG L17]</a> slide 30.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: a curvature panorama</p>
+<pre id="code-41-3-1"><code>import numpy as np
+import dgmesh as dm
+import dgdec as dd
+def sphere_inscribed_normals(V, F):
+    """Definition 41.3.6: the direction of the sum over the faces (i, j, k) at i of e_j x e_k / (|e_j|^2 |e_k|^2)"""
+    S = np.zeros_like(V)
+    for c in range(3):
+        i, j, k = F[:, c], F[:, (c + 1) % 3], F[:, (c + 2) % 3]
+        a, b = V[j] - V[i], V[k] - V[i]
+        np.add.at(S, i, np.cross(a, b) / (np.sum(a * a, 1) * np.sum(b * b, 1))[:, None])
+    return S / np.linalg.norm(S, axis=1, keepdims=True)
+def principal(H, K):                       # Definition 41.3.3 with the clamp; kappa_1 >= kappa_2
+    s = np.sqrt(np.maximum(H * H - K, 0))
+    return H + s, H - s, H * H &lt; K
+R, r = 2.0, 0.8
+V, F = dm.torus_mesh(R, r, 24, 48)
+u = np.arctan2(V[:, 2], np.hypot(V[:, 0], V[:, 1]) - R)
+N_ex = np.c_[np.cos(u)[:, None] * V[:, :2] / np.hypot(V[:, 0], V[:, 1])[:, None], np.sin(u)]   # outward normal
+K_ex, H_ex = np.cos(u) / (r * (R + r * np.cos(u))), -(R + 2 * r * np.cos(u)) / (2 * r * (R + r * np.cos(u)))
+A = dm.mass_voronoi(V, F)
+K, H = dm.angle_defect(V, F) / A, dd.mean_curvature(V, F)                    # delta_i / A_i and H_i^A
+k1, k2, clamped = principal(H, K)
+print(f"torus: max error  K {np.abs(K - K_ex).max():.4f}, H {np.abs(H - H_ex).max():.4f}, "
+      f"kappa_1 {np.abs(k1 + np.cos(u) / (R + r * np.cos(u))).max():.4f}, kappa_2 {np.abs(k2 + 1 / r).max():.4f}, clamped {clamped.sum()}")
+normals = {k: dm.vertex_normals(V, F, kind=k) for k in ("uniform", "area", "angle")} | {"sphere": sphere_inscribed_normals(V, F)}
+print("torus: max angle to the exact normal (deg)",
+      {k: round(float(np.degrees(np.arccos(np.clip(np.sum(N * N_ex, 1), -1, 1))).max()), 3) for k, N in normals.items()})
+Vs, Fs = dm.icosphere(3)
+Hs, Ks = dd.mean_curvature(Vs, Fs), dm.angle_defect(Vs, Fs) / dm.mass_voronoi(Vs, Fs)
+print(f"icosphere(3): H^2 &lt; K at {np.sum(Hs ** 2 &lt; Ks)} of {len(Vs)} vertices, so kappa_1 = kappa_2 = H there")
+</code></pre>
+<pre id="out-41-3-1"><code>torus: max error  K 0.0075, H 0.0029, kappa_1 0.0059, kappa_2 0.0051, clamped 0
+torus: max angle to the exact normal (deg) {'uniform': 0.165, 'area': 0.308, 'angle': 0.312, 'sphere': 0.0}
+icosphere(3): H^2 &lt; K at 642 of 642 vertices, so kappa_1 = kappa_2 = H there</code></pre>
+        <p><code>sphere_inscribed_normals</code>는 <a href="#eq-41-3-3">(41.3.3)</a>의 합을 face마다 계산한다. face \((i, j, k)\)를 각 vertex부터 순환시켜 읽으면 그 vertex의 \(e_k\times e_{k+1}\)항이 된다. <code>principal</code>은 clamp를 넣은 <a href="#eq-41-3-2">(41.3.2)</a>다. 첫 줄은 torus에서 \(K_i\), \(H_i\), \(\kappa_{1,i}\), \(\kappa_{2,i}\)의 최대 오차와 clamp가 걸린 vertex의 수(\(0\))이고, 둘째 줄은 vertex normal 넷의 최대 각 오차다. 이 regular torus mesh에서는 sphere-inscribed normal이 반올림 오차 안에서 정확하다(<a href="#i-41-3-8">Example 41.3.8</a>(c)의 관찰). 마지막 줄은 icosphere에서 clamp가 모든 vertex에 걸린다는 <a href="#i-41-3-5">Example 41.3.5</a>(b)다.</p>
+        <p class="verified">Verification: <code>verify/v-41-3-panorama.py</code>가 이 코드를 그대로 실행하고 출력과 비교한다.</p>
+      </aside>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: one curvature, many numbers</p>
+        <p><strong>smooth</strong>: 한 점의 shape operator \(W\)가 \(H\), \(K\), \(\kappa_{1,2}\), principal direction을 모두 정한다. \(H\mathbf{N}\)과 \(K\)는 normal에 무관하고, \(H\)의 부호만 normal에 달려 있다.</p>
+        <p><strong>discrete</strong>: 하나의 shape operator가 없다. vector curvature 셋은 각각 smooth 양 하나의 gradient이고, scalar curvature는 그 vector를 어느 normal에 사영하느냐에 따라, 또 어느 dual area로 나누느냐에 따라 값이 다르다. principal curvature는 서로 다른 근사인 \(H_i\)와 \(K_i\)를 섞어 만들기 때문에 \(H_i^2 \lt K_i\)가 될 수 있다.</p>
+        <p><strong>무엇을 보존하는가</strong>: 정의마다 다르다(위의 표). 적분한 양과 gradient는 정확하다. <strong>무엇을 잃는가</strong>: “올바른” 하나의 값. 어느 정의도 모든 줄에서 정확하지 않으므로, 용도가 정의를 고른다. 위상(\(\chi\))이 중요하면 angle defect, flow와 최적화에는 정확한 gradient인 cotan mean curvature normal, sphere 같은 형상을 정확히 재현해야 하면 sphere-inscribed normal이다.</p>
+      </aside>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: Section 31.2 and Chapter 38</p>
+        <p>Chapter 31은 정의를 고르는 기준(무엇이 정확하고 무엇이 수렴하는가)을 처음 꺼냈다(<a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>). Chapter 38은 vertex normal 넷을 정의하고 각자가 지키는 것을 증명했다(<a href="../38-surfaces-smooth-discrete/38-5-discrete-normals.html#i-38-5-8">Proposition 38.5.8</a>). 이 절이 새로 한 것은 셋이다. scalar curvature를 vector curvature의 사영으로 묶어 부호의 출처를 밝혔고, principal curvature의 discrete 판과 그 불안정성을 증명했으며, sphere 위에서 정확한 normal을 하나 더해 Chapter 32의 네 discrete curvature와 짝을 맞췄다.</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Track 1: <a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>.</li>
+          <li>Track 3: principal curvature와 \(H\), \(K\)(<a href="../08-gauss-map/index.html#toc-8-4">Section 8.4</a>).</li>
+          <li>sphere-inscribed normal의 원 논문 <a class="cite" href="../../references.html#Max99">[Max99]</a>, mesh 위의 curvature 연산자 <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>, 노트 <a class="cite" href="../../references.html#Cr">[Cr §5.4]</a>, 강의 <a class="cite" href="../../references.html#CMU-DDG-L17">[CMU-DDG L17]</a> slides 4–7, 28–30.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>scalar curvature \(H_i^w\), \(K_i^w\)는 vector curvature를 vertex normal에 사영한 것이다. orientation을 뒤집으면 \(H_i^w\)는 부호가 바뀌고 \(K_i^w\), \(\delta_i\)는 그대로다. vector가 거의 tangent이면 normal의 선택이 \(H_i\)의 부호까지 바꿀 수 있다(<a href="#i-41-3-1">Proposition 41.3.1</a>).</li>
+        <li>discrete principal curvatures는 \(H_i \pm \sqrt{(H_i^2 - K_i)_+}\)이다. clamp는 수렴을 해치지 않지만, umbilical point 근처에서는 오차가 \(\sqrt{\varepsilon}\)로 커진다. icosphere에서는 모든 vertex에서 clamp가 걸린다(<a href="#i-41-3-3">Definition 41.3.3</a>, <a href="#i-41-3-4">Proposition 41.3.4</a>).</li>
+        <li>sphere-inscribed normal은 inversion으로 sphere를 평면으로 펴서 얻은 가중치이고, one-ring이 sphere 위에 있으면 정확하다(<a href="#i-41-3-7">Theorem 41.3.7</a>).</li>
+        <li>각 정의는 smooth 특징 하나를 정확히 지킨다. plane curve의 A, B, C, D는 surface의 angle defect, cotan mean curvature normal, Steiner \(H_{ij}\), sphere-inscribed normal에 대응한다.</li>
+      </ul>
+      <p class="next">다음 절에서는 “근사”를 정량적으로 따진다. mesh를 촘촘하게 할 때 이 curvature들이 smooth 값에 어떻게, 얼마나 빨리 다가가는지, 그리고 언제 다가가지 않는지를 실험으로 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-41-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 41.3.1</span> <span class="level">★</span>
+        <a href="#i-41-3-2">Example 41.3.2</a>(a)의 corner \((1, 0, 0)\)에서 \(H_i^U/H_i^\theta = \cos19.47^\circ\)임을 확인하고, 일반적으로 \(H_i^w/H_i^{w'}\)가 \((L\mathbf{x})_i\)와 두 normal 사이의 각으로 어떻게 쓰이는지 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\((L\mathbf{x})_i = -(1, -1, -1)\)은 \(\mathbf{N}^\theta = (1, -1, -1)/\sqrt3\)에 평행하므로 \(H_i^\theta = -\sqrt3/(2A_i)\)이다. \(\inner{(1, -1, -1)}{(2, -1, -1)/\sqrt6} = 4/\sqrt6\)이므로 \(H_i^U = -(4/\sqrt6)/(2A_i)\)이고, 비는 \(\tfrac{4}{\sqrt6\sqrt3} = \tfrac{4}{\sqrt{18}} = 0.9428 = \cos19.47^\circ\)이다. \(A_i = 0.75\)를 넣으면 \(-1.0887\), \(-1.1547\)이다. 일반적으로 \(\phi_w\)를 \((L\mathbf{x})_i\)와 \(\mathbf{N}_i^w\) 사이의 각이라 하면 \(H_i^w = \abs{(L\mathbf{x})_i}\cos\phi_w/(2A_i)\)(부호는 cosine이 정한다)이므로 \(H_i^w/H_i^{w'} = \cos\phi_w/\cos\phi_{w'}\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 41.3.2</span> <span class="level">★</span>
+        smooth surface에서 \(H^2 - K = \tfrac14(\kappa_1 - \kappa_2)^2\)임을 보이고, 그래서 clamp는 smooth 값에 대해서는 아무 일도 하지 않음을 설명하여라. icosphere에서 \(H_i^2 \lt K_i\)가 되는 이유를 한 문장으로 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(H = \tfrac12(\kappa_1 + \kappa_2)\), \(K = \kappa_1\kappa_2\)이므로</p>
+          <p>\[ \begin{aligned} H^2 - K &= \tfrac14(\kappa_1^2 + 2\kappa_1\kappa_2 + \kappa_2^2) - \kappa_1\kappa_2 \\ &= \tfrac14(\kappa_1 - \kappa_2)^2 \ge 0 \end{aligned} \]</p>
+          <p>이다. 그래서 \((H^2 - K)_+ = H^2 - K\)이고 <a href="#eq-41-3-2">(41.3.2)</a>는 근의 공식 그대로다. icosphere에서는 \(K_i = \delta_i/A_i\)가 \(1\)보다 조금 크고(dual area의 합이 \(4\pi\)보다 작은데 \(\sum\delta_i\)는 정확히 \(4\pi\)다) \(\abs{H_i}\)는 \(1\)에 더 가까워서 \(H_i^2 - K_i\)가 작은 음수가 된다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-3-3" data-level="2">
+        <p><span class="thm-head">Exercise 41.3.3</span> <span class="level">★★</span>
+        (a) umbilical point(\(H = -1\), \(K = 1\))에서 \(H\)와 \(K\)에 크기 \(10^{-6}\)의 오차가 있으면 principal curvature의 오차는 얼마까지 커질 수 있는가? (b) umbilical point가 아닌 점(\(H^2 - K = d \gt 0\))에서는 오차가 1차로만 전해짐을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(H' = -1\), \(K' = 1 - 10^{-6}\)이면 \(H'^2 - K' = 10^{-6}\)이므로 \(\kappa_\pm = -1 \pm 10^{-3}\)이다. 오차 \(10^{-6}\)이 \(10^{-3}\)으로 커졌다(<a href="#i-41-3-4">Proposition 41.3.4</a>(b)의 \(\sqrt{\ }\)). 반대로 \(K' = 1 + 10^{-6}\)이면 clamp가 걸려 오차가 \(0\)이다. (b) \(s = H^2 - K \gt 0\) 근처에서 \(\sqrt s\)는 미분가능하고 \(\tfrac{d}{ds}\sqrt s = \tfrac{1}{2\sqrt s}\)이므로, \(\abs{\delta s} \lt d/2\)이면 mean value theorem에서 \(\abs{\sqrt{s + \delta s} - \sqrt s} \le \abs{\delta s}/\sqrt{2d}\)이다. \(\delta s = 2H\delta H + (\delta H)^2 - \delta K\)이므로 오차는 \(\delta H\), \(\delta K\)의 1차다. 계수 \(1/\sqrt{2d}\)는 umbilical point에 가까울수록(\(d \to 0\)) 커진다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-3-4" data-level="1">
+        <p><span class="thm-head">Exercise 41.3.4</span> <span class="level">★</span>
+        [<a class="cite" href="../../references.html#Cr">Cr §5.4</a> 변형] unit sphere 위의 vertex \(\mathbf{x}_i = e_3\)과 이웃 넷 \(\mathbf{x}_{j_k} = (\sin t_k\cos\phi_k, \sin t_k\sin\phi_k, \cos t_k)\)(\(\phi_k = 0, \tfrac\pi2, \pi, \tfrac{3\pi}2\), \(t_k = 0.3, 0.5, 0.3, 0.7\))에 대하여 \(\mathbf{N}_i^S\)와 area-weighted normal을 계산하여라. 어느 쪽이 \(e_3\)인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>네 이웃이 \(e_3\)을 지나는 unit sphere 위에 있으므로 <a href="#i-41-3-7">Theorem 41.3.7</a>에서 \(\mathbf{N}_i^S = e_3\)이다(수치로 \(10^{-16}\) 안). area-weighted normal은 넷의 face \((i, j_k, j_{k+1})\)의 \(2A_f\mathbf{N}_f = e_k\times e_{k+1}\)의 합의 방향이다. 넷째 이웃(\(\phi = \tfrac{3\pi}{2}\), 곧 \(-y\) 방향)이 가장 멀리(\(t = 0.7\)) 있어 그쪽 face가 크고 더 기울어 있으므로 합이 \(-y\) 쪽으로 기운다. 계산하면 \(\mathbf{N}_i^A = (0, -0.0998, 0.9950)\)이고 \(e_3\)과 \(5.73^\circ\)를 이룬다(uniform \(2.87^\circ\), angle-weighted \(2.79^\circ\)). 첫째 이웃과 셋째 이웃(\(\pm x\) 방향)은 \(t\)가 같아 \(x\) 방향으로 대칭이므로 \(x\) 성분은 \(0\)이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-3-5" data-level="1">
+        <p><span class="thm-head">Exercise 41.3.5</span> <span class="level">★</span>
+        참인지 거짓인지 말하고 이유를 써라. (a) \(K_i^w\)는 orientation을 뒤집어도 그대로다. (b) discrete principal curvatures는 언제나 \(\kappa_{1,i}\kappa_{2,i} = K_i\)를 만족한다. (c) sphere-inscribed normal은 vertex의 이웃이 모두 한 sphere 위에 있으면 그 sphere의 반지름 방향과 평행하다. (d) torus mesh에서 sphere-inscribed normal이 정확했으므로, one-ring이 어떤 sphere 위에 있다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 참. \((K\mathbf{N})_i\)와 \(\mathbf{N}_i^w\)가 함께 부호를 바꾼다(<a href="#i-41-3-1">Proposition 41.3.1</a>(a)). (b) 거짓. clamp가 걸리면 \(\kappa_{1,i}\kappa_{2,i} = H_i^2 \gt K_i\)이다. (c) 참. 단, \(\mathbf{x}_i\)도 그 sphere 위에 있어야 한다(<a href="#i-41-3-7">Theorem 41.3.7</a>의 가정). 이웃만 sphere 위에 있고 \(\mathbf{x}_i\)가 아니면 \(\inner{a_k}{\mathbf{n}} = -\tfrac12\)이 성립하지 않는다. (d) 거짓. <a href="#i-41-3-7">Theorem 41.3.7</a>은 충분조건이고, torus의 one-ring은 sphere 위에 있지 않다(\(\mathbf{x}_i\)와 네 이웃을 지나는 sphere를 맞추면 잔차가 \(0\)이 아니다, verify).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-3-6" data-level="2">
+        <p><span class="thm-head">Exercise 41.3.6</span> <span class="level">★★</span>
+        <strong>Coding.</strong> \([-0.5, 0.5]^2\)의 \(n\times n\) grid(interior vertex를 grid 간격의 \(0.35\)배까지 무작위로 옮김, seed 5)를 \(z = 0.6\tanh(4x)\)로 들어 올린 mesh에서 네 vertex normal로 사영한 \(H_i^w\)의 부호가 엇갈리는 interior vertex를 찾아라(\(n = 13, 49\)). 찾은 vertex에서 정확한 \(H\)(위쪽 normal)와 비교하고, 무엇이 문제인지 설명하여라. Implementation 상자의 <code>sphere_inscribed_normals</code>를 쓴다.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-41-3-6"><code>def step_mesh(n, seed=5, jitter=0.35):
+    """grid over [-0.5, 0.5]^2 with jittered interior vertices, lifted to z = 0.6 tanh(4 x)"""
+    s = np.linspace(-0.5, 0.5, n)
+    V, F = dm.grid_mesh(s, s, pattern="same")
+    inner = (np.abs(V[:, 0]) &lt; 0.5 - 1e-9) &amp; (np.abs(V[:, 1]) &lt; 0.5 - 1e-9)
+    V[inner, :2] += jitter * (s[1] - s[0]) * np.random.default_rng(seed).uniform(-1, 1, (inner.sum(), 2))
+    V[:, 2] = 0.6 * np.tanh(4 * V[:, 0])
+    return V, F, np.where(inner)[0]
+def H_exact(x):                                    # graph of f(x), upward normal: H = f'' / (2 (1 + f'^2)^(3/2))
+    c = 1 / np.cosh(4 * x) ** 2
+    return -19.2 * c * np.tanh(4 * x) / (2 * (1 + (2.4 * c) ** 2) ** 1.5)
+for n in (13, 49):
+    V, F, inner = step_mesh(n)
+    Lx, A = dm.cotan_laplacian(V, F) @ V, dm.mass_voronoi(V, F)
+    normals = {k: dm.vertex_normals(V, F, kind=k) for k in ("uniform", "area", "angle")}
+    normals["sphere"] = sphere_inscribed_normals(V, F)
+    H = {k: np.sum(Lx * N, 1) / (2 * A) for k, N in normals.items()}
+    signs = np.array([np.sign(H[k][inner]) for k in H])
+    bad = inner[np.any(signs != signs[0], axis=0)]
+    print(f"n = {n}: {len(bad)} of {len(inner)} interior vertices get H_i of both signs")
+    for i in bad[:1]:
+        print("  vertex at", np.round(V[i], 3), {k: round(float(H[k][i]), 3) for k in H}, " exact H =", round(float(H_exact(V[i, 0])), 3))
+</code></pre>
+<pre id="out-ex-41-3-6"><code>n = 13: 1 of 121 interior vertices get H_i of both signs
+  vertex at [-0.274 -0.147 -0.48 ] {'uniform': -0.352, 'area': -0.085, 'angle': 0.084, 'sphere': 0.043}  exact H = 1.196
+n = 49: 0 of 2209 interior vertices get H_i of both signs</code></pre>
+          <p>\(n = 13\)에서 vertex 하나가 네 normal 가운데 둘로는 음수, 둘로는 양수인 \(H_i\)를 받는다. 그곳의 정확한 \(H\)는 \(1.196\)인데 네 값은 모두 \(0\)에 가깝다. 이 vertex는 계단 \(\tanh\)가 크게 휘는 곳(\(x \approx -0.27\). \(\abs{H}\)의 최댓값은 \(x = \pm0.33\)의 \(1.31\)이다)에 있고, 격자 간격 \(0.083\)이 그 휨을 따라가지 못해 \((L\mathbf{x})_i\)가 거의 tangent가 되었다(\(\abs{(L\mathbf{x})_i}/(2A_i) = 2.96\) 가운데 정확한 normal 방향의 성분은 \(0.13\)뿐이다). 그러면 <a href="#i-41-3-1">Proposition 41.3.1</a>(c)에서 보듯 normal을 조금 바꾸는 것만으로 부호가 바뀐다. \(n = 49\)에서는 그런 vertex가 없다. normal의 선택이 부호를 좌우하는 것은 mesh가 surface를 충분히 해상하지 못한다는 신호다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="41-2-gradients.html">← 41.2 Volume, Area, and Mean Curvature Gradients</a>
+    <a rel="next" href="41-4-convergence.html">41.4 Numerical Tests and Convergence →</a>
+  </nav>
+</body>
+</html>

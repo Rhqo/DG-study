@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>41.4 Numerical Tests and Convergence — DG Study</title>
+  <meta name="dg-id" content="41.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="41.2, 41.3, 40.1, 40.2, 40.4, 31.2">
+  <meta name="dg-refs" content="CMU-DDG L16, L17; Cr §5.6; Borrelli03; Hildebrandt06; Wardetzky07">
+  <meta name="dg-updated" content="2026-10-21">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">41. Discrete Curvature II: The Variational Viewpoint</a> ›
+    <span>41.4 Numerical Tests and Convergence</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>41.4 Numerical Tests and Convergence</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#Cr">[Cr §5.6]</a>,
+        <a class="cite" href="../../references.html#Borrelli03">[Borrelli03]</a>,
+        <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>,
+        <a class="cite" href="../../references.html#Wardetzky07">[Wardetzky07]</a> · Lecture:
+        <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slide 18,
+        <a class="cite" href="../../references.html#CMU-DDG-L17">[CMU-DDG L17]</a></p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>정확히 성립해야 하는 항등식(Gauss–Bonnet, gradient의 합)과 근사로만 맞는 양을 구별하고, 앞의 것을 machine precision으로 검사할 수 있다.</li>
+        <li>refinement 수열, 최대 오차와 넓이 가중 \(L^2\) 오차, 적분한(weak) 오차, log-log 기울기로 수렴을 실험하는 방법을 쓸 수 있다.</li>
+        <li>같은 surface와 같은 valence에서도 vertex의 배치에 따라 점마다의 curvature가 수렴하기도 하고 수렴하지 않기도 한다는 것을 실험으로 보이고, one-ring의 모양으로 설명할 수 있다.</li>
+        <li>“수렴한다”가 정확히 무슨 뜻인지(정확, 적분한 뜻, 점마다) 구별해 말할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Section 41.2–41.3: 세 gradient와 그 항등식, discrete \(K_i\), \(H_i\), \(\kappa_{1,i}\)(<a href="41-3-panorama.html#i-41-3-3">Definition 41.3.3</a>).</li>
+        <li>Chapter 40: discrete Gauss–Bonnet theorem <a href="../40-discrete-curvature-integral/40-2-discrete-gauss-bonnet.html#i-40-2-1">Theorem 40.2.1</a>, dual area의 선택과 icosphere의 수렴 <a href="../40-discrete-curvature-integral/40-1-angle-defect.html#fig-40-1-3">Figure 40.1.3</a>, <a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-15">Remark 40.1.15</a>.</li>
+        <li>Track 1: 수렴의 함정 <a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>, 4-8 cylinder <a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-8">Example 31.2.8</a>, jittered torus <a href="../31-meshes/31-2-discrete-curvature.html#fig-31-2-5">Figure 31.2.5</a>.</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 41.3의 표는 “무엇을 정확히 지키는가”를 정리했다. 남은 질문은 정확하지 않은 부분이 얼마나 정확하지 않은가이다. mesh를 촘촘하게 하면 \(\delta_i/A_i\)는 \(K\)에, \(H_i\)는 \(H\)에 다가가는가? 얼마나 빨리? Chapter 40은 icosphere에서 그렇다는 것을 보였고(<a href="../40-discrete-curvature-integral/40-1-angle-defect.html#fig-40-1-3">Figure 40.1.3</a>), 동시에 dual area를 잘못 고르거나 vertex가 불규칙하면 그렇지 않을 수 있다고 경고했다(<a href="../40-discrete-curvature-integral/40-1-angle-defect.html#i-40-1-15">Remark 40.1.15</a>). 이 절은 그 실험을 체계적으로 한다. 먼저 근사가 아니라 정확해야 하는 것부터 검사한다. 그런 검사는 구현의 오류를 잡는다.</p>
+    </section>
+
+    <section id="sec-exact">
+      <h2>Exact Tests</h2>
+      <p>이 장과 앞 장이 증명한 등식 가운데 여럿은 mesh가 어떻든 정확히 성립한다. 이런 등식은 반올림 오차 수준으로 맞아야 하고, 그보다 크게 어긋나면 구현이 틀린 것이다. orientation이 뒤집힌 face 하나, 잘못 짝지은 cotangent 하나가 이런 검사에서 바로 드러난다.</p>
+
+      <div class="thm example" id="i-41-4-1">
+        <p><span class="thm-head">Example 41.4.1</span> <span class="thm-name">(identities that hold to machine precision)</span>.
+        다섯 닫힌 mesh(vertex는 차례로 10242, 18432, 32768, 2562, 386개. 마지막은 face마다 \(8\times8\) 칸으로 나눈 cube)에서 세 양 \(\abs{\sum_i\delta_i - 2\pi\chi}\)(G–B), \(\abs{\sum_i(L\mathbf{x})_i}\), \(\abs{\sum_i(K\mathbf{N})_i}\)를 계산했다(\(\chi\)는 셈으로 구한 Euler characteristic). 모두 \(10^{-11}\) 이하다.</p>
+        <table>
+          <thead>
+            <tr><th>mesh</th><th>G–B</th><th>\(\sum L\mathbf{x}\)</th><th>\(\sum K\mathbf{N}\)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>icosphere, level 5</td><td>\(2.4\times10^{-12}\)</td><td>\(9\times10^{-15}\)</td><td>\(8\times10^{-15}\)</td></tr>
+            <tr><td>torus \(96\times192\)</td><td>\(4.5\times10^{-12}\)</td><td>\(3\times10^{-13}\)</td><td>\(9\times10^{-15}\)</td></tr>
+            <tr><td>subdivided torus</td><td>\(8.2\times10^{-12}\)</td><td>\(7\times10^{-14}\)</td><td>\(1.2\times10^{-14}\)</td></tr>
+            <tr><td>jittered sphere</td><td>\(6.2\times10^{-13}\)</td><td>\(1\times10^{-15}\)</td><td>\(1\times10^{-15}\)</td></tr>
+            <tr><td>cube \(8\times8\)</td><td>\(2.9\times10^{-13}\)</td><td>\(3\times10^{-17}\)</td><td>\(0\)</td></tr>
+          </tbody>
+        </table>
+        <p>(subdivided torus는 아래 <a href="#i-41-4-4">Example 41.4.4</a>의 level 4, jittered sphere는 <a href="41-3-panorama.html#i-41-3-8">Example 41.3.8</a>(b)의 mesh를 level 4로 만든 것이다.) 첫 열은 discrete Gauss–Bonnet theorem(<a href="../40-discrete-curvature-integral/40-2-discrete-gauss-bonnet.html#i-40-2-1">Theorem 40.2.1</a>)이고, 둘째와 셋째 열은 넓이와 total mean curvature가 평행이동에 불변이라 gradient의 합이 \(0\)이라는 것이다(<a href="41-1-geometric-differentiation.html#i-41-1-3">Proposition 41.1.3</a>(a)). 같은 방법으로 vector area의 합, torque의 합, Euler 항등식(<a href="41-2-gradients.html#i-41-2-1">Section 41.2</a>의 Implementation 상자), Schläfli formula(<a href="41-2-gradients.html#i-41-2-9">Theorem 41.2.9</a>)도 반올림 오차 수준으로 맞는다. 닫힌 꼴로 알려진 값도 정확히 맞는다. 한 변이 \(1\)인 cube의 \(\mathcal{H} = -\tfrac12\sum\ell\theta\)는 face를 어떻게 나누든 정확히 \(-3\pi\)다(<a href="../40-discrete-curvature-integral/40-4-steiner-mollified.html#i-40-4-12">Example 40.4.12</a>).</p>
+        <p class="verified">Verification: <code>verify/v-41-4-convergence.py</code></p>
+      </div>
+      <p>반대로 sphere의 total mean curvature \(\sum H_{ij} \to -4\pi\)(<a href="../40-discrete-curvature-integral/40-4-steiner-mollified.html#i-40-4-15">Example 40.4.15</a>(b))나 점마다의 \(K_i \to 1\)은 정확한 등식이 아니라 근사다. 근사를 검사하려면 mesh를 바꿔 가며 오차가 어떻게 줄어드는지를 봐야 한다.</p>
+    </section>
+
+    <section id="sec-method">
+      <h2>Measuring Convergence</h2>
+      <div class="thm remark" id="i-41-4-2">
+        <p><span class="thm-head">Remark 41.4.2</span> <span class="thm-name">(error measures convention)</span>.
+        이 절에서 vertex마다의 근사값 \(q_i\)와 smooth 값 \(q(\mathbf{x}_i)\)(vertex는 smooth surface 위에 있다)를 다음 셋으로 비교한다. \(A_i\)는 mixed area다.</p>
+        <div class="equation" id="eq-41-4-1">
+        \[ \begin{aligned} E_\infty &= \max_i\abs{q_i - q(\mathbf{x}_i)}, \\ E_2 &= \Big(\sum_iA_i\big(q_i - q(\mathbf{x}_i)\big)^2\Big/\sum_iA_i\Big)^{1/2}, \\ E_\phi &= \Big|\sum_iA_iq_i\,\phi(\mathbf{x}_i) - \int_Sq\,\phi\,dA\Big| \end{aligned} \tag{41.4.1} \]
+        </div>
+        <p>\(E_\infty\)은 가장 나쁜 vertex의 오차, \(E_2\)는 넓이로 가중한 평균 오차, \(E_\phi\)는 매끄러운 test function \(\phi\)와 짝지어 적분한 오차, 곧 weak error(약한 오차)다. \(q = K\)일 때 \(A_iK_i = \delta_i\)이므로 \(E_\phi\)는 \(\abs{\sum_i\delta_i\phi(\mathbf{x}_i) - \int K\phi\,dA}\)이다. mesh의 크기는 평균 edge 길이 \(h\)로 재고, \(h\)를 반으로 줄일 때 \(E\)가 \(E/2^p\)이 되면 \(p = \log_2\big(E(h)/E(h/2)\big)\)를 observed order(관찰된 수렴 차수)라 한다. log-log 그래프에서 기울기다.</p>
+      </div>
+      <p>세 측도는 서로 다른 질문에 답한다. \(E_\infty \to 0\)은 모든 vertex에서 curvature를 믿을 수 있다는 뜻이고, \(E_2 \to 0\)은 나쁜 vertex가 있어도 그 넓이의 몫이 줄어든다는 뜻이며, \(E_\phi \to 0\)은 curvature를 적분해서 쓰는 계산(평균, 힘, energy)이 맞는다는 뜻이다. 노트의 실험도 \(L^2\)와 \(L^\infty\) 오차를 mean edge length에 대해 log-log로 그리라고 한다 <a class="cite" href="../../references.html#Cr">[Cr §5.6]</a>.</p>
+    </section>
+
+    <section id="sec-regular">
+      <h2>Regular Refinement</h2>
+      <div class="thm example" id="i-41-4-3">
+        <p><span class="thm-head">Example 41.4.3</span> <span class="thm-name">(the regular torus grids)</span>.
+        <code>torus_mesh(2, 0.8, n, 2n)</code>(\(n = 12, 24, 48, 96\), \(h = 0.536, 0.269, 0.135, 0.067\))에서 바깥쪽 normal의 정확한 값 \(K = \cos u/(r(R + r\cos u))\), \(H = -(R + 2r\cos u)/(2r(R + r\cos u))\)와 비교하면, \(K_i = \delta_i/A_i\)의 \(E_\infty\)는 \(2.9\times10^{-2}\), \(7.5\times10^{-3}\), \(1.9\times10^{-3}\), \(4.8\times10^{-4}\)이고 관찰된 차수가 \(1.95, 1.99, 2.00\)이다. cotan \(H_i\), Steiner \(H_i\), \(\kappa_{1,i}\)도 모두 차수 \(2\)로 수렴하고(\(n = 96\)에서 \(E_\infty\)가 \(1.8\times10^{-4}\), \(2.6\times10^{-4}\), \(3.8\times10^{-4}\)), \(E_2\)와 weak error(\(\phi = x^2 + y^2\))도 차수 \(2\)다. 이 mesh는 \((u, v)\) 격자를 그대로 쓴 것이고 모든 vertex의 valence가 \(6\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-41-4-convergence.py</code></p>
+      </div>
+      <p>icosphere의 결과(<a href="../40-discrete-curvature-integral/40-1-angle-defect.html#fig-40-1-3">Figure 40.1.3</a>)와 합치면, 규칙적인 mesh에서는 이 장의 curvature들이 모두 \(O(h^2)\)로 점마다 수렴한다. 그러면 “규칙적”은 무엇을 뜻하는가? valence가 6이면 되는가?</p>
+    </section>
+
+    <section id="sec-subdivided">
+      <h2>Same Valence, Different Placement</h2>
+      <p>같은 torus를 다른 방법으로 촘촘하게 하자. 거친 <code>torus_mesh(2, 0.8, 8, 16)</code>에서 출발해 triangle마다 edge의 중점을 이어 넷으로 나누고(<code>dgmesh.subdivide</code>), 새 vertex를 torus 위의 가장 가까운 점으로 옮기기(\(z\)축을 포함하는 평면 안에서 관의 중심원을 향한 반지름 방향으로)를 되풀이한다. 원래 vertex는 그대로 있고, 새 vertex는 모두 valence가 \(6\)이며, 모든 vertex가 정확히 torus 위에 있다. 이런 mesh는 graphics에서 흔하다.</p>
+
+      <div class="thm example" id="i-41-4-4">
+        <p><span class="thm-head">Example 41.4.4</span> <span class="thm-name">(the subdivided torus)</span>.
+        subdivision을 1–4번 한 mesh(\(h = 0.403, 0.202, 0.101, 0.051\))에서 \(K_i = \delta_i/A_i\)의 \(E_\infty\)는 \(0.038, 0.029, 0.027, 0.027\)이고, cotan \(H_i\)의 \(E_\infty\)는 \(0.017, 0.024, 0.029, 0.031\)로 오히려 커진다. 점마다는 수렴하지 않는다. 그런데 \(E_2\)는 \(K\)에서 \(8.2\times10^{-3}\), \(3.9\times10^{-3}\), \(2.0\times10^{-3}\), \(9.7\times10^{-4}\)으로 차수 \(1\)이고, weak error \(\abs{\sum\delta_i\rho_i^2 - \int K\rho^2\,dA}\)(\(\rho^2 = x^2 + y^2\), \(\int K\rho^2\,dA = 4\pi^2Rr = 63.165\))는 \(0.45, 0.11, 0.029, 0.0072\)로 차수 \(2\)다. 오차가 큰 vertex의 위치도 정해져 있다. 원래 mesh의 vertex 128개에서 \(\abs{K_i - K}\)의 최댓값은 \(0.027\)에 머물고, 원래 edge 위의 vertex에서는 \(0.0069\), 원래 face 안쪽의 vertex에서는 \(0.0028\)에 머문다.</p>
+        <p class="verified">Verification: <code>verify/v-41-4-convergence.py</code></p>
+      </div>
+      <p><a href="#fig-41-4-1">Figure 41.4.1</a>은 두 수열을 같은 축에 놓는다. 왼쪽 (a)의 regular grid에서는 네 곡선이 모두 회색 기울기 \(2\)의 안내선과 나란히 내려간다. 오른쪽 (b)의 subdivided mesh에서는 같은 네 곡선이 \(10^{-2}\) 근처에서 수평이다. 두 수열 모두 같은 surface, 같은 valence, 같은 크기의 \(h\)인데 결과가 다르다. <a href="#fig-41-4-2">Figure 41.4.2</a>가 그 이유의 실마리를 준다. 왼쪽 (a)에서 오차를 vertex의 종류별로 나누면 세 곡선이 각자 다른 높이에서 수평이고, 회색 점선(regular grid)만 내려간다. 원래 vertex(주홍)가 가장 나쁘고, 원래 edge 위(주황), 원래 face 안쪽(파랑) 순이다. 오른쪽 (b)는 subdivided mesh의 세 측도다. 최댓값(주홍)은 평평하지만 \(L^2\)(파랑)는 기울기 \(1\), weak error(초록)는 기울기 \(2\)로 내려간다. 나쁜 vertex는 줄지 않지만 그것이 차지하는 넓이의 몫이 줄기 때문에 \(L^2\)가 줄고, 적분하면 오차가 이웃끼리 상쇄되어 weak error는 regular grid와 같은 속도로 준다.</p>
+      <figure class="dg-figure" id="fig-41-4-1">
+        <img src="figures/fig-41-4-1-regular-vs-subdivided.svg" alt="두 패널, 같은 log-log 축. 가로축 평균 edge 길이 h(0.05에서 0.4), 세로축 vertex 최대 오차. (a) regular grids: 파랑, 주홍, 주황 점선, 초록 점선 네 곡선이 회색 기울기 2 안내선과 나란히 왼쪽 아래로 곧게 내려간다. (b) subdivided: 같은 네 곡선이 1e-2 근처에서 거의 수평이고, 초록 점선만 조금 아래인 9e-3 근처에서 수평이다.">
+        <figcaption><span class="fig-head">Figure 41.4.1.</span>
+        <em>무엇을</em>: torus \(T_{2,0.8}\)(바깥쪽 normal)의 두 refinement 수열에서 네 discrete curvature의 최대 오차 \(E_\infty\). (a) regular grid <code>torus_mesh(2, 0.8, n, 2n)</code>, \(n = 12, 24, 48, 96\). (b) <code>torus_mesh(2, 0.8, 8, 16)</code>을 1–4번 midpoint subdivision하고 새 vertex를 torus로 옮긴 mesh. 두 수열 모두 모든 vertex의 valence가 \(6\)이다.
+        <em>읽는 법</em>: 가로축은 평균 edge 길이 \(h\), 세로축은 \(E_\infty\)(둘 다 log)다. 파랑 동그라미 \(\delta_i/A_i\), 주홍 사각형 cotan \(H_i\), 주황 삼각형 Steiner \(H_i\), 초록 마름모 \(\kappa_{1,i}\)이고, \(A_i\)는 mixed area다. 회색 직선은 기울기 \(2\)다.
+        <em>볼 것</em>: (a)는 관찰된 차수가 마지막 구간에서 모두 \(2.00 \pm 0.01\)이다. (b)는 \(h\)를 8배 줄여도 오차가 거의 그대로이고(마지막 mesh에서 \(0.027, 0.031, 0.031, 0.009\)), cotan \(H_i\)는 오히려 커진다.
+        <em>본문과의 연결</em>: <a href="#i-41-4-3">Example 41.4.3</a>, <a href="#i-41-4-4">Example 41.4.4</a>.</figcaption>
+      </figure>
+      <figure class="dg-figure" id="fig-41-4-2">
+        <img src="figures/fig-41-4-2-where-the-error-lives.svg" alt="두 패널, log-log. (a) 가로축 h, 세로축 K의 최대 오차. 주홍 사각형(original vertices)이 0.03 근처에서, 주황 삼각형(on original edges)이 0.007에서 0.014 사이에서, 파란 동그라미(inside original faces)가 0.003에서 0.005 사이에서 거의 수평이고, 회색 점선 x(regular grid)는 0.03에서 5e-4로 곧게 내려간다. (b) 주홍 사각형(max)은 0.03 근처에서 수평, 파란 동그라미(L2)는 0.008에서 0.001로 기울기 1로, 초록 삼각형(weak, relative)은 7e-3에서 1e-4로 기울기 2로 내려간다. 회색 짧은 안내선 두 개에 slope 1, slope 2라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 41.4.2.</span>
+        <em>무엇을</em>: <a href="#fig-41-4-1">Figure 41.4.1</a>(b)의 subdivided torus에서 \(K_i = \delta_i/A_i\)의 오차. (a) vertex의 종류별 최대 오차와 regular grid의 최대 오차, (b) 세 측도 <a href="#eq-41-4-1">(41.4.1)</a>.
+        <em>읽는 법</em>: (a) 주홍은 원래 <code>torus_mesh(2, 0.8, 8, 16)</code>의 vertex 128개, 주황은 원래 edge 위의 vertex, 파랑은 원래 face 안쪽의 vertex(level 1에는 없다), 회색 점선은 regular grid다. (b) 주홍이 \(E_\infty\), 파랑이 \(E_2\), 초록이 weak error \(\abs{\sum\delta_i\rho_i^2 - 4\pi^2Rr}\)를 \(4\pi^2Rr\)로 나눈 것(\(\rho^2 = x^2 + y^2\))이다. 회색 짧은 선은 기울기 \(1\)과 \(2\)다.
+        <em>볼 것</em>: (a) 세 종류의 오차가 level 4에서 \(0.027\), \(0.0069\), \(0.0028\)로 각자 멈춘다. (b) \(E_2\)의 차수는 \(1.0\), weak error의 차수는 \(2.0\)이다.
+        <em>본문과의 연결</em>: <a href="#i-41-4-4">Example 41.4.4</a>, <a href="#i-41-4-5">Example 41.4.5</a>. level 3의 mesh를 \(\abs{K_i - K}\)로 칠한 <a href="figures/fig-41-4-2-where-the-error-lives-interactive.html">interactive version</a>에서 오차가 원래 mesh의 vertex와 edge를 따라 그물처럼 놓인 것을 볼 수 있다.</figcaption>
+      </figure>
+
+      <p>왜 이런 일이 생기는가? subdivision은 원래 vertex의 one-ring을 매번 절반 크기로 줄일 뿐 모양을 바꾸지 않는다. 그 모양은 거친 mesh가 정한 것이고, 접평면에서 보면 대칭이 아니다. 반면 regular grid의 one-ring은 \((u, v)\) 격자의 한 칸을 3차원으로 옮긴 것이라, \(h \to 0\)에서 평행사변형 격자의 hexagon 모양에 다가간다. 그래서 관건은 \(h\)가 아니라 \(h\)로 나누어 본 one-ring의 모양이다. 다음 예가 이것을 따로 떼어 본다.</p>
+
+      <div class="thm example" id="i-41-4-5">
+        <p><span class="thm-head">Example 41.4.5</span> <span class="thm-name">(fixed one-ring shapes)</span>.
+        평면의 star 하나(link vertex \(P_1, \dots, P_m\))를 \(h\)배로 줄여 이차 곡면 \(z = \tfrac12(ax^2 + 2bxy + cy^2)\)(원점에서 \(K = ac - b^2\)) 위로 들어 올리고 원점의 \(\delta_i/A_i\)를 보자. \(h = 10^{-3}\)에서(그보다 작게 해도 넷째 자리까지 같다) 다음 값이 나온다(<a href="#ex-41-4-5">Exercise 41.4.5</a>).</p>
+        <table>
+          <thead>
+            <tr><th>link shape</th><th>paraboloid</th><th>saddle</th><th>tilted</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>regular hexagon</td><td>\(1.0000\)</td><td>\(-1.0000\)</td><td>\(-0.9500\)</td></tr>
+            <tr><td>lattice hexagon</td><td>\(1.0000\)</td><td>\(-1.0000\)</td><td>\(-0.9500\)</td></tr>
+            <tr><td>irregular hexagon</td><td>\(1.0000\)</td><td>\(-1.0952\)</td><td>\(-1.0536\)</td></tr>
+            <tr><td>regular pentagon</td><td>\(1.0000\)</td><td>\(-0.8090\)</td><td>\(-0.7514\)</td></tr>
+            <tr><td>square</td><td>\(1.0000\)</td><td>\(-1.0000\)</td><td>\(-0.9100\)</td></tr>
+          </tbody>
+        </table>
+        <p>“lattice hexagon”은 \(P_{k+3} = -P_k\)이고 \(P_2 = P_1 + P_3\)인 hexagon, 곧 평행사변형 격자의 한 vertex의 이웃이다(정육각형은 그 특수한 경우다). “irregular hexagon”은 정육각형의 반지름만 \(1, 0.7, 1.2, 0.9, 1.1, 0.8\)배로 바꾼 것이고, paraboloid는 \((a, b, c) = (1, 0, 1)\)(\(K = 1\)), saddle은 \((1, 0, -1)\)(\(K = -1\)), tilted는 \((1.3, 0.2, -0.7)\)(\(K = -0.95\))이다. lattice hexagon은 세 곡면 모두에서 정확하다. 나머지는 paraboloid처럼 방향에 무관한 곡면에서만 맞고, 방향이 있는 곡면에서는 \(h \to 0\)이어도 틀린 값으로 간다. regular pentagon은 대칭이 커도 saddle에서 \(-0.809\)다. square는 축 방향의 곡률만 보아 tilted 곡면에서 \(ac = -0.91\)을 준다.</p>
+        <p class="verified">Verification: <code>verify/v-41-4-convergence.py</code></p>
+      </div>
+      <p>torus로 돌아가면, one-ring이 lattice hexagon에서 얼마나 벗어났는지를 \(\max_k\abs{P_k + P_{k+3}}\)와 \(\max_k\abs{P_{k+1} - P_k - P_{k+2}}\)의 합을 평균 edge 길이로 나눈 값으로 잴 수 있다(접평면에 사영한 값). regular grid에서는 \(n = 24, 48, 96\)에서 \(0.41, 0.20, 0.10\)으로 \(h\)에 비례해 \(0\)에 간다. subdivided mesh에서는 level 2–4에서 원래 vertex가 \(1.20\), 원래 edge 위가 \(0.96\), 원래 face 안쪽이 \(0.11\)–\(0.12\)로 줄지 않는다. 오차가 멈추는 세 높이와 순서가 같다. 이것은 실험이 보여 주는 관계이고, 이 절에서 정리로 증명하지는 않는다.</p>
+
+      <div class="thm remark" id="i-41-4-6">
+        <p><span class="thm-head">Remark 41.4.6</span> <span class="thm-name">(what is known)</span>.
+        강의 슬라이드는 vertex의 valence가 4나 6이 아니면 angle defect가 점마다 수렴하지 않는다는 결과를 <a class="cite" href="../../references.html#Borrelli03">[Borrelli03]</a>에서 인용한다 <a class="cite" href="../../references.html#CMU-DDG-L16">[CMU-DDG L16]</a> slide 18. <a href="#i-41-4-5">Example 41.4.5</a>는 이것과 대체로 맞는다. 다음은 그 표를 읽은 해석이다. 평면 lattice의 한 점의 이웃 모양은 valence 4(평행사변형)와 6(위의 hexagon)에서 나오고, 그런 모양 쪽으로 다가가지 않는 one-ring에서는 값이 틀린 극한으로 간다. 거꾸로 valence가 6이어도 모양이 lattice로 다가가지 않으면 수렴하지 않는다는 것이 <a href="#i-41-4-4">Example 41.4.4</a>이고, valence 5인 icosphere의 vertex에서 mixed area로 수렴하는 것(<a href="../40-discrete-curvature-integral/40-1-angle-defect.html#fig-40-1-3">Figure 40.1.3</a>)은 sphere가 방향에 무관한 곡면이기 때문으로 볼 수 있다(regular pentagon은 paraboloid에서 맞았다). square는 tilted 곡면에서 틀렸으므로, valence 4의 정확한 조건은 이 표보다 더 섬세하다. 원 논문의 정확한 가정은 확인하지 못했다. mean curvature에 대해서는 Chapter 31이 <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>를 소개했다(<a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>). polyhedral surface의 열이 smooth surface에 Hausdorff distance로 수렴하고 normal도 수렴하면(이 논문은 이것을 totally normal convergence라 부르고, 넓이, metric, Laplace–Beltrami operator의 수렴과 동치임을 보인다), mean curvature vector를 test function과 짝짓는 functional로 본 weak mean curvature가 수렴한다는 내용이다(Sobolev space \(H^1_0\)의 dual norm으로). 그러나 그것을 piecewise linear 함수로 바꾼 discrete mean curvature(FEM의 mass matrix로 푼 것)는 \(L^2\)에서조차 수렴하지 않을 수 있고, 그 반례가 cylinder의 4-8 tessellation이다(<a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-8">Example 31.2.8</a>과 같은 배치). 저자가 공개한 판(ZIB-Report 05-24)으로 확인했다. 위의 weak error의 차수 \(2\)는 그 진술과 같은 방향의 관찰이다. 또 discrete Laplacian 전반에 대해서는 원하는 성질(대칭, locality, linear precision, 양의 weight)을 일반 mesh에서 모두 갖는 것이 없다 <a class="cite" href="../../references.html#Wardetzky07">[Wardetzky07]</a>(<a href="../31-meshes/31-3-cotangent-laplacian.html">Section 31.3</a>). 수렴도 그런 trade-off의 하나다.</p>
+      </div>
+    </section>
+
+    <section id="sec-meaning">
+      <h2>What “Convergence” Means</h2>
+      <p>이 장의 실험을 정리하면 “discrete curvature가 수렴한다”는 말에는 적어도 세 가지 뜻이 있다.</p>
+      <ul>
+        <li><strong>정확하다.</strong> 수렴이 필요 없다. 모든 mesh에서 등식이다. Gauss–Bonnet, gradient의 합, Schläfli formula, convex polyhedron의 Steiner formula가 그렇다.</li>
+        <li><strong>적분한 뜻으로 수렴한다.</strong> 매끄러운 함수와 짝지어 더한 값이 수렴한다. 이 장의 실험에서는 regular grid와 subdivided mesh 모두 차수 \(2\)였다. 넓이 가중 평균 오차 \(E_2\)는 그 중간이다.</li>
+        <li><strong>점마다 수렴한다.</strong> 모든 vertex의 값이 smooth 값에 다가간다. vertex의 배치가 \(h \to 0\)에서 충분히 규칙적인 모양으로 다가가야 하고, dual area도 알맞게 골라야 한다(<a href="../40-discrete-curvature-integral/40-1-angle-defect.html#fig-40-1-3">Figure 40.1.3</a>의 barycentric area).</li>
+      </ul>
+      <p>그래서 mesh의 curvature를 쓸 때는 어느 뜻이 필요한지부터 묻는다. 위상을 세거나 energy를 적분하는 계산이면 앞의 두 뜻으로 충분하다. curvature를 vertex마다 시각화하거나 그 값으로 feature를 고르는 계산이면 셋째 뜻이 필요하고, 그때는 mesh의 품질이 결과를 정한다.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: a convergence study</p>
+<pre id="code-41-4-1"><code>import numpy as np
+import dgmesh as dm
+import dgdec as dd
+R, r = 2.0, 0.8
+def exact_K_H(V):                                   # torus of revolution, outward normal (Notation)   
+    u = np.arctan2(V[:, 2], np.hypot(V[:, 0], V[:, 1]) - R)
+    return np.cos(u) / (r * (R + r * np.cos(u))), -(R + 2 * r * np.cos(u)) / (2 * r * (R + r * np.cos(u)))
+def subdivided(level):
+    """torus_mesh(R, r, 8, 16) refined by midpoint subdivision; every new vertex is projected to the torus"""
+    V, F = dm.torus_mesh(R, r, 8, 16)
+    for _ in range(level):
+        n = len(V)
+        V, F = dm.subdivide(V, F)
+        u, v = np.arctan2(V[n:, 2], np.hypot(V[n:, 0], V[n:, 1]) - R), np.arctan2(V[n:, 1], V[n:, 0])
+        V[n:] = np.c_[(R + r * np.cos(u)) * np.cos(v), (R + r * np.cos(u)) * np.sin(v), r * np.sin(u)]
+    return V, F
+def errors(V, F):
+    """mean edge length h and the max and area-weighted L2 errors of K_i = delta_i / A_i and H_i (mixed A_i)"""
+    A, (K, H), E = dm.mass_voronoi(V, F), exact_K_H(V), dm.edges(F)
+    eK, eH = dm.angle_defect(V, F) / A - K, dd.mean_curvature(V, F) - H
+    L2 = lambda e: np.sqrt(np.sum(A * e ** 2) / A.sum())
+    return np.linalg.norm(V[E[:, 0]] - V[E[:, 1]], axis=1).mean(), np.abs(eK).max(), L2(eK), np.abs(eH).max(), L2(eH)
+for name, meshes in (("regular grid", [dm.torus_mesh(R, r, n, 2 * n) for n in (12, 24, 48, 96)]),
+                     ("subdivided", [subdivided(k) for k in (1, 2, 3, 4)])):
+    rows = np.array([errors(V, F) for V, F in meshes])
+    order = np.log2(rows[:-1, 1:] / rows[1:, 1:])                     # observed order between successive meshes
+    print(f"{name}: h = {np.round(rows[:, 0], 3)}")
+    for c, label in enumerate(("K  max", "K  L2 ", "H  max", "H  L2 ")):
+        print(f"  {label} {' '.join(f'{x:.1e}' for x in rows[:, c + 1])}   order {' '.join(f'{p:5.2f}' for p in order[:, c])}")
+</code></pre>
+<pre id="out-41-4-1"><code>regular grid: h = [0.536 0.269 0.135 0.067]
+  K  max 2.9e-02 7.5e-03 1.9e-03 4.8e-04   order  1.95  1.99  2.00
+  K  L2  1.1e-02 2.8e-03 7.0e-04 1.7e-04   order  2.00  2.00  2.00
+  H  max 1.1e-02 2.9e-03 7.3e-04 1.8e-04   order  1.93  1.98  2.00
+  H  L2  4.9e-03 1.3e-03 3.2e-04 8.0e-05   order  1.95  1.98  1.99
+subdivided: h = [0.403 0.202 0.101 0.051]
+  K  max 3.8e-02 2.9e-02 2.7e-02 2.7e-02   order  0.35  0.11  0.03
+  K  L2  8.2e-03 3.9e-03 2.0e-03 9.7e-04   order  1.06  1.00  1.02
+  H  max 1.7e-02 2.4e-02 2.9e-02 3.1e-02   order -0.50 -0.25 -0.12
+  H  L2  9.4e-03 5.4e-03 2.8e-03 1.5e-03   order  0.79  0.93  0.97</code></pre>
+        <p><code>subdivided</code>는 <a href="#i-41-4-4">Example 41.4.4</a>의 mesh를 만든다. 새 vertex의 \((u, v)\)를 위치에서 읽어(\(v\)는 방위각, \(u\)는 관의 중심원에서 본 각) torus 위의 점으로 바꾼다. <code>errors</code>는 <a href="#eq-41-4-1">(41.4.1)</a>의 \(E_\infty\)와 \(E_2\)를 \(K_i\), \(H_i\)에 대해 계산하고, 마지막 반복문은 두 수열의 오차와 이웃한 mesh 사이의 관찰된 차수를 찍는다. regular grid에서는 넷 다 차수가 \(2\)에 다가가고, subdivided mesh에서는 최댓값의 차수가 \(0\) 근처(\(H\)는 음수), \(L^2\)의 차수가 \(1\) 근처다.</p>
+        <p class="verified">Verification: <code>verify/v-41-4-convergence.py</code>가 이 코드를 그대로 실행하고 출력과 비교한다.</p>
+      </aside>
+
+      <aside class="box discrete">
+        <p class="box-title">Smooth vs. Discrete: approximation</p>
+        <p><strong>smooth</strong>: \(K\)와 \(H\)는 점마다의 함수이고, 그 적분과 점마다의 값은 같은 정보를 준다.</p>
+        <p><strong>discrete</strong>: vertex의 값은 dual cell 위의 적분을 넓이로 나눈 것이다. 적분은 정확하거나(Gauss–Bonnet) 빠르게 수렴하지만, 나눈 값은 one-ring의 모양에 좌우된다.</p>
+        <p><strong>무엇을 보존하는가</strong>: 적분한 정보. 정확한 항등식은 machine precision으로, weak error는 이 장의 모든 실험에서 \(O(h^2)\)로 맞았다. <strong>무엇을 잃는가</strong>: 점마다의 신뢰성. regular grid에서는 \(O(h^2)\)이지만, 같은 valence의 subdivided mesh에서는 \(h\)를 8배 줄여도 오차가 \(0.03\) 근처에 머문다.</p>
+      </aside>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: <a href="../31-meshes/31-2-discrete-curvature.html#fig-31-2-5">Figure 31.2.5</a></p>
+        <p>Chapter 31은 \((u, v)\)를 무작위로 흔든 torus에서 점마다의 오차가 줄지 않고 \(\cos u\)와 짝지은 적분 오차는 줄어드는 것을 보였다(<a href="../31-meshes/31-2-discrete-curvature.html#fig-31-2-5">Figure 31.2.5</a>). 이 절이 새로 한 것은 셋이다. 무작위가 아닌 규칙적인 subdivision에서도, 그리고 모든 vertex의 valence가 6이어도 같은 일이 일어난다는 것을 보였고, 오차가 머무는 vertex의 종류와 높이를 나누어 재었으며, 그 원인을 one-ring의 모양(<a href="#i-41-4-5">Example 41.4.5</a>)으로 떼어 보았다.</p>
+      </aside>
+
+      <aside class="box deeper">
+        <p class="box-title">Go deeper</p>
+        <ul>
+          <li>Track 1: <a href="../31-meshes/31-2-discrete-curvature.html#sec-choosing">Section 31.2</a>(<a href="../31-meshes/31-2-discrete-curvature.html#i-31-2-8">Example 31.2.8</a>, <a href="../31-meshes/31-2-discrete-curvature.html#fig-31-2-5">Figure 31.2.5</a>).</li>
+          <li>FEM의 수렴 이론과 Laplacian: Chapter 42(<a href="../42-laplace-beltrami/42-3-fem.html">Section 42.3</a>).</li>
+          <li>논문: angle defect의 점마다 수렴 <a class="cite" href="../../references.html#Borrelli03">[Borrelli03]</a>, polyhedral surface의 수렴 <a class="cite" href="../../references.html#Hildebrandt06">[Hildebrandt06]</a>, discrete Laplacian의 trade-off <a class="cite" href="../../references.html#Wardetzky07">[Wardetzky07]</a>. 노트의 실험 안내 <a class="cite" href="../../references.html#Cr">[Cr §5.6]</a>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>정확한 항등식(Gauss–Bonnet, gradient의 합, Schläfli)은 machine precision으로 검사한다. 이것이 구현의 오류를 잡는 첫 단계다(<a href="#i-41-4-1">Example 41.4.1</a>).</li>
+        <li>근사는 refinement 수열에서 \(E_\infty\), \(E_2\), weak error를 재고 log-log 기울기로 차수를 읽는다(<a href="#i-41-4-2">Remark 41.4.2</a>).</li>
+        <li>regular torus grid에서는 \(\delta_i/A_i\), cotan \(H_i\), Steiner \(H_i\), \(\kappa_{1,i}\)가 모두 \(O(h^2)\)로 점마다 수렴한다(<a href="#i-41-4-3">Example 41.4.3</a>).</li>
+        <li>같은 valence 6이어도 subdivision으로 만든 mesh에서는 점마다의 오차가 멈추고, \(E_2\)는 \(O(h)\), weak error는 \(O(h^2)\)이다. 원인은 \(h\)로 나누어 본 one-ring의 모양이다(<a href="#i-41-4-4">Example 41.4.4</a>, <a href="#i-41-4-5">Example 41.4.5</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 이 장의 gradient로 surface를 움직인다. 넓이의 gradient flow는 mean curvature flow이고, total mean curvature의 gradient flow는 Gauss curvature flow다. 그리고 \(\int H^2\,dA\)의 gradient flow인 Willmore flow를 더한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Exercises</h2>
+
+      <div class="exercise" id="ex-41-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 41.4.1</span> <span class="level">★</span>
+        <a href="#i-41-4-3">Example 41.4.3</a>의 \(E_\infty\)(\(K\)) 값으로 세 관찰된 차수를 직접 계산하여라. 이 차수가 \(2\)이면, \(E_\infty = 10^{-6}\)을 얻으려면 \(n\)이 대략 얼마여야 하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\log_2(0.029/0.0075) = 1.95\), \(\log_2(0.0075/0.0019) = 1.99\), \(\log_2(0.0019/0.00048) = 2.00\)이다(반올림한 값으로 계산하면 마지막 자리가 조금 다를 수 있다). 차수 \(2\)면 \(n\)을 두 배로 할 때마다 오차가 \(\tfrac14\)이므로, \(n = 96\)의 \(4.8\times10^{-4}\)에서 \(10^{-6}\)까지는 \(\log_4(480) \approx 4.5\)번, 곧 \(n \approx 96\cdot2^{4.5} \approx 2200\)이다. 그때 vertex는 \(2n^2 \approx 10^7\)개다. 점마다의 정확도를 높이는 비용이 빠르게 커진다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-4-2" data-level="1">
+        <p><span class="thm-head">Exercise 41.4.2</span> <span class="level">★</span>
+        닫힌 mesh에서 test function이 상수 \(\phi = 1\)이면 \(K\)의 weak error가 정확히 \(0\)임을 보여라. \(\phi = x^2 + y^2\)이면 왜 \(0\)이 아닌가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\phi = 1\)이면 \(\sum_i\delta_i\phi = \sum_i\delta_i = 2\pi\chi\)(<a href="../40-discrete-curvature-integral/40-2-discrete-gauss-bonnet.html#i-40-2-1">Theorem 40.2.1</a>)이고 \(\int K\,dA = 2\pi\chi\)(Gauss–Bonnet theorem)이므로 차이가 \(0\)이다. \(\phi = \rho^2\)이면 \(\sum_i\delta_i\rho_i^2\)는 vertex마다 \(\delta_i\)에 그 점의 \(\rho^2\)를 곱하므로 dual cell 안에서 \(\rho^2\)이 변하는 몫과 \(\delta_i\)가 vertex마다 틀리는 몫이 남는다. 둘 다 이웃끼리 대부분 상쇄되어 \(O(h^2)\)가 된다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-4-3" data-level="1">
+        <p><span class="thm-head">Exercise 41.4.3</span> <span class="level">★</span>
+        참인지 거짓인지 말하고 이유를 써라. (a) 모든 vertex의 valence가 6인 mesh에서는 \(\delta_i/A_i\)가 점마다 수렴한다. (b) 점마다 수렴하지 않는 mesh에서는 \(L^2\) 오차도 줄지 않는다. (c) \(\abs{\sum\delta_i - 2\pi\chi}\)가 \(10^{-6}\)이면 구현을 의심해야 한다. (d) regular pentagon 모양의 one-ring은 sphere에서도 saddle에서도 틀린 \(K\)로 간다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) 거짓. subdivided torus(<a href="#i-41-4-4">Example 41.4.4</a>). (b) 거짓. 같은 mesh에서 \(E_2\)는 차수 \(1\)로 준다. 나쁜 vertex가 차지하는 넓이가 줄기 때문이다. (c) 참. discrete Gauss–Bonnet은 정확한 등식이므로 반올림 오차(\(n_0\epsilon\), 이 장의 mesh에서 \(10^{-11}\) 이하)보다 훨씬 큰 차이는 구현의 문제다(예: 각을 잘못 셈, 퇴화한 face). (d) 거짓. 방향에 무관한 paraboloid(\(K = 1\))에서는 정확했다. 틀리는 것은 saddle과 tilted 곡면이다(<a href="#i-41-4-5">Example 41.4.5</a>).</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-4-4" data-level="2">
+        <p><span class="thm-head">Exercise 41.4.4</span> <span class="level">★★</span>
+        <strong>Coding.</strong> unit sphere의 <code>icosphere(level)</code>(level 2–5)의 vertex를 접선 방향으로 무작위로(각 성분 \([-1, 1]\)의 균등 난수를 접평면에 사영하고 평균 edge 길이의 \(0.15\)배, seed = level) 흔든 뒤 sphere로 되돌려라. \(\delta_i/A_i\)와 \(H_i\)의 \(E_\infty\)와 weak error(\(\phi = z^2\), \(\int z^2\,dA = \tfrac{4\pi}{3}\), \(\int Hz^2\,dA = -\tfrac{4\pi}{3}\))를 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-41-4-4"><code>for level in (2, 3, 4, 5):
+    V, F = dm.icosphere(level)
+    E = dm.edges(F)
+    ell = np.linalg.norm(V[E[:, 0]] - V[E[:, 1]], axis=1).mean()
+    D = np.random.default_rng(level).uniform(-1, 1, V.shape)
+    D -= np.sum(D * V, 1, keepdims=True) * V                         # tangential random directions
+    V = V + 0.15 * ell * D
+    V /= np.linalg.norm(V, axis=1, keepdims=True)                      # jittered, still on the unit sphere
+    A, delta, H = dm.mass_voronoi(V, F), dm.angle_defect(V, F), dd.mean_curvature(V, F)
+    z2 = V[:, 2] ** 2                                                  # test function; int z^2 dA = 4 pi / 3
+    print(f"level {level}: h = {ell:.4f}  pointwise K {np.abs(delta / A - 1).max():.4f}, H {np.abs(H + 1).max():.4f}   "
+          f"weak K {abs(np.sum(delta * z2) - 4 * np.pi / 3):.1e}, H {abs(np.sum(A * H * z2) + 4 * np.pi / 3):.1e}")
+</code></pre>
+<pre id="out-ex-41-4-4"><code>level 2: h = 0.2993  pointwise K 0.0624, H 0.0428   weak K 4.1e-04, H 8.1e-02
+level 3: h = 0.1507  pointwise K 0.0469, H 0.0419   weak K 8.9e-05, H 2.1e-02
+level 4: h = 0.0755  pointwise K 0.0479, H 0.0467   weak K 1.7e-05, H 5.1e-03
+level 5: h = 0.0378  pointwise K 0.0796, H 0.0792   weak K 1.2e-06, H 1.3e-03</code></pre>
+          <p>점마다의 오차는 \(0.04\)–\(0.08\)에서 줄지 않고 level 5에서는 오히려 크다. 흔든 정도가 edge 길이에 비례하므로 one-ring의 모양이 \(h\)로 나누어 보아 일정하게 불규칙하기 때문이다. weak error는 \(H\)에서 level마다 약 \(\tfrac14\)로(차수 \(2\)), \(K\)에서는 그보다 빠르게 준다. 이것이 Chapter 31의 jittered torus(<a href="../31-meshes/31-2-discrete-curvature.html#fig-31-2-5">Figure 31.2.5</a>)와 같은 현상을 sphere와 다른 test function에서 다시 본 것이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-41-4-5" data-level="2">
+        <p><span class="thm-head">Exercise 41.4.5</span> <span class="level">★★</span>
+        <strong>Coding.</strong> <a href="#i-41-4-5">Example 41.4.5</a>의 표를 만들어라. 평면의 star를 \(h = 10^{-3}\)으로 줄여 \(z = \tfrac12(ax^2 + 2bxy + cy^2)\) 위로 들어 올리고, 원점의 \(\delta_i/A_i\)(mixed area)를 계산한다. lattice hexagon이 세 곡면 모두에서 정확한 이유를 한 문장으로 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+<pre id="code-ex-41-4-5"><code>def star_curvature(P, h, a, b, c):
+    """delta_i / A_i (mixed area) at the apex of the star with link h P (P: (m, 2), in order) on z = (a x^2 + 2 b x y + c y^2) / 2"""
+    Q = h * np.asarray(P, float)
+    V = np.vstack([[0, 0, 0], np.c_[Q, (a * Q[:, 0] ** 2 + 2 * b * Q[:, 0] * Q[:, 1] + c * Q[:, 1] ** 2) / 2]])
+    F = np.array([[0, 1 + k, 1 + (k + 1) % len(P)] for k in range(len(P))])
+    return dm.angle_defect(V, F)[0] / dm.mass_voronoi(V, F)[0]        # boundary vertices do not matter here
+polygon = lambda m: np.c_[np.cos(2 * np.pi * np.arange(m) / m), np.sin(2 * np.pi * np.arange(m) / m)]
+stars = {"regular hexagon": polygon(6), "lattice hexagon": [[1, 0], [1.3, 0.8], [0.3, 0.8], [-1, 0], [-1.3, -0.8], [-0.3, -0.8]],
+         "irregular hexagon": polygon(6) * np.array([1, 0.7, 1.2, 0.9, 1.1, 0.8])[:, None],
+         "regular pentagon": polygon(5), "square": polygon(4)}
+surfaces = {"paraboloid K = 1": (1, 0, 1), "saddle K = -1": (1, 0, -1), "tilted K = -0.95": (1.3, 0.2, -0.7)}
+print(f"{'link shape':18s}" + "".join(f"{name:&gt;18s}" for name in surfaces))
+for name, P in stars.items():
+    print(f"{name:18s}" + "".join(f"{star_curvature(P, 1e-3, *abc):18.4f}" for abc in surfaces.values()))
+</code></pre>
+<pre id="out-ex-41-4-5"><code>link shape          paraboloid K = 1     saddle K = -1  tilted K = -0.95
+regular hexagon               1.0000           -1.0000           -0.9500
+lattice hexagon               1.0000           -1.0000           -0.9500
+irregular hexagon             1.0000           -1.0952           -1.0536
+regular pentagon              1.0000           -0.8090           -0.7514
+square                        1.0000           -1.0000           -0.9100</code></pre>
+          <p><code>star_curvature</code>는 apex와 link로 star 하나를 만들고 apex의 angle defect를 mixed area로 나눈다. link의 vertex는 boundary vertex라 그 값은 쓰지 않는다. lattice hexagon은 평행사변형 격자 \(\{mP_1 + nP_3\}\)의 한 점의 이웃이므로, 평면 전체를 그 격자로 덮은 mesh를 이차 곡면에 들어 올리면 모든 vertex가 같은 모양의 one-ring을 갖는다. 그런 mesh에서는 Gauss–Bonnet과 대칭이 함께 작용해 점마다의 값이 맞게 된다고 볼 수 있다. 이것은 해석이고, 정확한 증명은 <a class="cite" href="../../references.html#Borrelli03">[Borrelli03]</a>의 주제다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="41-3-panorama.html">← 41.3 A Panorama of Discrete Curvatures</a>
+    <a rel="next" href="41-5-surface-flows.html">41.5 Curvature Flows on Surfaces →</a>
+  </nav>
+</body>
+</html>

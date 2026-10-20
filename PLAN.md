@@ -1239,3 +1239,36 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - 포트는 Chrome이 고른다(--remote-debugging-port=0, 새 user-data-dir의 DevToolsActivePort).
     - Chrome 프로세스 그룹 전체를 종료하고 profile 폴더를 지운다.
     - 예전 shot.mjs 실행에서 남은 고아 headless Chrome 약 46개(61h, 304h)는 종료 명령이 권한 분류기에 막혔다. 사용자에게 알린다.
+- 2026-10-21: **41장 reviewed, 공개. Track 2의 14장이 모두 reviewed다.**
+  - 검토가 고친 것
+    - 안쪽 normal GCF의 수치 해석: 불안정해서 t = 0.065에서는 이미 sphere가 아니다. t = 0.0325의 1.0316으로 바꿨다.
+    - cube normal flow 속력의 조건(대각선 배치)
+    - Example 41.2.2(b)의 tangential 성분
+    - Exercise 41.3.6의 |H| 최댓값
+    - stiffness 행렬 K → B
+    - "흐름" 33곳 → flow
+    - slide 32–33 번역 문단
+    - Hildebrandt06: 저자 공개판(ZIB-Report 05-24)으로 확인하고 Remark 41.4.6을 그 범위로 썼다.
+    - Huisken84·Grayson89·MarquesNeves14 cite
+  - 원문 대조: 작성자의 Crane 주장은 모두 맞았다. slide 36·38의 update 부호는 Crane 자신의 gradient로 읽어도 틀리다.
+  - 통합
+    - 다른 장의 Chapter 41 todo 11개를 정확한 항목으로 확정했다: 39.2, 39.3, 40.1–40.4, 42.1, 42.6 ×2, 45 index
+    - 32–40장의 41장 toc 앵커 21곳을 실제 절로 바꿨다.
+    - notation 2행, terms 4개(변분, 둘러싼 부피, 전진 차분, 수렴 차수). 루트 index의 41을 Reviewed로 바꿨다.
+  - 이제 Track 2 안에 다른 장을 가리키는 todo는 없다.
+- 2026-10-21: **C(Track 2 통합 검토) 시작.** 3명이 나누어 맡는다: C1 32–36, C2 37–41, C3 42–45.
+  - 공통 점검: 흐름, 장 사이 기호·부호 일관성, Threads, §3.5 기준 예제 여정, §16, 언어, 휴대폰 폭
+  - 언어 결정: "곡면"은 terms.tsv대로 surface로 쓴다(§8. terms_keep에 없다). 약 330곳이다. dfn 뒤 괄호의 번역어는 그대로 둔다.
+  - 개별 항목
+    - C2: REVIEW 2개(37.6 Fig 37.6.1(a), 37.1 Looking ahead/back), todo 2개(37.4 Pinkall, 40.4 3D signed Steiner)
+    - C3: 42.3 Hildebrandt06 todo, 43.5 행렬 K, 45 index 회고
+  - 공유 파일(루트 index Threads, GUIDELINES §3.5 Track 2 칸, notation)은 보고를 받아 통합 담당이 반영한다.
+  - 지금 도는 것: D(Track 1 링크), C1, C2, C3. 41장 공개용 check_all이 백그라운드에서 돈다.
+- 2026-10-21: **D(Track 1 → Track 2 연결) 완료.**
+  - Tour 0.1–0.8, 31.1–31.6과 31 index, 28.4, 29.6, 30.1의 18페이지에 Track 2 항목 링크를 약 220개 달았다. Go deeper `<li>`와 항목 뒤 한 문장 `<p>`로 넣었다.
+  - check_all 0·28·29·30·31 OK
+  - 통합 담당이 고친 것
+    - 0.1의 사이트 구성을 세 track으로 고쳤다(Part IV와 Track 2가 빠져 있었다).
+    - 0.4의 "이 공식은 증명하지 않는다"를 Prop 41.2.1(유도)로 바꿨다.
+  - 31장 interactive 그림 5개는 새 plotly_save로 다시 만들어졌다.
+  - Track 1의 400px 문제는 원래부터 있던 것이고 고치지 않았다(Track 2 범위 밖, 보고만): 0.3, 0.5, 31.1–31.3, 31.5, 31.6, 28.4, 29.6의 page width가 400을 넘는다.
