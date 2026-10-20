@@ -1225,3 +1225,17 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
   - 18페이지 모두 400px에서 넘침 0이고 page width는 400이다. check_all 32·33·34 OK
   - 숨은 보조 MathML이 페이지를 넓히던 곳도 더 잘게 나눠 해결했다.
   - ddg32.CURVES의 ellipse와 flower를 dgsym.EXAMPLES에서 가져오게 했다(EXAMPLES["flower"]["radius"]를 더했다). 32장 그림 SVG는 바이트 단위로 같다. ddg37도 P3가 끝나면 같은 방식으로 바꾼다.
+- 2026-10-21: **P2(35·36·42)와 P3(37·38) 휴대폰 폭 정리 완료.**
+  - P2는 20페이지에서 display 15개, inline 60여 개를 고쳤다. P3는 14페이지에서 inline 75개를 고쳤다.
+  - 모든 페이지가 400px에서 넘침 0이고 page width는 400이다. check_all OK
+  - P2가 원인을 찾았다: 숨은 보조 MathML(mjx-assistive-mml)이 보이는 수식보다 15–20% 넓다. 그래서 줄바꿈 위치에 따라 페이지 폭이 늘어난다.
+    - style.css에 `mjx-assistive-mml { max-width: 100%; }`를 넣었다. 사이트 전체에서 막히고, 화면은 바뀌지 않는다.
+  - 통합
+    - ddg37도 dgsym.EXAMPLES의 ellipse와 flower를 쓴다.
+    - 42.1·42.6의 Chapter 45 todo → Def 45.1.6, Prop 45.1.13
+    - 32–38장의 45장 toc 앵커 링크 14곳을 실제 절로 바꿨다.
+  - shot.mjs 개선
+    - inline 검사에서 스크롤 상자(overflow-x auto, 표·pre) 안은 건너뛰고, th를 블록에 넣었다.
+    - 포트는 Chrome이 고른다(--remote-debugging-port=0, 새 user-data-dir의 DevToolsActivePort).
+    - Chrome 프로세스 그룹 전체를 종료하고 profile 폴더를 지운다.
+    - 예전 shot.mjs 실행에서 남은 고아 headless Chrome 약 46개(61h, 304h)는 종료 명령이 권한 분류기에 막혔다. 사용자에게 알린다.

@@ -35,11 +35,12 @@ import dgsym  # noqa: E402
 
 J = np.array([[0.0, -1.0], [1.0, 0.0]])
 
-T_SYM = sp.symbols("t", real=True)
+T_SYM = dgsym.EXAMPLES["ellipse"]["coords"][0]
 A_SYM = sp.symbols("a", positive=True)
-ELLIPSE_EXPR = sp.Matrix([2 * sp.cos(T_SYM), sp.sin(T_SYM)])
-FLOWER_R = 1 + sp.Rational(3, 10) * sp.cos(5 * T_SYM)
-FLOWER_EXPR = sp.Matrix([FLOWER_R * sp.cos(T_SYM), FLOWER_R * sp.sin(T_SYM)])
+# the ellipse and the flower curve are defined once, in dgsym.EXAMPLES (GUIDELINES 3.6)
+ELLIPSE_EXPR = sp.Matrix(list(dgsym.EXAMPLES["ellipse"]["expr"][:2]))
+FLOWER_R = dgsym.EXAMPLES["flower"]["radius"]
+FLOWER_EXPR = sp.Matrix(list(dgsym.EXAMPLES["flower"]["expr"][:2]))
 FIG8_EXPR = sp.Matrix([sp.sin(T_SYM), sp.sin(T_SYM) * sp.cos(T_SYM)])
 CIRCLE_EXPR = dgsym.EXAMPLES["circle"]["expr"][:2, :]          # (r cos t, r sin t)
 

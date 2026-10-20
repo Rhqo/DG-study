@@ -3,21 +3,37 @@
 // out 자리에 -를 주면 캡처하지 않고 검사만 한다.
 // 넘치는 디스플레이 수식, 문단 밖으로 넘치는 inline 수식, 페이지 가로 스크롤(문서 폭 > 창 폭)을 출력한다. (GUIDELINES.md 부록 E)
 import { spawn } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { writeFileSync, readFileSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const [file, out, widthArg] = process.argv.slice(2);
 const width = Number(widthArg || 900);
-const port = 9300 + Math.floor(Math.random() * 500);
+// 포트는 Chrome이 고르게 하고(0), 새 profile 폴더의 DevToolsActivePort에서 읽는다. 남아 있는 다른 Chrome과 겹치지 않는다.
+const profile = mkdtempSync(join(tmpdir(), "shot-"));
 const chrome = spawn("google-chrome", [
-  "--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
-  `--remote-debugging-port=${port}`, `--window-size=${width},1200`, "about:blank",
-], { stdio: "ignore" });
+  "--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars", `--user-data-dir=${profile}`,
+  "--remote-debugging-port=0", `--window-size=${width},1200`, "about:blank",
+], { stdio: "ignore", detached: true });
+// Chrome은 자식 프로세스(renderer, zygote 등)를 따로 둔다. 프로세스 그룹 전체를 끝내야 남지 않는다.
+const cleanup = () => {
+  try { process.kill(-chrome.pid, "SIGKILL"); } catch { try { chrome.kill("SIGKILL"); } catch {} }
+  for (let i = 0; i < 30; i++) {
+    try { rmSync(profile, { recursive: true, force: true }); break; } catch { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100); }
+  }
+};
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let port = null;
+for (let i = 0; i < 150 && port === null; i++) {
+  try { port = Number(readFileSync(join(profile, "DevToolsActivePort"), "utf8").split("\n")[0]) || null; } catch { await sleep(100); }
+}
+if (port === null) { cleanup(); throw new Error("chrome did not start"); }
 async function getJSON(path) {
   for (let i = 0; i < 100; i++) {
     try { const r = await fetch(`http://127.0.0.1:${port}${path}`); return await r.json(); } catch { await sleep(100); }
   }
+  cleanup();
   throw new Error("chrome did not start");
 }
 
@@ -61,7 +77,11 @@ const ov = await send("Runtime.evaluate", { expression: ovExpr, returnByValue: t
 console.log("overflowing displays:", ov.result.result.value);
 const inExpr = `JSON.stringify(Array.from(MathJax.startup.document.math).filter(it => !it.display && it.typesetRoot).filter(it => {
   const e = it.typesetRoot; const r = e.getBoundingClientRect(); if (r.width === 0) return false;
-  const blk = e.parentElement.closest('p, li, div, td, figcaption, dd, summary') || document.body;
+  for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) {
+    const ox = getComputedStyle(a).overflowX;
+    if (ox === 'auto' || ox === 'scroll') return false;  // 스크롤 상자(표, pre) 안은 페이지를 넓히지 않는다
+  }
+  const blk = e.parentElement.closest('p, li, div, td, th, figcaption, dd, summary') || document.body;
   return r.right > blk.getBoundingClientRect().right + 1;
 }).map(it => { const p = it.typesetRoot.closest('[id]'); return (p ? p.id : '?') + ' :: ' + it.math.slice(0, 90); }))`;
 const inl = await send("Runtime.evaluate", { expression: inExpr, returnByValue: true });
@@ -70,7 +90,7 @@ const sw = await send("Runtime.evaluate", { expression: "document.documentElemen
 console.log(`page width: ${sw.result.result.value} / ${width}${sw.result.result.value > width ? "  HORIZONTAL SCROLL" : ""}`);
 if (out === "-") {
   console.log(`mathjax ${ok ? "done" : "TIMEOUT"}, containers ${cnt.result.result.value}, errors ${errs.result.result.value}`);
-  ws.close(); chrome.kill("SIGKILL"); process.exit(0);
+  ws.close(); cleanup(); process.exit(0);
 }
 const m = await send("Page.getLayoutMetrics");
 const h = Math.ceil(m.result.cssContentSize.height);
@@ -80,5 +100,5 @@ const shot = await send("Page.captureScreenshot", { format: "png", captureBeyond
 writeFileSync(out, Buffer.from(shot.result.data, "base64"));
 console.log(`mathjax ${ok ? "done" : "TIMEOUT"}, containers ${cnt.result.result.value}, errors ${errs.result.result.value}, height ${h}`);
 ws.close();
-chrome.kill("SIGKILL");
+cleanup();
 process.exit(0);
