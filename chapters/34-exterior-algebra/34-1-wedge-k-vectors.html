@@ -50,7 +50,7 @@
 
     <section id="sec-motivation">
       <h2>Motivation</h2>
-      <p>Track 2의 목표는 mesh 위에서 미분기하의 계산을 하는 것이다(<a href="../32-ddg-overview/index.html">Chapter 32</a>). <a href="../33-combinatorial-surfaces/index.html">Chapter 33</a>에서 보았듯이 mesh는 vertex, edge, triangle, tetrahedron으로 되어 있고, 이것들은 각각 \(0, 1, 2, 3\)차원의 작은 조각이다. mesh 위의 방정식을 풀려면 이런 조각 위에서 무언가를 적분하고, 조각끼리 비교하고, 조각의 경계를 따라 더해야 한다. 그러려면 먼저 “방향이 있는 작은 \(k\)차원 부피”를 대수적으로 다룰 수 있어야 한다.</p>
+      <p>Track 2의 목표는 mesh 위에서 미분기하의 계산을 하는 것이다(<a href="../32-ddg-overview/index.html">Chapter 32</a>). <a href="../33-combinatorial-surfaces/index.html">Chapter 33</a>에서 보았듯이 mesh는 vertex, edge, triangle, tetrahedron으로 되어 있고, 이것들은 각각 \(0, 1, 2, 3\)차원의 작은 조각이다. mesh 위의 방정식을 풀려면 이런 조각 위에서 무언가를 적분하고, 조각끼리 비교하고, 조각의 boundary를 따라 더해야 한다. 그러려면 먼저 “방향이 있는 작은 \(k\)차원 부피”를 대수적으로 다룰 수 있어야 한다.</p>
       <p>Crane의 강의와 노트는 이 길을 네 단계로 나눈다 <a class="cite" href="../../references.html#Cr">[Cr ch. 4]</a>, <a class="cite" href="../../references.html#CMU-DDG-L3">[CMU-DDG L3]</a>.</p>
       <ul>
         <li><strong>linear algebra</strong>: vector, 즉 화살표를 더하고 늘인다(Chapter 1).</li>
@@ -58,7 +58,7 @@
         <li><strong>exterior algebra</strong>: \(k\)차원의 작은 부피(\(k\)-vector)를 더하고 늘이고 곱한다. 이 장의 주제다.</li>
         <li><strong>exterior calculus</strong>: 점마다 붙은 작은 부피와 그것을 재는 도구가 어떻게 변하는지 미분하고 적분한다(<a href="../35-exterior-calculus/index.html">Chapter 35</a>). <a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>은 이것을 mesh 위에서 그대로 따라 한다.</li>
       </ul>
-      <p>linear algebra에도 크기를 재는 도구가 이미 있다. 그러나 셋 다 모자란다. span(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-8">Definition 1.1.8</a>)은 vector들이 펼치는 subspace를 주지만 크기도 방향도 없다. determinant(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-6">Definition 1.6.6</a>)는 부호 있는 부피를 주지만 \(\R^n\)의 vector \(n\)개에만 쓸 수 있다. \(\R^3\)의 cross product(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-15">Definition 1.6.15</a>)는 평행사변형의 넓이를 주지만 \(\R^3\)에서만 정의되고, 평면을 그 법선 vector로 바꿔 놓는다. 이 절에서는 \(\R^n\)의 vector \(k\)개(\(k \le n\)이면 무엇이든)가 만드는 조각의 subspace, 크기, 방향을 한꺼번에 기록하고 더하거나 늘일 수 있는 대상, 즉 \(k\)-vector를 만든다.</p>
+      <p>linear algebra에도 크기를 재는 도구가 이미 있다. 그러나 셋 다 모자란다. span(<a href="../01-linear-algebra/1-1-vector-spaces-bases.html#i-1-1-8">Definition 1.1.8</a>)은 vector들이 펼치는 subspace를 주지만 크기도 방향도 없다. determinant(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-6">Definition 1.6.6</a>)는 signed volume을 주지만 \(\R^n\)의 vector \(n\)개에만 쓸 수 있다. \(\R^3\)의 cross product(<a href="../01-linear-algebra/1-6-determinant-orientation.html#i-1-6-15">Definition 1.6.15</a>)는 평행사변형의 넓이를 주지만 \(\R^3\)에서만 정의되고, 평면을 그 법선 vector로 바꿔 놓는다. 이 절에서는 \(\R^n\)의 vector \(k\)개(\(k \le n\)이면 무엇이든)가 만드는 조각의 subspace, 크기, 방향을 한꺼번에 기록하고 더하거나 늘일 수 있는 대상, 즉 \(k\)-vector를 만든다.</p>
     </section>
 
     <section id="sec-intuition">
@@ -69,7 +69,7 @@
         <img src="figures/fig-34-1-1-k-vectors.svg" alt="두 패널의 3D 그림. (a)에서는 원점에서 나가는 파란 화살표 u와 초록 화살표 v가 하늘색 평행사변형을 이루고, 평행사변형 가운데에 u에서 v 쪽으로 도는 검은 곡선 화살표와 라벨 u∧v가 있다. (b)에서는 같은 평행사변형(진한 하늘색 바닥면)을 주황 화살표 w 방향으로 밀어 만든 반투명 parallelepiped가 있고, 바닥면에 같은 곡선 화살표가 있다.">
         <figcaption><span class="fig-head">Figure 34.1.1.</span>
         \(\R^3\)의 \(u = (1, 0.15, 0)\), \(v = (0.3, 0.9, 0)\), \(w = (0.15, 0.2, 0.85)\)로 만든 2-vector와 3-vector.
-        읽는 법: 파랑은 첫째 인자 \(u\), 초록은 둘째 인자 \(v\), 주황은 셋째 인자 \(w\)다. 하늘색 면은 vector들이 펼치는 조각이고, 검은 곡선 화살표는 \(u\)에서 \(v\)로 도는 방향, 즉 orientation이다. (b)의 진한 바닥면이 (a)의 \(u\wedge v\)이고 반투명 상자가 그것을 \(w\) 방향으로 민 것이다.
+        읽는 법: 파랑은 첫째 인자 \(u\), 초록은 둘째 인자 \(v\), 주황은 셋째 인자 \(w\)다. 하늘색 영역은 vector들이 펼치는 조각이고, 검은 곡선 화살표는 \(u\)에서 \(v\)로 도는 방향, 즉 orientation이다. (b)의 진한 바닥면이 (a)의 \(u\wedge v\)이고 반투명 상자가 그것을 \(w\) 방향으로 민 것이다.
         볼 것: 평행사변형의 넓이는 \(\abs{u\times v} = 0.855\)이고, \(\det(u, v, w) = 0.727 \gt 0\)이라 \((u, v, w)\)는 positively oriented이다.
         본문의 네 규칙((W1)–(W4), <a href="#i-34-1-1">Definition 34.1.1</a>)이 이 그림에서 나온다.</figcaption>
       </figure>
@@ -328,7 +328,7 @@
         <p class="box-title">Smooth vs. Discrete: oriented simplices as k-vectors</p>
         <p>mesh에 저장되는 것은 방향이 있는 조각이다. <a href="../33-combinatorial-surfaces/33-3-orientation.html#i-33-3-2">Definition 33.3.2</a>는 oriented \(k\)-simplex를 “vertex 순서 \((x_0, \dots, x_k)\)를 even permutation만큼 다른 것끼리 같다고 본 것”으로 정의한다. \(\R^n\) 안에 놓인 simplex에는 simple \(k\)-vector</p>
         <p>\[ (x_1 - x_0)\wedge\cdots\wedge(x_k - x_0) \]</p>
-        <p>를 대응시킬 수 있다. triangle \((x_0, x_1, x_2)\)에서 \(a = x_1 - x_0\), \(b = x_2 - x_0\)라 하자. 순서를 순환시킨 \((x_1, x_2, x_0)\)에서는 \((x_2 - x_1)\wedge(x_0 - x_1)\) \(= (b - a)\wedge(-a) = a\wedge b\)로 같고, 두 vertex를 맞바꾼 \((x_1, x_0, x_2)\)에서는 \((x_0 - x_1)\wedge(x_2 - x_1)\) \(= (-a)\wedge(b - a) = -a\wedge b\)로 부호가 바뀐다. 즉 이 2-vector는 orientation의 equivalence class를 정확히 구별한다. 또 triangle이 퇴화하지 않았으면(세 점이 한 직선 위에 있지 않으면) <a href="#i-34-1-8">Proposition 34.1.8</a>에 의해 \(0\)이 아니다.</p>
+        <p>를 대응시킬 수 있다. triangle \((x_0, x_1, x_2)\)에서 \(a = x_1 - x_0\), \(b = x_2 - x_0\)라 하자. 순서를 cyclic permutation으로 바꾼 \((x_1, x_2, x_0)\)에서는 \((x_2 - x_1)\wedge(x_0 - x_1)\) \(= (b - a)\wedge(-a) = a\wedge b\)로 같고, 두 vertex를 맞바꾼 \((x_1, x_0, x_2)\)에서는 \((x_0 - x_1)\wedge(x_2 - x_1)\) \(= (-a)\wedge(b - a) = -a\wedge b\)로 부호가 바뀐다. 즉 이 2-vector는 orientation의 equivalence class를 정확히 구별한다. 또 triangle이 퇴화하지 않았으면(세 점이 한 직선 위에 있지 않으면) <a href="#i-34-1-8">Proposition 34.1.8</a>에 의해 \(0\)이 아니다.</p>
         <ul>
           <li>보존하는 것: simplex가 놓인 \(k\)-평면의 방향, orientation, 크기(inner product를 주면 \(k\)-vector의 크기는 simplex 부피의 \(k!\)배다. triangle이면 넓이의 두 배다. <a href="34-2-hodge-star.html#i-34-2-1">Proposition 34.2.1</a>).</li>
           <li>잃는 것: 위치(평행 이동에 무관하다)와 모양(<a href="#i-34-1-9">Proposition 34.1.9</a>: 같은 평면, 같은 넓이, 같은 방향이면 같다).</li>

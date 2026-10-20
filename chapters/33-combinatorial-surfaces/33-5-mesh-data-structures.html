@@ -50,10 +50,10 @@
     <section id="sec-motivation">
       <h2>Motivation</h2>
       <p><a href="33-4-simplicial-manifolds.html">Section 33.4</a>에서 surface의 조건을 vertex마다의 link 검사로 정리했다. 이제 이 조합적 정보를 컴퓨터에 저장하고 쓰는 방법이 문제다. <a href="33-2-star-closure-link.html">Section 33.2</a>의 집합 algorithm은 정의를 그대로 옮겼지만, vertex 하나의 star를 찾을 때마다 complex 전체를 훑는다. vertex가 수십만 개인 mesh에서 모든 vertex의 이웃을 차례로 보려면 이것으로는 부족하다.</p>
-      <p>mesh 자료구조가 답해야 할 질문은 몇 가지로 정해져 있다. 이 face의 vertex는? 이 vertex에 붙은 face를 차례로? 이 edge의 양쪽 face는? boundary loop는? 이 절은 세 가지 답을 본다. 가장 간단한 face list, 선형대수로 계산하는 incidence matrix, 그리고 surface의 구조를 그대로 담아 이웃을 상수 시간에 찾는 halfedge mesh다. incidence matrix의 부호 판은 Chapter 36에서 discrete exterior derivative가 된다.</p>
+      <p>mesh 자료구조가 답해야 할 질문은 몇 가지로 정해져 있다. 이 face의 vertex는? 이 vertex에 붙은 face를 차례로? 이 edge의 양쪽 face는? boundary loop는? 이 절은 세 가지 답을 본다. 가장 간단한 face list, linear algebra로 계산하는 incidence matrix, 그리고 surface의 구조를 그대로 담아 이웃을 상수 시간에 찾는 halfedge mesh다. incidence matrix의 부호 판은 Chapter 36에서 discrete exterior derivative가 된다.</p>
 
       <figure class="dg-figure" id="fig-33-5-1">
-        <img src="figures/fig-33-5-1-incidence.svg" alt="두 패널. (a) mesh: 가운데 vertex 0과 둘레의 vertex 1부터 5로 된 정오각형 fan. 다섯 triangle에 회색 f0부터 f4, 열 개의 edge에 파란 e0부터 e9가 적혀 있다. 안쪽 spoke가 e0부터 e4, 바깥 테두리가 e5부터 e9다. (b) incidence matrices: 열 개의 열(e0부터 e9)을 공유하는 두 격자. 위는 A1으로 행이 f0부터 f4이고 각 행에 검은 칸이 세 개, 아래는 A0의 전치로 행이 vertex 0부터 5이고 각 열에 검은 칸이 두 개다. vertex 0의 행은 왼쪽 다섯 칸이 검다.">
+        <img src="figures/fig-33-5-1-incidence.svg" alt="두 패널. (a) mesh: 가운데 vertex 0과 둘레의 vertex 1부터 5로 된 정오각형 fan. 다섯 triangle에 회색 f0부터 f4, 열 개의 edge에 파란 e0부터 e9가 적혀 있다. 안쪽 spoke가 e0부터 e4, 바깥 테두리가 e5부터 e9다. (b) incidence matrices: 열 개의 열(e0부터 e9)을 공유하는 두 격자. 위는 A1으로 행이 f0부터 f4이고 각 행에 검은 칸이 세 개, 아래는 A0의 transpose로 행이 vertex 0부터 5이고 각 열에 검은 칸이 두 개다. vertex 0의 행은 왼쪽 다섯 칸이 검다.">
         <figcaption><span class="fig-head">Figure 33.5.1.</span>
         작은 mesh 하나와 그 incidence matrix. <em>무엇을</em>: vertex 0이 원점, vertex 1–5가 단위원 위(각 \(90^\circ + 72^\circ(k-1)\))에 있고 triangle \(f_t = (0, t{+}1, t{+}2)\)(5 다음은 1)로 된 닫힌 fan. edge 번호는 <code>dgdec.edge_list</code>의 사전식 순서다(\(e_0 = 01, \dots, e_4 = 05\)가 spoke, \(e_5 = 12, \dots, e_9 = 45\)가 테두리). <em>읽는 법</em>: (a)의 검은 수는 vertex, 파란 \(e\)는 edge, 회색 \(f\)는 triangle의 번호다. (b)는 위에 \(A_1\)(triangle × edge), 아래에 \(A_0^{\mathsf T}\)(vertex × edge)을 같은 edge 열에 맞춰 그렸다. 검은 칸이 1이다. <em>볼 것</em>: \(A_1\)의 행마다 검은 칸이 셋(triangle의 세 edge), \(A_0^{\mathsf T}\)의 열마다 둘(edge의 두 끝점)이다. \(A_1\)의 열을 세로로 보면 spoke \(e_0\)–\(e_4\)는 검은 칸이 둘(안쪽 edge), 테두리 \(e_5\)–\(e_9\)는 하나(boundary edge)다. \(A_0^{\mathsf T}\)의 행 0은 검은 칸이 다섯이고, 이것이 vertex 0의 valence다. <em>본문과의 연결</em>: <a href="#i-33-5-1">Definition 33.5.1</a>, <a href="#i-33-5-4">Proposition 33.5.4</a>. 같은 mesh를 halfedge로 저장한 것은 <a href="#fig-33-5-2">Figure 33.5.2</a>다.</figcaption>
       </figure>
@@ -67,7 +67,7 @@
 
     <section id="sec-incidence">
       <h2>Incidence Matrices</h2>
-      <p>이웃 관계를 행렬로 쓰면 선형대수의 도구를 쓸 수 있다. 먼저 simplex에 번호를 붙인다. vertex는 \(0, \dots, n_0 - 1\), triangle은 \(F\)의 행 번호, edge는 \(\{i, j\}\) (\(i \lt j\))의 사전식 순서(<code>dgdec.edge_list</code>, <a href="../../notation.html#sec-ddg">Notation</a>)다.</p>
+      <p>이웃 관계를 행렬로 쓰면 linear algebra의 도구를 쓸 수 있다. 먼저 simplex에 번호를 붙인다. vertex는 \(0, \dots, n_0 - 1\), triangle은 \(F\)의 행 번호, edge는 \(\{i, j\}\) (\(i \lt j\))의 사전식 순서(<code>dgdec.edge_list</code>, <a href="../../notation.html#sec-ddg">Notation</a>)다.</p>
       <div class="thm definition" id="i-33-5-1">
         <p><span class="thm-head">Definition 33.5.1</span> <span class="thm-name">(incidence matrix)</span>.
         pure 2-complex \(\mathcal{K}\)의 <dfn>incidence matrix</dfn>(접속 행렬)는 두 행렬 \(A_0 \in \{0, 1\}^{n_1 \times n_0}\), \(A_1 \in \{0, 1\}^{n_2 \times n_1}\)</p>
@@ -199,7 +199,7 @@ print(np.flatnonzero(L0), [tuple(e) for e in dd.edge_list(F)[0][L1].tolist()], L
 
       <aside class="box forward">
         <p class="box-title">Looking ahead: \(d_0\), \(d_1\), and \(\partial\)</p>
-        <p><a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>에서 \(A_0^{\pm}\)와 \(A_1^{\pm}\)은 discrete exterior derivative \(d_0\), \(d_1\)이 된다. vertex 값 \(u\)에 \(A_0^{\pm}\)를 곱하면 edge \([i,j]\)마다 \(u_j - u_i\)가 나오는데, 이것이 함수의 차이를 edge 위에 적은 discrete 1-form이다. 전치행렬은 boundary operator \(\partial\)가 되고(<a href="../36-discrete-exterior-calculus/index.html#toc-36-2">Section 36.2</a>), <a href="#i-33-5-7">Example 33.5.7</a>에서 수치로 본 \(A_1^{\pm}A_0^{\pm} = 0\)은 <a href="../36-discrete-exterior-calculus/index.html#toc-36-4">Section 36.4</a>에서 \(d_1d_0 = 0\)으로 증명된다. \(\mathbf{1}^{\mathsf T}A_1^{\pm} = 0\)은 “닫힌 surface의 oriented triangle을 모두 더한 것의 boundary가 0”이라는 진술로 다시 읽힌다. 이 절에서는 이 해석을 정의나 증명에 쓰지 않는다. 구현과 부호의 정본은 <code>dgdec.d0</code>, <code>dgdec.d1</code>이고, 이 절의 \(A_0^{\pm}, A_1^{\pm}\)과 같은 행렬이다.</p>
+        <p><a href="../36-discrete-exterior-calculus/index.html">Chapter 36</a>에서 \(A_0^{\pm}\)와 \(A_1^{\pm}\)은 discrete exterior derivative \(d_0\), \(d_1\)이 된다. vertex 값 \(u\)에 \(A_0^{\pm}\)를 곱하면 edge \([i,j]\)마다 \(u_j - u_i\)가 나오는데, 이것이 함수의 차이를 edge 위에 적은 discrete 1-form이다. transpose는 boundary operator \(\partial\)가 되고(<a href="../36-discrete-exterior-calculus/36-2-chains-cochains.html">Section 36.2</a>), <a href="#i-33-5-7">Example 33.5.7</a>에서 수치로 본 \(A_1^{\pm}A_0^{\pm} = 0\)은 <a href="../36-discrete-exterior-calculus/36-4-discrete-exterior-derivative.html">Section 36.4</a>에서 \(d_1d_0 = 0\)으로 증명된다. \(\mathbf{1}^{\mathsf T}A_1^{\pm} = 0\)은 “닫힌 surface의 oriented triangle을 모두 더한 것의 boundary가 0”이라는 진술로 다시 읽힌다. 이 절에서는 이 해석을 정의나 증명에 쓰지 않는다. 구현과 부호의 정본은 <code>dgdec.d0</code>, <code>dgdec.d1</code>이고, 이 절의 \(A_0^{\pm}, A_1^{\pm}\)과 같은 행렬이다.</p>
       </aside>
     </section>
 
@@ -273,12 +273,12 @@ print(np.flatnonzero(L0), [tuple(e) for e in dd.edge_list(F)[0][L1].tolist()], L
         halfedge mesh \((H, \eta, \rho)\)에서 \(\rho\)의 orbit마다 그 길이만큼 변을 가진 polygon을 하나씩 두고(변 하나가 halfedge 하나), \(\eta\)로 짝지은 두 변을 서로 반대 방향으로 붙이면 boundary가 없는 oriented surface가 나온다. 그 Euler characteristic은 \(\chi^H\)이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">Proof sketch.</span> 각 polygon은 disk이고, 변을 둘씩 붙이므로 변 위의 점 근처는 반쪽 disk 두 장을 붙인 disk다. polygon의 꼭짓점은 붙인 뒤 \(\rho\circ\eta\)의 orbit마다 하나의 점이 되고, 그 점에 모이는 polygon의 모퉁이들이 orbit의 순서대로 한 바퀴를 이루므로 그 근처도 disk다. 모든 polygon을 \(\rho\)의 방향으로 돌게 orient하면 붙인 변에서 방향이 반대라서 orientation이 맞는다. 이 cell 분할의 vertex, edge, face의 수가 \(n_0^H, n_1^H, n_2^H\)이므로 그것으로 센 Euler characteristic은 \(\chi^H\)이다. polygon을 붙인 공간이 surface라는 것의 엄밀한 증명은 cell complex의 topology에 속한다 <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>.</p>
+        <p><span class="proof-head">Proof sketch.</span> 각 polygon은 disk이고, 변을 둘씩 붙이므로 변 위의 점 근처는 반쪽 disk 두 장을 붙인 disk다. polygon의 vertex는 붙인 뒤 \(\rho\circ\eta\)의 orbit마다 하나의 점이 되고, 그 점에 모이는 polygon의 모퉁이들이 orbit의 순서대로 한 바퀴를 이루므로 그 근처도 disk다. 모든 polygon을 \(\rho\)의 방향으로 돌게 orient하면 붙인 변에서 방향이 반대라서 orientation이 맞는다. 이 cell 분할의 vertex, edge, face의 수가 \(n_0^H, n_1^H, n_2^H\)이므로 그것으로 센 Euler characteristic은 \(\chi^H\)이다. polygon을 붙인 공간이 surface라는 것의 엄밀한 증명은 cell complex의 topology에 속한다 <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>.</p>
       </div>
 
       <div class="thm example" id="i-33-5-15">
         <p><span class="thm-head">Example 33.5.15</span> <span class="thm-name">(two halfedges)</span>.
-        \(H = \{h_0, h_1\}\), \(\eta = (h_0\ h_1)\)이라 하자. (a) \(\rho = \id\)이면 face는 \(\{h_0\}\), \(\{h_1\}\)의 둘(변이 하나인 polygon, 곧 원판 둘), edge는 하나, \(\rho\circ\eta = \eta\)의 orbit은 \(\{h_0, h_1\}\) 하나라서 vertex가 하나다. \(\chi^H = 1 - 1 + 2 = 2\)이다. 원판 두 장의 테두리를 한 점을 맞춰 붙인 sphere다. (b) \(\rho = \eta\)이면 face는 하나(변이 둘인 polygon), \(\rho\circ\eta = \id\)라서 vertex가 둘이고 \(\chi^H = 2 - 1 + 1 = 2\)이다. 변이 둘인 polygon의 두 변을 지퍼처럼 붙인 sphere다. 둘 다 simplicial complex로는 쓸 수 없다. triangle이 아닌 face가 있고, (a)는 edge의 두 끝이 같은 vertex다. halfedge가 둘이면 \(\rho\)는 이 두 가지뿐이고, 강의 슬라이드도 이 둘을 가장 작은 예로 든다 <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a>.</p>
+        \(H = \{h_0, h_1\}\), \(\eta = (h_0\ h_1)\)이라 하자. (a) \(\rho = \id\)이면 face는 \(\{h_0\}\), \(\{h_1\}\)의 둘(변이 하나인 polygon, 곧 disk 둘), edge는 하나, \(\rho\circ\eta = \eta\)의 orbit은 \(\{h_0, h_1\}\) 하나라서 vertex가 하나다. \(\chi^H = 1 - 1 + 2 = 2\)이다. disk 두 장의 테두리를 한 점을 맞춰 붙인 sphere다. (b) \(\rho = \eta\)이면 face는 하나(변이 둘인 polygon), \(\rho\circ\eta = \id\)라서 vertex가 둘이고 \(\chi^H = 2 - 1 + 1 = 2\)이다. 변이 둘인 polygon의 두 변을 지퍼처럼 붙인 sphere다. 둘 다 simplicial complex로는 쓸 수 없다. triangle이 아닌 face가 있고, (a)는 edge의 두 끝이 같은 vertex다. halfedge가 둘이면 \(\rho\)는 이 두 가지뿐이고, 강의 슬라이드도 이 둘을 가장 작은 예로 든다 <a class="cite" href="../../references.html#CMU-DDG-L2B">[CMU-DDG L2B]</a>.</p>
         <p class="verified">Verification: <code>verify/v-33-5-mesh-data-structures.py</code></p>
       </div>
       <div class="thm nonexample" id="i-33-5-16">
@@ -335,7 +335,7 @@ print(ring)</code></pre>
 
       <aside class="box discrete">
         <p class="box-title">Smooth vs. Discrete: going around a point</p>
-        <p><strong>Smooth.</strong> oriented surface의 점 \(p\)에서 tangent plane의 orientation은 방향들의 “반시계” 순서를 정한다. 작은 원을 따라 \(p\) 둘레를 돌 수 있고, 그 방향이 orientation이다. <strong>Discrete.</strong> halfedge mesh에서 \(\eta\circ\rho^{-1}\)은 vertex에서 나가는 edge들을 반시계 순서로 돈다. 이 순환 순서, 곧 rotation system이 surface의 orientation을 조합적으로 담는다.</p>
+        <p><strong>Smooth.</strong> oriented surface의 점 \(p\)에서 tangent plane의 orientation은 방향들의 “반시계” 순서를 정한다. 작은 원을 따라 \(p\) 둘레를 돌 수 있고, 그 방향이 orientation이다. <strong>Discrete.</strong> halfedge mesh에서 \(\eta\circ\rho^{-1}\)은 vertex에서 나가는 edge들을 반시계 순서로 돈다. 이 cyclic order, 곧 rotation system이 surface의 orientation을 조합적으로 담는다.</p>
         <p><strong>정확히 보존하는 것.</strong> oriented surface의 topology 전체다. 짝수 개의 halfedge 위의 permutation 쌍 하나가 닫힌 oriented surface를 정하고(<a href="#i-33-5-14">Proposition 33.5.14</a>), simplicial surface에서는 vertex, edge, face와 \(\chi\)를 정확히 되살린다(<a href="#i-33-5-13">Proposition 33.5.13</a>). <strong>잃는 것.</strong> 순서만 있고 각도는 없다. 이웃한 두 edge 사이의 각은 vertex 위치를 준 뒤에 계산한다(Chapter 38, Chapter 40). 또 halfedge는 non-manifold와 non-orientable 대상을 담지 못한다.</p>
       </aside>
     </section>
@@ -346,7 +346,7 @@ print(ring)</code></pre>
         <li>Track 1의 mesh 서술과 non-manifold 복원 mesh: <a href="../31-meshes/31-1-mesh-as-surface.html">Section 31.1</a>.</li>
         <li>mesh 자료구조 전반(halfedge, 다른 구조, 구현): <a class="cite" href="../../references.html#PMP">[PMP]</a>.</li>
         <li>polygon을 붙여 만든 surface와 CW complex: <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>.</li>
-        <li>signed incidence matrix가 discrete exterior derivative가 되는 곳: <a href="../36-discrete-exterior-calculus/index.html#toc-36-4">Section 36.4</a>.</li>
+        <li>signed incidence matrix가 discrete exterior derivative가 되는 곳: <a href="../36-discrete-exterior-calculus/36-4-discrete-exterior-derivative.html">Section 36.4</a>.</li>
       </ul>
     </aside>
 
@@ -358,7 +358,7 @@ print(ring)</code></pre>
         <li>signed incidence matrix \(A_0^{\pm}, A_1^{\pm}\)은 relative orientation의 부호를 넣은 것이다. orientation을 바꾸면 행과 열에 \(-1\)이 곱해지고, consistent orientation은 \(A_1^{\pm}\)의 열의 합으로 판정된다. \(A_1^{\pm}A_0^{\pm} = 0\)은 Chapter 36에서 증명한다.</li>
         <li>halfedge mesh는 twin과 next 두 permutation이다. face, edge, vertex는 \(\rho\), \(\eta\), \(\rho\circ\eta\)의 orbit이고, oriented simplicial surface에서 이것들은 원래의 simplex와 정확히 대응한다.</li>
       </ul>
-      <p class="next">다음 절에서는 primal mesh와 짝을 이루는 dual complex를 정의한다. triangle은 dual vertex가, edge는 dual edge가, vertex는 vertex 둘레의 face를 잇는 dual face가 된다. 그 incidence matrix가 이 절의 \(A_0, A_1\)을 전치한 것이라는 사실이 Poincaré duality의 조합적 얼굴이다.</p>
+      <p class="next">다음 절에서는 primal mesh와 짝을 이루는 dual complex를 정의한다. triangle은 dual vertex가, edge는 dual edge가, vertex는 vertex 둘레의 face를 잇는 dual face가 된다. 그 incidence matrix가 이 절의 \(A_0, A_1\)의 transpose라는 사실이 Poincaré duality의 조합적 얼굴이다.</p>
     </section>
 
     <section class="exercises">

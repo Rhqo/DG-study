@@ -1272,3 +1272,14 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - 0.4의 "이 공식은 증명하지 않는다"를 Prop 41.2.1(유도)로 바꿨다.
   - 31장 interactive 그림 5개는 새 plotly_save로 다시 만들어졌다.
   - Track 1의 400px 문제는 원래부터 있던 것이고 고치지 않았다(Track 2 범위 밖, 보고만): 0.3, 0.5, 31.1–31.3, 31.5, 31.6, 28.4, 29.6의 page width가 400을 넘는다.
+- 2026-10-21: **C1(32–36) 통합 검토 완료.** REVIEW 0, check_all 32–36 OK, 30페이지 400px OK
+  - 이미 쓰인 절을 toc 앵커로 가리키던 링크 52개를 절 파일로 바꿨다.
+  - 35.2 상자: discrete 판은 ⋆₀⁻¹L이고, L이 cotan Laplacian이다.
+  - 32.3, 33 index·33.4, 32 index의 링크를 정확히 했다.
+  - 용어(§8): 곡면, 꺾은선, 매개화, 편미분, 볼록, 꼭짓점, 면 등을 영어로 바꿨다. term_guard 경고가 619개에서 101개로 줄었고, 남은 101개는 오탐이다.
+  - 장 사이 일관성을 확인했다: ⋆, d*, L, dual 방향, torus normal, p.next 사슬, Threads, running example 값이 모두 맞다.
+  - 통합
+    - 루트 index의 thread 설명 T1–T6에 Track 2 문단을 더했다.
+    - terms 14개(상한(오차의) upper bound, de Rham 상 → de Rham image, 차수(form의) degree 등)
+    - §3.5 Track 2 행(32–36)을 scratch guidelines-3-5-track2-c1.md에 두었다. C2·C3 것과 합쳐 GUIDELINES에 넣는다.
+  - 37–45장의 32–36 toc 앵커 링크와 "de Rham 상"은 C2·C3에게 보냈다.
