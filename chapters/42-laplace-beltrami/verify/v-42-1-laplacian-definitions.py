@@ -280,8 +280,20 @@ for nu6, nv6 in ((12, 24), (24, 48)):
     tube6 = np.arctan2(c6[:, 2], np.hypot(c6[:, 0], c6[:, 1]) - 2.0)
     obt6 = dm.corner_angles(V6, F6).max(1) > np.pi / 2
     rows6 = np.histogram(tube6[obt6], bins=nu6, range=(-np.pi, np.pi))[0]
-    check(f"Exercise 42.1.6 ({nu6}, {nv6}): every negative weight is on a diagonal edge, half of the triangles are obtuse, "
-          "spread evenly around the tube", np.all(diag6[w6 < 0]) and obt6.sum() * 2 == len(F6) and rows6.min() == rows6.max())
+    check(f"Exercise 42.1.6 ({nu6}, {nv6}): the weight is 0 (round-off) exactly on the nu*nv diagonal edges, "
+          "all other weights are positive, half of the triangles are obtuse, spread evenly around the tube",
+          np.array_equal(np.abs(w6) < 1e-12, diag6) and diag6.sum() == nu6 * nv6 and np.all(w6[~diag6] > 0.5)
+          and obt6.sum() * 2 == len(F6) and rows6.min() == rows6.max())
+    # isosceles trapezoid cell -> cyclic -> opposite angles of a diagonal sum to pi
+    ang6 = dm.corner_angles(V6, F6)
+    pair6 = {}
+    for t6 in range(len(F6)):
+        for k6 in range(3):
+            a6, b6 = sorted((F6[t6][(k6 + 1) % 3], F6[t6][(k6 + 2) % 3]))
+            pair6.setdefault((a6, b6), []).append(ang6[t6, k6])
+    sums6 = np.array([sum(pair6[(a6, b6)]) for (a6, b6), dg in zip(map(tuple, np.sort(E6, 1)), diag6) if dg])
+    check(f"Exercise 42.1.6 ({nu6}, {nv6}): the two angles opposite each diagonal sum to pi",
+          np.abs(sums6 - np.pi).max() < 1e-12, np.abs(sums6 - np.pi).max())
 check("Exercise 42.1.3, 42.1.6: code blocks are at most 30 lines",
       dgcode.code_lines(PAGE, "code-ex-42-1-3") <= 30 and dgcode.code_lines(PAGE, "code-ex-42-1-6") <= 30)
 

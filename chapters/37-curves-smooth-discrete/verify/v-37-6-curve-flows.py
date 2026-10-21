@@ -51,6 +51,13 @@ for name, Minv in (("M = I", np.ones(64)), ("M = diag(lbar)", 1 / lb)):
     eps = 1e-7
     dLdt = (dd.curve_length(X0 + eps * v, True) - dd.curve_length(X0 - eps * v, True)) / (2 * eps)
     close(f"Prop 37.6.2: dL/dt = -grad L^T M^-1 grad L ({name})", dLdt, -np.sum(Minv[:, None] * gL ** 2), 1e-6)
+_xs, _ys = sp.symbols("x y", real=True)
+_E = (_xs ** 2 + _ys ** 2) / 2
+_rot = sp.Matrix([-_ys, _xs])                       # x' = J x
+sym_equal("Non-example after Prop 37.6.2: dE/dt = <grad E, Jx> = 0 for E = |x|^2/2",
+          sp.Matrix([sp.diff(_E, _xs), sp.diff(_E, _ys)]).dot(_rot), 0)
+sym_equal("Non-example after Prop 37.6.2: x' = -x/2 is -M^-1 grad E with M = 2 I",
+          (-(sp.eye(2) * 2).inv() * sp.Matrix([sp.diff(_E, _xs), sp.diff(_E, _ys)]))[0], -_xs / 2)
 close("Example 37.6.3(a): -grad L = kappa^B n (the integrated B flow)", -gL,
       dd.curvature_length_variation(X0, True)[:, None] * dd.curve_vertex_normals(X0, True), 1e-12)
 
@@ -125,17 +132,27 @@ close("Motivation / Figure 37.6.1: min edge ratio at t = 0.2: 0.003 (M = I) and 
 _lE, _lW = dd.curve_edge_lengths(XE, True), dd.curve_edge_lengths(XW, True)
 _dE = np.linalg.norm(XE - XE.mean(0), axis=1)
 _dW = np.linalg.norm(XW - XW.mean(0), axis=1)
-close("Figure 37.6.1(a): distance to the vertex centroid 0.84..0.90 (M = I), 0.801..0.805 (M = diag lbar)",
+close("37.6 text after Figure 37.6.1: distance to the vertex centroid 0.84..0.90 (M = I), 0.801..0.805 (M = diag lbar)",
       [round(_dE.min(), 2), round(_dE.max(), 2), round(_dW.min(), 3), round(_dW.max(), 3)],
       [0.84, 0.90, 0.801, 0.805], 1e-12)
-close("Figure 37.6.1(a): longest / shortest edge about 400 (M = I)", _lE.max() / _lE.min(), 400, 25)
-close("Figure 37.6.1(a): longest / shortest edge 6.3 (M = diag lbar)", round(_lW.max() / _lW.min(), 1), 6.3, 1e-12)
-_short = np.argsort(_lE / ell0)[:5]                # the five shortest edges (relative to their start)
-_tips = np.angle(np.exp(1j * (2 * np.pi * (_short + 0.5) / 64 - np.round((_short + 0.5) / 64 * 5) * 2 * np.pi / 5)))
-check("Figure 37.6.1(a): with M = I the five shortest edges sit at the five former petal tips "
-      "(within one edge of t = 2 pi j / 5) and keep 0.3%..3.5% of their length",
-      len(set(np.round((_short + 0.5) / 64 * 5) % 5)) == 5 and np.all(np.abs(_tips) < 2 * np.pi / 64)
-      and 0.003 <= (_lE / ell0)[_short].min() and (_lE / ell0)[_short].max() <= 0.035)
+close("37.6 text after Figure 37.6.1: longest / shortest edge about 400 (M = I)", _lE.max() / _lE.min(), 400, 25)
+close("37.6 text after Figure 37.6.1: longest / shortest edge 6.3 (M = diag lbar)", round(_lW.max() / _lW.min(), 1), 6.3, 1e-12)
+_qE, _qW = _lE / ell0, _lW / ell0                 # Figure 37.6.1(a): per-edge ratios at t = 0.2
+_mid = np.arange(64) + 0.5                         # edge i runs from vertex i to i + 1
+_tip_pos = 64 * np.arange(6) / 5                   # petal tips t = 2 pi k / 5 at vertex position 64 k / 5
+_at_tip = np.min(np.abs(_mid[:, None] - _tip_pos[None, :]), axis=1) <= 0.5   # edges whose segment holds a tip
+check("Figure 37.6.1(a): the edges at the tips are 0, 12, 25, 38, 51, 63 (vertex 0 sits on the tip t = 0)",
+      list(np.nonzero(_at_tip)[0]) == [0, 12, 25, 38, 51, 63])
+check("Figure 37.6.1(a): with M = I the six smallest ratios are exactly the tip edges",
+      set(np.argsort(_qE)[:6]) == set(np.nonzero(_at_tip)[0]))
+close("Figure 37.6.1(a): M = I tip edges keep 0.3%..3.4%, the other edges 0.08..0.95",
+      [round(_qE[_at_tip].min(), 3), round(_qE[_at_tip].max(), 3), round(_qE[~_at_tip].min(), 2),
+       round(_qE[~_at_tip].max(), 2)], [0.003, 0.034, 0.08, 0.95], 1e-12)
+close("Figure 37.6.1(a): the two edges beside vertex 0 keep 0.034 each; the other four tips 0.003..0.006",
+      [round(_qE[0], 3), round(_qE[63], 3), round(_qE[[12, 25, 38, 51]].min(), 3), round(_qE[[12, 25, 38, 51]].max(), 3)],
+      [0.034, 0.034, 0.003, 0.006], 1e-12)
+check("Figure 37.6.1(a): with M = diag lbar the smallest ratios also sit at the tips, and none is below 0.17",
+      set(np.argsort(_qW)[:6]) == set(np.nonzero(_at_tip)[0]) and _qW.min() > 0.17)
 
 # ---------------------------------------------------------------- Example 37.6.10, Exercise 37.6.3
 r = sp.symbols("r", positive=True)

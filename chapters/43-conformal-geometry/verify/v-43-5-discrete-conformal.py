@@ -133,7 +133,7 @@ for bb in (m, bd):
     y = crand(n)
     y -= (bb @ y) / bb.sum()
     x = np.linalg.solve(K, bb * y)
-    check("Remark 43.5.10: K = EC + b b^T is positive definite and K x = B y gives EC x = B y, <x, 1>_B = 0",
+    check("Remark 43.5.10: E_b = EC + b b^T is positive definite and E_b x = B y gives EC x = B y, <x, 1>_B = 0",
           np.linalg.eigvalsh(K).min() > 1e-12 and np.abs(EC @ x - bb * y).max() < 1e-9 and abs(bb @ x) < 1e-9)
 close("Remark 43.5.10: lambda_1 / lambda_2 = 0.042 for B = M", lam_d[0] / lam_d[1], 0.042, 5e-4)
 

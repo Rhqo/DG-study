@@ -48,21 +48,21 @@
     <section id="sec-motivation">
       <h2>Motivation</h2>
       <p>Section 37.5까지는 곡선 하나를 고정해 놓고 그 기하를 보았다. 이제 곡선을 움직인다. Chapter 32는 curve shortening flow를 네 discrete curvature로 돌려 보았는데(<a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-5">Definition 32.4.5</a>), 그때 두 가지 문제가 남았다. 첫째, integrated curvature로 만든 flow에서는 vertex마다 사실상 다른 time step \(h\bar\ell_i\)를 쓰게 되고, 오래 돌리면 짧은 edge가 점점 더 짧아질 수 있다(<a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-7">Proposition 32.4.7</a> 뒤의 설명). 이 절의 계산으로는 vertex 64개의 flower 다각형을 아주 작은 step으로 움직여도 시각 \(t = 0.2\)에 가장 짧은 edge가 처음 길이의 \(0.3\%\)로 줄어든다(<a href="#fig-37-6-1">Figure 37.6.1</a>). 둘째, forward Euler는 time step이 크면 불안정해진다(<a href="../32-ddg-overview/32-4-no-free-lunch.html#sec-other">Section 32.4</a> 끝).</p>
-      <p>두 문제는 서로 다른 선택에서 온다. 앞의 것은 “gradient를 어떤 inner product로 잡는가”이고, 뒤의 것은 “시간을 어떻게 이산화하는가”이다. 이 절은 둘을 분리해서 다룬다. 먼저 gradient flow를 정의하고, 그다음 explicit과 implicit step을 비교한다. 마지막으로 길이 대신 휘는 정도를 줄이는 elastic flow를 보고, Section 37.4의 복원을 이용해 edge length를 정확히 지키는 flow를 만든다.</p>
+      <p>두 문제는 서로 다른 선택에서 온다. 앞의 것은 “gradient를 어떤 inner product로 잡는가”이고, 뒤의 것은 “시간을 어떻게 discretize하는가”이다. 이 절은 둘을 분리해서 다룬다. 먼저 gradient flow를 정의하고, 그다음 explicit과 implicit step을 비교한다. 마지막으로 길이 대신 휘는 정도를 줄이는 elastic flow를 보고, Section 37.4의 복원을 이용해 edge length를 정확히 지키는 flow를 만든다.</p>
     </section>
 
     <section id="sec-gradient-flow">
       <h2>Gradient Flows and the Choice of Inner Product</h2>
-      <p>유한차원에서 시작하자. 다각형의 vertex 위치를 하나의 vector \(x \in \R^N\)(\(N = 2n\) 또는 \(3n\))로 쌓고, energy \(E\colon \R^N \to \R\)가 매끄럽다고 하자. Euclidean gradient \(\nabla E(x)\)는 \(dE_x(v) = \inner{\nabla E(x)}{v}\)인 vector다. 그런데 inner product를 바꾸면 gradient도 바뀐다.</p>
+      <p>finite-dimensional에서 시작하자. 다각형의 vertex 위치를 하나의 vector \(x \in \R^N\)(\(N = 2n\) 또는 \(3n\))로 쌓고, energy \(E\colon \R^N \to \R\)가 매끄럽다고 하자. Euclidean gradient \(\nabla E(x)\)는 \(dE_x(v) = \inner{\nabla E(x)}{v}\)인 vector다. 그런데 inner product를 바꾸면 gradient도 바뀐다.</p>
       <div class="thm definition" id="i-37-6-1">
         <p><span class="thm-head">Definition 37.6.1</span> <span class="thm-name">(gradient flow)</span>.
-        \(U \subseteq \R^N\)이 열린집합이고 \(E\colon U \to \R\)가 매끄러우며, 각 \(x \in U\)에 symmetric positive definite matrix \(M(x)\)가 \(x\)에 대해 매끄럽게 주어졌다고 하자. \(M(x)\)에 대한 gradient를</p>
+        \(U \subseteq \R^N\)이 open set이고 \(E\colon U \to \R\)가 매끄러우며, 각 \(x \in U\)에 symmetric positive definite matrix \(M(x)\)가 \(x\)에 대해 매끄럽게 주어졌다고 하자. \(M(x)\)에 대한 gradient를</p>
         <div class="equation" id="eq-37-6-1">
         \[ \begin{aligned} \nabla_M E(x) &= M(x)^{-1}\,\nabla E(x),\ \ \text{i.e.}\\ dE_x(v) &= \nabla_M E(x)^{\mathsf T}M(x)\,v \ \ \text{for all } v \end{aligned} \tag{37.6.1} \]
         </div>
         <p>로 정하고, \(x'(t) = -\nabla_M E(x(t))\)를 만족하는 곡선 \(x(t)\)를 \(M\)에 대한 \(E\)의 <dfn>gradient flow</dfn>(기울기 흐름)라 한다.</p>
       </div>
-      <p>\(M = I_N\)이면 보통의 gradient descent다. \(M\)은 “어느 방향으로 움직이는 것이 얼마나 비싼가”를 정한다. 같은 energy라도 비싼 방향으로는 덜 움직인다. smooth curve에서는 \(x\)가 곡선 전체이고, inner product는 곡선 위의 \(L^2\) inner product \(\int\inner{\eta}{\zeta}\,ds\)다. <a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-3">Proposition 32.2.3</a>이 보인 대로 길이의 \(L^2\) gradient는 \(-\kappa_s\mathbf{n}_s\)이고, 따라서 curve shortening flow \(\partial_t\gamma = \kappa_s\mathbf{n}_s\)(<a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-1">Definition 32.4.1</a>)는 길이의 \(L^2\) gradient flow다. 이 절에서는 무한차원의 gradient를 정의하지 않고 이 대응만 쓴다.</p>
+      <p>\(M = I_N\)이면 보통의 gradient descent다. \(M\)은 “어느 방향으로 움직이는 것이 얼마나 비싼가”를 정한다. 같은 energy라도 비싼 방향으로는 덜 움직인다. smooth curve에서는 \(x\)가 곡선 전체이고, inner product는 곡선 위의 \(L^2\) inner product \(\int\inner{\eta}{\zeta}\,ds\)다. <a href="../32-ddg-overview/32-2-plane-curve-curvature.html#i-32-2-3">Proposition 32.2.3</a>이 보인 대로 길이의 \(L^2\) gradient는 \(-\kappa_s\mathbf{n}_s\)이고, 따라서 curve shortening flow \(\partial_t\gamma = \kappa_s\mathbf{n}_s\)(<a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-1">Definition 32.4.1</a>)는 길이의 \(L^2\) gradient flow다. 이 절에서는 infinite-dimensional gradient를 정의하지 않고 이 대응만 쓴다.</p>
       <div class="thm proposition" id="i-37-6-2">
         <p><span class="thm-head">Proposition 37.6.2</span> <span class="thm-name">(energy decreases along a gradient flow)</span>.
         gradient flow \(x(t)\)에서</p>
@@ -74,6 +74,7 @@
       <div class="proof">
         <p><span class="proof-head">Proof.</span> chain rule과 <a href="#eq-37-6-1">(37.6.1)</a>에서 \(\tfrac{d}{dt}E(x) = dE_x(x') = \nabla_M E^{\mathsf T}M x'\) \(= -\nabla_M E^{\mathsf T}M\nabla_M E\)이다. \(\nabla_M E = M^{-1}\nabla E\)를 넣으면 둘째 꼴이 되고, \(M^{-1}\)이 positive definite이므로 \(0\) 이하이며 \(\nabla E = 0\)일 때만 \(0\)이다.</p>
       </div>
+      <p>그래서 energy를 줄이지 않는 움직임은 어떤 \(M\)을 골라도 gradient flow가 아니다. 비예: \(\R^2\)에서 \(E(x) = \tfrac12\abs{x}^2\)이라 하면 \(\nabla E(x) = x\)이다. 원점 둘레로 도는 흐름 \(x' = Jx\)(\(J\)는 \(+90^\circ\) 회전)에서는 \(\tfrac{d}{dt}E = \inner{x}{Jx} = 0\)이고, \(x \neq 0\)이면 \(\nabla E \neq 0\)이므로 <a href="#i-37-6-2">Proposition 37.6.2</a>의 등호 조건에 어긋난다. 곧 이 흐름은 어떤 symmetric positive definite \(M\)에 대해서도 \(E\)의 gradient flow가 아니다. 반면 \(x' = -x\)는 \(M = I_2\)에 대한 gradient flow이고, \(x' = -x/2\)는 \(M = 2I_2\)에 대한 gradient flow다.</p>
 
       <div class="thm example" id="i-37-6-3">
         <p><span class="thm-head">Example 37.6.3</span> <span class="thm-name">(two gradient flows of discrete length)</span>.
@@ -83,21 +84,20 @@
       </div>
 
       <figure class="dg-figure" id="fig-37-6-1">
-        <img src="figures/fig-37-6-1-inner-product.svg" alt="두 패널. (a) 회색 파선의 flower curve 안에 겹친 두 둥근 다각형: 파란 다각형은 거의 원이고, 주홍 다각형은 그보다 조금 크고 덜 둥글며 꽃잎 끝이 있던 다섯 방향에서 이웃한 점(vertex)이 겹쳐 보일 만큼 모여 있다. 아래에 M = I(주홍)와 M = diag(lbar_i)(파랑) 범례. (b) 가로축 time t(0에서 0.2), 세로축 min_i l_i(t)/l_i(0)의 로그 눈금. 파란 곡선은 0.18 근처에서 평평해지고, 주홍 곡선은 계속 떨어져 t = 0.17 무렵 0.01 아래로 내려가 흔들린다.">
+        <img src="figures/fig-37-6-1-inner-product.svg" alt="두 패널, 세로축은 모두 로그 눈금. (a) 가로축 edge 번호 i(0에서 64), 세로축 l_i(0.2)/l_i(0). 회색 점선 다섯 개(꽃잎 끝)가 세로로 그어져 있다. 주홍 점(M = I)과 파란 사각형(M = diag(lbar_i))은 점선 사이에서 0.3에서 1 사이를 함께 오르내리지만, 점선 위치에서 주홍 점만 0.003 근처까지 깊게 떨어지고 파란 점은 0.2 근처에서 멈춘다. (b) 가로축 time t(0에서 0.2), 세로축 min_i l_i(t)/l_i(0). 파란 곡선은 0.18 근처에서 평평해지고, 주홍 곡선은 계속 떨어져 t = 0.17 무렵 0.01 아래로 내려가 흔들린다.">
         <figcaption><span class="fig-head">Figure 37.6.1.</span>
-        <em>무엇을</em>: flower curve를 \(t\)의 같은 간격으로 vertex 64개 sampling한 다각형을, <a href="#i-37-6-3">Example 37.6.3</a>의 두 inner product로 같은 시각 \(t = 0.2\)까지 움직인 것. 두 경우 모두 작은 forward Euler step을 썼다(\(M = \diag(\bar\ell_i)\)는 \(h = 10^{-4}\), \(M = I\)는 \(h = 10^{-4}/\operatorname{mean}\bar\ell_i\)로 시간을 맞춤, 2000걸음).
-        <em>읽는 법</em>: (a)의 회색 파선이 처음 곡선, 주홍이 \(M = I\), 파랑이 \(M = \diag(\bar\ell_i)\)의 결과이고 점이 vertex다. (b)의 세로축은 가장 짧은 edge의 길이를 처음 길이로 나눈 비율(로그 눈금)이다.
-        <em>볼 것</em>: (a)의 파란 다각형은 거의 원이다(vertex 평균에서 vertex까지의 거리 \(0.801\)–\(0.805\)). 주홍 다각형은 덜 둥글고(\(0.84\)–\(0.90\)), 꽃잎 끝이 있던 다섯 곳에서 이웃한 vertex가 거의 겹친다. 그곳의 edge는 처음 길이의 \(0.3\)–\(3.5\%\)만 남았고, 가장 긴 edge와 가장 짧은 edge의 비는 약 \(400\)이다(파랑은 \(6.3\)). (b)에서 두 곡선은 \(t \approx 0.05\)까지 비슷하다가, 그 뒤로 파랑은 \(0.18\)쯤에서 평평해지고 주홍은 \(t = 0.2\)에 \(0.003\)까지 떨어진다. 같은 energy, 같은 time step 방식인데 inner product만 다르다.
+        <em>무엇을</em>: flower curve를 \(t\)의 같은 간격으로 vertex 64개 sampling한 다각형을, <a href="#i-37-6-3">Example 37.6.3</a>의 두 inner product로 같은 시각 \(t = 0.2\)까지 움직인 것. 두 경우 모두 작은 forward Euler step을 썼다(\(M = \diag(\bar\ell_i)\)는 \(h = 10^{-4}\), \(M = I\)는 \(h = 10^{-4}/\operatorname{mean}\bar\ell_i\)로 시간을 맞춤, 2000걸음). (a)는 \(t = 0.2\)에서 edge마다의 길이를 처음 길이로 나눈 비율 \(\ell_i(0.2)/\ell_i(0)\), (b)는 그 최솟값을 시간에 따라 그린 것이다.
+        <em>읽는 법</em>: 주홍이 \(M = I\), 파랑이 \(M = \diag(\bar\ell_i)\)이고, 두 패널 모두 세로축은 로그 눈금이다. (a)의 가로축은 edge 번호 \(i\)(edge \(i\)는 vertex \(i\)에서 \(i + 1\)로 간다)이고, 회색 점선은 처음 곡선의 꽃잎 끝 \(t = 2\pi k/5\), 곧 vertex 번호 \(64k/5\)의 위치다.
+        <em>볼 것</em>: (a)에서 주홍 점은 다섯 꽃잎 끝에서 처음 길이의 \(0.3\)–\(3.4\%\)로 떨어지고, 그 사이의 edge는 \(0.08\)–\(0.95\)에 머문다. \(t = 0\)의 꽃잎 끝에는 vertex 0이 놓여 있어 양옆의 두 edge가 각각 \(0.034\)이고, 나머지 네 끝에서는 그 끝을 지나는 edge 하나가 \(0.003\)–\(0.006\)이다. 파란 사각형도 같은 곳에서 가장 많이 줄지만 \(0.18\) 아래로 내려가지 않는다. (b)에서 두 곡선은 \(t \approx 0.05\)까지 비슷하다가, 그 뒤로 파랑은 \(0.18\)쯤에서 평평해지고 주홍은 \(t = 0.2\)에 \(0.003\)까지 떨어진다. 같은 energy, 같은 time step 방식인데 inner product만 다르다.
         <em>본문과의 연결</em>: <a href="#i-37-6-1">Definition 37.6.1</a>, <a href="#i-37-6-3">Example 37.6.3</a>. Chapter 32의 integrated flow에서 짧은 edge가 무너지던 현상이 time step이 아니라 inner product의 선택에서 온다는 것을 보여 준다.</figcaption>
       </figure>
-      <p><a href="#fig-37-6-1">Figure 37.6.1</a>의 (a)에서 먼저 두 다각형의 모양을 비교해 보자. 파란 다각형은 거의 원이고, 주홍 다각형은 조금 크고 덜 둥글다. 다음으로 점(vertex)을 보자. 처음 sampling이 고르지 않았으므로 두 다각형 모두 edge 길이가 고르지 않지만, 주홍 다각형에서는 꽃잎 끝이 있던 다섯 방향에서 이웃한 점이 거의 하나로 겹친다. <a href="#i-37-6-3">Example 37.6.3</a>(a)에서 보았듯 \(M = I\)이면 vertex마다 시간이 \(\bar\ell_i\)에 비례하는 빠르기로 흐르므로, 이 flow는 curve shortening flow를 이산화한 것이 아니라 sampling에 따라 곳마다 다른 빠르기로 돌린 것이다. 그 결과가 덜 둥근 모양과 무너지는 edge다(edge가 무너지는 자세한 과정은 여기서 분석하지 않는다). (b)를 보면 두 곡선은 \(t \approx 0.05\)까지 비슷하고, 그 뒤로 주홍만 계속 떨어진다. 주홍 곡선이 끝에서 흔들리는 것은 edge가 너무 짧아져 고정된 time step이 상대적으로 커진 탓이다(다음 소절).</p>
-      <!-- REVIEW (R2): 원래 글은 "주홍은 vertex가 다섯 곳에 뭉치고 그 사이 edge가 늘어난 오각형에 가까운 모양, 파랑은 vertex가 고르게 퍼짐"이라 했고, 원인을 "짧은 edge가 몰린 잘록한 곳의 vertex가 느리게 움직이기 때문"이라 설명했다. 그림과 수치가 이와 맞지 않아(파랑도 edge 비 6.3, 무너지는 edge는 잘록한 곳이 아니라 옛 꽃잎 끝) 측정한 사실만 남기고 기제 설명은 뺐다. 메시지(M = I이면 edge가 무너진다)를 더 잘 보이려면 (a)에 edge 길이 분포(예: edge index 대 l_i(t)/l_i(0))를 그리는 panel로 바꾸는 것을 작성자가 검토한다. 고르지 않은 원에서 M = I flow를 돌려 보면 둥근 모양은 잃지만 짧은 시간 안에 edge가 무너지지는 않아, 단순한 기제 설명은 찾지 못했다. -->
-      <p>gradient flow를 이산화하는 길은 둘이다 <a class="cite" href="../../references.html#CMU-DDG-L11">[CMU-DDG L11]</a>. smooth gradient를 유도한 뒤 그 식을 이산화하거나, energy를 먼저 이산화한 뒤 그 gradient를 취한다. 두 길은 일반적으로 다른 algorithm을 준다. 길이에서 보면 smooth의 \(\kappa_s\mathbf{n}_s\)를 turning angle로 이산화하면 \(\kappa^A_i\mathbf{n}_i\)가 되고, discrete 길이의 gradient를 취하면 \(\kappa^B_i\mathbf{n}_i\)가 된다. 위의 예는 둘째 길을 택하더라도 inner product라는 선택이 하나 더 남는다는 것을 보여 준다.</p>
+      <p><a href="#fig-37-6-1">Figure 37.6.1</a>의 (a)에서 먼저 회색 점선 다섯 개를 보자. 처음 곡선의 꽃잎 끝이 있던 자리다. 주홍 점(\(M = I\))을 왼쪽부터 따라가면 점선 사이에서는 파란 사각형과 거의 함께 오르내리다가, 점선마다 홀로 깊게 떨어진다. 그 edge들은 처음 길이의 \(0.3\)–\(3.4\%\)만 남아 이웃한 vertex가 거의 겹친다. 파란 사각형(\(M = \diag(\bar\ell_i)\))도 같은 자리에서 가장 많이 줄지만 \(0.18\)에서 멈춘다. 두 다각형은 모양도 다르다(그림에는 그리지 않았다). 파란 다각형은 거의 원이고(vertex 평균에서 vertex까지의 거리 \(0.801\)–\(0.805\)), 주홍 다각형은 조금 크고 덜 둥글다(\(0.84\)–\(0.90\)). 가장 긴 edge와 가장 짧은 edge의 비는 주홍이 약 \(400\), 파랑이 \(6.3\)이다. <a href="#i-37-6-3">Example 37.6.3</a>(a)에서 보았듯 \(M = I\)이면 vertex마다 시간이 \(\bar\ell_i\)에 비례하는 빠르기로 흐르므로, 이 flow는 curve shortening flow를 discretize한 것이 아니라 sampling에 따라 곳마다 다른 빠르기로 돌린 것이다. 그 결과가 덜 둥근 모양과 무너지는 edge다(edge가 무너지는 자세한 과정은 여기서 분석하지 않는다). (b)는 (a)의 최솟값을 시간에 따라 본 것이다. 두 곡선은 \(t \approx 0.05\)까지 비슷하고, 그 뒤로 주홍만 계속 떨어진다. 주홍 곡선이 끝에서 흔들리는 것은 edge가 너무 짧아져 고정된 time step이 상대적으로 커진 탓이다(다음 소절).</p>
+      <p>gradient flow를 discretize하는 길은 둘이다 <a class="cite" href="../../references.html#CMU-DDG-L11">[CMU-DDG L11]</a>. smooth gradient를 유도한 뒤 그 식을 discretize하거나, energy를 먼저 discretize한 뒤 그 gradient를 취한다. 두 길은 일반적으로 다른 algorithm을 준다. 길이에서 보면 smooth의 \(\kappa_s\mathbf{n}_s\)를 turning angle로 discretize하면 \(\kappa^A_i\mathbf{n}_i\)가 되고, discrete 길이의 gradient를 취하면 \(\kappa^B_i\mathbf{n}_i\)가 된다. 위의 예는 둘째 길을 택하더라도 inner product라는 선택이 하나 더 남는다는 것을 보여 준다.</p>
     </section>
 
     <section id="sec-time-steps">
       <h2>Explicit and Implicit Time Steps</h2>
-      <p>gradient flow를 계산하려면 시간도 이산화해야 한다. time step을 \(h \gt 0\)이라 할 때 두 가장 단순한 방법은</p>
+      <p>gradient flow를 계산하려면 시간도 discretize해야 한다. time step을 \(h \gt 0\)이라 할 때 두 가장 단순한 방법은</p>
       <div class="equation" id="eq-37-6-3">
       \[ \begin{aligned} \text{explicit:}&\ \ x^{k+1} = x^k - h\,\nabla_M E(x^k),\\ \text{implicit:}&\ \ x^{k+1} = x^k - h\,\nabla_M E(x^{k+1}) \end{aligned} \tag{37.6.3} \]
       </div>
@@ -125,13 +125,13 @@
       <div class="thm proposition" id="i-37-6-5">
         <p><span class="thm-head">Proposition 37.6.5</span> <span class="thm-name">(linear gradient flows)</span>.
         \(K\)가 symmetric positive semidefinite, \(M\)이 symmetric positive definite인 \(N \times N\) 행렬이고 \(E(x) = \tfrac12x^{\mathsf T}Kx\)라 하자. \(M^{-1}K\)의 eigenvalue는 모두 실수이고 \(0\) 이상이다. 가장 큰 것을 \(\lambda_{\max}\)라 하자.
-        (a) explicit step \(x^{k+1} = (I_N - hM^{-1}K)x^k\)가 모든 처음 값에서 유계일 필요충분조건은 \(h\lambda_{\max} \le 2\)이다.
+        (a) explicit step \(x^{k+1} = (I_N - hM^{-1}K)x^k\)가 모든 처음 값에서 bounded일 필요충분조건은 \(h\lambda_{\max} \le 2\)이다.
         (b) implicit step \((M + hK)x^{k+1} = Mx^k\)는 모든 \(h \gt 0\)에서 풀리고, \(E(x^{k+1}) \le E(x^k)\)이다.</p>
       </div>
       <div class="proof">
         <p class="proof-idea">Proof idea: \(y = M^{1/2}x\)로 좌표를 바꾸면 \(M\)이 사라지고 symmetric matrix \(A = M^{-1/2}KM^{-1/2}\) 하나가 남는다. 그 eigenvector 방향마다 model problem이다.</p>
         <p><span class="proof-head">Proof.</span> \(M\)은 symmetric positive definite이므로 symmetric positive definite인 square root \(M^{1/2}\)가 있다(spectral theorem). \(A = M^{-1/2}KM^{-1/2}\)는 symmetric이고 \(y^{\mathsf T}Ay = (M^{-1/2}y)^{\mathsf T}K(M^{-1/2}y) \ge 0\)이므로 positive semidefinite이다. \(M^{-1}K = M^{-1/2}AM^{1/2}\)는 \(A\)와 닮음이므로 eigenvalue가 같고, 그것은 실수이며 \(0\) 이상이다. spectral theorem으로 \(A = Q\Lambda Q^{\mathsf T}\)(\(Q\) orthogonal, \(\Lambda = \diag(\lambda_j)\))라 쓰고 \(z = Q^{\mathsf T}M^{1/2}x\)라 하자.
-        (a) explicit step은 \(M^{1/2}x^{k+1} = (I - hA)M^{1/2}x^k\)이므로 \(z^{k+1}_j = (1 - h\lambda_j)z^k_j\)이다. <a href="#i-37-6-4">Proposition 37.6.4</a>(a)에 의해 모든 \(z_j\)가 유계일 필요충분조건은 모든 \(j\)에서 \(\abs{1 - h\lambda_j} \le 1\), 곧 \(h\lambda_{\max} \le 2\)이다(\(\lambda_j \ge 0\)). \(x = M^{-1/2}Qz\)이므로 \(x^k\)의 유계성은 \(z^k\)의 유계성과 같다.
+        (a) explicit step은 \(M^{1/2}x^{k+1} = (I - hA)M^{1/2}x^k\)이므로 \(z^{k+1}_j = (1 - h\lambda_j)z^k_j\)이다. <a href="#i-37-6-4">Proposition 37.6.4</a>(a)에 의해 모든 \(z_j\)가 bounded일 필요충분조건은 모든 \(j\)에서 \(\abs{1 - h\lambda_j} \le 1\), 곧 \(h\lambda_{\max} \le 2\)이다(\(\lambda_j \ge 0\)). \(x = M^{-1/2}Qz\)이므로 \(x^k\)의 boundedness는 \(z^k\)의 boundedness와 같다.
         (b) \(M + hK = M^{1/2}(I + hA)M^{1/2}\)은 invertible이다(\(I + hA\)의 eigenvalue \(1 + h\lambda_j \ge 1\)). 같은 좌표에서 \(z^{k+1}_j = z^k_j/(1 + h\lambda_j)\)이고, \(E(x) = \tfrac12\sum_j\lambda_jz_j^2\)이므로 \(E(x^{k+1}) = \tfrac12\sum_j\lambda_j(z^k_j)^2/(1 + h\lambda_j)^2\) \(\le E(x^k)\)이다.</p>
       </div>
       <p>gradient가 큰 eigenvalue 방향, 곧 “짧은 파장의 흔들림”일수록 explicit step의 허용 범위가 좁다. curve에서 그 방향은 이웃 vertex가 번갈아 반대쪽으로 움직이는 zigzag이고, 그 eigenvalue는 edge length의 제곱에 반비례한다(<a href="#ex-37-6-4">Exercise 37.6.4</a>). 그래서 explicit flow의 time step은 \(h \lesssim \ell^2\)이어야 하고, flow 도중 edge가 짧아지면 같은 \(h\)도 불안정해진다.</p>
@@ -166,7 +166,7 @@
 
       <aside class="box code">
         <p class="box-title">Implementation: explicit and semi-implicit length flow</p>
-        <p>\(\bar\ell\)-weighted inner product(<a href="#i-37-6-3">Example 37.6.3</a>(b))로 두 step을 구현한다. <code>K</code>는 <a href="#eq-37-6-4">(37.6.4)</a>의 \(K(\gamma)\)이고, dense한 <code>np.linalg.solve</code>를 쓴다(vertex 수가 적은 곡선용. 큰 문제에서는 \(M + hK\)가 tridiagonal(닫힌 곡선에서는 cyclic)이라는 것을 이용한다).</p>
+        <p>\(\bar\ell\)-weighted inner product(<a href="#i-37-6-3">Example 37.6.3</a>(b))로 두 step을 구현한다. <code>K</code>는 <a href="#eq-37-6-4">(37.6.4)</a>의 \(K(\gamma)\)이고, dense한 <code>np.linalg.solve</code>를 쓴다(vertex 수가 적은 곡선용. 큰 문제에서는 \(M + hK\)가 tridiagonal(closed curve에서는 cyclic)이라는 것을 이용한다).</p>
         <pre id="code-37-6-1"><code>import numpy as np
 
 def length_laplacian(X):
@@ -196,7 +196,7 @@ def semi_implicit_step(X, h):
       </div>
 
       <figure class="dg-figure" id="fig-37-6-3">
-        <img src="figures/fig-37-6-3-explicit-implicit.svg" alt="두 패널. (a) 거의 겹치는 둥근 닫힌 곡선 셋: 회색 파선(reference)과 파란 실선(semi-implicit)은 매끄럽고, 주홍 실선(explicit)은 둘레를 따라 작은 톱니 모양으로 들쭉날쭉하다. (b) 가로축 time t(0에서 0.2), 세로축 max |theta_i|. 주홍(explicit 0.9 h0)은 0.6에서 갑자기 1.5로 뛰고 2.16까지 오르내린 뒤 1.0 근처로 내려온다. 회색 파선(explicit h0/40)과 파랑(semi-implicit 0.9 h0)은 0.83에서 0.16까지 매끄럽게 내려가며 거의 겹친다. 초록 점선(semi-implicit 10 h0)은 점 다섯 개로 같은 곳까지 내려간다.">
+        <img src="figures/fig-37-6-3-explicit-implicit.svg" alt="두 패널. (a) 거의 겹치는 둥근 closed curve 셋: 회색 파선(reference)과 파란 실선(semi-implicit)은 매끄럽고, 주홍 실선(explicit)은 둘레를 따라 작은 톱니 모양으로 들쭉날쭉하다. (b) 가로축 time t(0에서 0.2), 세로축 max |theta_i|. 주홍(explicit 0.9 h0)은 0.6에서 갑자기 1.5로 뛰고 2.16까지 오르내린 뒤 1.0 근처로 내려온다. 회색 파선(explicit h0/40)과 파랑(semi-implicit 0.9 h0)은 0.83에서 0.16까지 매끄럽게 내려가며 거의 겹친다. 초록 점선(semi-implicit 10 h0)은 점 다섯 개로 같은 곳까지 내려간다.">
         <figcaption><span class="fig-head">Figure 37.6.3.</span>
         <em>무엇을</em>: <a href="#i-37-6-8">Example 37.6.8</a>. flower 다각형(vertex 64개)의 \(\bar\ell\)-weighted length flow를 explicit과 semi-implicit step으로 같은 시각까지 계산한 것(\(h_0 = 0.004137\)).
         <em>읽는 법</em>: (a)는 \(t = 0.201\)의 곡선이다. 회색 파선이 explicit \(h = h_0/40\)(기준), 주홍이 explicit \(h = 0.9h_0\), 파랑이 semi-implicit \(h = 0.9h_0\)다. (b)의 세로축은 가장 큰 turning angle의 크기로, 다각형이 얼마나 들쭉날쭉한지를 잰다. 초록은 semi-implicit \(h = 10h_0\)이다.
@@ -208,14 +208,14 @@ def semi_implicit_step(X, h):
       <aside class="box discrete">
         <p class="box-title">Smooth vs. Discrete: gradient flows of length</p>
         <p><strong>Smooth.</strong> 길이의 \(L^2\) gradient flow는 \(\partial_t\gamma = \kappa_s\mathbf{n}_s\)이고, 길이는 \(dL/dt = -\int\kappa_s^2\,ds\)로 준다(<a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-2">Proposition 32.4.2</a>). 시간은 연속이다.</p>
-        <p><strong>Discrete.</strong> discrete 길이의 gradient는 정확히 \(K(\gamma)\gamma\)이고(<a href="#i-37-6-6">Proposition 37.6.6</a>), 어떤 inner product \(M\)으로 gradient를 잡느냐에 따라 flow가 다르다. \(M = \diag(\bar\ell_i)\)가 \(L^2\)의 discrete 판이다. 시간을 이산화하면 explicit step은 \(h \lesssim \ell^2\)에서만 안정하고, semi-implicit step은 모든 \(h\)에서 길이를 늘리지 않는다(<a href="#i-37-6-7">Proposition 37.6.7</a>).</p>
-        <p><strong>보존하는 것과 잃는 것.</strong> “energy가 줄어든다”는 smooth flow의 성질은 연속 시간의 discrete flow에서 정확하고(<a href="#i-37-6-2">Proposition 37.6.2</a>), 시간까지 이산화하면 semi-implicit step에서만 보장된다. 잃는 것은 정확도다. 큰 step의 implicit 결과는 실제 flow보다 느리다. 무엇을 지키고 무엇을 근사할지 고르는 Chapter 32의 “게임”이 시간 방향에도 있다.</p>
+        <p><strong>Discrete.</strong> discrete 길이의 gradient는 정확히 \(K(\gamma)\gamma\)이고(<a href="#i-37-6-6">Proposition 37.6.6</a>), 어떤 inner product \(M\)으로 gradient를 잡느냐에 따라 flow가 다르다. \(M = \diag(\bar\ell_i)\)가 \(L^2\)의 discrete 판이다. 시간을 discretize하면 explicit step은 \(h \lesssim \ell^2\)에서만 안정하고, semi-implicit step은 모든 \(h\)에서 길이를 늘리지 않는다(<a href="#i-37-6-7">Proposition 37.6.7</a>).</p>
+        <p><strong>보존하는 것과 잃는 것.</strong> “energy가 줄어든다”는 smooth flow의 성질은 연속 시간의 discrete flow에서 정확하고(<a href="#i-37-6-2">Proposition 37.6.2</a>), 시간까지 discretize하면 semi-implicit step에서만 보장된다. 잃는 것은 정확도다. 큰 step의 implicit 결과는 실제 flow보다 느리다. 무엇을 지키고 무엇을 근사할지 고르는 Chapter 32의 “게임”이 시간 방향에도 있다.</p>
       </aside>
     </section>
 
     <section id="sec-elastic">
       <h2>Elastic Energy and Elastic Flow</h2>
-      <p>curve shortening flow는 길이를 줄이므로 닫힌 곡선을 결국 한 점으로 줄인다(<a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-4">Remark 32.4.4</a>). 모양만 매끄럽게 하고 크기는 유지하고 싶으면 다른 energy가 필요하다. 휘는 정도를 직접 재는 것이 자연스럽다.</p>
+      <p>curve shortening flow는 길이를 줄이므로 closed curve를 결국 한 점으로 줄인다(<a href="../32-ddg-overview/32-4-no-free-lunch.html#i-32-4-4">Remark 32.4.4</a>). 모양만 매끄럽게 하고 크기는 유지하고 싶으면 다른 energy가 필요하다. 휘는 정도를 직접 재는 것이 자연스럽다.</p>
       <div class="thm definition" id="i-37-6-9">
         <p><span class="thm-head">Definition 37.6.9</span> <span class="thm-name">(elastic energy)</span>.
         arc length로 parametrization된 regular curve \(\gamma\)의 <dfn>elastic energy</dfn>(탄성 에너지)를</p>
@@ -236,22 +236,22 @@ def semi_implicit_step(X, h):
       </div>
       <p id="sec-elastic-flow">elastic energy의 gradient flow를 <dfn>elastic flow</dfn>(탄성 흐름)라 한다. plane curve의 \(L^2\) gradient는 다음과 같다.</p>
       <div class="proof">
-        <p><span class="proof-head">Derivation.</span> closed curve를 normal 방향으로 \(\gamma_\varepsilon = \gamma + \varepsilon f\mathbf{n}_s\)만큼 움직이자(\(f\)는 매끄러운 주기함수). \(\gamma_\varepsilon' = \mathbf{t} + \varepsilon(f'\mathbf{n}_s - \kappa_sf\,\mathbf{t})\)이므로(\(\mathbf{n}_s' = -\kappa_s\mathbf{t}\)) 일차까지 속력은 \(1 - \varepsilon\kappa_sf\)이고 tangent의 각은 \(\varphi + \varepsilon f'\)이다. 새 arc length로 미분하면 curvature는 \(\kappa_\varepsilon = (\varphi' + \varepsilon f'')(1 + \varepsilon\kappa_sf) + O(\varepsilon^2)\) \(= \kappa_s + \varepsilon(f'' + \kappa_s^2f) + O(\varepsilon^2)\)이다. 따라서</p>
+        <p><span class="proof-head">Derivation.</span> closed curve를 normal 방향으로 \(\gamma_\varepsilon = \gamma + \varepsilon f\mathbf{n}_s\)만큼 움직이자(\(f\)는 smooth한 주기함수). \(\gamma_\varepsilon' = \mathbf{t} + \varepsilon(f'\mathbf{n}_s - \kappa_sf\,\mathbf{t})\)이므로(\(\mathbf{n}_s' = -\kappa_s\mathbf{t}\)) 일차까지 속력은 \(1 - \varepsilon\kappa_sf\)이고 tangent의 각은 \(\varphi + \varepsilon f'\)이다. 새 arc length로 미분하면 curvature는 \(\kappa_\varepsilon = (\varphi' + \varepsilon f'')(1 + \varepsilon\kappa_sf) + O(\varepsilon^2)\) \(= \kappa_s + \varepsilon(f'' + \kappa_s^2f) + O(\varepsilon^2)\)이다. 따라서</p>
         \[ \begin{aligned} \frac{d}{d\varepsilon}\Big|_0\frac12\int\kappa_\varepsilon^2\,ds_\varepsilon &= \int\Bigl(\kappa_s(f'' + \kappa_s^2f) - \tfrac12\kappa_s^3f\Bigr)ds\\ &= \int\Bigl(\kappa_s'' + \tfrac12\kappa_s^3\Bigr)f\,ds \end{aligned} \]
-        <p>이다(마지막 등호는 부분적분 두 번, closed curve라 경계항이 없다). 곧 normal 방향의 \(L^2\) gradient는 \((\kappa_s'' + \tfrac12\kappa_s^3)\,\mathbf{n}_s\)이고, elastic flow는 \(\partial_t\gamma = -(\kappa_s'' + \tfrac12\kappa_s^3)\,\mathbf{n}_s\)이다. 반시계 방향 원에서는 \(\kappa_s = 1/r\)이 상수이므로 \(\partial_t\gamma = -\tfrac{1}{2r^3}\mathbf{n}_s\), 곧 원이 바깥으로 \(r' = 1/(2r^3)\)의 속도로 커진다.</p>
+        <p>이다(마지막 등호는 부분적분 두 번, closed curve라 boundary term이 없다). 곧 normal 방향의 \(L^2\) gradient는 \((\kappa_s'' + \tfrac12\kappa_s^3)\,\mathbf{n}_s\)이고, elastic flow는 \(\partial_t\gamma = -(\kappa_s'' + \tfrac12\kappa_s^3)\,\mathbf{n}_s\)이다. 반시계 방향 원에서는 \(\kappa_s = 1/r\)이 상수이므로 \(\partial_t\gamma = -\tfrac{1}{2r^3}\mathbf{n}_s\), 곧 원이 바깥으로 \(r' = 1/(2r^3)\)의 속도로 커진다.</p>
       </div>
       <p>verify는 ellipse에서 이 식을 수치 미분과 비교한다. 원이 끝없이 커진다는 것은 <a href="#i-37-6-10">Example 37.6.10</a>의 관찰과 같다. 그래서 실제로는 길이를 함께 벌하는 energy \(E + \lambda L\)을 쓰거나 길이를 고정한 채로 flow를 돌린다. 길이를 고정하고 elastic energy를 최소로 하는 곡선이 Euler elastica이고, 강의 슬라이드는 turning angle로 쓴 discrete 판의 최소점이 refinement에서 smooth elastica로 수렴한다는 결과를 소개한다 <a class="cite" href="../../references.html#CMU-DDG-L11">[CMU-DDG L11]</a>.</p>
     </section>
 
     <section id="sec-isometric">
       <h2>Isometric Elastic Flow</h2>
-      <p>Section 37.4는 edge length와 turning angle이 다각형을 정한다는 것을 보였다. 그렇다면 edge length는 그대로 두고 turning angle만 움직이면, 길이가 정확히 보존되는 flow가 된다. 강의 슬라이드도 이런 isometric elastic flow를 다룬다 <a class="cite" href="../../references.html#CMU-DDG-L11">[CMU-DDG L11]</a>. 어려운 점은 닫힌 곡선을 닫힌 채로 유지하는 것이다. 슬라이드는 이 방법의 출처로 Crane, Pinkall, Schröder의 conformal curvature flow를 든다 <a class="cite" href="../../references.html#Crane13f">[Crane13f]</a>. 여기서는 같은 생각을 단순하게 구현한다.</p>
+      <p>Section 37.4는 edge length와 turning angle이 다각형을 정한다는 것을 보였다. 그렇다면 edge length는 그대로 두고 turning angle만 움직이면, 길이가 정확히 보존되는 flow가 된다. 강의 슬라이드도 이런 isometric elastic flow를 다룬다 <a class="cite" href="../../references.html#CMU-DDG-L11">[CMU-DDG L11]</a>. 어려운 점은 closed curve를 닫힌 채로 유지하는 것이다. 슬라이드는 이 방법의 출처로 Crane, Pinkall, Schröder의 conformal curvature flow를 든다 <a class="cite" href="../../references.html#Crane13f">[Crane13f]</a>. 여기서는 같은 생각을 단순하게 구현한다.</p>
       <p>edge length \(\ell\)을 고정하면 다각형은 turning angle \(\theta \in \R^n\)로 정해지고, <a href="#eq-37-6-7">(37.6.7)</a>은 \(\theta\)의 2차식이다. pointwise curvature \(\kappa_i = \theta_i/\bar\ell_i\)의 \(L^2\) inner product \(\sum_i\kappa_i\kappa_i'\bar\ell_i = \sum_i\theta_i\theta_i'/\bar\ell_i\)을 \(\theta\) 공간의 inner product로 쓰면 \(dE^{\mathrm d}(\delta) = \sum_i\theta_i\delta_i/\bar\ell_i\)이므로 gradient는 \(\theta\) 자신이다. 곧 gradient flow는 \(\theta' = -\theta\)이고, implicit step은 \(\theta \leftarrow \theta/(1 + h)\)이다. turning angle을 일정한 비율로 줄이는 것이다.</p>
       <p>그러나 줄인 \(\theta\)는 일반적으로 closing condition <a href="37-4-discrete-plane-curves.html#eq-37-4-4">(37.4.4)</a>을 깨뜨린다. 합이 \(2\pi k\)에서 벗어나고, tangent의 합도 \(0\)이 아니게 된다. 그래서 매 step 뒤에 \(\theta\)를 closing condition을 만족하는 가장 가까운 점으로 되돌린다. “가장 가까운”은 같은 inner product로 잰다. 조건은 \(c(\theta) = \bigl(\sum_i\theta_i - 2\pi k,\ \sum_i\ell_i\mathbf{t}_i\bigr) = 0\)(식 셋)이고, 그 Jacobian \(G\)를 쓰면 \(\sum\delta_i^2/\bar\ell_i\)를 최소로 하며 \(c + G\delta = 0\)을 만족하는 \(\delta\)는</p>
       <div class="equation" id="eq-37-6-8">
       \[ \delta = -WG^{\mathsf T}(GWG^{\mathsf T})^{-1}c, \qquad W = \diag(\bar\ell_i) \tag{37.6.8} \]
       </div>
-      <p>이다(Lagrange multiplier). \(c\)가 \(\theta\)에 대해 비선형이므로 이것을 Newton 방법처럼 몇 번 되풀이한다. \(\varphi_i = \varphi_0 + \sum_{j=1}^{i}\theta_j\)이므로 \(\partial(\sum_i\ell_i\mathbf{t}_i)/\partial\theta_j = \sum_{i\ge j}\ell_i J\mathbf{t}_i\)(\(j \ge 1\))이고, \(\theta_0\)은 첫째 조건에만 들어간다.</p>
+      <p>이다(Lagrange multiplier). \(c\)가 \(\theta\)에 대해 nonlinear이므로 이것을 Newton 방법처럼 몇 번 되풀이한다. \(\varphi_i = \varphi_0 + \sum_{j=1}^{i}\theta_j\)이므로 \(\partial(\sum_i\ell_i\mathbf{t}_i)/\partial\theta_j = \sum_{i\ge j}\ell_i J\mathbf{t}_i\)(\(j \ge 1\))이고, \(\theta_0\)은 첫째 조건에만 들어간다.</p>
       <aside class="box code">
         <p class="box-title">Implementation: one step of isometric elastic flow</p>
         <p>turning angle을 줄인 뒤 <a href="#eq-37-6-8">(37.6.8)</a>을 다섯 번 되풀이해 closing condition으로 되돌린다. 결과 \(\theta\)와 고정된 \(\ell\)에 Section 37.4의 <code>curve_from_angles</code>(<a href="37-4-discrete-plane-curves.html#code-37-4-1">Implementation</a>)를 쓰면 다각형이 나온다.</p>
@@ -332,7 +332,7 @@ def isometric_elastic_step(theta, ell, h, k=1, newton=5):
         <li>elastic energy \(\tfrac12\int\kappa^2\,ds\)의 discrete 판은 \(\tfrac12\sum\theta_i^2/\bar\ell_i\)이고, elastic flow는 \(\partial_t\gamma = -(\kappa_s'' + \tfrac12\kappa_s^3)\mathbf{n}_s\)이다. 제약이 없으면 곡선이 커진다.</li>
         <li>isometric elastic flow는 turning angle을 줄이고 closing condition으로 되돌린 뒤 Section 37.4의 복원을 쓴다. edge length가 정확히 보존된다.</li>
       </ul>
-      <p class="next">다음 장에서는 곡선에서 곡면으로 넘어간다. 곡선의 differential \(d\gamma\)와 edge vector가 surface에서는 \(d\mathbf{x}\)와 mesh의 edge vector가 되고, tangent line은 tangent plane이 된다. Chapter 38은 그 smooth와 discrete 판을 나란히 놓고, surface의 normal과 metric을 mesh 위에서 정의한다.</p>
+      <p class="next">다음 장에서는 곡선에서 surface로 넘어간다. 곡선의 differential \(d\gamma\)와 edge vector가 surface에서는 \(d\mathbf{x}\)와 mesh의 edge vector가 되고, tangent line은 tangent plane이 된다. Chapter 38은 그 smooth와 discrete 판을 나란히 놓고, surface의 normal과 metric을 mesh 위에서 정의한다.</p>
     </section>
 
     <section class="exercises">

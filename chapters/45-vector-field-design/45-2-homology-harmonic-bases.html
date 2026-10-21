@@ -32,7 +32,7 @@
     <section class="goals">
       <h2>Goals</h2>
       <ul>
-        <li>실수 계수 simplicial homology \(H_1 = \ker\partial_1/\im\partial_2\)를 정의하고, closed 1-form의 period로 두 loop가 homologous인지 판별할 수 있다.</li>
+        <li>real coefficient simplicial homology \(H_1 = \ker\partial_1/\im\partial_2\)를 정의하고, closed 1-form의 period로 두 loop가 homologous인지 판별할 수 있다.</li>
         <li>dual complex의 cycle이 primal의 closed 1-form과 같은 것임을, 곧 dual 쪽의 homology가 primal의 cohomology임을 증명할 수 있다.</li>
         <li>tree-cotree decomposition을 BFS 두 번으로 구현하고, 남는 edge가 정확히 \(2g\)개이며 각각이 homology generator를 하나씩 준다는 것을 증명할 수 있다.</li>
         <li>generator마다 closed 1-form을 만들어 그 harmonic 부분으로 \(\mathcal{H}\)의 basis를 얻고, 그 period와 Gram matrix를 계산할 수 있다.</li>
@@ -52,20 +52,20 @@
 
     <section id="sec-motivation">
       <h2>Motivation</h2>
-      <p><a href="45-1-hodge-decomposition.html">Section 45.1</a>은 harmonic 1-form의 공간 \(\mathcal{H}\)의 dimension이 \(2g\)임을 보였지만 그 basis를 주지는 않았다. basis가 있으면 harmonic 성분을 \(2g\)개의 수로 기록할 수 있고, Section 45.4에서 vector field를 설계할 때 곡면의 손잡이를 도는 방향의 회전을 그 수로 조절하게 된다. basis를 만들려면 closed이지만 exact가 아닌 1-form이 \(2g\)개 필요하다. torus의 \(du\), \(dv\)처럼 좌표에서 오는 form은 일반 mesh에는 없다. 대신 곡면의 손잡이를 감는 loop를 찾고, 그 loop를 가로지르는 edge에만 값을 주는 form을 만든다. 이 절은 그 loop를 찾는 가장 간단한 알고리즘인 tree-cotree decomposition과, 그것이 옳다는 증명을 다룬다.</p>
+      <p><a href="45-1-hodge-decomposition.html">Section 45.1</a>은 harmonic 1-form의 공간 \(\mathcal{H}\)의 dimension이 \(2g\)임을 보였지만 그 basis를 주지는 않았다. basis가 있으면 harmonic 성분을 \(2g\)개의 수로 기록할 수 있고, Section 45.4에서 vector field를 설계할 때 surface의 손잡이를 도는 방향의 회전을 그 수로 조절하게 된다. basis를 만들려면 closed이지만 exact가 아닌 1-form이 \(2g\)개 필요하다. torus의 \(du\), \(dv\)처럼 좌표에서 오는 form은 일반 mesh에는 없다. 대신 surface의 손잡이를 감는 loop를 찾고, 그 loop를 가로지르는 edge에만 값을 주는 form을 만든다. 이 절은 그 loop를 찾는 가장 간단한 알고리즘인 tree-cotree decomposition과, 그것이 옳다는 증명을 다룬다.</p>
     </section>
 
     <section id="sec-homology">
       <h2>Cycles, Boundaries, and Homology</h2>
-      <p>Section 36.2는 boundary가 \(0\)인 chain을 <strong>cycle</strong>(순환), 어떤 chain의 boundary인 chain을 <strong>boundary</strong>(경계)라 부르고, 1-chain에서 \(Z_1 = \ker\partial_1\), \(B_1 = \im\partial_2\)로 썼다(<a href="../36-discrete-exterior-calculus/36-2-chains-cochains.html#i-36-2-15">Example 36.2.15</a>의 앞). \(\partial_1\partial_2 = 0\)(<a href="../36-discrete-exterior-calculus/36-2-chains-cochains.html#i-36-2-8">Theorem 36.2.8</a>)이므로 \(B_1 \subseteq Z_1\)이다. 남는 cycle이 곡면의 “구멍”을 감는 loop다.</p>
+      <p>Section 36.2는 boundary가 \(0\)인 chain을 <strong>cycle</strong>(순환), 어떤 chain의 boundary인 chain을 <strong>boundary</strong>(경계)라 부르고, 1-chain에서 \(Z_1 = \ker\partial_1\), \(B_1 = \im\partial_2\)로 썼다(<a href="../36-discrete-exterior-calculus/36-2-chains-cochains.html#i-36-2-15">Example 36.2.15</a>의 앞). \(\partial_1\partial_2 = 0\)(<a href="../36-discrete-exterior-calculus/36-2-chains-cochains.html#i-36-2-8">Theorem 36.2.8</a>)이므로 \(B_1 \subseteq Z_1\)이다. 남는 cycle이 surface의 “구멍”을 감는 loop다.</p>
 
       <div class="thm definition" id="i-45-2-1">
         <p><span class="thm-head">Definition 45.2.1</span> <span class="thm-name">(simplicial homology)</span>.
-        2-complex \(\mathcal{K}\)에 대하여 몫공간
+        2-complex \(\mathcal{K}\)에 대하여 quotient space
         \[ H_1(\mathcal{K}) := Z_1/B_1 = \ker\partial_1/\im\partial_2 \]
-        을 \(\mathcal{K}\)의 (실수 계수, 1차) <dfn>simplicial homology</dfn>(단체 호몰로지)라 한다. cycle \(c\)의 class를 \([c]\)로 쓰고, \([c] = [c']\), 곧 \(c - c'\)이 boundary이면 \(c\)와 \(c'\)이 homologous라 한다. \(H_0 = \ker\partial_0/\im\partial_1\)(\(\partial_0 = 0\)), \(H_2 = \ker\partial_2\)도 같은 방식으로 정한다.</p>
+        을 \(\mathcal{K}\)의 (real coefficient, 1차) <dfn>simplicial homology</dfn>(단체 호몰로지)라 한다. cycle \(c\)의 class를 \([c]\)로 쓰고, \([c] = [c']\), 곧 \(c - c'\)이 boundary이면 \(c\)와 \(c'\)이 homologous라 한다. \(H_0 = \ker\partial_0/\im\partial_1\)(\(\partial_0 = 0\)), \(H_2 = \ker\partial_2\)도 같은 방식으로 정한다.</p>
       </div>
-      <p>대수적 위상수학의 표준 정의는 정수 계수다 <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>. 이 장은 계산을 위해 Chapter 36처럼 실수 계수를 쓴다(Section 36.2의 Conventions 상자). 곡면 mesh에서 두 정의의 dimension(rank)은 같다. 실수 계수로 생기는 차이는 이 장의 범위 밖이다.</p>
+      <p>algebraic topology의 표준 정의는 integer coefficient다 <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>. 이 장은 계산을 위해 Chapter 36처럼 real coefficient를 쓴다(Section 36.2의 Conventions 상자). surface mesh에서 두 정의의 dimension(rank)은 같다. real coefficient로 생기는 차이는 이 장의 범위 밖이다.</p>
 
       <div class="thm proposition" id="i-45-2-2">
         <p><span class="thm-head">Proposition 45.2.2</span> <span class="thm-name">(the dimension of the homology)</span>.
@@ -109,7 +109,7 @@
 
     <section id="sec-dual-loops">
       <h2>Dual Loops</h2>
-      <p>dual complex(<a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-2">Definition 33.6.2</a>)에도 chain이 있다. dual 1-chain은 dual edge의 계수 있는 합이고, edge 번호로 저장하면 \(\R^{n_1}\)의 vector \(c^\star\)이다. 계수 \(+1\)은 dual edge \(e^\star\)를 <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-1">Remark 36.5.1</a>의 방향, 곧 \(e = [i, j]\)의 오른쪽 face에서 왼쪽 face로 지나간다는 뜻이다. dual 0-chain은 face마다, dual 2-chain은 vertex마다(dual cell \(i^\star\)) 수 하나다. primal 1-chain \(c\)와 dual 1-chain \(c^\star\)에 대해
+      <p>dual complex(<a href="../33-combinatorial-surfaces/33-6-dual-complex.html#i-33-6-2">Definition 33.6.2</a>)에도 chain이 있다. dual 1-chain은 dual edge의 coefficient를 붙인 합이고, edge 번호로 저장하면 \(\R^{n_1}\)의 vector \(c^\star\)이다. coefficient \(+1\)은 dual edge \(e^\star\)를 <a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-1">Remark 36.5.1</a>의 방향, 곧 \(e = [i, j]\)의 오른쪽 face에서 왼쪽 face로 지나간다는 뜻이다. dual 0-chain은 face마다, dual 2-chain은 vertex마다(dual cell \(i^\star\)) 수 하나다. primal 1-chain \(c\)와 dual 1-chain \(c^\star\)에 대해
       \[ c^\star\cdot c := \sum_e c^\star_e\,c_e \]
       를 둘의 <strong>intersection number</strong>(교차수)라 하자. primal loop가 edge \(e\)를 지나는 곳에서 dual loop가 \(e\)를 가로지르면 \(\pm1\)을 센다.</p>
 
@@ -122,7 +122,7 @@
       <div class="proof">
         <p><span class="proof-head">Proof.</span> coboundary는 boundary의 dual map이므로(<a href="../36-discrete-exterior-calculus/36-2-chains-cochains.html#i-36-2-14">Definition 36.2.14</a>) 같은 번호 매김에서 그 행렬은 boundary operator의 행렬의 transpose다. dual complex의 coboundary, 곧 dual exterior derivative는 \(\tilde d_0 = d_1^{\mathsf T}\), \(\tilde d_1 = -d_0^{\mathsf T}\)이다(<a href="../36-discrete-exterior-calculus/36-5-discrete-hodge-star.html#i-36-5-5">Proposition 36.5.5</a>). 따라서 \(\tilde\partial_1 = \tilde d_0^{\mathsf T} = d_1\), \(\tilde\partial_2 = \tilde d_1^{\mathsf T} = -d_0\)이다. 나머지는 정의를 읽은 것이다.</p>
       </div>
-      <p>예를 들어 vertex \(i\)의 dual cell의 boundary는 dual 1-chain \(-d_0e_i\)이다. edge \([i, j]\)(\(i \lt j\))에서 계수가 \(+1\)이고 \([j, i]\)(\(j \lt i\))에서 \(-1\)이므로, \(i\) 둘레의 dual edge를 face의 방향(반시계)으로 한 바퀴 돈다. 같은 vector를 primal 1-form으로 읽으면 \(d_0\)의 \(i\)번 열의 \(-1\)배, 곧 exact form \(d_0(-e_i)\)이다. Crane은 이 장의 첫머리에서 homology와 cohomology가 discrete에서는 “행렬 transpose 하나만큼만” 다르다고 적는다 <a class="cite" href="../../references.html#Cr">[Cr ch8]</a>. <a href="#i-45-2-8">Proposition 45.2.8</a>이 그 말의 정확한 판이다. primal의 \(H_1 = \ker d_0^{\mathsf T}/\im d_1^{\mathsf T}\)와 dual의 \(\tilde H_1 = \ker d_1/\im d_0\)은 같은 \(\R^{n_1}\) 안에서 \(d\)와 \(d^{\mathsf T}\)의 역할을 바꾼 것이다. \(k\)차원 조각과 \((2-k)\)차원 조각의 짝짓기(<strong>Poincaré duality</strong>, <a href="../33-combinatorial-surfaces/33-6-dual-complex.html">Section 33.6</a>)가 homology에서 이렇게 나타난다.</p>
+      <p>예를 들어 vertex \(i\)의 dual cell의 boundary는 dual 1-chain \(-d_0e_i\)이다. edge \([i, j]\)(\(i \lt j\))에서 coefficient가 \(+1\)이고 \([j, i]\)(\(j \lt i\))에서 \(-1\)이므로, \(i\) 둘레의 dual edge를 face의 방향(반시계)으로 한 바퀴 돈다. 같은 vector를 primal 1-form으로 읽으면 \(d_0\)의 \(i\)번 열의 \(-1\)배, 곧 exact form \(d_0(-e_i)\)이다. Crane은 이 장의 첫머리에서 homology와 cohomology가 discrete에서는 “행렬 transpose 하나만큼만” 다르다고 적는다 <a class="cite" href="../../references.html#Cr">[Cr ch8]</a>. <a href="#i-45-2-8">Proposition 45.2.8</a>이 그 말의 정확한 판이다. primal의 \(H_1 = \ker d_0^{\mathsf T}/\im d_1^{\mathsf T}\)와 dual의 \(\tilde H_1 = \ker d_1/\im d_0\)은 같은 \(\R^{n_1}\) 안에서 \(d\)와 \(d^{\mathsf T}\)의 역할을 바꾼 것이다. \(k\)차원 조각과 \((2-k)\)차원 조각의 pairing(<strong>Poincaré duality</strong>, <a href="../33-combinatorial-surfaces/33-6-dual-complex.html">Section 33.6</a>)가 homology에서 이렇게 나타난다.</p>
     </section>
 
     <section id="sec-tree-cotree">
@@ -137,10 +137,10 @@
 
       <div class="thm lemma" id="i-45-2-10">
         <p><span class="thm-head">Lemma 45.2.10</span> <span class="thm-name">(a tree carries no nonzero cycle)</span>.
-        1-chain \(c\)의 계수가 \(0\)이 아닌 edge들이 모두 한 tree(더 일반적으로 고리가 없는 graph)에 속하고 \(\partial_1c = 0\)이면 \(c = 0\)이다.</p>
+        1-chain \(c\)의 coefficient가 \(0\)이 아닌 edge들이 모두 한 tree(더 일반적으로 고리가 없는 graph)에 속하고 \(\partial_1c = 0\)이면 \(c = 0\)이다.</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">Proof.</span> \(c \ne 0\)이라 하자. 계수가 \(0\)이 아닌 edge들이 이루는 graph \(G\)는 비어 있지 않고 고리가 없다. \(G\)에서 가장 긴 path의 한 끝 vertex \(v\)는 \(G\)의 edge 하나에만 속한다. 다른 edge에도 속한다면 path를 늘이거나(새 vertex로 갈 때) 고리를 만들 수(path 위의 vertex로 돌아올 때) 있기 때문이다. 그 edge를 \(e\)라 하면 \((\partial_1c)_v = \pm c_e \ne 0\)이다. 모순이다.</p>
+        <p><span class="proof-head">Proof.</span> \(c \ne 0\)이라 하자. coefficient가 \(0\)이 아닌 edge들이 이루는 graph \(G\)는 비어 있지 않고 고리가 없다. \(G\)에서 가장 긴 path의 한 끝 vertex \(v\)는 \(G\)의 edge 하나에만 속한다. 다른 edge에도 속한다면 path를 늘이거나(새 vertex로 갈 때) 고리를 만들 수(path 위의 vertex로 돌아올 때) 있기 때문이다. 그 edge를 \(e\)라 하면 \((\partial_1c)_v = \pm c_e \ne 0\)이다. 모순이다.</p>
       </div>
 
       <div class="thm theorem" id="i-45-2-11">
@@ -154,8 +154,8 @@
       </div>
       <div class="proof">
         <p class="proof-idea">Proof idea: \(T\)와 \(T^\star\)는 서로 가로지르지 않으므로, 남는 edge 하나가 만드는 primal loop와 dual loop는 그 edge에서만 만난다. 이 “대각” 교차가 <a href="#i-45-2-5">Lemma 45.2.5</a>(c)의 invertible matrix가 된다.</p>
-        <p><span class="proof-head">Proof.</span> (a) 남은 dual graph, 곧 \(T\)에 속하지 않는 edge의 dual edge만 쓴 graph가 connected임을 보이면 된다. 그렇지 않다고 하자. 그러면 face가 공집합이 아닌 두 모임 \(A\), \(B\)로 나뉘고, \(A\)의 face와 \(B\)의 face가 공유하는 edge는 모두 \(T\)에 속한다. 2-chain \(s := \sum_{f\in A}f\)의 boundary에서 두 face가 모두 \(A\)에 있는 edge는 consistent orientation 때문에 반대 부호로 두 번 나와 지워진다. 그러므로 \(\partial_2s\)의 계수가 \(0\)이 아닌 edge는 \(A\)와 \(B\) 사이의 edge뿐이고, 모두 \(T\)에 있다. \(\partial_1\partial_2s = 0\)이므로 <a href="#i-45-2-10">Lemma 45.2.10</a>에서 \(\partial_2s = 0\)이다. 그런데 \(\ker\partial_2 = \ker d_1^{\mathsf T} = \Span\{\mathbf{1}\}\)(<a href="../36-discrete-exterior-calculus/36-4-discrete-exterior-derivative.html#i-36-4-12">Lemma 36.4.12</a>(b))이고, \(s\)는 \(A\)의 face에서 \(1\), \(B\)의 face에서 \(0\)이라 \(\mathbf{1}\)의 상수배가 아니다. 모순이다. spanning tree의 edge 수는 vertex 수보다 하나 적으므로 \(\abs T = n_0 - 1\), \(\abs{T^\star} = n_2 - 1\)이고, \(\abs R\)은 나머지다. \(2 - \chi = 2g\)는 <a href="../40-discrete-curvature-integral/40-2-discrete-gauss-bonnet.html#i-40-2-1">Theorem 40.2.1</a>의 진술의 관계다.
-        (b) edge의 집합으로 보면 \(c_b\)는 \(T \cup \{b\}\) 안에, \(c^\star_a\)는 \(\{e : e^\star\in T^\star\}\cup\{a\}\) 안에 있다. \(T\)와 \(T^\star\)는 정의에서 가로지르지 않고, \(a, b \in R\)이라 \(a \notin T\), \(b^\star \notin T^\star\)이다. 따라서 두 support의 공통 부분은 \(\{a\}\cap\{b\}\)에 들어 있다. \(a \ne b\)이면 \(c^\star_a\cdot c_b = 0\)이고, \(a = b\)이면 그 edge에서 두 계수가 orientation의 정의에 의해 모두 \(+1\)이므로 \(1\)이다.
+        <p><span class="proof-head">Proof.</span> (a) 남은 dual graph, 곧 \(T\)에 속하지 않는 edge의 dual edge만 쓴 graph가 connected임을 보이면 된다. 그렇지 않다고 하자. 그러면 face가 공집합이 아닌 두 모임 \(A\), \(B\)로 나뉘고, \(A\)의 face와 \(B\)의 face가 공유하는 edge는 모두 \(T\)에 속한다. 2-chain \(s := \sum_{f\in A}f\)의 boundary에서 두 face가 모두 \(A\)에 있는 edge는 consistent orientation 때문에 반대 부호로 두 번 나와 지워진다. 그러므로 \(\partial_2s\)의 coefficient가 \(0\)이 아닌 edge는 \(A\)와 \(B\) 사이의 edge뿐이고, 모두 \(T\)에 있다. \(\partial_1\partial_2s = 0\)이므로 <a href="#i-45-2-10">Lemma 45.2.10</a>에서 \(\partial_2s = 0\)이다. 그런데 \(\ker\partial_2 = \ker d_1^{\mathsf T} = \Span\{\mathbf{1}\}\)(<a href="../36-discrete-exterior-calculus/36-4-discrete-exterior-derivative.html#i-36-4-12">Lemma 36.4.12</a>(b))이고, \(s\)는 \(A\)의 face에서 \(1\), \(B\)의 face에서 \(0\)이라 \(\mathbf{1}\)의 상수배가 아니다. 모순이다. spanning tree의 edge 수는 vertex 수보다 하나 적으므로 \(\abs T = n_0 - 1\), \(\abs{T^\star} = n_2 - 1\)이고, \(\abs R\)은 나머지다. \(2 - \chi = 2g\)는 <a href="../40-discrete-curvature-integral/40-2-discrete-gauss-bonnet.html#i-40-2-1">Theorem 40.2.1</a>의 진술의 관계다.
+        (b) edge의 집합으로 보면 \(c_b\)는 \(T \cup \{b\}\) 안에, \(c^\star_a\)는 \(\{e : e^\star\in T^\star\}\cup\{a\}\) 안에 있다. \(T\)와 \(T^\star\)는 정의에서 가로지르지 않고, \(a, b \in R\)이라 \(a \notin T\), \(b^\star \notin T^\star\)이다. 따라서 두 support의 공통 부분은 \(\{a\}\cap\{b\}\)에 들어 있다. \(a \ne b\)이면 \(c^\star_a\cdot c_b = 0\)이고, \(a = b\)이면 그 edge에서 두 coefficient가 orientation의 정의에 의해 모두 \(+1\)이므로 \(1\)이다.
         (c) <a href="#i-45-2-8">Proposition 45.2.8</a>에서 \(c^\star_a \in \ker d_1\)이다. 곧 \(\omega_a := c^\star_a\)를 primal 1-form으로 읽으면 closed이고, (b)에서 \(c_b^{\mathsf T}\omega_a = c^\star_a\cdot c_b\)이므로 period matrix가 identity다. <a href="#i-45-2-5">Lemma 45.2.5</a>(c)로 \([c_e]\)들은 independent이고, 개수 \(2 - \chi\)가 \(\dim H_1\)(<a href="#i-45-2-2">Proposition 45.2.2</a>)과 같으므로 basis다. dual 쪽도 같다. \(\sum_az_ac^\star_a = d_0y\)(dual boundary)이면 \(c_b\)와의 intersection number를 취해 \(z_b = c_b^{\mathsf T}d_0y = (d_0^{\mathsf T}c_b)^{\mathsf T}y = 0\)이고, \(\dim\tilde H_1 = 2 - \chi\)(<a href="../36-discrete-exterior-calculus/36-4-discrete-exterior-derivative.html#i-36-4-13">Proposition 36.4.13</a>)이다.</p>
       </div>
       <p>Crane의 노트는 단계를 반대 순서(먼저 \(T^\star\), 그다음 \(T^\star\)를 가로지르지 않는 \(T\))로 적고 dual loop를 generator로 쓴다 <a class="cite" href="../../references.html#Cr">[Cr §8.2.1]</a>. <a class="cite" href="../../references.html#Crane10">[Crane10]</a>은 이 절과 같은 순서다. 위의 증명은 primal과 dual의 역할을 바꾸어도 그대로이므로(<a href="#ex-45-2-4">Exercise 45.2.4</a>) 두 순서 모두 같은 결론을 준다. Section 45.4는 dual loop의 holonomy를 쓰므로 이 절은 두 종류의 loop를 모두 기록한다.</p>
@@ -235,7 +235,7 @@ genus2_mesh(0.2): |T| = 2523, |T*| = 5051, leftover 4, 2 - chi = 4</code></pre>
 
       <div class="thm example" id="i-45-2-15">
         <p><span class="thm-head">Example 45.2.15</span> <span class="thm-name">(the harmonic basis of the torus mesh)</span>.
-        <code>torus_mesh(2, 0.8, 24, 48)</code>에서 BFS(root vertex 0, face 0)의 generator는 <a href="#fig-45-2-1">Figure 45.2.1</a>과 같은 종류다: \(c_1\)의 \((du, dv)\) period가 \((-2\pi, 0)\), \(c_2\)가 \((-2\pi, 2\pi)\)이다. harmonic basis는 <a href="45-1-hodge-decomposition.html#i-45-1-17">Example 45.1.17</a>의 \(\hat\gamma_{du}\), \(\hat\gamma_{dv}\)(각각 \(R_1(du)\), \(R_1(dv)\)의 harmonic 부분)로 \(\gamma_1 = -\tfrac{1}{2\pi}(\hat\gamma_{du} + \hat\gamma_{dv})\), \(\gamma_2 = \tfrac{1}{2\pi}\hat\gamma_{dv}\)이다(\(10^{-12}\) 안에서). period가 \(\delta_{ab}\)라는 조건만으로 계수가 정해지기 때문이다. Gram matrix는 \(\begin{pmatrix}2.7382 & -0.4359\\ -0.4359 & 0.4359\end{pmatrix}\)이다. smooth 값은 <a href="45-1-hodge-decomposition.html#eq-45-1-1">(45.1.1)</a>의 \(\gamma_{du}\)와 \(dv\)가 L2-orthogonal이고 \(\norm{\gamma_{du}}^2 = 4\pi^2c/r\), \(\norm{dv}^2 = 4\pi^2r/c\)(\(c = \sqrt{R^2 - r^2}\))이므로 \(\begin{pmatrix}c/r + r/c & -r/c\\ -r/c & r/c\end{pmatrix}\) \(= \begin{pmatrix}2.7277 & -0.4364\\ -0.4364 & 0.4364\end{pmatrix}\)이다.</p>
+        <code>torus_mesh(2, 0.8, 24, 48)</code>에서 BFS(root vertex 0, face 0)의 generator는 <a href="#fig-45-2-1">Figure 45.2.1</a>과 같은 종류다: \(c_1\)의 \((du, dv)\) period가 \((-2\pi, 0)\), \(c_2\)가 \((-2\pi, 2\pi)\)이다. harmonic basis는 <a href="45-1-hodge-decomposition.html#i-45-1-17">Example 45.1.17</a>의 \(\hat\gamma_{du}\), \(\hat\gamma_{dv}\)(각각 \(R_1(du)\), \(R_1(dv)\)의 harmonic 부분)로 \(\gamma_1 = -\tfrac{1}{2\pi}(\hat\gamma_{du} + \hat\gamma_{dv})\), \(\gamma_2 = \tfrac{1}{2\pi}\hat\gamma_{dv}\)이다(\(10^{-12}\) 안에서). period가 \(\delta_{ab}\)라는 조건만으로 coefficient가 정해지기 때문이다. Gram matrix는 \(\begin{pmatrix}2.7382 & -0.4359\\ -0.4359 & 0.4359\end{pmatrix}\)이다. smooth 값은 <a href="45-1-hodge-decomposition.html#eq-45-1-1">(45.1.1)</a>의 \(\gamma_{du}\)와 \(dv\)가 L2-orthogonal이고 \(\norm{\gamma_{du}}^2 = 4\pi^2c/r\), \(\norm{dv}^2 = 4\pi^2r/c\)(\(c = \sqrt{R^2 - r^2}\))이므로 \(\begin{pmatrix}c/r + r/c & -r/c\\ -r/c & r/c\end{pmatrix}\) \(= \begin{pmatrix}2.7277 & -0.4364\\ -0.4364 & 0.4364\end{pmatrix}\)이다.</p>
         <p class="verified">Verification: <code>verify/v-45-2-homology-harmonic-bases.py</code></p>
       </div>
 
@@ -247,13 +247,13 @@ genus2_mesh(0.2): |T| = 2523, |T*| = 5051, leftover 4, 2 - chi = 4</code></pre>
 
       <div class="thm remark" id="i-45-2-16">
         <p><span class="thm-head">Remark 45.2.16</span> <span class="thm-name">(de Rham's theorem)</span>.
-        <a href="#i-45-2-5">Lemma 45.2.5</a>와 <a href="#i-45-2-14">Proposition 45.2.14</a>(a)를 합치면, period pairing \(([\omega], [c]) \mapsto c^{\mathsf T}\omega\)는 \(\ker d_1/\im d_0\)과 \(H_1\) 사이의 잘 정의된 bilinear map이고, 두 basis \(\{[\gamma_a]\}\), \(\{[c_b]\}\)에서 identity matrix를 갖는다. 곧 cohomology class는 homology generator 위의 period로 정확히 정해진다. smooth 판은 de Rham theorem이다: 닫힌 manifold에서 적분이 \(H^1_{\mathrm{dR}}\)과 (실수 계수) homology의 dual space 사이의 isomorphism을 준다. 이 study set은 그 정리를 진술만 한다(<a href="../19-de-rham/index.html#toc-19-5">Section 19.5</a>, <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>). mesh에서는 위의 계산이 증명 전체다.</p>
+        <a href="#i-45-2-5">Lemma 45.2.5</a>와 <a href="#i-45-2-14">Proposition 45.2.14</a>(a)를 합치면, period pairing \(([\omega], [c]) \mapsto c^{\mathsf T}\omega\)는 \(\ker d_1/\im d_0\)과 \(H_1\) 사이의 잘 정의된 bilinear map이고, 두 basis \(\{[\gamma_a]\}\), \(\{[c_b]\}\)에서 identity matrix를 갖는다. 곧 cohomology class는 homology generator 위의 period로 정확히 정해진다. smooth 판은 de Rham theorem이다: 닫힌 manifold에서 적분이 \(H^1_{\mathrm{dR}}\)과 (real coefficient) homology의 dual space 사이의 isomorphism을 준다. 이 study set은 그 정리를 진술만 한다(<a href="../19-de-rham/index.html#toc-19-5">Section 19.5</a>, <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>). mesh에서는 위의 계산이 증명 전체다.</p>
       </div>
 
       <aside class="box discrete">
         <p class="box-title">Smooth vs. Discrete: loops and harmonic bases</p>
-        <p><strong>Smooth.</strong> genus \(g\)인 닫힌 곡면에는 손잡이마다 두 개, 모두 \(2g\)개의 기본 loop가 있고, 그 각각에 period가 \(1\)인 harmonic 1-form이 대응한다. loop의 존재와 그 개수는 topology의 정리(곡면의 분류)이고, harmonic form의 존재는 Hodge theorem이다.</p>
-        <p><strong>Discrete.</strong> loop는 tree-cotree가 선형 시간에 찾고, 개수 \(n_1 - (n_0 - 1) - (n_2 - 1) = 2 - \chi\)는 셈이다. 정확히 보존하는 것: \(\dim H_1 = \dim\tilde H_1 = \dim\mathcal{H} = 2g\), intersection number \(c^\star_a\cdot c_b = \delta_{ab}\), period matrix가 identity라는 것, homology와 cohomology의 쌍대성(transpose). 잃는 것: loop의 모양. BFS가 만드는 loop는 짧지도 매끄럽지도 않고 root에 따라 달라진다. 짧은 generator가 필요하면 다른 알고리즘을 쓴다(Go deeper). harmonic form은 smooth form의 \(O(h^2)\) 근사다(<a href="#i-45-2-15">Example 45.2.15</a>의 Gram matrix).</p>
+        <p><strong>Smooth.</strong> genus \(g\)인 닫힌 surface에는 손잡이마다 두 개, 모두 \(2g\)개의 기본 loop가 있고, 그 각각에 period가 \(1\)인 harmonic 1-form이 대응한다. loop의 존재와 그 개수는 topology의 정리(surface의 분류)이고, harmonic form의 존재는 Hodge theorem이다.</p>
+        <p><strong>Discrete.</strong> loop는 tree-cotree가 linear time에 찾고, 개수 \(n_1 - (n_0 - 1) - (n_2 - 1) = 2 - \chi\)는 셈이다. 정확히 보존하는 것: \(\dim H_1 = \dim\tilde H_1 = \dim\mathcal{H} = 2g\), intersection number \(c^\star_a\cdot c_b = \delta_{ab}\), period matrix가 identity라는 것, homology와 cohomology의 duality(transpose). 잃는 것: loop의 모양. BFS가 만드는 loop는 짧지도 매끄럽지도 않고 root에 따라 달라진다. 짧은 generator가 필요하면 다른 알고리즘을 쓴다(Go deeper). harmonic form은 smooth form의 \(O(h^2)\) 근사다(<a href="#i-45-2-15">Example 45.2.15</a>의 Gram matrix).</p>
       </aside>
 
       <aside class="box backward">
@@ -263,7 +263,7 @@ genus2_mesh(0.2): |T| = 2523, |T*| = 5051, leftover 4, 2 - chi = 4</code></pre>
 
       <aside class="box deeper">
         <p class="box-title">Go deeper</p>
-        <p>simplicial homology와 정수 계수, 곡면의 분류: <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>(Ch. 2). de Rham cohomology와 de Rham theorem: <a href="../19-de-rham/index.html#toc-19-5">Section 19.5</a>. tree-cotree의 원전: <a class="cite" href="../../references.html#Eppstein03">[Eppstein03]</a>. 노트: <a class="cite" href="../../references.html#Cr">[Cr §8.2]</a>(짧은 generator를 찾는 greedy 판의 참고문헌도 거기에 있다).</p>
+        <p>simplicial homology와 integer coefficient, surface의 분류: <a class="cite" href="../../references.html#Hatcher02">[Hatcher02]</a>(Ch. 2). de Rham cohomology와 de Rham theorem: <a href="../19-de-rham/index.html#toc-19-5">Section 19.5</a>. tree-cotree의 원전: <a class="cite" href="../../references.html#Eppstein03">[Eppstein03]</a>. 노트: <a class="cite" href="../../references.html#Cr">[Cr §8.2]</a>(짧은 generator를 찾는 greedy 판의 참고문헌도 거기에 있다).</p>
       </aside>
     </section>
 
@@ -332,7 +332,7 @@ c*_a . c_b = identity: True
 periods c_b . gamma_a = identity: True
 closed: True   co-closed: True
 negative star1 entries: 880  of 7578</code></pre>
-          <p>(a)와 (b)는 \(\star_1\)의 부호를 쓰지 않는다. 쓰인 것은 intersection number(조합), <a href="#i-45-2-5">Lemma 45.2.5</a>(조합), <a href="45-1-hodge-decomposition.html#i-45-1-16">Theorem 45.1.16</a>(a)(\(-L\)의 positive semidefiniteness, 모든 mesh에서 성립)뿐이다. 그래서 이 mesh에서도 \(\gamma_a\)는 \(\mathcal{H}\)의 basis다. (c)는 \(\langle\cdot,\cdot\rangle_1\)이 inner product라는 것을 쓰므로 이 mesh에서는 보장되지 않는다. <code>ch45</code>는 verify와 같은 경로(<code>lib/</code>)에서 import한다.</p>
+          <p>(a)와 (b)는 \(\star_1\)의 부호를 쓰지 않는다. 쓰인 것은 intersection number(조합), <a href="#i-45-2-5">Lemma 45.2.5</a>(조합), <a href="45-1-hodge-decomposition.html#i-45-1-16">Theorem 45.1.16</a>(a)(\(-L\)의 positive semidefiniteness, 모든 mesh에서 성립)뿐이다. 그래서 이 mesh에서도 \(\gamma_a\)는 \(\mathcal{H}\)의 basis다. (c)는 \(\langle\cdot,\cdot\rangle_1\)이 inner product라는 것을 쓰므로 이 mesh에서는 보장되지 않는다. <code>ch45</code>는 verify와 같은 path(<code>lib/</code>)에서 import한다.</p>
         </details>
       </div>
 

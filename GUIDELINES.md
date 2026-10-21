@@ -310,6 +310,29 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 | 쌍곡평면 𝕌² | 둘러싼 공간 없이 계량만 주어진 "곡면", K = −1 (09 끝, T3 줄기) → 리만 다양체로 재정의 (21) → 측지선 (23) → 상수곡률 −1 모형공간 (24) |
 | ℝℙⁿ | 몫위상, Sⁿ/± ≅ ℝℙⁿ, 차트 φ_i의 위상동형성, 하우스도르프·제2가산·컴팩트·연결 (03) → 차트와 매끄러운 구조, 좌표변환 행렬식의 부호 (11) → Sⁿ → ℝℙⁿ은 2대1 국소 미분동형 (12) → 방향 불가능성 (18) |
 
+**Track 2 기준 예제의 여정** (2026-10-22, Track 2 통합 검토에서 실제로 쓴 값을 모았다. §2.5의 기준 예제와 같다)
+
+| 예제 | 여정 (장 번호) |
+|---|---|
+| ellipse (2cos t, sin t) | L = 9.6884, ∫κ_s² ds = 6.636, offset 길이 (32.2) → 네 discrete curvature의 order 2 수렴 (32.3) → curve shortening flow (32.4) → ½∮(x dy − y dx) = 2π = 둘러싼 넓이 (35.3–35.4) → dγ의 늘이는 비율 1–2, κ_s에서 복원(O(m⁻²)), 16각형의 (ℓ, θ)로 정확한 복원 (37) → dn_s = −κ_s dγ (39) |
+| flower r = 1 + 0.3 cos 5t | κ_s 최대 5.207, waist −13.878, 부호가 10번 바뀜, 길이 9.0172 (32.2) → 수렴 (32.3) → A(0) = 3.2830, 소멸 시각 0.5225, 대칭 없는 sampling의 drift (32.4) → turning number 1, 40각형의 정확한 복원, sampling 가정(n = 10, 20, n ≥ 23), 64각형 length flow(M = I에서 꽃잎 끝 edge가 0.3%로 무너짐), isometric elastic flow (37) |
+| 원과 내접 정 n각형 | L_n = 2nr sin(π/n), 오차의 upper bound π³r/(3n²) (32.1) → κ^B, κ^D가 정확히 1/r (32.3) → 원 위에 머무는 discrete flow (32.4) → 넓이 S_n (35.4) → turning number ±1, (ℓ, 2π/n)에서 정확한 복원, elastic energy π/r와 E^d = π²/(nr sin(π/n)) (37) |
+| helix (cos t, sin t, 0.3t) | ∫(−y dx + x dy + z dz) = 2π + 0.18π² (35.3) → κ = 0.91743, τ = 0.27523, Bishop frame 한 바퀴 −1.80546, Frenet–Serret 적분으로 복원, discrete torsion (37) → cylinder 위의 κ_n, κ_g (39) |
+| sphere S²(r) | ⋆dθ = sin θ dφ (35.1) → 넓이 4πr², hemisphere의 그림자 πr² (35.3) → dx∧dx = 2r² sin θ N dθ∧dφ (35.5) → induced metric, stereographic·Mercator의 conformal factor, 바깥쪽 𝐍, vector area 0 (38) → 𝖶 = −(1/r)id, κ_n = H = −1/r, K = 1/r², geodesic disk의 넓이, polar cap의 Gauss–Bonnet (39) → Steiner A(ε), V(ε) (40) → first variation, MCF r² = r₀² − 4t, GCF r³ = r₀³ − 3t, W = 4π (41) → Mercator에서 Δz = −2z, 점 원천 G = (1/4π)log(1 − cos θ) (42) → 바깥쪽 𝐍에서 σ̄가 holomorphic, μ = log 2 − log(1 + u² + v²) (43) → great circle, Γ, Karcher mean (44) |
+| icosphere(level) | level 0, 1, 2 = (12, 30, 20), (42, 120, 80), (162, 480, 320) (33.1) → dual = dodecahedron (33.6) → d₁d₀ = 0 (36.4) → ⋆₀의 합 11.6659(level 1), 12.3298(level 2) (36.5) → L𝟏 = 0, −⋆₀⁻¹L의 eigenvalue 0, 2, 5.865, … (36.6) → vertex normal 넷의 정확도, Δ_h z → −2z (38) → (ℓ, θ)에서 다시 만들기 (39) → δ_i/A_i → 1, Σδ = 4π, (L𝐱)_i/A_i ≈ −2𝐱_i, (K𝐍)_i/A_i ≈ 𝐱_i, ΣH_ij → −4π (40) → ∇A ≈ 2A_i𝐍_i, sphere-inscribed normal(정확), MCF·GCF 수치 (41) → Poisson으로 z를 O(ℓ̄²)로, semi-implicit MCF r_{k+1} = r_k/(1 + 2h/r_k²) (42) → heat method는 수렴하고 Dijkstra는 수렴하지 않음 (44) → harmonic 부분 없음, 위도 띠 holonomy 3.1594(θ₀ = π/3, smooth 값 π), singularity 옮기기 (45) |
+| torus of revolution T_{2,0.8} | immersion(\|𝐱_u × 𝐱_v\| ≥ 0.96), 𝐍 안쪽, d𝐍 (38) → 안쪽 𝐍으로 κ₁ = 1/r, κ₂ = cos u/(R + r cos u), H ∈ [0.208, 0.804], ∫K dA = 0, ∫H dA = 2π²R (39) → Steiner A(ε) (40) → W = π²a²/√(a² − 1) = 26.922(a = 2.5), Willmore gradient (41) → Δz = −sin u(R + 2r cos u)/(r(R + r cos u)) (42) → flat rectangle과 conformal, 비 r/√(R² − r²) = 0.4364 (43) → Clairaut (44) |
+| torus_mesh(2, 0.8, nu, nv) (바깥쪽 face) | (4, 6) = (24, 72, 48), χ = 0 (33.1, 33.4) → orientation과 dual (33.3, 33.6) → Betti (1, 2, 1) (36.2) → 대각선이 모두 flat edge라 normal로 모양이 정해지지 않음 (38) → Σδ = 0과 부호 분포 (40) → principal curvature, regular grid에서 order 2, subdivision하면 점마다 수렴하지 않음 (41) → 대각선 ⋆₁ = 0(칸이 원에 내접), 오차 2.95e-2 → 7.95e-3 (42) → heat method (44) → R₁(dv)는 harmonic, harmonic basis와 Gram 0.4364 (45) |
+| cylinder | g (38) → 둘레 방향 κ_n = −1/r, K = 0이고 H ≠ 0 (39) → MCF ρ² = ρ₀² − 2t (41) → log/exp 좌표 (43) → helix geodesic, exp (44) |
+| saddle | induced metric과 넓이 (38) → q = (0.5, −0.4)에서 symmetric이 아닌 𝖶, principal direction 사이 각 63.92° (39) → grid의 원점에서 H = 0 (40) → 원점에서 K = −4, κ₁,₂ = ±2 (41) |
+| 𝕌² | μ = −log y로 conformally flat (43) → geodesic equation과 vertical line (44) |
+| planar grid | 4×4 = (16, 33, 18), χ = 1 (33.4) → x dy의 de Rham image와 Whitney 오차 O(h) (36.1, 36.3) → harmonic x² − y²에서 Lu = 0(interior), Poisson 오차 1.30e-2, 3.22e-3, 8.04e-4 (36.6) → x² − y² Dirichlet 해가 정확, alternating grid (42) → Dijkstra의 metrication 오차 (44) |
+| unit cube(삼각분할) | 바깥쪽 orientation, 손으로 쓴 d₀·d₁ (33.3, 33.5, 36.4) → octahedron ↔ cube (33.6) → corner의 vertex normal (38) → corner δ = π/2, ½Σℓθ = 3π, mollification 부피, (K𝐍) = (π/4)(1, 1, 1) (40) → volume·area gradient, MCF·GCF (41) → unfolding 거리 1.9235, cut locus, corner 둘레의 straightest (44) → corner holonomy π/2, 손으로 만드는 trivial connection (45) |
+| 정다면체와 dimpled icosahedron | tetrahedron은 self-dual (33.6) → bending angle, 길이가 같아도 모양이 다름 (39) → δ = π, 2π/3, π/3, Descartes (40) |
+| 정삼각형 grid, non-Delaunay pair | ⋆₁ = 1/√3, ⋆₀ = (√3/2)ℓ² (36.5) → 7점 stencil, pair의 ⋆₁ = −1.696, −L의 eigenvalue 0, 0.275, 3.607, 7.393 (36.5–36.6) → Warning: ⋆₁-inner product가 inner product가 아님 (45) |
+| hemisphere(icosphere(3)에서 z < 0인 face) | boundary 문제 (42) → hemisphere → disk, spectral conformal ≈ σ̄(λ₁ = 2.194e-3) (43) |
+| flat torus(periodic planar grid) | Hodge decomposition, trivial connection (45) |
+| jittered sphere(s = 0.15, seed 42) | 점마다의 값은 수렴하지 않고 Poisson 해는 수렴 (42) |
+
 ### 3.6 일관성 유지 장치
 
 규칙을 기억에만 맡기지 않는다. 정본을 한 곳에 두고 도구로 검사한다.
@@ -728,6 +751,7 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 - 영어 용어는 소문자로 쓴다. 고유명사가 들어간 용어는 그 부분만 대문자로 쓴다: Gauss map, Lie bracket, Riemannian metric, Frenet frame, Theorema Egregium.
 - 한국어 문장 안에서는 영어 명사를 단수형으로 쓴다("두 tangent vector", "모든 chart"). "-s"를 붙이지 않는다. 고정된 이름은 예외다: Christoffel symbols, normal coordinates.
 - 한국어 수식어와 영어 용어를 한 용어 안에 섞지 않는다. "매끄러운 map"이 아니라 "smooth map"으로 쓴다. 문장 차원의 수식은 괜찮다("이 map은 매끄럽다").
+- **동사형**은 영어 동사에 "하다"를 붙인다: discretize하다, parametrize하다, triangulate하다, interpolate하다, translate하다(유클리드 평행이동). "이산화하다", "매개화하다"로 쓰지 않는다(2026-10-22, Track 2 통합 검토).
 - **처음 정의할 때**: `<dfn>dual space</dfn>(쌍대공간)`처럼 영어를 `<dfn>`에 넣고 한국어 번역어를 괄호에 한 번 적는다. 그 뒤로는 영어만 쓴다.
 - **영어 용어 뒤 조사**는 영어 발음의 끝소리에 맞춘다.
   - 예: kernel**은**(커널), image**는**(이미지), dual space**는**(스페이스), basis**는**(베이시스), manifold**는**(매니폴드), chart**는**(차트), map**은**(맵), diffeomorphism**은**(-즘), curvature**는**(커버처), torsion**은**(토션), atlas**는**(아틀라스), Lie bracket**은**(브래킷), Gauss map**은**(맵)

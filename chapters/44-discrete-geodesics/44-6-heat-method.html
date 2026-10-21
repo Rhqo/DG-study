@@ -34,7 +34,7 @@
     <section class="goals">
       <h2>Goals</h2>
       <ul>
-        <li>거리 함수가 eikonal equation \(\abs{\grad\varphi} = 1\)을 만족함을 증명하고, 그 방정식을 직접 풀기 어려운 이유를 말할 수 있다.</li>
+        <li>distance function이 eikonal equation \(\abs{\grad\varphi} = 1\)을 만족함을 증명하고, 그 방정식을 직접 풀기 어려운 이유를 말할 수 있다.</li>
         <li>heat method의 세 단계(backward Euler 한 step, gradient의 정규화, Poisson solve)를 이 study set의 \(L\)의 부호로 정확히 쓰고 구현할 수 있다.</li>
         <li>face마다 상수인 vector field의 integrated divergence의 cotan 식을 FEM의 weak divergence와 dual cell의 flux로 증명할 수 있다.</li>
         <li>time step, boundary condition, prefactorization이 정확도와 속도에 어떤 영향을 주는지 수치로 설명하고, Dijkstra 및 정확한 polyhedral distance와 비교할 수 있다.</li>
@@ -53,7 +53,7 @@
 
     <section id="sec-motivation">
       <h2>Motivation</h2>
-      <p>Section 44.5는 한 점과 한 방향에서 geodesic 하나를 계산했다. 많은 응용에 필요한 것은 그보다 큰 양, 한 점(또는 점들의 집합)에서 모든 점까지의 거리다. Section 44.2의 Dijkstra는 빠르지만 metrication error가 줄지 않았고(<a href="44-2-shortest-paths-cut-locus.html#i-44-2-1">Proposition 44.2.1</a>), MMP는 정확하지만 구현이 복잡하고 비싸다. 이 절의 heat method는 Chapter 42에서 만든 두 linear system만으로 거리를 계산한다. Section 31.4가 결과와 직관을 소개했으니, 여기서는 이산화를 완전히 쓰고 그 정확도를 시험한다.</p>
+      <p>Section 44.5는 한 점과 한 방향에서 geodesic 하나를 계산했다. 많은 응용에 필요한 것은 그보다 큰 양, 한 점(또는 점들의 집합)에서 모든 점까지의 거리다. Section 44.2의 Dijkstra는 빠르지만 metrication error가 줄지 않았고(<a href="44-2-shortest-paths-cut-locus.html#i-44-2-1">Proposition 44.2.1</a>), MMP는 정확하지만 구현이 복잡하고 비싸다. 이 절의 heat method는 Chapter 42에서 만든 두 linear system만으로 거리를 계산한다. Section 31.4가 결과와 직관을 소개했으니, 여기서는 discretization을 완전히 쓰고 그 정확도를 시험한다.</p>
       <aside class="box convention">
         <p class="box-title">Conventions: the heat method</p>
         <ul>
@@ -67,7 +67,7 @@
 
     <section id="sec-eikonal">
       <h2>The Distance Function and the Eikonal Equation</h2>
-      <p>complete surface \(S\)와 닫힌 집합 \(\gamma \subseteq S\)(한 점 또는 곡선)에 대해 \(\varphi(x) := \min_{y\in\gamma}d(x, y)\)를 \(\gamma\)에서의 거리 함수라 하자.</p>
+      <p>complete surface \(S\)와 닫힌 집합 \(\gamma \subseteq S\)(한 점 또는 곡선)에 대해 \(\varphi(x) := \min_{y\in\gamma}d(x, y)\)를 \(\gamma\)에서의 distance function이라 하자.</p>
       <div class="thm proposition" id="i-44-6-1">
         <p><span class="thm-head">Proposition 44.6.1</span> <span class="thm-name">(the distance function)</span>.
         (a) 모든 \(x, x'\)에서 \(\abs{\varphi(x) - \varphi(x')} \le d(x, x')\)이다. (b) \(\varphi\)가 \(x \notin \gamma\)에서 differentiable이면</p>
@@ -77,12 +77,12 @@
         <p>이다(<strong>eikonal equation</strong>(아이코날 방정식), <a href="../30-radiance-field-surfaces/30-1-implicit-surfaces-eikonal.html#sec-eikonal">Section 30.1</a>).</p>
       </div>
       <div class="proof">
-        <p><span class="proof-head">Proof.</span> (a) \(y \in \gamma\)에서 \(d(x, y) \le d(x, x') + d(x', y)\)이므로 \(y\)에 대한 최솟값을 취하면 \(\varphi(x) \le d(x, x') + \varphi(x')\)이고, \(x\)와 \(x'\)을 바꾸어도 같다. (b) \(w \in T_xS\)와 \(\beta(0) = x\), \(\beta'(0) = w\)인 곡선에 대하여 (a)에서 \(\abs{\varphi(\beta(s)) - \varphi(x)} \le L(\beta|_{[0, s]}) = s\abs w + o(s)\)이므로 \(\abs{d\varphi_x(w)} \le \abs w\), 곧 \(\abs{\grad\varphi(x)} \le 1\)이다. 거꾸로, \(\gamma\)에서 \(x\)로 가는 shortest 곡선이 있다(Hopf–Rinow theorem, 받아들인다. \(\gamma\)가 compact이면 가장 가까운 \(y\)도 있다). 그것을 arc length로 매개화한 \(c\)(\(c(0) = y\), \(c(\ell) = x\), \(\ell = \varphi(x)\))의 부분도 shortest이므로 \(\varphi(c(s)) = s\)이다. \(s = \ell\)에서 미분하면 \(\inner{\grad\varphi(x)}{c'(\ell)} = 1\)이고, \(\abs{c'} = 1\)이므로 Cauchy–Schwarz에서 \(\abs{\grad\varphi(x)} \ge 1\)이다.</p>
+        <p><span class="proof-head">Proof.</span> (a) \(y \in \gamma\)에서 \(d(x, y) \le d(x, x') + d(x', y)\)이므로 \(y\)에 대한 최솟값을 취하면 \(\varphi(x) \le d(x, x') + \varphi(x')\)이고, \(x\)와 \(x'\)을 바꾸어도 같다. (b) \(w \in T_xS\)와 \(\beta(0) = x\), \(\beta'(0) = w\)인 곡선에 대하여 (a)에서 \(\abs{\varphi(\beta(s)) - \varphi(x)} \le L(\beta|_{[0, s]}) = s\abs w + o(s)\)이므로 \(\abs{d\varphi_x(w)} \le \abs w\), 곧 \(\abs{\grad\varphi(x)} \le 1\)이다. 거꾸로, \(\gamma\)에서 \(x\)로 가는 shortest 곡선이 있다(Hopf–Rinow theorem, 받아들인다. \(\gamma\)가 compact이면 가장 가까운 \(y\)도 있다). 그것을 arc length로 parametrize한 \(c\)(\(c(0) = y\), \(c(\ell) = x\), \(\ell = \varphi(x)\))의 부분도 shortest이므로 \(\varphi(c(s)) = s\)이다. \(s = \ell\)에서 미분하면 \(\inner{\grad\varphi(x)}{c'(\ell)} = 1\)이고, \(\abs{c'} = 1\)이므로 Cauchy–Schwarz에서 \(\abs{\grad\varphi(x)} \ge 1\)이다.</p>
       </div>
-      <p>증명에서 \(\grad\varphi(x) = c'(\ell)\), 곧 거리 함수의 gradient는 출발점에서 오는 shortest geodesic의 방향이다. 그런데 eikonal equation만으로는 거리를 정하기 어렵다. 방정식이 nonlinear이고, 해가 미분 불가능한 곳(cut locus, <a href="44-2-shortest-paths-cut-locus.html#i-44-2-8">Remark 44.2.8</a>)이 반드시 생기며, 그곳을 허용하면 해가 하나가 아니다.</p>
+      <p>증명에서 \(\grad\varphi(x) = c'(\ell)\), 곧 distance function의 gradient는 출발점에서 오는 shortest geodesic의 방향이다. 그런데 eikonal equation만으로는 거리를 정하기 어렵다. 방정식이 nonlinear이고, 해가 미분 불가능한 곳(cut locus, <a href="44-2-shortest-paths-cut-locus.html#i-44-2-8">Remark 44.2.8</a>)이 반드시 생기며, 그곳을 허용하면 해가 하나가 아니다.</p>
       <div class="thm nonexample" id="i-44-6-2">
         <p><span class="thm-head">Non-example 44.6.2</span> <span class="thm-name">(almost-everywhere solutions are not unique)</span>.
-        구간 \([0, 1]\)에서 \(\gamma = \{0, 1\}\)의 거리 함수는 \(\varphi(x) = \min(x, 1 - x)\)이고, \(x = \tfrac12\)(cut point)만 빼고 \(\abs{\varphi'} = 1\)이다. 그러나 \(\psi(x) = \min(x, \abs{x - \tfrac12}, 1 - x)\)도 \(\psi(0) = \psi(1) = 0\)이고 꺾이는 세 점만 빼고 \(\abs{\psi'} = 1\)이다. “거의 모든 곳에서 eikonal equation과 경계 조건을 만족한다”는 것만으로는 거리 함수가 정해지지 않는다. 올바른 해를 고르려면 <strong>viscosity solution</strong>(점성해) 같은 추가 조건이 필요하고, fast marching은 vertex를 거리 순서대로 확정해 이것을 강제한다(<a href="44-2-shortest-paths-cut-locus.html#sec-algorithms">Section 44.2</a>). 그 순서 때문에 계산이 순차적이 된다.</p>
+        구간 \([0, 1]\)에서 \(\gamma = \{0, 1\}\)의 distance function은 \(\varphi(x) = \min(x, 1 - x)\)이고, \(x = \tfrac12\)(cut point)만 빼고 \(\abs{\varphi'} = 1\)이다. 그러나 \(\psi(x) = \min(x, \abs{x - \tfrac12}, 1 - x)\)도 \(\psi(0) = \psi(1) = 0\)이고 꺾이는 세 점만 빼고 \(\abs{\psi'} = 1\)이다. “거의 모든 곳에서 eikonal equation과 boundary condition을 만족한다”는 것만으로는 distance function이 정해지지 않는다. 올바른 해를 고르려면 <strong>viscosity solution</strong>(점성해) 같은 추가 조건이 필요하고, fast marching은 vertex를 거리 순서대로 확정해 이것을 강제한다(<a href="44-2-shortest-paths-cut-locus.html#sec-algorithms">Section 44.2</a>). 그 순서 때문에 계산이 순차적이 된다.</p>
       </div>
     </section>
 
@@ -97,7 +97,7 @@
         <p><span class="thm-head">Example 44.6.3</span> <span class="thm-name">(the heat kernel of the plane)</span>.
         평면에서 \(k_t(x, 0) = (4\pi t)^{-1}e^{-\abs x^2/(4t)}\)이다. \(-4t\log k_t = \abs x^2 + 4t\log(4\pi t) \to \abs x^2\)이므로 <a href="#eq-44-6-2">(44.6.2)</a>가 성립한다. 그러나 \(t\)가 작지 않으면 \(4t\log(4\pi t)\)만큼 틀린다. 반면 gradient는 \(\grad_xk_t = -\tfrac{x}{2t}k_t\)이므로</p>
         <p>\[ -\frac{\grad k_t}{\abs{\grad k_t}} = \frac{x}{\abs x} = \grad\abs x \]</p>
-        <p>는 모든 \(t \gt 0\)에서 정확히 거리 함수의 gradient다. 열의 크기는 \(t\)에 따라 틀리지만, 그 방향은 틀리지 않는다.</p>
+        <p>는 모든 \(t \gt 0\)에서 정확히 distance function의 gradient다. 열의 크기는 \(t\)에 따라 틀리지만, 그 방향은 틀리지 않는다.</p>
         <p class="verified">Verification: <code>verify/v-44-6-heat-method.py</code></p>
       </div>
       <p>휜 surface에서는 이것이 근사로만 성립한다. 짧은 시간의 열은 대략 \(c\,e^{-d^2/(4t)}\) 꼴이라 \(\grad u \approx -\tfrac{d}{2t}u\,\grad d\)이고, 앞의 양수 \(\tfrac{d}{2t}u\)는 정규화로 사라진다(Section 31.4의 논증, <a href="../31-meshes/31-4-spectral-geometry.html#ex-31-4-5">Exercise 31.4.5</a>). 그다음 \(\grad\varphi\)가 그 방향 \(X\)에 가장 가까운 \(\varphi\)를 찾으면 된다. 이것이 heat method의 생각이다. eikonal equation의 nonlinear한 부분(\(\abs{\cdot} = 1\))을 정규화라는 face마다의 계산으로 옮기고, 나머지 두 단계를 linear system으로 남긴다.</p>
@@ -115,7 +115,7 @@
         <div class="equation" id="eq-44-6-3">
         \[ \begin{aligned} &\text{(I)}\quad (M - tL)\,u = \delta_\gamma, \\ &\text{(II)}\quad X_f = -\frac{\grad u|_f}{\abs{\grad u|_f}}, \\ &\text{(III)}\quad L\varphi = b, \\ &\phantom{\text{(III)}}\quad \varphi \leftarrow \varphi - \min_i\varphi_i. \end{aligned} \tag{44.6.3} \]
         </div>
-        <p>(II)는 face마다 계산하고, \(\grad u|_f = \sum_{i\in f}u_i\,\grad\lambda_i\)는 \(u\)의 piecewise linear 보간의 gradient이고(<a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#eq-36-3-1">(36.3.1)</a>: \(\grad\lambda_i = \mathbf{N}_f\times(\mathbf{x}_k - \mathbf{x}_j)/(2A_f)\)), (III)의 \(b\)는 아래 <a href="#eq-44-6-4">(44.6.4)</a>의 integrated divergence다. 닫힌 mesh에서 (III)은 \((-L + aa^{\mathsf T})\varphi = -b\)(\(a = M\mathbf{1}\), <a href="../42-laplace-beltrami/42-6-implicit-mcf.html#i-42-6-1">Proposition 42.6.1</a>)로 풀고, boundary가 있으면 (I)의 boundary 처리를 <a href="#i-44-6-12">Example 44.6.12</a>에서 정한다.</p>
+        <p>(II)는 face마다 계산하고, \(\grad u|_f = \sum_{i\in f}u_i\,\grad\lambda_i\)는 \(u\)의 piecewise linear interpolation의 gradient이고(<a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#eq-36-3-1">(36.3.1)</a>: \(\grad\lambda_i = \mathbf{N}_f\times(\mathbf{x}_k - \mathbf{x}_j)/(2A_f)\)), (III)의 \(b\)는 아래 <a href="#eq-44-6-4">(44.6.4)</a>의 integrated divergence다. 닫힌 mesh에서 (III)은 \((-L + aa^{\mathsf T})\varphi = -b\)(\(a = M\mathbf{1}\), <a href="../42-laplace-beltrami/42-6-implicit-mcf.html#i-42-6-1">Proposition 42.6.1</a>)로 풀고, boundary가 있으면 (I)의 boundary 처리를 <a href="#i-44-6-12">Example 44.6.12</a>에서 정한다.</p>
       </div>
       <p>(I)은 heat equation의 backward Euler 한 step이다(<a href="../42-laplace-beltrami/42-6-implicit-mcf.html#eq-42-6-2">(42.6.2)</a>에서 \(u^0 = M^{-1}\delta_\gamma\), 곧 각 출발점에 총량 \(1\)의 열). \(M - tL\)은 symmetric positive definite이므로(<a href="../42-laplace-beltrami/42-6-implicit-mcf.html#i-42-6-4">Proposition 42.6.4</a>(a)) 해가 하나다. 한 step뿐인 것은 짧은 시간의 정확한 heat flow가 목적이 아니라 방향만 필요하기 때문이다. 모든 cotan weight가 양수인 connected mesh에서는 (I)의 해가 모든 vertex에서 양수다(<a href="#ex-44-6-4">Exercise 44.6.4</a>). (II)의 분모가 \(0\)이 되는 face는 \(u\)가 face의 세 vertex에서 같은 값일 때뿐이고, 일반적인 mesh에서는 생기지 않는다.</p>
       <p>이제 (III)의 오른쪽을 정한다. 연속 판의 목표는 \(\grad\varphi\)가 \(X\)에 가장 가까운 \(\varphi\), 곧 \(\int\abs{\grad\varphi - X}^2\,dA\)의 minimizer이고, 그 조건이 \(\Delta\varphi = \divg X\)이다(과제 A5가 이 유도를 연습으로 둔다). mesh에서는 \(X\)가 face마다 상수라 점마다의 divergence가 의미가 없다(<a href="../42-laplace-beltrami/42-3-fem.html#i-42-3-4">Non-example 42.3.4</a>와 같은 이유). 그래서 hat function으로 잰다.</p>
@@ -128,18 +128,18 @@
           \[ \begin{aligned} b_i = \frac12\sum_{f = (i, j, k)\ni i}\Big(&\cot\theta_k\,\inner{e_{ij}}{X_f} \\ &+ \cot\theta_j\,\inner{e_{ik}}{X_f}\Big) \end{aligned} \tag{44.6.4} \]
           </div>
           </li>
-          <li>(b) \(b_i\)는 \(X\)가 vertex \(i\)의 dual cell \(C_i\)의 boundary를 지나 바깥으로 나가는 flux이다. dual cell은 face마다 \(e_{ij}\)의 중점에서 \(e_{ik}\)의 중점까지의 곡선으로 경계를 이루는 것이면 무엇이든 된다(barycentric, circumcentric, mixed).</li>
+          <li>(b) \(b_i\)는 \(X\)가 vertex \(i\)의 dual cell \(C_i\)의 boundary를 지나 바깥으로 나가는 flux이다. dual cell은 face마다 \(e_{ij}\)의 중점에서 \(e_{ik}\)의 중점까지의 곡선으로 boundary를 이루는 것이면 무엇이든 된다(barycentric, circumcentric, mixed).</li>
           <li>(c) \(\sum_ib_i = 0\)이다(boundary가 있어도 된다).</li>
           <li>(d) \(X = \grad w\)(piecewise linear 함수 \(w\)의 gradient)이면 \(b = Lw\)이다.</li>
         </ul>
       </div>
       <div class="proof">
-        <p class="proof-idea">Proof idea: (a)는 \(\grad\lambda_i\)를 이웃한 두 edge의 조합으로 쓰는 항등식이다. (b)는 상수 vector field의 flux가 경로가 아니라 끝점에만 의존한다는 것이다.</p>
+        <p class="proof-idea">Proof idea: (a)는 \(\grad\lambda_i\)를 이웃한 두 edge의 조합으로 쓰는 항등식이다. (b)는 상수 vector field의 flux가 path가 아니라 끝점에만 의존한다는 것이다.</p>
         <p><span class="proof-head">Proof.</span> (a) \(a = e_{ij}\), \(c = e_{ik}\)로 두자. \(\lambda_i\)는 \(\mathbf{x}_i\)에서 \(1\), \(\mathbf{x}_j\)와 \(\mathbf{x}_k\)에서 \(0\)인 affine 함수이므로 \(\inner{\grad\lambda_i}{a} = \inner{\grad\lambda_i}{c} = -1\)이다. 한편 \(\cot\theta_j = \inner{-a}{c - a}/(2A_f)\), 곧 \((\abs a^2 - \inner ac)/(2A_f)\)이고, \(\cot\theta_k = \inner{-c}{a - c}/(2A_f)\), 곧 \((\abs c^2 - \inner ac)/(2A_f)\)이다(\(\cot\theta = \cos\theta/\sin\theta\)이고 두 edge의 inner product가 \(\cos\), 넓이의 두 배가 \(\sin\)을 준다). 그러므로 \(Y := \cot\theta_k\,a + \cot\theta_j\,c\)에 대해</p>
         <p>\[ \begin{aligned} \inner{Y}{a} &= \frac{(\abs c^2 - \inner ac)\abs a^2 + (\abs a^2 - \inner ac)\inner ac}{2A_f} \\ &= \frac{\abs a^2\abs c^2 - \inner ac^2}{2A_f} = \frac{(2A_f)^2}{2A_f} = 2A_f \end{aligned} \]</p>
-        <p>이고 같은 계산으로 \(\inner{Y}{c} = 2A_f\)이다. \(Y\)와 \(-2A_f\grad\lambda_i\)는 모두 face의 평면 안에 있고, 평면의 basis \(a, c\)와의 inner product가 같으므로 \(Y = -2A_f\grad\lambda_i\)이다. \(X_f\)와 inner product를 취해 \(2\)로 나누면 (a)이고, face에 대해 더하면 <a href="#eq-44-6-4">(44.6.4)</a>이다. (b) face \(f\) 안의 dual cell의 경계 조각 \(\beta\)가 \(m_{ij} = \mathbf{x}_i + a/2\)에서 \(m_{ik} = \mathbf{x}_i + c/2\)로 간다고 하자. 상수 \(X_f\)의 flux \(\int_\beta\inner{X_f}{\mathbf{n}}\,ds\)는 \(\beta\)를 선분 \(m_{ij}m_{ik}\)로 바꾸어도 같다(두 곡선 사이의 영역에서 \(\divg X_f = 0\)이므로 divergence theorem). 선분의 방향은 \((c - a)/2 = (\mathbf{x}_k - \mathbf{x}_j)/2\)이고, \(\mathbf{x}_i\)는 그 왼쪽에 있으므로(face가 \((i, j, k)\) 순서로 반시계 방향) \(\mathbf{x}_i\)에서 멀어지는 단위 normal에 길이를 곱한 것은 \(-\mathbf{N}_f\times(\mathbf{x}_k - \mathbf{x}_j)/2 = -A_f\grad\lambda_i\)이다. 그러므로 flux는 \(-A_f\inner{X_f}{\grad\lambda_i}\)이고, face에 대해 더하면 \(b_i\)다. 같은 계산이 <a href="../42-laplace-beltrami/42-4-dec.html#i-42-4-1">Proposition 42.4.1</a>의 \(X = \grad u\)인 경우였다. (c) face마다 \(\sum_{i\in f}\grad\lambda_i = 0\)(<a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#eq-36-3-1">(36.3.1)</a>)이므로 \(\sum_ib_i = -\sum_fA_f\inner{X_f}{\sum_{i\in f}\grad\lambda_i} = 0\)이다. (d) \(b_i = -\sum_jw_j\int\inner{\grad\lambda_j}{\grad\lambda_i}\,dA\)이고 이것은 \(-\sum_jw_ja_{ij} = (Lw)_i\)이다(<a href="../42-laplace-beltrami/42-3-fem.html#i-42-3-5">Theorem 42.3.5</a>의 \((a_{ij}) = -L\)).</p>
+        <p>이고 같은 계산으로 \(\inner{Y}{c} = 2A_f\)이다. \(Y\)와 \(-2A_f\grad\lambda_i\)는 모두 face의 평면 안에 있고, 평면의 basis \(a, c\)와의 inner product가 같으므로 \(Y = -2A_f\grad\lambda_i\)이다. \(X_f\)와 inner product를 취해 \(2\)로 나누면 (a)이고, face에 대해 더하면 <a href="#eq-44-6-4">(44.6.4)</a>이다. (b) face \(f\) 안의 dual cell의 boundary 조각 \(\beta\)가 \(m_{ij} = \mathbf{x}_i + a/2\)에서 \(m_{ik} = \mathbf{x}_i + c/2\)로 간다고 하자. 상수 \(X_f\)의 flux \(\int_\beta\inner{X_f}{\mathbf{n}}\,ds\)는 \(\beta\)를 선분 \(m_{ij}m_{ik}\)로 바꾸어도 같다(두 곡선 사이의 영역에서 \(\divg X_f = 0\)이므로 divergence theorem). 선분의 방향은 \((c - a)/2 = (\mathbf{x}_k - \mathbf{x}_j)/2\)이고, \(\mathbf{x}_i\)는 그 왼쪽에 있으므로(face가 \((i, j, k)\) 순서로 반시계 방향) \(\mathbf{x}_i\)에서 멀어지는 단위 normal에 길이를 곱한 것은 \(-\mathbf{N}_f\times(\mathbf{x}_k - \mathbf{x}_j)/2 = -A_f\grad\lambda_i\)이다. 그러므로 flux는 \(-A_f\inner{X_f}{\grad\lambda_i}\)이고, face에 대해 더하면 \(b_i\)다. 같은 계산이 <a href="../42-laplace-beltrami/42-4-dec.html#i-42-4-1">Proposition 42.4.1</a>의 \(X = \grad u\)인 경우였다. (c) face마다 \(\sum_{i\in f}\grad\lambda_i = 0\)(<a href="../36-discrete-exterior-calculus/36-3-whitney-forms.html#eq-36-3-1">(36.3.1)</a>)이므로 \(\sum_ib_i = -\sum_fA_f\inner{X_f}{\sum_{i\in f}\grad\lambda_i} = 0\)이다. (d) \(b_i = -\sum_jw_j\int\inner{\grad\lambda_j}{\grad\lambda_i}\,dA\)이고 이것은 \(-\sum_jw_ja_{ij} = (Lw)_i\)이다(<a href="../42-laplace-beltrami/42-3-fem.html#i-42-3-5">Theorem 42.3.5</a>의 \((a_{ij}) = -L\)).</p>
       </div>
-      <p>(b)의 “어떤 dual cell이든”이 이 식의 좋은 점이다. face마다 상수인 vector field의 flux는 dual cell의 꼭짓점이 circumcenter인지 무게중심인지에 무관하고, 그래서 obtuse triangle에서도 식이 그대로다. (d)는 (III)이 정확한 gradient를 정확히 되돌린다는 것이다. \(X\)가 어떤 \(w\)의 gradient이면 \(L\varphi = Lw\)에서 \(\varphi = w\) + 상수다.</p>
+      <p>(b)의 “어떤 dual cell이든”이 이 식의 좋은 점이다. face마다 상수인 vector field의 flux는 dual cell의 vertex가 circumcenter인지 무게중심인지에 무관하고, 그래서 obtuse triangle에서도 식이 그대로다. (d)는 (III)이 정확한 gradient를 정확히 되돌린다는 것이다. \(X\)가 어떤 \(w\)의 gradient이면 \(L\varphi = Lw\)에서 \(\varphi = w\) + 상수다.</p>
       <div class="thm proposition" id="i-44-6-6">
         <p><span class="thm-head">Proposition 44.6.6</span> <span class="thm-name">(step III is a least-squares fit)</span>.
         boundary가 없는 connected mesh에서 piecewise linear 함수 \(W_0\varphi\)(vertex 값 \(\varphi\))에 대한 \(J(\varphi) := \int\abs{\grad W_0\varphi - X}^2\,dA\)의 minimizer는 \(L\varphi = b\)의 해와 같고, 상수를 더한 것만큼 다르다. \(\mathbf{1}^{\mathsf T}b = 0\)이므로 해가 있다.</p>
@@ -200,7 +200,7 @@ two sources: max |phi - min(d_1, d_2)| = 0.0247</code></pre>
       </div>
       <div class="thm example" id="i-44-6-8">
         <p><span class="thm-head">Example 44.6.8</span> <span class="thm-name">(the cube against the exact polyhedral distance)</span>.
-        <code>ch44.unit_cube(n)</code>(\(n = 4, 8, 16\))에서 바닥 가운데 vertex \((0.5, 0.5, 0)\)으로부터의 정확한 polyhedral distance는 펼침으로 계산한다(<a href="44-2-shortest-paths-cut-locus.html#i-44-2-4">Example 44.2.4</a>. cube에서는 MMP가 주는 값과 같다). heat method의 평균 오차는 \(0.032, 0.020, 0.012\), 최대 오차는 \(0.127, 0.090, 0.062\)이고, Dijkstra는 평균 \(0.076, 0.082, 0.084\), 최대 \(0.293, 0.298, 0.310\)이다. cube의 corner는 cone vertex이고 cut locus에 속하므로 거리 함수가 그곳에서 꺾인다(<a href="44-2-shortest-paths-cut-locus.html#fig-44-2-1">Figure 44.2.1</a>). heat method의 \(\varphi\)는 매끈한 근사라서, 세 mesh 모두 최대 오차가 뚜껑의 corner(정확한 거리 \(\sqrt{2.5} = 1.581\))에서 생긴다.</p>
+        <code>ch44.unit_cube(n)</code>(\(n = 4, 8, 16\))에서 바닥 가운데 vertex \((0.5, 0.5, 0)\)으로부터의 정확한 polyhedral distance는 unfolding으로 계산한다(<a href="44-2-shortest-paths-cut-locus.html#i-44-2-4">Example 44.2.4</a>. cube에서는 MMP가 주는 값과 같다). heat method의 평균 오차는 \(0.032, 0.020, 0.012\), 최대 오차는 \(0.127, 0.090, 0.062\)이고, Dijkstra는 평균 \(0.076, 0.082, 0.084\), 최대 \(0.293, 0.298, 0.310\)이다. cube의 corner는 cone vertex이고 cut locus에 속하므로 distance function이 그곳에서 꺾인다(<a href="44-2-shortest-paths-cut-locus.html#fig-44-2-1">Figure 44.2.1</a>). heat method의 \(\varphi\)는 매끈한 근사라서, 세 mesh 모두 최대 오차가 뚜껑의 corner(정확한 거리 \(\sqrt{2.5} = 1.581\))에서 생긴다.</p>
         <p class="verified">Verification: <code>verify/v-44-6-heat-method.py</code></p>
       </div>
       <div class="thm example" id="i-44-6-9">
@@ -227,7 +227,7 @@ two sources: max |phi - min(d_1, d_2)| = 0.0247</code></pre>
       <figure class="dg-figure" id="fig-44-6-2">
         <img src="figures/fig-44-6-2-accuracy.svg" alt="두 log–log 패널. (a) 가로축 m = t/ℓ̄², 세로축 평균 오차. 파란 icosphere(4) 곡선은 m이 커질수록 계속 내려간다. 주홍(cube 가운데 출발점)과 초록(cube 비켜난 출발점) 곡선은 m = 1(회색 점선)에서 가장 낮고 양쪽으로 올라간다. (b) 가로축 평균 edge 길이, 세로축 평균 오차. 파란 실선(icosphere heat)과 주홍 실선(cube heat)은 edge가 짧아질수록 내려가고, 같은 색의 점선(Dijkstra)은 0.06에서 0.09 사이에서 거의 평평하다.">
         <figcaption><span class="fig-head">Figure 44.6.2.</span>
-        heat method의 정확도. <em>무엇을</em>: (a) \(t = m\bar\ell^2\)(\(m = 2^{-4}, \dots, 2^6\))에 따른 넓이 가중 평균 오차. icosphere(4)의 북극 vertex(정확한 거리 \(\arccos\)), unit_cube(16)의 \((0.5, 0.5, 0)\)과 \((0.1875, 0.3125, 0)\)(정확한 거리는 펼침). (b) icosphere(1)–(4)와 unit_cube(4, 8, 16)의 평균 오차를 평균 edge 길이 \(\bar\ell\)에 대해 그린 것. <em>읽는 법</em>: (a)의 회색 점선이 \(m = 1\)이다. (b)의 실선과 채운 점이 heat method(\(m = 1\)), 점선과 빈 점이 Dijkstra다. 색은 mesh다(파랑 icosphere, 주홍 cube). <em>볼 것</em>: (a) cube의 두 곡선은 \(m = 1\)에서 최소(\(0.012\), \(0.013\))인 V자이고, 대칭인 sphere는 \(m\)이 클수록 좋아진다(<a href="#i-44-6-10">Example 44.6.10</a>). (b) heat method는 세분할수록 줄고 Dijkstra는 줄지 않는다. 가장 거친 icosphere(1)에서만 Dijkstra가 더 작다. <em>본문과의 연결</em>: <a href="#i-44-6-10">Example 44.6.10</a>, <a href="#i-44-6-11">Example 44.6.11</a>.</figcaption>
+        heat method의 정확도. <em>무엇을</em>: (a) \(t = m\bar\ell^2\)(\(m = 2^{-4}, \dots, 2^6\))에 따른 넓이 가중 평균 오차. icosphere(4)의 북극 vertex(정확한 거리 \(\arccos\)), unit_cube(16)의 \((0.5, 0.5, 0)\)과 \((0.1875, 0.3125, 0)\)(정확한 거리는 unfolding). (b) icosphere(1)–(4)와 unit_cube(4, 8, 16)의 평균 오차를 평균 edge 길이 \(\bar\ell\)에 대해 그린 것. <em>읽는 법</em>: (a)의 회색 점선이 \(m = 1\)이다. (b)의 실선과 채운 점이 heat method(\(m = 1\)), 점선과 빈 점이 Dijkstra다. 색은 mesh다(파랑 icosphere, 주홍 cube). <em>볼 것</em>: (a) cube의 두 곡선은 \(m = 1\)에서 최소(\(0.012\), \(0.013\))인 V자이고, 대칭인 sphere는 \(m\)이 클수록 좋아진다(<a href="#i-44-6-10">Example 44.6.10</a>). (b) heat method는 세분할수록 줄고 Dijkstra는 줄지 않는다. 가장 거친 icosphere(1)에서만 Dijkstra가 더 작다. <em>본문과의 연결</em>: <a href="#i-44-6-10">Example 44.6.10</a>, <a href="#i-44-6-11">Example 44.6.11</a>.</figcaption>
       </figure>
       <p><a href="#fig-44-6-2">Figure 44.6.2</a>의 (a)에서 V자의 왼쪽 가지를 보자. \(m\)을 \(1/16\)로 줄이면 오차가 열 배로 커진다. \(t\)가 \(\bar\ell^2\)보다 훨씬 작으면 열이 한 step 동안 한두 ring밖에 퍼지지 못하고, 그 바깥의 \(u\)는 \(t\)의 거듭제곱으로 작아져 방향 정보가 사라진다. 오른쪽 가지는 반대로 열이 너무 퍼진 경우다. (b)의 두 실선은 거의 평행하게 내려간다. 서로 다른 두 surface에서 같은 수렴이 보인다.</p>
     </section>
@@ -237,13 +237,13 @@ two sources: max |phi - min(d_1, d_2)| = 0.0247</code></pre>
       <p>boundary가 있는 mesh에서는 (I)의 boundary condition을 정해야 한다. 아무것도 하지 않으면 zero Neumann이다(<a href="../42-laplace-beltrami/42-5-boundary-conditions.html#i-42-5-8">Proposition 42.5.8</a>). 열이 boundary에서 반사되어 boundary 근처의 \(u\)가 커지고, 등고선이 boundary에 수직으로 휜다. boundary에서 \(u = 0\)(Dirichlet, <a href="../42-laplace-beltrami/42-5-boundary-conditions.html#i-42-5-7">Proposition 42.5.7</a>)이면 열이 빠져나가 등고선이 boundary와 나란하게 휜다. 두 오차는 반대 방향이다. 그래서 두 해의 평균 \(u = \tfrac12(u_N + u_D)\)를 쓰면 서로 상쇄되기를 기대할 수 있다. 이것이 <a class="cite" href="../../references.html#Crane13">[Crane13 §3.4]</a>가 권하는 averaged boundary condition이다. Crane13은 정확한 거리(\(t \to 0\)의 극한)에는 zero Neumann이든 zero Dirichlet이든 충분하고, boundary 처리가 결과를 바꾸는 것은 큰 \(t\)로 얻는 smoothed distance라고 적는다. (III)은 언제나 자연스러운 Neumann 조건이다(<a href="#i-44-6-6">Proposition 44.6.6</a> 뒤의 문단).</p>
       <div class="thm example" id="i-44-6-12">
         <p><span class="thm-head">Example 44.6.12</span> <span class="thm-name">(a planar square)</span>.
-        unit square의 <code>dgmesh.grid_mesh</code>(\(32\times32\)칸, 대각선이 엇갈리는 pattern)에서 vertex \((0.25, 0.375)\)를 출발점으로 하자. square는 convex이므로 정확한 거리는 유클리드 거리다. \(t = \bar\ell^2\)에서 평균 오차는 Neumann \(0.0060\), Dirichlet \(0.0170\), 평균 \(0.0070\)이고, \(t = 16\bar\ell^2\)에서는 \(0.0334\), \(0.0372\), \(0.0029\)이다(<a href="#fig-44-6-3">Figure 44.6.3</a>). \(t = \bar\ell^2\)에서는 Neumann만으로도 평균보다 조금 낫고, \(t\)가 클수록 평균의 효과가 커서 \(m \ge 4\)(<a href="#fig-44-6-3">Figure 44.6.3</a>(b)의 범위 \(m \le 64\))에서는 평균이 언제나 가장 좋다. 큰 \(t\)에서 평균을 권하는 Crane13 §3.4와 맞는 결과다. 같은 mesh의 Dijkstra는 평균 오차 \(0.025\)이다.</p>
+        unit square의 <code>dgmesh.grid_mesh</code>(\(32\times32\)칸, 대각선이 엇갈리는 pattern)에서 vertex \((0.25, 0.375)\)를 출발점으로 하자. square는 convex이므로 정확한 거리는 Euclidean distance다. \(t = \bar\ell^2\)에서 평균 오차는 Neumann \(0.0060\), Dirichlet \(0.0170\), 평균 \(0.0070\)이고, \(t = 16\bar\ell^2\)에서는 \(0.0334\), \(0.0372\), \(0.0029\)이다(<a href="#fig-44-6-3">Figure 44.6.3</a>). \(t = \bar\ell^2\)에서는 Neumann만으로도 평균보다 조금 낫고, \(t\)가 클수록 평균의 효과가 커서 \(m \ge 4\)(<a href="#fig-44-6-3">Figure 44.6.3</a>(b)의 범위 \(m \le 64\))에서는 평균이 언제나 가장 좋다. 큰 \(t\)에서 평균을 권하는 Crane13 §3.4와 맞는 결과다. 같은 mesh의 Dijkstra는 평균 오차 \(0.025\)이다.</p>
         <p class="verified">Verification: <code>verify/v-44-6-heat-method.py</code></p>
       </div>
       <figure class="dg-figure" id="fig-44-6-3">
         <img src="figures/fig-44-6-3-boundary.svg" alt="두 패널. (a) 가로축은 square의 boundary를 (0, 0)에서 반시계 방향으로 잰 길이(0에서 4), 세로축은 오차. 주홍 Dirichlet 곡선은 1과 2의 점선(corner (1, 0)과 (1, 1))에서 약 0.10과 0.145까지, 파란 Neumann 곡선은 2에서 약 0.106까지 솟는다. 주황 average 곡선은 대부분 0.01 아래에 붙어 있고 양 끝(corner (0, 0))에서만 약 0.024까지 오른다. (b) 가로축 m, 세로축 평균 오차(log–log). 파란 선과 주홍 선은 m이 커질수록 0.006–0.017에서 0.05–0.06으로 올라간다. 주황 선은 m = 8에서 약 0.002로 가장 낮고 양쪽으로 조금 올라간다.">
         <figcaption><span class="fig-head">Figure 44.6.3.</span>
-        (I)의 boundary condition. <em>무엇을</em>: unit square의 \(32\times32\) grid, 출발점 \((0.25, 0.375)\), 정확한 거리는 유클리드 거리(<a href="#i-44-6-12">Example 44.6.12</a>). (I)을 zero Neumann(파랑), boundary에서 \(u = 0\)(Dirichlet, 주홍), 두 해의 평균(주황)으로 풀었고 (III)은 셋 모두 같다. <em>읽는 법</em>: (a)의 가로축은 \((0, 0)\)에서 반시계 방향으로 잰 boundary의 arc length(점선이 square의 꼭짓점), 세로축은 \(t = 16\bar\ell^2\)에서 boundary vertex의 오차 \(\abs{\varphi - d}\)다. (b)는 \(t = m\bar\ell^2\)에 따른 넓이 가중 평균 오차다. <em>볼 것</em>: (a)에서 Neumann과 Dirichlet은 출발점에서 가장 먼 corner \((1, 1)\) 근처에서 가장 틀리고(최대 \(0.106\), \(0.145\)), Dirichlet은 \((1, 0)\)에서도 \(0.105\)이다. 평균은 boundary vertex의 \(91\%\)에서 \(0.01\) 아래이고 최대 \(0.024\)(corner \((0, 0)\))다. (b)에서 Neumann과 Dirichlet은 \(m\)이 커질수록 나빠지지만 평균은 \(m = 8\)에서 \(0.0021\)로 가장 좋다. <em>본문과의 연결</em>: <a href="#i-44-6-12">Example 44.6.12</a>.</figcaption>
+        (I)의 boundary condition. <em>무엇을</em>: unit square의 \(32\times32\) grid, 출발점 \((0.25, 0.375)\), 정확한 거리는 Euclidean distance(<a href="#i-44-6-12">Example 44.6.12</a>). (I)을 zero Neumann(파랑), boundary에서 \(u = 0\)(Dirichlet, 주홍), 두 해의 평균(주황)으로 풀었고 (III)은 셋 모두 같다. <em>읽는 법</em>: (a)의 가로축은 \((0, 0)\)에서 반시계 방향으로 잰 boundary의 arc length(점선이 square의 vertex), 세로축은 \(t = 16\bar\ell^2\)에서 boundary vertex의 오차 \(\abs{\varphi - d}\)다. (b)는 \(t = m\bar\ell^2\)에 따른 넓이 가중 평균 오차다. <em>볼 것</em>: (a)에서 Neumann과 Dirichlet은 출발점에서 가장 먼 corner \((1, 1)\) 근처에서 가장 틀리고(최대 \(0.106\), \(0.145\)), Dirichlet은 \((1, 0)\)에서도 \(0.105\)이다. 평균은 boundary vertex의 \(91\%\)에서 \(0.01\) 아래이고 최대 \(0.024\)(corner \((0, 0)\))다. (b)에서 Neumann과 Dirichlet은 \(m\)이 커질수록 나빠지지만 평균은 \(m = 8\)에서 \(0.0021\)로 가장 좋다. <em>본문과의 연결</em>: <a href="#i-44-6-12">Example 44.6.12</a>.</figcaption>
       </figure>
       <p><a href="#fig-44-6-3">Figure 44.6.3</a>의 (a)에서 파랑과 주홍의 가장 큰 봉우리가 같은 자리, 곧 출발점에서 가장 먼 corner \((1, 1)\)에 있다는 데 주의하자. 그곳에서 Neumann은 열을 가두고 Dirichlet은 내보내므로 \(X\)가 반대쪽으로 기운다. 평균은 그 둘을 상쇄한다. 정확한 상쇄를 보장하는 정리가 아니라 수치로 확인한 효과라는 것도 기억하자. (b)에서 평균의 곡선도 \(m\)이 아주 크면 다시 올라간다.</p>
     </section>
@@ -256,12 +256,12 @@ two sources: max |phi - min(d_1, d_2)| = 0.0247</code></pre>
       </div>
       <div class="thm remark" id="i-44-6-14">
         <p><span class="thm-head">Remark 44.6.14</span> <span class="thm-name">(extensions)</span>.
-        같은 생각은 다른 이산화(polygon mesh, point cloud)와 다른 양으로 확장된다. vector heat method <a class="cite" href="../../references.html#Sharp19">[Sharp19]</a>는 vector를 짧은 시간의 vector heat flow로 퍼뜨려 parallel transport를 근사하고, 그것으로 만든 radial field와 그 Poisson 적분(이 절의 (III)과 같은 단계)으로 logarithm map을 mesh 전체에서 계산한다(<a href="44-4-exp-log-karcher.html#i-44-4-14">Remark 44.4.14</a>). 보충 강의 HM1, HM2는 영상만 있고 이 study set은 강의 영상을 볼 수 없으므로, 이 확장들은 논문 제목 수준으로만 소개한다.</p>
+        같은 생각은 다른 discretization(polygon mesh, point cloud)와 다른 양으로 확장된다. vector heat method <a class="cite" href="../../references.html#Sharp19">[Sharp19]</a>는 vector를 짧은 시간의 vector heat flow로 퍼뜨려 parallel transport를 근사하고, 그것으로 만든 radial field와 그 Poisson 적분(이 절의 (III)과 같은 단계)으로 logarithm map을 mesh 전체에서 계산한다(<a href="44-4-exp-log-karcher.html#i-44-4-14">Remark 44.4.14</a>). 보충 강의 HM1, HM2는 영상만 있고 이 study set은 강의 영상을 볼 수 없으므로, 이 확장들은 논문 제목 수준으로만 소개한다.</p>
       </div>
       <aside class="box discrete">
         <p class="box-title">Smooth vs. Discrete: computing distance</p>
         <ul>
-          <li>smooth: 거리 함수는 eikonal equation \(\abs{\grad\varphi} = 1\)의 (viscosity) 해이고 cut locus에서 미분 불가능하다. 짧은 시간의 heat flow의 gradient 방향은 거리의 gradient다(평면에서는 정확히, <a href="#i-44-6-3">Example 44.6.3</a>).</li>
+          <li>smooth: distance function은 eikonal equation \(\abs{\grad\varphi} = 1\)의 (viscosity) 해이고 cut locus에서 미분 불가능하다. 짧은 시간의 heat flow의 gradient 방향은 거리의 gradient다(평면에서는 정확히, <a href="#i-44-6-3">Example 44.6.3</a>).</li>
           <li>discrete: heat method는 linear solve 두 번과 face마다의 정규화다. integrated divergence는 dual cell의 선택과 무관한 정확한 식이고(<a href="#i-44-6-5">Proposition 44.6.5</a>), (III)은 정확한 gradient를 정확히 되돌린다.</li>
           <li>무엇을 보존하는가: 세분할 때의 수렴(Dijkstra는 없다), 출발점에 무관한 행렬(prefactorization), 여러 출발점과 곡선 출발점을 같은 식으로 다루는 것. 무엇을 잃는가: 정확한 polyhedral distance(MMP)가 아니고, symmetric이 아니며, time step과 boundary 처리에 따라 오차가 달라진다. 거리의 꺾임(cut locus)은 매끈해진다.</li>
         </ul>
@@ -283,13 +283,13 @@ two sources: max |phi - min(d_1, d_2)| = 0.0247</code></pre>
     <section class="summary">
       <h2>Summary</h2>
       <ul>
-        <li>거리 함수는 1-Lipschitz이고 미분 가능한 곳에서 \(\abs{\grad\varphi} = 1\)이다(<a href="#i-44-6-1">Proposition 44.6.1</a>). 이 nonlinear equation은 거의 모든 곳의 해가 하나가 아니라 직접 풀기 어렵다.</li>
+        <li>distance function은 1-Lipschitz이고 미분 가능한 곳에서 \(\abs{\grad\varphi} = 1\)이다(<a href="#i-44-6-1">Proposition 44.6.1</a>). 이 nonlinear equation은 거의 모든 곳의 해가 하나가 아니라 직접 풀기 어렵다.</li>
         <li>heat method는 \((M - tL)u = \delta_\gamma\), \(X = -\grad u/\abs{\grad u}\), \(L\varphi = b\)의 세 단계이고 최솟값을 \(0\)으로 옮긴다(<a href="#i-44-6-4">Definition 44.6.4</a>). 열의 크기는 틀려도 방향은 맞다.</li>
         <li>integrated divergence <a href="#eq-44-6-4">(44.6.4)</a>는 weak divergence이자 어떤 dual cell을 지나는 flux이고, 합이 \(0\)이며 gradient를 정확히 되돌린다(<a href="#i-44-6-5">Proposition 44.6.5</a>). (III)은 \(\int\abs{\grad\varphi - X}^2\)의 minimizer다(<a href="#i-44-6-6">Proposition 44.6.6</a>).</li>
         <li>\(t = \bar\ell^2\)은 대칭이 아닌 mesh에서 좋은 절충이다. boundary에서는 Neumann 해와 Dirichlet 해의 평균이 큰 \(t\)에서 특히 좋다. 세분하면 heat method는 수렴하고 Dijkstra는 수렴하지 않는다.</li>
         <li>두 행렬은 출발점에 무관하므로 한 번 factorization하면 출발점마다 빠르게 다시 풀 수 있다.</li>
       </ul>
-      <p class="next">다음 장에서는 거리 대신 vector를 옮긴다. geodesic을 따라 vector를 평행이동하는 것을 mesh 전체에서 일관되게 정할 수 있는가? angle defect가 그 장애물이고, 그것을 피하거나 이용해 원하는 singularity를 가진 vector field를 만드는 것이 <a href="../45-vector-field-design/index.html">Chapter 45</a>의 주제다.</p>
+      <p class="next">다음 장에서는 거리 대신 vector를 옮긴다. geodesic을 따라 vector를 parallel transport하는 것을 mesh 전체에서 일관되게 정할 수 있는가? angle defect가 그 장애물이고, 그것을 피하거나 이용해 원하는 singularity를 가진 vector field를 만드는 것이 <a href="../45-vector-field-design/index.html">Chapter 45</a>의 주제다.</p>
     </section>
 
     <section class="exercises">
@@ -315,7 +315,7 @@ two sources: max |phi - min(d_1, d_2)| = 0.0247</code></pre>
         <p><span class="thm-head">Exercise 44.6.3</span> <span class="level">★★</span>
         torus \((R, r) = (2, 0.8)\)의 바깥 적도에서 \(v\)의 차가 \(v_1\)인 두 점을 적도의 호로 잇는 곡선이 \(u = a\sin(\pi v/v_1)\) 꼴의 작은 변형에 대해 길이가 최소임을 \(v_1 \lt \pi\sqrt{r/(R + r)}\)일 때 보여라. <a href="#i-44-6-9">Example 44.6.9</a>의 \(\abs v \le \pi/4\)는 이 범위인가?</p>
         <details class="solution"><summary>Solution</summary>
-          <p>곡선 \(v \mapsto \mathbf{x}(u(v), v)\)의 길이는 \(\int_0^{v_1}\sqrt{r^2u'^2 + (R + r\cos u)^2}\,dv\)이다. \(u\)가 작으면 \(R + r\cos u \approx (R + r) - ru^2/2\)이고 \(\sqrt{A^2 + \varepsilon} \approx A + \varepsilon/(2A)\)이므로 길이는 \((R + r)v_1 + \int(-\tfrac r2u^2 + \tfrac{r^2}{2(R + r)}u'^2)\,dv\)(\(a^2\)의 차수까지)이다. \(u = a\sin(\pi v/v_1)\)이면 \(\int u^2 = a^2v_1/2\), \(\int u'^2 = a^2\pi^2/(2v_1)\)이므로 변화는 \(\tfrac{a^2v_1}{4}\big(-r + \tfrac{r^2\pi^2}{(R + r)v_1^2}\big)\)이다. 이것이 양수인 조건이 \(v_1^2 \lt r\pi^2/(R + r)\), 곧 \(v_1 \lt \pi\sqrt{0.8/2.8} = 1.679\)이다. <a href="#i-44-6-9">Example 44.6.9</a>의 두 점은 출발점(\(v = 0\))과 \(\abs v \le \pi/4\)인 적도의 점이므로 \(v_1 \le \pi/4 = 0.785\)이고 이 범위다. (이것은 한 family의 2차 조건이므로 국소적인 확인이다. 전역적인 확인은 <a href="#i-44-6-9">Example 44.6.9</a>의 수치 계산이 한다.)</p>
+          <p>곡선 \(v \mapsto \mathbf{x}(u(v), v)\)의 길이는 \(\int_0^{v_1}\sqrt{r^2u'^2 + (R + r\cos u)^2}\,dv\)이다. \(u\)가 작으면 \(R + r\cos u \approx (R + r) - ru^2/2\)이고 \(\sqrt{A^2 + \varepsilon} \approx A + \varepsilon/(2A)\)이므로 길이는 \((R + r)v_1 + \int(-\tfrac r2u^2 + \tfrac{r^2}{2(R + r)}u'^2)\,dv\)(\(a^2\)의 order까지)이다. \(u = a\sin(\pi v/v_1)\)이면 \(\int u^2 = a^2v_1/2\), \(\int u'^2 = a^2\pi^2/(2v_1)\)이므로 변화는 \(\tfrac{a^2v_1}{4}\big(-r + \tfrac{r^2\pi^2}{(R + r)v_1^2}\big)\)이다. 이것이 양수인 조건이 \(v_1^2 \lt r\pi^2/(R + r)\), 곧 \(v_1 \lt \pi\sqrt{0.8/2.8} = 1.679\)이다. <a href="#i-44-6-9">Example 44.6.9</a>의 두 점은 출발점(\(v = 0\))과 \(\abs v \le \pi/4\)인 적도의 점이므로 \(v_1 \le \pi/4 = 0.785\)이고 이 범위다. (이것은 한 family의 2차 조건이므로 국소적인 확인이다. 전역적인 확인은 <a href="#i-44-6-9">Example 44.6.9</a>의 수치 계산이 한다.)</p>
         </details>
       </div>
 
@@ -323,7 +323,7 @@ two sources: max |phi - min(d_1, d_2)| = 0.0247</code></pre>
         <p><span class="thm-head">Exercise 44.6.4</span> <span class="level">★★</span>
         모든 cotan weight가 양수인 connected mesh(예: Delaunay mesh)에서 (I)의 해 \(u = (M - tL)^{-1}\delta_\gamma\)가 모든 vertex에서 양수임을 보여라. [힌트: \(M - tL\)의 대각 밖 성분의 부호]</p>
         <details class="solution"><summary>Solution</summary>
-          <p>\(A := M - tL\)의 대각 밖 성분은 \(-tL_{ij} \le 0\)이고 대각은 \(m_i + t\sum_jL_{ij} \gt 0\)이며 \(A\)는 symmetric positive definite이다. 이런 행렬(Stieltjes matrix)의 역행렬은 모든 성분이 \(0\) 이상이고, 그래프가 connected이면 양수다. 짧은 증명: \(u\)의 최솟값이 vertex \(i\)에서 음수라 하자. \(i\)의 식은 \(m_iu_i + t\sum_jL_{ij}(u_i - u_j) = (\delta_\gamma)_i \ge 0\)인데 왼쪽의 첫 항은 음수이고 둘째 항은 \(u_i \le u_j\)이므로 \(0\) 이하라 모순이다. 곧 \(u \ge 0\)이다. \(u_i = 0\)인 vertex가 있으면 같은 식에서 이웃이 모두 \(0\)이어야 하고(\(L_{ij} \gt 0\)), connected이므로 전부 \(0\)이 되어 출발점의 식 \(m_su_s + \cdots = 1\)에 어긋난다. 그러므로 \(u \gt 0\)이다. cotan weight가 음수인 edge가 있으면 이 증명은 깨지고, 실제로 \(u\)가 음수인 vertex가 생길 수 있다. (II)는 \(u\)의 부호를 쓰지 않으므로 방법 자체는 동작한다.</p>
+          <p>\(A := M - tL\)의 대각 밖 성분은 \(-tL_{ij} \le 0\)이고 대각은 \(m_i + t\sum_jL_{ij} \gt 0\)이며 \(A\)는 symmetric positive definite이다. 이런 행렬(Stieltjes matrix)의 inverse matrix는 모든 성분이 \(0\) 이상이고, 그래프가 connected이면 양수다. 짧은 증명: \(u\)의 최솟값이 vertex \(i\)에서 음수라 하자. \(i\)의 식은 \(m_iu_i + t\sum_jL_{ij}(u_i - u_j) = (\delta_\gamma)_i \ge 0\)인데 왼쪽의 첫 항은 음수이고 둘째 항은 \(u_i \le u_j\)이므로 \(0\) 이하라 모순이다. 곧 \(u \ge 0\)이다. \(u_i = 0\)인 vertex가 있으면 같은 식에서 이웃이 모두 \(0\)이어야 하고(\(L_{ij} \gt 0\)), connected이므로 전부 \(0\)이 되어 출발점의 식 \(m_su_s + \cdots = 1\)에 어긋난다. 그러므로 \(u \gt 0\)이다. cotan weight가 음수인 edge가 있으면 이 증명은 깨지고, 실제로 \(u\)가 음수인 vertex가 생길 수 있다. (II)는 \(u\)의 부호를 쓰지 않으므로 방법 자체는 동작한다.</p>
         </details>
       </div>
 

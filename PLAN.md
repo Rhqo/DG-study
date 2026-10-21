@@ -1283,3 +1283,38 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
     - terms 14개(상한(오차의) upper bound, de Rham 상 → de Rham image, 차수(form의) degree 등)
     - §3.5 Track 2 행(32–36)을 scratch guidelines-3-5-track2-c1.md에 두었다. C2·C3 것과 합쳐 GUIDELINES에 넣는다.
   - 37–45장의 32–36 toc 앵커 링크와 "de Rham 상"은 C2·C3에게 보냈다.
+- 2026-10-22: 주간 사용량 한도로 C2·C3가 멈췄다. 사용자 지시("계속 진행해줘")로 둘 다 재개했다.
+- 2026-10-22: **C3(42–45) 통합 검토 완료.** REVIEW 0, todo 0, check_all 42–45 OK, 25페이지 400px OK
+  - 수학: Ex 42.1.6·42.3.6의 "음수 cotan weight"는 틀렸다. torus_mesh의 대각선은 ⋆1이 정확히 0이고, 음수로 보인 것은 round-off였다. 45.1 Warning이 맞았다. verify에 검사를 더했다.
+  - 개별 항목
+    - 42.3 Remark 42.3.15: Hildebrandt06 원문(Thm 2, Cor 5–7)으로 다시 썼다.
+    - 43.5의 K → 𝖤_b
+    - 45 index의 회고를 세 층위(정확, 적분 수렴, 조건부 pointwise)로 쓰고 항목 링크를 달았다.
+  - 흐름: 42.6의 MCF 재정의를 41.5 링크로 바꿨다. 44.1 Motivation은 43장 끝에서, 45.1 Motivation은 44장 끝에서 출발하게 고쳤다.
+  - 링크: GUIDELINES "§" 참조 약 28곳을 notation 링크로 바꿨다. toc 앵커 6곳, de Rham image
+  - 언어: 곡면 → surface 197곳 등
+  - §3.5 행은 scratch guidelines-3-5-track2-c3.md에 두었다.
+  - term_guard 오탐 제안(반각 치환, 정규분포, 방사상 등)은 통합 검토 뒤 도구 정리에서 본다.
+- 2026-10-22: **C2(37–41) 통합 검토 완료. C(통합 검토) 단계를 끝냈다.** C2는 REVIEW 0, todo 0, check_all 37–41 OK, 31페이지 400px OK
+  - 수학: "turning angle은 dual 0-form"은 틀렸다. φ_i가 dual 0-form이고 θ_i는 dual 1-form이다. 37.4와 37 index에서 고쳤고, 통합 담당이 32.3도 고쳤다. notation 행에도 적었다.
+  - REVIEW
+    - 37.1과 37.4는 Looking back(Chapters 35 and 36 / Chapter 36)으로 바꿨다.
+    - 37.6 Fig 37.6.1(a)는 edge 길이 비율 그래프로 바꾸고 verify를 더했다.
+  - todo
+    - 37.4 Pinkall: 서지를 확인했다. references에 Pinkall13을 넣고 인용했다.
+    - 40.4 Remark 40.4.16: 3D signed Steiner는 확인할 수 있는 근거가 없어 진술을 줄였다.
+  - 그 밖
+    - 40·41 index toc-note를 실제 항목으로 다시 썼다(계획 문구를 지웠다).
+    - toc 앵커 30곳, 용어 약 780곳
+    - 37.6: Prop 37.6.2 뒤에 비예를 넣었다.
+  - 통합 담당
+    - 36.6 p.next의 과장을 고쳤다("다시 읽을 수 있다").
+    - GUIDELINES §3.5에 **Track 2 기준 예제의 여정** 표(17행)를 넣었다(C1·C2·C3 보고를 합쳤다).
+    - GUIDELINES §8.1에 동사형 규칙(discretize하다 등)을 넣었다.
+    - terms_keep에 회전과 주기를 넣었다. "회전 (벡터장의) curl", "주기 (닫힌 형식의)" 항목 때문에 생기던 오탐이다.
+    - terms 12개(concave, convexity, quadric surface, closed surface 등)
+    - 루트 index의 Track 2 표 Topics(38, 40, 41)
+  - Track 2 전체: REVIEW 0, todo 0(check_site에서 남은 REVIEW 2와 todo는 Track 3 장의 것이다)
+- 2026-10-22: **E(애니메이션) 규모 결정(AskUserQuestion): "핵심만, 장마다 3–4개(약 50개)".**
+  - 시간에 따른 변화 자체가 메시지인 것만 고른다(§12.8). 후보는 scratch anim-proposals.md에 있다. 39–45장은 작성자 제안이고, 32–38장은 내용을 보고 고른다.
+  - 진행은 Tour·31장 때와 같다: 작성 agent 4명(32–35, 36–39, 40–42, 43–45) → 렌더 → 독립 검토 → 통합

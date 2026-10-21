@@ -229,7 +229,9 @@ close("Exercise 42.3.6: lumped errors 7.1e-3, 4.1e-3, 1.8e-3 (relative)", res[:,
       tol=0.02)
 check("Exercise 42.3.6: lumped errors are about 4 times smaller", np.all(np.abs(res[:, 1] / res[:, 2] - 4.4) < 0.3))
 V, F = dm.torus_mesh(R, r, 24, 48)
-check("Exercise 42.3.6: torus_mesh(2, 0.8, 24, 48) has 1152 obtuse triangles and 574 negative weights",
-      (dm.corner_angles(V, F).max(1) > np.pi / 2).sum() == 1152 and (dd.hodge1(V, F) < 0).sum() == 574)
+w = dd.hodge1(V, F)
+check("Exercise 42.3.6: torus_mesh(2, 0.8, 24, 48) has 2304 triangles, 1152 obtuse ones, 1152 zero weights (diagonals), "
+      "no negative weight", len(F) == 2304 and (dm.corner_angles(V, F).max(1) > np.pi / 2).sum() == 1152
+      and (np.abs(w) < 1e-12).sum() == 1152 and np.all(w > -1e-12))
 
 summary()
