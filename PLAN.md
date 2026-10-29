@@ -1318,3 +1318,30 @@ GUIDELINES.md §15.6의 3단계를 따라 다음을 확인한다:
 - 2026-10-22: **E(애니메이션) 규모 결정(AskUserQuestion): "핵심만, 장마다 3–4개(약 50개)".**
   - 시간에 따른 변화 자체가 메시지인 것만 고른다(§12.8). 후보는 scratch anim-proposals.md에 있다. 39–45장은 작성자 제안이고, 32–38장은 내용을 보고 고른다.
   - 진행은 Tour·31장 때와 같다: 작성 agent 4명(32–35, 36–39, 40–42, 43–45) → 렌더 → 독립 검토 → 통합
+- 2026-10-22: 통합 검토 결과를 공개했다(c3fdb05). **E 시작**: 애니메이션 작성 agent 4명을 띄웠다. AW1은 32–35, AW2는 36–39, AW3은 40–42, AW4는 43–45를 맡는다. 지시 전문은 scratch aw{1..4}-prompt.md(템플릿 anim-writer-template.md)에 있다. 작성이 끝나면 묶음마다 독립 검토 agent를 띄운다.
+
+## 14. Track 4: Paper Notes (2026-10-30, 사용자 지시)
+
+- **사용자 지시** (2026-10-30): "일단 이건 보류해 두고(애니메이션 E 단계), 요즘 관심있는 논문이 있어서 그거 정리해보려고. 0번으로 이 논문들 잘 이해하려면 어떤걸 공부해야하는지, 기초 설명해줘. varifold 개념은 처음인거같아. 다음으로 1번부터는 아래 논문들 설명해줘: 1. A varifold approach to surface approximation 2. Weak and approximate curvatures of a measure: a varifold perspective 3. GeoSplat 4. Manifold-GS. 논문 설명 위주로, 쉽게 이해할 수 있을 정도의 수준으로, 논문 내용은 빠지지 않게. 논문의 그림이나 표 수치 설명도 해주고 필요하면 추가 그림도 그려줘."
+- **AskUserQuestion 결정**: 형식은 "DG-study 사이트에 추가", 목차는 제안한 그대로(0번 9절 + 논문 1–4는 한눈에 보기 → 문제 설정 → 핵심 아이디어 → 절별 해설 → 그림·표 해설 → 한계와 평가).
+- **구조**: Track 4 = Chapter 46(배경, 9절) + 47–50(논문 한 편에 한 장). 규칙은 GUIDELINES §2.6. 인용 키 BLM17, BLM22, GeoSplat25, ManifoldGS26(references.html `#sec-refs-paper-notes`).
+- **애니메이션(E) 보류 상태**: AW1(32–35, 13개)과 AW3(40–42, 9개)은 작성 끝, 검토 전. AW2(36–39)는 작성 중 사용량 한도로 멈춤. RA4(43–45 검토)는 검토 중 멈춤. 작업 트리에 commit하지 않은 애니메이션 파일과 절 HTML 변경이 있다. Track 4 commit에는 섞지 않는다.
+- **진행**
+  1. 논문 정독 agent 4명(논문마다 1명)이 scratch papers/notes-<arXiv id>.md에 노트를 쓴다(모든 정의·정리, 모든 그림·표의 수치, 실험 설정, 한계, 선수 지식, 추가 그림 제안).
+  2. 46장 작성 → 독립 검토 → 공개
+  3. 47, 49, 50장을 병렬로 작성(46에만 의존), 48은 47 다음 → 장마다 독립 검토 → 공개
+
+### 14.1 진행 기록
+
+- 2026-10-30: arXiv에서 네 논문을 받았다(1609.03625 46쪽, 1904.05930 35쪽, 2509.05075 32쪽, 2608.00214 9쪽; scratch papers/dl). Manifold-GS는 단독 저자의 "Preliminary Draft"(2026-07-31)다. 정독 agent 4명을 띄웠다. GUIDELINES §1·§2.6·§9, references.html, 루트 index(About, 읽는 경로, Track 4 표, 의존 관계), 46–50 장 개요 뼈대(planned)를 만들었다.
+- 2026-10-30: 정독 노트 4개가 끝났다(scratch papers/notes-*.md, 750–1150줄). 각 노트가 찾은 원문의 오식(BLM17 (4.3)의 부호와 상수, BLM22 §7.1의 1/ε, GeoSplat (12)/(37)의 부호와 (31)의 1/ε)과 불일치는 작성 agent에게 "원문으로 다시 확인" 조건으로 넘긴다. **W46을 띄웠다**(지시문 scratch papers/writer46.md).
+  - 논문 장의 절 구성을 정해 장 개요에 planned로 넣었다: 47(8절: Problem and Key Idea / §2 / §3 / §4 / §5 / §6–7 / §8 실험 / Assessment), 48(7절), 49(7절, 부록 E를 따로 한 절), 50(6절).
+  - 번호는 arXiv 판을 따른다(BLM17 v1, BLM22 v2, GeoSplat v3, Manifold-GS v1). BLM17의 게재본은 번호가 다르다(references.html에 적었다).
+  - 작성 지시문: scratch papers/writer47.md–writer50.md(템플릿 writer-paper-template.md). 46이 draft가 되면 R46과 W47·W49·W50을 띄우고, W48은 W47 다음에 띄운다.
+- 2026-10-30: **46장 draft**(9절, 그림 21개, verify 9개, check_all OK). 47–50장이 링크할 id·규약·이름 구분을 인계 문서(scratch papers/handoff46.md)로 정리했다.
+  - 이름: Hutchinson의 대상은 [BLM22] Def 4.1을 따라 generalized second fundamental form·curvature varifold로 부르고, [BLM22] Def 3.5의 weak second fundamental form은 48장이 정의한다.
+  - terms.tsv에 Track 4 용어 20개를 넣었다. varifold의 mass는 다른 장의 물리적 "질량"과 겹쳐서 넣지 않았다.
+  - R46(검토, 지시문 scratch papers/review46.md; 배경 GMT 문헌을 references.html #sec-refs-paper-notes에 추가)과 W47·W49·W50을 띄웠다.
+- 2026-10-30: **46장 reviewed.** 검토가 고친 것: Ex 46.8.6의 수치(quadrature 오류, 6.654 → 6.651), 46.5의 Tour (0.4.3) 인용, Table 46.9.2의 [BLM22] atom 순서 (x_i, P_i, m_i), [ManifoldGS26]이 거리를 "bounded-Lipschitz"라 부른다는 점, ellipse의 12각형 서술, [BLM17, Prop 2.13]의 bound, 용어 약 140곳. 작성자가 자체 증명한 Prop 46.6.5(half-line junction이 curvature varifold일 조건)는 맞다.
+  - 통합: references.html에 GMT 문헌 15개(Allard72, Simon83, Hutchinson86a·b 등, 검토가 서지 확인), terms.tsv에 mass·barycenter, notation.html에 `#sec-paper-notes`, glossary.html에 `#sec-glossary-paper-notes`(tools/ddg_glossary.py가 Track 2와 Track 4 표를 함께 만든다), 루트 index의 46장 Reviewed.
+  - 47·49·50 작성 agent에게 검토의 변경(인계 문서 handoff46.md 끝)을 알렸다.

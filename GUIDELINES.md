@@ -42,6 +42,7 @@
   - **Track 1. Foundations and Intuition** (기초·입문): Tour(0) → Part IV(27–31) → Part 0(1–3)
   - **Track 2. Discrete Differential Geometry** (CMU 15-458/858 강의를 따르는 독립 섹션): 32–45 (§2.5)
   - **Track 3. Rigorous Differential Geometry** (심화): Part I(4–10) → Part II(11–20) → Part III(21–26). 위의 "도달 목표"는 이 track의 목표다.
+  - **Track 4. Paper Notes** (논문 정리, 2026-10-30 사용자 결정): 사용자가 관심 있는 논문을 쉽게, 그러나 빠짐없이 정리한다. 46(배경) → 47–50(논문 한 편에 한 장) (§2.6)
 
 ---
 
@@ -212,6 +213,47 @@ Track 2 「Discrete Differential Geometry」(32–45장)는 CMU 15-458/858 강�
   - Track 2 장끼리는 §3.2대로 Builds on / Leads to로 잇는다.
   - Track 3과는 Go deeper와 Looking ahead로 잇는다. Track 1(Tour, Chapter 31)과는 Looking back으로 잇는다.
   - 장 번호 32–45는 식별자다. pager는 Track 1의 마지막 장(03)에서 32로, 45에서 Track 3의 첫 장(04)으로 이어진다.
+
+### 2.6 Track 4: Paper Notes의 원칙 (2026-10-30 사용자 결정)
+
+Track 4 「Paper Notes」는 사용자가 관심 있는 논문을 정리하는 **독립 섹션**이다. 목차에서 Track 3 다음, 맨 끝에 온다(§1). 첫 묶음은 varifold로 surface와 curvature를 근사하는 수학 논문 두 편과, 그 생각을 3D Gaussian Splatting에 가져온 논문 두 편이다.
+
+- **사용자 요청** (2026-10-30)
+  - 논문 설명 위주로, 쉽게 이해할 수 있는 수준으로 쓴다.
+  - 논문 내용은 빠뜨리지 않는다. 모든 정의, 가정, 정리, 실험을 다룬다.
+  - 논문의 그림과 표를 수치까지 설명한다.
+  - 필요하면 그림을 새로 그린다.
+  - 0번(배경)에서 이 논문들을 읽는 데 필요한 것을 기초부터 설명한다. varifold는 처음 보는 개념이다.
+- **장**
+  - 46 Background: Measures, Varifolds, and First Variation. 네 논문이 공통으로 쓰는 기초다. 목차(9절)는 사용자가 승인했다.
+  - 47 A varifold approach to surface approximation [BLM17], 48 Weak and approximate curvatures of a measure [BLM22], 49 GeoSplat [GeoSplat25], 50 Manifold-GS [ManifoldGS26]. 논문 한 편이 한 장이다.
+- **독자**: Part IV와 같다(§2.4). 3D vision(3DGS, NeRF, mesh)을 실무로 알고 differential geometry는 Tour와 Track 2 정도로 안다. measure theory와 geometric measure theory는 처음이다.
+- **논문 장의 구성**
+  - 장 개요(index.html)는 부록 A-2를 따르고, Questions 앞에 **At a Glance** section을 둔다(`<section id="sec-at-a-glance">`). 서지(저자, 발표처, 연도, arXiv 판), 한 문단 요약, 논문이 주장하는 기여, 논문의 절 ↔ 이 장의 절 대응표를 쓴다.
+  - 첫 절은 **Problem and Key Idea**(문제 설정과 핵심 아이디어)다.
+  - 가운데 절들은 논문의 순서를 따라 절별로 해설한다. 논문의 모든 정의·가정·정리·예·비고를 다룬다. 부록도 빠뜨리지 않는다(순수 기술적인 보조정리는 짧게).
+  - 실험을 다루는 절은 논문의 **모든 그림과 표**를 해설한다. 표는 수치를 그대로 옮겨 적은 우리 표로 보이고(출처 표시), 행·열의 뜻, 지표의 방향(높을수록 좋은가), 무엇을 보여 주는지, 어디서 이기지 못하는지를 쓴다. 그림은 무엇을 그렸는지(축, 색, 매개변수), 무엇을 봐야 하는지, 보이는 수치를 쓴다.
+  - 마지막 절은 **Assessment**(한계와 평가)다. 저자가 밝힌 한계, 주장과 근거 사이의 간격, 다른 논문(이 묶음과 Track 1–3)과의 관계를 쓴다.
+- **엄밀성**: Part IV(§2.4)와 같은 수준이다.
+  - 논문의 정의, 가정, 정리는 **정확하게**(가정 빠짐없이) 진술한다. 바로 뒤에 "이 정리가 말하는 것"을 평이한 문장으로 쓰고, 핵심 정리에는 증명의 흐름을 "Proof sketch."로 보인다. 완전한 증명은 논문에 맡기고 번호를 정확히 인용한다.
+  - **논문의 주장, 우리의 해석, 우리의 평가를 구분한다.** 해석은 "이렇게 볼 수 있다"로, 평가는 Assessment 절이나 `box insight`(제목 "Assessment")에 쓴다. 논문 결과를 과장하거나 지어내지 않는다.
+  - 논문 번호는 원문에서 확인한 것만 쓴다(§4.4). 정리 이름 뒤에 `<a class="cite" href="../../references.html#BLM17">[BLM17, Thm 4.6]</a>`처럼 원래 번호를 단다. 우리 항목 번호(N.M.K)는 따로 센다.
+  - 논문의 그림과 표는 "[BLM17, Fig. 4]"처럼 부른다. 우리 그림(Figure N.M.K)과 헷갈리지 않게 한다.
+- **저작권**: 논문 문장을 번역해 옮기지 않고, 논문의 그림을 캡처하거나 따라 그리지 않는다(§4.4). 내용은 우리 말로 다시 쓴다. 그림이 필요하면 논문의 정의와 식으로 **직접 계산해서** 새로 그린다(예: 논문의 estimator를 우리 point cloud에 돌린 결과). 표의 수치는 출처를 밝히고 인용한다.
+- **한 개념, 한 정의(§3.3)와 `<dfn>`**
+  - measure, varifold, first variation, generalized mean curvature 등 **공통 개념은 46장이 정의한다.** 47–50장은 46장을 링크로 상기한다.
+  - 논문에만 있는 구성(예: approximate mean curvature, Gaussian의 geometric mass)은 그 논문 장이 정의한다.
+  - 이미 study set에 있는 개념(mean curvature, shape operator, second fundamental form, 3DGS의 covariance 등)은 다시 정의하지 않고 링크한다. concepts.html에서 확인한다. 논문의 규약이 이 study set과 다르면 `box convention`(Conventions)으로 알린다. 예: 논문의 mean curvature vector는 principal curvature의 **합**일 수 있다(§6.3의 \(H\)는 평균이다).
+- **절의 구성**: §2.1과 Part IV(§2.4)를 따른다.
+  - Goals, Prerequisites, Motivation(앞 절이 끝난 지점에서 시작), Summary(`p.next`)를 둔다.
+  - 그림 설명 규칙(§12.6)은 필수다. 그림을 본문에서 따라 읽힌다.
+  - 상자: In computer vision(`application`, 3DGS·mesh 실무와의 연결), What geometry explains(`insight`), Assessment(`insight`), Conventions(`convention`), Looking back(`backward`, Track 1–2의 같은 주제와 비교), Go deeper(`deeper`). 알고리즘이 나오면 Implementation(`code`, NumPy 30줄 이하, verify가 실행)을 둘 수 있다.
+  - Exercises: 제목은 "Quick check"다. ★–★★ 문제 3–5개에 모두 풀이를 단다.
+  - 분량은 한 절에 30–50분이다. 논문의 한 절이 길면 여러 절로 나눈다.
+- **연결**
+  - 47 ← 46, 48 ← 46·47, 49 ← 46(·47·48), 50 ← 46(·49). 같은 장의 절은 순서대로 쓴다(§3.7).
+  - Track 2의 discrete curvature(Chapter 40–42), Part IV의 Gaussian Splatting(Chapter 29–30)과 Looking back·Go deeper로 잇는다. Track 3은 링크만 건다.
+  - 장 번호 46–50은 식별자다. pager는 46 개요의 이전 링크가 Contents로, 50의 마지막 절의 다음 링크가 Contents로 간다.
 
 ---
 
@@ -850,6 +892,11 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
 | | 24 | Curvature | `24-curvature` |
 | | 25 | Riemannian Submanifolds | `25-submanifold-geometry` |
 | | 26 | Gauss–Bonnet Revisited and Jacobi Fields (optional) | `26-gauss-bonnet-jacobi` |
+| **Track 4. Paper Notes** | 46 | Background: Measures, Varifolds, and First Variation | `46-varifold-background` |
+| | 47 | Paper: A Varifold Approach to Surface Approximation | `47-paper-varifold-approximation` |
+| | 48 | Paper: Weak and Approximate Curvatures of a Measure | `48-paper-varifold-curvatures` |
+| | 49 | Paper: GeoSplat | `49-paper-geosplat` |
+| | 50 | Paper: Manifold-GS | `50-paper-manifold-gs` |
 
 **Track 2. Discrete Differential Geometry** (§2.5). 강의 번호는 Spring 2021 사이트의 번호다. 재생목록에서는 L21–22가 "Lecture 20: Geodesics" 한 영상이다.
 
@@ -925,6 +972,7 @@ Part I의 개념이 Part II·III에서 일반화될 때, 아래 명제를 해당
   - 32, 33, 34는 서로 독립이다.
   - 35 ← 34, 36 ← 33·35, 37 ← 32·36, 38 ← 35·36·37, 39 ← 38, 40 ← 33·39, 41 ← 40, 42 ← 36·41, 43 ← 42, 44 ← 39·42, 45 ← 36·42·44
   - 병렬 작성 방법은 §15.5를 따른다. 선행 장의 장 개요("Leads to")가 넘겨줄 정의와 결과의 계약이다.
+- **Track 4**는 46장(배경)에 의존하고, Track 1–3에는 링크로만 잇는다. 47 ← 46, 48 ← 46·47, 49 ← 46, 50 ← 46(49를 자주 참조).
 
 ---
 

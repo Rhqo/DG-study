@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>46.4 Varifolds — DG Study</title>
+  <meta name="dg-id" content="46.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="46.1, 46.2, 46.3">
+  <meta name="dg-refs" content="BLM17 Def 2.1–2.5, 2.11, 2.12, 2.15, Prop 2.4; BLM22 Def 2.1–2.6; GeoSplat25 §2.2; ManifoldGS26 Def 1; Kazhdan06">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">46. Background: Measures, Varifolds, and First Variation</a> ›
+    <span>46.4 Varifolds</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>46.4 Varifolds</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.1–2.5, 2.11, 2.12, 2.15, Prop. 2.4]</a>,
+        <a class="cite" href="../../references.html#BLM22">[BLM22, §2]</a>,
+        <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §2.2]</a>,
+        <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26, Def. 1]</a>.
+        rectifiable set과 approximate tangent space는 <a class="cite" href="../../references.html#Simon83">[Simon83]</a>의 Chapter 3과 Chapter 8을 따른다.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>varifold를 \(\Omega \times G_{d,n}\) 위의 Radon measure로 정의하고, 그 mass \(\norm{V}\)와 점마다의 plane의 distribution(Young measure)으로 나누어 읽을 수 있다.</li>
+        <li>smooth surface, polygon, 교차하는 두 직선, 여러 겹의 surface가 rectifiable varifold이고, point cloud와 voxel 데이터가 rectifiable이 아닌 varifold라는 것을 식으로 쓸 수 있다.</li>
+        <li>varifold의 수렴을 정의하고, staircase의 극한 varifold \(\sqrt2\,\mathcal{H}^1\llcorner D \otimes (\tfrac12\delta_{P_h} + \tfrac12\delta_{P_v})\)를 계산해서 그것이 대각선의 varifold와 다르다는 것을 보일 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="46-2-measures.html">Section 46.2</a>: Radon measure(<a href="46-2-measures.html#i-46-2-1">Definition 46.2.1</a>), Hausdorff measure(<a href="46-2-measures.html#i-46-2-3">Definition 46.2.3</a>), weak-* convergence(<a href="46-2-measures.html#i-46-2-6">Definition 46.2.6</a>), compactness(<a href="46-2-measures.html#i-46-2-9">Theorem 46.2.9</a>), push-forward(<a href="46-2-measures.html#i-46-2-11">Definition 46.2.11</a>)</li>
+        <li><a href="46-3-grassmannian.html">Section 46.3</a>: Grassmannian \(G_{d,n}\)(<a href="46-3-grassmannian.html#i-46-3-1">Definition 46.3.1</a>), 거리 \(\norm{P - Q}\)(<a href="46-3-grassmannian.html#i-46-3-4">Proposition 46.3.4</a>), \(G_{1,2}\)의 그림(<a href="46-3-grassmannian.html#fig-46-3-1">Figure 46.3.1</a>)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="46-1-why-varifolds.html">Section 46.1</a>에서 모든 데이터는 (위치, 방향 없는 plane, mass)의 목록이었고, smooth surface는 그 연속판이었다. <a href="46-2-measures.html">Section 46.2</a>는 “위치와 mass”을 measure로, <a href="46-3-grassmannian.html">Section 46.3</a>은 “방향 없는 plane”을 \(G_{d,n}\)의 점으로 만들었다. 둘을 합치는 방법은 하나다. 위치와 plane의 쌍 \((x, P)\)가 사는 공간 \(\Omega \times G_{d,n}\) 위에 mass를 두는 것이다. 그것이 varifold다. 이렇게 하면 staircase의 극한처럼 “한 점에 두 방향이 반씩” 있는 대상도 자연스럽게 들어오고, varifold로 가깝다는 것은 위치와 mass와 tangent가 함께 가깝다는 뜻이 된다.</p>
+    </section>
+
+    <section id="sec-definition">
+      <h2>Definition and Mass</h2>
+
+      <div class="thm definition" id="i-46-4-1">
+        <p><span class="thm-head">Definition 46.4.1</span> <span class="thm-name">(varifold)</span>.
+        \(\Omega \subseteq \R^n\)을 open set, \(1 \le d \lt n\)이라 하자. \(\Omega\) 위의 \(d\)-<dfn>varifold</dfn>(바리폴드)는 \(\Omega \times G_{d,n}\) 위의 Radon measure \(V\)다. test function \(\varphi \in C_c(\Omega \times G_{d,n})\)에 대해</p>
+        <div class="equation" id="eq-46-4-1">
+        \[ V(\varphi) = \int_{\Omega \times G_{d,n}}\varphi(x, S)\,dV(x, S) \tag{46.4.1} \]
+        </div>
+        <p>로 쓴다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.1]</a>, <a class="cite" href="../../references.html#BLM22">[BLM22, Def. 2.1]</a>.</p>
+      </div>
+      <p>정의는 이것이 전부다. 위치 \(x\)와 plane \(S\)의 함수 \(\varphi\)를 넣으면 숫자를 돌려주는 기계, 곧 <a href="46-1-why-varifolds.html#eq-46-1-1">(46.1.1)</a>과 <a href="46-1-why-varifolds.html#eq-46-1-2">(46.1.2)</a>의 공통의 꼴이다. \(G_{d,n}\)이 compact하므로 \(\Omega\)의 compact set \(K\)에 대해 \(K \times G_{d,n}\)도 compact하고, Radon measure라는 조건은 “\(\Omega\)의 compact set 위에 mass가 유한하다”는 것과 같다.</p>
+
+      <div class="thm definition" id="i-46-4-2">
+        <p><span class="thm-head">Definition 46.4.2</span> <span class="thm-name">(mass)</span>.
+        \(\pi(x, S) = x\)라 하자. varifold \(V\)의 <dfn>mass</dfn>(질량)는 push-forward \(\norm{V} = \pi_\#V\), 곧 \(\Omega\)의 Borel set \(B\)마다 \(\norm{V}(B) = V(B \times G_{d,n})\)인 \(\Omega\) 위의 Radon measure다. test function으로는 \(\int\psi\,d\norm{V} = \int\psi(x)\,dV(x, S)\)이다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.3]</a>.</p>
+      </div>
+      <p>mass는 varifold에서 plane을 잊고 “어디에 얼마나”만 남긴 것이다. 3D vision의 말로 하면 normal을 버린 point cloud의 밀도다. 이 장에서는 mass를 \(\norm{V}\)로 쓰고, 전체 mass \(\norm{V}(\Omega)\)도 같은 기호로 쓴다.</p>
+
+      <div class="thm example" id="i-46-4-3">
+        <p><span class="thm-head">Example 46.4.3</span> <span class="thm-name">(the varifold of a curve or a surface)</span>.
+        \(M\)이 \(\Omega\) 안의 \(d\)차원 \(C^1\) submanifold이고 넓이가 국소적으로 유한하면</p>
+        <p>\[ V_M(\varphi) = \int_M\varphi(x, T_xM)\,d\mathcal{H}^d(x) \]</p>
+        <p>는 varifold이고 \(\norm{V_M} = \mathcal{H}^d\llcorner M\)이다. unit circle \(C\)이면 \(V_C(\varphi) = \int_0^{2\pi}\varphi\big(x(t), P(t + \tfrac\pi2)\big)\,dt\)이고(\(P(\theta)\)는 각 \(\theta\)인 직선, <a href="46-3-grassmannian.html#i-46-3-3">Example 46.3.3</a>), 예를 들어 \(V_C(1) = 2\pi\), \(V_C(P_{11}) = \pi\)이다(<a href="46-1-why-varifolds.html#i-46-1-1">Example 46.1.1</a>). polygon은 edge마다 그 직선을 붙인 것의 합 \(\sum_e\mathcal{H}^1\llcorner e \otimes \delta_{P_e}\)이다(기호 \(\otimes\)는 바로 아래에서 설명한다).</p>
+        <p class="verified">Verification: <code>verify/v-46-4-varifolds.py</code></p>
+      </div>
+      <p>기호 \(\mu \otimes \delta_{T_x}\)는 “\(\mu\)의 mass를 위치 \(x\)마다 plane \(T_x\) 하나에 몰아 둔다”는 뜻이다. 곧 \((\mu \otimes \delta_{T_x})(\varphi) = \int\varphi(x, T_x)\,d\mu(x)\)이다. 위의 \(V_M\)은 \(\mathcal{H}^d\llcorner M \otimes \delta_{T_xM}\)이다.</p>
+      <p><a href="#fig-46-4-1">Figure 46.4.1</a>은 이 대상을 눈으로 보는 방법이다. (a)는 unit circle의 내접 정12각형(검정)과 12점의 point cloud(파랑, 점마다 tangent line)다. (b)는 같은 대상을 위치와 직선의 좌표 \((t, \theta)\)에 그린 것이다. \(t\)는 점의 polar angle, \(\theta \in [0^\circ, 180^\circ)\)는 직선의 각이다. circle의 varifold는 \(\theta = t + 90^\circ\)(mod \(180^\circ\))인 톱니 모양의 선(회색) 위에 고르게 놓인 mass이다. polygon의 edge 하나는 위치가 \(30^\circ\)만큼 움직이는 동안 직선이 그대로이므로 수평 선분이 되고, point cloud의 점은 톱니 위의 점이 된다. 세 대상이 이 좌표에서 서로 가깝다는 것이 varifold로 가깝다는 것이다. polygon의 수평 선분이 톱니에서 가장 멀리 떨어진 곳(vertex 근처)에서 직선 사이의 거리는 \(\sin(\pi/12) = 0.259\)다.</p>
+
+      <figure class="dg-figure" id="fig-46-4-1">
+        <img src="figures/fig-46-4-1-circle-varifolds.svg" alt="두 패널. (a) 점선 unit circle에 내접한 검은 정12각형과, 각 edge의 바깥쪽 호 가운데에 있는 파란 점 12개와 짧은 파란 접선. (b) 가로축 position angle t(0에서 360도), 세로축 line angle θ(0에서 180도)인 그래프. 회색 사선 세 조각이 톱니 모양을 이루고, 그 위에 짧은 검은 수평 선분 12개가 중심을 맞춰 놓여 있으며, 각 수평 선분의 가운데에 파란 점이 있다.">
+        <figcaption><span class="fig-head">Figure 46.4.1.</span>
+        <em>무엇을</em>: unit circle의 세 varifold. (a) 내접 정12각형(검정)과 12점 point cloud(파랑, mass \(2\pi/12\), 직선은 circle의 tangent line). (b) 같은 것을 좌표 \((t, \theta)\)에 그린 것. 회색은 \(V_C\), 검은 수평 선분은 polygon의 edge, 파란 점은 point cloud의 atom이다.
+        <em>읽는 법</em>: (b)의 가로축은 위치(점의 polar angle \(t\)), 세로축은 그 점에 붙은 직선의 각 \(\theta\)다. \(\theta\)는 \(180^\circ\)마다 같은 직선이므로 위아래가 이어져 있고, 그래서 회색 선이 \(180^\circ\)에서 \(0^\circ\)으로 넘어간다.
+        <em>볼 것</em>: polygon의 edge는 직선이 하나라서 수평이고, 그 가운데에서만 회색 선과 만난다. edge 끝(vertex)에서 \(\theta\)의 차이는 \(15^\circ\)(직선 사이의 거리 \(\sin15^\circ = 0.259\))다. vertex 수를 늘리면 수평 선분이 짧아지고 회색 선에 붙는다. point cloud의 점은 정확히 회색 선 위에 있지만 mass가 점에 모여 있다.
+        <em>본문과의 연결</em>: <a href="#i-46-4-3">Example 46.4.3</a>, <a href="#i-46-4-6">Definition 46.4.6</a>, <a href="#i-46-4-8">Definition 46.4.8</a>.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-rectifiable">
+      <h2>Rectifiable Varifolds</h2>
+      <p>smooth surface의 varifold는 위치마다 plane이 하나다. 이 성질만 남기고 smoothness를 버린 것이 rectifiable varifold다. 그러려면 “거의 어디서나 tangent plane이 있는 집합”이 필요하다.</p>
+
+      <div class="thm definition" id="i-46-4-4">
+        <p><span class="thm-head">Definition 46.4.4</span> <span class="thm-name">(rectifiable varifold)</span>.
+        (a) \(M \subseteq \R^n\)이 <strong>countably \(d\)-rectifiable</strong>(가산 \(d\)-정류 집합)이라는 것은 \(\mathcal{H}^d(M_0) = 0\)인 \(M_0\)과 Lipschitz map \(F_j\colon\R^d \to \R^n\)(\(j = 1, 2, \dots\))이 있어 \(M \subseteq M_0 \cup \bigcup_jF_j(\R^d)\)인 것이다. 이것은 \(M\)이 \(\mathcal{H}^d\)-null set을 빼면 countably many \(C^1\) \(d\)-submanifold에 덮인다는 것과 같다.</p>
+        <p>(b) 이런 \(M\)이 compact set마다 유한한 \(\mathcal{H}^d\)를 가지면, \(\mathcal{H}^d\)-a.e. \(x \in M\)에서 <dfn>approximate tangent space</dfn>(근사 접공간) \(T_xM \in G_{d,n}\)이 하나 있다. 이것은 \(M\)을 \(x\) 중심으로 \(1/r\)배 확대한 집합의 \(\mathcal{H}^d\)가 \(r \to 0\)에서 plane \(T_xM\)의 \(\mathcal{H}^d\)로 weak-* 수렴하는 유일한 plane이다. \(M\)이 \(C^1\) submanifold 조각 \(N\)에 들어 있는 \(\mathcal{H}^d\)-a.e. 점에서 \(T_xM = T_xN\)이다.</p>
+        <p>(c) \(\theta\colon M \to (0, \infty)\)가 \(\mathcal{H}^d\llcorner M\)에 대해 locally integrable이면</p>
+        <div class="equation" id="eq-46-4-2">
+        \[ v(M, \theta)(\varphi) = \int_M\varphi(x, T_xM)\,\theta(x)\,d\mathcal{H}^d(x) \tag{46.4.2} \]
+        </div>
+        <p>로 정한 varifold \(v(M, \theta) = \theta\,\mathcal{H}^d\llcorner M \otimes \delta_{T_xM}\)을 <dfn>rectifiable varifold</dfn>(정류가능 바리폴드), \(\theta\)를 그 multiplicity라 한다. \(\theta\)가 정수값이면 <dfn>integral varifold</dfn>(정수 바리폴드)라 한다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.2]</a>.</p>
+      </div>
+      <p>(b)는 정리이고 증명은 <a class="cite" href="../../references.html#Simon83">[Simon83, Chapter 3]</a>에 있다. 쉬운 말로 하면, rectifiable set은 “\(C^1\) surface 조각을 셀 수 있을 만큼 이어 붙인 것”이고, 넓이 \(0\)인 곳(조각이 만나는 선, 꺾인 모서리, 교차점)을 빼면 어디서나 tangent plane이 있다. 넓이 \(0\)인 곳은 \(\mathcal{H}^d\)-적분에 기여하지 않으므로 거기서 \(T_xM\)이 정해지지 않아도 <a href="#eq-46-4-2">(46.4.2)</a>는 잘 정의된다.</p>
+
+      <div class="thm example" id="i-46-4-5">
+        <p><span class="thm-head">Example 46.4.5</span> <span class="thm-name">(rectifiable varifolds that are not surfaces)</span>.</p>
+        <ol type="a">
+          <li><strong>두 직선의 교차</strong>: \(M = L_1 \cup L_2\)(원점에서 만나는 두 직선). 원점 하나는 \(\mathcal{H}^1\)-null이므로 \(v(M, 1) = \mathcal{H}^1\llcorner L_1 \otimes \delta_{L_1} + \mathcal{H}^1\llcorner L_2 \otimes \delta_{L_2}\)이다. 교차점에서 tangent를 고를 필요가 없다.</li>
+          <li><strong>triple junction</strong>: 원점에서 나가는 세 half-line의 합집합. 이것도 rectifiable이다. <a href="46-5-first-variation.html">Section 46.5</a>에서 \(120^\circ\) junction이 특별하다는 것을 본다.</li>
+          <li><strong>여러 겹</strong>: \(v(\mathbb{D}, 2)\)(unit disk \(\mathbb{D}\)를 multiplicity \(2\)로). 납작해지는 ellipsoid의 극한이다(<a href="46-1-why-varifolds.html#ex-46-1-4">Exercise 46.1.4</a>). \(v(\mathbb{D}, 2)\)와 \(2v(\mathbb{D}, 1)\)은 같은 varifold다.</li>
+          <li><strong>polyhedral surface</strong>: face \(F\)마다 plane \(P_F\)를 붙인 \(\sum_F\mathcal{H}^d\llcorner F \otimes \delta_{P_F}\). edge와 vertex는 \(\mathcal{H}^d\)-null이다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.15]</a>는 이것을 polyhedral varifold라 부르고, integral varifold다.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="sec-discrete">
+      <h2>Discrete Varifolds</h2>
+      <p>데이터는 보통 rectifiable이 아니다. 점에는 넓이가 없고, voxel에는 부피가 있다.</p>
+
+      <div class="thm definition" id="i-46-4-6">
+        <p><span class="thm-head">Definition 46.4.6</span> <span class="thm-name">(point cloud varifold)</span>.
+        점 \(x_i \in \Omega\), mass \(m_i \gt 0\), plane \(P_i \in G_{d,n}\)(\(i = 1, \dots, N\))에 대해</p>
+        <div class="equation" id="eq-46-4-3">
+        \[ \begin{aligned} V &= \sum_{i=1}^Nm_i\,\delta_{x_i} \otimes \delta_{P_i}, \\ V(\varphi) &= \sum_{i=1}^Nm_i\,\varphi(x_i, P_i) \end{aligned} \tag{46.4.3} \]
+        </div>
+        <p>를 <dfn>point cloud varifold</dfn>(점구름 바리폴드)라 한다. mass는 \(\norm{V} = \sum_im_i\delta_{x_i}\)이다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.12]</a>.</p>
+      </div>
+      <p>네 논문이 모두 이 정의를 쓴다. <a class="cite" href="../../references.html#BLM17">[BLM17]</a>과 <a class="cite" href="../../references.html#BLM22">[BLM22]</a>는 point cloud에 PCA로 구한 plane \(P_i\)와 mass \(m_i\)를 붙여 쓰고, <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §2.2]</a>는 Gaussian 중심의 point cloud varifold를 쓴다. <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26, Def. 1]</a>의 Gaussian varifold surrogate \(V_{\mathcal{G}}(\phi) = \sum_iq_i\,\phi(\mu_i, P_i)\)도 정확히 이 꼴이고, 중심 \(\mu_i\), covariance가 주는 plane \(P_i\), opacity와 따로 둔 mass \(q_i\)를 쓴다(<a href="46-8-gaussian-splatting-geometry.html">Section 46.8</a>). point cloud varifold의 support는 유한 집합이므로 \(d \ge 1\)이면 rectifiable이 아니다.</p>
+      <p><a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.11]</a>은 voxel 데이터를 위한 <strong>volumetric varifold</strong> \(\sum_K\tfrac{m_K}{\abs{K}}\mathcal{L}^n\llcorner K \otimes \delta_{P_K}\)도 정의한다. cell \(K\)마다 mass \(m_K\)를 cell 안에 고르게 펴고 plane \(P_K\) 하나를 붙인 것이다. 이것도 support가 \(n\)차원이라 rectifiable이 아니다. 같은 cell 데이터로 만든 volumetric varifold와 point cloud varifold의 차이가 cell의 지름 \(\delta\)와 mass의 곱 이하라는 것이 <a class="cite" href="../../references.html#BLM17">[BLM17, Prop. 2.13]</a>이고, <a href="46-7-regularization-distances.html">Section 46.7</a>의 거리로 다시 본다.</p>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: oriented point cloud와 무엇이 다른가</p>
+        <p>point cloud varifold는 “normal이 붙은 point cloud”와 거의 같은 자료구조다. 다른 점은 둘이다. normal의 부호가 없고(\(P_i = I - n_in_i^{\mathsf T}\)), 점마다 mass \(m_i\)가 있다. Poisson surface reconstruction은 부호까지 일관된 normal이 필요하므로 <a class="cite" href="../../references.html#Kazhdan06">[Kazhdan06]</a> normal의 부호를 맞추는 단계를 먼저 거쳐야 하지만, varifold로 하는 계산(mean curvature, second fundamental form, 거리)은 그 단계 없이 할 수 있다. mass \(m_i\)는 <a href="46-2-measures.html#i-46-2-7">Example 46.2.7</a>에서 본 것처럼 점의 밀도가 고르지 않을 때 넓이를 바로잡는 역할을 한다. mass를 고르게 둔 채 점의 간격만 고르지 않으면 varifold에 가짜 밀도 \(\theta\)가 생긴다. <a class="cite" href="../../references.html#BLM17">[BLM17, §8.1.4]</a>는 그 효과가 mean curvature의 tangential 성분으로 나타나고 normal 방향으로 정사영하면 사라진다는 것을 실험으로 보인다(<a href="46-5-first-variation.html">Section 46.5</a>, <a href="../47-paper-varifold-approximation/index.html">Chapter 47</a>).</p>
+      </aside>
+    </section>
+
+    <section id="sec-young">
+      <h2>Mass and Plane Distribution</h2>
+      <p>varifold는 언제나 “어디에 얼마나”와 “그곳에서 어느 방향으로”로 나누어 읽을 수 있다.</p>
+
+      <div class="thm proposition" id="i-46-4-7">
+        <p><span class="thm-head">Proposition 46.4.7</span> <span class="thm-name">(Young measure representation)</span>.
+        \(V\)가 \(\Omega\) 위의 \(d\)-varifold이면 \(\norm{V}\)-a.e. \(x\)에서 \(G_{d,n}\) 위의 probability measure \(\nu_x\)가 있어</p>
+        <div class="equation" id="eq-46-4-4">
+        \[ V(\varphi) = \int_\Omega\int_{G_{d,n}}\varphi(x, S)\,d\nu_x(S)\,d\norm{V}(x) \tag{46.4.4} \]
+        </div>
+        <p>이다. 이것을 \(V = \norm{V} \otimes \{\nu_x\}_x\)로 쓴다. <a class="cite" href="../../references.html#BLM17">[BLM17, Prop. 2.4]</a>.</p>
+      </div>
+      <p>증명은 measure의 disintegration이라는 표준 결과다. 쉬운 말로 하면 \(\nu_x\)는 “점 \(x\) 근처의 mass가 어떤 plane들에 어떤 비율로 놓여 있는가”이다. 예를 보자. rectifiable varifold \(v(M, \theta)\)는 \(\nu_x = \delta_{T_xM}\)이다. 점마다 plane이 하나다. point cloud varifold에서 점들이 서로 다르면 \(\nu_{x_i} = \delta_{P_i}\)이고, 같은 점에 두 atom \((x, P, m)\), \((x, Q, m')\)이 있으면 \(\nu_x = \tfrac{m\delta_P + m'\delta_Q}{m + m'}\)이다(<a href="#ex-46-4-4">Exercise 46.4.4</a>). <a class="cite" href="../../references.html#BLM17">[BLM17]</a>은 이 \(\nu_x\)를 orthogonal approximate mean curvature를 정의할 때 쓴다(<a href="../47-paper-varifold-approximation/index.html">Chapter 47</a>).</p>
+    </section>
+
+    <section id="sec-convergence">
+      <h2>Convergence of Varifolds</h2>
+
+      <div class="thm definition" id="i-46-4-8">
+        <p><span class="thm-head">Definition 46.4.8</span> <span class="thm-name">(convergence of varifolds)</span>.
+        varifold \(V_k\)가 \(V\)로 수렴한다는 것은 \(\Omega \times G_{d,n}\) 위의 Radon measure로서 weak-* 수렴하는 것, 곧 모든 \(\varphi \in C_c(\Omega \times G_{d,n})\)에서 \(V_k(\varphi) \to V(\varphi)\)인 것이다. \(V_k \overset{*}{\rightharpoonup} V\)로 쓴다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.5]</a>.</p>
+      </div>
+
+      <div class="thm proposition" id="i-46-4-9">
+        <p><span class="thm-head">Proposition 46.4.9</span> <span class="thm-name">(mass and compactness)</span>.
+        (a) \(V_k \overset{*}{\rightharpoonup} V\)이면 \(\norm{V_k} \overset{*}{\rightharpoonup} \norm{V}\)이다. 거꾸로는 성립하지 않는다.
+        (b) 모든 compact set \(K \subseteq \Omega\)에서 \(\sup_k\norm{V_k}(K) \lt \infty\)이면 수렴하는 부분열이 있다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \(\psi \in C_c(\Omega)\)이면 \(\varphi(x, S) = \psi(x)\)는 \(C_c(\Omega \times G_{d,n})\)에 있다. \(G_{d,n}\)이 compact하기 때문이다. 그래서 \(\int\psi\,d\norm{V_k} = V_k(\varphi) \to V(\varphi) = \int\psi\,d\norm{V}\)이다. 거꾸로가 성립하지 않는 예가 아래의 staircase다. (b) \(K \times G_{d,n}\)이 compact하고 \(V_k(K \times G_{d,n}) = \norm{V_k}(K)\)이므로 <a href="46-2-measures.html#i-46-2-9">Theorem 46.2.9</a>(a)를 \(\Omega \times G_{d,n}\)에 쓴다.</p>
+      </div>
+      <p>(b)가 varifold 이론이 쓸모 있는 첫째 이유다. 넓이가 bounded인 surface의 열은 언제나 varifold로 수렴하는 부분열을 갖는다. 극한이 surface가 아닐 수는 있지만(아래 예), 어쨌든 극한이라는 대상은 있다. 극한이 언제 rectifiable인지는 first variation이 정한다(Allard의 compactness theorem, <a href="46-5-first-variation.html">Section 46.5</a>).</p>
+
+      <div class="thm example" id="i-46-4-10">
+        <p><span class="thm-head">Example 46.4.10</span> <span class="thm-name">(the staircase limit)</span>.
+        staircase \(S_n\)(<a href="46-1-why-varifolds.html#i-46-1-2">Example 46.1.2</a>)의 varifold \(v(S_n, 1)\)은</p>
+        <div class="equation" id="eq-46-4-5">
+        \[ V_\infty = \sqrt2\,\mathcal{H}^1\llcorner D \otimes \big(\tfrac12\delta_{P_h} + \tfrac12\delta_{P_v}\big) \tag{46.4.5} \]
+        </div>
+        <p>로 수렴한다. 이유는 <a href="46-2-measures.html#i-46-2-8">Example 46.2.8</a>과 같다. 가로 조각들은 \(\varphi(\cdot, P_h)\)를, 세로 조각들은 \(\varphi(\cdot, P_v)\)를 \(D\)를 따라 Riemann 합으로 적분하고, 각각 \(\int_0^1\varphi((t, t), \cdot)\,dt = \tfrac{1}{\sqrt2}\int_D\varphi\,d\mathcal{H}^1\)로 간다. 둘을 더하면 <a href="#eq-46-4-5">(46.4.5)</a>다. 세 test function으로 확인하자(\([0, 1]^2\) 밖에서는 잘라 compact support로 만든다).</p>
+        <ul>
+          <li>\(\varphi = 1\): \(v(S_n, 1)(1) = 2 = V_\infty(1)\)이고 \(v(D, 1)(1) = \sqrt2\)이다. mass가 다르다.</li>
+          <li>\(\varphi = P_{11}\): 가로 조각만 \(1\)을 주므로 \(v(S_n, 1)(P_{11}) = 1 = V_\infty(P_{11})\)이고, \(v(D, 1)(P_{11}) = \tfrac12\sqrt2 = 0.7071\)이다.</li>
+          <li>\(\varphi = 2P_{12}\)(<a href="46-3-grassmannian.html#fig-46-3-1">Figure 46.3.1</a>(b)의 세로 좌표): 가로와 세로는 \(0\)이므로 \(V_\infty(2P_{12}) = 0\)이고, \(45^\circ\)선은 \(1\)이므로 \(v(D, 1)(2P_{12}) = \sqrt2 = 1.4142\)이다.</li>
+        </ul>
+        <p>\(V_\infty\)의 Young measure는 \(\nu_x = \tfrac12\delta_{P_h} + \tfrac12\delta_{P_v}\)로 Dirac이 아니다. 그래서 \(V_\infty\)는 rectifiable varifold가 아니고(<a href="#ex-46-4-3">Exercise 46.4.3</a>), 특히 대각선의 varifold \(v(D, 1)\)도, 그 multiplicity \(\sqrt2\)판 \(v(D, \sqrt2)\)도 아니다. Hausdorff distance로는 \(S_n \to D\)였지만 varifold로는 \(S_n\)이 \(D\)를 근사하지 않는다는 것이 정확히 드러난다.</p>
+        <p class="verified">Verification: <code>verify/v-46-4-varifolds.py</code></p>
+      </div>
+      <p><a href="#fig-46-4-2">Figure 46.4.2</a>가 이 계산을 그림으로 보인다. (a)는 \(S_4\)와 \(D\)이고, 점의 색이 조각의 방향(파랑 가로, 초록 세로)이다. (b)는 가로축이 \(D\)를 따른 위치 \(s = (x + y)/\sqrt2\), 세로축이 직선의 각인 좌표다. \(S_4\)의 가로 조각은 \(\theta = 0^\circ\)에, 세로 조각은 \(\theta = 90^\circ\)에 번갈아 놓인다. \(n\)을 키우면 이 짧은 선분들이 두 줄을 빈틈없이 채우고, 각 줄의 밀도가 \(\tfrac{\sqrt2}{2}\)인 \(V_\infty\)(연한 띠)가 된다. 대각선의 varifold는 \(\theta = 45^\circ\)의 한 줄(주홍)에 밀도 \(1\)로 있다. 두 극한은 이 좌표에서 \(45^\circ\)씩 떨어진 서로 다른 곳에 있다.</p>
+
+      <figure class="dg-figure" id="fig-46-4-2">
+        <img src="figures/fig-46-4-2-staircase-varifold.svg" alt="두 패널. (a) 단위 정사각형 안에 검은 4단 계단과 주홍 대각선이 있고, 계단의 가로 조각 가운데에 파란 점, 세로 조각 가운데에 초록 점이 있다. (b) 가로축 s(0에서 √2), 세로축 line angle θ(0에서 180도)인 그래프. θ = 0에 짧은 파란 선분 네 개, θ = 90에 짧은 초록 선분 네 개가 번갈아 놓이고, 각 줄을 연한 띠가 덮는다. θ = 45에 주홍 직선이 있다. 오른쪽에 √2/2, 1, √2/2라는 밀도가 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 46.4.2.</span>
+        <em>무엇을</em>: staircase를 varifold로 본 것. (a) \(S_4\)(검정)와 대각선 \(D\)(주홍). (b) 좌표 \((s, \theta)\)에서 \(v(S_4, 1)\)(진한 선분), 그 극한 \(V_\infty\)(연한 띠), \(v(D, 1)\)(주홍 선).
+        <em>읽는 법</em>: \(s = (x + y)/\sqrt2\)는 점을 \(D\)에 수직으로 내린 위치이고, \(\theta\)는 그 점의 직선의 각이다. 오른쪽의 숫자는 \(D\)의 길이 요소당 mass(밀도)이다.
+        <em>볼 것</em>: \(S_n\)의 mass는 언제나 \(\theta = 0^\circ\)과 \(90^\circ\)에만 있고 \(45^\circ\)에는 없다. 극한의 두 띠는 밀도가 \(\tfrac{\sqrt2}{2}\)씩이라 합이 \(\sqrt2\)(길이 \(2\)를 \(D\)의 길이 \(\sqrt2\)로 나눈 것)다. 대각선은 밀도 \(1\)의 한 줄이다.
+        <em>본문과의 연결</em>: <a href="#i-46-4-10">Example 46.4.10</a>, <a href="#eq-46-4-5">(46.4.5)</a>, <a href="#i-46-4-9">Proposition 46.4.9</a>(a)의 “거꾸로는 성립하지 않는다”.</figcaption>
+      </figure>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: varifold 수렴은 normal의 수렴을 포함한다</p>
+        <p><a href="46-1-why-varifolds.html">Section 46.1</a>의 Looking back 상자에서 polyhedral surface가 Hausdorff distance로 수렴할 때 넓이의 수렴과 normal의 수렴이 동치라는 정리를 보았다. varifold 수렴은 이 두 조건을 처음부터 묶어 둔다. \(V_k \overset{*}{\rightharpoonup} v(M, 1)\)이면 test function \(\varphi(x, S) = \psi(x)\)에서 넓이가, \(\varphi(x, S) = \psi(x)\norm{S - T_xM}\)(\(T_xM\)을 \(x\)에 대해 연속으로 확장한 것)에서 tangent의 평균 오차가 함께 수렴한다. 거꾸로 staircase처럼 tangent가 틀리면 varifold 극한이 달라진다. 이것이 네 논문이 Hausdorff distance나 Chamfer distance 대신 varifold의 수렴(과 그 정량판, <a href="46-7-regularization-distances.html">Section 46.7</a>)을 가정하는 이유다.</p>
+      </aside>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: varifold의 기호</p>
+        <ul>
+          <li>rectifiable varifold: 이 장과 <a class="cite" href="../../references.html#BLM17">[BLM17]</a>은 \(v(M, \theta) = \theta\,\mathcal{H}^d\llcorner M \otimes \delta_{T_xM}\), <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25]</a>는 \(\mathcal{W} = \theta\,\mathcal{H}^{D_{\mathsf{M}}}_{|\mathsf{M}} \otimes \delta_{\mathcal{T}_x\mathsf{M}}\)으로 쓴다. 논문들의 \(\mathcal{H}^d_{|M}\)은 이 장의 \(\mathcal{H}^d\llcorner M\)이다.</li>
+          <li>point cloud varifold의 삼중항: <a class="cite" href="../../references.html#BLM17">[BLM17]</a>은 \((x_i, m_i, P_i)\), <a class="cite" href="../../references.html#BLM22">[BLM22]</a>는 \((x_i, P_i, m_i)\), <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26]</a>은 \((\mu_i, P_i, q_i)\)다. 3DGS에서 \(\mu_i\)는 Gaussian의 중심이라, measure를 \(\mu\)로 쓰는 이 장의 기호와 겹친다. Chapter 50에서는 문맥으로 구별한다.</li>
+          <li>mass: 모든 논문이 \(\norm{V}\)를 쓴다. 이 장의 Young measure \(\nu_x\)는 <a class="cite" href="../../references.html#BLM17">[BLM17]</a>의 \(\nu_x\)와 같다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>rectifiable set, approximate tangent space, varifold의 기본: <a class="cite" href="../../references.html#Simon83">[Simon83]</a>의 Chapter 3(rectifiable set)과 Chapter 8(varifold). disintegration(Young measure): <a class="cite" href="../../references.html#AFP00">[AFP00]</a>를 <a class="cite" href="../../references.html#BLM17">[BLM17, Prop. 2.4]</a>가 인용한다.</li>
+        <li>varifold를 shape 비교에 쓴 vision 쪽의 예: N. Charon, A. Trouvé, “The varifold representation of nonoriented shapes for diffeomorphic registration” <a class="cite" href="../../references.html#CharonTrouve13">[CharonTrouve13]</a>. 두 mesh를 kernel로 부드럽게 한 varifold로 비교한다. <a class="cite" href="../../references.html#BLM17">[BLM17, Introduction]</a>이 varifold의 드문 응용으로 든다.</li>
+        <li>orientation이 있는 판(current)과의 비교: <a href="46-1-why-varifolds.html#sec-orientation">Section 46.1</a>, <a href="46-2-measures.html">Section 46.2</a>의 Looking back 상자.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(d\)-varifold는 \(\Omega \times G_{d,n}\) 위의 Radon measure이고, mass \(\norm{V} = \pi_\#V\)는 plane을 잊은 위치의 measure다(<a href="#i-46-4-1">Definition 46.4.1</a>, <a href="#i-46-4-2">Definition 46.4.2</a>).</li>
+        <li>rectifiable varifold \(v(M, \theta) = \theta\,\mathcal{H}^d\llcorner M \otimes \delta_{T_xM}\)은 거의 어디서나 tangent plane이 있는 집합에 multiplicity를 준 것이다. 교차, junction, 여러 겹, polyhedral surface가 모두 여기에 든다(<a href="#eq-46-4-2">(46.4.2)</a>, <a href="#i-46-4-5">Example 46.4.5</a>).</li>
+        <li>point cloud varifold \(\sum m_i\delta_{x_i} \otimes \delta_{P_i}\)는 네 논문의 공통 자료구조이고 rectifiable이 아니다(<a href="#eq-46-4-3">(46.4.3)</a>).</li>
+        <li>varifold는 mass와 점마다의 plane의 distribution \(\nu_x\)로 나뉜다(<a href="#eq-46-4-4">(46.4.4)</a>). varifold의 수렴은 weak-* 수렴이고 mass의 수렴을 포함하지만 거꾸로는 아니다. mass가 bounded이면 수렴하는 부분열이 있다(<a href="#i-46-4-9">Proposition 46.4.9</a>).</li>
+        <li>staircase의 극한은 \(V_\infty = \sqrt2\,\mathcal{H}^1\llcorner D \otimes (\tfrac12\delta_{P_h} + \tfrac12\delta_{P_v})\)이고, rectifiable이 아니며 대각선의 varifold와 다르다(<a href="#i-46-4-10">Example 46.4.10</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 varifold를 vector field로 밀었을 때 mass가 변하는 비율, 곧 first variation을 정의한다. smooth surface에서 그것이 mean curvature vector를 주고, polygon에서는 vertex의 turning vector, mesh에서는 cotan 공식, triple junction에서는 세 방향의 합이 된다는 것을 계산한다. staircase의 극한은 여기서도 이상하게 행동한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-46-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 46.4.1</span> <span class="level">★</span>
+        \(\R^2\)의 point cloud varifold \(V = 0.5\,\delta_{(0,0)} \otimes \delta_{P_h}\) \(+\ 1\,\delta_{(1,0)} \otimes \delta_{P_{45^\circ}}\) \(+\ 2\,\delta_{(0,2)} \otimes \delta_{P_v}\)에서 \(\norm{V}(\R^2)\), \(\norm{V}(B_{1.5}(0))\), \(V(P_{11})\), \(V(x_1P_{22})\)를 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\norm{V}(\R^2) = 0.5 + 1 + 2 = 3.5\)이다. \(B_{1.5}(0)\)에는 \((0, 0)\)과 \((1, 0)\)만 있으므로 \(1.5\)다. \(P_{11}\)은 \(P_h\)에서 \(1\), \(P_{45^\circ}\)에서 \(\tfrac12\), \(P_v\)에서 \(0\)이므로 \(V(P_{11}) = 0.5 + 0.5 + 0 = 1\)이다. \(x_1P_{22}\)는 첫 atom에서 \(0\cdot0\), 둘째에서 \(1\cdot\tfrac12\), 셋째에서 \(0\cdot1\)이므로 \(V(x_1P_{22}) = 0.5\)다.</p>
+          <p class="verified">Verification: <code>verify/v-46-4-varifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-46-4-2" data-level="1">
+        <p><span class="thm-head">Exercise 46.4.2</span> <span class="level">★</span>
+        <a href="46-1-why-varifolds.html#ex-46-1-2">Exercise 46.1.2</a>의 zigzag \(Z_n\)의 varifold \(v(Z_n, 1)\)의 극한을 구하고, test function \(P_{11}\)로 선분 \([0, 1]\)의 varifold와 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>조각은 \(\pm45^\circ\)이고 길이를 반씩 나누며, 각 방향의 조각들은 \([0, 1]\)을 따라 고르게 퍼진다. 극한은 \(\sqrt2\,\mathcal{H}^1\llcorner[0, 1] \otimes (\tfrac12\delta_{P_{45^\circ}} + \tfrac12\delta_{P_{-45^\circ}})\)이다. 두 직선 모두 \(P_{11} = \tfrac12\)이므로 \(v(Z_n, 1)(P_{11}) = \sqrt2\cdot\tfrac12 = 0.7071\)이고(모든 \(n\)에서 정확히), 선분 \([0, 1]\)은 \(P_{11} = 1\)이라 \(1\)이다. Young measure의 평균으로 보면 zigzag은 \(\tfrac12(P_{45^\circ} + P_{-45^\circ}) = \tfrac12I\)이고 선분은 \(P_h\)다. mass도 \(\sqrt2\) 대 \(1\)로 다르다.</p>
+          <p class="verified">Verification: <code>verify/v-46-4-varifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-46-4-3" data-level="1">
+        <p><span class="thm-head">Exercise 46.4.3</span> <span class="level">★</span>
+        staircase의 극한 \(V_\infty\)가 rectifiable varifold가 아님을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(V_\infty = v(M, \theta)\)라 하자. mass를 비교하면 \(\theta\,\mathcal{H}^1\llcorner M = \sqrt2\,\mathcal{H}^1\llcorner D\)이므로 \(\mathcal{H}^1\)-a.e.로 \(M = D\)이고 \(\theta = \sqrt2\)이다. 그러면 Young measure는 \(\mathcal{H}^1\)-a.e. \(x \in D\)에서 \(\delta_{T_xD} = \delta_{P_{45^\circ}}\)여야 한다. 그러나 \(V_\infty\)의 Young measure는 \(\tfrac12\delta_{P_h} + \tfrac12\delta_{P_v}\)이다. test function \(2P_{12}\)로 보면 앞의 것은 \(V(2P_{12}) = 2\), 뒤의 것은 \(0\)이다. 모순이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-46-4-4" data-level="1">
+        <p><span class="thm-head">Exercise 46.4.4</span> <span class="level">★</span>
+        같은 점 \(x\)에 atom \((x, P_h, 2)\)와 \((x, P_{45^\circ}, 1)\)이 있는 point cloud varifold의 mass와 \(x\)에서의 Young measure \(\nu_x\)를 구하고, \(\int P_{11}\,d\nu_x\)를 계산하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>mass는 \(3\delta_x\)이고 \(\nu_x = \tfrac23\delta_{P_h} + \tfrac13\delta_{P_{45^\circ}}\)이다. \(\int P_{11}\,d\nu_x = \tfrac23\cdot1 + \tfrac13\cdot\tfrac12 = \tfrac56\)이다. 교차하는 두 직선을 sampling하다가 교차점 근처에서 두 직선의 점이 겹치면 이런 atom이 생긴다. 한 점에 plane이 하나라는 가정(rectifiable)을 데이터가 깨는 경우다.</p>
+          <p class="verified">Verification: <code>verify/v-46-4-varifolds.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-46-4-5" data-level="2">
+        <p><span class="thm-head">Exercise 46.4.5</span> <span class="level">★★</span>
+        <a href="#i-46-4-9">Proposition 46.4.9</a>(a)의 거꾸로가 성립하지 않음을 보이는 열을 만들어라. 곧 \(\norm{V_k} \overset{*}{\rightharpoonup} \norm{V}\)이지만 \(V_k\)가 \(V\)로 수렴하지 않는 예를 들어라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(V_k = v(S_k, 1)\)(staircase), \(V = v(D, \sqrt2)\)라 하자. <a href="46-2-measures.html#i-46-2-8">Example 46.2.8</a>에서 \(\norm{V_k} = \mathcal{H}^1\llcorner S_k \overset{*}{\rightharpoonup} \sqrt2\,\mathcal{H}^1\llcorner D = \norm{V}\)이다. 그러나 \(V_k \overset{*}{\rightharpoonup} V_\infty \ne V\)이다. 예를 들어 \(\varphi = 2P_{12}\)(cutoff를 곱한 것)이면 \(V_k(\varphi) = 0\)이지만 \(V(\varphi) = \sqrt2\cdot\sqrt2 = 2\)다. mass는 같지만 plane이 다르다. 더 간단한 예는 \(V_k = \delta_0 \otimes \delta_{P_h}\)(모든 \(k\))와 \(V = \delta_0 \otimes \delta_{P_v}\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-46-4-varifolds.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="46-3-grassmannian.html">← 46.3 The Grassmannian: Unoriented Planes as Projections</a>
+    <a rel="next" href="46-5-first-variation.html">46.5 First Variation and Generalized Mean Curvature →</a>
+  </nav>
+</body>
+</html>

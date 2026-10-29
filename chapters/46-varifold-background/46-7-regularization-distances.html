@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>46.7 Regularization and Distances Between Varifolds — DG Study</title>
+  <meta name="dg-id" content="46.7">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="46.2, 46.3, 46.4, 46.5, 40.4, 41.4">
+  <meta name="dg-refs" content="BLM17 §1 (kernels), Def 2.6, Def 2.7, Prop 2.8, Prop 2.13, Def 3.1, Prop 3.2, Prop 3.5, (4.1), (4.7), Lemma 6.1, §8.1.1; BLM22 Def 2.7; ManifoldGS26 (6)–(7)">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">46. Background: Measures, Varifolds, and First Variation</a> ›
+    <span>46.7 Regularization and Distances Between Varifolds</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>46.7 Regularization and Distances Between Varifolds</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#BLM17">[BLM17, §1–3, §6]</a>,
+        <a class="cite" href="../../references.html#BLM22">[BLM22, Def. 2.7]</a>,
+        <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26, (6)–(7)]</a>.
+        bounded Lipschitz distance와 weak-* 수렴의 관계는 <a class="cite" href="../../references.html#Villani09">[Villani09]</a>와 <a class="cite" href="../../references.html#Bogachev07">[Bogachev07]</a>를 따른다.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>kernel \(\rho_\varepsilon\)로 measure를 convolution하는 것을 정의하고, mass 보존, weak-* 수렴, \(d\)차원 집합에서 \(\varepsilon^{d-n}\)으로 커지는 높이와 상수 \(C_\rho\)를 설명할 수 있다.</li>
+        <li>point cloud처럼 first variation이 measure가 아닌 varifold에서도 \(\delta V*\rho_\varepsilon\)이 연속 vector field라는 것을 보이고, 그것과 \(\norm{V}*\rho_\varepsilon\)의 비로 curvature를 읽을 때 \(\varepsilon\)이 너무 작거나 크면 어떻게 되는지 설명할 수 있다.</li>
+        <li>bounded Lipschitz distance \(\Delta^{1,1}\)을 정의하고 Dirac mass, mass 차이, 기울어진 plane에서 계산할 수 있다.</li>
+        <li>cell마다 위치 오차, plane 오차, mass 오차를 더하는 bound를 증명하고, circle과 point cloud, staircase에 적용할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="46-2-measures.html">Section 46.2</a>: measure, weak-* convergence(<a href="46-2-measures.html#i-46-2-6">Definition 46.2.6</a>), density(<a href="46-2-measures.html#i-46-2-13">Theorem 46.2.13</a>). <a href="46-3-grassmannian.html">Section 46.3</a>: \(\Omega \times G_{d,n}\)의 거리 \(\abs{x - y} + \norm{P - Q}\). <a href="46-4-varifolds.html">Section 46.4</a>: point cloud varifold(<a href="46-4-varifolds.html#i-46-4-6">Definition 46.4.6</a>), staircase의 극한(<a href="46-4-varifolds.html#i-46-4-10">Example 46.4.10</a>). <a href="46-5-first-variation.html">Section 46.5</a>: first variation, point cloud의 first variation이 measure가 아니라는 것(<a href="46-5-first-variation.html#ex-46-5-4">Exercise 46.5.4</a>).</li>
+        <li>Track 2: mollified polyhedron(<a href="../40-discrete-curvature-integral/40-4-steiner-mollified.html#i-40-4-7">Definition 40.4.7</a>), weak error(<a href="../41-discrete-curvature-variational/41-4-convergence.html#i-41-4-2">Remark 41.4.2</a>)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>앞의 두 절은 smooth surface, polygon, junction에서 curvature를 first variation으로 읽었다. 그런데 네 논문의 데이터는 point cloud다. point cloud varifold의 first variation은 \(X\)의 도함수를 점에서 읽으므로 measure가 아니고(<a href="46-5-first-variation.html#ex-46-5-4">Exercise 46.5.4</a>), \(\delta V = -\vec H\norm{V}\)라는 분해를 쓸 수 없다. 해결책은 영상 처리에서 익숙한 것이다. 반지름 \(\varepsilon\)의 kernel로 흐리게(blur) 하면 점들이 smooth function이 되고, 그러면 비를 취할 수 있다. 둘째 문제는 “가깝다”를 숫자로 말하는 것이다. weak-* 수렴(<a href="46-2-measures.html#i-46-2-6">Definition 46.2.6</a>)은 열이 수렴하는지만 말하고, 지금 가진 point cloud가 surface에서 얼마나 떨어져 있는지는 말하지 않는다. <a href="46-1-why-varifolds.html">Section 46.1</a>의 표에서 본 “가까움의 네 단계” 가운데 varifold의 수렴을 숫자로 재는 거리가 필요하다. 이 절은 이 두 도구, 곧 convolution과 bounded Lipschitz distance를 준비한다. <a class="cite" href="../../references.html#BLM17">[BLM17]</a>과 <a class="cite" href="../../references.html#BLM22">[BLM22]</a>의 정리는 모두 이 두 도구로 쓰여 있다.</p>
+    </section>
+
+    <section id="sec-convolution">
+      <h2>Smoothing a Measure</h2>
+      <p>먼저 kernel을 정한다. <a class="cite" href="../../references.html#BLM17">[BLM17, §1]</a>을 따라, profile \(\rho\colon\R \to [0, \infty)\)는 짝함수이고 \([-1, 1]\) 밖에서 \(0\)이며 \(C^1\)이라 하자. \(\R^n\)에서 적분이 \(1\)이 되도록 맞춘 radial kernel을 \(\varepsilon\)배로 줄인 것을 쓴다.</p>
+      <div class="equation" id="eq-46-7-1">
+      \[ \begin{aligned} \rho_\varepsilon(x) &= \frac{1}{\varepsilon^n}\,\rho\Big(\frac{\abs{x}}{\varepsilon}\Big), \\ \int_{\R^n}\rho_\varepsilon\,dx &= 1 \end{aligned} \tag{46.7.1} \]
+      </div>
+      <p>\(\rho_\varepsilon\)는 반지름 \(\varepsilon\)의 ball 밖에서 \(0\)이다. 이 절의 그림은 <a class="cite" href="../../references.html#BLM17">[BLM17, §8.1.1]</a>의 \(\rho(r) = c\,e^{-1/(1 - r^2)}\)(\(\abs{r} \lt 1\))을 쓰고, \(c\)는 \(\R^2\)에서 적분이 \(1\)이 되게 하는 상수 \(c = 2.1436\)이다.</p>
+
+      <div class="thm definition" id="i-46-7-1">
+        <p><span class="thm-head">Definition 46.7.1</span> <span class="thm-name">(convolution of a measure)</span>.
+        \(\R^n\) 위의 Radon measure \(\mu\)와 kernel \(\rho_\varepsilon\)에 대해</p>
+        <div class="equation" id="eq-46-7-2">
+        \[ (\mu*\rho_\varepsilon)(x) = \int\rho_\varepsilon(x - y)\,d\mu(y) \tag{46.7.2} \]
+        </div>
+        <p>로 정한 함수 \(\mu*\rho_\varepsilon\colon\R^n \to [0, \infty)\)를 \(\mu\)와 \(\rho_\varepsilon\)의 <dfn>convolution</dfn>(측도의 합성곱)이라 한다. varifold \(V\)에서는 mass의 convolution \(\norm{V}*\rho_\varepsilon\)을 쓴다.</p>
+      </div>
+      <p>점 \(x\)에서의 값은 반지름 \(\varepsilon\)의 ball 안의 mass를 kernel로 가중해 더한 것이다. point cloud \(\sum_im_i\delta_{x_i}\)이면 \(\sum_im_i\rho_\varepsilon(x - x_i)\), 곧 점마다 작은 bump를 올려 더한 그림이다. \(\mu = f\,\mathcal{L}^n\)이 density를 가지면 보통의 함수 convolution \(f*\rho_\varepsilon\)이다.</p>
+
+      <div class="thm proposition" id="i-46-7-2">
+        <p><span class="thm-head">Proposition 46.7.2</span> <span class="thm-name">(what smoothing keeps)</span>.
+        \(\mu\)가 \(\R^n\) 위의 Radon measure라 하자.</p>
+        <ul>
+          <li>(a) \(\mu*\rho_\varepsilon\)은 \(C^1\) 함수이고, \(\mu\)가 유한이면 \(\int(\mu*\rho_\varepsilon)\,dx = \mu(\R^n)\)이다.</li>
+          <li>(b) \(\varepsilon \to 0\)이면 measure \((\mu*\rho_\varepsilon)\,\mathcal{L}^n\)이 \(\mu\)로 weak-* 수렴한다.</li>
+          <li>(c) \(M\)이 \(C^1\) \(d\)-submanifold이고 \(\theta\)가 \(M\) 위의 연속함수이며 \(\mu = \theta\,\mathcal{H}^d\llcorner M\)이면, 모든 \(x \in M\)에서</li>
+        </ul>
+        <div class="equation" id="eq-46-7-3">
+        \[ \begin{aligned} \varepsilon^{n-d}(\mu*\rho_\varepsilon)(x) &\to C_\rho\,\theta(x), \\ C_\rho &= \int_{\R^d}\rho(\abs{z})\,dz \end{aligned} \tag{46.7.3} \]
+        </div>
+        <p>이다. \(C_\rho = d\,\omega_d\int_0^1\rho(r)r^{d-1}\,dr\)는 kernel을 \(d\)차원 plane 위에서 적분한 값이다(\(\omega_d\)는 \(d\)차원 unit ball의 부피). <a class="cite" href="../../references.html#BLM17">[BLM17, (4.1), (4.7)]</a>.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> (a) \(\rho_\varepsilon\)이 \(C^1\)이고 support가 compact이므로 적분 기호 안에서 미분할 수 있다. Fubini로 \(\int\int\rho_\varepsilon(x - y)\,dx\,d\mu(y) = \int1\,d\mu\)이다. (b) \(\varphi \in C_c(\R^n)\)이면 Fubini와 \(\rho_\varepsilon\)이 짝함수라는 것에서 \(\int\varphi\,(\mu*\rho_\varepsilon)\,dx = \int(\varphi*\rho_\varepsilon)\,d\mu\)이다. \(\varphi\)는 uniformly continuous이므로 \(\varphi*\rho_\varepsilon \to \varphi\)가 고르게 수렴하고, 모두 한 compact set 밖에서 \(0\)이므로 \(\int(\varphi*\rho_\varepsilon)\,d\mu \to \int\varphi\,d\mu\)이다. (c) \(y = x + \varepsilon z\)로 바꾸면</p>
+        <p>\[ \begin{aligned} &\varepsilon^{n-d}(\mu*\rho_\varepsilon)(x) \\ &= \int\rho(\abs{z})\,\theta(x + \varepsilon z)\,d\mathcal{H}^d\llcorner M_\varepsilon(z) \end{aligned} \]</p>
+        <p>이다. 여기서 \(M_\varepsilon = (M - x)/\varepsilon\)은 \(M\)을 \(x\) 중심으로 \(1/\varepsilon\)배 확대한 것이다(\(\mathcal{H}^d\)는 길이를 \(1/\varepsilon\)배 하면 \(\varepsilon^{-d}\)배가 된다). \(M\)이 \(C^1\)이므로 \(z\)가 unit ball에 있는 동안 \(M_\varepsilon\)은 tangent plane \(T_xM\)으로 다가가고, \(\theta(x + \varepsilon z) \to \theta(x)\)이다. 그래서 적분은 \(\theta(x)\int_{T_xM}\rho(\abs{z})\,d\mathcal{H}^d(z) = C_\rho\theta(x)\)로 간다.</p>
+      </div>
+      <p>(c)는 \(M\)이 rectifiable이어도 \(\mathcal{H}^d\)-a.e. \(x\)에서 성립한다. approximate tangent space의 정의(<a href="46-4-varifolds.html#i-46-4-4">Definition 46.4.4</a>(b))가 바로 확대한 집합이 plane으로 간다는 것이기 때문이다. (c)에서 두 가지를 읽자. 첫째, 높이가 \(\varepsilon^{d-n}\)으로 커진다. curve(\(d = 1\))를 \(\R^2\)(\(n = 2\))에서 흐리면 폭 \(2\varepsilon\)에 mass를 모아 놓으므로 높이가 \(1/\varepsilon\)배다. 둘째, \(\varepsilon\)을 곱해도 극한은 \(\theta\)가 아니라 \(C_\rho\theta\)다. kernel을 \(\R^n\)에서 정규화했는데 mass는 \(d\)차원에 있기 때문이다. 위의 kernel이면 \(n = 2\), \(d = 1\)에서 \(C_\rho = 0.9517\)이다. 같은 kernel로 나눈 비에서는 \(C_\rho\)가 약분되지만, 분자와 분모에 다른 kernel을 쓰면 상수의 비가 남는다(Looking ahead 상자).</p>
+
+      <div class="thm example" id="i-46-7-3">
+        <p><span class="thm-head">Example 46.7.3</span> <span class="thm-name">(smoothing a circle and a point cloud)</span>.
+        (a) unit circle \(C\)의 \(\mu = \mathcal{H}^1\llcorner C\)에서 \((\mu*\rho_\varepsilon)(1, 0)\)은 \(\varepsilon = 0.1, 0.2, 0.4\)일 때 \(9.519\), \(4.762\), \(2.387\)이고, \(\varepsilon\)을 곱하면 \(0.9519\), \(0.9525\), \(0.9548\)로 \(C_\rho = 0.9517\)에 가깝다. \(\varepsilon\)이 클수록 circle이 휘어 있는 효과로 조금 커진다. circle에서 \(\varepsilon\) 이상 떨어진 점에서는 \(0\)이다. (b) circle 위에 같은 간격으로 놓은 \(N = 24\)개의 점(간격 \(0.262\), mass \(2\pi/24\))에서는 \(\varepsilon = 0.15\)이면 \(\varepsilon(\norm{V}*\rho_\varepsilon)\)이 점 위에서 \(1.376\), 두 점 사이에서 \(0.115\)로 크게 출렁인다. \(\varepsilon = 0.3\)이면 \(0.749\)와 \(1.088\), \(\varepsilon = 0.5\)이면 \([0.941, 0.981]\) 안에 있다. kernel이 이웃한 점 몇 개를 덮어야 point cloud가 curve처럼 보인다.</p>
+        <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+      </div>
+      <p><a href="#fig-46-7-1">Figure 46.7.1</a>이 이 예다. (a)와 (b)는 같은 점 24개를 \(\varepsilon = 0.15\)와 \(0.5\)로 흐린 것이다. (a)에서는 점마다 따로 bump가 서서 구슬 목걸이처럼 보이고, (b)에서는 하나의 고리가 된다. (c)는 circle 위를 따라 \(\varepsilon(\norm{V}*\rho_\varepsilon)\)를 읽은 것으로, 주홍(\(\varepsilon = 0.15\))은 점 위(\(7.5^\circ\), \(22.5^\circ\))에서 솟고 사이에서 거의 \(0\)으로 떨어지며, 파랑(\(\varepsilon = 0.5\))은 회색 점선 \(C_\rho\) 근처에서 평평하다. (d)는 smooth circle을 가로질러 \((s, 0)\)에서 읽은 것이다. 폭 \(2\varepsilon\)의 bump가 \(\varepsilon\)이 작아질수록 좁고 높아지지만, 곡선 아래의 넓이는 모두 거의 \(1\)이다(직선이면 정확히 \(1\)이다).</p>
+
+      <figure class="dg-figure" id="fig-46-7-1">
+        <img src="figures/fig-46-7-1-smoothed-mass.svg" alt="2×2 패널. (a) 흰 바탕에 원을 따라 놓인 검은 점 24개 둘레에 짙은 파란 동그라미가 따로따로 있다. (b) 같은 점들 둘레가 하나의 두꺼운 파란 고리로 이어져 있다. (c) 가로축 angle on the circle(0에서 30도), 세로축 ε(‖V‖*ρ_ε). 주홍 곡선이 7.5도와 22.5도에서 1.38까지 솟고 0, 15, 30도에서 0.1까지 떨어진다. 주황 곡선은 0.75와 1.09 사이를 오가고, 파란 곡선은 회색 점선 C_ρ(0.95) 근처에서 거의 평평하다. (d) 가로축 s(0.5에서 1.5), 세로축 ‖V‖*ρ_ε. s = 1에 중심을 둔 bump 셋. 주홍(ε = 0.1)은 높이 9.5로 좁고, 주황(0.2)은 4.8, 파랑(0.4)은 2.4로 넓다.">
+        <figcaption><span class="fig-head">Figure 46.7.1.</span>
+        <em>무엇을</em>: mass의 convolution \(\norm{V}*\rho_\varepsilon\). (a), (b) unit circle 위의 점 \(N = 24\)개(mass \(2\pi/24\))의 varifold를 \(\varepsilon = 0.15\), \(0.5\)로 흐린 것. (c) 같은 point cloud에서 circle 위의 점을 따라 읽은 \(\varepsilon(\norm{V}*\rho_\varepsilon)\)(\(\varepsilon = 0.15, 0.3, 0.5\)). (d) smooth unit circle을 가로지르는 선 \((s, 0)\) 위의 \(\norm{V}*\rho_\varepsilon\)(\(\varepsilon = 0.1, 0.2, 0.4\)).
+        <em>읽는 법</em>: (a), (b)의 색이 짙을수록 값이 크고 검은 점이 원자다. (c)의 가로축은 circle 위의 각이고 점은 \(7.5^\circ\)와 \(22.5^\circ\)에 있다. 회색 점선은 smooth circle의 극한 \(C_\rho = 0.9517\)이다. (d)는 \(\varepsilon\)을 곱하지 않은 값이다.
+        <em>볼 것</em>: \(\varepsilon\)이 점 간격(\(0.262\))보다 조금 큰 정도로는 출렁임이 크고(\(\varepsilon = 0.15\)에서 \(0.115\)–\(1.376\)), 간격의 두 배쯤 되어야 \(C_\rho\) 근처로 평평해진다. (d)의 높이는 \(9.52\), \(4.76\), \(2.39\)로 거의 \(C_\rho/\varepsilon\)이고, 곡선 아래 넓이는 모두 거의 \(1\)이다.
+        <em>본문과의 연결</em>: <a href="#i-46-7-2">Proposition 46.7.2</a>, <a href="#eq-46-7-3">(46.7.3)</a>, <a href="#i-46-7-3">Example 46.7.3</a>.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sec-smoothed-variation">
+      <h2>Smoothing the First Variation</h2>
+      <p>first variation은 measure가 아닐 수 있지만, test vector field를 먼저 흐린 뒤에 넣을 수는 있다. \(X\)를 \(X*\rho_\varepsilon\)(성분마다 convolution)으로 바꾸면 도함수도 흐려지므로, point cloud에서도 큰 값이 튀지 않는다.</p>
+
+      <div class="thm proposition" id="i-46-7-4">
+        <p><span class="thm-head">Proposition 46.7.4</span> <span class="thm-name">(the smoothed first variation is a vector field)</span>.
+        \(V\)가 유한한 mass를 갖는 \(d\)-varifold이면, 모든 \(C^1_c\) vector field \(X\)에 대해 \(\delta V(X*\rho_\varepsilon) = \int\inner{X(x)}{(\delta V*\rho_\varepsilon)(x)}\,dx\)이다. 여기서</p>
+        <div class="equation" id="eq-46-7-4">
+        \[ (\delta V*\rho_\varepsilon)(x) = \int S\,\nabla\rho_\varepsilon(y - x)\,dV(y, S) \tag{46.7.4} \]
+        </div>
+        <p>는 연속 vector field다. point cloud varifold \(\sum_im_i\delta_{x_i} \otimes \delta_{P_i}\)이면 \((\delta V*\rho_\varepsilon)(x) = \sum_im_iP_i\nabla\rho_\varepsilon(x_i - x)\)이고, \(\abs{x_i - x} \lt \varepsilon\)인 이웃만 기여한다. \(V\)가 bounded first variation \(\delta V = -\vec H\norm{V} + \delta V_s\)를 가지면 \(\delta V*\rho_\varepsilon = -(\vec H\norm{V})*\rho_\varepsilon + \delta V_s*\rho_\varepsilon\)(vector measure의 성분마다 convolution)이다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 3.1, Prop. 3.2]</a>.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \((X*\rho_\varepsilon)(y) = \int X(x)\rho_\varepsilon(y - x)\,dx\)이므로 \(D(X*\rho_\varepsilon)(y) = \int X(x)\nabla\rho_\varepsilon(y - x)^{\mathsf T}\,dx\)이고, \(\divg_S(X*\rho_\varepsilon)(y) = \tr\big(S\,D(X*\rho_\varepsilon)(y)\big)\) \(= \int\inner{X(x)}{S\nabla\rho_\varepsilon(y - x)}\,dx\)이다. 이것을 \(dV(y, S)\)로 적분하고 Fubini로 순서를 바꾸면 된다. \(\nabla\rho_\varepsilon\)이 bounded continuous이고 \(\norm{V}\)가 유한이므로 \(x\)에 대해 연속이다. bounded first variation이면 \(\delta V(X*\rho_\varepsilon)\) \(= -\int\inner{\vec H}{X*\rho_\varepsilon}\,d\norm{V}\) \(+ \delta V_s(X*\rho_\varepsilon)\)이고, 각 항에 (b)의 증명과 같은 Fubini를 쓴다.</p>
+      </div>
+      <p><a href="#eq-46-7-4">(46.7.4)</a>를 말로 하면 이렇다. 이웃한 점 \(y\)마다 kernel의 기울기 \(\nabla\rho_\varepsilon(y - x)\)를 그 점의 plane \(S\)에 정사영해서 더한다. 감소하는 profile이면 \(\nabla\rho_\varepsilon(y - x)\)는 \(y\)에서 \(x\) 쪽을 향한다. plane에 정사영하면 curve를 따라 양쪽에서 온 성분이 서로 상쇄되고, curve가 휜 만큼만 바깥쪽 성분이 남는다. 그래서 \(-\delta V*\rho_\varepsilon\)은 안쪽, 곧 \(\vec H\) 쪽을 향한다.</p>
+      <p>이제 비를 취할 수 있다. smooth closed curve에서는 \(\delta V_s = 0\)이므로 \(-(\delta V*\rho_\varepsilon)/(\norm{V}*\rho_\varepsilon)\)은 \(\vec H\)를 kernel로 가중평균한 것이고, \(\varepsilon \to 0\)이면 \(\vec H(x)\)로 간다. <a href="46-2-measures.html#i-46-2-13">Theorem 46.2.13</a>의 “작은 ball에서 두 measure의 비”를 kernel로 부드럽게 한 것이다. 같은 식을 point cloud에 그대로 쓸 수 있다는 것이 요점이다.</p>
+
+      <div class="thm example" id="i-46-7-5">
+        <p><span class="thm-head">Example 46.7.5</span> <span class="thm-name">(curvature of an ellipse from a point cloud)</span>.
+        ellipse \((2\cos t, \sin t)\)(둘레 \(L = 9.6884\)) 위에 arc length 간격 \(h = L/N\)으로 \(N\)개의 점을 놓고, 정확한 tangent line \(P_i\)와 mass \(m_i = L/N\)을 준다. 각 점에서 \(-(\delta V*\rho_\varepsilon)/(\norm{V}*\rho_\varepsilon)\)를 계산하면 모든 점에서 안쪽을 향하고, 그 길이를 curvature \(\kappa\)와 비교하면 다음과 같다.</p>
+        <ul>
+          <li>smooth ellipse 자체(\(N \to \infty\))에서 vertex \(t = 0\)(\(\kappa = 2\))의 값은 \(\varepsilon = 0.05, 0.1, 0.3\)일 때 \(1.995\), \(1.980\), \(1.840\)이다. \(\varepsilon\)이 크면 curvature가 작은 이웃까지 평균하므로 vertex에서 작아진다.</li>
+          <li>\(N = 1024\)(\(h = 0.0095\))이면 모든 점에서의 상대 오차의 최댓값이 \(\varepsilon = 0.1\)에서 \(1.5\%\)이다. \(\varepsilon = 0.03\)(\(\varepsilon/h \approx 3\))이면 vertex에서 \(1.448\)로 \(28\%\) 작고, \(\varepsilon = 0.4\)이면 vertex에서 \(1.742\)로 \(13\%\) 작다.</li>
+          <li>\(N = 256\)(\(h = 0.038\))에서 \(\varepsilon \lt h\)이면 ball 안에 이웃이 없어 분자가 \(0\)이다. 오차가 \(100\%\)다.</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+      </div>
+      <p><a href="#fig-46-7-2">Figure 46.7.2</a>(a)는 \(N = 1024\)에서 \(t \in [0^\circ, 180^\circ]\)를 따라 비의 길이를 그린 것이다. 파랑(\(\varepsilon = 0.1\))은 검은 \(\kappa\)와 거의 겹친다. 주홍(\(\varepsilon = 0.03\))은 모든 곳에서 아래에 있다. 이웃이 세 개쯤이면 kernel의 적분을 점의 합으로 근사한 오차가 크기 때문이다. 주황(\(\varepsilon = 0.4\))은 평평한 곳에서는 맞지만 vertex에서 낮다. (b)는 \(\varepsilon\)을 바꾸며 가장 큰 상대 오차를 log-log로 그린 것이다. 두 곡선 모두 오른쪽에서는 같은 직선을 따라 올라가고(흐림의 오차, 점의 수에 무관하다), 왼쪽에서는 들쭉날쭉하게 커진다(이웃이 부족한 오차). 점이 많은 \(N = 1024\)(파랑)의 골짜기가 더 왼쪽, 더 아래에 있다. 결국 \(\varepsilon\)은 “점 간격의 몇 배”보다 크고 “curvature 반지름”보다 충분히 작아야 한다. <a class="cite" href="../../references.html#BLM17">[BLM17]</a>의 수렴 정리는 이 두 조건을 정량적으로 쓴 것이다.</p>
+
+      <figure class="dg-figure" id="fig-46-7-2">
+        <img src="figures/fig-46-7-2-smoothed-curvature.svg" alt="두 패널. (a) 가로축 t(0에서 180도), 세로축 0에서 2.6. 검은 곡선 κ가 0도와 180도에서 2, 90도에서 0.25인 U자 모양이다. 파란 곡선(ε = 0.1)은 거의 겹치고, 주황(ε = 0.4)은 양 끝에서 1.74로 낮으며, 주홍(ε = 0.03)은 전체가 아래에 있고 양 끝이 1.45다. (b) log-log, 가로축 ε(0.02에서 0.6), 세로축 largest relative error(0.002에서 3). 주홍 사각형(N = 256)은 ε가 0.04보다 작은 왼쪽에서 1에 붙어 있다가 들쭉날쭉 내려오고, 파란 동그라미(N = 1024)는 0.5에서 시작해 더 왼쪽에서 내려와 0.01 근처의 골짜기를 이룬다. ε가 0.2보다 큰 오른쪽에서는 두 곡선이 같은 직선을 따라 0.23까지 올라간다.">
+        <figcaption><span class="fig-head">Figure 46.7.2.</span>
+        <em>무엇을</em>: ellipse \((2\cos t, \sin t)\) 위 point cloud(같은 arc length 간격, 정확한 tangent, mass \(L/N\))에서 계산한 \(-(\delta V*\rho_\varepsilon)/(\norm{V}*\rho_\varepsilon)\). (a) \(N = 1024\)에서 그 길이와 curvature \(\kappa\)(검정). (b) 모든 점에 대한 상대 오차 \(\abs{\abs{\text{ratio}} - \kappa}/\kappa\)의 최댓값을 \(\varepsilon\)의 함수로 그린 것(\(N = 256\), \(1024\)).
+        <em>읽는 법</em>: (a)는 ellipse의 위쪽 반(\(t \in [0^\circ, 180^\circ]\))만 그렸다. 아래쪽은 위쪽과 symmetric하다. \(t = 0^\circ, 180^\circ\)가 vertex이다. (b)의 두 축은 log scale이다.
+        <em>볼 것</em>: 파랑(\(\varepsilon = 0.1\))은 \(\kappa\)와 \(1.5\%\) 안에서 맞는다. \(\varepsilon\)이 작으면(주홍) 이웃이 부족해서, 크면(주황) curvature를 넓게 평균해서 틀린다. (b)의 골짜기가 좋은 \(\varepsilon\)의 범위이고, 점이 많을수록 왼쪽으로 넓어진다. \(N = 256\)에서 \(\varepsilon \lt h = 0.038\)이면 오차가 \(1\)이다.
+        <em>본문과의 연결</em>: <a href="#i-46-7-4">Proposition 46.7.4</a>, <a href="#i-46-7-5">Example 46.7.5</a>.</figcaption>
+      </figure>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: 흐려서 curvature 읽기</p>
+        <p>Track 2는 polyhedron을 \(\varepsilon\)-ball과의 Minkowski sum으로 둥글게 만든 mollified polyhedron에서 curvature를 읽었다(<a href="../40-discrete-curvature-integral/40-4-steiner-mollified.html#i-40-4-7">Definition 40.4.7</a>). 그때 edge에 모여 있던 curvature가 반지름 \(\varepsilon\)의 cylinder 조각으로 퍼져 \(H = -\tfrac{1}{2\varepsilon}\)이 되었다(<a href="../40-discrete-curvature-integral/40-4-steiner-mollified.html#i-40-4-13">Proposition 40.4.13</a>). 여기서는 모양 대신 measure를 kernel로 흐린다. 어느 쪽이든 한 점이나 한 선에 모인 singular curvature가 폭 \(\varepsilon\)으로 퍼지고, 점마다의 값은 \(1/\varepsilon\) 크기가 된다. 또 <a href="../41-discrete-curvature-variational/41-4-convergence.html#i-41-4-2">Remark 41.4.2</a>의 weak error는 smooth test function 하나로 적분한 오차였다. 아래의 bounded Lipschitz distance는 그 test function을 Lipschitz 상수와 크기가 \(1\) 이하인 모든 함수로 바꾸고 가장 나쁜 것을 고른 것이다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-distance">
+      <h2>The Bounded Lipschitz Distance</h2>
+      <p>두 measure가 가까운지 재려면 test function으로 적분한 값의 차이를 보면 된다. 그러나 모든 continuous function을 허용하면 \(\delta_0\)과 \(\delta_h\)는 아무리 가까워도 차이가 크다(\(\varphi\)를 \(0\)에서 \(1\), \(h\)에서 \(0\)으로 잡으면 된다). 그래서 test function의 기울기를 제한한다. 크기도 제한하는 이유는 mass가 다른 두 measure를 비교하기 위해서다.</p>
+
+      <div class="thm definition" id="i-46-7-6">
+        <p><span class="thm-head">Definition 46.7.6</span> <span class="thm-name">(bounded Lipschitz distance)</span>.
+        locally compact metric space \((X, d)\) 위의 유한한 Radon measure \(\mu\), \(\nu\)에 대해</p>
+        <div class="equation" id="eq-46-7-5">
+        \[ \begin{aligned} &\Delta^{1,1}(\mu, \nu) \\ &= \sup_\varphi\Big|\int\varphi\,d\mu - \int\varphi\,d\nu\Big| \end{aligned} \tag{46.7.5} \]
+        </div>
+        <p>를 \(\mu\)와 \(\nu\)의 <dfn>bounded Lipschitz distance</dfn>(유계 립시츠 거리)라 한다. sup은 \(\mathrm{lip}(\varphi) \le 1\)이고 \(\norm{\varphi}_\infty \le 1\)인 함수 \(\varphi\colon X \to \R\) 전체에 대해 잡는다. 두 varifold \(V\), \(W\)에서는 \(X = \Omega \times G_{d,n}\)에 거리 \(\abs{x - y} + \norm{P - Q}\)(<a href="46-3-grassmannian.html">Section 46.3</a>)를 주고 \(\Delta^{1,1}(V, W)\)를 쓴다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def. 2.6, Def. 2.7]</a>, <a class="cite" href="../../references.html#BLM22">[BLM22, Def. 2.7]</a>. (<a class="cite" href="../../references.html#BLM17">[BLM17]</a>은 \(\Omega \times G_{d,n}\)의 거리를 따로 적지 않지만, Lemma 6.1의 증명에서 \(\abs{\varphi(x, P) - \varphi(y, T)} \le \abs{x - y} + \norm{P - T}\)로 쓴다.)</p>
+      </div>
+      <p>flat distance라고도 한다. mass가 같은 두 probability measure의 1-Wasserstein distance \(W_1\)은 Kantorovich–Rubinstein duality로 \(\norm{\varphi}_\infty \le 1\) 조건 없이 \(\mathrm{lip}(\varphi) \le 1\)인 \(\varphi\)에 대한 같은 sup이다. mass가 다르면 \(\varphi\)에 상수를 더해 sup을 무한대로 만들 수 있으므로 \(W_1 = \infty\)이고, \(\Delta^{1,1}\)은 크기 조건으로 그것을 막는다 <a class="cite" href="../../references.html#BLM17">[BLM17, §2]</a>. 국소판 \(\Delta^{1,1}_U\)는 \(\varphi\)의 support를 open set \(U\)(varifold에서는 \(U \times G_{d,n}\)) 안으로 제한한 것이고, <a class="cite" href="../../references.html#BLM17">[BLM17]</a>의 수렴 정리는 대부분 작은 ball \(U\)에서의 \(\Delta^{1,1}_U\)로 쓰여 있다.</p>
+
+      <div class="thm proposition" id="i-46-7-7">
+        <p><span class="thm-head">Proposition 46.7.7</span> <span class="thm-name">(the distance measures weak-* convergence)</span>.
+        locally compact metric space 위의 Radon measure \(\mu\), \(\mu_k\)가 \(\mu(X) + \sup_k\mu_k(X) \lt \infty\)를 만족하고 모두 한 compact set \(K\)에 support가 있으면, \(\mu_k \overset{*}{\rightharpoonup} \mu\)인 것과 \(\Delta^{1,1}(\mu_k, \mu) \to 0\)인 것은 동치다. <a class="cite" href="../../references.html#BLM17">[BLM17, Prop. 2.8]</a>(<a class="cite" href="../../references.html#Villani09">[Villani09]</a>, <a class="cite" href="../../references.html#Bogachev07">[Bogachev07]</a>).</p>
+      </div>
+      <p>증명은 생략한다. 한 방향만 직관을 적으면, \(K\) 위에서 \(\mathrm{lip} \le 1\), \(\abs{\varphi} \le 1\)인 함수들의 집합은 Arzelà–Ascoli로 compact이므로 유한 개의 함수로 \(\eta\)-근사할 수 있고, 그 유한 개에서의 weak-* 수렴이 sup의 수렴을 준다. 따라서 mass가 bounded이고 한 compact set 안에 있는 한, “\(\Delta^{1,1}\)이 작다”는 것은 weak-* 수렴의 정량판이다. 논문들의 가정 “\(\Delta^{1,1}(V_i, V) \le d_i\)”는 이 뜻이다.</p>
+
+      <div class="thm example" id="i-46-7-8">
+        <p><span class="thm-head">Example 46.7.8</span> <span class="thm-name">(Dirac masses)</span>.
+        (a) \(\R\)에서 \(\Delta^{1,1}(\delta_0, \delta_h) = \min(\abs{h}, 2)\)이다. \(\abs{\varphi(0) - \varphi(h)}\)는 Lipschitz 조건으로 \(\abs{h}\) 이하, 크기 조건으로 \(2\) 이하이고, \(\varphi(x) = \max\big(-1, \min(1, \tfrac h2 - x)\big)\)가 등호를 준다. (b) \(\Delta^{1,1}(a\delta_0, b\delta_0) = \abs{a - b}\)이다(\(\varphi \equiv 1\)). 반면 \(W_1(a\delta_0, b\delta_0) = \infty\)(\(a \ne b\))다. (c) 같은 점에 놓였지만 plane이 다른 varifold의 원자 \(\delta_{(0, P)}\)와 \(\delta_{(0, Q)}\)는 \(\Delta^{1,1} = \norm{P - Q}\)이고(두 projection의 차이의 operator norm은 \(1\) 이하다), \(\R^2\)의 두 직선이 각 \(\theta\)를 이루면 \(\abs{\sin\theta}\)다. 위 bound는 Lipschitz 조건이고, \(\varphi(x, S) = \norm{S - Q}\)가 등호를 준다. 위치와 plane의 차이가 같은 단위로 더해진다.</p>
+        <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-quadrature">
+      <h2>A Bound from Cells</h2>
+      <p>실제로 \(\Delta^{1,1}\)을 계산하는 일은 드물다. 대신 bound를 쓴다. surface를 조각(cell)으로 나누고 조각마다 원자 하나를 두면, 오차는 조각 안에서 위치와 plane이 얼마나 벗어나는지와 mass를 얼마나 틀리게 주었는지로 정해진다.</p>
+
+      <div class="thm proposition" id="i-46-7-9">
+        <p><span class="thm-head">Proposition 46.7.9</span> <span class="thm-name">(cell quadrature bound)</span>.
+        \(M\)이 \(\mathcal{H}^d(M) \lt \infty\)인 rectifiable set이고 \(V = v(M, 1)\)이라 하자. \(M\)을 Borel 조각 \(C_1, \dots, C_N\)으로 나누고, 점 \(x_i\), plane \(P_i\), mass \(m_i \ge 0\)으로 \(W = \sum_im_i\delta_{x_i} \otimes \delta_{P_i}\)를 만들면</p>
+        <div class="equation" id="eq-46-7-6">
+        \[ \begin{aligned} &\Delta^{1,1}(V, W) \\ &\le \sum_i\int_{C_i}\big(\abs{x - x_i} \\ &\qquad\quad + \norm{T_xM - P_i}\big)\,d\mathcal{H}^d \\ &\quad + \sum_i\big|m_i - \mathcal{H}^d(C_i)\big| \end{aligned} \tag{46.7.6} \]
+        </div>
+        <p>이다. 특히 모든 \(i\)와 \(x \in C_i\)에서 \(\abs{x - x_i} \le h\), \(\norm{T_xM - P_i} \le \varepsilon_T\)이면 \(\Delta^{1,1}(V, W) \le \mathcal{H}^d(M)(h + \varepsilon_T)\) \(+ \sum_i\abs{m_i - \mathcal{H}^d(C_i)}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> \(\mathrm{lip}(\varphi) \le 1\), \(\norm{\varphi}_\infty \le 1\)이면</p>
+        <p>\[ \begin{aligned} &\int\varphi\,dV - \int\varphi\,dW \\ &= \sum_i\int_{C_i}\big(\varphi(x, T_xM) - \varphi(x_i, P_i)\big)\,d\mathcal{H}^d \\ &\quad + \sum_i\big(\mathcal{H}^d(C_i) - m_i\big)\varphi(x_i, P_i) \end{aligned} \]</p>
+        <p>이다. 첫 합의 integrand는 Lipschitz 조건으로 \(\abs{x - x_i} + \norm{T_xM - P_i}\) 이하이고, 둘째 합의 각 항은 \(\abs{\varphi} \le 1\)로 \(\abs{m_i - \mathcal{H}^d(C_i)}\) 이하다. sup을 취하면 된다.</p>
+      </div>
+      <p>세 항이 각각 “Gaussian이나 sample 점이 surface 조각의 대표로서 얼마나 좋은가”의 세 측면이다. 조각의 크기(위치 오차), 조각 안에서 normal이 도는 정도(plane 오차), 조각의 넓이를 mass로 맞췄는지(mass 오차). <a class="cite" href="../../references.html#BLM17">[BLM17, Lemma 6.1]</a>은 \(m_i = \mathcal{H}^d(C_i)\)로 두고 첫 항으로 근사 정리를 증명하고, <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26, (6)–(7)]</a>의 forward consistency bound \(A(M)(h + \varepsilon_T) + \varepsilon_q\)가 둘째 형태다(<a href="#eq-46-7-6">(46.7.6)</a>에서 \(\varepsilon_q = \sum\abs{q_i - A(C_i)}\)). ManifoldGS26은 plane의 차이를 Frobenius norm으로 재는데, \(\norm{\cdot} \le \norm{\cdot}_F\)이므로 그 bound는 이 장의 거리로도 성립한다. 같은 논법으로, 같은 cell 데이터에서 만든 volumetric varifold와 point cloud varifold의 거리가 cell 지름 \(\delta\) 곱하기 mass 이하라는 <a class="cite" href="../../references.html#BLM17">[BLM17, Prop. 2.13]</a>(<a href="46-4-varifolds.html">Section 46.4</a>)도 나온다. 두 varifold는 cell마다 같은 mass와 같은 plane을 쓰고 위치만 cell 안에서 다르기 때문이다.</p>
+
+      <div class="thm example" id="i-46-7-10">
+        <p><span class="thm-head">Example 46.7.10</span> <span class="thm-name">(a circle against \(N\) atoms, exactly)</span>.
+        unit circle \(C\)를 길이 \(2\pi/N\)인 호 \(N\)개로 나누고, 호의 가운데 점 \(x_i\), 그 점의 tangent \(P_i\), mass \(m_i = 2\pi/N\)으로 \(W_N\)을 만들자. 호의 가운데에서 각 \(s\)만큼 떨어진 점은 \(\abs{x - x_i} = 2\sin(\abs{s}/2)\), \(\norm{T_x - P_i} = \abs{\sin s}\)이므로 <a href="#eq-46-7-6">(46.7.6)</a>은</p>
+        <p>\[ \begin{aligned} \Delta^{1,1}(v(C, 1), W_N) &\le N\Big[8\Big(1 - \cos\frac{\pi}{2N}\Big) \\ &\qquad + 2\Big(1 - \cos\frac{\pi}{N}\Big)\Big] \end{aligned} \]</p>
+        <p>이고, 오른쪽은 \(N\)이 크면 \(2\pi^2/N\)에 가깝다. \(N \ge 7\)이면 이것이 등호다. test function \(\varphi(x, S)\) \(= \min\big(1, \min_i(\abs{x - x_i} + \norm{S - P_i})\big)\)는 \(\mathrm{lip} \le 1\), \(0 \le \varphi \le 1\)이고 원자에서 \(0\)이므로 \(\int\varphi\,dW_N = 0\)이며, circle 위에서는 가장 가까운 원자가 최솟값을 주고 그 값이 \(1\)보다 작으므로(\(N \ge 7\)) \(\int\varphi\,dv(C, 1)\)이 정확히 위의 합이다. \(N = 8, 16, 32, 64\)이면 \(2.4477\), \(1.2312\), \(0.6165\), \(0.3084\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+      </div>
+      <p><a href="#fig-46-7-3">Figure 46.7.3</a>(a)는 <a href="#i-46-7-8">Example 46.7.8</a>(a)의 최적 test function이다. \(h = 0.8\)(파랑)이면 기울기 \(-1\)인 부분이 두 점을 모두 지나 차이가 \(0.8\)이고, \(h = 3\)(주홍)이면 \(\pm1\)에서 잘려 차이가 \(2\)에 머문다. (b)는 <a href="#i-46-7-10">Example 46.7.10</a>의 값을 log-log로 그린 것으로, 검은 점이 주황 점선 \(2\pi^2/N\) 위에 놓인다. 점을 두 배로 늘리면 거리가 반이 된다. 거리를 정확히 주는 test function은 원자에서 \(0\)이고 원자 사이에서 꺾이는 함수다. smooth test function 하나로 재면 오차가 훨씬 작게 보인다. 실제로 verify에서 무작위로 고른 affine test function들의 차이는 \(N = 8\)에서도 \(0.05\)를 넘지 않는다. \(\Delta^{1,1}\)은 그런 운 좋은 test function이 아니라 가장 나쁜 test function을 본다.</p>
+
+      <figure class="dg-figure" id="fig-46-7-3">
+        <img src="figures/fig-46-7-3-bounded-lipschitz.svg" alt="두 패널. (a) 가로축 x(−1.5에서 4.5), 세로축 φ(x)(−1에서 1). 파란 polygonal path(h = 0.8)는 1에서 시작해 x = −0.6부터 기울기 −1로 내려가 x = 1.4에서 −1이 된다. x = 0과 0.8에 파란 점(0.4, −0.4)이 있다. 주홍 polygonal path(h = 3)는 x = 0.5까지 1이고 2.5부터 −1이다. x = 0과 3에 주홍 점(1, −1)이 있다. (b) log-log, 가로축 N(8에서 128), 세로축 0.15에서 2.5. 검은 점이 2.45에서 0.15까지 곧게 내려가고, 주황 점선 2π²/N이 그 위에 겹쳐 있다.">
+        <figcaption><span class="fig-head">Figure 46.7.3.</span>
+        <em>무엇을</em>: bounded Lipschitz distance의 두 계산. (a) \(\R\)에서 \(\delta_0\)과 \(\delta_h\)의 거리를 주는 test function \(\varphi(x) = \max(-1, \min(1, \tfrac h2 - x))\)(\(h = 0.8\) 파랑, \(h = 3\) 주홍). (b) unit circle의 varifold와 원자 \(N\)개의 point cloud varifold 사이의 거리(검정)와 \(2\pi^2/N\)(주황 점선).
+        <em>읽는 법</em>: (a)의 점은 \(\varphi(0)\)과 \(\varphi(h)\)이고, 두 값의 차이가 거리다. (b)의 두 축은 log scale이다.
+        <em>볼 것</em>: (a)에서 차이는 \(h = 0.8\)이면 \(0.8\), \(h = 3\)이면 \(2\)로, \(\min(h, 2)\)다. (b)에서 거리는 \(N = 8\)에서 \(2.45\), \(N = 128\)에서 \(0.154\)로 \(N\)에 반비례한다.
+        <em>본문과의 연결</em>: <a href="#i-46-7-8">Example 46.7.8</a>, <a href="#i-46-7-9">Proposition 46.7.9</a>, <a href="#i-46-7-10">Example 46.7.10</a>.</figcaption>
+      </figure>
+
+      <div class="thm example" id="i-46-7-11">
+        <p><span class="thm-head">Example 46.7.11</span> <span class="thm-name">(the staircase in numbers)</span>.
+        <a href="46-1-why-varifolds.html#i-46-1-2">Example 46.1.2</a>의 staircase \(S_n\)(계단 \(n\)개, 대각선 \(D\) 위)과 그 varifold 극한 \(V_\infty = \sqrt2\,\mathcal{H}^1\llcorner D \otimes \tfrac12(\delta_{P_h} + \delta_{P_v})\)(<a href="46-4-varifolds.html#i-46-4-10">Example 46.4.10</a>)에 대해</p>
+        <p>\[ \frac{1}{\sqrt2\,n} \le \Delta^{1,1}\big(v(S_n, 1), V_\infty\big) \le \frac1n \]</p>
+        <p>이다. 반면 대각선 자체의 varifold와는 \(\Delta^{1,1}(v(S_n, 1), v(D, 1)) \ge \sqrt2\)로 \(n\)에 관계없이 떨어져 있다. 위의 bound: 가로 조각 \([\tfrac kn, \tfrac{k+1}n] \times \{\tfrac kn\}\)의 점 \((x, \tfrac kn)\)을 대각선의 점 \((x, x)\)로 보내면, 가로 조각의 mass \(\tfrac1n\)이 \(V_\infty\) 가운데 \(P_h\)를 가진 부분의 그 구간 위 mass(\(\tfrac12\cdot\sqrt2\cdot\tfrac{\sqrt2}{n} = \tfrac1n\))과 같고 plane도 같다. 움직인 거리는 \(x - \tfrac kn \le \tfrac1n\)이고, 세로 조각도 같으므로 차이는 \(\int\abs{x - \tfrac kn}\)들의 합 \(2n\cdot\tfrac{1}{2n^2} = \tfrac1n\) 이하다. 아래 bound는 대각선까지의 거리 \(\varphi(x, S) = \min(1, \operatorname{dist}(x, D))\)로, \(\int\varphi\,dv(S_n, 1) = \tfrac{1}{\sqrt2\,n}\)이고 \(\int\varphi\,dV_\infty = 0\)이다. 대각선과의 비교에서는 \(\varphi(x, S) = \norm{S - P_D}\)(\(P_D\)는 대각선의 projection)가 staircase에서 어디서나 \(\sin45^\circ\)이므로 \(\int\varphi\,dv(S_n, 1) = 2\cdot\tfrac{\sqrt2}{2} = \sqrt2\)이고 \(v(D, 1)\)에서는 \(0\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+      </div>
+      <p>이 예가 <a href="46-1-why-varifolds.html">Section 46.1</a>의 표를 숫자로 바꾼 것이다. staircase는 Hausdorff distance로는 대각선에 \(\tfrac{1}{\sqrt2 n}\)만큼 다가가지만, varifold로는 대각선에서 \(\sqrt2\) 이상 떨어져 있고 대신 tangent가 섞인 \(V_\infty\)에 \(\tfrac1n\)의 속도로 다가간다.</p>
+
+      <aside class="box convention">
+        <p class="box-title">Conventions: kernel과 거리의 표기</p>
+        <ul>
+          <li><a class="cite" href="../../references.html#BLM17">[BLM17]</a>과 <a class="cite" href="../../references.html#BLM22">[BLM22]</a>는 kernel을 \(\R^n\)에서 정규화한다(<a href="#eq-46-7-1">(46.7.1)</a>). 그래서 \(d\)차원 대상에서는 \(C_\rho\)(<a href="#eq-46-7-3">(46.7.3)</a>)가 나오고, 분자와 분모에 다른 kernel \(\rho\), \(\xi\)를 쓰면 \(C_\xi/C_\rho\)가 붙는다.</li>
+          <li>거리의 이름과 기호: <a class="cite" href="../../references.html#BLM17">[BLM17]</a>은 \(\Delta^{1,1}\), <a class="cite" href="../../references.html#BLM22">[BLM22]</a>는 \(\Delta\)로 쓰고 둘 다 bounded Lipschitz distance 또는 flat distance라 부른다. <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26]</a>은 기호 없이 test function \(\norm{\phi}_\infty \le 1\), \(\mathrm{lip}(\phi) \le 1\)에 대한 bound로 쓰고, 그것을 “bounded-Lipschitz” bound라 부른다(§1, App. A.2). 이 장은 \(\Delta^{1,1}\)을 쓴다.</li>
+          <li>\(G_{d,n}\)의 거리: <a class="cite" href="../../references.html#BLM17">[BLM17]</a>은 operator norm, <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26]</a>은 Frobenius norm을 쓴다. 직선이나 hyperplane이면 \(\norm{P - Q}_F = \sqrt2\norm{P - Q}\)이다(<a href="46-3-grassmannian.html#i-46-3-4">Proposition 46.3.4</a>).</li>
+        </ul>
+      </aside>
+
+      <aside class="box forward">
+        <p class="box-title">Looking ahead: 이 두 도구로 쓰인 정리들</p>
+        <p><a class="cite" href="../../references.html#BLM17">[BLM17]</a>은 분자와 분모에 서로 다른 kernel \(\rho\), \(\xi\)를 쓰고 \(C_\xi/C_\rho\)로 보정한 비를 approximate mean curvature라 부른다. 그리고 근사 varifold \(V_i\)가 \(V\)에 \(\Delta^{1,1}\)로 \(d_i\)만큼 가까우면, 오차가 \(d_i/\varepsilon_i^2\) 정도로 bound된다는 것을 보인다. \(\varepsilon\)이 작을수록 이 bound가 커진다는 것이 <a href="#fig-46-7-2">Figure 46.7.2</a>의 왼쪽을 정량적으로 설명한다. kernel 쌍을 고르는 법(natural kernel pair), normal 방향으로 정사영해 수렴을 빠르게 하는 법도 거기서 나온다(<a href="../47-paper-varifold-approximation/index.html">Chapter 47</a>). <a class="cite" href="../../references.html#BLM22">[BLM22]</a>는 같은 regularization을 <a href="46-6-weak-second-fundamental-form.html">Section 46.6</a>의 second fundamental form에 적용하고(<a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a>), <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26]</a>은 <a href="#eq-46-7-6">(46.7.6)</a>의 꼴로 Gaussian 집합이 surface를 얼마나 잘 나타내는지 말한다(<a href="../50-paper-manifold-gs/index.html">Chapter 50</a>).</p>
+      </aside>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: Chamfer distance와 neighborhood radius</p>
+        <p>Chamfer distance는 위치만 보고 mass와 normal을 보지 않는다. <a href="#i-46-7-11">Example 46.7.11</a>의 staircase는 Chamfer로는 대각선에 다가가지만 \(\Delta^{1,1}\)로는 \(\sqrt2\) 이상 떨어져 있다. 또 point cloud에서 normal이나 curvature를 추정할 때 고르는 “이웃 반지름”(radius search의 \(r\), 또는 \(k\)-nearest neighbor의 \(k\))이 이 절의 \(\varepsilon\)이다. 너무 작으면 이웃이 부족해 noise에 지고, 너무 크면 모서리와 작은 구조를 뭉갠다(<a href="#fig-46-7-2">Figure 46.7.2</a>(b)). 3DGS에서 Gaussian 하나의 크기도 비슷한 역할을 한다. Gaussian의 scale은 그 Gaussian이 대표하는 surface 조각의 크기이고, <a href="#eq-46-7-6">(46.7.6)</a>의 \(h\)와 \(\varepsilon_T\)가 그 조각이 크면 커진다.</p>
+      </aside>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>weak convergence와 bounded Lipschitz distance: <a class="cite" href="../../references.html#Bogachev07">[Bogachev07, Vol. II, Chapter 8]</a>. Wasserstein distance와 Kantorovich–Rubinstein duality: <a class="cite" href="../../references.html#Villani09">[Villani09, Chapter 5–6]</a>.</li>
+        <li>regularized first variation과 그것으로 쓴 Allard형 compactness 정리: <a class="cite" href="../../references.html#BLM17">[BLM17, §3]</a>. rectifiable varifold를 point cloud와 volumetric varifold로 근사하는 정량적 정리(piecewise \(C^{1,\beta}\)이면 \(\Delta^{1,1} \lesssim \delta^\beta\)): <a class="cite" href="../../references.html#BLM17">[BLM17, §6]</a>, <a href="../47-paper-varifold-approximation/index.html">Chapter 47</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>kernel \(\rho_\varepsilon\)로 흐린 \(\mu*\rho_\varepsilon\)은 smooth function이고, mass를 보존하며, \(\varepsilon \to 0\)에서 \(\mu\)로 weak-* 수렴한다. \(d\)차원 대상에서는 높이가 \(\varepsilon^{d-n}\)으로 커지고 \(\varepsilon^{n-d}\mu*\rho_\varepsilon \to C_\rho\theta\)이다(<a href="#i-46-7-1">Definition 46.7.1</a>, <a href="#i-46-7-2">Proposition 46.7.2</a>).</li>
+        <li>first variation은 measure가 아니어도 \(\delta V*\rho_\varepsilon(x) = \int S\nabla\rho_\varepsilon(y - x)\,dV\)로 흐릴 수 있고, point cloud에서는 반지름 \(\varepsilon\) 안의 이웃에 대한 합이다(<a href="#i-46-7-4">Proposition 46.7.4</a>). \(-\delta V*\rho_\varepsilon\)과 \(\norm{V}*\rho_\varepsilon\)의 비가 curvature vector를 근사하고, \(\varepsilon\)은 점 간격보다 충분히 크고 curvature 반지름보다 충분히 작아야 한다(<a href="#i-46-7-5">Example 46.7.5</a>).</li>
+        <li>bounded Lipschitz distance \(\Delta^{1,1}\)은 \(\mathrm{lip} \le 1\), \(\abs{\varphi} \le 1\)인 test function에 대한 차이의 sup이고, mass가 bounded인 compact 상황에서 weak-* 수렴을 잰다. 위치 \(h\)의 차이는 \(\min(h, 2)\), mass 차이는 그대로, plane의 차이는 \(\norm{P - Q}\)로 센다(<a href="#i-46-7-6">Definition 46.7.6</a>–<a href="#i-46-7-8">Example 46.7.8</a>).</li>
+        <li>cell마다 위치 오차, plane 오차, mass 오차를 더한 것이 \(\Delta^{1,1}\)의 bound다(<a href="#eq-46-7-6">(46.7.6)</a>). circle과 원자 \(N\)개는 정확히 \(\approx 2\pi^2/N\)이고, staircase는 \(V_\infty\)와 \(\le 1/n\), 대각선과 \(\ge\sqrt2\)이다(<a href="#i-46-7-10">Example 46.7.10</a>, <a href="#i-46-7-11">Example 46.7.11</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 3DGS의 Gaussian 하나를 varifold의 원자로 읽는다. covariance에서 plane을 어떻게 얻는지, opacity와 넓이(mass)가 왜 다른지, split과 clone이 mass를 어떻게 바꾸는지를 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-46-7-1" data-level="1">
+        <p><span class="thm-head">Exercise 46.7.1</span> <span class="level">★</span>
+        \(\R\)에서 \(\Delta^{1,1}(\delta_0, \tfrac12\delta_0 + \tfrac12\delta_h)\)를 구하여라(\(h \gt 0\)).</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>차이는 \(\tfrac12(\varphi(0) - \varphi(h))\)이고, <a href="#i-46-7-8">Example 46.7.8</a>(a)에서 \(\varphi(0) - \varphi(h)\)의 최댓값은 \(\min(h, 2)\)이므로 거리는 \(\tfrac12\min(h, 2)\)이다. mass의 절반만 움직였기 때문이다.</p>
+          <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-46-7-2" data-level="1">
+        <p><span class="thm-head">Exercise 46.7.2</span> <span class="level">★</span>
+        \(\R^3\)의 같은 점에 놓인 두 원자 \(\delta_{(0, P)}\), \(\delta_{(0, Q)}\)의 plane이 normal \(\mathbf{n}\), \(\mathbf{m}\)을 가진 평면이고 \(\mathbf{n}\)과 \(\mathbf{m}\) 사이의 각이 \(10^\circ\)이다. 이 장의 거리(operator norm)와 Frobenius norm을 쓴 거리에서 \(\Delta^{1,1}\)을 각각 구하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#i-46-7-8">Example 46.7.8</a>(c)에서 \(\Delta^{1,1} = \norm{P - Q}\)이다. hyperplane이면 \(\norm{P - Q} = \norm{\mathbf{n}\mathbf{n}^{\mathsf T} - \mathbf{m}\mathbf{m}^{\mathsf T}}\) \(= \sin10^\circ = 0.1736\)이고(<a href="46-3-grassmannian.html#i-46-3-4">Proposition 46.3.4</a>), Frobenius norm이면 \(\sqrt2\sin10^\circ = 0.2456\)이다. 같은 test function 논법이 Frobenius 거리에서도 그대로 성립한다.</p>
+          <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-46-7-3" data-level="1">
+        <p><span class="thm-head">Exercise 46.7.3</span> <span class="level">★</span>
+        <a href="#i-46-7-10">Example 46.7.10</a>에서 mass를 arc length \(2\pi/N\) 대신 현의 길이 \(2\sin(\pi/N)\)로 주면 <a href="#eq-46-7-6">(46.7.6)</a>의 bound는 얼마나 커지는가? \(N = 16\)에서 계산하고, \(N\)이 클 때의 크기를 말하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>mass 오차 항 \(\sum_i\abs{m_i - \mathcal{H}^1(C_i)} = N\big(\tfrac{2\pi}{N} - 2\sin\tfrac{\pi}{N}\big)\)이 더해진다. \(N = 16\)이면 \(2\pi - 32\sin(\pi/16) = 0.0403\)이다. \(\sin u = u - u^3/6 + \cdots\)에서 이 값은 \(\approx\pi^3/(3N^2)\)이므로 \(N^{-2}\)으로 줄고, 위치와 plane 오차의 \(2\pi^2/N\)보다 훨씬 빨리 작아진다. \(N = 16\)에서 bound는 \(1.2312 + 0.0403 = 1.2715\)다.</p>
+          <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-46-7-4" data-level="2">
+        <p><span class="thm-head">Exercise 46.7.4</span> <span class="level">★★</span>
+        <a href="#i-46-7-11">Example 46.7.11</a>의 아래 bound에서 \(\int\min(1, \operatorname{dist}(x, D))\,d\mathcal{H}^1\llcorner S_n = \tfrac{1}{\sqrt2\,n}\)임을 확인하고, mass만 보는 거리 \(\Delta^{1,1}(\norm{v(S_n, 1)}, \sqrt2\,\mathcal{H}^1\llcorner D)\)는 \(n \to \infty\)에서 \(0\)으로 가는지 답하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>가로 조각 위의 점 \((\tfrac kn + u, \tfrac kn)\)(\(0 \le u \le \tfrac1n\))은 대각선까지 거리가 \(u/\sqrt2\)이다. 세로 조각도 같으므로 적분은 \(2n\int_0^{1/n}\tfrac{u}{\sqrt2}\,du = \tfrac{2n}{\sqrt2}\cdot\tfrac{1}{2n^2} = \tfrac{1}{\sqrt2\,n}\)이다. mass끼리의 거리는 위의 bound 논법에서 plane을 잊은 것이므로 역시 \(\le\tfrac1n\)이고 \(0\)으로 간다. 이것이 <a href="46-2-measures.html#i-46-2-8">Example 46.2.8</a>의 measure 수렴이다. 차이는 plane에만 있다.</p>
+          <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-46-7-5" data-level="2">
+        <p><span class="thm-head">Exercise 46.7.5</span> <span class="level">★★</span>
+        \(\R^2\)의 직선 \(L = \{x_2 = 0\}\)의 \(\mu = \mathcal{H}^1\llcorner L\)에 대해 \((\mu*\rho_\varepsilon)(0, s)\)가 \(\tfrac1\varepsilon g(s/\varepsilon)\) 꼴임을 보이고, \(g(0) = C_\rho\), \(\abs{s} \ge \varepsilon\)이면 \(0\)임을 확인하여라. 같은 직선 위에 간격 \(h\)로 mass \(h\)인 점을 놓은 point cloud에서는 \(\varepsilon \lt h/2\)일 때 무슨 일이 생기는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\((\mu*\rho_\varepsilon)(0, s) = \int_{\R}\varepsilon^{-2}\rho\big(\sqrt{t^2 + s^2}/\varepsilon\big)\,dt\)이고 \(t = \varepsilon u\)로 바꾸면 \(\tfrac1\varepsilon\int\rho\big(\sqrt{u^2 + (s/\varepsilon)^2}\big)\,du = \tfrac1\varepsilon g(s/\varepsilon)\)이다. \(g(0) = \int_{\R}\rho(\abs{u})\,du = C_\rho\)(\(d = 1\))이고, \(\abs{s} \ge \varepsilon\)이면 \(\rho\)의 인자가 \(1\) 이상이라 \(0\)이다. point cloud에서 \(\varepsilon \lt h/2\)이면 서로 이웃한 점의 ball이 겹치지 않으므로 \(\norm{V}*\rho_\varepsilon\)은 점마다 떨어진 bump이고, 점 사이의 직선 위에서 \(0\)이다. 각 점에서 \(\delta V*\rho_\varepsilon\)는 자기 자신(\(\nabla\rho_\varepsilon(0) = 0\))밖에 보지 않으므로 \(0\)이다. <a href="#i-46-7-5">Example 46.7.5</a>의 오차 \(100\%\)가 이것이다.</p>
+          <p class="verified">Verification: <code>verify/v-46-7-regularization-distances.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="46-6-weak-second-fundamental-form.html">← 46.6 The Second Fundamental Form, Weakly</a>
+    <a rel="next" href="46-8-gaussian-splatting-geometry.html">46.8 Gaussian Splatting as Geometry →</a>
+  </nav>
+</body>
+</html>

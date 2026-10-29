@@ -1,9 +1,10 @@
-"""Regenerate the Track 2 section of glossary.html (#sec-glossary-ddg) from the <dfn>s in chapters 32–45.
+"""Regenerate the Track 2 section (#sec-glossary-ddg, chapters 32–45) and the Track 4 section
+(#sec-glossary-paper-notes, chapters 46–50) of glossary.html from the <dfn>s in those chapters.
 
-    python3 tools/ddg_glossary.py          rewrite the section in glossary.html
-    python3 tools/ddg_glossary.py --print  print the rows only
+    python3 tools/ddg_glossary.py          rewrite both sections in glossary.html
+    python3 tools/ddg_glossary.py --print  print the sections only
 
-Each <dfn>English</dfn>(한국어) in a written Track 2 section page becomes one row:
+Each <dfn>English</dfn>(한국어) in a written section page of the track becomes one row:
 English | 한국어 | note (from tools/terms.tsv, if any) | first place it appears (the nearest preceding id).
 Rows are sorted case-insensitively by the English term. The integrator runs this after each chapter is
 integrated (PLAN.md §13). Terms defined twice would already fail build_index, so the first one wins here.
@@ -15,7 +16,18 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CHAPTERS = range(32, 46)
+# (section id, chapters, heading, intro, section it follows)
+SECTIONS = [
+    ("sec-glossary-ddg", range(32, 46), "Track 2: Discrete Differential Geometry",
+     "Track 2(Chapter 32–45)가 정의하는 용어다. 각 절의 <code>&lt;dfn&gt;</code>에서 "
+     "<code>tools/ddg_glossary.py</code>가 만든다. Track 3이 정의하는 smooth 개념은 그 장의 표에 있다.",
+     "sec-glossary-3d-vision"),
+    ("sec-glossary-paper-notes", range(46, 51), "Track 4: Paper Notes",
+     "Track 4(Chapter 46–50)가 정의하는 용어다. 공통 개념(measure, varifold, first variation 등)은 "
+     "Chapter 46에, 논문에만 있는 구성은 그 논문 장에 있다. 각 절의 <code>&lt;dfn&gt;</code>에서 "
+     "<code>tools/ddg_glossary.py</code>가 만든다.",
+     "sec-glossary-ddg"),
+]
 DFN_RE = re.compile(r"<dfn(?:\s[^>]*)?>(.*?)</dfn>\s*\(([^)]*)\)", re.S)
 ID_RE = re.compile(r'\sid="([^"]+)"')
 HEAD_RE = re.compile(r'<span class="thm-head">([^<]+)</span>')
@@ -62,10 +74,10 @@ def label_for(text, pos, anchor, n, m):
     return f"Section {n}.{m}"
 
 
-def rows():
+def rows(chapters):
     notes = terms_notes()
     seen, out = set(), []
-    for ch in CHAPTERS:
+    for ch in chapters:
         for folder in sorted(ROOT.glob(f"chapters/{ch}-*")):
             for page in sorted(folder.glob("*.html")):
                 mm = SECTION_FILE_RE.match(page.name)
@@ -91,12 +103,11 @@ def rows():
     return out
 
 
-def render(rs):
+def render(rs, sid, heading, intro):
     lines = [
-        '    <section id="sec-glossary-ddg">',
-        "      <h2>Track 2: Discrete Differential Geometry</h2>",
-        "      <p>Track 2(Chapter 32–45)가 정의하는 용어다. 각 절의 <code>&lt;dfn&gt;</code>에서 "
-        "<code>tools/ddg_glossary.py</code>가 만든다. Track 3이 정의하는 smooth 개념은 그 장의 표에 있다.</p>",
+        f'    <section id="{sid}">',
+        f"      <h2>{heading}</h2>",
+        f"      <p>{intro}</p>",
         "      <table>",
         "        <thead>",
         "          <tr><th>English</th><th>한국어</th><th>Note</th><th>First appears</th></tr>",
@@ -111,22 +122,28 @@ def render(rs):
 
 
 def main():
-    rs = rows()
-    if "--print" in sys.argv:
-        print(render(rs))
-        return
     p = ROOT / "glossary.html"
     s = p.read_text(encoding="utf-8")
-    block = render(rs)
-    m = re.search(r'    <section id="sec-glossary-ddg">.*?</section>\n', s, re.S)
-    if m:
-        s = s[:m.start()] + block + s[m.end():]
-    else:
-        anchor = s.index('    <section id="sec-glossary-3d-vision">')
-        end = s.index("</section>\n", anchor) + len("</section>\n")
-        s = s[:end] + "\n" + block + s[end:]
-    p.write_text(s, encoding="utf-8")
-    print(f"ddg_glossary: {len(rs)} rows")
+    report = []
+    for sid, chapters, heading, intro, after in SECTIONS:
+        rs = rows(chapters)
+        block = render(rs, sid, heading, intro)
+        report.append(f"{sid}: {len(rs)} rows")
+        if "--print" in sys.argv:
+            print(block)
+            continue
+        if not rs:
+            continue
+        m = re.search(rf'    <section id="{sid}">.*?</section>\n', s, re.S)
+        if m:
+            s = s[:m.start()] + block + s[m.end():]
+        else:
+            anchor = s.index(f'    <section id="{after}">')
+            end = s.index("</section>\n", anchor) + len("</section>\n")
+            s = s[:end] + "\n" + block + s[end:]
+    if "--print" not in sys.argv:
+        p.write_text(s, encoding="utf-8")
+    print("ddg_glossary: " + ", ".join(report))
 
 
 if __name__ == "__main__":
