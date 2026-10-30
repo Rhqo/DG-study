@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>50. Paper: Manifold-GS — DG Study</title>
   <meta name="dg-id" content="50">
-  <meta name="dg-status" content="planned">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-updated" content="2026-10-30">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
@@ -23,55 +23,86 @@
 
     <section id="sec-at-a-glance">
       <h2>At a Glance</h2>
-      <p>surface 같은 Gaussian을 discrete unoriented varifold로 보고, opacity와 geometric mass를 분리해 confidence로 인증된 open surface patch만 asset으로 내보낸다. 이 장의 절과 논문의 절 대응은 장을 쓸 때 채운다.</p>
+      <table id="tab-50-0-1">
+        <caption>Table 50.0.1. The paper.</caption>
+        <tbody>
+          <tr><th>title</th><td>Manifold-GS: Certified Hybrid Assets via Varifold-Conservative Gaussian Splatting</td></tr>
+          <tr><th>author</th><td>Boyang Li (단독 저자, Peking University)</td></tr>
+          <tr><th>status</th><td>arXiv:2608.00214v1 [cs.CV], 2026년 7월 31일. 표지에 “Preliminary Draft”. 게재처 표기 없음</td></tr>
+          <tr><th>length</th><td>9쪽. 본문 §1–§10, 부록 A–C, 참고문헌 16편</td></tr>
+          <tr><th>experiments</th><td>합성 장면(평면, sphere)과 DTU <a class="cite" href="../../references.html#Jensen14">[Jensen14]</a> scan24, scan65, scan105. 공개 코드의 주소는 본문에 없다</td></tr>
+        </tbody>
+      </table>
+      <p><strong>한 문단 요약.</strong> 3DGS는 새 시점의 영상을 잘 그리지만 그 Gaussian들을 편집하거나 충돌에 쓰는 asset으로 바로 쓰기는 어렵다. opacity는 더해지는 넓이가 아니고, clone과 split이 기하를 바꾸며, watertight mesh 추출은 보지 않은 곳에 가짜 충돌면을 만든다. 이 논문은 surface 같은 Gaussian을 (중심, covariance의 plane, opacity와 <em>따로 둔</em> geometric mass)의 원자로 보고 장면을 discrete unoriented varifold \(V_{\mathcal{G}} = \sum_iq_i\delta_{(\mu_i, P_i)}\)로 읽는다. 그러면 refinement는 mass와 moment를 옮기는 transport 문제가 되고, 그것을 보존하는 규칙(Proposition 1)과 bounded-Lipschitz 안정성을 얻는다. 둘째로, Gaussian의 중심과 normal이 어떤 surface와 모순 없다(realizable)는 것과 그것이 진짜 surface로 정해진다(identifiable)는 것을 나누고, 앞의 것만 compatibility 진단으로 본다. 결과물은 관측으로 인증된 열린 patch만 편집·충돌용 기하로 내보내고 나머지는 residual splat으로 남기는 hybrid bundle이다. DTU 세 장면에서 floater는 비교한 mesh들보다 낮지만 coverage도 가장 낮고(precision–coverage tradeoff), RGB-only loss는 미리 정한 개선 규칙을 통과하지 못한다. 논문 스스로 “state-of-the-art 복원이 아니라 인증된 hybrid asset”이라는 보수적 주장을 한다.</p>
+      <p><strong>주장된 기여</strong>(논문 §1, <a href="50-1-problem-key-idea.html#tab-50-1-1">Table 50.1.1</a>): (1) opacity와 geometric mass를 나누는 refinement-conservative한 Gaussian→varifold 해석, (2) adaptive refinement의 conservation 규칙과 bounded-Lipschitz 안정성, (3) tangent support와 fundamental form compatibility에 기반한 realizability 진단, (4) certified hybrid asset export, (5) 고정된 DTU 세 장면 asset benchmark, (6) sparse RGB-only compatibility를 복원 주장으로 올리면 안 되는 이유의 실험적 감사.</p>
+      <table id="tab-50-0-2">
+        <caption>Table 50.0.2. Sections of the paper and of this chapter.</caption>
+        <thead>
+          <tr><th>paper</th><th>content</th><th>here</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Abstract, §1, §2</td><td>문제, 두 아이디어, 기여, 관련 연구</td><td><a href="50-1-problem-key-idea.html">50.1</a></td></tr>
+          <tr><td>§3, App. A.1</td><td>Def. 1, forward consistency (6)–(7)</td><td><a href="50-2-geometric-measure.html">50.2</a></td></tr>
+          <tr><td>§4, App. A.2</td><td>Prop. 1, (8)–(10), split·merge·prune</td><td><a href="50-3-refinement-conservation.html">50.3</a></td></tr>
+          <tr><td>§5, App. B, C</td><td>residuals, (11), (12), coercivity, identifiability</td><td><a href="50-4-realizability-identifiability.html">50.4</a></td></tr>
+          <tr><td>§6, §7</td><td>구현, Table 1–4, Fig. 1–2</td><td><a href="50-5-experiments.html">50.5</a></td></tr>
+          <tr><td>§8–§10</td><td>세 수준, 한계, 결론</td><td><a href="50-6-assessment.html">50.6</a></td></tr>
+        </tbody>
+      </table>
+      <p><strong>읽는 순서.</strong> 처음부터 차례로 읽는 것을 권한다. 수학을 먼저 보고 싶지 않다면 50.1 → 50.5 → 50.6으로 결과와 평가를 먼저 읽고 50.2–50.4로 돌아와도 된다. 필요한 배경은 Chapter 46의 varifold(<a href="../46-varifold-background/46-4-varifolds.html">Section 46.4</a>), bounded Lipschitz distance(<a href="../46-varifold-background/46-7-regularization-distances.html">Section 46.7</a>), Gaussian Splatting as geometry(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html">Section 46.8</a>)다. 이 논문은 Track 4의 다른 세 논문을 인용하지 않으며, 그것과의 연결은 이 장의 해석이다(<a href="50-6-assessment.html#sec-relations">Section 50.6</a>).</p>
     </section>
 
     <section class="questions">
       <h2>Questions</h2>
       <ul>
-        <li>Gaussian을 split·clone·prune해도 기하가 변하지 않으려면 무엇을 보존해야 하고, 어떤 surface 조각을 믿을 수 있다고 인증할 수 있는가?</li>
+        <li>Gaussian을 split·clone·merge·prune해도 기하가 변하지 않으려면 무엇을 보존해야 하는가? opacity로 넓이를 세면 무엇이 잘못되는가?</li>
+        <li>Gaussian의 중심과 normal이 한 surface의 것처럼 서로 맞는지(realizability)는 어떻게 검사하고, 그것만으로 진짜 surface를 찾았다고 할 수 없는 이유는 무엇인가?</li>
+        <li>어떤 surface 조각을 믿을 수 있다고 인증할 수 있는가? 그 대가(coverage)는 실험에서 얼마인가?</li>
       </ul>
     </section>
 
     <section class="inherits">
       <h2>Builds on</h2>
       <ul>
-        <li><a href="../46-varifold-background/index.html">Chapter 46</a>의 varifold와 Gaussian Splatting의 기하, Part IV의 <a href="../30-radiance-field-surfaces/index.html">Chapter 30</a>(SuGaR, 2DGS)를 쓴다.</li>
+        <li><a href="../46-varifold-background/index.html">Chapter 46</a>의 varifold, point cloud varifold, bounded Lipschitz distance, Gaussian의 plane과 mass(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html#i-46-8-5">Proposition 46.8.5</a>).</li>
+        <li>Part IV의 <a href="../29-gaussian-splatting/index.html">Chapter 29</a>(split과 clone, densification)와 <a href="../30-radiance-field-surfaces/index.html">Chapter 30</a>(2DGS, SuGaR, depth map).</li>
+        <li>Track 2의 first·second fundamental form과 Bonnet 정리(<a href="../39-surface-curvature/39-5-fundamental-theorem.html">Section 39.5</a>).</li>
       </ul>
     </section>
 
     <h2>Sections</h2>
     <ol class="toc">
       <li id="toc-50-1" data-file="50-1-problem-key-idea.html">
-        <span class="toc-title">50.1 Problem and Key Idea</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 Abstract, §1–§2</p>
+        <a class="toc-title" href="50-1-problem-key-idea.html">50.1 Problem and Key Idea</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 Abstract, §1–§2. 세 장애물(opacity는 넓이가 아니다, clone·split이 기하를 바꾼다, watertight 추출의 가짜 충돌면)과 floater·coverage·phantom의 장난감(<a href="50-1-problem-key-idea.html#fig-50-1-1">Figure 50.1.1</a>); 첫째 아이디어(Gaussian = varifold의 원자, mass와 opacity를 따로 두기)와 둘째 아이디어(realizable ≠ identifiable); hybrid bundle(<a href="50-1-problem-key-idea.html#fig-50-1-2">Figure 50.1.2</a>); 주장된 기여(<a href="50-1-problem-key-idea.html#tab-50-1-1">Table 50.1.1</a>); 관련 연구(<a href="50-1-problem-key-idea.html#tab-50-1-2">Table 50.1.2</a>); 기호표(<a href="50-1-problem-key-idea.html#tab-50-1-3">Table 50.1.3</a>) · Exercises: 4개</p>
       </li>
       <li id="toc-50-2" data-file="50-2-geometric-measure.html">
-        <span class="toc-title">50.2 Gaussian Splats as a Geometric Measure</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §3</p>
+        <a class="toc-title" href="50-2-geometric-measure.html">50.2 Gaussian Splats as a Geometric Measure</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §3, App. A.1. geometric mass(dfn)와 Gaussian varifold surrogate(dfn, <a href="50-2-geometric-measure.html#i-50-2-1">Definition 50.2.1</a> = Def. 1); mass의 세 후보(<a href="50-2-geometric-measure.html#i-50-2-2">Example 50.2.2</a>); forward consistency(<a href="50-2-geometric-measure.html#i-50-2-3">Proposition 50.2.3</a> = (6)–(7))와 거리로 읽기(<a href="50-2-geometric-measure.html#i-50-2-4">Remark 50.2.4</a>); unit sphere에서 bound와 실제 거리(<a href="50-2-geometric-measure.html#i-50-2-5">Example 50.2.5</a>, <a href="50-2-geometric-measure.html#tab-50-2-1">Table 50.2.1</a>): bound는 약 2배, order \(h\)는 날카롭고 smooth test function은 \(h^2\), mass 오차는 바닥 · Implementation: \(h\), \(\varepsilon_T\), bound (7) · Figure 50.2.1 · Exercises: 4개</p>
       </li>
       <li id="toc-50-3" data-file="50-3-refinement-conservation.html">
-        <span class="toc-title">50.3 Refinement Conservation</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §4</p>
+        <a class="toc-title" href="50-3-refinement-conservation.html">50.3 Refinement Conservation</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §4, App. A.2, §7.1. refinement conservation(<a href="50-3-refinement-conservation.html#i-50-3-1">Proposition 50.3.1</a> = Prop. 1, (8)–(9))과 전역 bound(<a href="50-3-refinement-conservation.html#i-50-3-2">Corollary 50.3.2</a>), 각 가정의 역할(<a href="50-3-refinement-conservation.html#i-50-3-3">Remark 50.3.3</a>); conservative split·merge·prune과 mass ledger(dfn, <a href="50-3-refinement-conservation.html#i-50-3-4">Definition 50.3.4</a>), split의 recentering(<a href="50-3-refinement-conservation.html#i-50-3-5">Example 50.3.5</a>); merge의 plane moment 오차(<a href="50-3-refinement-conservation.html#i-50-3-6">Proposition 50.3.6</a>, 우리, <a href="50-3-refinement-conservation.html#i-50-3-7">Example 50.3.7</a>); prune의 transport bound(<a href="50-3-refinement-conservation.html#i-50-3-8">Proposition 50.3.8</a> = (10), (19)–(20), <a href="50-3-refinement-conservation.html#i-50-3-9">Example 50.3.9</a>); ledger와 opacity-as-area의 비교(<a href="50-3-refinement-conservation.html#i-50-3-10">Example 50.3.10</a>, <a href="50-3-refinement-conservation.html#tab-50-3-1">Table 50.3.1</a>) · Implementation: 세 ledger 연산 · Figures 50.3.1–50.3.2 · Exercises: 4개</p>
       </li>
       <li id="toc-50-4" data-file="50-4-realizability-identifiability.html">
-        <span class="toc-title">50.4 Realizability Is Not Identifiability</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §5</p>
+        <a class="toc-title" href="50-4-realizability-identifiability.html">50.4 Realizability Is Not Identifiability</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §5, App. B, C. 두 second fundamental form 추정(<a href="50-4-realizability-identifiability.html#i-50-4-1">Definition 50.4.1</a>)과 다섯 compatibility residual(<a href="50-4-realizability-identifiability.html#i-50-4-2">Definition 50.4.2</a>, 우리의 정식화), normal curl = antisymmetry(<a href="50-4-realizability-identifiability.html#i-50-4-3">Proposition 50.4.3</a>), locally realizable(dfn, <a href="50-4-realizability-identifiability.html#i-50-4-4">Definition 50.4.4</a>)과 Bonnet, residual이 보는 것(<a href="50-4-realizability-identifiability.html#i-50-4-5">Remark 50.4.5</a>), sphere cap의 네 normal field(<a href="50-4-realizability-identifiability.html#i-50-4-6">Example 50.4.6</a>); metric decomposition(<a href="50-4-realizability-identifiability.html#i-50-4-7">Proposition 50.4.7</a> = (11), <a href="50-4-realizability-identifiability.html#i-50-4-8">Example 50.4.8</a>); coupling(dfn), maximum mean discrepancy(dfn, <a href="50-4-realizability-identifiability.html#i-50-4-9">Definition 50.4.9</a> = (22)), MMD ≤ transport(<a href="50-4-realizability-identifiability.html#i-50-4-10">Proposition 50.4.10</a> = (12), (23)–(24)), \(W_2\)와 역의 실패(<a href="50-4-realizability-identifiability.html#i-50-4-11">Remark 50.4.11</a>, <a href="50-4-realizability-identifiability.html#i-50-4-12">Example 50.4.12</a>); depth의 coercivity(dfn, <a href="50-4-realizability-identifiability.html#i-50-4-13">Remark 50.4.13</a>), locally identifiable(dfn, <a href="50-4-realizability-identifiability.html#i-50-4-14">Definition 50.4.14</a>), 카메라 하나와 둘(<a href="50-4-realizability-identifiability.html#i-50-4-15">Example 50.4.15</a>) · Implementation: kernel 거리와 bound (12) · Figures 50.4.1–50.4.2 · Exercises: 4개</p>
       </li>
       <li id="toc-50-5" data-file="50-5-experiments.html">
-        <span class="toc-title">50.5 Implementation and Experiments</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §6–§7, Table 1–4, Fig. 1–2</p>
+        <a class="toc-title" href="50-5-experiments.html">50.5 Implementation and Experiments</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §6–§7. 구현과 frozen protocol, 보고되지 않은 설정; metric(<a href="50-5-experiments.html#tab-50-5-1">Table 50.5.1</a>); §7.1 mechanism(<a href="50-5-experiments.html#tab-50-5-2">Table 50.5.2</a>, <a href="50-5-experiments.html#tab-50-5-3">Table 50.5.3</a>); Table 1과 무작위 normal(<a href="50-5-experiments.html#tab-50-5-4">Table 50.5.4</a>); DTU 규칙과 Table 2(<a href="50-5-experiments.html#tab-50-5-5">Table 50.5.5</a>); SuGaR pilot; Table 3과 외부 target(<a href="50-5-experiments.html#tab-50-5-6">Table 50.5.6</a>, <a href="50-5-experiments.html#tab-50-5-7">Table 50.5.7</a>); Table 4와 F1(<a href="50-5-experiments.html#tab-50-5-8">Table 50.5.8</a>), 이기지 못한 칸; 단순화(<a href="50-5-experiments.html#tab-50-5-9">Table 50.5.9</a>), phantom probe, 논문의 Figure 1–2; Fisher 진단(<a href="50-5-experiments.html#tab-50-5-10">Table 50.5.10</a>) · Implementation: 다시 계산한 수 · Figures 50.5.1–50.5.2 · Exercises: 4개</p>
       </li>
       <li id="toc-50-6" data-file="50-6-assessment.html">
-        <span class="toc-title">50.6 Assessment</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §8–§10, 한계와 평가</p>
+        <a class="toc-title" href="50-6-assessment.html">50.6 Assessment</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §8–§10. 세 수준(<a href="50-6-assessment.html#tab-50-6-1">Table 50.6.1</a>), 한계와 결론; 우리 평가: 수학의 정리(<a href="50-6-assessment.html#tab-50-6-2">Table 50.6.2</a>), 상속된 plane은 오차를 얼린다(<a href="50-6-assessment.html#i-50-6-1">Example 50.6.1</a>, <a href="50-6-assessment.html#tab-50-6-3">Table 50.6.3</a>), 증거의 강도, 불일치 목록, 잘한 점; BLM17, BLM22, GeoSplat과의 관계(우리의 해석)와 읽는 순서 · Figure 50.6.1 · Exercises: 4개</p>
       </li>
     </ol>
 
     <section class="handoff">
       <h2>Leads to</h2>
       <ul>
-        <li>Track 4의 마지막 장이다.</li>
+        <li>Track 4의 마지막 장이다. 네 논문의 관계는 <a href="../46-varifold-background/46-9-map-of-papers.html">Section 46.9</a>와 <a href="50-6-assessment.html#sec-relations">Section 50.6</a>에서 다시 볼 수 있다.</li>
+        <li>같은 묶음의 <a href="../47-paper-varifold-approximation/index.html">Chapter 47</a>(point cloud varifold의 mean curvature), <a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a>(varifold의 second fundamental form), <a href="../49-paper-geosplat/index.html">Chapter 49</a>(GeoSplat).</li>
       </ul>
     </section>
   </main>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>49. Paper: GeoSplat — DG Study</title>
   <meta name="dg-id" content="49">
-  <meta name="dg-status" content="planned">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-updated" content="2026-10-30">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
@@ -23,59 +23,91 @@
 
     <section id="sec-at-a-glance">
       <h2>At a Glance</h2>
-      <p>Gaussian Splatting의 초기화, gradient, densification에 first order(normal)와 second order(curvature) geometry를 넣는다. 이 장의 절과 논문의 절 대응은 장을 쓸 때 채운다.</p>
+      <table id="tab-49-0-1">
+        <caption>Table 49.0.1. The paper.</caption>
+        <tbody>
+          <tr><th>title</th><td>GeoSplat: A Deep Dive into Geometry-Constrained Gaussian Splatting</td></tr>
+          <tr><th>authors</th><td>Yangming Li, Chaoyu Liu, Lihao Liu, Simon Masnou, Carola-Bibiane Schönlieb (DAMTP, University of Cambridge; Institut Camille Jordan, Université Claude Bernard Lyon 1). Masnou는 [BLM17], [BLM22]의 공저자다</td></tr>
+          <tr><th>status</th><td>arXiv:2509.05075v3 [cs.CV], 2025년 9월 26일. 머리글은 “Paper preprint”이고 게재처 표기는 없다</td></tr>
+          <tr><th>length</th><td>본문 10쪽, 부록 A–F(13–32쪽). 그림 7개, 표 3개, 번호 붙은 식 (1)–(127)</td></tr>
+          <tr><th>experiments</th><td>Replica 8장면, ICL-NUIM 4장면의 novel view synthesis(PSNR, SSIM, LPIPS). 코드 공개 여부는 적혀 있지 않다</td></tr>
+        </tbody>
+      </table>
+      <p><strong>한 문단 요약.</strong> 3D Gaussian Splatting(3DGS)의 Gaussian들을 surface 쪽으로 붙잡아 두는 regularizer는 지금까지 주로 normal 같은 first order 양을 쓰고, 그 양을 학습 전에 한 번 추정해 두었다. GeoSplat은 second order 양, 곧 principal curvature와 principal direction까지 써서 3DGS 학습의 세 단계를 모두 제약한다. 초기화에서는 Gaussian의 축을 normal과 principal direction에 맞추고 scale의 비를 curvature의 비로 정하며, mean absolute curvature(MAC)가 작은 평평한 곳에 Gaussian을 더한다. 학습 중에는 위치 gradient의 normal 성분을 자르고 scale과 rotation을 curvature에 맞추도록 벌한다. densification에서는 새 Gaussian을 principal direction을 따라 흩뜨린다. 이 기하량을 학습 중에 주기적으로 다시 추정하는 estimator가 둘이다. manifold 기반 estimator는 kernel로 근사한 Laplacian이 곱의 미분 규칙을 어기는 양(Leibniz defect)으로 metric, normal, shape operator를 계산하고, varifold 기반 estimator는 [BLM22]의 approximate weak second fundamental form을 \(2 \times 2\) matrix로 줄인다. 실험에서는 12개의 실내 장면 모두에서 PSNR이 핵심 기준선 GeoGaussian보다 높고(평균 Replica \(+0.78\), ICL \(+0.38\) dB, 우리의 계산), 학습 view가 적을수록 차이가 커진다. 이 장의 확인으로는 표의 숫자는 맞지만, 기하적 주장(잡음에 강한 curvature, dynamic prior의 효과)은 실험이 직접 시험하지 않았고, 인쇄된 식에는 구현의 숫자를 바꾸는 오식이 여럿 있다.</p>
+      <p><strong>주장된 기여</strong>(논문 Abstract, §1, §6, <a href="49-1-problem-key-idea.html#sec-claims">Section 49.1</a>): (1) first order와 second order 기하로 초기화, gradient update, densification을 모두 제약하는 framework, (2) local manifold와 varifold에 기반한, 효율적이고 잡음에 강한 두 estimator와 학습 중 재추정(dynamic prior), (3) Replica와 ICL에서 3DGS와 GeoGaussian을 능가하고 view가 적을 때 이득이 크며 artifact가 적다는 실험, (4) 평평한 곳의 기준으로 mean curvature 대신 MAC.</p>
+      <table id="tab-49-0-2">
+        <caption>Table 49.0.2. Sections of the paper and of this chapter.</caption>
+        <thead>
+          <tr><th>paper</th><th>content</th><th>here</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Abstract, §1</td><td>문제, first·second order, 기여</td><td><a href="49-1-problem-key-idea.html">49.1</a></td></tr>
+          <tr><td>§2, App. A</td><td>렌더링 (1)–(2), Def. 2.1, Riemannian (13)–(14), varifold (15)–(18)</td><td><a href="49-2-preliminaries.html">49.2</a></td></tr>
+          <tr><td>§3.1, App. C, F.1</td><td>warm-up (3)–(5), Prop. 3.1, upsampling (6), (7)–(11)</td><td><a href="49-3-geometry-constrained-optimization.html">49.3</a></td></tr>
+          <tr><td>§3.2, App. B, D</td><td>Thm. 3.2, Koszul (19)–(23), varifold (12), (29)–(38)</td><td><a href="49-4-estimating-normals-curvature.html">49.4</a></td></tr>
+          <tr><td>App. E</td><td>Def. E.1, Prop. E.2–E.4, Cor. E.5, Prop. E.6, Thm. E.7, (39)–(127)</td><td><a href="49-5-manifold-estimator.html">49.5</a></td></tr>
+          <tr><td>§5, App. F</td><td>Tables 1–3, Figs. 1–7</td><td><a href="49-6-experiments.html">49.6</a></td></tr>
+          <tr><td>§4, §6</td><td>관련 연구, 결론, 한계, 정오표</td><td><a href="49-7-assessment.html">49.7</a></td></tr>
+        </tbody>
+      </table>
+      <p><strong>읽는 순서.</strong> 처음부터 차례로 읽는 것을 권한다. 결과부터 보고 싶다면 49.1 → 49.6 → 49.7을 먼저 읽고 49.2–49.5로 돌아와도 된다. 49.5(부록 E)는 가장 길고 수학이 가장 많은 절이므로, 처음 읽을 때는 그 절의 “The Five Steps”와 Summary만 보고 넘어가도 49.6–49.7을 읽을 수 있다. 필요한 배경은 Chapter 46의 varifold(<a href="../46-varifold-background/46-4-varifolds.html">Section 46.4</a>–<a href="../46-varifold-background/46-6-weak-second-fundamental-form.html">46.6</a>), 3DGS(<a href="../29-gaussian-splatting/index.html">Chapter 29</a>), Laplacian(<a href="../42-laplace-beltrami/42-1-laplacian-definitions.html">Section 42.1</a>)이다.</p>
     </section>
 
     <section class="questions">
       <h2>Questions</h2>
       <ul>
-        <li>3DGS의 최적화에 normal뿐 아니라 curvature까지 쓰려면 Gaussian 묶음에서 그 양을 어떻게 안정적으로 추정하는가?</li>
+        <li>3DGS의 최적화에 normal뿐 아니라 curvature까지 쓰려면 Gaussian 중심들에서 그 양을 어떻게 추정하는가? 그 추정은 정말 잡음에 강한가?</li>
+        <li>curvature로 Gaussian의 모양을 정하고 평평한 곳을 찾는 규칙들은 기하적으로 맞는가? 어떤 규칙은 휴리스틱이고, 어디서 깨지는가?</li>
+        <li>렌더링 지표의 향상은 논문의 기하적 주장을 얼마나 뒷받침하는가? 인쇄된 식을 그대로 구현해도 되는가?</li>
       </ul>
     </section>
 
     <section class="inherits">
       <h2>Builds on</h2>
       <ul>
-        <li><a href="../46-varifold-background/index.html">Chapter 46</a>의 varifold와 Gaussian Splatting의 기하, Part IV의 <a href="../29-gaussian-splatting/index.html">Chapter 29</a>를 쓴다.</li>
+        <li><a href="../46-varifold-background/index.html">Chapter 46</a>의 varifold, first variation, weak second fundamental form, Gaussian Splatting의 기하(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html">Section 46.8</a>).</li>
+        <li>Part IV의 <a href="../29-gaussian-splatting/index.html">Chapter 29</a>(3DGS의 parameter, Adam, densification)와 <a href="../30-radiance-field-surfaces/index.html">Chapter 30</a>(2DGS).</li>
+        <li>principal curvature와 shape operator(<a href="../08-gauss-map/index.html">Chapter 8</a>, <a href="../39-surface-curvature/index.html">Chapter 39</a>), submanifold의 second fundamental form(<a href="../25-submanifold-geometry/index.html">Chapter 25</a>), Laplacian과 random walk(<a href="../42-laplace-beltrami/index.html">Chapter 42</a>).</li>
       </ul>
     </section>
 
     <h2>Sections</h2>
     <ol class="toc">
       <li id="toc-49-1" data-file="49-1-problem-key-idea.html">
-        <span class="toc-title">49.1 Problem and Key Idea</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 Abstract, §1</p>
+        <a class="toc-title" href="49-1-problem-key-idea.html">49.1 Problem and Key Idea</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 Abstract, §1. 기존 regularizer의 두 한계(first order만, static prior); 같은 tangent plane과 normal을 가진 네 surface(<a href="49-1-problem-key-idea.html#i-49-1-1">Example 49.1.1</a>, <a href="49-1-problem-key-idea.html#fig-49-1-1">Figure 49.1.1</a>); GeoSplat의 pipeline(<a href="49-1-problem-key-idea.html#fig-49-1-2">Figure 49.1.2</a>); 주장된 기여; 기호와 규약(<a href="49-1-problem-key-idea.html#tab-notation">Table 49.1.1</a>: \(\tau_1, \tau_2\)는 크기 순, normal의 부호는 정해지지 않음) · Exercises: 4개</p>
       </li>
       <li id="toc-49-2" data-file="49-2-preliminaries.html">
-        <span class="toc-title">49.2 Preliminaries: Rendering, Merged Local Manifolds, Varifolds</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §2, App. A</p>
+        <a class="toc-title" href="49-2-preliminaries.html">49.2 Preliminaries: Rendering, Merged Local Manifolds, Varifolds</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §2, App. A. 렌더링 식 (1)–(2)와 이미지 손실의 비결정성; merged local manifolds(dfn, <a href="49-2-preliminaries.html#i-49-2-1">Definition 49.2.1</a> = Def. 2.1, <a href="49-2-preliminaries.html#fig-49-2-1">Figure 49.2.1</a>)와 유한한 scale에서의 모서리(<a href="49-2-preliminaries.html#i-49-2-2">Example 49.2.2</a>); 국소 frame(<a href="49-2-preliminaries.html#fig-49-2-2">Figure 49.2.2</a>); Riemannian 기초 (13)–(14)와 식 (14)의 부호; varifold (15)–(18)와 Chapter 46의 대응(<a href="49-2-preliminaries.html#tab-varifold-map">Table 49.2.1</a>), 모서리의 first variation(<a href="49-2-preliminaries.html#i-49-2-3">Example 49.2.3</a>) · Figures 49.2.1–49.2.2 · Exercises: 4개</p>
       </li>
       <li id="toc-49-3" data-file="49-3-geometry-constrained-optimization.html">
-        <span class="toc-title">49.3 Geometry-Constrained Optimization</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §3.1, App. C</p>
+        <a class="toc-title" href="49-3-geometry-constrained-optimization.html">49.3 Geometry-Constrained Optimization</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §3.1, App. C, F.1. covariance warm-up (3)–(5)와 curvature로 정한 scale(<a href="49-3-geometry-constrained-optimization.html#i-49-3-1">Proposition 49.3.1</a> = Prop. 3.1), torus에서의 warm-up(<a href="49-3-geometry-constrained-optimization.html#i-49-3-2">Example 49.3.2</a>), 비와 그 제곱근(<a href="49-3-geometry-constrained-optimization.html#i-49-3-3">Example 49.3.3</a>); mean absolute curvature(dfn, <a href="49-3-geometry-constrained-optimization.html#i-49-3-4">Definition 49.3.4</a>)와 helicoid(<a href="49-3-geometry-constrained-optimization.html#i-49-3-5">Example 49.3.5</a>), upsampling (6); truncated gradient (7)와 Adam; shape regularization (8)–(9); densification (10)–(11)과 torus의 split(<a href="49-3-geometry-constrained-optimization.html#i-49-3-6">Example 49.3.6</a>) · Implementation: warm-up과 truncated step · Figures 49.3.1–49.3.3 · Exercises: 5개</p>
       </li>
       <li id="toc-49-4" data-file="49-4-estimating-normals-curvature.html">
-        <span class="toc-title">49.4 Estimating Normals and Curvature</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §3.2, App. B, D</p>
+        <a class="toc-title" href="49-4-estimating-normals-curvature.html">49.4 Estimating Normals and Curvature</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §3.2, App. B, D. manifold 기반 estimation의 요약(<a href="49-4-estimating-normals-curvature.html#i-49-4-1">Theorem 49.4.1</a> = Thm. 3.2)과 unit sphere(<a href="49-4-estimating-normals-curvature.html#i-49-4-2">Example 49.4.2</a>); Koszul formula(<a href="49-4-estimating-normals-curvature.html#i-49-4-3">Proposition 49.4.3</a> = (19)–(23)); varifold의 approximate WSFF (29)–(32)와 \(2 \times 2\) 닫힌 꼴(<a href="49-4-estimating-normals-curvature.html#i-49-4-4">Proposition 49.4.4</a> = (12), (33)–(38)), 오식 \(\tilde{\mathbf{V}}^j\)와 부호, 수치(<a href="49-4-estimating-normals-curvature.html#i-49-4-5">Example 49.4.5</a>); dynamic re-estimation · Implementation: \(2 \times 2\) varifold curvature matrix · Figures 49.4.1–49.4.2 · Exercises: 5개</p>
       </li>
       <li id="toc-49-5" data-file="49-5-manifold-estimator.html">
-        <span class="toc-title">49.5 The Manifold Estimator in Detail</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 App. E</p>
+        <a class="toc-title" href="49-5-manifold-estimator.html">49.5 The Manifold Estimator in Detail</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 App. E. 다섯 단계; 곡선으로 본 tangent vector(<a href="49-5-manifold-estimator.html#i-49-5-1">Definition 49.5.1</a> = Def. E.1)와 tangential kernel(<a href="49-5-manifold-estimator.html#i-49-5-2">Proposition 49.5.2</a> = Prop. E.2); Leibniz defect(dfn)와 metric(<a href="49-5-manifold-estimator.html#i-49-5-3">Proposition 49.5.3</a> = Prop. E.3, <a href="49-5-manifold-estimator.html#i-49-5-4">Example 49.5.4</a>); Markov 연산자로 Laplacian 근사(<a href="49-5-manifold-estimator.html#i-49-5-5">Proposition 49.5.5</a> = Prop. E.4); kernel matrix = 가중 local PCA(<a href="49-5-manifold-estimator.html#i-49-5-6">Proposition 49.5.6</a>, 우리); normal(<a href="49-5-manifold-estimator.html#i-49-5-7">Corollary 49.5.7</a> = Cor. E.5); shape operator(<a href="49-5-manifold-estimator.html#i-49-5-8">Proposition 49.5.8</a> = Prop. E.6, <a href="49-5-manifold-estimator.html#i-49-5-9">Proposition 49.5.9</a>, <a href="49-5-manifold-estimator.html#i-49-5-10">Theorem 49.5.10</a> = Thm. E.7)와 \(\Gamma\)-calculus; 밀도 왜곡과 보정(<a href="49-5-manifold-estimator.html#i-49-5-11">Proposition 49.5.11</a>, 우리) · Implementation: manifold estimator · Figures 49.5.1–49.5.3 · Exercises: 5개</p>
       </li>
       <li id="toc-49-6" data-file="49-6-experiments.html">
-        <span class="toc-title">49.6 Experiments: Tables and Figures</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §5, App. F</p>
+        <a class="toc-title" href="49-6-experiments.html">49.6 Experiments: Tables and Figures</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §5, App. F. 설정(<a href="49-6-experiments.html#tab-49-6-1">Table 49.6.1</a>), 기준선, PSNR과 오차 제곱; Table 1–2(<a href="49-6-experiments.html#tab-49-6-2">Table 49.6.2</a>, <a href="49-6-experiments.html#tab-49-6-3">Table 49.6.3</a>)와 이기지 못한 칸, 백분율 검산, 장면에 대한 t-test(<a href="49-6-experiments.html#i-49-6-1">Example 49.6.1</a>); 저자원 설정 Fig. 1의 읽은 값(<a href="49-6-experiments.html#tab-49-6-4">Table 49.6.4</a>)과 “7.93%”; case study Figs. 2–6(<a href="49-6-experiments.html#tab-49-6-5">Table 49.6.5</a>); ablation Table 3(<a href="49-6-experiments.html#tab-49-6-6">Table 49.6.6</a>)과 더하기의 문제; Fig. 7과 합성 방에서의 MAC 검사(<a href="49-6-experiments.html#i-49-6-2">Example 49.6.2</a>), \(\xi_{\min}\)의 단위 · Implementation: dB와 paired t-test · Figures 49.6.1–49.6.3 · Exercises: 5개</p>
       </li>
       <li id="toc-49-7" data-file="49-7-assessment.html">
-        <span class="toc-title">49.7 Assessment</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §4, §6, 한계와 평가</p>
+        <a class="toc-title" href="49-7-assessment.html">49.7 Assessment</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §4, §6. 논문이 보는 관련 연구와 빠진 비교; 결론과 limitations 절의 부재; 주장과 증거(<a href="49-7-assessment.html#tab-49-7-1">Table 49.7.1</a>); 장부 없는 upsampling(<a href="49-7-assessment.html#i-49-7-1">Example 49.7.1</a>: 복제 43%, 큰 구멍은 남음); 한계; 정오표(<a href="49-7-assessment.html#tab-49-7-2">Table 49.7.2</a>); Chapter 46–48, 50과의 관계; 열린 질문 · Implementation: midpoint upsampling의 장부 · Figure 49.7.1 · Exercises: 4개</p>
       </li>
     </ol>
 
     <section class="handoff">
       <h2>Leads to</h2>
       <ul>
-        <li>Gaussian을 varifold로 보는 관점의 다른 쓰임 → <a href="../50-paper-manifold-gs/index.html">Chapter 50</a></li>
+        <li>같은 Gaussian varifold에서 출발해 refinement의 mass와 moment를 보존하고 기하를 인증하는 논문 → <a href="../50-paper-manifold-gs/index.html">Chapter 50</a>.</li>
+        <li>GeoSplat의 varifold estimator가 기대는 이론: point cloud varifold의 approximate mean curvature(<a href="../47-paper-varifold-approximation/index.html">Chapter 47</a>)와 approximate weak second fundamental form(<a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a>). 네 논문의 지도는 <a href="../46-varifold-background/46-9-map-of-papers.html">Section 46.9</a>.</li>
       </ul>
     </section>
   </main>

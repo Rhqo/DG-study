@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>49.1 Problem and Key Idea — DG Study</title>
+  <meta name="dg-id" content="49.1">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="46.8, 46.9, 29.1, 29.2, 29.4, 39.2">
+  <meta name="dg-refs" content="GeoSplat25 Abstract, §1, §2.2, §3 (overview), §6">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">49. Paper: GeoSplat</a> ›
+    <span>49.1 Problem and Key Idea</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>49.1 Problem and Key Idea</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, Abstract, §1, §2.2]</a>,
+        <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>GeoSplat이 지적하는 기존 geometry regularization의 두 한계, 곧 normal 같은 first order 양만 쓴다는 것과 그 양을 잡음에 약하고 고정된(static) 방법으로 추정한다는 것을 말할 수 있다.</li>
+        <li>first order 정보(tangent plane, normal)와 second order 정보(principal curvature와 principal direction)가 각각 무엇을 정하는지 작은 예로 설명할 수 있다.</li>
+        <li>GeoSplat이 3DGS 학습의 세 단계(initialization, gradient update, densification)에 geometry를 넣는 자리와, 그 geometry를 주는 두 estimator(manifold 기반, varifold 기반)의 역할을 한 그림으로 그릴 수 있다.</li>
+        <li>이 장의 기호를 논문의 기호, Chapter 46의 기호, 이 study set의 규약 사이에서 옮길 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Chapter 46: Gaussian을 varifold의 원자로 읽기(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html">Section 46.8</a>), 네 논문의 지도(<a href="../46-varifold-background/46-9-map-of-papers.html">Section 46.9</a>).</li>
+        <li>Part IV: 가장 짧은 축이 normal이라는 것(<a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>), covariance의 rotation·scale parametrization(<a href="../29-gaussian-splatting/29-2-covariance-parametrization.html#eq-29-2-1">(29.2.1)</a>), split과 clone(<a href="../29-gaussian-splatting/29-4-space-of-covariances.html#sec-split-clone">Section 29.4</a>).</li>
+        <li>principal curvature와 principal direction(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-4">Definition 8.3.4</a>, <a href="../39-surface-curvature/39-2-principal-curvatures.html#sec-principal">Section 39.2</a>)과 Euler's formula(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-5">Theorem 8.3.5</a>, <a href="../39-surface-curvature/39-2-principal-curvatures.html#eq-39-2-4">(39.2.4)</a>).</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Chapter 46은 Gaussian 하나를 varifold의 원자 \((\mu, P, q)\)로 읽는 법으로 끝났다. 위치는 중심, plane은 covariance의 가장 짧은 축에 수직인 평면, mass는 따로 둔 장부였다(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html#eq-46-8-3">(46.8.3)</a>). 그리고 <a href="../46-varifold-background/46-9-map-of-papers.html">Section 46.9</a>의 지도에서 GeoSplat은 [BLM17]과 [BLM22]의 varifold 계산식을 3DGS로 가져온 논문으로 표시되었다. 이 장은 그 논문을 절마다 읽는다.</p>
+      <p>GeoSplat의 방향은 Section 46.8과 반대다. Section 46.8은 Gaussian의 covariance에서 plane을 <em>읽었다</em>. GeoSplat은 먼저 Gaussian 중심들이 놓인 surface의 normal과 curvature를 <em>추정하고</em>, 그 값에 맞춰 covariance와 위치를 <em>정한다</em>. 이 절은 논문이 왜 그렇게 하려는지(문제), 무엇을 하는지(핵심 아이디어), 그리고 무엇을 주장하는지를 정리한다. 수식의 세부는 Section 49.2부터 다룬다.</p>
+    </section>
+
+    <section id="sec-problem">
+      <h2>What GeoSplat Asks</h2>
+      <p>3D Gaussian Splatting(3DGS) <a class="cite" href="../../references.html#Kerbl23">[Kerbl23]</a>은 장면을 수많은 Gaussian primitive로 표현하고 미분 가능한 rasterization으로 학습한다. 렌더링 품질과 속도 덕분에 메모리, texture 등 여러 방향의 후속 연구가 나왔다. 그 가운데 한 흐름은 “Gaussian은 결국 물체의 surface를 근사해야 한다”는 사실을 regularization으로 쓰는 것이다. 예를 들어 GeoGaussian <a class="cite" href="../../references.html#Li25">[Li25]</a>은 densification으로 생긴 새 Gaussian을 원래 Gaussian의 tangent plane 위에 놓아 surface에서 동떨어진 outlier를 줄인다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §1]</a>.</p>
+      <p>GeoSplat은 이 흐름에 두 가지 한계가 있다고 본다.</p>
+      <ul>
+        <li><strong>낮은 차수의 정보만 쓴다.</strong> 기존 연구는 normal vector 같은 first order 양을 주로 쓰고, curvature 같은 higher order 양은 거의 쓰지 않는다. 논문은 두 정보가 2D surface의 서로 다른 면을 기술한다고 쓴다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §1]</a>. 아래 <a href="#i-49-1-1">Example 49.1.1</a>이 그 뜻을 숫자로 보인다.</li>
+        <li><strong>추정이 잡음에 약하고 고정되어 있다.</strong> local principal component analysis(local PCA)로 normal을 구하면 잡음에 민감하고, 학습된 normal 예측 모델(StableNormal <a class="cite" href="../../references.html#YeC24">[YeC24]</a>)은 드문 데이터에서 실패한다. 게다가 이런 prior는 학습 전에 한 번 구해 두고 바꾸지 않는다(static). 최적화 중에 Gaussian이 움직이고 늘어나면 prior는 점점 맞지 않게 된다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §1, §4]</a>.</li>
+      </ul>
+      <p>논문 §2.2는 목표를 두 줄로 다시 쓴다. 여러 geometric prior, 특히 curvature 같은 higher order prior를 3DGS 최적화에 쓰는 것, 그리고 그 prior를 잡음에 강하게 추정하는 것이다.</p>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: local PCA normal</p>
+        <p>local PCA는 점 \(q\)의 이웃 \(k\)개로 covariance matrix를 만들고 가장 작은 eigenvalue의 eigenvector를 normal로 쓰는 방법이다(Tour의 <a href="../00-tour/0-3-surfaces.html#fig-0-3-4">Figure 0.3.4</a>). <a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>의 “가장 짧은 축이 normal”은 같은 원리를 Gaussian 하나의 covariance에 쓴 것이고, local PCA는 <em>이웃 중심들</em>의 배치에 쓴 것이다. 이웃이 잡음으로 흔들리면 covariance의 두 작은 eigenvalue의 간격이 줄고 normal이 크게 돈다(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html#i-46-8-2">Proposition 46.8.2</a>). GeoSplat이 “noise-sensitive”라고 부르는 것이 이 현상이다. 다만 Section 49.5에서 보듯 GeoSplat의 manifold estimator도 kernel로 가중한 local second moment를 계산하므로, 둘의 차이는 생각보다 작다(<a href="49-5-manifold-estimator.html#sec-kernel-pca">Section 49.5</a>).</p>
+      </aside>
+    </section>
+
+    <section id="sec-orders">
+      <h2>First Order and Second Order</h2>
+      <p>점 \(q\)에서 surface의 first order 정보는 tangent plane \(T_q\mathcal{M}\), 곧 normal \(\mathbf{N}\)이다. second order 정보는 surface가 그 plane에서 방향마다 얼마나 빨리 떠나는지, 곧 normal curvature \(\kappa_n\)이다. Euler's formula(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-5">Theorem 8.3.5</a>)에 의해 \(\kappa_n\)은 두 principal curvature \(\kappa_1, \kappa_2\)와 principal direction으로 정해진다. principal direction과 각 \(\theta\)를 이루는 unit tangent vector 방향으로</p>
+      <div class="equation" id="eq-49-1-1">
+      \[ \kappa_n(\theta) = \kappa_1\cos^2\theta + \kappa_2\sin^2\theta \tag{49.1.1} \]
+      </div>
+      <p>이고, surface를 tangent plane 위의 그래프로 쓰면 \(q\)에서 거리 \(\ell\)만큼 그 방향으로 간 곳의 높이가 \(\tfrac12\kappa_n(\theta)\ell^2 + O(\ell^3)\)이다(<a href="../08-gauss-map/8-2-normal-curvature.html#i-8-2-10">Proposition 8.2.10</a>). 이 두 사실이 이 장 전체에서 쓰는 직관이다.</p>
+
+      <div class="thm example" id="i-49-1-1">
+        <p><span class="thm-head">Example 49.1.1</span> <span class="thm-name">(one tangent plane, four surfaces)</span>.
+        원점을 지나고 원점에서 tangent plane이 \(z = 0\), unit normal이 \(\mathbf{N} = e_3\)(위쪽)인 surface 넷을 보자. plane \(z = 0\), \((0, 0, 1)\)이 중심인 반지름 \(1\)의 sphere, 축이 \(\{x = 0,\ z = 1\}\)(\(y\) 방향)인 반지름 \(1\)의 cylinder, 그리고 saddle \(z = x^2 - y^2\)(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-6">Example 8.3.6</a>의 running example)이다. \(\mathbf{N} = e_3\)에 대한 principal curvature \((\kappa_1, \kappa_2)\)는 차례로 \((0, 0)\), \((1, 1)\), \((1, 0)\), \((2, -2)\)이고 principal direction은 \(x\)축과 \(y\)축이다. 네 surface의 normal은 원점에서 똑같다. normal만 쓰는 regularizer에게 이 넷은 구별되지 않는다.</p>
+        <p>그런데 tangent plane 위에 반지름 \(\ell = 0.1\)인 납작한 Gaussian을 놓으면, 그 가장자리가 surface에서 떨어진 높이는 다르다. sphere에서는 모든 방향으로 \(1 - \sqrt{1 - 0.01} = 0.00501\)이고, cylinder에서는 \(x\) 방향으로 \(0.00501\), \(y\) 방향으로 \(0\)이며, saddle에서는 \(x\) 방향으로 \(+0.01\), \(y\) 방향으로 \(-0.01\), 대각선 방향(\(\theta = 45^\circ\))으로 \(0\)이다. Gaussian 반지름의 \(5\)–\(10\%\)만큼 surface를 벗어난다. 이것을 줄이려면 방향마다 Gaussian의 길이를 \(\kappa_n(\theta)\)에 맞춰야 하고, 그러려면 second order 정보가 필요하다.</p>
+        <p class="verified">Verification: <code>verify/v-49-1-problem-key-idea.py</code></p>
+      </div>
+
+      <p><a href="#fig-49-1-1">Figure 49.1.1</a>이 이 예를 그린 것이다. (a)는 네 surface를 \(x\) 방향(실선)과 \(y\) 방향(파선)으로 자른 cross-section이다. 모두 원점에서 수평선 \(z = 0\)에 접하고, 주홍 화살표 \(\mathbf{N}\)이 공통의 normal이다. 원점 근처의 하늘색 띠가 tangent plane에 놓인 납작한 Gaussian이다. 띠 끝(\(\ell = \pm0.3\))에서 sphere와 cylinder의 \(x\) cross-section(겹쳐 그린 검정과 굵은 연한 파랑)은 \(0.046\), saddle은 \(+0.09\)(실선)과 \(-0.09\)(파선)만큼 띠에서 벗어난다. (b)는 <a href="#eq-49-1-1">(49.1.1)</a>의 \(\kappa_n(\theta)\)이다. sphere는 상수, cylinder는 \(\cos^2\theta\), saddle은 \(2\cos2\theta\)로 부호까지 바뀐다. normal이 같아도 이 곡선은 전혀 다르다.</p>
+
+      <figure class="dg-figure" id="fig-49-1-1">
+        <img src="figures/fig-49-1-1-same-normal.svg" alt="두 패널. (a) 가로축 ell, 세로축 z. 회색 수평선 plane, 검정 sphere와 그 아래 겹친 굵은 하늘색 cylinder의 x cross-section이 원점에서 위로 휘고, 주홍 saddle 실선이 더 가파르게 위로, 주홍 파선이 아래로 휜다. 원점에 위를 향한 주홍 화살표 N이 있고, 원점 근처에 하늘색 띠와 flat Gaussian이라는 글이 있다. (b) 가로축 direction theta(0에서 180도), 세로축 kappa_n. 검정 sphere는 1에서 수평, 파랑 cylinder는 1에서 90도의 0으로 내려갔다가 다시 1, 주홍 saddle은 2에서 90도의 −2로 내려갔다가 다시 2, 회색 plane은 0.">
+        <figcaption><span class="fig-head">Figure 49.1.1.</span>
+        <em>무엇을</em>: 원점에서 같은 tangent plane \(z = 0\)과 같은 normal \(\mathbf{N} = e_3\)을 갖는 네 surface(<a href="#i-49-1-1">Example 49.1.1</a>: plane, 반지름 \(1\)의 sphere, \(y\)축 방향 반지름 \(1\)의 cylinder, saddle \(z = x^2 - y^2\)). (a) \(x\) 방향(실선)과 \(y\) 방향(파선)의 cross-section \(z(\ell)\), \(\abs{\ell} \le 0.8\), 그리고 tangent plane에 놓인 반지름 \(0.3\)의 납작한 Gaussian(하늘색 띠). (b) \(\mathbf{N} = e_3\)에 대한 normal curvature \(\kappa_n(\theta)\)(<a href="#eq-49-1-1">(49.1.1)</a>).
+        <em>읽는 법</em>: 색은 surface다(회색 plane, 검정 sphere, 파랑 cylinder, 주홍 saddle). (a)에서 sphere와 cylinder의 \(x\) cross-section은 같은 원호라서 검은 선이 굵은 연한 파란 선 위에 겹쳐 있고, cylinder의 \(y\) cross-section과 sphere의 \(y\) cross-section은 각각 plane과 같은 수평선, 같은 원호다. 파선은 saddle의 \(y\) cross-section이다. (b)의 \(\theta\)는 \(x\)축에서 잰 방향이다.
+        <em>볼 것</em>: 원점에서는 모두 수평선에 접한다(first order는 같다). 그러나 \(\ell = 0.3\)에서 높이는 \(0\), \(0.046\), \(\pm0.09\)로 다르고, (b)의 곡선도 다르다. 같은 normal 아래에서 surface를 가르는 것은 second order 정보다.
+        <em>본문과의 연결</em>: <a href="#eq-49-1-1">(49.1.1)</a>, <a href="#i-49-1-1">Example 49.1.1</a>, 그리고 GeoSplat이 Gaussian의 scale을 curvature로 정하는 동기(<a href="49-3-geometry-constrained-optimization.html">Section 49.3</a>).</figcaption>
+      </figure>
+
+      <aside class="box insight">
+        <p class="box-title">What geometry explains: Gaussian의 모양과 curvature</p>
+        <p>tangent plane에 놓인 납작한 Gaussian은 surface를 2차까지만 따라갈 수 없다. 방향 \(\theta\)로 길이 \(\ell\)인 축은 끝에서 surface와 대략 \(\tfrac12\abs{\kappa_n(\theta)}\ell^2\)만큼 벌어진다. 그래서 같은 오차를 허용한다면 덜 휜 방향으로 더 긴 축을 둘 수 있다. 이것은 이 장의 해석이다. GeoSplat이 scale의 비를 curvature의 비로 정하는 근거는 통계적인 설명이고(<a href="49-3-geometry-constrained-optimization.html#sec-warmup">Section 49.3</a>), 그 비는 위의 2차 오차를 같게 하는 비와 다르다(<a href="49-3-geometry-constrained-optimization.html#i-49-3-3">Example 49.3.3</a>).</p>
+      </aside>
+    </section>
+
+    <section id="sec-key-idea">
+      <h2>The Key Idea</h2>
+      <p>GeoSplat의 답은 두 부분이다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §1, §3]</a>.</p>
+      <ol>
+        <li><strong>geometry로 제약한 최적화(framework).</strong> 3DGS 학습은 initialization, optimization, densification으로 이루어진다. GeoSplat은 세 단계 모두에 normal과 curvature를 넣는다.
+          <ul>
+            <li>initialization: Gaussian의 한 축을 normal에 맞추고 그 scale을 아주 작게 둔다. 나머지 두 축은 principal direction에 맞추고 scale의 비를 principal curvature의 비로 정한다(covariance warm-up). 거의 평평한 곳에는 midpoint interpolation으로 Gaussian을 더 넣는다(upsampling).</li>
+            <li>optimization: 위치의 gradient update에서 normal 성분을 잘라 낸다(truncated gradient). scale과 rotation이 curvature가 정한 모양에서 벗어나면 벌점을 준다(shape regularization).</li>
+            <li>densification: split의 새 위치를 principal direction 위로 제한하고, clone의 이동에서 normal 성분을 자른다.</li>
+          </ul>
+          이것이 <a href="49-3-geometry-constrained-optimization.html">Section 49.3</a>이다.</li>
+        <li><strong>잡음에 강하고 빠른 동적(dynamic) 추정.</strong> 위의 모든 단계는 Gaussian마다 normal \(\tilde{\mathbf{u}}^i_3\)과 principal curvature·direction \((\tau^i_d, \tilde{\mathbf{w}}^i_d)\)을 요구한다. 논문은 두 estimator를 준다.
+          <ul>
+            <li>manifold 기반: 각 Gaussian이 국소적으로 smooth surface 위에 있다고 가정하고, Laplacian의 “Leibniz 규칙 위반량”으로 metric과 shape operator를 표현한다(Theorem 3.2, 부록 E). <a href="49-4-estimating-normals-curvature.html">Section 49.4</a>와 <a href="49-5-manifold-estimator.html">Section 49.5</a>.</li>
+            <li>varifold 기반: Gaussian 중심들을 point cloud varifold로 보고 [BLM22]의 approximate second fundamental form을 \(2 \times 2\) matrix로 바꾼다(eq. (12), 부록 D). <a href="49-4-estimating-normals-curvature.html">Section 49.4</a>.</li>
+          </ul>
+          두 estimator 모두 학습 중 일정한 간격의 iteration마다 다시 계산한다.</li>
+      </ol>
+      <p><a href="#fig-49-1-2">Figure 49.1.2</a>가 이 둘을 한 고리로 그린 것이다. 왼쪽 위의 SfM 점(Gaussian 중심의 초기값)에서 시작해 오른쪽으로 “geometry 추정 → initialization”으로 가고, 아래 줄에서 “학습 → densification”을 되풀이한다. 주홍 파선이 이 논문의 핵심인 “다시 추정하기”다. densification으로 Gaussian이 늘어나면 geometry를 다시 추정하고, 그 값이 다음 학습과 densification을 제약한다. 상자 안의 번호는 논문의 식 번호다.</p>
+
+      <figure class="dg-figure" id="fig-49-1-2">
+        <img src="figures/fig-49-1-2-pipeline.svg" alt="다섯 개의 둥근 상자와 화살표로 된 흐름도. 위 줄 왼쪽부터 검은 상자 SfM points(centers mu^i, COLMAP), 주홍 상자 estimate(u_3, tau_d, w_d, manifold / varifold), 파란 상자 initialize(warm-up (5), upsample (6)). 오른쪽 상자에서 아래로 화살표가 파란 상자 train(loss + (8) + (9), truncated step (7))으로 가고, 거기서 왼쪽 파란 상자 densify(split (10), clone (11))로 간다. densify에서 train으로 돌아가는 회색 곡선 화살표에 iterate라고 적혀 있다. densify에서 estimate로 올라가는 주홍 파선 화살표에 re-estimate at evenly spaced iterations라고 적혀 있다.">
+        <figcaption><span class="fig-head">Figure 49.1.2.</span>
+        <em>무엇을</em>: GeoSplat의 학습 고리 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §3]</a>. 상자는 단계, 안의 번호는 논문의 식 번호다.
+        <em>읽는 법</em>: 검은 상자는 입력(SfM 점), 주홍 상자는 geometry 추정, 파란 상자는 Gaussian을 바꾸는 단계다. 검은 화살표는 한 번 지나는 순서, 회색 곡선 화살표는 3DGS가 원래 되풀이하는 학습과 densification, 주홍 파선은 GeoSplat이 더한 재추정이다.
+        <em>볼 것</em>: normal과 curvature(주홍 상자)가 initialization, 학습, densification 세 곳에 모두 들어간다. 그리고 그 값은 한 번 구하고 끝나지 않는다.
+        <em>본문과의 연결</em>: 이 절의 두 부분. 상자마다 <a href="49-3-geometry-constrained-optimization.html">Section 49.3</a>(파랑)과 <a href="49-4-estimating-normals-curvature.html">Section 49.4</a>–<a href="49-5-manifold-estimator.html">49.5</a>(주홍)에서 다룬다. (schematic)</figcaption>
+      </figure>
+
+      <h3 id="sec-claims">What the paper claims</h3>
+      <p>Abstract, §1, §6에서 논문이 주장하는 기여를 모으면 다음과 같다. 이것은 <em>논문의 주장</em>이다. 어디까지 뒷받침되는지는 <a href="49-6-experiments.html">Section 49.6</a>과 <a href="49-7-assessment.html">Section 49.7</a>에서 따진다.</p>
+      <ol>
+        <li>first order와 second order geometry를 모두 써서 3DGS 학습의 전 과정(initialization, gradient update, densification)을 제약하는 일반적인 framework. 예: principal curvature로 초기 scale을 정해 무작위 초기화보다 surface를 더 잘 덮는다.</li>
+        <li>local manifold 같은 기하 구조에 기반한, 효율적이고 잡음에 강한 estimator 두 가지. 백만 개 수준의 Gaussian을 수십 초 안에 처리하므로 학습 중에 다시 추정할 수 있다(dynamic prior).</li>
+        <li>novel view synthesis 데이터셋(Replica 8장면, ICL 4장면)에서 3DGS와 기존 baseline(특히 GeoGaussian)을 능가하고, 학습 view가 적을 때 이득이 더 크며 artifact가 적다.</li>
+        <li>평평한 곳을 찾는 기준으로 mean curvature보다 mean absolute curvature가 맞다(SAGS <a class="cite" href="../../references.html#Ververas25">[Ververas25]</a> 비판).</li>
+      </ol>
+    </section>
+
+    <section id="sec-notation">
+      <h2>Notation</h2>
+      <p>논문은 3DGS, Riemannian geometry, varifold 세 분야의 기호를 함께 쓰고, 같은 글자를 여러 뜻으로 쓰는 곳도 있다. 이 장은 논문의 기호를 따르되 아래처럼 정리한다.</p>
+      <aside class="box convention">
+        <p class="box-title">Conventions: 이 장의 기호</p>
+        <table id="tab-notation">
+          <caption>Table 49.1.1. Symbols of [GeoSplat25] and how this chapter writes them (the same as the paper unless noted).</caption>
+          <thead>
+            <tr><th>object</th><th>this chapter</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Gaussian \(i\)</td><td>\(\mathcal{G}^i\), \(i \in \mathcal{I}\). 논문의 아래첨자 obj는 생략한다: \(\boldsymbol{\mu}^i = \boldsymbol{\mu}^i_{\text{obj}}\)</td></tr>
+            <tr><td>covariance</td><td>\(\boldsymbol{\Sigma}^i = \mathbf{R}^i\mathbf{S}^i(\mathbf{R}^i\mathbf{S}^i)^{\mathsf T}\), \(\mathbf{R}^i = [\mathbf{r}^i_1; \mathbf{r}^i_2; \mathbf{r}^i_3]\), \(\mathbf{S}^i = \diag(s^i_1, s^i_2, s^i_3)\). Chapter 29와 46의 \(\Sigma\), \(r_k\), \(s_k\)와 같다</td></tr>
+            <tr><td>tangent, normal</td><td>orthonormal tangent basis \(\mathbf{u}^i_1, \mathbf{u}^i_2\), unit normal \(\tilde{\mathbf{u}}^i_3\)(부호는 정하지 않는다), projection \(\tilde{\mathbf{V}}^i = \mathbf{I} - \tilde{\mathbf{u}}^i_3(\tilde{\mathbf{u}}^i_3)^{\mathsf T}\)(Chapter 46의 \(P\))</td></tr>
+            <tr><td>principal curvature, direction</td><td>\((\tau^i_d, \tilde{\mathbf{w}}^i_d)\), \(d = 1, 2\). \(\tau^i_1\)이 큰(high), \(\tau^i_2\)가 작은(low) curvature다(절댓값 순). 이 study set의 \(\kappa_1 \ge \kappa_2\)는 부호 순이므로 다르다</td></tr>
+            <tr><td>shape operator</td><td>\(s^i(\mathbf{n}, \mathbf{u}_1, \mathbf{u}_2)\) \(= -\inner{\nabla_{\mathbf{u}_1}\mathbf{N}}{\mathbf{u}_2}\) \(= \inner{W\mathbf{u}_1}{\mathbf{u}_2}\). study set의 \(W = -d\mathbf{N}\)과 같은 부호다. 바깥 normal의 unit sphere에서 \(\tau_1 = \tau_2 = -1\)</td></tr>
+            <tr><td>mean curvature</td><td>scalar \((\tau_1 + \tau_2)/2 = H\)(평균, study set과 같다). App. A.2의 generalized mean curvature \(\mathsf{H}\)는 합의 규약 \(\vec H = 2H\mathbf{N}\)이다(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-3">Proposition 46.5.3</a>)</td></tr>
+            <tr><td>transpose, projections</td><td>transpose는 \((\cdot)^{\mathsf T}\). 논문이 같은 \((\cdot)^\top\)으로 쓰는 tangent 성분은 \(\mathbf{v}^\top = \tilde{\mathbf{V}}^i\mathbf{v}\), normal 성분은 \(\mathbf{v}^\perp\)로 쓴다(Section 46.6과 같다)</td></tr>
+            <tr><td>dimensions</td><td>\(D_{\mathcal{M}} = 2\)(surface), \(D_{\mathcal{E}} = 3\)(ambient \(\mathcal{E} = \R^3\)). Chapter 46의 \(d\), \(n\)</td></tr>
+            <tr><td>varifold</td><td>논문의 \(\mathcal{W}\), \(\norm{\mathcal{W}}\), \(G_{D_{\mathcal{M}}, D_{\mathcal{E}}}\)는 Chapter 46의 \(V\), \(\norm{V}\), \(G_{d,n}\)이다. kernel \(\chi_\varepsilon, \Upsilon_\varepsilon\)은 [BLM22]의 \(\xi, \rho\)에 해당한다</td></tr>
+            <tr><td>coordinate functions</td><td>\(\varphi_d(\mathbf{x}) = [\mathbf{x}]_d\)(논문의 \(\phi_d\). study set은 \(\varphi\)를 쓴다), \(\varepsilon\)(논문의 \(\epsilon\))</td></tr>
+            <tr><td>loss, generator</td><td>loss \(\mathfrak{L}\), 위치에 대한 gradient \(\nabla^i\mathfrak{L}\). linear operator(Markov generator) \(\mathscr{L}\)</td></tr>
+            <tr><td>Laplacian</td><td>\(\Delta = \divg\grad\), \(\R^n\)에서 \(\sum_i\partial_i^2\)(study set과 같다)</td></tr>
+          </tbody>
+        </table>
+      </aside>
+      <p>두 가지를 특히 기억하자. 첫째, GeoSplat의 \(\tau_1, \tau_2\)는 크기 순이다. warm-up에서 긴 축을 “작은 curvature” 쪽에 두므로 크기가 중요하다. 둘째, normal \(\tilde{\mathbf{u}}^i_3\)의 부호는 어디서도 정해지지 않는다(cross product나 eigenvector의 부호는 임의다). 그래서 \(\tau_d\)의 부호도 정해지지 않고, 부호에 무관한 양(\(\abs{\tau_1/\tau_2}\), mean absolute curvature, Gaussian curvature \(\tau_1\tau_2\))만이 의미를 갖는다. [BLM22, §7.1]도 같은 점을 지적한다.</p>
+    </section>
+
+    <aside class="box backward">
+      <p class="box-title">Looking back: normal을 쓰는 3DGS regularizer</p>
+      <ul>
+        <li>Gaussian의 가장 짧은 축을 normal로 읽는 것은 <a href="../29-gaussian-splatting/29-1-gaussian-metric.html#sec-normal">Section 29.1</a>, 그 plane이 두 작은 scale의 간격만큼만 믿을 만하다는 것은 <a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html#i-46-8-2">Proposition 46.8.2</a>다.</li>
+        <li>2DGS의 normal consistency loss(<a href="../30-radiance-field-surfaces/30-3-surfels-2dgs.html#sec-normal-consistency">Section 30.3</a>)는 splat의 normal을 렌더링한 depth의 normal에 맞춘다. 이것도 first order 제약이다.</li>
+        <li>GeoSplat이 새로 넣는 것은 second order, 곧 <a href="#eq-49-1-1">(49.1.1)</a>의 \(\kappa_n(\theta)\)다. Track 2에서 mesh의 principal curvature를 구한 것(<a href="../41-discrete-curvature-variational/41-3-panorama.html#i-41-3-3">Definition 41.3.3</a>)과 같은 양을 Gaussian 중심들에서 구하려는 것이다.</li>
+      </ul>
+    </aside>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>second fundamental form과 normal curvature, principal curvature: <a href="../08-gauss-map/index.html">Chapter 8</a>, <a href="../39-surface-curvature/index.html">Chapter 39</a>.</li>
+        <li>submanifold의 second fundamental form(논문 부록 A, E가 쓰는 Riemannian 언어): <a href="../25-submanifold-geometry/index.html">Chapter 25</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>GeoSplat은 기존 3DGS geometry regularization이 normal 같은 first order 양만 쓰고, 그 양을 local PCA처럼 잡음에 약한 방법으로 한 번만(static) 추정한다고 비판한다.</li>
+        <li>normal이 같아도 surface는 방향마다 다르게 휜다. 그 차이가 normal curvature \(\kappa_n(\theta) = \kappa_1\cos^2\theta + \kappa_2\sin^2\theta\)이고, 반지름 \(\ell\)인 납작한 Gaussian은 대략 \(\tfrac12\abs{\kappa_n}\ell^2\)만큼 surface를 벗어난다(<a href="#eq-49-1-1">(49.1.1)</a>, <a href="#i-49-1-1">Example 49.1.1</a>).</li>
+        <li>GeoSplat은 normal과 principal curvature·direction을 initialization, gradient update, densification에 모두 넣고, 그 값을 manifold 기반과 varifold 기반 estimator로 학습 중에 다시 추정한다(<a href="#fig-49-1-2">Figure 49.1.2</a>).</li>
+        <li>이 장의 기호는 <a href="#tab-notation">Table 49.1.1</a>을 따른다. \(\tau_1, \tau_2\)는 크기 순이고 normal의 부호는 정해지지 않는다.</li>
+      </ul>
+      <p class="next">다음 절에서는 논문 §2와 부록 A의 준비를 읽는다. 3DGS의 rendering 식, Gaussian이 놓인 장면을 “singular point를 빼면 smooth한 manifold 몇 개”로 보는 가정(Definition 2.1), 그리고 논문이 요약한 varifold의 정의를 Chapter 46의 정의와 하나씩 맞춰 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-49-1-1" data-level="1">
+        <p><span class="thm-head">Exercise 49.1.1</span> <span class="level">★</span>
+        어떤 점에서 principal curvature가 \(\kappa_1 = 2\), \(\kappa_2 = 0.5\)이다. tangent plane에 놓인 반지름 \(0.1\)의 납작한 disk Gaussian의 가장자리는 두 principal direction에서 surface와 얼마나 벌어지는가(2차 근사)? 두 방향 모두 \(0.0025\)만큼만 벌어지게 하려면 각 방향의 반축을 얼마로 해야 하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\tfrac12\kappa\ell^2\)이므로 \(\kappa_1\) 방향은 \(\tfrac12\cdot2\cdot0.01 = 0.01\), \(\kappa_2\) 방향은 \(\tfrac12\cdot0.5\cdot0.01 = 0.0025\)이다. \(\tfrac12\kappa\ell^2 = 0.0025\)를 풀면 \(\kappa_1\) 방향은 \(\ell = 0.05\), \(\kappa_2\) 방향은 \(\ell = 0.1\)이다. 반축의 비는 \(\sqrt{\kappa_1/\kappa_2} = 2\)이고, curvature의 비 \(4\)가 아니다. <a href="49-3-geometry-constrained-optimization.html#i-49-3-3">Example 49.3.3</a>에서 이 차이를 다시 본다.</p>
+          <p class="verified">Verification: <code>verify/v-49-1-problem-key-idea.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-1-2" data-level="1">
+        <p><span class="thm-head">Exercise 49.1.2</span> <span class="level">★</span>
+        참인가 거짓인가? “Gaussian의 가장 짧은 축이 surface의 normal과 정확히 같으면 Gaussian은 surface에 붙어 있다.” 이유를 쓰라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>거짓이다. normal이 같다는 것은 중심에서 tangent plane이 맞는다는 first order 조건뿐이다. surface가 휘어 있으면 납작한 Gaussian의 가장자리는 방향 \(\theta\)마다 대략 \(\tfrac12\abs{\kappa_n(\theta)}\ell^2\)만큼 벗어난다. 예를 들어 반지름 \(1\)의 sphere에서 반지름 \(0.3\)인 disk는 가장자리에서 \(0.046\)만큼 떨어진다(<a href="#fig-49-1-1">Figure 49.1.1</a>). 중심이 surface 위에 있다는 것도 따로 필요한 조건이다.</p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-1-3" data-level="1">
+        <p><span class="thm-head">Exercise 49.1.3</span> <span class="level">★</span>
+        saddle \(z = x^2 - y^2\)의 원점에서 mean curvature \(H = \tfrac12(\kappa_1 + \kappa_2)\)와 \(\theta = 45^\circ\) 방향의 normal curvature를 구하라(\(\mathbf{N} = e_3\)). “\(H = 0\)이면 그 근처는 평평하다”는 판정은 왜 틀리는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\kappa_1 = 2\), \(\kappa_2 = -2\)이므로 \(H = 0\)이고, \(\kappa_n(45^\circ) = 2\cdot\tfrac12 - 2\cdot\tfrac12 = 0\)이다. 그러나 \(x\)축과 \(y\)축 방향으로는 \(\kappa_n = \pm2\)라서 거리 \(0.1\)에서 \(\pm0.01\)만큼 휜다. \(H\)는 두 principal curvature의 평균이라 부호가 반대인 휨이 상쇄된다. 평평함을 판정하려면 두 값의 크기를 모두 봐야 한다. 이것이 GeoSplat이 mean absolute curvature를 쓰는 이유다(<a href="49-3-geometry-constrained-optimization.html#sec-upsampling">Section 49.3</a>).</p>
+          <p class="verified">Verification: <code>verify/v-49-1-problem-key-idea.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-1-4" data-level="1">
+        <p><span class="thm-head">Exercise 49.1.4</span> <span class="level">★</span>
+        GeoSplat은 학습 전에 한 번 구한 normal을 끝까지 쓰는 방법을 “static prior”라 비판한다. 3DGS 학습에서 static prior가 점점 맞지 않게 되는 이유를 두 가지 들어라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>첫째, Gaussian의 위치 \(\boldsymbol{\mu}^i\)가 최적화로 움직인다. 처음 위치에서 구한 normal과 curvature는 새 위치의 것이 아니다. 둘째, densification(split, clone)으로 Gaussian이 늘어나 이웃이 바뀐다. 이웃의 배치로 구한 normal과 curvature는 이웃이 바뀌면 달라지고, 새 Gaussian에는 prior가 아예 없다. 그래서 GeoSplat은 일정한 간격으로 다시 추정한다(<a href="#fig-49-1-2">Figure 49.1.2</a>의 주홍 파선).</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="index.html">← 49. Paper: GeoSplat</a>
+    <a rel="next" href="49-2-preliminaries.html">49.2 Preliminaries: Rendering, Merged Local Manifolds, Varifolds →</a>
+  </nav>
+</body>
+</html>

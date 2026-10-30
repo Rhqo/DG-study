@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>49.4 Estimating Normals and Curvature — DG Study</title>
+  <meta name="dg-id" content="49.4">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="49.2, 49.3, 46.6, 46.7, 22">
+  <meta name="dg-refs" content="GeoSplat25 §3.2, App. B, App. D; BLM22 §7">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">49. Paper: GeoSplat</a> ›
+    <span>49.4 Estimating Normals and Curvature</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>49.4 Estimating Normals and Curvature</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §3.2, App. B, App. D]</a>,
+        <a class="cite" href="../../references.html#BLM22">[BLM22, §7]</a>,
+        <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM, Ch. 5]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>Theorem 3.2가 말하는 manifold 기반 estimator의 입력과 출력을 말하고, tangential kernel matrix와 shape operator matrix의 eigen decomposition에서 normal과 principal curvature·direction이 나오는 흐름을 설명할 수 있다.</li>
+        <li>부록 B의 Koszul formula를 metric compatibility와 torsion-free 조건에서 유도할 수 있다.</li>
+        <li>varifold 기반 estimator, 곧 [BLM22]의 approximate weak second fundamental form을 \(2 \times 2\) matrix로 줄인 식 (12)를 쓰고, 그 matrix가 “이웃의 tangent plane에서 본 normal의 기울기를 거리로 나눈 것”임을 설명할 수 있다.</li>
+        <li>식 (12)와 부록 D에 있는 네 가지 문제(\(\tilde{\mathbf{V}}^j\)의 오식, 둘째 항의 부호, 빠진 \(1/\varepsilon\), 첨자 범위)를 짚고 수치로 확인할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="49-2-preliminaries.html#sec-frame">Section 49.2</a>(Gaussian마다 붙는 기하량)와 <a href="49-3-geometry-constrained-optimization.html">Section 49.3</a>(그 기하량을 쓰는 곳).</li>
+        <li>Levi-Civita connection과 Christoffel symbol(<a href="../22-connections/index.html">Chapter 22</a>).</li>
+        <li>tangent projection의 도함수와 generalized second fundamental form(<a href="../46-varifold-background/46-6-weak-second-fundamental-form.html">Section 46.6</a>), kernel로 부드럽게 한 first variation(<a href="../46-varifold-background/46-7-regularization-distances.html#sec-smoothed-variation">Section 46.7</a>).</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>Section 49.3의 모든 식은 Gaussian마다 normal \(\tilde{\mathbf{u}}^i_3\)와 principal curvature·direction \((\tau^i_d, \tilde{\mathbf{w}}^i_d)\)를 요구했다. 논문은 이전 연구가 이 값을 local PCA처럼 잡음에 약한 방법으로 한 번만 구했다고 비판하고, 두 가지 estimator를 내놓는다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §3.2]</a>. 하나는 Gaussian 중심들이 smooth surface 위에 있다고 보고 Laplacian으로 계산하는 manifold 기반 estimator이고, 다른 하나는 중심들을 point cloud varifold로 보고 [BLM22]의 curvature 식을 쓰는 varifold 기반 estimator다.</p>
+      <p>이 절은 두 estimator의 결과(Theorem 3.2와 식 (12))를 읽고, 그 뒤의 부록 B(Koszul formula)와 부록 D(식 (12)의 유도)를 따라간다. manifold 기반 estimator의 증명 전체(부록 E)는 길어서 <a href="49-5-manifold-estimator.html">Section 49.5</a>에서 따로 읽는다.</p>
+    </section>
+
+    <section id="sec-manifold">
+      <h2>The Manifold-Based Estimator in One Theorem</h2>
+      <p>manifold 기반 estimator는 모든 Gaussian이 local manifold 위에 있다고 가정한다(<a href="49-2-preliminaries.html#i-49-2-1">Definition 49.2.1</a>). 그 핵심은 두 개의 작은 matrix다. 첫째는 \(3 \times 3\) tangential kernel matrix로, 성분은 coordinate function \(\varphi_d(\mathbf{x}) = [\mathbf{x}]_d\)와 Laplacian \(\Delta\)로 계산한다(논문 식 (42)–(43)).</p>
+      <div class="equation" id="eq-49-4-1">
+      \[ \mathcal{K}^i_{d_1d_2} = g_{\mathbf{q}}(\mathbf{v}^i_{d_1}, \mathbf{v}^i_{d_2}) = \tfrac12\operatorname{Lbnz}_\Delta[\varphi_{d_1}, \varphi_{d_2}](\mathbf{q}) \tag{49.4.1} \]
+      </div>
+      <p>여기서 \(\mathbf{v}^i_d\)는 \(d\)번째 좌표를 가장 빨리 늘리는 tangent vector이고, \(\operatorname{Lbnz}_\Delta[f, h] = \Delta(fh) - f\Delta h - h\Delta f\)는 Laplacian이 곱의 미분 규칙(Leibniz rule)을 어기는 양이다. 둘째는 \(2 \times 2\) shape operator matrix다(논문 식 (51)).</p>
+      <div class="equation" id="eq-49-4-2">
+      \[ \mathcal{S}^i = \big\{s^i(\mathbf{n}, \mathbf{u}^i_{d_1}, \mathbf{u}^i_{d_2})\big\}_{1 \le d_1, d_2 \le D_{\mathcal{M}}} \tag{49.4.2} \]
+      </div>
+      <p>\(s^i(\mathbf{n}, \cdot, \cdot)\)는 normal \(\mathbf{n}\)에 대한 shape operator, 곧 이 study set의 \(\inner{W\cdot}{\cdot}\)이다(<a href="49-1-problem-key-idea.html#tab-notation">Table 49.1.1</a>). 논문 본문은 결과를 다음과 같이 요약한다.</p>
+
+      <div class="thm theorem" id="i-49-4-1">
+        <p><span class="thm-head">Theorem 49.4.1</span> <span class="thm-name">(manifold-based estimation, simplified)</span> <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, Thm. 3.2]</a>.
+        embedded local manifold \(\mathcal{M} \hookrightarrow \mathcal{E}\)의 점 \(\mathbf{q} = \boldsymbol{\mu}^i\)에 있는 Gaussian \(\mathcal{G}^i\)에 대해, tangential kernel matrix \(\mathcal{K}^i\)(<a href="#eq-49-4-1">(49.4.1)</a>)의 eigenvector 가운데 \(0\)이 아닌 eigenvalue에 대응하는 것들은 \(T_{\mathbf{q}}\mathcal{M}\)의 orthonormal basis \(\{\mathbf{u}^i_d\}_{1 \le d \le D_{\mathcal{M}}}\)를 이룬다. 또 shape operator matrix \(\mathcal{S}^i\)(<a href="#eq-49-4-2">(49.4.2)</a>)는 eigenvalue와 “다시 정렬한(realigned)” eigenvector의 쌍으로 분해되고, 그 쌍이 principal curvature와 principal direction \(\{(\tau^i_d, \tilde{\mathbf{w}}^i_d)\}_{1 \le d \le D_{\mathcal{M}}}\)이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof sketch.</span> 논문은 이 정리를 Proposition E.2와 Theorem E.7을 줄인 것이라 하고, 증명은 부록 E에 있다. 요점은 두 가지다. (a) \(\mathbf{v}^i_d\)는 좌표축 \(e_d\)를 tangent plane에 project한 것이고, 그래서 \(\mathcal{K}^i\)는 tangent projection \(\mathbf{I} - \mathbf{n}\mathbf{n}^{\mathsf T}\)과 같다. eigenvalue는 \(1, 1, 0\)이고, \(1\)의 eigenvector가 tangent basis, \(0\)의 eigenvector가 normal이다. (b) \(\mathcal{S}^i\)는 tangent basis \(\mathcal{U}^i = [\mathbf{u}^i_1, \mathbf{u}^i_2]\)에 대한 shape operator의 matrix이므로 그 eigenvalue가 principal curvature이고, \(2 \times 2\) eigenvector \(\mathbf{w}^i_d\)를 \(\R^3\)으로 되돌린 \(\tilde{\mathbf{w}}^i_d = \mathcal{U}^i\mathbf{w}^i_d\)가 principal direction이다. 이것이 “realigned”의 뜻이다. 자세한 것은 <a href="49-5-manifold-estimator.html">Section 49.5</a>에서 본다.</p>
+      </div>
+
+      <p>normal은 두 tangent vector의 cross product \(\mathbf{u}^i_{d_1} \times \mathbf{u}^i_{d_2}\)(\(d_1 \ne d_2\))로 쉽게 얻는다고 논문은 쓴다(“unnormalized version”). \(\mathbf{u}^i_1, \mathbf{u}^i_2\)가 orthonormal이면 cross product는 이미 unit vector이고, \(\mathcal{K}^i\)의 \(0\) eigenvalue의 eigenvector와 부호까지 빼면 같다. 수치 계산에서는 \(\mathcal{K}^i\)의 eigenvalue가 정확히 \(0, 1\)이 아니므로 “가장 작은 eigenvalue의 eigenvector”를 normal로 쓰는 것과 같다.</p>
+
+      <div class="thm example" id="i-49-4-2">
+        <p><span class="thm-head">Example 49.4.2</span> <span class="thm-name">(the manifold estimator on the unit sphere)</span>.
+        unit sphere에서 고르게 뽑은 점 \(50{,}000\)개를 Gaussian 중심으로 두고, Laplacian을 kernel 폭 \(t = 0.01\)의 random-walk generator로 근사해(<a href="49-5-manifold-estimator.html">Section 49.5</a>) 점 \(12\)개에서 <a href="#i-49-4-1">Theorem 49.4.1</a>의 계산을 했다. \(\mathcal{K}^i\)의 eigenvalue의 평균은 \((0.010, 0.960, 1.017)\)로 \((0, 1, 1)\)에 가깝고, 가장 작은 eigenvalue의 eigenvector와 참 normal의 각은 모두 \(0.6^\circ\) 아래다. 바깥 normal로 맞춘 principal curvature의 평균은 \((-1.01, -0.92)\)이다(참값 \(-1, -1\)). 방향은 잘 맞지만 curvature에는 \(10\%\) 가까운 편향이 남는다.</p>
+        <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+      </div>
+    </section>
+
+    <section id="sec-koszul">
+      <h2>Appendix B: The Koszul Formula</h2>
+      <p>부록 E의 shape operator 계산은 Hessian을 connection으로 쓰고, 그 connection을 metric만으로 표현한다. 그 다리가 Koszul formula이고, 부록 B가 유도를 적는다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, App. B]</a>. metric과 compatible하고 torsion-free인 affine connection은 하나뿐이다(Levi-Civita connection, <a href="../22-connections/index.html">Chapter 22</a>). 그 connection을 metric으로 적는 공식이 다음이다.</p>
+
+      <div class="thm proposition" id="i-49-4-3">
+        <p><span class="thm-head">Proposition 49.4.3</span> <span class="thm-name">(Koszul formula)</span> <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, eq. (23)]</a>, <a class="cite" href="../../references.html#Lee-IRM">[Lee-IRM, Ch. 5]</a>.
+        Riemannian manifold \((\mathcal{M}, g)\)의 Levi-Civita connection \(\nabla\)과 smooth vector field \(U_1, U_2, U_3\)(논문의 \(\mathbf{U}_1, \mathbf{U}_2, \mathbf{U}_3\))에 대해</p>
+        <div class="equation" id="eq-49-4-3">
+        \[ \begin{aligned} g(\nabla_{U_1}U_2, U_3) = \tfrac12\big(&amp;\partial_{U_1}g(U_2, U_3) \\ &amp;+ \partial_{U_2}g(U_3, U_1) \\ &amp;- \partial_{U_3}g(U_1, U_2) \\ &amp;+ g([U_1, U_2], U_3) \\ &amp;- g([U_1, U_3], U_2) \\ &amp;- g([U_2, U_3], U_1)\big) \end{aligned} \tag{49.4.3} \]
+        </div>
+        <p>이다. 여기서 \(\partial_Uf\)는 \(f\)의 \(U\) 방향 도함수, \([\cdot, \cdot]\)은 Lie bracket이다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 부록 B의 순서를 따른다(논문은 \(\mathcal{M}\)을 위첨자로 붙이지만 여기서는 생략하고, 폭을 줄이려고 vector field를 \(U_i\)로 쓴다). metric compatibility를 세 번 순환해 쓰면(식 (19))</p>
+        <div class="equation" id="eq-49-4-4">
+        \[ \begin{aligned} \partial_{U_1}g(U_2, U_3) &amp;= g(\nabla_{U_1}U_2, U_3) \\ &amp;\quad + g(U_2, \nabla_{U_1}U_3), \\ \partial_{U_2}g(U_3, U_1) &amp;= g(\nabla_{U_2}U_3, U_1) \\ &amp;\quad + g(U_3, \nabla_{U_2}U_1), \\ \partial_{U_3}g(U_1, U_2) &amp;= g(\nabla_{U_3}U_1, U_2) \\ &amp;\quad + g(U_1, \nabla_{U_3}U_2) \end{aligned} \tag{49.4.4} \]
+        </div>
+        <p>이다. 처음 두 식을 더하고 셋째 식을 빼면(식 (20))</p>
+        <div class="equation" id="eq-49-4-5">
+        \[ \begin{aligned} &amp;\partial_{U_1}g(U_2, U_3) + \partial_{U_2}g(U_3, U_1) \\ &amp;\quad - \partial_{U_3}g(U_1, U_2) \\ &amp;= g(\nabla_{U_1}U_2 + \nabla_{U_2}U_1, U_3) \\ &amp;\quad + g(\nabla_{U_1}U_3 - \nabla_{U_3}U_1, U_2) \\ &amp;\quad + g(\nabla_{U_2}U_3 - \nabla_{U_3}U_2, U_1) \end{aligned} \tag{49.4.5} \]
+        </div>
+        <p>이다. torsion-free 조건(식 (21))</p>
+        <div class="equation" id="eq-49-4-6">
+        \[ \nabla_UU' - \nabla_{U'}U = [U, U'] \tag{49.4.6} \]
+        </div>
+        <p>로 \(\nabla_{U_2}U_1 = \nabla_{U_1}U_2 + [U_2, U_1]\)이고 나머지 두 차도 bracket이 되므로, 오른쪽은(식 (22))</p>
+        <div class="equation" id="eq-49-4-7">
+        \[ \begin{aligned} &amp;g(2\nabla_{U_1}U_2 + [U_2, U_1], U_3) \\ &amp;+ g([U_1, U_3], U_2) + g([U_2, U_3], U_1) \end{aligned} \tag{49.4.7} \]
+        </div>
+        <p>이다. \([U_2, U_1] = -[U_1, U_2]\)를 쓰고 \(g(\nabla_{U_1}U_2, U_3)\)에 대해 풀면 <a href="#eq-49-4-3">(49.4.3)</a>이다.</p>
+      </div>
+      <p>부록 B의 최종 식 (23)은 표준적인 Koszul formula와 부호까지 같다. 좌표 vector field \(U_i = \partial_i\)에서는 bracket이 모두 \(0\)이므로 <a href="#eq-49-4-3">(49.4.3)</a>은 Christoffel symbol의 식 \(g(\nabla_{\partial_i}\partial_j, \partial_k) = \tfrac12(\partial_ig_{jk} + \partial_jg_{ki} - \partial_kg_{ij})\)이 된다(<a href="#ex-49-4-2">Exercise 49.4.2</a>). GeoSplat은 이 공식을 부록 E.8에서 Hessian의 식</p>
+      <p>\[ \operatorname{Hess}\eta(\operatorname{grad}\varphi_{d_1}, \operatorname{grad}\varphi_{d_2}) = g(\nabla_{\operatorname{grad}\varphi_{d_1}}\operatorname{grad}\eta, \operatorname{grad}\varphi_{d_2}) \]</p>
+      <p>에 써서, 모든 항을 “metric의 방향 도함수”로 바꾼다(<a href="49-5-manifold-estimator.html">Section 49.5</a>).</p>
+    </section>
+
+    <section id="sec-varifold">
+      <h2>The Varifold-Based Estimator</h2>
+      <p>두 번째 estimator는 manifold를 가정하지 않는다. [BLM22]은 point cloud varifold에 대해 approximate weak second fundamental form(WSFF)을 정의하고, 그 matrix의 eigen decomposition이 curvature 정보 전체를 준다는 것을 보였다. GeoSplat의 부록 D는 그 식을 Gaussian에 맞게 \(2 \times 2\) matrix로 줄인다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §3.2, App. D]</a>. WSFF의 정의와 수렴 이론은 [BLM22]을 읽는 <a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a>의 몫이다 <span class="todo">[확인 필요: Chapter 48 미작성 — 참조 번호 확정 필요]</span>. 여기서는 부록 D가 요약한 식만 Chapter 46의 말로 읽는다.</p>
+
+      <h3 id="sec-recap">What GeoSplat recalls from [BLM22]</h3>
+      <p>\(G = G_{D_{\mathcal{M}}, D_{\mathcal{E}}}\)로 줄여 쓰자. Grassmannian의 원소 \(\mathsf{T}\)를 orthogonal projection matrix \((\mathsf{T}_{jk})\)와 같이 보고, \(\nabla^{\mathsf T}\)를 \(\mathsf{T}\)에 대한 tangential gradient, \(e_i\)를 \(i\)번째 표준 basis vector라 하자. varifold \(\mathcal{W}\)의 G-linear variation은 \(C^1_c(\Omega)\) 함수 \(\varphi\)에</p>
+      <div class="equation" id="eq-49-4-8">
+      \[ \begin{aligned} &amp;\delta_{i,j,k}\mathcal{W}(\varphi) \\ &amp;= \int_{\Omega \times G}\mathsf{T}_{jk}\inner{\nabla^{\mathsf T}\varphi(\mathbf{q})}{e_i}\,d\mathcal{W}(\mathbf{q}, \mathsf{T}) \end{aligned} \tag{49.4.8} \]
+      </div>
+      <p>로 작용한다(식 (29)). 모든 G-linear variation이 Radon measure이면 \(\mathcal{W}\)가 locally bounded variation을 가진다고 하고, 그때(식 (30))</p>
+      <div class="equation" id="eq-49-4-9">
+      \[ \delta_{i,j,k}\mathcal{W} = -b_{i,j,k}\norm{\mathcal{W}} + \delta^S_{i,j,k}\mathcal{W} \tag{49.4.9} \]
+      </div>
+      <p>로 나뉜다. \(b_{i,j,k} \in L^1(\norm{\mathcal{W}})\)이고 \(\delta^S_{i,j,k}\mathcal{W}\)는 \(\norm{\mathcal{W}}\)에 대해 singular다. <a href="49-2-preliminaries.html#eq-49-2-10">(49.2.10)</a>의 first variation을 성분 \((j, k)\)로 쪼갠 것이다. smooth closed surface이면 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#eq-46-6-5">(46.6.5)</a>에서 \(b_{i,j,k} = A_{ijk} + P_{jk}\vec H_i\)이고, \(A_{ijk} = \inner{\nabla^MP_{jk}}{e_i}\)는 tangent projection의 도함수다(<a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#eq-46-6-2">(46.6.2)</a>).</p>
+      <p>point cloud varifold, 곧 원자 \((\mathbf{q}_l, \mathsf{T}_l, m_l)\)의 합에서는 [BLM22]이 approximate WSFF를 다음과 같이 정의한다(식 (31)). 점 \(\mathbf{q}_{l_1}\)을 고정하고 이웃 \(l_2\)마다 \(\boldsymbol{\delta}_{l_2} = \mathbf{q}_{l_1} - \mathbf{q}_{l_2}\), \(r_{l_2} = \norm{\boldsymbol{\delta}_{l_2}}\), 분모를 \(Z = \sum_{l_2}m_{l_2}\chi(r_{l_2}/\varepsilon)\)로 줄여 쓰면</p>
+      <div class="equation" id="eq-49-4-10">
+      \[ \begin{aligned} \mathsf{B}_{i,j,k}(\mathbf{q}_{l_1}) &amp;= \frac{D_{\mathcal{M}}}{2D_{\mathcal{E}}Z}\sum_{l_2}m_{l_2}\Upsilon'\Big(\frac{r_{l_2}}{\varepsilon}\Big) \\ &amp;\qquad\cdot\Big\langle\frac{\mathsf{T}_{l_2}\boldsymbol{\delta}_{l_2}}{r_{l_2}}, \mathbf{t}_{l_1,l_2,i,j,k}\Big\rangle, \\ \mathbf{t}_{l_1,l_2,i,j,k} &amp;= (\mathsf{T}_{l_2} - \mathsf{T}_{l_1})_{jk}e_i \\ &amp;\quad + (\mathsf{T}_{l_2} - \mathsf{T}_{l_1})_{ik}e_j \\ &amp;\quad - (\mathsf{T}_{l_2} - \mathsf{T}_{l_1})_{ij}e_k \end{aligned} \tag{49.4.10} \]
+      </div>
+      <p>이다. \(\Upsilon, \chi\)는 적당한 kernel이고 \(\varepsilon \gt 0\)은 scale이다. \(\mathbf{t}\)의 첨자 모양 \((jk, i) + (ik, j) - (ij, k)\)는 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#eq-46-6-4">(46.6.4)</a>의 \(B^k_{ij} = \tfrac12(A_{ijk} + A_{jik} - A_{kij})\)와 같다. tangent projection의 차 \(\mathsf{T}_{l_2} - \mathsf{T}_{l_1}\)이 그 도함수 \(A\)의 역할을 하고, 그 조합에서 second fundamental form을 꺼내는 것이다. curvature는 다음 matrix의 eigen decomposition으로 얻는다(식 (32)).</p>
+      <div class="equation" id="eq-49-4-11">
+      \[ \mathcal{B}(\mathbf{q}_{l_1}) = \bar{\mathsf{T}}_{l_1}^{\mathsf T}\big\{\inner{\mathsf{B}_{i,j,:}(\mathbf{q}_{l_1})}{\mathbf{n}_{l_1}}\big\}_{1 \le i, j \le D_{\mathcal{E}}}\bar{\mathsf{T}}_{l_1} \tag{49.4.11} \]
+      </div>
+      <p>\(i, j, :\)는 마지막 첨자의 성분을 vector로 모은다는 뜻이고, \(\bar{\mathsf{T}}_{l_1}\)은 tangent space의 orthonormal basis를 열로 쌓은 \(D_{\mathcal{E}} \times D_{\mathcal{M}}\) matrix, \(\mathbf{n}_{l_1}\)은 normal이다. 곧 \(3 \times 3\) matrix를 만든 뒤 tangent plane으로 줄인다.</p>
+
+      <aside class="box warning">
+        <p class="box-title">Warning: 식 (31)과 식 (32)의 두 가지</p>
+        <ul>
+          <li><strong>빠진 \(1/\varepsilon\).</strong> 식 (31)은 [BLM22]의 식 (7.2)와 같고, 둘 다 \(\rho_\varepsilon(\mathbf{x}) = \varepsilon^{-n}\rho(\abs{\mathbf{x}}/\varepsilon)\)를 미분할 때 나오는 \(1/\varepsilon\)을 적지 않는다. 이 인수는 [BLM22]의 식 (6.4)–(6.5)에서 바로 따라 나온다. 식 (6.4)의 \(1/\varepsilon^{n+1}\)을 분모 \(\norm{V} * \xi_\varepsilon\)의 \(\varepsilon^{-n}\)으로 나누면 \(1/\varepsilon\)이 남는다. 빠지면 결과는 curvature의 \(\varepsilon\)배가 된다(<a href="#fig-49-4-2">Figure 49.4.2</a>(a)의 점선). GeoSplat의 최종 식 (38)은 \(\Upsilon'_\varepsilon\)으로 쓰는데, 이것이 \(\Upsilon(r/\varepsilon)\)의 \(r\)에 대한 도함수(곧 \(1/\varepsilon\)을 포함)를 뜻하는지는 논문에 적혀 있지 않다. 이 장의 계산은 \(1/\varepsilon\)을 곱한다.</li>
+          <li><strong>첨자 범위.</strong> 식 (32)는 \(\{\cdots\}_{1 \le i, j \le D_{\mathcal{M}}}\)으로 인쇄되어 있다. 양쪽에 \(D_{\mathcal{E}} \times D_{\mathcal{M}}\) matrix \(\bar{\mathsf{T}}_{l_1}\)을 곱하려면 가운데는 \(D_{\mathcal{E}} \times D_{\mathcal{E}}\)여야 하므로 \(D_{\mathcal{E}}\)가 맞다. <a href="#eq-49-4-11">(49.4.11)</a>은 고친 것이다.</li>
+        </ul>
+      </aside>
+
+      <h3 id="sec-closed-form">The 2 × 2 closed form</h3>
+      <p>부록 D는 점을 Gaussian 중심 \(\{\boldsymbol{\mu}^i\}\)로, 각 점의 plane을 normal로 정한 \(\tilde{\mathbf{V}}^i = \mathbf{I} - \tilde{\mathbf{u}}^i_3(\tilde{\mathbf{u}}^i_3)^{\mathsf T}\)로 두고(\(D_{\mathcal{M}} = 2\), \(\mathcal{E} = \R^3\)), \(\mathsf{B}_{i,j,k}(\mathbf{q}_{l_1})\)을 \(\mathsf{B}^i_{d_1,d_2,d_3}\)(\(\mathbf{q}_{l_1} = \boldsymbol{\mu}^i\)), 이웃 \(l_2\)를 \(j\)로 다시 이름 붙인다. 아래에서 \(\boldsymbol{\delta}^{ij} = \boldsymbol{\mu}^i - \boldsymbol{\mu}^j\), \(r^{ij} = \norm{\boldsymbol{\delta}^{ij}}\), \(\mathbf{p}^{ij} = \tilde{\mathbf{V}}^j\boldsymbol{\delta}^{ij}\)(논문이 “\(\cdot\)”으로 줄여 쓰는 vector), \(\mathbf{V}^i = [\mathbf{u}^i_1; \mathbf{u}^i_2]\)(tangent basis를 열로 쌓은 \(3 \times 2\) matrix), \(\Delta\mathbf{V} = \tilde{\mathbf{V}}^j - \tilde{\mathbf{V}}^i\)라 쓴다.</p>
+
+      <div class="thm proposition" id="i-49-4-4">
+        <p><span class="thm-head">Proposition 49.4.4</span> <span class="thm-name">(2 × 2 closed form of the approximate WSFF)</span> <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, App. D, eqs. (33)–(38)]</a>.
+        point cloud varifold \(\sum_jm_j\,\delta_{\boldsymbol{\mu}^j} \otimes \delta_{\tilde{\mathbf{V}}^j}\)에서 <a href="#eq-49-4-11">(49.4.11)</a>을 tangent basis \(\mathbf{V}^i\)와 normal \(\tilde{\mathbf{u}}^i_3\)로 계산하면</p>
+        <div class="equation" id="eq-49-4-12">
+        \[ \begin{aligned} \mathcal{B}^i &amp;= \frac{1}{Z^i}\sum_j\frac{m_j\Upsilon'_\varepsilon(r^{ij})}{3r^{ij}}\mathbf{B}^{i,j}, \\ Z^i &amp;= \sum_jm_j\chi_\varepsilon(r^{ij}) \end{aligned} \tag{49.4.12} \]
+        </div>
+        <p>이고, \(\mathbf{B}^{i,j}\)는 다음 \(2 \times 2\) matrix다.</p>
+        <div class="equation" id="eq-49-4-13">
+        \[ \begin{aligned} \mathbf{B}^{i,j} &amp;= 2(\tilde{\mathbf{V}}^j\mathbf{V}^i)^{\mathsf T}\operatorname{sym}\big(\tilde{\mathbf{u}}^i_3(\boldsymbol{\delta}^{ij})^{\mathsf T}\big)\tilde{\mathbf{V}}^j\mathbf{V}^i \\ &amp;\quad - (\boldsymbol{\delta}^{ij})^{\mathsf T}\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3\big((\mathbf{V}^i)^{\mathsf T}\tilde{\mathbf{V}}^j\mathbf{V}^i - \mathbf{I}\big) \end{aligned} \tag{49.4.13} \]
+        </div>
+        <p>\(\operatorname{sym}(\mathbf{A}) = (\mathbf{A} + \mathbf{A}^{\mathsf T})/2\)이고, \(\chi_\varepsilon(r) = \chi(r/\varepsilon)\), \(\Upsilon'_\varepsilon(r) = \Upsilon'(r/\varepsilon)/\varepsilon\)이다. 논문은 \(Z^i\)로 나누는 대신 그 역수를 앞에 곱해 쓴다. 합은 <a href="#eq-49-4-10">(49.4.10)</a>과 같은 이웃에 대해 한다.</p>
+      </div>
+      <div class="proof">
+        <p><span class="proof-head">Proof.</span> 부록 D의 계산을 따라가되 부호 하나를 고친다. 먼저 inner product를 linearity로 펼치면(식 (33))</p>
+        <div class="equation" id="eq-49-4-14">
+        \[ \begin{aligned} &amp;\inner{\mathbf{p}^{ij}}{\mathbf{t}_{i,j,d_1,d_2,d_3}} \\ &amp;= \frac{1}{r^{ij}}\big(\Delta\mathbf{V}_{d_2d_3}p^{ij}_{d_1} + \Delta\mathbf{V}_{d_1d_3}p^{ij}_{d_2} \\ &amp;\qquad - \Delta\mathbf{V}_{d_1d_2}p^{ij}_{d_3}\big) \end{aligned} \tag{49.4.14} \]
+        </div>
+        <p>이다. normal의 tangent projection은 \(0\)(\(\tilde{\mathbf{V}}^i\tilde{\mathbf{u}}^i_3 = \mathbf{0}\))이므로 \((\tilde{\mathbf{V}}^j - \tilde{\mathbf{V}}^i)\tilde{\mathbf{u}}^i_3 = \tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3\)이다. \(d_3\) 성분을 \(\tilde{\mathbf{u}}^i_3\)와 inner product를 취하면(식 (34))</p>
+        <div class="equation" id="eq-49-4-15">
+        \[ \begin{aligned} \bar t_{i,j,d_1,d_2} &amp;= (\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3)_{d_2}p^{ij}_{d_1} + (\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3)_{d_1}p^{ij}_{d_2} \\ &amp;\quad - \Delta\mathbf{V}_{d_1d_2}\inner{\mathbf{p}^{ij}}{\tilde{\mathbf{u}}^i_3} \end{aligned} \tag{49.4.15} \]
+        </div>
+        <p>이고(\(r^{ij}\)를 곱한 값), \(D_{\mathcal{M}}/(2D_{\mathcal{E}}) = 1/3\)이므로(식 (35))</p>
+        <div class="equation" id="eq-49-4-16">
+        \[ \begin{aligned} &amp;\inner{\mathsf{B}^i_{d_1,d_2,:}}{\tilde{\mathbf{u}}^i_3} \\ &amp;= \frac{1}{Z^i}\sum_j\frac{m_j\Upsilon'(r^{ij}/\varepsilon)}{3r^{ij}}\,\bar t_{i,j,d_1,d_2} \end{aligned} \tag{49.4.16} \]
+        </div>
+        <p>이다. 양쪽에 \(\mathbf{V}^i\)를 곱하면(식 (36))</p>
+        <div class="equation" id="eq-49-4-17">
+        \[ \begin{aligned} \mathcal{B}^i &amp;= \frac{1}{Z^i}\sum_j\frac{m_j\Upsilon'(r^{ij}/\varepsilon)}{3r^{ij}} \\ &amp;\qquad\cdot(\mathbf{V}^i)^{\mathsf T}\bar t_{i,j,:,:}\mathbf{V}^i \end{aligned} \tag{49.4.17} \]
+        </div>
+        <p>이다. 마지막으로 matrix로 쓰면</p>
+        <p>\[ \begin{aligned} \bar t_{i,j,:,:} &amp;= \mathbf{p}^{ij}(\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3)^{\mathsf T} + \tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3(\mathbf{p}^{ij})^{\mathsf T} \\ &amp;\quad - \inner{\mathbf{p}^{ij}}{\tilde{\mathbf{u}}^i_3}\Delta\mathbf{V} \end{aligned} \]</p>
+        <p>이다. \((\mathbf{V}^i)^{\mathsf T}\mathbf{p}^{ij} = (\tilde{\mathbf{V}}^j\mathbf{V}^i)^{\mathsf T}\boldsymbol{\delta}^{ij}\), \((\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3)^{\mathsf T}\mathbf{V}^i = (\tilde{\mathbf{u}}^i_3)^{\mathsf T}\tilde{\mathbf{V}}^j\mathbf{V}^i\)(\(\tilde{\mathbf{V}}^j\)는 symmetric), \((\mathbf{V}^i)^{\mathsf T}\tilde{\mathbf{V}}^i\mathbf{V}^i = \mathbf{I}\), \(\inner{\mathbf{p}^{ij}}{\tilde{\mathbf{u}}^i_3} = (\boldsymbol{\delta}^{ij})^{\mathsf T}\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3\)을 쓰면 처음 두 항이 \(2(\tilde{\mathbf{V}}^j\mathbf{V}^i)^{\mathsf T}\operatorname{sym}(\tilde{\mathbf{u}}^i_3(\boldsymbol{\delta}^{ij})^{\mathsf T})\tilde{\mathbf{V}}^j\mathbf{V}^i\)이 되고 셋째 항이 <a href="#eq-49-4-13">(49.4.13)</a>의 둘째 항이 된다(식 (37)). <a href="#eq-49-4-17">(49.4.17)</a>에 넣고 kernel을 \(\chi_\varepsilon, \Upsilon'_\varepsilon\)으로 다시 쓰면 <a href="#eq-49-4-12">(49.4.12)</a>이다(식 (38)).</p>
+      </div>
+
+      <p>논문 본문의 식 (12)는 이 결과를 그대로 옮긴 것이다. 다만 인쇄된 식에는 두 가지가 다르다.</p>
+
+      <aside class="box warning">
+        <p class="box-title">Warning: 식 (12)와 식 (37)의 오식</p>
+        <ul>
+          <li><strong>\(\tilde{\mathbf{V}}^j\)의 정의.</strong> 식 (12) 아래의 문장은 \(\tilde{\mathbf{V}}^j = \mathbf{I} - \tilde{\mathbf{u}}^i_3(\tilde{\mathbf{u}}^i_3)^{\mathsf T}\)로 인쇄되어 있다(\(220\) dpi로 확인). 그대로 읽으면 \(\tilde{\mathbf{V}}^j = \tilde{\mathbf{V}}^i\)이므로 \(\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3 = \mathbf{0}\)이고 \(\mathcal{B}^i\)가 언제나 \(0\)이다(<a href="#ex-49-4-5">Exercise 49.4.5</a>). 부록 D의 정의대로 \(\tilde{\mathbf{V}}^j = \mathbf{I} - \tilde{\mathbf{u}}^j_3(\tilde{\mathbf{u}}^j_3)^{\mathsf T}\)가 맞다.</li>
+          <li><strong>둘째 항의 부호.</strong> 식 (12)와 식 (37)은 <a href="#eq-49-4-13">(49.4.13)</a>의 둘째 항 앞을 \(+\)로 쓴다. 식 (34)의 셋째 항은 \(-\)이고, 식 (37)의 첫 줄에서 그 부호가 \(+\)로 바뀌었다. \(-\)인 판은 [BLM22]의 식 (7.2)와 (32)로 직접 계산한 값과 기계 정밀도(\(10^{-16}\))로 같고, \(+\)인 판은 다르다. 둘째 항은 이웃 normal 사이의 각 \(\theta\)에 대해 \(O(\theta^4)\)이고 첫째 항은 \(O(\theta^2)\)이라서 차이는 작다. unit sphere에서 \(\varepsilon = 0.2\)이면 약 \(2\%\), \(\varepsilon = 0.4\)이면 약 \(8\%\)다(<a href="#fig-49-4-2">Figure 49.4.2</a>(a)).</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+      </aside>
+
+      <p>이 matrix는 무엇을 재는가? 첫째 항의 \(\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3\)는 점 \(i\)의 normal을 이웃 \(j\)의 tangent plane에 project한 것, 곧 “\(j\)에서 보면 \(i\)의 normal이 얼마나 기울어 있는가”다. surface가 휘어 있으면 이 기울기는 거리에 비례하고, 그 비가 curvature다. 둘째 항은 그보다 두 차수 작은 보정이다(<a href="#ex-49-4-4">Exercise 49.4.4</a>). <a href="#fig-49-4-1">Figure 49.4.1</a>이 원 위에서 이것을 보인다. (a)에서 \(\boldsymbol{\mu}^j\)의 tangent line \(T_j\)(파랑) 위로 \(\tilde{\mathbf{u}}^i_3\)(아래쪽 주홍 화살표)를 project하면 초록 화살표가 된다. (b)는 그 길이를 두 점 사이의 거리로 나눈 값이다. 반지름 \(1\)인 원(실선)은 \(1\)에서, 반지름 \(2\)인 원(파선)은 \(0.5\)에서 출발해 거리가 커질수록 조금 내려간다. kernel 가중 평균은 이 비를 이웃 전체에서 모으고, 방향마다 모으므로 \(2 \times 2\) matrix가 된다.</p>
+
+      <figure class="dg-figure" id="fig-49-4-1">
+        <img src="figures/fig-49-4-1-normal-tilt.svg" alt="두 패널. (a) 검은 원호 위에 두 점 mu^i(아래)와 mu^j(위). 각 점에서 주홍 normal 화살표가 바깥으로 나간다. mu^j를 지나는 파란 tangent line T_j가 있고, mu^j에서 T_j를 따라 아래로 초록 화살표 V^j u^i_3가 나간다. 두 점을 잇는 회색 파선에 mu^i − mu^j라는 글이 있다. (b) 가로축 distance, 세로축 tilt per distance. 초록 실선(circle of radius 1)이 1에서 시작해 거리 1.1에서 0.82까지 천천히 내려가고, 초록 파선(circle of radius 2)이 0.5에서 거의 평평하다. 회색 점선 1/r = 1과 1/r = 0.5가 있다.">
+        <figcaption><span class="fig-head">Figure 49.4.1.</span>
+        <em>무엇을</em>: varifold estimator의 핵심 양을 원(cross-section) 위에서 계산한 것. 반지름 \(r\)인 원 위의 점 \(\boldsymbol{\mu}^i\)(각 \(0\))와 이웃 \(\boldsymbol{\mu}^j\)(각 \(\theta\)), 바깥 normal \(\tilde{\mathbf{u}}^i_3, \tilde{\mathbf{u}}^j_3\), \(\boldsymbol{\mu}^j\)의 tangent line \(T_j\). (a) \(r = 1\), \(\theta = 40^\circ\). (b) \(\norm{\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3}/\norm{\boldsymbol{\mu}^i - \boldsymbol{\mu}^j} = \cos(\theta/2)/r\)를 거리 \(2r\sin(\theta/2)\)에 대해 그린 것(\(r = 1, 2\)).
+        <em>읽는 법</em>: 주홍은 normal, 파랑은 tangent line, 초록은 normal의 projection \(\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3\), 회색 파선은 변위다. (a)의 vector는 길이를 \(0.5\)배(normal)와 \(0.7\)배(projection)으로 줄여 그렸다.
+        <em>볼 것</em>: 이웃이 가까울수록 기울기를 거리로 나눈 값은 curvature \(1/r\)에 다가간다. 거리가 반지름에 비해 커지면 \(\cos(\theta/2)\)만큼 작아진다. kernel의 폭 \(\varepsilon\)이 클 때 curvature가 작게 나오는 이유 중 하나다.
+        <em>본문과의 연결</em>: <a href="#eq-49-4-13">(49.4.13)</a>의 첫째 항, 그리고 <a href="#fig-49-4-2">Figure 49.4.2</a>(a)에서 \(\varepsilon\)이 커질수록 값이 \(-1\)에서 멀어지는 것.</figcaption>
+      </figure>
+
+      <aside class="box backward">
+        <p class="box-title">Looking back: 두 estimator는 같은 것을 잰다</p>
+        <p>Chapter 46의 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-1">Proposition 46.6.1</a>은 tangent projection \(P\)의 도함수가 second fundamental form으로 정해진다는 것(\(A_{ijk} = B^k_{ij} + B^j_{ik}\))이었다. varifold estimator는 이 도함수를 이웃의 \(\tilde{\mathbf{V}}^j - \tilde{\mathbf{V}}^i\)로 근사하고 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#eq-46-6-4">(46.6.4)</a>로 풀어낸다. manifold estimator도 결국 같은 양, 곧 \(dP\)를 normal과의 inner product을 Laplacian으로 계산한다는 것을 <a href="49-5-manifold-estimator.html">Section 49.5</a>에서 본다.</p>
+      </aside>
+
+      <div class="thm example" id="i-49-4-5">
+        <p><span class="thm-head">Example 49.4.5</span> <span class="thm-name">(the varifold estimator in numbers)</span>.
+        kernel은 [BLM22, §7.1]의 \(\Upsilon = \rho\), \(\rho(s) = \exp(-1/(1 - s^2))\)(\(s \lt 1\))와 그 짝 \(3\chi(s) = -s\rho'(s)\)로, mass는 \(m_j = 1\)로, 이웃은 거리 \(\varepsilon\) 안의 모든 점으로 두었다(논문은 이 셋을 밝히지 않는다). normal은 정확한 값을 썼다.</p>
+        <ul>
+          <li>unit sphere(점 \(40{,}000\)개, 바깥 normal, 참값 \(-1, -1\)): 점 \(10\)개에서 두 eigenvalue의 평균은 \(\varepsilon = 0.2\)일 때 \(-0.984\), \(\varepsilon = 0.4\)일 때 \(-0.939\)다. 인쇄된 \(+\) 부호로는 \(-0.964\), \(-0.860\)이고, \(1/\varepsilon\)을 빼면 \(\varepsilon = 0.2\)에서 \(-0.197\)이다.</li>
+          <li>torus \(T_{2,0.8}\)(점 \(150{,}000\)개, \(\varepsilon = 0.2\)): 바깥 적도 \((2.8, 0, 0)\)에서 \((-1.195, -0.363)\)이다(참값 \(-1.25, -0.357\)).</li>
+        </ul>
+        <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+      </div>
+
+      <p><a href="#fig-49-4-2">Figure 49.4.2</a>가 이 계산을 넓힌 것이다. (a)는 \(\varepsilon\)을 바꾸어 가며 sphere에서 잰 값이다. 검은 실선(고친 식)은 \(-1\) 가까이에 있다가 \(\varepsilon\)이 커지면 조금 올라가고, 주홍 파선(인쇄된 \(+\))은 더 빨리 올라간다. 회색 점선(\(1/\varepsilon\) 없음)은 \(-\varepsilon\)을 따라 내려가는 직선이다. (b)는 torus의 관을 바깥 적도에서 안쪽 적도까지 한 바퀴 반 돌며 잰 두 eigenvalue다. 위쪽 점들은 적도 방향 curvature \(-\cos u/(2 + 0.8\cos u)\)(파란 곡선)를 잘 따라가고, 아래쪽 점들은 관을 도는 curvature \(-1.25\) 주위에서 \(\pm0.2\) 정도 흔들린다.</p>
+
+      <figure class="dg-figure" id="fig-49-4-2">
+        <img src="figures/fig-49-4-2-varifold-accuracy.svg" alt="두 패널. (a) 가로축 scale epsilon(0.1에서 0.4), 세로축 mean of the two eigenvalues. 검은 실선(원 표시)은 −0.996에서 −0.939로 조금 올라가고, 주홍 파선(사각형)은 −0.991에서 −0.860으로 더 올라가며, 회색 점선(삼각형)은 −0.1에서 −0.376으로 내려간다. 파란 수평선 true value −1. (b) 가로축 tube angle u(0에서 180도), 세로축 principal curvature. 파란 수평선 −1.25 주위에 검은 점들이 흩어져 있고(around the tube), 파란 곡선이 −0.36에서 0.83으로 올라가며 검은 점들이 그 위에 놓인다(along the parallel).">
+        <figcaption><span class="fig-head">Figure 49.4.2.</span>
+        <em>무엇을</em>: 정확한 normal을 준 point cloud에서 varifold estimator <a href="#eq-49-4-12">(49.4.12)</a>의 값. (a) unit sphere(점 \(40{,}000\)개)에서 점 \(10\)개의 두 eigenvalue 평균을 \(\varepsilon\)에 대해 그린 것. 세 판: 고친 부호(\(-\))와 \(1/\varepsilon\), 인쇄된 부호(\(+\))와 \(1/\varepsilon\), 고친 부호에서 \(1/\varepsilon\)을 뺀 것(인쇄된 식 (31)). (b) torus \(T_{2,0.8}\)(점 \(150{,}000\)개, \(\varepsilon = 0.2\))의 한 meridian 위 \(25\)개 점에서 두 eigenvalue.
+        <em>읽는 법</em>: (a)의 파란 수평선이 참값 \(-1\)이다. (b)의 가로축 \(u\)는 관을 도는 각으로 \(0\)이 바깥 적도, \(180^\circ\)가 안쪽 적도다. 파란 선이 정확한 principal curvature(바깥 normal), 검은 점이 추정값이다.
+        <em>볼 것</em>: 부호를 고치고 \(1/\varepsilon\)을 곱하면 sphere에서 \(\varepsilon \le 0.2\)일 때 오차가 \(2\%\) 안이다. \(1/\varepsilon\)이 빠지면 값의 크기 자체가 틀린다. torus에서 적도 방향 curvature는 부호가 바뀌는 곳까지 잘 따라가고, 큰 curvature \(-1.25\)는 \(\varepsilon = 0.2\)에서 최대 \(0.19\) 정도 어긋난다.
+        <em>본문과의 연결</em>: <a href="#i-49-4-4">Proposition 49.4.4</a>, <a href="#i-49-4-5">Example 49.4.5</a>, 그리고 식 (12)와 식 (31)의 Warning.</figcaption>
+      </figure>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: the 2 × 2 varifold curvature matrix</p>
+<pre id="code-49-4-1"><code>import numpy as np
+
+def rho(s):  return np.where(s &lt; 1, np.exp(-1 / np.maximum(1 - s ** 2, 1e-12)), 0.0)
+def drho(s): return rho(s) * (-2 * s / np.maximum(1 - s ** 2, 1e-12) ** 2)
+def xi(s):   return -s * drho(s) / 3                       # natural kernel pair of [BLM22]: 3 xi = -s rho'
+
+def varifold_B(X, N, m, i, eps):
+    """2x2 approximate WSFF (12) at X[i] in a tangent basis V; second term with the corrected sign (-)."""
+    u = N[i]
+    a = np.array([1.0, 0, 0]) if abs(u[0]) &lt; 0.9 else np.array([0, 1.0, 0])
+    e1 = a - (a @ u) * u
+    e1 /= np.linalg.norm(e1)
+    V = np.stack([e1, np.cross(u, e1)], axis=1)              # V^i = [u_1; u_2]
+    d = X[i] - X
+    r = np.linalg.norm(d, axis=1)
+    k = (r &gt; 0) &amp; (r &lt; eps)
+    d, r, Nj, mj = d[k], r[k], N[k], m[k]
+    P = np.eye(3) - Nj[:, :, None] * Nj[:, None, :]          # V~^j = I - u_3^j (u_3^j)^T
+    A = P @ V                                                # V~^j V^i
+    S = 0.5 * (u[None, :, None] * d[:, None, :] + d[:, :, None] * u[None, None, :])
+    first = 2 * np.einsum("kai,kab,kbj->kij", A, S, A)
+    c = np.einsum("ka,kab,b->k", d, P, u)                    # (mu^i - mu^j)^T V~^j u_3^i
+    second = c[:, None, None] * (np.einsum("ai,kab,bj->kij", V, P, V) - np.eye(2))
+    w = mj * drho(r / eps) / (3 * r)
+    B = np.einsum("k,kij->ij", w, first - second) / (mj * xi(r / eps)).sum()
+    return B / eps                                           # 1/eps from the derivative of rho(r/eps)
+
+X = np.random.default_rng(0).normal(size=(40000, 3))
+X /= np.linalg.norm(X, axis=1, keepdims=True)                # unit sphere; outward normals N = X
+tau = np.linalg.eigvalsh(varifold_B(X, X, np.ones(len(X)), 0, eps=0.2))   # both close to -1</code></pre>
+        <p>결과는 \(\tau = (-1.006, -0.963)\)이다. 이웃은 거리 \(\varepsilon\) 안의 모든 점이고, 논문처럼 KNN으로 바꾸려면 마스크 <code>k</code>만 바꾸면 된다. eigenvector \(\mathbf{w}\)를 <code>V @ w</code>로 \(\R^3\)에 되돌리면 principal direction \(\tilde{\mathbf{w}}\)다.</p>
+        <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+      </aside>
+
+      <p><em>이 장의 평가</em>: varifold estimator는 [BLM22]의 식을 계산하기 쉬운 꼴로 바꾼 것이고, 새로운 이론(수렴 정리 등)은 없다. 실제로 쓰려면 정해야 할 것이 여럿인데, normal과 tangent basis \(\mathbf{V}^i\)의 출처, 가중치 \(m_j\), kernel \(\chi\)와 \(\Upsilon\), scale \(\varepsilon\), KNN의 \(K\)는 모두 논문에 적혀 있지 않다. 특히 각 Gaussian의 normal \(\tilde{\mathbf{u}}^j_3\)가 입력인데, 그것을 manifold estimator로 구하는지 Gaussian의 가장 짧은 축으로 쓰는지가 없다(<a href="../46-varifold-background/46-9-map-of-papers.html">Section 46.9</a>도 같은 점을 적었다). normal의 오차는 curvature에 직접 들어간다. 또 이웃을 \(\varepsilon\)-ball 대신 KNN으로 잡으면, Gaussian이 조밀한 곳에서는 kernel의 support 안에 있는 점이 잘려 나가 [BLM22]의 정규화가 깨진다.</p>
+    </section>
+
+    <section id="sec-dynamic">
+      <h2>Dynamic Re-Estimation</h2>
+      <p>논문은 두 estimator가 잡음에 강하고 빨라서 백만 개 수준의 Gaussian을 수십 초 안에 처리한다고 쓴다. 그래서 늘어나는 Gaussian에 맞춰 학습 중 일정한 간격의 iteration마다 다시 추정하고, 시간은 조금만 늘어난다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §3.2]</a>. 이것이 <a href="49-1-problem-key-idea.html#fig-49-1-2">Figure 49.1.2</a>의 주홍 파선이다.</p>
+      <p><em>이 장의 평가</em>: 계산량은 Gaussian마다 이웃 \(K\)개에 대한 합이므로 \(O(NK)\)이고(manifold estimator는 이웃의 이웃까지 보므로 \(O(NK^2)\)), GPU에서 백만 개를 수십 초에 처리한다는 것은 그럴듯하다. 그러나 시간 측정표, 재추정 간격, 전체 학습 시간의 증가량은 논문에 적혀 있지 않다. “noise-robust”라는 주장도 이 절에는 실험이 없다. local PCA나 StableNormal <a class="cite" href="../../references.html#YeC24">[YeC24]</a>과 같은 조건에서 normal이나 curvature의 오차를 비교한 결과는 논문 어디에도 없다. 렌더링 품질의 향상(<a href="49-6-experiments.html">Section 49.6</a>)이 간접적인 근거일 뿐이다.</p>
+
+      <aside class="box application">
+        <p class="box-title">In computer vision: 어느 estimator를 쓸까</p>
+        <p>논문의 실험(<a href="49-6-experiments.html">Section 49.6</a>)은 두 estimator를 모두 돌린다. 두 판의 PSNR 차이는 장면마다 많아야 \(0.31\) dB(Replica R2)이고, 어느 쪽이 앞서는지는 장면마다 바뀐다. 실무에서의 차이는 입력이다. manifold estimator는 Gaussian 중심만 있으면 normal까지 스스로 만든다. varifold estimator는 normal이 이미 있어야 하고 그 대신 \(2 \times 2\) matrix 하나로 끝난다. 둘 다 이웃 검색(KNN)이 대부분의 시간을 차지한다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>manifold estimator(<a href="#i-49-4-1">Theorem 49.4.1</a>): \(\mathcal{K}^i = \tfrac12\operatorname{Lbnz}_\Delta[\varphi_{d_1}, \varphi_{d_2}]\)의 eigenvector가 tangent basis와 normal을 주고, \(\mathcal{S}^i\)의 eigenpair를 \(\R^3\)으로 되돌리면 principal curvature·direction이다. unit sphere에서 normal은 \(0.6^\circ\) 안, curvature는 약 \(10\%\) 안이다(<a href="#i-49-4-2">Example 49.4.2</a>).</li>
+        <li>부록 B는 metric compatibility 세 개와 torsion-free 조건에서 Koszul formula를 유도한다(<a href="#i-49-4-3">Proposition 49.4.3</a>). 부호까지 표준 공식과 같다.</li>
+        <li>varifold estimator는 [BLM22]의 approximate WSFF(<a href="#eq-49-4-10">(49.4.10)</a>–<a href="#eq-49-4-11">(49.4.11)</a>)를 \(2 \times 2\) 닫힌 꼴 <a href="#eq-49-4-12">(49.4.12)</a>로 줄인 것이다. 핵심 양은 이웃의 tangent plane에서 본 normal의 기울기를 거리로 나눈 것이다(<a href="#fig-49-4-1">Figure 49.4.1</a>).</li>
+        <li>인쇄된 식에는 \(\tilde{\mathbf{V}}^j\)의 오식, 둘째 항의 부호(\(+\) 대신 \(-\)), [BLM22]에서 물려받은 빠진 \(1/\varepsilon\), 식 (32)의 첨자 범위가 있다. 고친 식은 [BLM22]과 \(10^{-16}\)까지 같고 sphere와 torus에서 잘 동작한다(<a href="#fig-49-4-2">Figure 49.4.2</a>).</li>
+        <li>두 estimator 모두 학습 중 주기적으로 다시 계산한다. 재추정 간격과 시간, 잡음에 대한 직접 비교는 보고되지 않았다.</li>
+      </ul>
+      <p class="next">다음 절에서는 manifold estimator의 유도 전체, 곧 부록 E의 Definition E.1부터 Theorem E.7과 그 증명을 읽는다. 그리고 Laplacian을 kernel 합으로 바꾸면 \(\mathcal{K}^i\)가 정확히 kernel로 가중한 local second moment, 곧 일종의 local PCA가 된다는 것, Gaussian의 밀도가 고르지 않으면 curvature가 밀도의 제곱만큼 부풀려진다는 것을 계산으로 보인다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-49-4-1" data-level="1">
+        <p><span class="thm-head">Exercise 49.4.1</span> <span class="level">★</span>
+        \(\mathcal{K}^i\)의 tangent eigenvector가 \(\mathbf{u}_1 = (1, 0, 0)\), \(\mathbf{u}_2 = (0, 0.6, 0.8)\)일 때 normal을 구하라. normal의 부호를 정할 수 있는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>성분마다 \(0\cdot0.8 - 0\cdot0.6 = 0\), \(0\cdot0 - 1\cdot0.8 = -0.8\), \(1\cdot0.6 - 0\cdot0 = 0.6\)이므로 \(\mathbf{u}_1 \times \mathbf{u}_2 = (0, -0.8, 0.6)\)이고 길이가 \(1\)이다. \(\mathbf{u}_1, \mathbf{u}_2\)의 순서나 부호를 바꾸면 \(-(0, -0.8, 0.6)\)이 된다. eigenvector의 부호는 임의이므로 normal의 부호는 정해지지 않는다. 그래서 \(\tau_d\)의 부호도 정해지지 않는다(<a href="49-1-problem-key-idea.html#sec-notation">Section 49.1</a>).</p>
+          <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-4-2" data-level="2">
+        <p><span class="thm-head">Exercise 49.4.2</span> <span class="level">★★</span>
+        좌표 vector field \(\mathbf{U}_i = \partial_i\)에서 <a href="#eq-49-4-3">(49.4.3)</a>이 \(g(\nabla_{\partial_i}\partial_j, \partial_k) = \tfrac12(\partial_ig_{jk} + \partial_jg_{ki} - \partial_kg_{ij})\)가 됨을 보이고, 평면의 polar coordinate \(g = dr^2 + r^2d\theta^2\)에서 \(\nabla_{\partial_\theta}\partial_\theta\)를 구하라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>좌표 vector field끼리의 Lie bracket은 \(0\)이므로 bracket 세 항이 사라지고, \(\partial_{\partial_i}g(\partial_j, \partial_k) = \partial_ig_{jk}\)이다. polar coordinate에서 \(g_{rr} = 1\), \(g_{\theta\theta} = r^2\), \(g_{r\theta} = 0\)이다. \(g(\nabla_{\partial_\theta}\partial_\theta, \partial_r) = \tfrac12(0 + 0 - \partial_rr^2) = -r\), \(g(\nabla_{\partial_\theta}\partial_\theta, \partial_\theta) = \tfrac12\partial_\theta r^2 = 0\)이므로 \(\nabla_{\partial_\theta}\partial_\theta = -r\,\partial_r\)이다. 원을 따라 도는 속도 vector가 중심 쪽으로 변한다는 뜻이다.</p>
+          <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-4-3" data-level="1">
+        <p><span class="thm-head">Exercise 49.4.3</span> <span class="level">★</span>
+        장면 전체를 \(10\)배 키우고 \(\varepsilon\)도 \(10\)배로 하면, \(1/\varepsilon\)이 있는 <a href="#eq-49-4-12">(49.4.12)</a>과 \(1/\varepsilon\)이 없는 식 (31)의 값은 각각 어떻게 바뀌는가? 어느 쪽이 curvature인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(r^{ij}/\varepsilon\)은 바뀌지 않으므로 kernel 값은 같고, \(\mathbf{B}^{i,j}\)는 \(\boldsymbol{\delta}^{ij}\)에 대해 1차이므로 \(10\)배, \(1/(3r^{ij})\)는 \(1/10\)배다. 그래서 \(1/\varepsilon\)이 없는 값은 그대로이고, \(1/\varepsilon\)이 있으면 \(1/10\)배가 된다. 크기를 \(10\)배 하면 curvature는 \(1/10\)배이므로 \(1/\varepsilon\)이 있는 쪽이 curvature다. \(1/\varepsilon\)이 없는 값은 무차원 양 \(\varepsilon\kappa\)다. sphere에서 \(\varepsilon = 0.2\)일 때 \(-0.197\)이 그 예다.</p>
+          <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-4-4" data-level="2">
+        <p><span class="thm-head">Exercise 49.4.4</span> <span class="level">★★</span>
+        두 이웃의 normal 사이 각이 \(\theta\)이고 \(\norm{\boldsymbol{\delta}^{ij}} \approx \theta/\kappa\)일 때, <a href="#eq-49-4-13">(49.4.13)</a>의 첫째 항이 \(O(\theta^2/\kappa)\), 둘째 항이 \(O(\theta^4/\kappa)\)임을 보여라. 인쇄된 부호 오류가 결과를 크게 바꾸지 않는 이유는?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3 = \tilde{\mathbf{u}}^i_3 - \inner{\tilde{\mathbf{u}}^j_3}{\tilde{\mathbf{u}}^i_3}\tilde{\mathbf{u}}^j_3\)의 길이는 \(\sin\theta\)이므로, 첫째 항의 성분은 \(\norm{\boldsymbol{\delta}^{ij}}\sin\theta = O(\theta^2/\kappa)\)다. 둘째 항에서 \((\mathbf{V}^i)^{\mathsf T}\tilde{\mathbf{V}}^j\mathbf{V}^i - \mathbf{I} = -((\mathbf{V}^i)^{\mathsf T}\tilde{\mathbf{u}}^j_3)((\mathbf{V}^i)^{\mathsf T}\tilde{\mathbf{u}}^j_3)^{\mathsf T}\)의 크기는 \(\sin^2\theta\)이고, \((\boldsymbol{\delta}^{ij})^{\mathsf T}\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3\)는 \(\norm{\boldsymbol{\delta}^{ij}}\sin\theta\) 이하이므로 곱은 \(O(\theta^4/\kappa)\)다. 단위원(\(\kappa = 1\))에서 \(\theta = 0.05\)이면 첫째 항의 가장 큰 성분이 \(2\theta^2\), 둘째 항이 \(\theta^4\)과 \(1\%\) 안에서 맞는다. 둘째 항은 첫째 항보다 \(\theta^2\)배 작으므로, 이웃이 가까워 \(\theta\)가 작으면 부호를 틀려도 차이가 작다. \(\varepsilon\)이 크면 \(\theta\)가 커져 차이가 커진다(<a href="#fig-49-4-2">Figure 49.4.2</a>(a)).</p>
+          <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-4-5" data-level="1">
+        <p><span class="thm-head">Exercise 49.4.5</span> <span class="level">★</span>
+        식 (12) 아래에 인쇄된 대로 \(\tilde{\mathbf{V}}^j = \mathbf{I} - \tilde{\mathbf{u}}^i_3(\tilde{\mathbf{u}}^i_3)^{\mathsf T}\)를 쓰면 모든 \(\mathbf{B}^{i,j}\)가 \(0\)임을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>그러면 \(\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3 = \mathbf{0}\)이고 \(\tilde{\mathbf{V}}^j\mathbf{V}^i = \mathbf{V}^i\)다. 첫째 항은 \((\mathbf{V}^i)^{\mathsf T}(\tilde{\mathbf{u}}^i_3\boldsymbol{\delta}^{\mathsf T} + \boldsymbol{\delta}(\tilde{\mathbf{u}}^i_3)^{\mathsf T})\mathbf{V}^i\)인데 \((\mathbf{V}^i)^{\mathsf T}\tilde{\mathbf{u}}^i_3 = \mathbf{0}\)이므로 \(0\)이다. 둘째 항의 coefficient \(\boldsymbol{\delta}^{\mathsf T}\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3\)도 \(0\)이다. 이웃의 normal이 전혀 들어가지 않으므로 curvature 정보가 없다.</p>
+          <p class="verified">Verification: <code>verify/v-49-4-estimating-normals-curvature.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="49-3-geometry-constrained-optimization.html">← 49.3 Geometry-Constrained Optimization</a>
+    <a rel="next" href="49-5-manifold-estimator.html">49.5 The Manifold Estimator in Detail →</a>
+  </nav>
+</body>
+</html>

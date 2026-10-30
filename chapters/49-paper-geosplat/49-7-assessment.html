@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>49.7 Assessment — DG Study</title>
+  <meta name="dg-id" content="49.7">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="49.1, 49.2, 49.3, 49.4, 49.5, 49.6">
+  <meta name="dg-refs" content="GeoSplat25 §4, §6 (and the errata of §2–§5, App. A–F)">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">49. Paper: GeoSplat</a> ›
+    <span>49.7 Assessment</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>49.7 Assessment</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §4, §6]</a>,
+        <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26]</a>,
+        <a class="cite" href="../../references.html#BLM22">[BLM22]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>논문이 스스로를 어디에 놓는지(§4)와 무엇을 결론으로 내세우는지(§6)를 말하고, 빠진 비교 대상을 지적할 수 있다.</li>
+        <li>논문의 주장마다 논문 안의 증거와 이 장의 확인 결과를 짝지을 수 있다.</li>
+        <li>이 장에서 찾은 오식과 모호한 곳을 모아, 어느 것이 구현의 숫자를 바꾸고 어느 것이 무해한지 가를 수 있다.</li>
+        <li>GeoSplat의 upsampling을 mass 장부가 없는 refinement로 읽고, Chapter 50의 conservative refinement와 비교할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>이 장의 앞 절 전부(<a href="49-1-problem-key-idea.html">Section 49.1</a>–<a href="49-6-experiments.html">Section 49.6</a>). 특히 논문의 주장 목록(<a href="49-1-problem-key-idea.html#sec-claims">Section 49.1</a>)과 실험의 숫자(<a href="49-6-experiments.html">Section 49.6</a>).</li>
+        <li>네 논문의 지도(<a href="../46-varifold-background/46-9-map-of-papers.html#sec-map">Section 46.9</a>).</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p>GeoSplat은 두 가지를 동시에 하려는 논문이다. 하나는 실용적인 렌더링 향상이고, 다른 하나는 그 향상을 미분기하로 설명하는 것이다. 앞의 여섯 절은 식과 실험을 하나씩 따졌다. 이 절은 그 결과를 모은다. 논문이 스스로를 어떻게 소개하는지, 무엇이 증거로 뒷받침되는지, 무엇이 인쇄의 문제이고 무엇이 방법의 문제인지, 그리고 이 묶음의 다른 논문들과 어떻게 이어지는지다.</p>
+    </section>
+
+    <section id="sec-related">
+      <h2>Related Work as the Paper Sees It (§4)</h2>
+      <p>논문의 관련 연구는 두 문단이다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §4]</a>.</p>
+      <ul>
+        <li><strong>기하로 Gaussian Splatting을 regularize하는 흐름.</strong> 실제 장면에는 smoothness 같은 분명한 기하 구조가 있으므로 이것으로 학습을 규제하는 연구가 늘고 있다(GausSurf <a class="cite" href="../../references.html#Wang24">[Wang24]</a>; Gaussian pancakes <a class="cite" href="../../references.html#Bonilla24">[Bonilla24]</a>; GeoGaussian <a class="cite" href="../../references.html#Li25">[Li25]</a>). 몇몇은 Gaussian을 normal 방향에 맞추고(GausSurf, DN-Splatter <a class="cite" href="../../references.html#Turkulainen25">[Turkulainen25]</a>), GeoGaussian은 더 나아가 densification으로 생긴 Gaussian을 tangent plane에 놓는다. 논문의 평가는 이들이 모두 normal 같은 낮은 차수의 양만 쓰고 curvature를 버린다는 것이다. 드문 예외인 SAGS <a class="cite" href="../../references.html#Ververas25">[Ververas25]</a>는 mean curvature로 평평한 곳을 찾지만, 논문은 이 기준이 완전히 옳지 않고(<a href="49-3-geometry-constrained-optimization.html#i-49-3-5">Example 49.3.5</a>) 구현도 낮은 차수의 양에 기반한다고 쓴다.</li>
+        <li><strong>추정의 문제.</strong> 기존 연구의 prior는 한 번 구해 두는 static prior이고 잡음에 약하다. GausSurf는 학습된 normal 예측 모델 StableNormal <a class="cite" href="../../references.html#YeC24">[YeC24]</a>을 쓰는데 보지 못한 데이터에서 실패하기 쉽고, GeoGaussian은 고전적인 군집법 AHC(agglomerative hierarchical clustering) <a class="cite" href="../../references.html#Feng14">[Feng14]</a>를 쓰는데 드문 데이터에 약하다. Gaussian이 늘어날수록 static prior는 더 맞지 않게 된다. GeoSplat은 local manifold 같은 기하 구조에 기반한 dynamic prior로 이것을 해결한다고 쓴다.</li>
+      </ul>
+      <p><em>이 장의 평가</em>: 이 구도에서 빠진 것이 셋 있다.</p>
+      <ul>
+        <li><strong>surface를 직접 목표로 하는 Gaussian 방법.</strong> 2DGS <a class="cite" href="../../references.html#Huang24">[Huang24]</a>는 Gaussian을 disk로 바꾸고 normal consistency를 건다(<a href="../30-radiance-field-surfaces/30-3-surfels-2dgs.html">Section 30.3</a>). SuGaR <a class="cite" href="../../references.html#Guedon24">[Guedon24]</a>, PGSR <a class="cite" href="../../references.html#Chen24PGSR">[Chen24PGSR]</a>도 Gaussian을 surface에 붙이는 regularizer를 쓴다. GeoSplat의 \((s_3)^2\) 벌점(<a href="49-3-geometry-constrained-optimization.html#eq-49-3-7">(49.3.7)</a>)은 같은 방향의 장치인데, 이 방법들과의 비교나 논의가 없다.</li>
+        <li><strong>점에서 curvature를 추정하는 오랜 연구.</strong> local PCA <a class="cite" href="../../references.html#Hoppe92">[Hoppe92]</a>, mesh의 이산 curvature 연산자 <a class="cite" href="../../references.html#Meyer03">[Meyer03]</a>(<a href="../40-discrete-curvature-integral/index.html">Chapter 40</a>, <a href="../41-discrete-curvature-variational/index.html">Chapter 41</a>), diffusion map 계열의 manifold 학습(Coifman–Lafon <a class="cite" href="../../references.html#CoifmanLafon06">[CoifmanLafon06]</a>, 논문은 부록 E에서만 언급), 그리고 varifold의 approximate curvature <a class="cite" href="../../references.html#BLM17">[BLM17]</a>, <a class="cite" href="../../references.html#BLM22">[BLM22]</a>다. 부록 E는 고전 연구와 겹친다고 스스로 밝히지만, “noise-robust”를 주장하면서 이들과 정확도를 비교하지 않는다.</li>
+        <li><strong>논문 자신의 estimator와 local PCA의 관계.</strong> kernel로 근사한 tangential kernel matrix는 \(\mathbf{q}\)를 중심으로 한 가중 이차 moment, 곧 local PCA의 한 변형이다(<a href="49-5-manifold-estimator.html#i-49-5-6">Proposition 49.5.6</a>). 그래서 “local PCA는 잡음에 약하고 우리 방법은 강하다”는 대비는 이론적으로 이어지지 않고, 우리의 계산에서도 같은 크기의 이웃에서 더 강하지 않았다(<a href="49-5-manifold-estimator.html#fig-49-5-1">Figure 49.5.1</a>).</li>
+      </ul>
+    </section>
+
+    <section id="sec-conclusion">
+      <h2>Conclusion (§6) and What Is Missing</h2>
+      <p>결론은 한 문단이다 <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25, §6]</a>. 논문은 기존 방법이 거의 쓰지 않은 higher order 기하(curvature)를 활용하는 geometry-constrained Gaussian Splatting의 일반 framework를 소개했고, 실험에서 이 framework가 Gaussian Splatting을 크게 개선하며 기존 기준선을 능가하고 학습 view가 적을 때 artifact가 매우 적다고 요약한다. 또 local manifold 같은 기하 구조에 기반한 효율적인 estimator가 잡음에 강한 dynamic prior를 주어, static하고 잡음에 약한 prior에 기대던 기존 방법의 한계를 넘는다고 쓴다.</p>
+      <p>논문에는 limitations 절이 없다. 한계에 가까운 언급은 본문과 부록에 흩어져 있다.</p>
+      <ul>
+        <li>manifold라는 말은 “어디서나 smooth”를 가정하므로 너무 강하다. 그래서 singular point를 허용하는 merged local manifolds(<a href="49-2-preliminaries.html#i-49-2-1">Definition 49.2.1</a>)와 varifold를 도입한다(§2.2, App. A.2).</li>
+        <li>curvature가 \(0\)이면 warm-up의 비가 정의되지 않으므로 \([\xi_{\min}, \xi_{\max}]\)로 자른다(§3.1.1, <a href="49-3-geometry-constrained-optimization.html#sec-warmup">Section 49.3</a>).</li>
+        <li>point cloud varifold의 first variation은 locally bounded가 아니므로 approximate curvature를 써야 한다(App. A.2, <a href="49-2-preliminaries.html#sec-varifolds">Section 49.2</a>).</li>
+        <li>부록 E의 방법은 고전 연구와 겹칠 것이다(App. E 도입부).</li>
+        <li>학습 중 재추정은 시간을 조금 늘린다(§3.2).</li>
+      </ul>
+    </section>
+
+    <section id="sec-claims">
+      <h2>Claims and Evidence</h2>
+      <p><a href="49-1-problem-key-idea.html#sec-claims">Section 49.1</a>의 주장 목록을 더 잘게 나누어, 논문 안의 증거와 이 장에서 확인한 것을 나란히 놓으면 다음과 같다.</p>
+      <table id="tab-49-7-1">
+        <caption>Table 49.7.1. Claims of [GeoSplat25], the evidence in the paper, and what this chapter found.</caption>
+        <thead>
+          <tr><th>claim</th><th>evidence</th><th>this chapter</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>higher order priors improve 3DGS</td><td>Tables 1–2: PSNR above GeoGaussian in all 12 scenes (mean +0.78 / +0.38 dB)</td><td>numbers check out; rendering metrics only; baselines copied; SSIM exceptions (<a href="49-6-experiments.html#sec-main">49.6</a>)</td></tr>
+          <tr><td>curvature-guided warm-up covers the surface better</td><td>Table 3: −0.36 / −0.18 dB without it</td><td>the ratio \(\abs{\tau_1/\tau_2}\) does not reduce the largest gap; its square root does (<a href="49-3-geometry-constrained-optimization.html#i-49-3-3">Example 49.3.3</a>); the ablation does not separate axes from ratio</td></tr>
+          <tr><td>MAC is the right flatness test</td><td>Table 3: +0.12 / +0.03 dB over mean curvature</td><td>right geometrically (<a href="49-3-geometry-constrained-optimization.html#i-49-3-5">Example 49.3.5</a>); small effect; \(\xi_{\min}\) depends on units and noise (<a href="49-6-experiments.html#i-49-6-2">Example 49.6.2</a>)</td></tr>
+          <tr><td>noise-robust estimators</td><td>none</td><td>the kernel matrix is a weighted local second moment; no robustness gain over local PCA (<a href="49-5-manifold-estimator.html#fig-49-5-1">Figure 49.5.1</a>); density bias \(p^2\) (<a href="49-5-manifold-estimator.html#i-49-5-11">Proposition 49.5.11</a>)</td></tr>
+          <tr><td>efficient: millions in tens of seconds</td><td>a sentence (§3.2)</td><td>cost \(O(NK)\) and \(O(NK^2)\) makes it plausible; no timing (<a href="49-4-estimating-normals-curvature.html#sec-dynamic">49.4</a>)</td></tr>
+          <tr><td>dynamic priors beat static ones</td><td>none</td><td>not ablated</td></tr>
+          <tr><td>larger gains with fewer views, fewer artifacts</td><td>Fig. 1; Figs. 2–6 (selected views)</td><td>visible in Fig. 1; no numbers; “7.93%” fits R1, not R2; Fig. 5 Case 1 keeps a defect (<a href="49-6-experiments.html#sec-low-resource">49.6</a>)</td></tr>
+          <tr><td>the estimators are derived from geometry</td><td>Prop. 3.1, Thm. 3.2, App. B–E</td><td>the derivations go the right way; the printed formulas have the errata of <a href="#tab-49-7-2">Table 49.7.2</a>; the varifold formula needs a sign fix and a corrected projection (<a href="49-4-estimating-normals-curvature.html#i-49-4-4">Proposition 49.4.4</a>)</td></tr>
+        </tbody>
+      </table>
+      <p>정리하면, 표의 숫자가 보여 주는 것은 “여섯 구성요소를 모두 켠 시스템이 실내 장면의 렌더링 지표를 일관되게 올린다”는 것이다. 이것은 분명한 결과다. 그러나 논문이 내세우는 기하적 이유, 곧 curvature가 정확히 추정되고 잡음에 강하며 학습 중의 재추정이 중요하다는 것은 실험이 직접 시험하지 않았다. 이 장의 합성 실험(<a href="49-4-estimating-normals-curvature.html#fig-49-4-2">Figure 49.4.2</a>, <a href="49-5-manifold-estimator.html#fig-49-5-2">Figure 49.5.2</a>)은 두 estimator가 깨끗한 점에서는 curvature를 잘 추정한다는 것을 보였다. 잡음과 밀도에 대해서는 논문의 주장보다 약했다.</p>
+    </section>
+
+    <section id="sec-ledger">
+      <h2>Upsampling Without a Ledger</h2>
+      <p>한 가지를 더 계산해 보자. upsampling(<a href="49-3-geometry-constrained-optimization.html#eq-49-3-5">(49.3.5)</a>)은 평평하다고 판정된 Gaussian \(i\)마다 \(k\)개의 최근접 이웃 \(j\)와의 중점에 새 Gaussian을 놓는다(부록 F.1의 \(k = 10\)). 부모는 그대로 남고 새 Gaussian은 부모의 속성을 midpoint interpolation으로 얻는다. 이것을 refinement로 보면 두 가지를 물을 수 있다. varifold의 mass가 보존되는가, 그리고 빈 곳이 실제로 채워지는가.</p>
+
+      <div class="thm example" id="i-49-7-1">
+        <p><span class="thm-head">Example 49.7.1</span> <span class="thm-name">(midpoint upsampling on a flat patch)</span>.
+        단위 정사각형에 고르게 뽑은 점 \(N = 1500\)개가 모두 검사를 통과한다고 하자. 방향이 있는 쌍 \((i, j)\)가 \(kN = 15000\)개 생기고 새 Gaussian도 그만큼 생긴다. \(j\)도 \(i\)를 이웃으로 골랐다면(서로 이웃) 같은 중점이 두 번 만들어진다. 서로 이웃인 쌍의 수를 \(M\)이라 하면</p>
+        <div class="equation" id="eq-49-7-1">
+        \[ \begin{aligned} \#\text{new Gaussians} &= kN, \\ \#\text{distinct new locations} &= kN - M \end{aligned} \tag{49.7.1} \]
+        </div>
+        <p>이다. 이 예에서 새 Gaussian의 \(86\%\)가 서로 이웃인 쌍에서 나와 \(M = 6452\)이고, 서로 다른 위치는 \(8548\)개다. 곧 서로 이웃인 쌍에서 나온 새 Gaussian은 위치와 속성이 정확히 같은 짝을 하나씩 가지므로, 그 절반인 새 Gaussian의 \(43\%\)는 다른 새 Gaussian의 복제다(지워도 서로 다른 위치는 그대로다). 각 Gaussian이 무게 \(1\)의 원자라면 평평한 곳의 mass는 \(1 + k = 11\)배가 되고, 겹친 것을 하나로 세도 약 \(6.7\)배가 된다. 한편 빈 곳은 잘 채워지지 않는다. \([0.1, 0.9]^2\)의 \(161 \times 161\) 격자 위의 탐침점에서 가장 가까운 점까지의 거리(빈 원의 반지름)는 중앙값이 \(0.0123\)에서 \(0.0055\)로 반이 되지만, 최댓값은 \(0.0432\)에서 \(0.0429\)로 거의 그대로다. 큰 구멍의 가장자리에 있는 점의 이웃은 대부분 구멍의 같은 쪽에 있어서, 중점이 구멍을 건너지 않기 때문이다.</p>
+        <p class="verified">Verification: <code>verify/v-49-7-assessment.py</code></p>
+      </div>
+
+      <figure class="dg-figure" id="fig-49-7-1">
+        <img src="figures/fig-49-7-1-upsampling-ledger.svg" alt="두 패널. (a) 정사각형 창 안에 검은 점(original), 주황 점(new, made twice), 파란 점(new, made once). 주황 점이 검은 점들 사이에 촘촘히 모여 있고, 회색 파선 원 두 개 안은 비어 있다. (b) 가로축 x, -1에서 1. 세로축 Gaussians per area / before, 0에서 13.5. x = 0에 세로선, 왼쪽 위에 passes (flat), 오른쪽 위에 fails. 회색 파선 before는 1 근처에서 평평하다. 검은 계단선 after (paper)는 x &lt; 0에서 9에서 13 사이, x &gt; 0에서 1 근처. 파란 일점쇄선 after, duplicates merged는 x &lt; 0에서 5.5에서 7.7 사이. 초록 점선이 높이 1에 있고 conservative: stays 1 라벨.">
+        <figcaption><span class="fig-head">Figure 49.7.1.</span>
+        <em>무엇을</em>: <a href="49-3-geometry-constrained-optimization.html#eq-49-3-5">(49.3.5)</a>의 upsampling(이웃 \(10\)개)을 평평한 점들에 적용한 결과. (a) <a href="#i-49-7-1">Example 49.7.1</a>의 점들 가운데 창 \([0.35, 0.65]^2\). (b) 띠 \([-1, 1] \times [0, 0.6]\)의 점 \(2500\)개 가운데 \(x \lt 0\)인 점만 검사를 통과할 때, 폭 \(0.1\)의 구간마다 센 단위 넓이당 Gaussian 수(처음 밀도에 대한 비).
+        <em>읽는 법</em>: (a)의 검은 점이 원래 Gaussian, 주황 점이 서로 이웃인 쌍에서 두 번 만들어진 새 Gaussian, 파란 점이 한 번 만들어진 새 Gaussian이다. 회색 파선 원은 upsampling 뒤에도 남은 가장 큰 빈 원 두 개다. (b)의 회색 파선은 처음, 검은 실선은 논문처럼 새 Gaussian을 모두 센 것, 파란 일점쇄선은 같은 위치의 것을 하나로 센 것이다. 초록 점선 \(1\)은 conservative refinement가 지키는 값이다.
+        <em>볼 것</em>: (a)에서 새 점은 원래 점이 이미 촘촘한 곳에 몰리고, 큰 빈 원 안에는 들어가지 않는다. (b)에서 Gaussian 수는 평평한 쪽에서 약 \(11\)배(겹친 것을 합치면 약 \(6.7\)배)로 뛰고 boundary \(x = 0\)에서 계단을 이룬다.
+        <em>본문과의 연결</em>: 무게가 바뀌는 refinement와 바뀌지 않는 refinement의 차이는 Chapter 50의 주제다(<a href="../50-paper-manifold-gs/50-3-refinement-conservation.html#i-50-3-1">Proposition 50.3.1</a>). 빈 곳을 채운다는 upsampling의 목적(<a href="49-6-experiments.html#sec-enriched">Section 49.6</a>)과 (a)를 비교하라.</figcaption>
+      </figure>
+
+      <p>이 계산이 뜻하는 바는 두 가지다. 첫째, GeoSplat은 Gaussian을 더하지만 varifold의 원자 무게 \(m_j\)를 어떻게 정하는지 쓰지 않는다(<a href="49-4-estimating-normals-curvature.html#i-49-4-4">Proposition 49.4.4</a>의 “a weight”). 무게가 모두 \(1\)이면 upsampling한 곳과 하지 않은 곳의 boundary에서 mass의 밀도가 \(11\)배 뛴다. varifold estimator는 \(Z^i\)로 나누므로 전체 배율은 지워지지만, kernel이 boundary를 걸치는 곳에서는 무게가 평평한 쪽으로 쏠린다. manifold estimator에서 상수 \(C\)로 정규화하면 밀도의 제곱만큼 curvature가 부풀려진다(<a href="49-5-manifold-estimator.html#i-49-5-11">Proposition 49.5.11</a>). 둘째, 식 (6)으로 생긴 같은 위치의 Gaussian을 합치거나 지우는지는 논문에 적혀 있지 않다. 중복 제거가 없다면 같은 위치의 복제는 계산만 늘린다. 그리고 이웃 사이의 중점은 이미 촘촘한 곳을 더 촘촘하게 할 뿐, 이웃 거리보다 큰 구멍은 메우지 못한다. SfM 점이 거의 없는 무늬 없는 벽에서는 구멍이 이웃 거리보다 큰 경우가 많을 것이다. [GeoSplat25, Fig. 7]에서 새 점이 규칙적인 줄무늬를 이루는 것도 midpoint interpolation이 원래 점의 배치를 따라가기 때문으로 읽을 수 있다.</p>
+
+      <aside class="box code">
+        <p class="box-title">Implementation: midpoint upsampling and its bookkeeping</p>
+<pre id="code-49-7-1"><code>import numpy as np
+
+def upsample(X, passes, k=10):
+    """(49.3.5): every passing point i adds the midpoints with its k nearest neighbours (weight 1 each)."""
+    D = ((X[:, None, :] - X[None, :, :]) ** 2).sum(-1)
+    np.fill_diagonal(D, np.inf)
+    nn = np.argsort(D, axis=1)[:, :k]
+    I = np.repeat(np.flatnonzero(passes), k)
+    J = nn[passes].ravel()
+    return 0.5 * (X[I] + X[J]), I, J
+
+rng = np.random.default_rng(0)
+X = rng.uniform(0, 1, (1500, 2))                 # Gaussian centres on a flat patch (2D coordinates)
+M, I, J = upsample(X, np.ones(len(X), bool))
+mass_ratio = (len(X) + len(M)) / len(X)           # 11: total weight after / before, without a ledger
+key = np.minimum(I, J) * len(X) + np.maximum(I, J)
+distinct = len(np.unique(key))                    # (49.7.1): kN - M distinct new locations
+dup_fraction = 1 - distinct / len(M)              # about 0.43 of the new Gaussians repeat another one</code></pre>
+        <p>쌍 \((i, j)\)와 \((j, i)\)는 같은 key를 가지므로 <code>np.unique</code>가 서로 이웃인 쌍을 하나로 센다. 결과는 <a href="#i-49-7-1">Example 49.7.1</a>의 \(8548\)과 \(0.43\)이다.</p>
+        <p class="verified">Verification: <code>verify/v-49-7-assessment.py</code></p>
+      </aside>
+
+      <p>conservative하게 바꾸는 방법은 Chapter 50이 준다. 부모의 무게를 자식들이 나누어 가져 mass와 무게중심을 보존하면(<a href="../50-paper-manifold-gs/50-3-refinement-conservation.html#eq-50-3-1">(50.3.1)</a>), varifold로서의 변화가 bounded Lipschitz 거리로 통제된다(<a href="../50-paper-manifold-gs/50-3-refinement-conservation.html#i-50-3-2">Corollary 50.3.2</a>). 중점 upsampling에 이것을 그대로 쓰면 어떤 조건이 필요한지가 <a href="#ex-49-7-3">Exercise 49.7.3</a>이다.</p>
+    </section>
+
+    <section id="sec-limitations">
+      <h2>Limitations</h2>
+      <p>앞 절들의 평가를 두 묶음으로 모은다. 각 항목은 근거가 있는 절로 이어진다.</p>
+      <h3>Gaps between claims and evidence</h3>
+      <ol>
+        <li><strong>기하를 재지 않았다.</strong> 기하 방법인데 평가가 렌더링 지표뿐이다. 추정한 normal과 curvature의 정확도, 복원한 surface의 품질(Chamfer 거리 등)이 없다(<a href="49-6-experiments.html#sec-setup">Section 49.6</a>).</li>
+        <li><strong>“noise-robust”와 “dynamic”이 시험되지 않았다.</strong> 잡음을 넣은 추정 실험, local PCA·AHC·StableNormal과의 비교, estimator나 재추정만 바꾼 ablation이 없다(<a href="49-5-manifold-estimator.html#sec-kernel-pca">Section 49.5</a>, <a href="49-4-estimating-normals-curvature.html#sec-dynamic">Section 49.4</a>).</li>
+        <li><strong>효율의 숫자가 없다.</strong> 시간과 메모리, 재추정 간격이 보고되지 않았다.</li>
+        <li><strong>이득의 출처를 가를 수 없다.</strong> 구성요소를 모두 끈 같은 코드의 기준선이 없고, 기준선의 숫자는 다른 논문에서 왔다. ablation은 두 장면, 한 번의 실행이다(<a href="49-6-experiments.html#sec-ablation">Section 49.6</a>).</li>
+        <li><strong>통계가 불분명하다.</strong> t-test의 표본이 무엇인지, 시드를 몇 번 바꿨는지 없다(<a href="49-6-experiments.html#i-49-6-1">Example 49.6.1</a>).</li>
+        <li><strong>본문과 표·그림이 어긋나는 곳이 있다.</strong> SSIM의 예외, “Fig. 2”와 Fig. 1, “7.93%”, “80% 제외”와 그림의 비율, Fig. 5의 남은 결함(<a href="49-6-experiments.html">Section 49.6</a>).</li>
+        <li><strong>장면이 치우쳐 있다.</strong> 12장면 모두 큰 평면이 많은 실내이고 대부분 합성이다. 평면 upsampling과 tangent 제약이 특히 유리하다. 실사 야외, 얇은 구조, 반투명이 많은 장면은 시험되지 않았다.</li>
+      </ol>
+      <h3>Assumptions and design</h3>
+      <ol>
+        <li><strong>Gaussian 중심이 surface 위에 있다는 가정.</strong> 학습 초기와 floater에서는 깨진다. 가정이 얼마나 깨졌는지 진단하지 않는다(<a href="49-2-preliminaries.html#sec-merged">Section 49.2</a>). 모서리처럼 singular한 곳은 kernel의 크기에서 무시할 수 없다(<a href="49-2-preliminaries.html#i-49-2-2">Example 49.2.2</a>).</li>
+        <li><strong>축척과 정규화.</strong> curvature의 전체 배율이 kernel의 정규화에 달려 있고(<a href="49-5-manifold-estimator.html#sec-laplacian">Section 49.5</a>), 밀도에 따라 \(p^2\)만큼 왜곡될 수 있으며(<a href="49-5-manifold-estimator.html#i-49-5-11">Proposition 49.5.11</a>), \(\xi_{\min}\)은 단위가 있다(<a href="49-6-experiments.html#i-49-6-2">Example 49.6.2</a>). 비 \(\abs{\tau_1/\tau_2}\)만 이 문제에서 자유롭다.</li>
+        <li><strong>warm-up의 비.</strong> \(\abs{\tau_1/\tau_2}\)는 휴리스틱이고, tangent plane에서의 이탈을 기준으로 하면 제곱근이 맞다(<a href="49-3-geometry-constrained-optimization.html#i-49-3-3">Example 49.3.3</a>).</li>
+        <li><strong>rotation 손실의 부호와 umbilic point.</strong> normal과 principal direction의 부호를 처리하지 않고, 평면과 sphere에서 principal direction이 정해지지 않는데도 맞추라고 한다(<a href="49-3-geometry-constrained-optimization.html#sec-shape-regularization">Section 49.3</a>).</li>
+        <li><strong>optimizer와의 결합.</strong> truncation은 SGD의 꼴로 쓰였고 Adam에서는 효과가 사라질 수 있다. 식 (11)은 부호와 걸음이 모호하고, 인쇄된 식 (10)은 새 Gaussian을 surface에서 멀리 보낸다(<a href="49-3-geometry-constrained-optimization.html#sec-truncation">Section 49.3</a>, <a href="49-3-geometry-constrained-optimization.html#i-49-3-6">Example 49.3.6</a>).</li>
+        <li><strong>varifold estimator의 입력과 보장.</strong> normal과 tangent basis를 어디서 얻는지, \(m_j\), kernel, \(\varepsilon\)이 정해지지 않았다. [BLM22]의 수렴 정리는 \(\varepsilon\)-ball과 특정 kernel, mass 근사 조건 아래의 것이고, KNN 이웃과 임의의 kernel로 바꾼 설정에서 그대로 성립하는지는 논의되지 않았다(<a href="49-4-estimating-normals-curvature.html#sec-varifold">Section 49.4</a>).</li>
+        <li><strong>mass 장부가 없다.</strong> upsampling과 densification이 Gaussian을 더하지만 무게를 갱신하지 않고, 같은 위치의 복제가 생기며, 큰 구멍은 메우지 못한다(<a href="#sec-ledger">위</a>).</li>
+      </ol>
+    </section>
+
+    <section id="sec-errata">
+      <h2>Errata</h2>
+      <p>이 장에서 확인한 오식과 모호한 곳을 모은다. “Impact”는 인쇄된 식을 그대로 구현했을 때 숫자가 바뀌는지다. 괄호 안은 그 항목을 다룬 곳이다. 모든 항목을 arXiv v3의 원문으로 다시 확인했고, 수치가 걸린 항목은 해당 절의 verify 스크립트로 확인했다.</p>
+      <table id="tab-49-7-2">
+        <caption>Table 49.7.2. Errata of [GeoSplat25] arXiv v3 found in this chapter: printed → corrected or issue, and the impact if implemented as printed.</caption>
+        <thead>
+          <tr><th>where</th><th>printed → corrected; impact</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>eq. (14) (<a href="49-2-preliminaries.html#sec-riemannian">49.2</a>)</td><td>\(g(\mathcal{R}(\mathbf{V}_1, \mathbf{V}_2)\mathbf{V}_1, \mathbf{V}_2)\) → \(\mathbf{V}_2, \mathbf{V}_1\) in the convention of (13). <em>Impact</em>: sign of \(K\) (background only).</td></tr>
+          <tr><td>eq. (28) (<a href="49-3-geometry-constrained-optimization.html#sec-warmup">49.3</a>)</td><td>“\(s_1s_2\tfrac14(s_{\text{nbr}})^2\)” → \(s_1s_2 = \tfrac14(s_{\text{nbr}})^2\). <em>Impact</em>: none (typo).</td></tr>
+          <tr><td>§3.1.1, clamp (<a href="49-3-geometry-constrained-optimization.html#sec-warmup">49.3</a>)</td><td>\(\min(\max(\tau, \xi_{\min}), \xi_{\max})\) → clamp \(\abs{\tau}\). <em>Impact</em>: large: negative curvatures become \(\xi_{\min}\).</td></tr>
+          <tr><td>§3.1.1, eq. (5) (<a href="49-3-geometry-constrained-optimization.html#sec-warmup">49.3</a>)</td><td>\(s_{\text{nbr}}/2\), whereas the 3DGS paper (mean distance to the three nearest points) and its code (their root mean square) have no \(\tfrac12\). <em>Impact</em>: a discrepancy rather than a proven error; factor 2 in the initial scale if GeoSplat builds on the 3DGS code.</td></tr>
+          <tr><td>eq. (10) (<a href="49-3-geometry-constrained-optimization.html#i-49-3-6">Example 49.3.6</a>)</td><td>displacement \(\rho_d/\tau_d\): no length scale. <em>Impact</em>: large on flat areas.</td></tr>
+          <tr><td>eq. (11) (<a href="49-3-geometry-constrained-optimization.html#sec-densification">49.3</a>)</td><td>sign \(+\) (echoing the 3DGS paper's “in the direction of the positional gradient”), no learning rate, vector \(\bar\nabla^i\mathfrak{L}\). <em>Impact</em>: ambiguous.</td></tr>
+          <tr><td>below eq. (12) (<a href="49-4-estimating-normals-curvature.html#sec-varifold">49.4</a>)</td><td>\(\tilde{\mathbf{V}}^j = \mathbf{I} - \tilde{\mathbf{u}}^i_3(\tilde{\mathbf{u}}^i_3)^{\mathsf T}\) → \(\tilde{\mathbf{u}}^j_3\). <em>Impact</em>: fatal: \(\mathcal{B}^i \equiv 0\).</td></tr>
+          <tr><td>eqs. (12), (37), (38) (<a href="49-4-estimating-normals-curvature.html#i-49-4-4">Proposition 49.4.4</a>)</td><td>second term \(+\) → \(-\). <em>Impact</em>: about 2% at \(\varepsilon = 0.2\), 8% at \(0.4\) (unit sphere).</td></tr>
+          <tr><td>eq. (31) (<a href="49-4-estimating-normals-curvature.html#sec-varifold">49.4</a>)</td><td>\(\Upsilon'(\abs{\cdot}/\varepsilon)\): factor \(1/\varepsilon\) missing. <em>Impact</em>: global factor \(\varepsilon\).</td></tr>
+          <tr><td>eq. (32) (<a href="49-4-estimating-normals-curvature.html#sec-varifold">49.4</a>)</td><td>index range \(D_{\mathcal{M}}\) → \(D_{\mathcal{E}}\). <em>Impact</em>: none if read correctly.</td></tr>
+          <tr><td>App. E.4.3 (<a href="49-5-manifold-estimator.html#sec-tangent">49.5</a>)</td><td>normalized and unnormalized \(\mathbf{v}_d\) not distinguished. <em>Impact</em>: wrong eigenvalues if normalized.</td></tr>
+          <tr><td>eq. (44) (<a href="49-5-manifold-estimator.html#sec-metric">49.5</a>)</td><td>\(\forall f, g\) → \(\forall f, h\). <em>Impact</em>: none (typo).</td></tr>
+          <tr><td>Prop. E.4 and eq. (47) (<a href="49-5-manifold-estimator.html#sec-laplacian">49.5</a>)</td><td>centre written \(\mathbf{c}^i_{\text{obj}}\) (the colour's symbol) → \(\boldsymbol{\mu}^i\); “unbiased” only at fixed \(t\). <em>Impact</em>: none / interpretation.</td></tr>
+          <tr><td>eq. (47) (<a href="49-5-manifold-estimator.html#sec-laplacian">49.5</a>)</td><td>\(\boldsymbol{\Lambda}_t = t\boldsymbol{\Sigma}^i\boldsymbol{\Sigma}^j\): not symmetric, wrong units. <em>Impact</em>: ill-defined kernel.</td></tr>
+          <tr><td>below eq. (49) (<a href="49-5-manifold-estimator.html#sec-shape">49.5</a>)</td><td>“operator \(\int^i\)” → \(s^i\). <em>Impact</em>: none (typo).</td></tr>
+          <tr><td>before Cor. E.5 (<a href="49-5-manifold-estimator.html#sec-normal">49.5</a>)</td><td>“Theorem E.2” → Proposition E.2. <em>Impact</em>: none.</td></tr>
+          <tr><td>eq. (98) (<a href="49-5-manifold-estimator.html#sec-metric">49.5</a>)</td><td>\(\operatorname{grad}^{\mathcal{M}}g\) → \(\operatorname{grad}^{\mathcal{M}}h\). <em>Impact</em>: none (typo).</td></tr>
+          <tr><td>eq. (100) (<a href="49-5-manifold-estimator.html#sec-metric">49.5</a>)</td><td>factor \(\tfrac12\) missing. <em>Impact</em>: factor 2 in the metric.</td></tr>
+          <tr><td>eqs. (126)–(127) (<a href="49-5-manifold-estimator.html#sec-shape">49.5</a>)</td><td>\(\mathcal{U}^i(\mathcal{U}^i)^{\mathsf T} = \mathbf{I}\) → the tangent projection. <em>Impact</em>: none (conclusion holds on tangents).</td></tr>
+          <tr><td>§5.2 (<a href="49-6-experiments.html#sec-low-resource">49.6</a>)</td><td>“results in Fig. 2” → Fig. 1; “7.93% on R2” fits R1. <em>Impact</em>: reading.</td></tr>
+          <tr><td>Table 1 (<a href="49-6-experiments.html#sec-main">49.6</a>)</td><td>varifold OFF1 LPIPS “0.971”. <em>Impact</em>: typo (value unknown).</td></tr>
+          <tr><td>references</td><td>Anderson (1958): the author's name printed four times. <em>Impact</em>: none.</td></tr>
+        </tbody>
+      </table>
+      <p>무해한 오식(\(\forall f, g\), “Theorem E.2”, \(\int^i\) 등)과 구현의 숫자를 바꾸는 오식은 구별해야 한다. 앞의 것은 읽으면서 고치면 되지만, 뒤의 것 가운데 \(\tilde{\mathbf{V}}^j\)의 첨자는 varifold estimator를 \(0\)으로 만들고, clamp의 위치는 음의 curvature를 모두 지우며, \(1/\varepsilon\)과 \(\tfrac12\)은 curvature의 크기를 바꾸어 \(\xi_{\min}\) 같은 threshold의 뜻을 바꾼다. 논문에는 코드 링크가 없고 공개된 코드도 찾지 못했으므로(2026년 10월), 실제 구현이 인쇄된 식과 같은지는 확인할 수 없다.</p>
+    </section>
+
+    <section id="sec-relations">
+      <h2>Relation to Chapters 46–48 and 50</h2>
+      <ul>
+        <li><strong>Chapter 46(배경).</strong> GeoSplat의 varifold 언어(mass, first variation, generalized mean curvature)는 <a href="../46-varifold-background/46-5-first-variation.html">Section 46.5</a>, weak second fundamental form은 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html">Section 46.6</a>, Gaussian의 covariance에서 plane을 읽는 것은 <a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html">Section 46.8</a>에 있다. GeoSplat은 그 반대 방향, 곧 추정한 plane과 curvature로 covariance를 정한다.</li>
+        <li><strong>Chapter 47(BLM17).</strong> point cloud varifold의 first variation을 kernel로 부드럽게 하는 생각(<a href="../47-paper-varifold-approximation/index.html#toc-47-4">Definition 47.4.1</a>)과 kernel 쌍의 선택(<a href="../47-paper-varifold-approximation/index.html#toc-47-5">Section 47.5</a>)이 GeoSplat의 \(\chi, \Upsilon\)의 출처다. GeoSplat은 kernel을 정하지 않는다.</li>
+        <li><strong>Chapter 48(BLM22).</strong> GeoSplat의 varifold estimator는 [BLM22]의 approximate weak second fundamental form(식 (7.2))을 \(2 \times 2\) matrix로 줄인 것이다(<a href="49-4-estimating-normals-curvature.html#sec-varifold">Section 49.4</a>). 수렴과 정확도의 보장은 그쪽 정리에 기대는데, GeoSplat의 KNN 설정이 그 가정을 만족하는지는 따로 따져야 한다(<a href="../48-paper-varifold-curvatures/index.html#toc-48-5">Chapter 48</a> <span class="todo">[확인 필요: Chapter 48 미작성 — 참조 번호 확정 필요]</span>).</li>
+        <li><strong>Chapter 50(Manifold-GS).</strong> 같은 출발점(Gaussian을 point cloud varifold로 읽기)에서 다른 목적으로 간다. GeoSplat은 기하를 prior로 써서 렌더링을 좋게 하고, Manifold-GS는 refinement에서 mass와 moment를 보존하는 장부(<a href="../50-paper-manifold-gs/50-3-refinement-conservation.html#i-50-3-1">Proposition 50.3.1</a>)와 인증을 내세운다. GeoSplat에 없는 것이 정확히 그 장부다(<a href="#sec-ledger">위</a>). 반대로 Manifold-GS의 identifiability 경고, 곧 관측이 기하를 정하지 못하면 prior가 그럴듯하지만 틀린 surface로 끌 수 있다는 것은 GeoSplat류의 방법에 대한 경고다(<a href="../50-paper-manifold-gs/50-6-assessment.html#sec-geosplat">Section 50.6</a>).</li>
+        <li><strong>Track 2.</strong> MAC와 principal curvature는 mesh에서 <a href="../41-discrete-curvature-variational/41-3-panorama.html">Section 41.3</a>, 점에서 Laplacian을 만드는 graph Laplacian과 random walk는 <a href="../42-laplace-beltrami/42-1-laplacian-definitions.html">Section 42.1</a>에서 보았다. 부록 E는 이 둘을 Leibniz defect로 잇는다(<a href="49-5-manifold-estimator.html#sec-metric">Section 49.5</a>).</li>
+      </ul>
+    </section>
+
+    <section id="sec-open">
+      <h2>Open Questions</h2>
+      <p>논문만으로는 답할 수 없는 물음을 모은다. 앞의 세 항목은 원문을 다시 확인한 결과 모두 논문에 적혀 있지 않다(본문의 해당 자리에도 그렇게 적었다). 코드나 저자의 답이 있어야 풀린다. 마지막 항목만 이 study set 안의 일이다.</p>
+      <ul>
+        <li>구현과 설정: GeoSplat의 기반 코드와 \(s_{\text{nbr}}\)의 정의, clamp의 위치, 식 (6)에서 이웃을 몇 개 쓰는지, 같은 위치의 Gaussian을 합치는지, 식 (7)과 Adam의 결합, 손실의 가중치, 식 (10)의 축척, 식 (11)의 뜻(<a href="49-3-geometry-constrained-optimization.html">Section 49.3</a>, <a href="#sec-ledger">위</a>).</li>
+        <li>estimator: varifold estimator의 normal과 tangent basis의 출처와 \(m_j, \chi, \Upsilon, \varepsilon\), KNN의 크기, 식 (38)의 \(1/\varepsilon\), 재추정 간격과 시간(<a href="49-4-estimating-normals-curvature.html">Section 49.4</a>). 식 (46)의 정규화와 상수 \(C\), 식 (47)의 의도(<a href="49-5-manifold-estimator.html">Section 49.5</a>).</li>
+        <li>실험: 학습 설정 전체, Table 1의 오타 칸의 원래 값, Figure 1의 view 비율, “7.93%”의 출처, 장면 좌표의 단위(<a href="49-6-experiments.html">Section 49.6</a>).</li>
+        <li>교차 참조: Chapter 48의 항목 번호(<a href="49-2-preliminaries.html#sec-varifolds">Section 49.2</a>, <a href="49-4-estimating-normals-curvature.html#sec-varifold">Section 49.4</a>, 이 절).</li>
+      </ul>
+    </section>
+
+    <aside class="box deeper">
+      <p class="box-title">Go deeper</p>
+      <ul>
+        <li>네 논문을 읽는 순서와 각 논문이 쓰는 varifold의 도구: <a href="../46-varifold-background/46-9-map-of-papers.html#sec-reading">Section 46.9</a>.</li>
+        <li>conservative refinement와 identifiability: <a href="../50-paper-manifold-gs/index.html">Chapter 50</a>.</li>
+        <li>점에서의 curvature를 더 엄밀하게 다루는 varifold의 이론: <a href="../47-paper-varifold-approximation/index.html">Chapter 47</a>, <a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a>.</li>
+      </ul>
+    </aside>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>논문은 기존 연구를 “normal만 쓰고 prior가 static하며 잡음에 약하다”로 묶고 자신을 curvature와 dynamic prior로 차별화한다. surface를 직접 목표로 하는 Gaussian 방법과 점에서 curvature를 추정하는 고전 연구와의 비교는 없다.</li>
+        <li>렌더링 지표의 일관된 향상은 표가 뒷받침한다. 기하적 이유(정확하고 잡음에 강한 curvature, dynamic prior의 효과)는 실험이 직접 시험하지 않았다(<a href="#tab-49-7-1">Table 49.7.1</a>).</li>
+        <li>limitations 절이 없다. 이 장의 한계 목록은 증거의 빈칸 일곱과 가정·설계의 문제 일곱이다.</li>
+        <li>오식 가운데 \(\tilde{\mathbf{V}}^j\)의 첨자, 둘째 항의 부호, clamp의 위치, \(1/\varepsilon\)과 \(\tfrac12\)은 구현의 숫자를 바꾼다(<a href="#tab-49-7-2">Table 49.7.2</a>).</li>
+        <li>중점 upsampling은 mass 장부가 없는 refinement다. 평평한 곳의 Gaussian 수가 \(11\)배가 되고 새 Gaussian의 \(43\%\)가 복제이며 큰 구멍은 남는다(<a href="#i-49-7-1">Example 49.7.1</a>, <a href="#fig-49-7-1">Figure 49.7.1</a>). 이 빈칸을 Chapter 50이 채운다.</li>
+      </ul>
+      <p class="next">다음 장은 같은 Gaussian varifold에서 출발해 refinement의 mass와 moment를 보존하고, 기하를 인증하며, 관측이 기하를 정하는 조건을 묻는 Manifold-GS다(<a href="../50-paper-manifold-gs/index.html">Chapter 50</a>).</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+
+      <div class="exercise" id="ex-49-7-1" data-level="1">
+        <p><span class="thm-head">Exercise 49.7.1</span> <span class="level">★</span>
+        <a href="49-1-problem-key-idea.html#sec-claims">Section 49.1</a>의 네 기여 각각에 대해, 논문 안에서 그것을 직접 시험한 표나 그림이 있는지 말하라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(1) framework가 3DGS를 개선한다: Table 1–3과 Fig. 1이 있다. 다만 구성요소를 모두 켠 전체와 하나씩 뺀 것만 비교한다. (2) 효율적이고 잡음에 강한 estimator, dynamic prior: 직접 시험한 표나 그림이 없다. 시간 측정, 잡음 실험, estimator나 재추정을 바꾼 ablation이 모두 없다. (3) 기준선을 능가하고 view가 적을 때 이득이 크다: Table 1, 2와 Fig. 1, 정성적으로 Figs. 2–6이 있다. (4) MAC가 mean curvature보다 맞다: Table 3의 한 행(R0 \(+0.12\), Office-3 \(+0.03\) dB)이 직접 비교다. 기하적 근거는 이 장의 <a href="49-3-geometry-constrained-optimization.html#i-49-3-5">Example 49.3.5</a>다.</p>
+          <p class="verified">Verification: <code>verify/v-49-7-assessment.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-7-2" data-level="2">
+        <p><span class="thm-head">Exercise 49.7.2</span> <span class="level">★★</span>
+        “noise-robust”라는 주장을 시험하는 실험을 설계하라. 데이터, 잡음, 비교할 방법, 지표, 그리고 GeoSplat 안에서의 ablation을 정하라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>한 가지 설계는 다음과 같다. 데이터는 Replica처럼 mesh가 있는 장면에서 mesh 위의 점(정답 normal과 curvature를 mesh에서 계산)과 실제 학습 중의 Gaussian 중심 둘이다. 잡음은 등방 Gaussian 잡음 \(\sigma\)를 장면 크기의 \(0.1\%\)–\(2\%\)로 바꾸고, 밀도의 불균일(<a href="49-5-manifold-estimator.html#i-49-5-11">Proposition 49.5.11</a>)과 outlier 비율도 바꾼다. 방법은 local PCA(\(k\) 여럿), kernel PCA, GeoSplat의 두 estimator, GeoGaussian의 AHC다. 지표는 normal의 각 오차(중앙값과 90 percentile)와 principal curvature의 오차, 그리고 MAC 검사의 판정 정확도다(<a href="49-6-experiments.html#fig-49-6-3">Figure 49.6.3</a>). GeoSplat 안에서는 다른 모든 것을 고정하고 estimator만 local PCA로 바꾼 것, 재추정을 끈 것(처음 한 번만), 재추정 간격을 바꾼 것을 같은 시드 여러 개로 돌려 렌더링 지표의 평균과 표준편차를 보고한다.</p>
+          <p class="verified">Verification: <code>verify/v-49-7-assessment.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-7-3" data-level="2">
+        <p><span class="thm-head">Exercise 49.7.3</span> <span class="level">★★</span>
+        무게 \(q_i\)인 부모 \(\boldsymbol{\mu}_i\)가 자신과 \(k\)개의 중점 \((\boldsymbol{\mu}_i + \boldsymbol{\mu}_j)/2\)에 무게를 \(q_i/(k + 1)\)씩 나누어 준다고 하자. mass는 보존됨을 보이고, 무게중심 <a href="../50-paper-manifold-gs/50-3-refinement-conservation.html#eq-50-3-1">(50.3.1)</a>이 보존될 조건을 구하라. 이웃이 한쪽에 몰린 boundary의 점에서는 어떻게 되는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>무게의 합은 \((k + 1) \cdot q_i/(k + 1) = q_i\)다. 1차 moment는</p>
+          <p>\[ \begin{aligned} &amp;\frac{q_i}{k + 1}\Big(\boldsymbol{\mu}_i + \sum_j\frac{\boldsymbol{\mu}_i + \boldsymbol{\mu}_j}{2}\Big) \\ &amp;= q_i\boldsymbol{\mu}_i + \frac{q_i}{k + 1}\cdot\frac{k}{2}(\bar{\boldsymbol{\mu}} - \boldsymbol{\mu}_i) \end{aligned} \]</p>
+          <p>이다(\(\bar{\boldsymbol{\mu}}\)는 \(k\)개 이웃의 평균). 따라서 무게중심은 \(\bar{\boldsymbol{\mu}} = \boldsymbol{\mu}_i\)일 때만, 곧 이웃이 부모를 중심으로 고르게 놓일 때만 보존된다. 구멍의 가장자리나 평평한 영역의 boundary에서는 이웃이 한쪽에 몰리므로 무게중심이 \(\tfrac{k}{2(k + 1)}(\bar{\boldsymbol{\mu}} - \boldsymbol{\mu}_i)\)만큼, \(k = 10\)이면 이웃 평균 쪽으로 약 \(45\%\) 옮겨진다. 보존하려면 중점은 원래 위치 \(\boldsymbol{\mu}_i\)로 계산한 채 부모 자신의 원자를 반대쪽으로 \(\tfrac{k}{2}(\bar{\boldsymbol{\mu}} - \boldsymbol{\mu}_i)\)만큼 옮기거나 무게를 거리에 따라 다르게 나누어야 한다.</p>
+          <p class="verified">Verification: <code>verify/v-49-7-assessment.py</code></p>
+        </details>
+      </div>
+
+      <div class="exercise" id="ex-49-7-4" data-level="2">
+        <p><span class="thm-head">Exercise 49.7.4</span> <span class="level">★★</span>
+        <a href="#tab-49-7-2">Table 49.7.2</a>에서 인쇄된 식을 그대로 구현하면 결과가 틀리는 항목 셋을 골라, 각각 어떤 입력에서 어떻게 틀리는지 구체적인 수로 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(\tilde{\mathbf{V}}^j\)에 \(\tilde{\mathbf{u}}^i_3\)를 쓰면 \(\tilde{\mathbf{V}}^j\mathbf{V}^i = \mathbf{V}^i\)이고 \((\mathbf{V}^i)^{\mathsf T}\tilde{\mathbf{u}}^i_3 = \mathbf{0}\), \(\tilde{\mathbf{V}}^j\tilde{\mathbf{u}}^i_3 = \mathbf{0}\)이므로 두 항이 모두 \(0\)이다. unit sphere의 어느 점에서든 \(\mathcal{B}^i = \mathbf{0}\), 곧 curvature가 \(0\)으로 나온다(참값 \(-1, -1\)). (b) 둘째 항의 부호를 \(+\)로 두면 unit sphere에서 \(\varepsilon = 0.2\)일 때 약 \(2\%\), \(0.4\)일 때 약 \(8\%\) 어긋난다(<a href="49-4-estimating-normals-curvature.html#i-49-4-4">Proposition 49.4.4</a>). (c) clamp를 부호 있는 \(\tau\)에 하면 \(\tau = (-2, 0.5)\)인 saddle에서 \(\tau_1\)이 \(0.001\)이 되어 비가 \(4\) 대신 \(0.002\)가 된다. 긴 축과 짧은 축이 뒤바뀐다(<a href="49-3-geometry-constrained-optimization.html#ex-49-3-1">Exercise 49.3.1</a>).</p>
+          <p class="verified">Verification: <code>verify/v-49-7-assessment.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="49-6-experiments.html">← 49.6 Experiments: Tables and Figures</a>
+    <a rel="next" href="../50-paper-manifold-gs/index.html">50. Paper: Manifold-GS →</a>
+  </nav>
+</body>
+</html>
