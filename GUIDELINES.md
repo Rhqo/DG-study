@@ -1359,7 +1359,12 @@ style.css는 아래 클래스를 전부 지원해야 하고, 페이지는 아래
   - `bash tools/render_anims.sh --chapter NN`: 렌더와 assert
   - `bash tools/check_all.sh --chapter NN`: HTML, 파일 존재. 렌더는 하지 않는다.
   - 검토자는 `ffmpeg -ss T -i X.mp4 -frames:v 1 x.png`로 여러 시점의 프레임을 뽑아 보고, 캡션의 시간 구간과 맞는지 확인한다.
-- **이 컴퓨터**: 렌더는 `render_anims.sh`가 CPU 0–7에 묶는다(모든 코어를 오래 쓰면 멈춘다). 여러 agent가 동시에 렌더해도 이 제한을 지킨다.
+- **이 컴퓨터**: 렌더는 `render_anims.sh`가 CPU 0–7에 묶는다(모든 코어를 오래 쓰면 멈춘다). ffmpeg(`-threads 2`), node, 검산 python도 `taskset -c 0-7`로 묶는다. 2026-10-30에 렌더하는 agent 네 개가 동시에 돌다가 컴퓨터가 멈췄다. 렌더하는 agent는 한 번에 두 개까지만 돌린다.
+- **manim(Cairo) 렌더의 함정** (2026-10-30, Track 2 애니메이션 검토에서 찾은 것)
+  - Cairo renderer는 `play()`를 시작할 때의 family member 목록과 순서를 그 play 동안 그대로 그린다. play 중에 submobject를 바꿔 끼우면 빠진 것이 옛 자리에 남고(ghost), painter 순서가 첫 프레임에 고정된다. 3D mesh는 slot 수를 고정하고 내용만 바꾸거나, 프레임마다 새로 만들고 빠진 것은 opacity 0으로 숨긴다. 움직이는 중간 프레임을 뽑아 확인한다.
+  - `ValueTracker`를 바꾼 뒤의 정적 `wait()`에서는 updater가 돌지 않는다. 그 구간에 화면 값이 지난 값으로 남는다. 바꾼 뒤 `update()`를 부르고, wait 구간의 프레임에서 표시값을 확인한다.
+  - `play()`와 `wait()`마다 key frame으로 시작하는 partial movie가 생겨 파일이 커진다. 한 단계의 여러 변화는 play 하나로 묶는다.
+  - `Scene2D`의 frame 검사는 play·wait가 끝날 때만 돈다. timeline 중간에만 나오는 라벨과 poster 아래 15%의 글자(특히 축 라벨)는 자동으로 잡히지 않는다. poster와 중간 프레임을 눈으로 본다.
 
 ---
 

@@ -296,7 +296,23 @@ icosphere(1), one angle + 0.05: largest edge length error 0.0317</code></pre>
         <em>무엇을</em>: icosphere(1)(vertex 42개, face 80개)을 그 edge length와 bending angle로 다시 만드는 과정(Implementation 상자의 <code>reconstruct</code>와 같은 algorithm). (a) 처음 놓인 24개의 face, (b) bending angle 하나를 바꾼 자료로 만든 결과.
         <em>읽는 법</em>: (a)의 파란 face는 놓인 순서대로 진한 색에서 옅은 색으로, 회색 윤곽은 완성된 mesh다(원래 mesh와 rigid motion으로 맞추어 그렸다). (b)에서는 60번째 face를 놓을 때 지난 edge의 \(\theta\)를 \(0.3\) 늘렸다. 하늘색은 그 뒤에 놓인 face, 주황 굵은 선은 다시 만든 길이가 주어진 길이와 \(10^{-6}\) 넘게 다른 edge다.
         <em>볼 것</em>: (a)의 완성본은 원래 mesh와 \(10^{-12}\) 안에서 같다. (b)에서는 vertex 3개가 움직이고 edge 14개의 길이가 틀린다. 바꾼 edge의 길이는 맞는다.
-        <em>본문과의 연결</em>: <a href="#i-39-5-10">Theorem 39.5.10</a>의 증명과 <a href="#i-39-5-11">Proposition 39.5.11</a>. (b)를 돌려 볼 수 있는 <a href="figures/fig-39-5-3-reconstruction-interactive.html">interactive version</a>이 있다.</figcaption>
+        <em>본문과의 연결</em>: <a href="#i-39-5-10">Theorem 39.5.10</a>의 증명과 <a href="#i-39-5-11">Proposition 39.5.11</a>. (b)를 돌려 볼 수 있는 <a href="figures/fig-39-5-3-reconstruction-interactive.html">interactive version</a>이 있다. face를 하나씩 붙이는 과정은 <a href="#anim-39-5-1">Animation 39.5.1</a>이다.</figcaption>
+      </figure>
+      <p><a href="#anim-39-5-1">Animation 39.5.1</a>은 같은 algorithm을 face 하나씩 진행한다. 지켜볼 것은 두 가지다. 앞부분에서 face는 언제나 이미 놓인 face에 이어 붙고, 새 face의 위치를 정하는 데 쓰는 것은 공유 edge의 bending angle 하나와 세 edge length뿐이다. 80개를 다 붙이면 원래 icosphere가 나온다. 뒷부분에서는 60번째 face를 놓을 때 쓴 bending angle 하나에 \(\delta\)를 더해 \(0.3\)까지 키운다. 하늘색은 그 뒤에 놓인 face 20개다. vertex는 처음 놓일 때 한 번만 정해지므로, 움직이는 것은 그 뒤에 처음 놓이는 vertex 3개와 그것을 가진 face 12개뿐이고 한 덩어리로 움직이지도 않는다. 그 둘레에 굵은 주황 edge, 곧 다시 만든 길이가 주어진 길이와 다른 edge가 \(\delta \gt 0\)이 되자마자 나타난다.</p>
+
+      <figure class="dg-figure animation" id="anim-39-5-1">
+        <video controls loop muted playsinline preload="metadata"
+               poster="anim/anim-39-5-1-rebuild-from-angles-poster.png"
+               aria-label="회색 triangle이 하나씩 이웃에 붙어 icosphere가 완성된다. 방금 붙은 triangle은 주황이다. 이어서 bending angle 하나를 조금씩 키우면 나중에 붙은 triangle들이 하늘색으로 바뀌며 함께 움직이고, 길이가 틀린 edge 14개가 굵은 주황 선으로 나타난다.">
+          <source src="anim/anim-39-5-1-rebuild-from-angles.mp4" type="video/mp4">
+        </video>
+        <figcaption><span class="fig-head">Animation 39.5.1.</span>
+        edge length와 bending angle로 mesh를 face 하나씩 다시 만들고, 맞지 않는 각 하나가 하는 일을 본다.
+        <em>무엇을</em>: <a href="#fig-39-5-3">Figure 39.5.3</a>과 같은 계산이다. icosphere(1)(vertex 42개, face 80개)에서 읽은 edge length와 bending angle로 <code>ddg39.reconstruct</code>가 face 0부터 depth-first 순서로 face를 붙인다(새 face의 normal은 공유 edge 둘레로 \(\theta\)만큼 돌리고, 셋째 vertex는 <a href="#eq-39-5-4">(39.5.4)</a>의 apex). 뒷부분은 60번째 face를 놓을 때 지난 tree edge의 \(\theta\)에 \(\delta = 0, \dots, 0.3\)을 더한 자료다. 모든 그림은 face 0에서 원래 mesh와 맞추어 그렸다.
+        <em>읽는 법</em>: 회색이 놓인 face, 주황 face가 방금 놓인 face다. 뒷부분의 하늘색은 바꾼 각 뒤에 놓인 face, 굵은 주황 선은 다시 만든 길이가 주어진 길이와 \(10^{-6}\) 넘게 다른 edge다. 오른쪽 숫자가 놓인 face의 수, \(\delta\), 틀린 edge의 수, 가장 큰 길이 오차다.
+        <em>볼 것</em>: 80개를 다 놓으면 원래 mesh와 rigid motion을 빼고 \(10^{-12}\) 안에서 같다. \(\delta \gt 0\)이면 곧바로 edge 14개의 길이가 틀리고(\(\delta = 0.3\)에서 가장 큰 오차 \(0.041\)), vertex 3개(그것을 가진 하늘색 face 12개)가 움직인다. 바꾼 edge 자신의 길이는 맞는다.
+        <em>본문과의 연결</em>: <a href="#i-39-5-10">Theorem 39.5.10</a>의 증명(이웃으로 번지는 “좋은 face”), <a href="#i-39-5-11">Proposition 39.5.11</a>(맞지 않는 자료에서는 vertex 둘레의 곱 <a href="#eq-39-5-5">(39.5.5)</a>이 identity가 아니다).
+        <em>시간</em>: 0–1.5초 face 0, 1.5–11초 나머지 79개를 붙인다, 11–13초 완성, 13–16.6초 \(\delta\)를 \(0\)에서 \(0.3\)까지, 16.6–19.9초 끝 상태.</figcaption>
       </figure>
 
       <aside class="box backward">

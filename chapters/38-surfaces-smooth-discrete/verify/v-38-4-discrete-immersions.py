@@ -129,6 +129,10 @@ check("Non-example 38.4.15: link vertices at 90, 234, 18, 162, 306 deg", np.allc
 Va, Fa = ddg38.folded_star()
 anga = np.rad2deg(ddg38.projected_star_angles(Va, Fa, 0, ez))
 check("Non-example 38.4.14: angles 150, -30, 60, 60, 60, 60 (sum 360)", np.allclose(anga, [150, -30, 60, 60, 60, 60]))
+close("Non-example 38.4.14: face (0,2,3) lies inside face (0,3,4): overlap = area of (0,2,3) = 0.200",
+      ddg38.planar_overlap(Va[[0, 2, 3]], Va[[0, 3, 4]]), 0.2, 1e-12)
+close("Non-example 38.4.14: area of face (0,2,3) is 0.200", dm.face_areas(Va, Fa)[1], 0.2, 1e-12)
+close("Non-example 38.4.14: overlap of faces (0,2,3) and (0,1,2) is 0.063", ddg38.planar_overlap(Va[[0, 2, 3]], Va[[0, 1, 2]]), 0.0632, 1e-3)
 for name, (Vx, Fx) in (("folded star", (Va, Fa)), ("pentagram star", (Vb, Fb))):
     check(f"Non-examples 38.4.14-15: {name}: edges and triangles nondegenerate",
           np.all(dm.face_areas(Vx, Fx) > 1e-3) and min(np.linalg.norm(Vx[a] - Vx[b]) for a, b in dm.edges(Fx)) > 0.1)
