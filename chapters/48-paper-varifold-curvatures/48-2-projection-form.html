@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>48.2 The Second Fundamental Form in Projection Form — DG Study</title>
+  <meta name="dg-id" content="48.2">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="8.1, 8.3, 46.3, 46.4, 46.5, 46.6, 46.7, 47.2, 48.1">
+  <meta name="dg-refs" content="BLM22 §1, §2, §7.1">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">48. Paper: Weak and Approximate Curvatures of a Measure</a> ›
+    <span>48.2 The Second Fundamental Form in Projection Form</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>48.2 The Second Fundamental Form in Projection Form</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#BLM22">[BLM22, §1, §2, §7.1]</a>,
+        <a class="cite" href="../../references.html#BLM17">[BLM17, §2]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>논문 §1의 식 (1.1)–(1.6)이 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html">Section 46.6</a>의 어느 항목인지 찾고, 그 연결(\(P \to A \to B\), 부분적분)을 한 문단으로 다시 말할 수 있다.</li>
+        <li>extended second fundamental form \(B\)를 unit normal과 contract하고 tangent plane에 제한하면 shape operator의 matrix가 된다는 것(<a href="#i-48-2-1">Proposition 48.2.1</a>)을 증명하고, 부호가 이 study set의 \(W = -d\mathbf{N}\)과 같음을 확인할 수 있다.</li>
+        <li>torus of revolution에서 plane field \(P\)만으로 principal curvature를 계산할 수 있다(<a href="#fig-48-2-1">Figure 48.2.1</a>).</li>
+        <li>논문 §2의 정의들이 Chapter 46–47의 어디에 있는지, 그리고 <a class="cite" href="../../references.html#BLM17">[BLM17]</a> §2와 무엇이 달라졌는지 안다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="../46-varifold-background/46-6-weak-second-fundamental-form.html">Section 46.6</a>: \(A_{ijk}\)와 \(B^k_{ij}\)(<a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-1">Proposition 46.6.1</a>), 부분적분 공식(<a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-3">Proposition 46.6.3</a>)</li>
+        <li><a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-12">Definition 8.1.12</a>(shape operator \(W = -d\mathbf{N}\))와 <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-4">Definition 8.3.4</a>(principal curvature)</li>
+        <li><a href="../46-varifold-background/46-4-varifolds.html">Section 46.4</a>, <a href="../46-varifold-background/46-5-first-variation.html">Section 46.5</a>, <a href="../46-varifold-background/46-7-regularization-distances.html">Section 46.7</a>, <a href="../47-paper-varifold-approximation/47-2-discrete-varifolds.html">Section 47.2</a>: varifold, mass, first variation, bounded Lipschitz distance</li>
+        <li><a href="48-1-problem-key-idea.html#sec-conventions">Section 48.1의 Conventions 상자</a></li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="48-1-problem-key-idea.html">Section 48.1</a>은 부분적분 공식 <a href="48-1-problem-key-idea.html#eq-48-1-1">(48.1.1)</a>에서 출발해 curvature tensor \(A\)를 풀어낸다는 계획을 세웠다. 계획의 두 끝을 먼저 고정해야 한다. 출발점은 smooth submanifold에서 \(A\)가 무엇이고 그 공식이 어떻게 나오는지이고, 도착점은 \(A\)(또는 \(B\))를 얻은 뒤 principal curvature를 어떻게 읽는지다. 논문 §1이 앞의 것을 정리하고, 뒤의 것은 §7.1이 증명 없이 쓴다. 이 절은 둘을 함께 다룬다. 앞의 것은 <a href="../46-varifold-background/index.html">Chapter 46</a>에서 이미 증명했으므로 대응표로 정리하고, 뒤의 것은 명제로 증명한다. 마지막으로 §2의 varifold 정의들을 Chapter 46–47과 맞춘다.</p>
+    </section>
+
+    <section id="sec-classical">
+      <h2>Section 1: The Classical Second Fundamental Form</h2>
+      <p>논문 §1은 Hutchinson의 기호를 따라 smooth \(d\)-submanifold \(M \subseteq \R^n\)의 second fundamental form을 tangent projection \(P(x)\)의 도함수로 다시 쓴다. 각 식의 정의와 증명은 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html">Section 46.6</a>에 있다.</p>
+      <table id="tab-48-2-1">
+        <caption>Table 48.2.1. 논문 §1의 식과 이 study set에서의 위치</caption>
+        <thead>
+          <tr><th>[BLM22]</th><th>내용</th><th>이 study set</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>§1 (번호 없음)</td><td>\(S\)-gradient \(\nabla^Sf = \Pi_S\nabla f\), \(S\)-divergence \(\divg_SX\)</td><td><a href="../46-varifold-background/46-3-grassmannian.html#i-46-3-5">Definition 46.3.5</a></td></tr>
+          <tr><td>§1 (번호 없음)</td><td>\(G_{d,n}\)의 거리 \(\norm{\Pi_T - \Pi_P}\)(operator norm)</td><td><a href="../46-varifold-background/46-3-grassmannian.html#i-46-3-1">Definition 46.3.1</a>, <a href="../46-varifold-background/46-3-grassmannian.html#i-46-3-4">Proposition 46.3.4</a></td></tr>
+          <tr><td>§1 (번호 없음)</td><td>\(\mathrm{II}(U, V) = (D_UV)^\perp\), extended form \(\mathbf{B}(U, V) = \mathrm{II}(U^{\mathsf T}, V^{\mathsf T})\)</td><td><a href="../46-varifold-background/46-6-weak-second-fundamental-form.html">Section 46.6</a> 첫머리</td></tr>
+          <tr><td>(1.1)</td><td>\(B^k_{ij} = \inner{\mathbf{B}(e_i, e_j)}{e_k}\)</td><td><a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#eq-46-6-1">(46.6.1)</a></td></tr>
+          <tr><td>(1.2)</td><td>\(A_{ijk} = \inner{\nabla^MP_{jk}}{e_i}\)</td><td><a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#eq-46-6-2">(46.6.2)</a></td></tr>
+          <tr><td>(1.3), (1.4)</td><td>\(A_{ijk} = B^k_{ij} + B^j_{ik}\), \(B^k_{ij} = \tfrac12(A_{ijk} + A_{jik} - A_{kij})\)</td><td><a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-1">Proposition 46.6.1</a>(a), (b)</td></tr>
+          <tr><td>§1 (번호 없음)</td><td>symmetry \(A_{ijk} = A_{ikj}\), \(B^k_{ij} = B^k_{ji}\)</td><td><a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-1">Proposition 46.6.1</a>(b), (c)</td></tr>
+          <tr><td>(1.5)</td><td>divergence theorem \(\int_M\divg_M(PX) = \int_{\partial M}\inner{X}{\eta}\)</td><td><a href="../46-varifold-background/46-5-first-variation.html#i-46-5-3">Proposition 46.5.3</a></td></tr>
+          <tr><td>(1.6)</td><td>\(P_{jk}\)를 곱한 부분적분 공식</td><td><a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#eq-46-6-5">(46.6.5)</a>, <a href="48-1-problem-key-idea.html#eq-48-1-1">(48.1.1)</a></td></tr>
+          <tr><td>(1.6) 아래</td><td>\(\sum_qA_{qiq} = \inner{H}{e_i}\)(합의 규약, 이 장의 \(\vec H_i\))</td><td><a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-1">Proposition 46.6.1</a>(c)</td></tr>
+        </tbody>
+      </table>
+      <p>연결은 이렇다. tangent plane을 projection matrix \(P(x)\)로 저장하면, 그 tangential 도함수 \(A_{ijk}\)는 “plane이 \(e_i\) 방향으로 움직일 때 얼마나 기우는가”이고, (1.3)과 (1.4)로 \(B\)와 서로 바뀐다. (1.6)은 test vector field \(X = \varphi P_{jk}e_i\)를 divergence theorem에 넣은 것이고, 그 왼쪽에는 \(P\)만 남는다. 논문은 (1.3)–(1.4)의 증명을 §3의 Proposition 3.6에 미룬다. 그것은 약한 판의 증명이고(<a href="48-3-weak-sff.html">Section 48.3</a>), smooth한 경우의 증명은 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-1">Proposition 46.6.1</a>에 있다.</p>
+      <aside class="box warning">
+        <p class="box-title">Warning: §1–§2에 인쇄된 세부 사항</p>
+        <ul>
+          <li>§1의 \(S\)-divergence는 \(\divg_SX(x) = \sum_{i=1}^n\inner{DX(x)\tau_i}{\tau_i}\)(\((\tau_1, \dots, \tau_d)\)는 \(S\)의 orthonormal basis)로 인쇄되어 있다. basis가 \(d\)개이므로 합은 \(\sum_{i=1}^d\)여야 한다. 같은 양을 <a href="../46-varifold-background/46-3-grassmannian.html#eq-46-3-3">(46.3.3)</a>처럼 \(\tr(\Pi_S\,DX)\)로 쓰면 첨자 문제가 없다.</li>
+          <li>§2는 locally compact metric space 위의 measure의 weak-* 수렴을 “모든 \(\varphi \in C^0_c(\Omega)\)에 대해 \(\mu_i(\varphi) \to \mu(\varphi)\)”로 정의한다. 일반 공간 \(X\)에서는 \(C^0_c(X)\)로 읽는다. 바로 뒤의 Definition 2.6(varifold의 수렴)은 \(C^0_c(\Omega \times G_{d,n})\)으로 바르게 쓴다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-reading">
+      <h2>Reading Principal Curvatures from B</h2>
+      <p>WSFF든 그 근사든, 논문의 계산이 내놓는 것은 \(n^3\)개의 수 \(A_{ijk}\)다. principal curvature를 보고 싶으면 이것을 \(d \times d\) symmetric matrix로 줄여야 한다. 논문 §7.1은 \(B^k_{ij}\)를 unit normal \(n\)과 contract한 \(\sum_kB^k_{ij}n_k\)를 tangent plane에 제한하고 그 eigenvalue를 principal curvature로 쓴다. 근거는 적혀 있지 않다. 아래 명제가 그 근거이고, 부호가 어떻게 정해지는지도 알려 준다.</p>
+      <div class="thm proposition" id="i-48-2-1">
+        <p><span class="thm-head">Proposition 48.2.1</span> <span class="thm-name">(principal curvatures from the extended second fundamental form)</span>. \(M \subseteq \R^n\)이 \(C^2\) hypersurface(\(d = n - 1\))이고, \(x \in M\)에서 \(\mathbf{N}\)이 unit normal, \(W = -d\mathbf{N}\)이 shape operator, \(P = P(x)\)라 하자. \(Q\)는 \(T_xM\)의 orthonormal basis를 열로 갖는 \(n \times d\) matrix이고</p>
+        <div class="equation" id="eq-48-2-1">
+        \[ (B_{\mathbf{N}})_{ij} = \sum_{k=1}^nB^k_{ij}\,\mathbf{N}_k \tag{48.2.1} \]
+        </div>
+        <p>라 하자. 그러면 다음이 성립한다.</p>
+        <ol type="a">
+          <li>\(B^k_{ij} = \inner{WPe_i}{Pe_j}\,\mathbf{N}_k\)이다. 따라서 모든 \(a, b \in \R^n\)에 대해 \(a^{\mathsf T}B_{\mathbf{N}}b = \inner{WPa}{Pb}\)이다.</li>
+          <li>\(Q^{\mathsf T}B_{\mathbf{N}}Q\)는 basis \(Q\)에 대한 \(W\)의 matrix다. 그래서 그 eigenvalue는 \(\mathbf{N}\)에 대한 principal curvature \(\kappa_1, \dots, \kappa_d\)이고, eigenvector \(y\)마다 \(Qy\)가 principal direction이다. 또 \(B_{\mathbf{N}}\mathbf{N} = 0\)이고 \(B_{\mathbf{N}}\)의 eigenvalue는 \(\kappa_1, \dots, \kappa_d, 0\)이다.</li>
+          <li>\(\tr B_{\mathbf{N}} = \kappa_1 + \dots + \kappa_d = \inner{\vec H}{\mathbf{N}}\)이고 \(\det(Q^{\mathsf T}B_{\mathbf{N}}Q) = \kappa_1\cdots\kappa_d\)이다. \(d = 2\)이면 이것이 Gaussian curvature \(K\)다.</li>
+          <li>\(B\)는 \(\mathbf{N}\)의 선택에 의존하지 않는다. \(\mathbf{N}\)을 \(-\mathbf{N}\)으로 바꾸면 \(B_{\mathbf{N}}\)은 \(-B_{\mathbf{N}}\)이 되고 모든 \(\kappa_l\)의 부호가 바뀐다.</li>
+        </ol>
+        <p>논문은 §7.1에서 이 절차를 증명 없이 쓴다. 명제와 증명은 우리의 것이다. <a class="cite" href="../../references.html#BLM22">[BLM22, (1.1), §7.1]</a></p>
+      </div>
+      <p><em>Proof.</em> (a) tangent vector field \(U, V\)에 대해 \(\inner{V}{\mathbf{N}} = 0\)을 \(U\) 방향으로 미분하면 \(\inner{D_UV}{\mathbf{N}} = -\inner{V}{D_U\mathbf{N}} = \inner{V}{WU}\)이다. hypersurface의 normal space는 \(\mathbf{N}\)이 span하므로 \(\mathrm{II}(U, V) = \inner{D_UV}{\mathbf{N}}\mathbf{N} = \inner{WU}{V}\mathbf{N}\)이다. 정의대로 \(\mathbf{B}(e_i, e_j) = \mathrm{II}(Pe_i, Pe_j) = \inner{WPe_i}{Pe_j}\mathbf{N}\)이고, \(e_k\)와 inner product를 취하면 첫 식이다. \(\abs{\mathbf{N}} = 1\)이므로 \(\mathbf{N}\)과 contract하면 \((B_{\mathbf{N}})_{ij} = \inner{WPe_i}{Pe_j}\)이고, 둘째 식은 bilinear성에서 나온다.</p>
+      <p>(b) \(PQ = Q\)이므로 (a)에서 \((Q^{\mathsf T}B_{\mathbf{N}}Q)_{ab} = \inner{Wq_a}{q_b}\)(\(q_a\)는 \(Q\)의 \(a\)번째 열)이다. 이것이 orthonormal basis에 대한 \(W\)의 matrix이고, \(W\)는 self-adjoint이므로(<a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-10">Theorem 8.1.10</a>) symmetric이다. 그 eigenvalue와 eigenvector가 정의대로 principal curvature와 principal direction이다(<a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-4">Definition 8.3.4</a>). \(P\mathbf{N} = 0\)이므로 (a)에서 \(B_{\mathbf{N}}\mathbf{N} = 0\)이다. \(P = QQ^{\mathsf T}\)이므로 \(B_{\mathbf{N}} = Q(Q^{\mathsf T}B_{\mathbf{N}}Q)Q^{\mathsf T}\)이고, \(B_{\mathbf{N}}\)의 eigenvalue는 \(Q^{\mathsf T}B_{\mathbf{N}}Q\)의 eigenvalue에 \(\mathbf{N}\) 방향의 \(0\)을 더한 것이다.</p>
+      <p>(c) trace와 determinant는 (b)에서 바로 나온다. <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-1">Proposition 46.6.1</a>(c)의 \(\vec H = \sum_l\mathrm{II}(\tau_l, \tau_l)\)에 (a)의 \(\mathrm{II}\)를 넣으면 \(\vec H = (\tr W)\mathbf{N}\)이므로 \(\inner{\vec H}{\mathbf{N}} = \tr W\)이다.</p>
+      <p>(d) \(\mathbf{B}\)는 \((D_UV)^\perp\)로 정의되므로 normal의 선택이 들어가지 않는다. \(B_{\mathbf{N}}\)은 \(\mathbf{N}\)에 대해 linear이므로 부호가 바뀌고, \(-\mathbf{N}\)의 shape operator는 \(-W\)다. \(\square\)</p>
+      <p>이 명제가 말하는 것은 두 가지다. 첫째, \(B\)는 curvature 정보를 normal의 방향과 무관하게 모두 담고 있고, principal curvature를 읽으려면 <em>normal의 부호</em>와 <em>tangent plane의 basis</em>라는 두 가지가 더 필요하다. point cloud에서는 PCA가 둘을 준다. 가장 작은 eigenvalue의 eigenvector가 \(\mathbf{N}\)(부호는 임의)이고 나머지 둘이 \(Q\)다. 둘째, 바깥쪽 normal을 고르면 convex한 곳의 principal curvature가 음수다. 반지름 \(r\)인 sphere에서 바깥쪽 \(\mathbf{N} = x/r\)이면 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-2">Example 46.6.2</a>(b)의 \(B^k_{ij} = -P_{ij}x_k/r^2\)에서 \(B_{\mathbf{N}} = -P/r\)이고, 두 principal curvature는 \(-1/r\)이다. 이것은 <a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-12">Definition 8.1.12</a>의 \(W = -d\mathbf{N}\)과 같은 부호다. 논문은 normal의 부호를 정하지 않으므로, 부호에 무관한 \(\kappa_1\kappa_2\), \(\abs{\kappa_1} + \abs{\kappa_2}\), \(\abs{\kappa_1 + \kappa_2}\)만 그린다(<a href="48-1-problem-key-idea.html#ex-48-1-1">Exercise 48.1.1</a>).</p>
+      <div class="thm example" id="i-48-2-2">
+        <p><span class="thm-head">Example 48.2.2</span> <span class="thm-name">(the torus of revolution)</span>. \(R = 2\), \(r = 0.8\)인 \(T_{2,0.8}\)</p>
+        <p>\[ \begin{aligned} x(u, v) &= \big((R + r\cos u)\cos v, \\ &\qquad (R + r\cos u)\sin v,\ r\sin u\big) \end{aligned} \]</p>
+        <p>에서 바깥쪽 unit normal은 \(\mathbf{N} = (\cos u\cos v, \cos u\sin v, \sin u)\)이고, principal curvature는 meridian 방향 \(x_u\)로 \(-1/r = -1.25\), 위도 원 방향 \(x_v\)로 \(-\cos u/(R + r\cos u)\)이다. <a href="../08-gauss-map/8-3-principal-curvatures.html#i-8-3-6">Example 8.3.6</a>은 안쪽 normal을 써서 두 값의 부호가 반대다.</p>
+        <ul>
+          <li>바깥 equator의 점 \((2.8, 0, 0)\)(\(u = 0\), \(v = 0\)): \(\mathbf{N} = e_1\), \(x_u \parallel e_3\), \(x_v \parallel e_2\)이므로 \(B_{\mathbf{N}} = \diag(0, -0.3571, -1.25)\)이다. 두 principal curvature가 모두 음수이고 \(K = 0.4464\)다.</li>
+          <li>안쪽 equator의 점 \((1.2, 0, 0)\)(\(u = \pi\)): \(\mathbf{N} = -e_1\)(tube의 바깥쪽, 곧 회전축 쪽)이고 \(B_{\mathbf{N}} = \diag(0, 0.8333, -1.25)\)이다. 부호가 다르므로 saddle이고 \(K = -1.0417\)이다.</li>
+          <li>위아래 원(\(u = \pm\pi/2\)): \(\cos u = 0\)이므로 한 principal curvature가 \(0\)이고 \(K = 0\)이다. \(B_{\mathbf{N}}\)의 eigenvalue는 \(-1.25, 0, 0\)이다.</li>
+        </ul>
+        <p>\(B_{\mathbf{N}}\)의 둘째, 셋째 대각 성분은 \(\mathbf{N}\)에 수직인 \(e_2\), \(e_3\) 방향, 곧 tangent 방향이다. 첫째 성분이 \(0\)인 것이 (b)의 \(B_{\mathbf{N}}\mathbf{N} = 0\)이다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-48-2-projection-form.py</code></p>
+      <p>이 계산은 \(W\)를 미리 알고 한 것이다. 논문의 관점은 반대다. 점마다 plane \(P\)만 주어졌을 때 \(P\)를 미분해 \(A\)를 만들고, (1.4)로 \(B\)를 만들고, normal로 contract해 curvature를 읽는다. <a href="#fig-48-2-1">Figure 48.2.1</a>은 이것을 그대로 해 본 것이다. torus의 \((u, v)\) 격자 \(48 \times 96\)개 점에서 위치 \(x\)와 plane \(P = I - \mathbf{N}\mathbf{N}^{\mathsf T}\)만 저장하고, 이웃한 격자점의 차분으로 \(x_u\), \(x_v\), \(P_u\), \(P_v\)를 구한다. tangential gradient는 \(\nabla^MP_{jk} = \sum_{a,b}g^{ab}(\partial_aP_{jk})\,x_b\)(\(g_{ab}\)는 \(x_u\), \(x_v\)의 inner product, \(g^{ab}\)는 그 inverse matrix)이고, 그 \(i\)번째 성분이 \(A_{ijk}\)다. 그다음은 (1.4)와 <a href="#eq-48-2-1">(48.2.1)</a>이다.</p>
+      <p>(a)는 이렇게 얻은 \(K = \det(Q^{\mathsf T}B_{\mathbf{N}}Q)\)로 torus를 칠한 것이다. 바깥쪽이 빨강(\(K \gt 0\), 최대 \(0.446\)), 안쪽이 파랑(\(K \lt 0\), 최소 \(-1.042\))이고, 위아래 원을 따라 흰 띠(\(K = 0\))가 지난다. 색의 \(0\)은 가운데에 고정했으므로 파랑이 더 진한 것은 \(\abs{K}\)가 안쪽에서 더 크기 때문이다. (b)는 \(v = 0\)인 meridian을 따라 두 eigenvalue를 \(u\)에 대해 그린 것이다. 파란 선 \(-1/r = -1.25\)는 상수이고, 주황 선 \(-\cos u/(R + r\cos u)\)는 바깥 equator(\(u = 0\))의 \(-0.357\)에서 안쪽 equator(\(u = \pm\pi\))의 \(+0.833\)까지 올라간다. 격자에서 계산한 값(검은 점)이 두 선 위에 놓인다. 최대 오차는 principal curvature에서 \(0.011\), \(K\)에서 \(0.011\)이다. 오차는 격자 간격 \(h = 2\pi/48\)의 central difference에서 온다. \(P\)는 \(\mathbf{N}\)의 이차식이라 차분이 각을 두 배로 보고(\(\sin 2h/2h\)), \(x\)의 차분(\(\sin h/h\))과 비율이 \(0.991\)이 되어 \(-1.25\)가 \(-1.239\)가 된다.</p>
+      <figure class="dg-figure" id="fig-48-2-1">
+        <img src="figures/fig-48-2-1-torus-from-planes.svg" alt="두 패널. (a) 위에서 비스듬히 본 torus. 바깥쪽 둘레가 진한 빨강, 안쪽 구멍 둘레가 진한 파랑이고 그 사이에 흰 띠가 있다. 오른쪽 색 막대는 -1.04에서 0.45까지. (b) 가로축 u(-pi에서 pi), 세로축 kappa_1, kappa_2. 파란 가로선이 -1.25에 있고, 주황 곡선이 양 끝 0.83에서 가운데 -0.36까지 내려가는 U자 모양이다. 검은 점들이 두 선 위에 놓여 있다.">
+        <figcaption><span class="fig-head">Figure 48.2.1.</span>
+          무엇을: torus of revolution \(T_{2,0.8}\)의 \((u, v)\) 격자 \(48 \times 96\)개 점에서 위치 \(x\)와 tangent projection \(P\)만 써서 principal curvature와 Gaussian curvature를 계산한 결과. \(A_{ijk} = \inner{\nabla^MP_{jk}}{e_i}\)를 central difference으로 만들고 (1.4)로 \(B\)를 얻은 뒤, 바깥쪽 normal \(\mathbf{N}\)으로 contract해 \(Q^{\mathsf T}B_{\mathbf{N}}Q\)의 eigenvalue를 구했다(<a href="#i-48-2-1">Proposition 48.2.1</a>).
+          읽는 법: (a) 색은 \(K = \det(Q^{\mathsf T}B_{\mathbf{N}}Q)\)이다. 빨강이 \(K \gt 0\), 파랑이 \(K \lt 0\), 흰색이 \(K = 0\)이고 \(0\)을 색 막대의 가운데에 두었다. (b) 가로축은 meridian의 parameter \(u\)(\(u = 0\)이 바깥 equator, \(u = \pm\pi\)가 안쪽 equator), 세로축은 바깥쪽 normal에 대한 principal curvature다. 파란 선과 주황 선이 정확한 값 \(-1/r\)과 \(-\cos u/(R + r\cos u)\), 검은 점이 \(v = 0\)인 격자점에서 계산한 두 eigenvalue다.
+          볼 것: 바깥쪽은 두 principal curvature가 모두 음수라 \(K \gt 0\)(최대 \(0.446\))이고, 안쪽은 주황 선이 \(0\)을 지나 양수가 되므로 saddle(\(K\)는 최소 \(-1.042\))이다. \(u = \pm\pi/2\)에서 주황 선이 \(0\)을 지나는 것이 (a)의 흰 띠다. 격자값의 최대 오차는 \(0.011\)이다.
+          본문과의 연결: <a href="#i-48-2-2">Example 48.2.2</a>의 세 점, 그리고 같은 일을 \(P\)의 차분 대신 kernel의 도함수로 하는 <a href="48-1-problem-key-idea.html#eq-48-1-2">(48.1.2)</a>. point cloud에서 같은 torus를 계산한 결과는 <a href="48-6-numerical-illustrations.html">Section 48.6</a>에 있다.</figcaption>
+      </figure>
+      <p class="verified">Verification: <code>verify/v-48-2-projection-form.py</code></p>
+      <div class="thm remark" id="i-48-2-3">
+        <p><span class="thm-head">Remark 48.2.3</span> <span class="thm-name">(why the paper contracts B and not A)</span>. smooth hypersurface에서는 \(\sum_kA_{ijk}\mathbf{N}_k\)도 같은 matrix다. (1.3)에서 \(\sum_kA_{ijk}\mathbf{N}_k = (B_{\mathbf{N}})_{ij} + \sum_kB^j_{ik}\mathbf{N}_k\)이고, (a)에서 둘째 항은 \(\inner{WPe_i}{P\mathbf{N}}\mathbf{N}_j = 0\)이다. 그런데 근사한 \(A\)에서는 둘째 항이 \(0\)이 아니고 \(\sum_kA_{ijk}\mathbf{N}_k\)는 symmetric이 아닐 수 있다. 반면 (1.4)로 만든 \(B_{\mathbf{N}}\)은 \(A_{ijk} = A_{ikj}\)이기만 하면 항상 symmetric이다(<a href="#ex-48-2-1">Exercise 48.2.1</a>). G-linear variation에서 만든 근사 \(A\)는 \(S_{jk} = S_{kj}\)이므로 이 조건을 만족한다. 그래서 \(B\)를 거치면 eigenvalue가 실수로 보장된다. 예를 들어 \(T_{2,0.8}\) 위의 area-uniform random point cloud(점 \(20000\)개, 정확한 plane)에서 \(\varepsilon = 0.25\)로 <a href="48-1-problem-key-idea.html#eq-48-1-2">(48.1.2)</a>을 계산하면, 안쪽 equator 근처의 한 점에서 \(\sum_kA_{ijk}\mathbf{N}_k\)가 symmetric에서 벗어난 정도 \(\max_{ij}\abs{M_{ij} - M_{ji}}\)이 \(0.14\)이고 \(B_{\mathbf{N}}\)은 정확히 symmetric이다. 이 해석은 우리의 것이다. 논문은 \(B\)를 쓰는 이유를 적지 않는다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-48-2-projection-form.py</code></p>
+      <aside class="box backward">
+        <p class="box-title">Looking back: 세 번째로 만나는 shape operator</p>
+        <p>Part I에서 shape operator는 Gauss map의 미분 \(W = -d\mathbf{N}\)이었다(<a href="../08-gauss-map/8-1-gauss-map.html#i-8-1-12">Definition 8.1.12</a>). Track 2의 <a href="../41-discrete-curvature-variational/41-3-panorama.html#i-41-3-3">Definition 41.3.3</a>은 mesh의 vertex 둘레에서 normal의 변화로 이산 shape operator를 만들었다. 여기서는 normal 대신 projection \(P\)를 미분한다. \(P = I - \mathbf{N}\mathbf{N}^{\mathsf T}\)는 \(\mathbf{N}\)의 이차식이므로 \(\mathbf{N}\)과 \(-\mathbf{N}\)을 구별하지 않는다. 그래서 \(P\)의 도함수인 \(A\)와 \(B\)도 normal의 부호를 모른다. 부호는 마지막 contraction <a href="#eq-48-2-1">(48.2.1)</a>에서 비로소 들어간다. normal의 방향을 일관되게 맞추기 어려운 point cloud에는 이 순서가 맞다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-varifolds">
+      <h2>Section 2: Varifolds</h2>
+      <p>논문 §2는 varifold의 기본 정의를 모은다. 모두 <a href="../46-varifold-background/index.html">Chapter 46</a>과 <a href="../47-paper-varifold-approximation/47-2-discrete-varifolds.html">Section 47.2</a>에 있으므로 대응표로 정리한다. 셋째 열은 <a class="cite" href="../../references.html#BLM17">[BLM17]</a>(arXiv v1)의 같은 항목이다.</p>
+      <table id="tab-48-2-2">
+        <caption>Table 48.2.2. 논문 §2의 항목, [BLM17]의 번호, 이 study set에서의 위치</caption>
+        <thead>
+          <tr><th>[BLM22]</th><th>내용</th><th>[BLM17]</th><th>이 study set</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Def 2.1</td><td>\(d\)-varifold</td><td>Def 2.1</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-1">Definition 46.4.1</a></td></tr>
+          <tr><td>Def 2.2</td><td>rectifiable varifold \(v(M, \theta)\), integral varifold</td><td>Def 2.2</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-4">Definition 46.4.4</a></td></tr>
+          <tr><td>Def 2.3</td><td>point cloud varifold \(\sum_im_i\delta_{x_i} \otimes \delta_{P_i}\)</td><td>Def 2.12</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-6">Definition 46.4.6</a></td></tr>
+          <tr><td>Def 2.4</td><td>mass \(\norm{V}\)</td><td>Def 2.3</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-2">Definition 46.4.2</a></td></tr>
+          <tr><td>Prop 2.5</td><td>Young measure 표현 \(V = \norm{V} \otimes \{\nu_x\}_x\)</td><td>Prop 2.4</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-7">Proposition 46.4.7</a></td></tr>
+          <tr><td>Def 2.6</td><td>varifold의 weak-* 수렴</td><td>Def 2.5</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-8">Definition 46.4.8</a></td></tr>
+          <tr><td>Def 2.7</td><td>bounded Lipschitz distance \(\Delta\)</td><td>Def 2.6 (\(\Delta^{1,1}\))</td><td><a href="../46-varifold-background/46-7-regularization-distances.html#i-46-7-6">Definition 46.7.6</a></td></tr>
+          <tr><td>Def 2.8</td><td>국소판 \(\Delta_U(V, W)\), \(\Delta_U(\norm{V}, \norm{W})\)</td><td>Def 2.7</td><td><a href="../47-paper-varifold-approximation/47-2-discrete-varifolds.html#i-47-2-1">Definition 47.2.1</a></td></tr>
+          <tr><td>Prop 2.9</td><td>mass bounded, 공통 compact support이면 \(\Delta \to 0 \iff\) weak-* 수렴</td><td>Prop 2.8</td><td><a href="../46-varifold-background/46-7-regularization-distances.html#i-46-7-7">Proposition 46.7.7</a></td></tr>
+          <tr><td>Def 2.10</td><td>first variation \(\delta V(X) = \int\divg_SX\,dV\)</td><td>Def 2.9</td><td><a href="../46-varifold-background/46-5-first-variation.html#i-46-5-1">Definition 46.5.1</a></td></tr>
+          <tr><td>Remark 2.11</td><td>스칼라 \(\varphi\)의 \(\delta V(\varphi) = \int\nabla^S\varphi\,dV\), Lipschitz \(X\), 넓이의 변화율, locally bounded first variation</td><td>Remark 2.10</td><td><a href="../47-paper-varifold-approximation/47-2-discrete-varifolds.html#i-47-2-2">Remark 47.2.2</a>, <a href="../46-varifold-background/46-5-first-variation.html#i-46-5-2">Proposition 46.5.2</a>, <a href="../46-varifold-background/46-5-first-variation.html#i-46-5-4">Definition 46.5.4</a></td></tr>
+          <tr><td>(2.1)</td><td>\(\delta V = -H\norm{V} + \delta V_s\)</td><td>(2.1)</td><td><a href="../46-varifold-background/46-5-first-variation.html#eq-46-5-5">(46.5.5)</a></td></tr>
+        </tbody>
+      </table>
+      <div class="thm remark" id="i-48-2-4">
+        <p><span class="thm-head">Remark 48.2.4</span> <span class="thm-name">(what changed from [BLM17])</span>. 두 논문의 §1–§2를 나란히 놓고 비교한 결과다(우리의 비교).</p>
+        <ol>
+          <li><strong>차원</strong>: [BLM17]은 \(1 \le d \lt n\), 이 논문은 \(1 \le d \le n\)이다. \(d = n\)이면 \(G_{n,n} = \{I\}\)이므로 varifold는 \(\Omega\) 위의 measure와 같다. 이 장의 예와 실험은 모두 \(d \lt n\)이다.</li>
+          <li><strong>거리의 이름</strong>: \(\Delta^{1,1}\)을 \(\Delta\)로 줄여 쓴다. 이 장은 Chapter 46–47에 맞춰 \(\Delta^{1,1}\)로 쓴다.</li>
+          <li><strong>[BLM17]에서 고친 곳</strong>: Definition 2.8의 mass판에서 \(\mathrm{Lip}(\Omega)\)가 \(\mathrm{Lip}_1(\Omega)\)로 바뀌었고, Remark 2.11은 push-forward \(V_t\)에 tangential Jacobian \(J^S\varphi_t\)를 곱한 식을 명시한다. 둘 다 <a href="../47-paper-varifold-approximation/47-2-discrete-varifolds.html">Section 47.2</a>의 Warning 상자가 지적한 곳이다. Proposition 2.9는 공간이 separable이라는 가정을 덧붙였다.</li>
+          <li><strong>point cloud varifold</strong>: [BLM17]에서는 discrete varifold의 한 종류(§2.2의 Definition 2.12)였는데, 여기서는 §2의 Definition 2.3으로 올라왔다. volumetric varifold와 mesh(<a href="../47-paper-varifold-approximation/47-2-discrete-varifolds.html#i-47-2-4">Definition 47.2.4</a>)는 이 논문에 나오지 않는다.</li>
+          <li><strong>\(S\)-divergence</strong>: [BLM17]은 \(\divg_PX = \sum_j\inner{P\nabla X_j}{e_j}\)(표준 basis), 이 논문은 \(S\)의 orthonormal basis로 쓴다. 같은 양이다(<a href="../46-varifold-background/46-3-grassmannian.html#eq-46-3-3">(46.3.3)</a>).</li>
+        </ol>
+      </div>
+      <p>§2의 마지막 식 (2.1)이 이 논문의 출발점이다. first variation이 measure이면 그 density가 mean curvature다. 논문은 §3에서 이 문장을 그대로 따라간다. first variation 대신 \(P_{jk}\)를 곱한 G-linear variation을 쓰고, 그 density에서 \(A\)를 푼다. point cloud에서는 (2.1)도 그 G-linear판도 measure가 아니므로(<a href="../47-paper-varifold-approximation/47-2-discrete-varifolds.html#i-47-2-8">Remark 47.2.8</a>), §6에서 kernel로 흐린다.</p>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>논문 §1의 (1.1)–(1.6)은 <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html">Section 46.6</a>의 내용이다. tangent projection \(P\)의 도함수 \(A\)와 extended second fundamental form \(B\)는 (1.3)–(1.4)로 서로 바뀌고, (1.6)의 왼쪽에는 \(P\)만 남는다(<a href="#tab-48-2-1">Table 48.2.1</a>).</li>
+        <li>hypersurface에서 \(B_{\mathbf{N}} = \sum_kB^k_{ij}\mathbf{N}_k\)를 tangent plane에 제한한 \(Q^{\mathsf T}B_{\mathbf{N}}Q\)는 \(W = -d\mathbf{N}\)의 matrix이고, 그 eigenvalue가 principal curvature다(<a href="#i-48-2-1">Proposition 48.2.1</a>). 바깥쪽 normal이면 sphere에서 \(-1/r\)이다. \(A_{ijk} = A_{ikj}\)이면 \(B_{\mathbf{N}}\)은 항상 symmetric이다.</li>
+        <li>torus \(T_{2,0.8}\)에서 \(P\)의 격자 차분만으로 계산한 principal curvature가 정확한 값과 \(0.011\) 안에서 맞는다(<a href="#fig-48-2-1">Figure 48.2.1</a>).</li>
+        <li>논문 §2의 정의는 Chapter 46–47에 모두 있다(<a href="#tab-48-2-2">Table 48.2.2</a>). [BLM17]과 달리 \(d = n\)을 허용하고, \(\Delta^{1,1}\)을 \(\Delta\)로 쓰며, [BLM17]의 인쇄 오류 두 곳을 고쳤다.</li>
+      </ul>
+      <p class="next">다음 절에서는 논문 §3을 읽는다. (1.6)의 왼쪽을 varifold로 옮긴 G-linear variation을 정의하고, 그것이 measure일 때 density에서 \(A\)를 푸는 \(n^3 \times n^3\) linear system이 언제나 유일한 해를 갖는다는 것(Lemma 3.4)과 그 해의 닫힌 꼴을 증명한다. 그 해가 weak second fundamental form이다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+      <div class="exercise" id="ex-48-2-1" data-level="1">
+        <p><span class="thm-head">Exercise 48.2.1</span> <span class="level">★</span> \(n^3\)개의 수 \(A_{ijk}\)에서 \(B^k_{ij} = \tfrac12(A_{ijk} + A_{jik} - A_{kij})\)로 \(B\)를 만든다. \(B^k_{ji} - B^k_{ij}\)를 \(A\)로 쓰고, \(B\)가 \((i, j)\)에 대해 symmetric인 것이 \(A\)가 뒤의 두 첨자에 대해 symmetric인 것과 동치임을 보여라. 그로부터 \(B_\nu = \sum_kB^k_{ij}\nu_k\)가 모든 vector \(\nu\)에 대해 symmetric matrix임을 결론지어라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(B^k_{ji} = \tfrac12(A_{jik} + A_{ijk} - A_{kji})\)이므로 \(B^k_{ji} - B^k_{ij} = \tfrac12(A_{kij} - A_{kji})\)이다. 이것이 모든 \(i, j, k\)에서 \(0\)인 것은 모든 \(k, i, j\)에서 \(A_{kij} = A_{kji}\)인 것과 같다. 이때 \((B_\nu)_{ji} = \sum_kB^k_{ji}\nu_k = \sum_kB^k_{ij}\nu_k = (B_\nu)_{ij}\)이다. G-linear variation과 그 근사는 plane의 성분 \(S_{jk}\)에 linear이고 \(S_{jk} = S_{kj}\)이므로 \(A_{ijk} = A_{ikj}\)를 만족한다. 그래서 논문 §7.1의 \(2 \times 2\) matrix는 데이터가 어떻든 symmetric이고 eigenvalue가 실수다.</p>
+          <p class="verified">Verification: <code>verify/v-48-2-projection-form.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-2-2" data-level="1">
+        <p><span class="thm-head">Exercise 48.2.2</span> <span class="level">★</span> 반지름 \(r\)인 cylinder \(\{x_1^2 + x_2^2 = r^2\}\)의 점 \((r, 0, 0)\)에서 바깥쪽 normal로 \(B_{\mathbf{N}}\)을 구하고, \(3 \times 3\) matrix \(B_{\mathbf{N}}\)의 eigenvalue가 \(-1/r, 0, 0\)임을 보여라. 왜 \(B_{\mathbf{N}}\)의 eigenvalue만 보고는 principal curvature를 정할 수 없고 \(Q\)로 제한해야 하는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathbf{N} = e_1\)이고, \(e_2\) 방향(cross-section의 원)의 principal curvature는 \(-1/r\), \(e_3\) 방향(직선)은 \(0\)이다. <a href="#i-48-2-1">Proposition 48.2.1</a>(a)에서 \(B_{\mathbf{N}} = \diag(0, -1/r, 0)\)이고 eigenvalue는 \(-1/r, 0, 0\)이다. \(0\) 두 개 가운데 하나는 normal 방향(\(B_{\mathbf{N}}\mathbf{N} = 0\))이고 하나는 진짜 principal curvature \(0\)이다. eigenvalue만으로는 둘을 구별할 수 없으므로, \(3\)개 중 “\(0\)을 하나 버리는” 방법은 \(K = 0\)인 곳에서 틀린 답을 낼 수 있다. tangent basis \(Q = (e_2, e_3)\)로 제한하면 \(\diag(-1/r, 0)\)이 되어 모호함이 없다.</p>
+          <p class="verified">Verification: <code>verify/v-48-2-projection-form.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-2-3" data-level="1">
+        <p><span class="thm-head">Exercise 48.2.3</span> <span class="level">★</span> hypersurface에서 \(\sum_{i,j,k}(B^k_{ij})^2 = \sum_l\kappa_l^2\)이고 \(\sum_{i,j,k}A_{ijk}^2 = 2\sum_l\kappa_l^2\)임을 보여라. (힌트: <a href="../46-varifold-background/46-6-weak-second-fundamental-form.html#i-46-6-1">Proposition 46.6.1</a>(d)의 \(D_UP = (WU)\mathbf{N}^{\mathsf T} + \mathbf{N}(WU)^{\mathsf T}\).) \(T_{2,0.8}\)의 바깥 equator에서 두 값을 계산하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a)에서 \(B^k_{ij} = (B_{\mathbf{N}})_{ij}\mathbf{N}_k\)이므로 \(\sum(B^k_{ij})^2 = \norm{B_{\mathbf{N}}}_F^2\sum_k\mathbf{N}_k^2 = \norm{B_{\mathbf{N}}}_F^2\)이고, \(B_{\mathbf{N}}\)의 eigenvalue가 \(\kappa_1, \dots, \kappa_d, 0\)이므로 \(\sum_l\kappa_l^2\)이다. \(A_{i\cdot\cdot}\)는 matrix \(D_{Pe_i}P = w\mathbf{N}^{\mathsf T} + \mathbf{N}w^{\mathsf T}\)(\(w = WPe_i \perp \mathbf{N}\))이고, 그 Frobenius norm의 제곱은 \(2\abs{w}^2\)이다(\(\abs{w\mathbf{N}^{\mathsf T}}_F^2 = \abs{w}^2\), 교차항 \(2\inner{w}{\mathbf{N}}^2 = 0\)). \(i\)에 대해 더하면 \(2\sum_i\abs{WPe_i}^2 = 2\norm{WP}_F^2 = 2\sum_l\kappa_l^2\)이다. 바깥 equator에서 \(\kappa = (-1.25, -0.3571)\)이므로 \(\sum\kappa_l^2 = 1.6901\), \(\sum A_{ijk}^2 = 3.3801\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-48-2-projection-form.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-2-4" data-level="2">
+        <p><span class="thm-head">Exercise 48.2.4</span> <span class="level">★★</span> \(\R^3\)의 \(x_1x_2\)-평면에 놓인 반지름 \(r\)인 circle(\(d = 1\), \(n = 3\), codimension \(2\))에서, 점 \(x\)의 unit tangent를 \(\tau\)라 하자. \(B^k_{ij} = -\tau_i\tau_jx_k/r^2\)임을 보이고, unit normal \(\nu = \cos\alpha\,(x/r) + \sin\alpha\,e_3\)에 대해 \(\tau^{\mathsf T}B_\nu\tau = -\cos\alpha/r\)임을 보여라. codimension이 \(2\) 이상이면 <a href="#i-48-2-1">Proposition 48.2.1</a>의 절차에서 무엇이 달라지는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\mathbf{B}(U, V) = \inner{U}{\tau}\inner{V}{\tau}\,\mathrm{II}(\tau, \tau)\)이고 \(\mathrm{II}(\tau, \tau) = D_\tau\tau = -x/r^2\)(circle의 curvature vector는 중심을 향하고 크기 \(1/r\)이며, 이미 normal이다)이므로 \(B^k_{ij} = -\tau_i\tau_jx_k/r^2\)이다. \(\nu\)와 contract하면 \(\sum_kx_k\nu_k = r\cos\alpha\)이므로 \(B_\nu = -(\cos\alpha/r)\tau\tau^{\mathsf T}\)이고 \(\tau^{\mathsf T}B_\nu\tau = -\cos\alpha/r\)이다. \(\alpha = \pi/2\)(\(\nu = e_3\))이면 \(0\)이다. codimension이 \(2\) 이상이면 normal이 하나로 정해지지 않으므로, \(B_\nu\)는 normal 방향 \(\nu\)마다 다른 shape operator를 준다. principal curvature 한 쌍 대신 normal space의 basis \(\nu_1, \nu_2, \dots\)마다 matrix가 하나씩 있다. 논문 §7.1의 절차는 \(\R^3\)의 surface(codimension \(1\))에 대한 것이다. tensor \(B\) 자체와 \(\vec H = \sum_qA_{q\cdot q} = -x/r^2\)은 codimension과 무관하게 정의된다.</p>
+          <p class="verified">Verification: <code>verify/v-48-2-projection-form.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-2-5" data-level="1">
+        <p><span class="thm-head">Exercise 48.2.5</span> <span class="level">★</span> \(\R\) 위의 Dirac measure \(\mu_i = \delta_i\)(\(i = 1, 2, \dots\))가 \(0\)으로 weak-* 수렴하지만 \(\Delta^{1,1}(\mu_i, 0) = 1\)임을 보여라. Proposition 2.9의 어느 가정이 깨졌는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\varphi \in C^0_c(\R)\)이면 \(i\)가 \(\supp\varphi\)보다 크면 \(\varphi(i) = 0\)이므로 \(\mu_i(\varphi) \to 0\)이다. 반면 \(\varphi(x) = \max(0, 1 - \abs{x - i})\)는 \(\mathrm{Lip}_1\)이고 \(\norm{\varphi}_\infty = 1\)이므로 \(\Delta^{1,1}(\mu_i, 0) \ge \varphi(i) = 1\)이고, \(\abs{\varphi} \le 1\)이므로 \(\le 1\)이다. mass는 \(1\)로 bounded이지만 support가 공통 compact set 안에 있지 않다. mass가 무한히 멀리 달아나는 것을 weak-* 수렴은 보지 못하고 \(\Delta^{1,1}\)은 본다. Proposition 2.9가 공통 compact support를 가정하는 이유가 이것이다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="48-1-problem-key-idea.html">← 48.1 Problem and Key Idea</a>
+    <a rel="next" href="48-3-weak-sff.html">48.3 The Weak Second Fundamental Form →</a>
+  </nav>
+</body>
+</html>

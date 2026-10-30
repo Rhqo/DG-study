@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>48.6 Implementation and Numerical Illustrations — DG Study</title>
+  <meta name="dg-id" content="48.6">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="46.4, 47.7, 48.2, 48.5">
+  <meta name="dg-refs" content="BLM22 §7">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">48. Paper: Weak and Approximate Curvatures of a Measure</a> ›
+    <span>48.6 Implementation and Numerical Illustrations</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>48.6 Implementation and Numerical Illustrations</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#BLM22">[BLM22, §7]</a>,
+        <a class="cite" href="../../references.html#BLM17">[BLM17, §8]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>point cloud varifold에서 \(\varepsilon\)-WSFF\(^\perp\)와 그 \(B\) tensor를 원자의 합으로 쓰고(<a href="#i-48-6-1">Proposition 48.6.1</a>), 인쇄된 식에 빠진 \(1/\varepsilon\)을 복원할 수 있다.</li>
+        <li>tensor를 normal과 contract해 tangent plane에 제한하고 eigenvalue를 읽는 절차와, 그때 남는 부호의 모호함을 설명할 수 있다.</li>
+        <li>PCA plane, mass, 이웃 개수로 정하는 \(\varepsilon\)을 합쳐 point cloud의 principal curvature를 30줄의 NumPy로 계산할 수 있다.</li>
+        <li>논문의 Figure 1–5가 보여 주는 것과 보여 주지 않는 것을 말하고, torus와 cube에서 이웃 개수 \(k\)와 noise가 오차를 어떻게 바꾸는지 읽을 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="48-2-projection-form.html#i-48-2-1">Proposition 48.2.1</a>: \(B\)에서 principal curvature를 읽는 법</li>
+        <li><a href="48-5-approximate-wsff.html#i-48-5-7">Definition 48.5.7</a>과 <a href="48-5-approximate-wsff.html#eq-48-5-11">(48.5.11)</a>: \(\varepsilon\)-WSFF\(^\perp\)와 그 중심화한 꼴. <a href="48-5-approximate-wsff.html#i-48-5-9">Theorem 48.5.9</a>와 <a href="48-5-approximate-wsff.html#ex-48-5-4">Exercise 48.5.4</a>: 속도 \(1/\varepsilon\)과 이웃 개수를 고정할 때의 bound</li>
+        <li><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-6">Definition 46.4.6</a>(point cloud varifold), <a href="../47-paper-varifold-approximation/47-7-numerical-experiments.html#i-47-7-1">Definition 47.7.1</a>(같은 계산을 mean curvature에서 한 것)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="48-5-approximate-wsff.html">Section 48.5</a>는 \(\varepsilon\)-WSFF\(^\perp\)가 “이웃의 plane과 중심의 plane의 차를 kernel 도함수로 평균한 것” <a href="48-5-approximate-wsff.html#eq-48-5-11">(48.5.11)</a>이고, 데이터가 \(V\)에 가까우면 \(1/\varepsilon\)의 속도로 \(V\)의 흐린 값에 가깝다는 것을 보였다. point cloud에서는 적분이 원자의 합이 되고, coefficient \(c^V(x_{l_0})\)가 그 점의 plane \(P_{l_0}\)으로 정확히 알려져 있다. 그래서 linear system을 풀 필요도 없다. 실제 계산에 남는 질문은 셋이다. plane \(P_l\)은 데이터에 없으니 어떻게 구하는가, mass \(m_l\)과 scale \(\varepsilon\)은 무엇으로 하는가, 그리고 \(n^3\)개의 수에서 어떻게 principal curvature 두 개를 꺼내는가. 논문 §7은 이 셋에 세 쪽으로 답하고, 다섯 장의 그림을 보인다. 그림은 정성적이다. 이 절은 공식을 정확히 적고, 정답을 아는 모양에서 수치를 재현한다.</p>
+    </section>
+
+    <section id="sec-formulas">
+      <h2>Point Cloud Formulas (Section 7.1)</h2>
+      <p>point cloud varifold \(V = \sum_{l=1}^Nm_l\,\delta_{x_l} \otimes \delta_{P_l}\)(논문의 (7.1), <a href="../46-varifold-background/46-4-varifolds.html#i-46-4-6">Definition 46.4.6</a>)의 원자 \(x_{l_0}\)를 고정하고, 다른 원자와 위치가 겹치지 않는다고 하자. 다음과 같이 줄여 쓴다.</p>
+      <ul>
+        <li>\(r_l = \abs{x_l - x_{l_0}}/\varepsilon\), \(u_l = (x_l - x_{l_0})/\abs{x_l - x_{l_0}}\)</li>
+        <li>\(w_l = P_lu_l\), \(D_l = P_l - P_{l_0}\)</li>
+        <li>\(Z = \sum_lm_l\,\xi(r_l)\)</li>
+      </ul>
+      <p>kernel은 논문대로 \(\rho(t) = e^{-1/(1 - t^2)}\)(\(0 \le t \lt 1\), 정규화 상수는 생략)과 natural 짝 \(n\xi(t) = -t\rho'(t)\)(논문의 (6.7))이다. 그러면 \(C_\xi/C_\rho = d/n\)이다(<a href="../47-paper-varifold-approximation/47-5-natural-kernel-pairs.html#i-47-5-2">Proposition 47.5.2</a>).</p>
+      <div class="thm proposition" id="i-48-6-1">
+        <p><span class="thm-head">Proposition 48.6.1</span> <span class="thm-name">(\(\varepsilon\)-WSFF\(^\perp\) of a point cloud)</span>. 위의 기호로</p>
+        <div class="equation" id="eq-48-6-1">
+        \[ \begin{aligned} &\beta^{V,\varepsilon}_{ijk}(x_{l_0}) \\ &= -\frac{d}{n}\,\frac{1}{\varepsilon Z}\sum_lm_l\,\rho'(r_l)\,(P_l)_{jk}(w_l)_i, \end{aligned} \tag{48.6.1} \]
+        </div>
+        <div class="equation" id="eq-48-6-2">
+        \[ \begin{aligned} &A^{V,\varepsilon,\perp}_{ijk}(x_{l_0}) \\ &= -\frac{d}{n}\,\frac{1}{\varepsilon Z}\sum_lm_l\,\rho'(r_l)\,(D_l)_{jk}(w_l)_i \end{aligned} \tag{48.6.2} \]
+        </div>
+        <p>이고, \(B^k_{ij} = \tfrac12(A_{ijk} + A_{jik} - A_{kij})\)로 정한 \(B\) tensor는</p>
+        <div class="equation" id="eq-48-6-3">
+        \[ \begin{aligned} &B^{k,\varepsilon,\perp}_{ij}(x_{l_0}) \\ &= -\frac{d}{n}\,\frac{1}{2\varepsilon Z}\sum_lm_l\,\rho'(r_l)\,T^l_{ijk}, \\ &T^l_{ijk} = (D_l)_{jk}(w_l)_i + (D_l)_{ik}(w_l)_j \\ &\qquad\quad - (D_l)_{ij}(w_l)_k \end{aligned} \tag{48.6.3} \]
+        </div>
+        <p>이다. 합은 모든 \(l\)에 대한 것이지만 \(r_l \ge 1\)인 항과 \(l = l_0\)인 항은 \(0\)이다. <a class="cite" href="../../references.html#BLM22">[BLM22, §7.1, (7.2)]</a></p>
+      </div>
+      <p><em>Proof.</em> 정규화한 kernel을 \(\rho_\varepsilon(z) = \rho(\abs{z}/\varepsilon)/(c_\rho\varepsilon^n)\), \(\xi_\varepsilon(z) = \xi(\abs{z}/\varepsilon)/(c_\xi\varepsilon^n)\)이라 하자. natural 짝에서는 부분적분으로 \(c_\xi = c_\rho\)이다(<a href="#ex-48-6-1">Exercise 48.6.1</a>). \(\nabla\rho_\varepsilon(z) = \rho'(\abs{z}/\varepsilon)\,z/\abs{z}\,/(c_\rho\varepsilon^{n+1})\)이므로 <a href="48-5-approximate-wsff.html#eq-48-5-2">(48.5.2)</a>에 \(V\)를 넣으면</p>
+      <p>\[ \begin{aligned} &(\delta_{ijk}V*\rho_\varepsilon)(x_{l_0}) \\ &= \frac{1}{c_\rho\varepsilon^{n+1}}\sum_lm_l\,(P_l)_{jk}\,\rho'(r_l)(w_l)_i \end{aligned} \]</p>
+      <p>이고, 분모는 \((\norm{V}*\xi_\varepsilon)(x_{l_0}) = Z/(c_\xi\varepsilon^n)\)이다. <a href="48-5-approximate-wsff.html#eq-48-5-3">(48.5.3)</a>의 비에서 \(c_\rho = c_\xi\)와 \(\varepsilon^n\)이 약분되고 \(1/\varepsilon\)이 남으며, \(-C_\xi/C_\rho = -d/n\)을 곱하면 <a href="#eq-48-6-1">(48.6.1)</a>이다. 원자 \(x_{l_0}\)에서는 \(\nu_{x_{l_0}} = \delta_{P_{l_0}}\)이므로 \(c^V(x_{l_0}) = P_{l_0}\)이고(<a href="48-5-approximate-wsff.html#ex-48-5-2">Exercise 48.5.2</a>), <a href="48-5-approximate-wsff.html#eq-48-5-11">(48.5.11)</a>의 \(S_{jk} - c^V_{jk}(x)\)가 \((D_l)_{jk}\)가 되어 <a href="#eq-48-6-2">(48.6.2)</a>이다. <a href="#eq-48-6-3">(48.6.3)</a>은 <a href="#eq-48-6-2">(48.6.2)</a>를 \(B\)의 정의(<a href="48-3-weak-sff.html#i-48-3-8">Proposition 48.3.8</a>)에 넣은 것이다. \(l = l_0\)에서는 \(\rho'(0) = 0\), \(\xi(0) = 0\)이고 \(r_l \ge 1\)에서는 \(\rho' = \xi = 0\)이다. \(\square\)</p>
+      <p>이 명제가 말하는 것은 단순하다. 점 \(x_{l_0}\)의 curvature tensor는 반지름 \(\varepsilon\) 안의 이웃마다 “plane이 얼마나 다른가”(\(D_l\))와 “그 이웃이 어느 방향에 있는가”(\(w_l\))를 곱해, kernel 도함수 \(\rho'(r_l) \le 0\)으로 가중해 더한 것이다. 가까운 이웃의 plane 차이를 거리로 나눈 차분 몫의 평균이다. <a href="../47-paper-varifold-approximation/47-7-numerical-experiments.html#eq-47-7-1">(47.7.1)</a>의 mean curvature 공식에서 normal projection \(\Pi_0P_ju_j\) 자리에 \((D_l)_{jk}(w_l)_i\)가 들어간 것과 같은 구조다. 실제로 \(j = k\)로 contract하면(\(\sum_q(D_l)_{iq}(w_l)_q\)) 그 공식으로 돌아간다(<a href="#ex-48-6-2">Exercise 48.6.2</a>).</p>
+      <div class="thm remark" id="i-48-6-2">
+        <p><span class="thm-head">Remark 48.6.2</span> <span class="thm-name">(from the tensor to principal curvatures)</span>. 논문 §7.1은 <a href="#eq-48-6-3">(48.6.3)</a>에서 다음 세 단계로 principal curvature를 꺼낸다(\(d = n - 1\)).</p>
+        <ol>
+          <li>\(i, j\)마다 vector \((B^k_{ij})_k\)를 normal space로 project하고 unit normal \(\mathbf{N}_{l_0}\)(논문의 \(n_{l_0}\))과 inner product를 취한다. 곧 \((B_{\mathbf{N}})_{ij} = \sum_kB^k_{ij}(\mathbf{N}_{l_0})_k\)이다. projection \((I - P_{l_0})\)은 \(\mathbf{N}_{l_0}\)과의 inner product에서 사라지므로 따로 할 필요가 없다(논문도 그렇게 적는다).</li>
+          <li>\(n \times d\) matrix \(Q\)의 열이 \(P_{l_0}\)의 orthonormal basis일 때 \(\bar B = Q^{\mathsf T}B_{\mathbf{N}}Q\)를 만든다.</li>
+          <li>\(\bar B\)의 eigenvalue와 eigenvector가 principal curvature와 principal direction의 근사다.</li>
+        </ol>
+        <p>근거는 <a href="48-2-projection-form.html#i-48-2-1">Proposition 48.2.1</a>(b)이다. 전체적인 orientation이 없으면 \(\mathbf{N}_{l_0}\)의 부호가 정해지지 않으므로 eigenvalue의 부호는 함께 뒤집힐 수 있고, 둘 사이의 상대적 부호만 의미가 있다. 그래서 논문은 \(\kappa_1\kappa_2\), \(\abs{\kappa_1} + \abs{\kappa_2}\), \(\abs{\kappa_1 + \kappa_2}\)만 그린다. <a class="cite" href="../../references.html#BLM22">[BLM22, §7.1]</a></p>
+      </div>
+      <div class="thm remark" id="i-48-6-3">
+        <p><span class="thm-head">Remark 48.6.3</span> <span class="thm-name">(contracting before summing)</span>. 계산에서는 \(27\)개의 성분을 만들 필요가 없다. <a href="#eq-48-6-3">(48.6.3)</a>을 먼저 \(\mathbf{N} = \mathbf{N}_{l_0}\)과 contract하면</p>
+        <div class="equation" id="eq-48-6-4">
+        \[ \begin{aligned} &B_{\mathbf{N}} = -\frac{d}{n}\,\frac{1}{2\varepsilon Z}\sum_lm_l\,\rho'(r_l)\,M^l, \\ &M^l = w_l(D_l\mathbf{N})^{\mathsf T} + (D_l\mathbf{N})w_l^{\mathsf T} \\ &\qquad - \inner{w_l}{\mathbf{N}}\,D_l \end{aligned} \tag{48.6.4} \]
+        </div>
+        <p>인 \(n \times n\) symmetric matrix다. \(P_{l_0}\mathbf{N} = 0\)이므로 \(D_l\mathbf{N} = P_l\mathbf{N}\)이고, 이것은 이웃의 plane이 중심의 normal 쪽으로 기운 정도다(<a href="48-1-problem-key-idea.html#sec-key-idea">Section 48.1</a>의 Looking back 상자). 첫째 두 항이 주된 항이고, \(Q^{\mathsf T}D_lQ = Q^{\mathsf T}P_lQ - I\)는 기운 각의 제곱 정도로 작다. 식은 우리가 정리한 것이고, 아래 구현과 <code>lib/var48.py</code>가 이것을 쓴다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code></p>
+      <aside class="box warning">
+        <p class="box-title">Warning: §7.1의 식에 빠진 \(1/\varepsilon\)</p>
+        <ul>
+          <li>§7.1의 \(\beta^{V,\varepsilon}_{ijk}(x_{l_0})\), \(A^{V,\perp,\varepsilon}_{ijk}(x_{l_0})\)과 (7.2)에는 \(1/\varepsilon\)이 없다. 위의 증명처럼 (6.4)의 \(1/\varepsilon^{n+1}\)을 분모의 \(\varepsilon^{-n}\)으로 나누면 \(1/\varepsilon\)이 남는다. 인쇄된 식은 \(x\)와 \(\varepsilon\)을 함께 \(\lambda\)배 해도 바뀌지 않는 무차원 양이라 curvature(길이의 역수)일 수 없다(<a href="#ex-48-6-3">Exercise 48.6.3</a>).</li>
+          <li>수치로 보면, unit sphere의 Fibonacci point cloud(\(N = 20000\), 정확한 plane, 같은 mass)에서 \(\varepsilon = 0.2\)로 다섯 점을 계산하면 \(1/\varepsilon\)을 넣은 eigenvalue는 \(-0.979\)에서 \(-0.990\) 사이이고(정답 \(-1\)), 인쇄된 식 그대로는 \(-0.196\)에서 \(-0.198\) 사이다. 곧 \(\varepsilon\)배다.</li>
+          <li>논문의 그림에는 colorbar가 없으므로 그림으로는 구현에 \(1/\varepsilon\)이 있었는지 알 수 없다. 이웃 개수를 고정하면 \(\varepsilon\)이 점마다 다르므로, 빠졌다면 상수배가 아니라 점마다 다른 배율이 된다. 저자 구현에 이 인수가 있었는지는 논문에 적혀 있지 않고 코드도 공개되지 않았다.</li>
+          <li><a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25]</a>의 식 (31)이 (7.2)를 그대로 옮겨 같은 인수가 빠져 있다(<a href="../49-paper-geosplat/49-4-estimating-normals-curvature.html#sec-varifold">Section 49.4</a>의 Warning).</li>
+          <li>같은 종류의 누락이 [BLM17]의 (8.1)–(8.2)에도 있다. 거기서는 상수 \(C_\xi/C_\rho\)가 빠졌다(<a href="../47-paper-varifold-approximation/47-7-numerical-experiments.html#i-47-7-1">Definition 47.7.1</a> 아래의 Warning). §7.1의 식은 \(d/n\)을 적고 있으므로 그 문제는 없다.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-implementation">
+      <h2>Implementation (Section 7.2)</h2>
+      <p>논문의 구현은 C++이다. 점의 \(\varepsilon\)-neighborhood 또는 \(k\)-nearest neighbor를 Nanoflann으로 찾고, linear algebra는 Eigen으로, 그림은 CloudCompare로 그린다. 공식에 들어갈 plane과 mass는 위치만으로 정한다.</p>
+      <div class="thm definition" id="i-48-6-4">
+        <p><span class="thm-head">Definition 48.6.4</span> <span class="thm-name">(PCA tangent planes and masses)</span>. 위치 \(\{x_l\}\)만 주어진 point cloud에서 다음과 같이 정한다.</p>
+        <ul>
+          <li><strong>plane</strong>: \(\sigma \gt 0\)(또는 이웃 개수 \(k_\sigma\))를 정하고, \(x_i\)의 \(\sigma\)-neighborhood(또는 가장 가까운 \(k_\sigma\)개 점)의 무게중심 \(\bar x\)를 구한다. covariance matrix
+          <div class="equation" id="eq-48-6-5">
+          \[ \begin{aligned} C_{ab} = \sum_j&\rho\Big(\frac{\abs{x_j - x_i}}{\sigma}\Big) \\ &\cdot(x_j - \bar x)_a(x_j - \bar x)_b \end{aligned} \tag{48.6.5} \]
+          </div>
+          (\(a, b = 1, \dots, n\))의 가장 큰 eigenvalue \(d\)개의 eigenvector가 span하는 plane을 \(P_i\)로 한다.</li>
+          <li><strong>mass</strong>: 국소적으로(scale \(\varepsilon\)에서) 고른 sampling이면 모든 mass를 같게(예를 들어 \(1\)) 둔다. 아니면 개수 \(N_{\mathrm{mass}}\)를 정하고, \(x_i\) 중심의 ball이 \(N_{\mathrm{mass}}\)개 이상의 점을 담는 가장 작은 반지름 \(r_i\)로 \(m_i = \omega_dr_i^d/N_{\mathrm{mass}}\)(또는 상수를 약분한 \(r_i^d\))로 둔다.</li>
+        </ul>
+        <p><a class="cite" href="../../references.html#BLM22">[BLM22, §7.2]</a></p>
+      </div>
+      <p>plane은 이웃의 공분산에서 가장 덜 퍼진 방향을 normal로 고르는 local PCA이고(<a class="cite" href="../../references.html#Hoppe92">[Hoppe92]</a>), mass는 점 하나가 대표하는 넓이 \(\omega_dr_i^d/N_{\mathrm{mass}}\)다. 균일한 sampling에서 둘째 규칙은 첫째 규칙과 같은 결과를 준다. 모든 mass를 같은 상수배 해도 <a href="#eq-48-6-2">(48.6.2)</a>는 바뀌지 않기 때문이다(<a href="#ex-48-6-4">Exercise 48.6.4</a>).</p>
+      <div class="thm remark" id="i-48-6-5">
+        <p><span class="thm-head">Remark 48.6.5</span> <span class="thm-name">(what Section 7 leaves open, and our reading)</span>. 논문은 실험의 매개변수를 “tangent plane과 \(\varepsilon\)-WSFF\(^\perp\)를 계산하는 데 쓴 점의 개수 \(N_{\mathrm{neigh}} = 40\), 평균 \(\varepsilon = 0.060\)”처럼 적는다. 다음은 적혀 있지 않다.</p>
+        <ul>
+          <li>\(\varepsilon\)이 점마다 다른지. “평균 \(\varepsilon\)”이라는 말에서 우리는 \(\varepsilon_i\)를 \(x_i\)에서 \(N_{\mathrm{neigh}}\)번째로 가까운 점까지의 거리(자기 자신을 첫째로 센다)로, PCA의 \(\sigma\)도 같은 값으로 읽는다. cube 실험의 \(N = 21602\)는 간격 \(1/60\)인 격자의 cube 표면 점 개수 \(6 \cdot 61^2 - 12 \cdot 61 + 8\)과 정확히 같다. 이 격자에서 우리의 읽기는 평균 \(\varepsilon = 0.0589\)(\(N_{\mathrm{neigh}} = 40\))와 \(0.1307\)(noise \(0.05\), \(N_{\mathrm{neigh}} = 150\))을 주고, 논문의 \(0.060\), \(0.134\)와 가깝다.</li>
+          <li>실험에서 어느 mass 규칙을 썼는지. 아래 재현은 모두 같은 mass를 쓴다.</li>
+          <li>Figure 5에서 \(N_{\mathrm{neigh}} = 150\)을 쓴 “these latter experiments”가 (c), (f)만인지 (b)–(f) 모두인지. (b), (e)는 “the same test”라고 하므로 우리는 \(N_{\mathrm{neigh}} = 40\)으로 읽는다.</li>
+          <li>\(\varepsilon\)-WSFF(linear system을 푸는 판)는 계산하지 않는다. 실험은 모두 \(\varepsilon\)-WSFF\(^\perp\)이고, 그래서 \(\eta\)를 고를 필요가 없다(<a href="48-5-approximate-wsff.html">Section 48.5</a>의 Warning).</li>
+        </ul>
+        <p>저자 구현의 \(\varepsilon_i\), 실험의 mass 규칙, Figure 5(b), (e)의 \(N_{\mathrm{neigh}}\)는 논문에 적혀 있지 않다. 그래서 위의 읽기는 cube의 평균 \(\varepsilon\)으로 지지될 뿐 확정할 수 없다.</p>
+      </div>
+      <aside class="box code">
+        <p class="box-title">Implementation: principal curvatures of a point cloud</p>
+<pre id="code-48-6-1"><code>import numpy as np
+
+def curvatures(X, k=40, n=3, d=2):
+    """principal curvatures from the epsilon-WSFF-perp of a point cloud in R^3 ((48.6.4))."""
+    R = np.linalg.norm(X[None] - X[:, None], axis=2)              # pairwise distances
+    nn = np.argsort(R, axis=1)[:, :k]                             # k nearest points (the point itself first)
+    Y = X[nn] - X[nn].mean(axis=1, keepdims=True)
+    Nrm = np.linalg.eigh(np.einsum("ika,ikb-&gt;iab", Y, Y))[1][:, :, 0]   # PCA normal: smallest eigenvalue
+    P = np.eye(n) - Nrm[:, :, None] * Nrm[:, None, :]             # tangent projections
+    kap = np.zeros((len(X), d))
+    for i in range(len(X)):
+        eps, l = R[i, nn[i, -1]], nn[i, 1:-1]                     # eps = distance to the k-th point
+        s = R[i, l] / eps
+        drho = -2 * s * np.exp(-1 / (1 - s ** 2)) / (1 - s ** 2) ** 2   # rho' of rho = exp(-1/(1 - s^2))
+        a = -(d / n) * drho / eps / np.sum(-s * drho / n)         # natural pair n xi = -s rho'; equal masses
+        w = np.einsum("lab,lb-&gt;la", P[l], (X[l] - X[i]) / R[i, l, None])     # w_l = P_l u_l
+        D = P[l] - P[i]
+        Dn = D @ Nrm[i]
+        BN = 0.5 * np.einsum("l,lab-&gt;ab", a, w[:, :, None] * Dn[:, None] + Dn[:, :, None] * w[:, None]
+                              - (w @ Nrm[i])[:, None, None] * D)  # B_N of (48.6.4)
+        Q = np.linalg.eigh(P[i])[1][:, 1:]                        # orthonormal basis of the tangent plane
+        kap[i] = np.linalg.eigvalsh(Q.T @ BN @ Q)
+    return kap
+
+N, z = 2000, 1 - (2 * np.arange(2000) + 1) / 2000                 # Fibonacci sphere of radius 0.5
+t = np.pi * (3 - np.sqrt(5)) * np.arange(N)
+X = 0.5 * np.stack([np.sqrt(1 - z ** 2) * np.cos(t), np.sqrt(1 - z ** 2) * np.sin(t), z], 1)
+kap = curvatures(X)
+print("mean |kappa| = %.3f (exact 2), mean K = %.3f (exact 4)" % (np.abs(kap).mean(), kap.prod(1).mean()))
+print("K &gt; 0 at every point:", bool(np.all(kap.prod(1) &gt; 0)))
+</code></pre>
+<pre id="out-48-6-1"><code>mean |kappa| = 1.940 (exact 2), mean K = 3.753 (exact 4)
+K &gt; 0 at every point: True</code></pre>
+        <p>논문의 절차를 두 군데 단순화했다. PCA는 \(\rho\) 가중치 없이 \(k\)개 이웃의 보통 공분산이고, mass는 모두 같다. \(\varepsilon\)은 점마다 \(k\)번째 점까지의 거리이고, 자기 자신(\(r = 0\))과 \(k\)번째 점(\(r = 1\))은 \(\rho' = 0\)이라 합에서 뺐다. 상수 \(-(d/n)\)과 \(1/(\varepsilon Z)\)를 <code>a</code>에 모았으므로 <code>BN</code>은 <a href="#eq-48-6-4">(48.6.4)</a> 그대로다. PCA의 normal은 eigenvector라 부호가 점마다 제멋대로다. 그래서 \(\kappa\) 자체가 아니라 \(\abs{\kappa}\)와 \(K\)를 출력하고, 모든 점에서 \(K \gt 0\)인 것은 두 eigenvalue의 상대적 부호가 맞다는 뜻이다. 반지름 \(0.5\)인 sphere의 정답은 \(\abs{\kappa} = 2\), \(K = 4\)다. 평균 \(\varepsilon\)은 약 \(0.14\)로 반지름의 \(28\%\)이고, 값이 \(3\%\)(\(K\)는 \(6\%\)) 작은 것은 주로 이 큰 \(\varepsilon\)의 bias다.</p>
+        <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code>가 이 코드를 그대로 실행해 출력을 비교하고, 같은 plane으로 <code>lib/var48.py</code>의 구현과 값을 맞춰 본다.</p>
+      </aside>
+    </section>
+
+    <section id="sec-paper-experiments">
+      <h2>The Experiments of the Paper (Section 7.3)</h2>
+      <p>논문의 실험은 모두 \(\R^3\)의 \(2\)차원 point cloud이고, 색으로 칠한 그림 다섯 장이다. <a href="#tab-48-6-1">Table 48.6.1</a>은 그 내용을 정리한 것이다.</p>
+      <table id="tab-48-6-1">
+        <caption>Table 48.6.1. [BLM22]의 Figure 1–5</caption>
+        <thead>
+          <tr><th>Figure</th><th>data, \(N\)</th><th>\(N_{\mathrm{neigh}}\), 평균 \(\varepsilon\)</th><th>그린 양</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>dragon(Stanford 3D Scanning Repository의 mesh에서 sampling), \(435\,545\)</td><td>\(40\), 없음</td><td>\(\kappa_1\kappa_2\) (파랑 음수, 흰색, 빨강 양수), 확대와 전체</td></tr>
+          <tr><td>2</td><td>같은 dragon</td><td>\(40\), 없음</td><td>\(\abs{\kappa_1} + \abs{\kappa_2}\) (파랑 작음, 초록, 노랑, 빨강 큼)</td></tr>
+          <tr><td>3</td><td>genus \(3\) surface(caption의 “3-torus”), \(100\,030\)</td><td>\(40\), \(0.016\)(지름 약 \(1\))</td><td>\(\kappa_1\kappa_2\), \(\abs{\kappa_1} + \abs{\kappa_2}\), \(\abs{\kappa_1 + \kappa_2}\)</td></tr>
+          <tr><td>4</td><td>Farman Institute 3D Point Sets <a class="cite" href="../../references.html#Digne11">[Digne11]</a>의 한 cloud, 없음</td><td>없음</td><td>\(\abs{\kappa_1} + \abs{\kappa_2}\)</td></tr>
+          <tr><td>5(a), (d)</td><td>한 변 \(1\)인 cube, \(21\,602\)</td><td>\(40\), \(0.060\)</td><td>(a) \(\kappa_1\kappa_2\), (d) \(\abs{\kappa_1} + \abs{\kappa_2}\)</td></tr>
+          <tr><td>5(b), (e)</td><td>위치에 표준편차 \(0.01\)의 Gaussian noise</td><td>\(40\)(“same test”로 읽음), 없음</td><td>같음</td></tr>
+          <tr><td>5(c), (f)</td><td>표준편차 \(0.05\)의 Gaussian noise</td><td>\(150\), \(0.134\)</td><td>같음</td></tr>
+        </tbody>
+      </table>
+      <div class="thm remark" id="i-48-6-6">
+        <p><span class="thm-head">Remark 48.6.6</span> <span class="thm-name">(what the figures claim and what they do not show)</span>. 논문이 그림에 붙인 주장은 두 가지다. Figure 4는 curvature 정보가 데이터에서 feature를 뽑는 데 쓸모 있음을 보여 주고(“pyramid의 의미 있는 정보가 큰 curvature 값과 분명히 연결된다”), Figure 5는 noise에 대한 안정성을 시험한다. 다음은 우리의 평가다.</p>
+        <ul>
+          <li>그림에는 colorbar도 값의 범위도 없다. 그래서 어느 값이 어느 색인지, 두 그림의 색을 비교할 수 있는지 알 수 없다. 예를 들어 Figure 5(a)에서 \(K = 0\)인 face는 caption대로라면 흰색이어야 하는데 파랑으로 보인다. 색의 척도가 \(0\)을 가운데에 두지 않은 것으로 보인다(우리의 추정). 척도는 논문에 적혀 있지 않다.</li>
+          <li>정답이 알려진 cube에서도 정답과의 비교, 오차의 수치, 계산 시간이 없다. 논문 Introduction이 인용하는 다른 estimator(MLS, curvature measure <a class="cite" href="../../references.html#CCLT09">[CCLT09]</a>, second fundamental measure <a class="cite" href="../../references.html#CohenSteinerMorvan06">[CohenSteinerMorvan06]</a> 등)와의 비교도 없다.</li>
+          <li><a href="48-5-approximate-wsff.html#i-48-5-9">Theorem 48.5.9</a>의 속도를 확인하는 실험이 없다. 이웃 개수를 고정한 실험만 있는데, 그 선택에서는 정리의 bound가 \(0\)으로 가지 않는다(<a href="48-5-approximate-wsff.html#ex-48-5-4">Exercise 48.5.4</a>).</li>
+          <li>dragon은 [BLM17]의 Fig. 11과 같은 cloud다(점 \(435\,545\)개, <a href="../47-paper-varifold-approximation/47-7-numerical-experiments.html#sec-3d">Section 47.7</a>). 거기서는 mean curvature의 크기를, 여기서는 Gaussian curvature와 \(\abs{\kappa_1} + \abs{\kappa_2}\)를 보인다.</li>
+        </ul>
+        <p>그림 자체는 기대에 맞는 모양이다. cube의 vertex에서 \(K\)가 크고, edge를 따라 \(\abs{\kappa_1} + \abs{\kappa_2}\)가 크며, noise가 커지면 face에 얼룩이 생기고, 이웃을 \(150\)개로 늘리면 edge가 다시 보인다. 아래의 재현은 이 정성적 관찰에 수치를 붙인다.</p>
+      </div>
+    </section>
+
+    <section id="sec-reproduction">
+      <h2>A Small Reproduction</h2>
+      <p>정답을 아는 두 모양에서 논문의 절차(<a href="#i-48-6-4">Definition 48.6.4</a>, <a href="#i-48-6-5">Remark 48.6.5</a>의 읽기, <a href="#eq-48-6-4">(48.6.4)</a>)를 그대로 돌렸다. plane은 \(k\)개 이웃의 \(\rho\) 가중 PCA, \(\varepsilon_i\)는 \(k\)번째 점까지의 거리, mass는 모두 같다. 이 절의 실험은 모두 우리의 것이다.</p>
+      <div class="thm example" id="i-48-6-7">
+        <p><span class="thm-head">Example 48.6.7</span> <span class="thm-name">(a random point cloud on the torus \(T_{2,0.8}\))</span>. <a href="48-2-projection-form.html#i-48-2-2">Example 48.2.2</a>의 torus(\(R = 2\), \(r = 0.8\))에서 넓이에 대해 균일한 random 점 \(N = 20000\) 또는 \(80000\)개를 뽑았다(noise 없음). 정답은 바깥쪽 normal에 대해 \(\kappa_{\min} = -1/r = -1.25\)(meridian 방향), \(\kappa_{\max} = -\cos u/(R + r\cos u)\)이고 \(\kappa_{\max}\)는 \(-0.357\)(바깥 적도)에서 \(0.833\)(안쪽 적도)까지 변한다. PCA normal의 부호는 정해지지 않으므로, 부호가 있는 정답과 비교하기 위해서만 알려진 기하로 바깥쪽을 향하게 했다(논문은 이것을 할 수 없고 하지 않는다). 점 \(4000\)개에서 오차를 평균했다.</p>
+      </div>
+      <p><a href="#fig-48-6-1">Figure 48.6.1</a>(a)는 \(N = 20000\), \(k = 40\)(평균 \(\varepsilon = 0.197\))에서 두 eigenvalue를 \(u\)에 대해 찍은 것이다. 주홍 점(\(\kappa_{\max}\))은 검은 파선의 정답 곡선을 따라가고, 파랑 점(\(\kappa_{\min}\))은 \(-1.25\)의 수평선 주위에 더 넓게 퍼진다. 평균 절대 오차는 \(\kappa_{\min}\)이 \(0.153\), \(\kappa_{\max}\)가 \(0.056\)이고, PCA normal과 정확한 normal 사이의 각은 평균 \(1.0°\)다. 상대 오차로 보면 \(\kappa_{\min}\)이 \(12\%\)다. noise가 없는 깨끗한 cloud에서도 이웃 \(40\)개로는 이 정도의 요동이 남는다.</p>
+      <p>(b)는 \(k\)를 \(20\)에서 \(320\)까지 바꾼 평균 절대 오차다. 읽을 것은 세 가지다.</p>
+      <ul>
+        <li><strong>\(k\)가 같으면 오차가 \(N\)에 거의 무관하다.</strong> \(k = 40\)에서 \(\kappa_{\min}\)의 오차는 \(N = 20000\)이 \(0.153\), \(N = 80000\)이 \(0.160\)이다. 점을 \(4\)배로 늘리면 \(\varepsilon\)이 절반(\(0.197 \to 0.099\))이 되어 discretization 오차의 bound \(h/\varepsilon\)이 그대로이기 때문이다(<a href="48-5-approximate-wsff.html#ex-48-5-4">Exercise 48.5.4</a>).</li>
+        <li><strong>\(\varepsilon\)이 같으면 점이 많을수록 낫다.</strong> \(\varepsilon \approx 0.2\)에서 \(N = 20000\)(\(k = 40\))은 \(0.153\), \(N = 80000\)(\(k = 160\))은 \(0.075\)이다.</li>
+        <li><strong>최적의 \(k\)는 \(N\)과 함께 커진다.</strong> \(N = 20000\)에서는 \(k = 160\)(\(\varepsilon = 0.40\))에서 \(\kappa_{\min}\)의 오차가 \(0.108\)로 가장 작고, \(k = 320\)(\(\varepsilon = 0.56\), 관의 반지름 \(0.8\)에 가깝다)에서는 bias 때문에 \(0.174\)로 다시 커진다. \(N = 80000\)에서는 \(k = 320\)(\(\varepsilon = 0.28\))까지 계속 줄어 \(0.064\)이다.</li>
+      </ul>
+      <p>Gaussian curvature \(K = \kappa_1\kappa_2\)(정답 범위 \(-1.04\)에서 \(0.45\))의 평균 절대 오차는 \(k = 40\)에서 \(0.066\)(\(N = 20000\))과 \(0.061\)(\(N = 80000\))이고, 가장 좋은 값은 \(0.047\)(\(N = 20000\), \(k = 80\))과 \(0.026\)(\(N = 80000\), \(k = 160\))이다.</p>
+      <figure class="dg-figure" id="fig-48-6-1">
+        <img src="figures/fig-48-6-1-torus.svg" alt="두 패널. (a) 가로축 u(-pi에서 pi), 세로축 principal curvature. 주홍 점 구름이 양 끝 0.83에서 가운데 -0.36까지 내려가는 U자 검은 파선을 따라가고, 파랑 점 구름이 -1.25의 검은 수평선 주위 -0.6에서 -1.8 사이에 퍼져 있다. (b) 가로축 k(20, 40, 80, 160, 320, log 눈금), 세로축 평균 절대 오차. 파란 실선 두 개가 0.23에서 시작해 내려가는데, 채운 원(N = 20000)은 k = 160에서 0.11로 바닥을 찍고 k = 320에서 0.17로 올라가고, 빈 사각형(N = 80000)은 0.064까지 계속 내려간다. 주홍 파선 두 개는 0.1에서 0.02에서 0.035 사이로 내려간다.">
+        <figcaption><span class="fig-head">Figure 48.6.1.</span>
+          무엇을: torus \(T_{2,0.8}\) 위의 균일한 random point cloud에서 논문 §7의 절차(\(\rho\) 가중 PCA plane, \(\varepsilon_i\) = \(k\)번째 점까지의 거리, 같은 mass, <a href="#eq-48-6-4">(48.6.4)</a>)로 계산한 principal curvature. normal은 비교를 위해서만 바깥쪽으로 맞췄다.
+          읽는 법: (a)는 \(N = 20000\), \(k = 40\)에서 점 \(4000\)개의 \(\kappa_{\min}\)(파랑)과 \(\kappa_{\max}\)(주홍)를 meridian 각 \(u\)에 대해 찍은 것이고, 검은 실선이 정답 \(-1/r\), 검은 파선이 정답 \(-\cos u/(R + r\cos u)\)다. \(u = 0\)이 바깥 적도, \(u = \pm\pi\)가 안쪽 적도다. (b)는 평균 절대 오차를 \(k\)(log 눈금)에 대해 그린 것이다. 실선이 \(\kappa_{\min}\), 파선이 \(\kappa_{\max}\), 채운 원이 \(N = 20000\), 빈 사각형이 \(N = 80000\)이다.
+          볼 것: (a)에서 점 구름이 정답 곡선을 따라가고, 큰 curvature 쪽(\(\kappa_{\min}\))이 더 퍼진다. (b)에서 같은 \(k\)의 두 곡선이 \(k = 40\)까지 거의 겹치고(\(0.153\)와 \(0.160\)), \(N = 20000\)의 \(\kappa_{\min}\)은 \(k = 160\)에서 바닥을 찍은 뒤 올라간다.
+          본문과의 연결: <a href="#i-48-6-7">Example 48.6.7</a>, <a href="48-5-approximate-wsff.html#i-48-5-9">Theorem 48.5.9</a>와 <a href="48-5-approximate-wsff.html#ex-48-5-4">Exercise 48.5.4</a>(이웃 개수를 고정할 때의 bound), 같은 균형을 정확한 plane으로 본 <a href="48-5-approximate-wsff.html#fig-48-5-1">Figure 48.5.1</a>(b).</figcaption>
+      </figure>
+      <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code></p>
+      <div class="thm remark" id="i-48-6-8">
+        <p><span class="thm-head">Remark 48.6.8</span> <span class="thm-name">(a fixed number of neighbours)</span>. 이웃 개수 \(k\)를 고정하는 것은 실무의 관행이고 논문의 실험도 그렇다(\(N_{\mathrm{neigh}} = 40\)). 그 선택은 sampling의 밀도에 자동으로 맞춰진다는 장점이 있지만, <a href="#i-48-6-7">Example 48.6.7</a>이 보이듯 점을 늘려도 오차가 줄지 않는다. <a href="48-5-approximate-wsff.html#i-48-5-9">Theorem 48.5.9</a>의 수렴 조건 \(h = o(\varepsilon)\)은 이웃 개수가 늘어날 것을 요구한다. 해상도가 높은 데이터일수록 \(k\)를 키워야 이론의 수렴을 얻는다(우리의 해석).</p>
+      </div>
+      <div class="thm example" id="i-48-6-9">
+        <p><span class="thm-head">Example 48.6.9</span> <span class="thm-name">(the cube with noise)</span>. 논문 Figure 5의 실험을 다시 계산했다. 점은 간격 \(1/60\)인 격자의 \([0, 1]^3\) 표면 \(N = 21602\)개(<a href="#i-48-6-5">Remark 48.6.5</a>)이고, 모든 좌표에 표준편차 \(\sigma\)의 Gaussian noise를 더했다(seed \(0\)). \((\sigma, k) = (0, 40)\), \((0.01, 40)\), \((0.05, 40)\), \((0.05, 150)\)의 네 경우를 보았다. 셋째 경우는 논문에 없고, 이웃을 \(40\)개로 둔 채 noise만 키운 비교다. 정답은 face와 edge에서 \(K = 0\)이고, edge에서 \(\abs{\kappa_1} + \abs{\kappa_2}\)는 무한대(curvature가 edge 선 위의 measure)이며, 전체 Gaussian curvature \(4\pi\)는 vertex 여덟 개에 \(\pi/2\)씩 모여 있다.</p>
+      </div>
+      <p><a href="#fig-48-6-2">Figure 48.6.2</a>와 <a href="#tab-48-6-2">Table 48.6.2</a>가 결과다. 표의 S는 \(\abs{\kappa_1} + \abs{\kappa_2}\)의 평균이다. face는 가장 가까운 edge까지 \(0.1\)보다 먼 점, edge는 edge 위의 점(vertex에서 \(0.1\)보다 먼 것), vertex 부근은 face 안의 두 좌표가 모두 \(0\) 또는 \(1\)에서 \(0.05\) 안인 점이다.</p>
+      <table id="tab-48-6-2">
+        <caption>Table 48.6.2. cube에서 \(\abs{\kappa_1} + \abs{\kappa_2}\)의 평균</caption>
+        <thead>
+          <tr><th>\((\sigma, k)\)</th><th>평균 \(\varepsilon\)</th><th>S, face</th><th>S, edge</th><th>S, near vertices</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>\((0, 40)\)</td><td>\(0.0589\)</td><td>\(0\)</td><td>\(14.69\)</td><td>\(17.51\)</td></tr>
+          <tr><td>\((0.01, 40)\)</td><td>\(0.0601\)</td><td>\(2.70\)</td><td>\(10.01\)</td><td>\(10.86\)</td></tr>
+          <tr><td>\((0.05, 40)\)</td><td>\(0.0805\)</td><td>\(3.85\)</td><td>\(4.02\)</td><td>\(4.00\)</td></tr>
+          <tr><td>\((0.05, 150)\)</td><td>\(0.1307\)</td><td>\(1.78\)</td><td>\(2.60\)</td><td>\(3.03\)</td></tr>
+        </tbody>
+      </table>
+      <p>noise가 없으면 face의 값은 정확히 \(0\)이다. 반지름 \(\varepsilon\) 안의 모든 이웃의 plane이 중심의 plane과 같으면 <a href="#eq-48-6-2">(48.6.2)</a>의 모든 \(D_l\)이 \(0\)이기 때문이다. edge에서 멀어지면 값이 \(14.69\), \(13.43\), \(9.05\), \(3.71\), \(1.76\), \(0.47\), \(0.045\)로 줄고, edge에서 격자 \(7\)칸부터는 정확히 \(0\)이다. 띠의 폭이 약 \(2\varepsilon\)인 이유는 <a href="#ex-48-6-5">Exercise 48.6.5</a>에서 본다. vertex 부근의 \(K\)는 평균 \(73.5\)이고, vertex 위의 점에서는 \(\abs{\kappa} = (9.91, 10.70)\), \(K = 105\)이다. vertex의 \(3\)-fold symmetry로 보면 두 principal curvature는 같아야 한다. 다르게 나온 것은 격자에 거리가 같은 점이 많아서 \(k\)개의 이웃을 고를 때 어느 것을 넣느냐가 symmetry를 깨기 때문이다(예를 들어 vertex 자신의 이웃 \(40\)개에는 거리 \(\sqrt{17}h\)인 점 \(6\)개 가운데 \(3\)개만 든다). 그래서 vertex 근처의 값은 이 선택에 따라 조금 달라진다.</p>
+      <p>noise \(\sigma = 0.01\)(격자 간격의 \(0.6\)배)이면 face에 \(2.70\) 정도의 얼룩이 생기지만 edge(\(10.01\))는 여전히 분명하다. \(\sigma = 0.05\)(격자 간격의 \(3\)배)에서 이웃을 \(40\)개로 두면 face(\(3.85\))와 edge(\(4.02\))와 vertex(\(4.00\))가 구별되지 않는다. 이웃을 \(150\)개로 늘리면 face \(1.78\), edge \(2.60\), vertex \(3.03\)으로 순서가 돌아온다. 그 대가로 edge의 값은 noise 없는 경우의 \(14.69\)에서 \(2.60\)으로 흐려진다. 논문이 \(\sigma = 0.05\)에서 \(N_{\mathrm{neigh}} = 150\)을 쓴 이유가 이것으로 보인다. 같은 이웃 \(40\)개로는 noise \(0.05\)가 \(\varepsilon \approx 0.08\)에 비해 너무 커서, PCA plane의 오차(<a href="48-5-approximate-wsff.html#eq-48-5-15">(48.5.15)</a>의 \(d_{2,h}\))와 위치의 오차가 \(\varepsilon\)에 비해 작다는 정리의 가정이 깨진다.</p>
+      <p><a href="#fig-48-6-2">Figure 48.6.2</a>를 위에서부터 보자. (a)는 noise가 없을 때다. 테두리의 노란 띠가 edge이고, 안쪽은 정확히 \(0\)의 색이다. (b)에서는 안쪽에 푸른 얼룩이 생기지만 테두리의 띠는 남는다. (c)에서는 띠가 잡음에 묻혀 테두리와 안쪽이 구별되지 않는다. (d)는 같은 noise에서 이웃을 \(150\)개로 늘린 것으로, 전체가 어두워지고 테두리가 안쪽보다 조금 밝다. (e)는 네 경우를 edge까지의 거리 \(t\)에 대해 평균한 것이다. 검은 선은 \(7\)칸에서 \(0\)이 되고, 주홍 선(\(\sigma = 0.05\), \(k = 40\))은 평평하며, 초록 선(\(k = 150\))은 edge 쪽이 다시 높다.</p>
+      <figure class="dg-figure" id="fig-48-6-2">
+        <img src="figures/fig-48-6-2-cube.svg" alt="위에 2 곱하기 2로 놓인 정사각형 heatmap 네 개와 오른쪽의 colorbar(0에서 15), 아래에 선 그래프 하나. (a)는 가장자리에 노란 띠가 있고 안쪽은 균일한 진한 보라색이다. (b)는 가장자리 띠가 노랑과 초록으로 얼룩지고 안쪽에 파란 얼룩이 퍼져 있다. (c)는 전체가 파랑과 초록의 잡음이고 가장자리가 구별되지 않는다. (d)는 전체가 어두운 파랑이고 가장자리가 안쪽보다 조금 밝다. (e)는 가로축 edge까지의 거리 0에서 20칸, 세로축 절대 principal curvature의 합. 검은 선이 14.7에서 시작해 7칸에서 0이 되고, 파란 선이 10에서 시작해 6칸 이후 2.7 근처에서 평평해지고, 주홍 선은 4 근처에서 평평하며, 초록 선은 2.6에서 1.5로 천천히 내려간다.">
+        <figcaption><span class="fig-head">Figure 48.6.2.</span>
+          무엇을: 간격 \(1/60\)의 격자로 만든 cube 표면 point cloud(\(N = 21602\))에 Gaussian noise를 더하고, 논문 §7의 절차로 계산한 \(\abs{\kappa_1} + \abs{\kappa_2}\). 논문 Figure 5(d)–(f)와 같은 양을 우리가 다시 계산한 것이다.
+          읽는 법: (a)–(d)는 윗면 \(z = 1\)의 \(61 \times 61\)개 점의 값을 noise 없는 격자 위치에 칠한 heatmap이고, 네 패널이 같은 색 척도(\(0\)에서 \(15\), 넘는 값은 \(15\)의 색)를 쓴다. 제목이 noise의 표준편차 \(\sigma\)와 이웃 개수 \(k\)다. (e)는 네 경우의 값을 가장 가까운 edge까지의 거리 \(t\)(격자 칸)에 대해 평균한 profile이다(다른 좌표가 \([0.2, 0.8]\)인 점).
+          볼 것: (a)의 노란 띠가 edge이고 안쪽은 정확히 \(0\)이며, (e)의 검은 선이 \(7\)칸에서 \(0\)이 된다. (c)에서는 edge가 잡음에 묻히고, (e)의 주홍 선이 평평하다. (d)는 같은 noise에서 이웃을 \(150\)개로 늘린 것으로, (e)의 초록 선에서 edge 쪽이 다시 높다.
+          본문과의 연결: <a href="#i-48-6-9">Example 48.6.9</a>, <a href="#tab-48-6-2">Table 48.6.2</a>, <a href="#ex-48-6-5">Exercise 48.6.5</a>, 그리고 논문 Figure 5(<a href="#tab-48-6-1">Table 48.6.1</a>).</figcaption>
+      </figure>
+      <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code></p>
+      <div class="thm remark" id="i-48-6-10">
+        <p><span class="thm-head">Remark 48.6.10</span> <span class="thm-name">(no Gauss–Bonnet for the pointwise estimate)</span>. noise 없는 cube에서 \(K\)에 점 하나가 대표하는 넓이 \(h^2 = 1/3600\)을 곱해 더하면 \(\sum_iK_ih^2 = 4.55\)이다. \(4\pi = 12.57\)이 아니다. face 안의 두 좌표가 모두 \(0\) 또는 \(1\)에서 \(0.1\) 안인 vertex 부근이 \(4.58\)(vertex 하나에 \(0.57\), 정답 \(\pi/2 = 1.57\))이고, 나머지 edge 근처의 띠가 \(-0.03\), face가 \(0\)이다. angle defect는 vertex마다 정확히 \(\pi/2\)를 주고 그 합은 언제나 \(2\pi\chi = 4\pi\)다(<a href="../40-discrete-curvature-integral/40-2-discrete-gauss-bonnet.html#i-40-2-1">Theorem 40.2.1</a>, <a href="../40-discrete-curvature-integral/40-2-discrete-gauss-bonnet.html#i-40-2-10">Corollary 40.2.10</a>). \(\varepsilon\)-WSFF\(^\perp\)의 eigenvalue의 곱은 어떤 map의 Jacobian도 아니므로 그런 항등식이 없다. 이 estimator는 점마다의 값을 주는 것이고, vertex처럼 curvature가 measure로 모인 곳에서 그 총량을 보존하지 않는다(우리의 해석). 격자를 촘촘하게 해도 이것은 고쳐지지 않는다. \(k\)를 그대로 두고 간격 \(h\)를 \(\lambda\)배 하면 vertex 근처의 배치는 닮은꼴이므로 \(K\)는 \(1/\lambda^2\)배, \(h^2\)은 \(\lambda^2\)배가 되어(<a href="#ex-48-6-3">Exercise 48.6.3</a>의 scaling) vertex 근처의 \(\sum K_ih^2\)은 (거리가 같은 이웃을 고르는 차이를 빼면) \(h\)에 무관하다. \(h \to 0\)으로 보내도 vertex 하나의 몫은 \(\pi/2\)로 가지 않는다.</p>
+      </div>
+      <aside class="box application">
+        <p class="box-title">In computer vision: choosing \(k\) for Gaussian centers</p>
+        <p>3DGS에서 같은 계산을 하면 plane을 PCA 대신 각 Gaussian에서 얻을 수 있다. 가장 짧은 축이 그 후보다(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html">Section 46.8</a>). GeoSplat이 이 입력을 어디서 얻는지는 논문에 적혀 있지 않다(<a href="../49-paper-geosplat/49-4-estimating-normals-curvature.html#sec-varifold">Section 49.4</a>). 그 normal의 오차가 <a href="48-5-approximate-wsff.html#i-48-5-9">Theorem 48.5.9</a>의 \(d_{2,h}\)로 그대로 들어간다. 위의 두 실험이 주는 실무적 교훈은 셋이다. 이웃 개수를 고정하면 오차의 바닥이 생기고 장면의 해상도를 높여도 그 바닥은 내려가지 않는다. 위치의 noise가 \(\varepsilon\)에 비해 크면 \(k\)를 키워야 하지만 그만큼 날카로운 feature가 흐려진다. 공식에는 \(1/\varepsilon\)이 있어야 하고, 이웃 개수로 \(\varepsilon\)을 정하면 그 인수가 점마다 다르다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>point cloud의 \(\varepsilon\)-WSFF\(^\perp\)는 이웃마다 plane의 차 \(D_l = P_l - P_{l_0}\)와 방향 \(w_l = P_lu_l\)를 곱해 \(-\tfrac{d}{n}\tfrac{1}{\varepsilon Z}m_l\rho'(r_l)\)로 더한 것이다. 인쇄된 §7.1의 식과 (7.2)에는 \(1/\varepsilon\)이 빠져 있다.</li>
+        <li>principal curvature는 \(B\)를 normal과 contract해 tangent plane에 제한한 \(2 \times 2\) matrix의 eigenvalue다. normal의 부호가 정해지지 않으므로 \(\kappa_1\kappa_2\), \(\abs{\kappa_1} + \abs{\kappa_2}\), \(\abs{\kappa_1 + \kappa_2}\)만 의미가 있다.</li>
+        <li>구현은 local PCA로 plane을, 고른 sampling이면 같은 mass를, 이웃 개수로 \(\varepsilon\)을 정한다. 논문의 그림 다섯 장은 colorbar와 정답 비교가 없는 정성적 예시다.</li>
+        <li>torus에서 이웃 \(40\)개의 오차는 \(\kappa_{\min}\) \(12\%\) 정도이고 \(N\)을 늘려도 줄지 않는다. 최적의 \(k\)는 \(N\)과 함께 커진다. cube에서 noise가 \(\varepsilon\)에 비해 크면 edge가 사라지고, 이웃을 늘리면 흐려진 채 돌아온다. 점마다의 \(K\)를 더해도 \(4\pi\)가 나오지 않는다.</li>
+      </ul>
+      <p class="next">다음 절에서는 논문 전체를 평가한다. 주장과 근거를 나란히 놓고, 이 장에서 찾은 인쇄 오류와 확인하지 못한 것을 모으며, Chapter 47, 49, 50과의 관계와 한계를 정리한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+      <div class="exercise" id="ex-48-6-1" data-level="1">
+        <p><span class="thm-head">Exercise 48.6.1</span> <span class="level">★</span> \(n\xi(t) = -t\rho'(t)\)이면 \(\int_{\R^n}\xi(\abs{x})\,dx = \int_{\R^n}\rho(\abs{x})\,dx\)임을 보여라. 그래서 <a href="#i-48-6-1">Proposition 48.6.1</a>의 증명에서 두 정규화 상수가 약분된다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>polar coordinates로 \(\int_{\R^n}\xi(\abs{x})\,dx\) \(= n\omega_n\int_0^1\xi(t)t^{n-1}\,dt\) \(= -\omega_n\int_0^1\rho'(t)t^n\,dt\)이다. 부분적분하면 \(-\omega_n[\rho(t)t^n]_0^1 + n\omega_n\int_0^1\rho(t)t^{n-1}\,dt\)이고, \(\rho(1) = 0\)이므로 첫 항이 \(0\)이다. 남은 것이 \(\int_{\R^n}\rho(\abs{x})\,dx\)다. 곧 \(c_\xi = c_\rho\)이다.</p>
+          <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-6-2" data-level="1">
+        <p><span class="thm-head">Exercise 48.6.2</span> <span class="level">★</span> <a href="#eq-48-6-2">(48.6.2)</a>를 \(j = k\)로 contract한 \(\sum_qA^{V,\varepsilon,\perp}_{qiq}\)를 계산하고, 그것이 <a href="../47-paper-varifold-approximation/47-7-numerical-experiments.html#eq-47-7-1">(47.7.1)</a>의 orthogonal approximate mean curvature와 같음을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\sum_q(D_l)_{iq}(w_l)_q = (D_lw_l)_i\) \(= (P_lP_lu_l - P_{l_0}P_lu_l)_i\) \(= ((I - P_{l_0})P_lu_l)_i\)이다. \(\Pi_0 = I - P_{l_0}\)으로 쓰면 \(\sum_qA^{V,\varepsilon,\perp}_{qiq}(x_{l_0})\) \(= -\tfrac{d}{n}\tfrac{1}{\varepsilon Z}\sum_lm_l\rho'(r_l)(\Pi_0P_lu_l)_i\)이고, \(C_\xi/C_\rho = d/n\)이므로 <a href="../47-paper-varifold-approximation/47-7-numerical-experiments.html#eq-47-7-1">(47.7.1)</a>과 같다. <a href="48-4-hutchinson-properties.html#i-48-4-8">Proposition 48.4.8</a>의 \(\sum_qA^\perp_{q\cdot q} = \vec H^{V,\perp} = (I - c^V)\vec H^V\)이 흐린 판에서도 같은 꼴로 성립하는 것이다(\(c^V(x_{l_0}) = P_{l_0}\)이고 \(\vec H^V\) 자리에 \(\vec H^{V,\varepsilon}\)이 온다).</p>
+          <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-6-3" data-level="1">
+        <p><span class="thm-head">Exercise 48.6.3</span> <span class="level">★</span> cloud 전체를 \(\lambda \gt 0\)배 하고(\(x_l \mapsto \lambda x_l\), plane은 그대로, mass는 \(\lambda^dm_l\)) \(\varepsilon\)도 \(\lambda\varepsilon\)으로 바꾸자. <a href="#eq-48-6-2">(48.6.2)</a>와 \(1/\varepsilon\)을 뺀 인쇄된 식은 각각 어떻게 바뀌는가? 어느 쪽이 curvature일 수 있는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(r_l\), \(u_l\), \(w_l\), \(D_l\)은 바뀌지 않고, mass의 \(\lambda^d\)는 분자와 분모에서 약분된다. 그래서 <a href="#eq-48-6-2">(48.6.2)</a>는 \(1/\varepsilon\)만큼, 곧 \(1/\lambda\)배가 되고, 인쇄된 식은 그대로다. \(\lambda\)배 한 surface의 principal curvature는 \(1/\lambda\)배이므로 curvature일 수 있는 것은 <a href="#eq-48-6-2">(48.6.2)</a>뿐이다. 인쇄된 식은 \(\varepsilon\kappa\)를 준다.</p>
+          <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-6-4" data-level="1">
+        <p><span class="thm-head">Exercise 48.6.4</span> <span class="level">★</span> (a) 모든 mass를 같은 상수 \(c \gt 0\)배 해도 <a href="#eq-48-6-2">(48.6.2)</a>가 바뀌지 않음을 보여라. (b) 넓이당 \(\lambda\)개의 밀도로 고르게 놓인 \(2\)차원 cloud에서 <a href="#i-48-6-4">Definition 48.6.4</a>의 규칙 \(m_i = \omega_2r_i^2/N_{\mathrm{mass}}\)이 대략 \(1/\lambda\)임을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>(a) \(m_l\)이 분자의 합과 \(Z\)에 한 번씩 들어가므로 \(c\)가 약분된다. (b) 반지름 \(r_i\)의 disk에 점이 \(N_{\mathrm{mass}}\)개 있으므로 \(\lambda\pi r_i^2 \approx N_{\mathrm{mass}}\)이고, \(m_i = \pi r_i^2/N_{\mathrm{mass}} \approx 1/\lambda\)이다. 곧 mass는 점 하나가 대표하는 넓이이고, 고른 sampling에서는 상수라 (a)에 의해 같은 mass와 결과가 같다. 예를 들어 unit sphere의 Fibonacci 점 \(20000\)개에서 \(N_{\mathrm{mass}} = 20\)으로 하면 \(m_i\)의 평균은 \(4\pi/20000\)의 \(0.95\)배다(반지름을 \(N_{\mathrm{mass}}\)번째 점까지의 거리로 잡으면 disk의 boundary 위의 점 때문에 조금 작게 나온다).</p>
+          <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-6-5" data-level="2">
+        <p><span class="thm-head">Exercise 48.6.5</span> <span class="level">★★</span> noise 없는 cube(<a href="#i-48-6-9">Example 48.6.9</a>, \(k = 40\))에서 edge에서 격자 \(t\)칸 떨어진 점(vertex에서 먼 곳)의 \(\abs{\kappa_1} + \abs{\kappa_2}\)가 \(t \ge 7\)에서 정확히 \(0\)이고 \(t = 6\)에서는 \(0\)이 아닌 이유를 설명하여라. face 안쪽 점의 \(\varepsilon\)은 \(\sqrt{13}h \approx 3.61h\)(\(h = 1/60\))이고, PCA plane은 \(t = 0, 1, 2, 3\)에서 face에 대해 각각 \(45°\), \(15.8°\), \(5.8°\), \(0.67°\) 기울어 있으며 \(t \ge 4\)에서는 정확하다.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-48-6-2">(48.6.2)</a>는 \(r_l \lt 1\)인 이웃 중에 \(D_l \ne 0\)인 것, 곧 plane이 기운 점이 있을 때만 \(0\)이 아니다. 기운 plane은 \(t' \le 3\)인 점에만 있다. \(t\)칸의 점에서 \(t' = 3\)인 점까지의 가장 짧은 거리는 \((t - 3)h\)이므로, \((t - 3)h \lt \sqrt{13}h\), 곧 \(t \le 6\)이면 기운 이웃이 있고 \(t \ge 7\)이면 없다. 그래서 값이 \(0\)이 아닌 띠의 폭은 “PCA plane이 기우는 범위(약 \(\varepsilon\))”와 “WSFF\(^\perp\)가 보는 범위(\(\varepsilon\))”를 더한 약 \(2\varepsilon\)이다. PCA plane이 \(t \ge 4\)에서 정확한 것도 같은 이유다. 다른 face의 가장 가까운 점까지의 거리가 \(\sqrt{t^2 + 1}\,h\)이고, \(t = 4\)에서 \(\sqrt{17}h \gt \sqrt{13}h\)라 \(40\)개의 이웃이 모두 같은 face에 있다.</p>
+          <p class="verified">Verification: <code>verify/v-48-6-numerical-illustrations.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="48-5-approximate-wsff.html">← 48.5 Approximate Weak Second Fundamental Form</a>
+    <a rel="next" href="48-7-assessment.html">48.7 Assessment →</a>
+  </nav>
+</body>
+</html>

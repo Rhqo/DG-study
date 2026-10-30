@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>48.5 Approximate Weak Second Fundamental Form — DG Study</title>
+  <meta name="dg-id" content="48.5">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="46.7, 47.3, 47.4, 47.5, 48.3, 48.4">
+  <meta name="dg-refs" content="BLM22 §6">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">48. Paper: Weak and Approximate Curvatures of a Measure</a> ›
+    <span>48.5 Approximate Weak Second Fundamental Form</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>48.5 Approximate Weak Second Fundamental Form</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#BLM22">[BLM22, §6]</a>,
+        <a class="cite" href="../../references.html#BLM17">[BLM17, §3–§5]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>G-linear variation과 mass를 kernel로 흐려 어떤 varifold에서도 계산되는 \(\beta^{V,\varepsilon}\), \(c^{V,\varepsilon}\), 그리고 \(\varepsilon\)-WSFF를 정의할 수 있다.</li>
+        <li>\(\varepsilon\)-WSFF\(^\perp\)의 닫힌 꼴과 그 “plane field의 kernel 차분 몫” 꼴 <a href="48-1-problem-key-idea.html#eq-48-1-2">(48.1.2)</a>을 유도할 수 있다.</li>
+        <li>두 수렴 정리(Theorem 6.8과 6.11)의 가정과 속도(\(1/\varepsilon^2\) 대 \(1/\varepsilon\))를 말하고, 그 차이가 어디서 오는지 test function의 Lipschitz 상수로 설명할 수 있다.</li>
+        <li>sphere 위의 point cloud에서 두 속도를 수치로 확인하고(<a href="#fig-48-5-1">Figure 48.5.1</a>), discretization 오차와 smoothing bias 사이의 균형으로 \(\varepsilon\)을 고르는 이유를 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="48-3-weak-sff.html">Section 48.3</a>, <a href="48-4-hutchinson-properties.html">Section 48.4</a>: WSFF, WSFF\(^\perp\), <a href="48-4-hutchinson-properties.html#eq-48-4-5">(48.4.5)</a></li>
+        <li><a href="../47-paper-varifold-approximation/47-3-regularized-first-variation.html#i-47-3-3">Proposition 47.3.3</a>(흐린 first variation의 표현), <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-1">Definition 47.4.1</a>(approximate mean curvature), <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-8">Theorem 47.4.8</a>과 <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-13">Theorem 47.4.13</a>(두 수렴 정리), <a href="../47-paper-varifold-approximation/47-5-natural-kernel-pairs.html#i-47-5-2">Proposition 47.5.2</a>(natural kernel pair)</li>
+        <li><a href="../46-varifold-background/46-7-regularization-distances.html#i-46-7-6">Definition 46.7.6</a>, <a href="../47-paper-varifold-approximation/47-2-discrete-varifolds.html#i-47-2-1">Definition 47.2.1</a>: bounded Lipschitz distance \(\Delta^{1,1}\)과 국소판</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="48-4-hutchinson-properties.html#i-48-4-12">Example 48.4.12</a>에서 polygon의 G-linear variation은 vertex의 Dirac mass뿐이어서 WSFF가 \(0\)이었다. point cloud도 같다. 정보는 원자에 집중되어 있고 density가 없다. <a href="../47-paper-varifold-approximation/index.html">Chapter 47</a>은 first variation에서 같은 문제를 만나 kernel로 흐려서 풀었다. 이 절은 그 방법을 G-linear variation에 그대로 쓴다. 새로 생기는 일은 두 가지다. linear system의 coefficient \(c\)도 흐려야 하고, mean curvature에서 보았던 “normal로 project하면 속도가 좋아진다”는 현상이 tensor에서는 WSFF\(^\perp\)의 형태로 나타난다.</p>
+    </section>
+
+    <section id="sec-mollification">
+      <h2>Approximation by Mollification</h2>
+      <p>논문은 세 kernel profile \(\rho, \xi, \eta\colon[0, \infty) \to [0, \infty)\)을 쓴다. 모두 \(C^1\)이고 \(t \ge 1\)에서 \(0\)이다. \(\rho\)는 감소하고 \(\rho'(0) = 0\), \(\int_{\R^n}\rho(\abs{x})\,dx = 1\)이며, \(\xi\)는 \(0 \lt t \lt 1\)에서 양수이고 \(\int_{\R^n}\xi(\abs{x})\,dx = 1\)이다. \(\rho_\varepsilon(x) = \varepsilon^{-n}\rho(\abs{x}/\varepsilon)\) 등으로 줄이고(논문의 (6.1)), 상수 \(C_\rho\), \(C_\xi\)는 <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#eq-47-4-1">(47.4.1)</a>과 같다(논문의 (6.2)). \(\rho\)는 G-linear variation을, \(\xi\)는 mass를, \(\eta\)는 mean projection을 흐린다. \(\Omega_\varepsilon = \{x \in \Omega : \mathrm{dist}(x, \partial\Omega) \gt \varepsilon\}\)이다.</p>
+      <div class="thm definition" id="i-48-5-1">
+        <p><span class="thm-head">Definition 48.5.1</span> <span class="thm-name">(regularized G-linear variation)</span>. \(V\)가 \(\Omega\) 위의 \(d\)-varifold이고 \(\varepsilon \gt 0\)이라 하자. \(\varphi \in C^1_c(\Omega_\varepsilon)\)에 대해</p>
+        <div class="equation" id="eq-48-5-1">
+        \[ \begin{aligned} &(\delta_{ijk}V*\rho_\varepsilon)(\varphi) = \delta_{ijk}V(\varphi*\rho_\varepsilon) \\ &= \int S_{jk}\inner{\nabla^S(\varphi*\rho_\varepsilon)(y)}{e_i}\,dV(y, S) \end{aligned} \tag{48.5.1} \]
+        </div>
+        <p>로 정한 \(\delta_{ijk}V*\rho_\varepsilon\)을 \(V\)의 <dfn>regularized G-linear variation</dfn>(정칙화한 G-선형 변분)이라 한다. <a class="cite" href="../../references.html#BLM22">[BLM22, Def 6.1, (6.3)]</a></p>
+      </div>
+      <div class="thm proposition" id="i-48-5-2">
+        <p><span class="thm-head">Proposition 48.5.2</span> <span class="thm-name">(representation)</span>. \(\delta_{ijk}V*\rho_\varepsilon\)은 \(\Omega_\varepsilon\) 위의 연속 함수</p>
+        <div class="equation" id="eq-48-5-2">
+        \[ \begin{aligned} &(\delta_{ijk}V*\rho_\varepsilon)(x) \\ &= \int S_{jk}\inner{\nabla^S\rho_\varepsilon(y - x)}{e_i}\,dV \\ &= \frac{1}{\varepsilon^{n+1}}\int S_{jk}\Big\langle S\nabla\rho_1\Big(\frac{y - x}{\varepsilon}\Big), e_i\Big\rangle\,dV \end{aligned} \tag{48.5.2} \]
+        </div>
+        <p>로 표현되고 \(L^1_{\mathrm{loc}}(\Omega_\varepsilon)\)에 속한다. \(\delta_{ijk}V\)가 locally bounded가 아니어도 그렇다. <a class="cite" href="../../references.html#BLM22">[BLM22, Prop 6.2, (6.4), Remark 6.3]</a></p>
+      </div>
+      <p><em>Proof.</em> \(\nabla^S(\varphi*\rho_\varepsilon)(y) = \int\varphi(x)\nabla^S\rho_\varepsilon(y - x)\,dx\)를 <a href="#eq-48-5-1">(48.5.1)</a>에 넣고 Fubini–Tonelli로 적분 순서를 바꾸면 \(\int\varphi(x)\,(\cdots)\,dx\)의 꼴이 되고, 괄호 안이 <a href="#eq-48-5-2">(48.5.2)</a>다. \(\nabla\rho_\varepsilon\)이 bound되어 있으므로 \(V\)의 mass가 국소적으로 유한하면 \(L^1_{\mathrm{loc}}\)이다. \(\square\)</p>
+      <p>first variation의 경우(<a href="../47-paper-varifold-approximation/47-3-regularized-first-variation.html#i-47-3-3">Proposition 47.3.3</a>)와 같은 증명이다. 논문은 이것을 [BLM17]의 “Proposition 4.2”의 단순한 변형이라 적는다(<a href="48-1-problem-key-idea.html#sec-conventions">Conventions</a>의 번호 주의). 이제 흐린 양의 비를 density로 쓴다.</p>
+      <div class="thm definition" id="i-48-5-3">
+        <p><span class="thm-head">Definition 48.5.3</span> <span class="thm-name">(approximate density and mean projection)</span>. \(V = \norm{V} \otimes \{\nu_x\}_x\)와 \(\varepsilon \gt 0\)에 대해 \(\norm{V}\)-a.e. \(x \in \Omega_\varepsilon\)에서</p>
+        <div class="equation" id="eq-48-5-3">
+        \[ \begin{aligned} \beta^{V,\varepsilon}_{ijk}(x) &= -\frac{C_\xi}{C_\rho}\,\frac{(\delta_{ijk}V*\rho_\varepsilon)(x)}{(\norm{V}*\xi_\varepsilon)(x)}, \\ c^{V,\varepsilon}_{jk}(x) &= \frac{\big((\int S_{jk}\,d\nu_\cdot(S))\norm{V}\big)*\eta_\varepsilon(x)}{(\norm{V}*\eta_\varepsilon)(x)} \end{aligned} \tag{48.5.3} \]
+        </div>
+        <p>로 정한다. <a class="cite" href="../../references.html#BLM22">[BLM22, (6.5)]</a></p>
+      </div>
+      <p>\(\beta^{V,\varepsilon}\)은 “흐린 G-linear variation을 흐린 mass로 나눈 것”, 곧 Radon–Nikodym density \(\beta = -d(\delta_{ijk}V)/d\norm{V}\)의 근사다. 앞의 상수 \(C_\xi/C_\rho\)는 평평한 plane에서 \(\norm{V}*\rho_\varepsilon/\norm{V}*\xi_\varepsilon \to C_\rho/C_\xi\)인 것을 보정한다. \(c^{V,\varepsilon}(x)\)는 반지름 \(\varepsilon\) 안에 있는 plane들의 \(\eta\)-가중 평균이다. 곧</p>
+      <p>\[ dW_x(y, S) = \frac{\eta_\varepsilon(y - x)\,dV(y, S)}{\int\eta_\varepsilon(z - x)\,dV(z, P)} \]</p>
+      <p>로 정한 probability measure \(W_x\)에 대해 \(c^{V,\varepsilon}(x) = \int S\,dW_x(y, S)\)이다. 그래서 <a href="48-3-weak-sff.html#i-48-3-6">Proposition 48.3.6</a>의 성질을 모두 갖고 <a href="48-3-weak-sff.html#i-48-3-5">Lemma 48.3.5</a>가 적용된다.</p>
+      <div class="thm proposition" id="i-48-5-4">
+        <p><span class="thm-head">Proposition 48.5.4</span> <span class="thm-name">(the structural identities survive)</span>. \(\vec H^{V,\varepsilon} = -\tfrac{C_\xi}{C_\rho}\,\delta V*\rho_\varepsilon/\norm{V}*\xi_\varepsilon\)를 <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-1">Definition 47.4.1</a>의 approximate mean curvature라 하면</p>
+        <div class="equation" id="eq-48-5-4">
+        \[ \sum_q\beta^{V,\varepsilon}_{qiq} = \vec H^{V,\varepsilon}_i, \qquad \sum_q\beta^{V,\varepsilon}_{iqq} = d\,\vec H^{V,\varepsilon}_i \tag{48.5.4} \]
+        </div>
+        <p>이다. <a class="cite" href="../../references.html#BLM22">[BLM22, (6.6)]</a></p>
+      </div>
+      <p>증명은 <a href="#ex-48-5-1">Exercise 48.5.1</a>이다. 두 kernel을 따로 두는 이유와 그 선택은 Chapter 47과 같다. 논문은 <a class="cite" href="../../references.html#BLM17">[BLM17]</a> §5의 계산이 시사하는 natural kernel pair \(n\xi(s) = -s\rho'(s)\)(논문의 (6.7), <a href="../47-paper-varifold-approximation/47-5-natural-kernel-pairs.html#i-47-5-1">Definition 47.5.1</a>)가 수치적으로 효과적이었다고 쓰고(Remark 6.4), §7의 실험에서 이것을 쓴다. 이때 \(C_\xi/C_\rho = d/n\)이다(<a href="../47-paper-varifold-approximation/47-5-natural-kernel-pairs.html#i-47-5-2">Proposition 47.5.2</a>).</p>
+      <p>이제 linear system <a href="48-3-weak-sff.html#eq-48-3-9">(48.3.9)</a>의 \(\beta^V\), \(c^V\)를 흐린 값으로 바꾼다.</p>
+      <div class="thm definition" id="i-48-5-5">
+        <p><span class="thm-head">Definition 48.5.5</span> <span class="thm-name">(approximate second fundamental form, \(\varepsilon\)-WSFF)</span>. \(\varepsilon \gt 0\)과 \(\norm{V}\)-a.e. \(x \in \Omega_\varepsilon\)에서 system</p>
+        <div class="equation" id="eq-48-5-5">
+        \[ a_{ijk} + c^{V,\varepsilon}_{jk}(x)\sum_la_{lil} = \beta^{V,\varepsilon}_{ijk}(x) \tag{48.5.5} \]
+        </div>
+        <p>의 유일한 해</p>
+        <div class="equation" id="eq-48-5-6">
+        \[ A^{V,\varepsilon}_{ijk} = \beta^{V,\varepsilon}_{ijk} - c^{V,\varepsilon}_{jk}\Big((I + c^{V,\varepsilon})^{-1}\vec H^{V,\varepsilon}\Big)_i \tag{48.5.6} \]
+        </div>
+        <p>를 \(V\)의 <dfn>approximate second fundamental form</dfn>(근사 제2기본형식) 또는 \(\varepsilon\)-WSFF라 한다. \(B^{k,\varepsilon}_{ij} = \tfrac12(A^{V,\varepsilon}_{ijk} + A^{V,\varepsilon}_{jik} - A^{V,\varepsilon}_{kij})\)도 같은 이름으로 부른다. <a class="cite" href="../../references.html#BLM22">[BLM22, (6.8), Def 6.5, (6.9)]</a></p>
+      </div>
+      <p>\(\varepsilon\)-WSFF는 bounded variations가 없는 varifold에서도 정의된다(논문의 Remark 6.6). point cloud에서도, polygon에서도, 흐린 데이터에서도 계산되는 식이다. 남은 질문은 이것이 맞는 값으로 가는가이다. 질문은 두 층이다. 하나는 고정된 smooth한 \(V\)에서 \(\varepsilon \to 0\)일 때(consistency)이고, 다른 하나는 데이터 \(V_h\)가 \(V\)에 가까워지면서 \(\varepsilon_h \to 0\)일 때(convergence)다.</p>
+    </section>
+
+    <section id="sec-consistency">
+      <h2>Consistency</h2>
+      <div class="thm proposition" id="i-48-5-6">
+        <p><span class="thm-head">Proposition 48.5.6</span> <span class="thm-name">(consistency)</span>. \(V\)가 locally bounded variations를 갖는 rectifiable \(d\)-varifold이면, \(\norm{V}\)-a.e. \(x\)에서 \(\varepsilon\)이 충분히 작을 때 \(\beta^{V,\varepsilon}(x)\), \(c^{V,\varepsilon}(x)\), \(A^{V,\varepsilon}(x)\), \(B^{V,\varepsilon}(x)\)가 정의되고 \(\varepsilon \to 0\)이면 각각 \(\beta^V(x)\), \(c^V(x)\), \(A^V(x)\), \(B^V(x)\)로 수렴한다. 또 상수 \(C_1, C_2 \gt 0\)이 있어</p>
+        <div class="equation" id="eq-48-5-7">
+        \[ \begin{aligned} \abs{A^{V,\varepsilon} - A^V} &\le C_1\abs{\beta^{V,\varepsilon} - \beta^V} \\ &\quad + C_2\abs{\vec H^V}\abs{c^{V,\varepsilon} - c^V} \end{aligned} \tag{48.5.7} \]
+        </div>
+        <p>이다. <a class="cite" href="../../references.html#BLM22">[BLM22, Prop 6.7, (6.10)]</a></p>
+      </div>
+      <p><em>Proof sketch.</em> <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-3">Theorem 47.4.3</a>의 증명과 같다. \(\delta_{ijk}V = -\beta\norm{V} + (\delta_{ijk}V)_s\)를 넣으면 \(\abs{\beta^\varepsilon_{ijk}(x) - \beta_{ijk}(x)}\)이 세 항으로 나뉜다(논문의 (6.11)). \(\beta(y) - \beta(x)\)를 kernel로 평균한 항(\(x\)가 \(\beta\)의 Lebesgue point이면 \(0\)으로 간다), 흐린 mass의 비 \(\norm{V}*\rho_\varepsilon/\norm{V}*\xi_\varepsilon\)와 \(C_\rho/C_\xi\)의 차이(rectifiable이면 \(\varepsilon^{n-d}\norm{V}*\rho_\varepsilon(x) \to C_\rho\theta(x)\), 논문의 (6.12)), singular part의 항(singular measure의 \(\norm{V}\)에 대한 density는 a.e. \(0\))이다. \(c^{V,\varepsilon}\)도 \(\beta\) 자리에 \(\int S\,d\nu_x\)를 넣으면 같다. <a href="#eq-48-5-7">(48.5.7)</a>은 <a href="48-3-weak-sff.html#eq-48-3-6">(48.3.6)</a>의 두 해를 빼서 얻는다. \(u = (I + c)^{-1}\vec H\), \(u^\varepsilon = (I + c^\varepsilon)^{-1}\vec H^\varepsilon\)이라 하면 \((I + c^\varepsilon)(u^\varepsilon - u) + (c - c^\varepsilon)u = \vec H^\varepsilon - \vec H\)이고, \(\norm{(I + c^\varepsilon)^{-1}} \le C_0\), \(\abs{c_{jk}} \le 1\), \(\vec H_i = \sum_q\beta_{qiq}\)를 쓰면 된다(논문의 (6.13), (6.14)). \(\square\)</p>
+      <p>이 명제는 속도를 말하지 않는다. 고정된 \(V\)에서 \(\varepsilon\)을 줄이면 맞는 값으로 간다는 것뿐이다. 이 오차(smoothing bias)는 sphere의 \(\varepsilon\)-WSFF\(^\perp\)에서 \(\varepsilon^2\) 정도다(<a href="#fig-48-5-1">Figure 48.5.1</a>(b)의 주황 선, 우리의 실험). 일반적인 속도는 논문에 없다.</p>
+    </section>
+
+    <section id="sec-orthogonal">
+      <h2>The Orthogonal Version</h2>
+      <p>수렴 정리로 가기 전에 논문은 smooth surface에서 성립하는 분해를 하나 적는다. \(V = v(M, 1)\)이면</p>
+      <div class="equation" id="eq-48-5-8">
+      \[ \begin{aligned} &\int S_{jk}\nabla^S\rho\Big(\frac{y - x}{\varepsilon}\Big)\,dV(y, S) \\ &= \int_M\big[P(y)_{jk} - P(x)_{jk}\big] \\ &\qquad\cdot\nabla^{P(y)}\rho\Big(\frac{y - x}{\varepsilon}\Big)\,d\mathcal{H}^d \\ &\quad + P(x)_{jk}\int_M\nabla^{P(y)}\rho\Big(\frac{y - x}{\varepsilon}\Big)\,d\mathcal{H}^d \end{aligned} \tag{48.5.8} \]
+      </div>
+      <p>(논문의 (6.20))이다. 첫째 항에서는 tangent plane이 Lipschitz이면 \(P(y) - P(x) = O(\varepsilon)\)이므로 test function의 Lipschitz 상수에서 \(\varepsilon\)을 하나 번다. 둘째 항은 approximate mean curvature에 \(P(x)_{jk}\)를 곱한 것이고, <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-13">Theorem 47.4.13</a>처럼 \(x\)의 normal space로 project하면 \(\varepsilon\)을 하나 번다. 이 분해에 맞춘 \(\beta\)의 수정이 바로 <a href="48-3-weak-sff.html#i-48-3-11">Definition 48.3.11</a>의 \(\beta^\perp\)이었다. 그 근사판은 다음과 같다.</p>
+      <div class="thm definition" id="i-48-5-7">
+        <p><span class="thm-head">Definition 48.5.7</span> <span class="thm-name">(approximate orthogonal weak second fundamental form, \(\varepsilon\)-WSFF\(^\perp\))</span>. \(x \in \Omega\)에서</p>
+        <div class="equation" id="eq-48-5-9">
+        \[ \begin{aligned} &\beta^{V,\varepsilon,\perp}_{ijk}(x) \\ &= \beta^{V,\varepsilon}_{ijk}(x) - c^V_{jk}(x)\Big(c^V(x)\sum_q\beta^{V,\varepsilon}_{q\cdot q}(x)\Big)_i \end{aligned} \tag{48.5.9} \]
+        </div>
+        <p>로 두고, <a href="48-3-weak-sff.html#eq-48-3-5">(48.3.5)</a>를 \(b = \beta^{V,\varepsilon,\perp}(x)\), \(c = c^V(x)\)로 푼 해 \(A^{V,\varepsilon,\perp}(x)\)를 \(V\)의 <dfn>approximate orthogonal weak second fundamental form</dfn>(근사 직교 약한 제2기본형식) 또는 \(\varepsilon\)-WSFF\(^\perp\)라 한다. 해는</p>
+        <div class="equation" id="eq-48-5-10">
+        \[ \begin{aligned} A^{V,\varepsilon,\perp}_{ijk} &= \beta^{V,\varepsilon}_{ijk} - c^V_{jk}\sum_{q=1}^n\beta^{V,\varepsilon}_{qiq} \\ &= \beta^{V,\varepsilon}_{ijk} - c^V_{jk}\,\vec H^{V,\varepsilon}_i \end{aligned} \tag{48.5.10} \]
+        </div>
+        <p>이다. <a class="cite" href="../../references.html#BLM22">[BLM22, Def 6.9, (6.21), (6.22)]</a></p>
+      </div>
+      <p><a href="#eq-48-5-10">(48.5.10)</a>은 <a href="48-4-hutchinson-properties.html#i-48-4-8">Proposition 48.4.8</a>의 계산을 그대로 따른다. 두 가지를 짚어 두자. 첫째, coefficient는 흐린 \(c^{V,\varepsilon}(x)\)가 아니라 \(c^V(x)\) 그대로다(논문의 Remark 6.10). 흐린 값을 쓰면 Theorem 6.8의 수렴만 그대로 얻고, Theorem 6.11의 가정 아래서는 흐릴 필요가 없다는 것이 저자들의 설명이다. point cloud의 원자에서 \(c^V(x_l) = P_l\)이다(<a href="48-3-weak-sff.html#i-48-3-6">Proposition 48.3.6</a>(c)). 둘째, \(\beta^{V,\varepsilon}\)의 정의에서 \(S_{jk} = (S_{jk} - c^V_{jk}(x)) + c^V_{jk}(x)\)로 나누면 뒤의 몫이 정확히 \(c^V_{jk}\vec H^{V,\varepsilon}_i\)이므로 빼고 남는 것은</p>
+      <div class="equation" id="eq-48-5-11">
+      \[ \begin{aligned} &A^{V,\varepsilon,\perp}_{ijk}(x) \\ &= -\frac{C_\xi}{C_\rho}\,\frac{1}{(\norm{V}*\xi_\varepsilon)(x)} \\ &\quad\cdot\int\big(S_{jk} - c^V_{jk}(x)\big) \\ &\qquad\cdot\big(S\nabla\rho_\varepsilon(y - x)\big)_i\,dV(y, S) \end{aligned} \tag{48.5.11} \]
+      </div>
+      <p>이다. 이것이 <a href="48-1-problem-key-idea.html#eq-48-1-2">(48.1.2)</a>다(우리의 정리). 논문의 (6.26) 첫째 줄과 §7.1의 point cloud 공식이 이 꼴이다. plane field \(P\)의 tangential 도함수 \(A_{ijk} = \inner{\nabla^MP_{jk}}{e_i}\)를 “이웃의 plane과 중심 plane의 차를 kernel의 도함수로 가중 평균한 것”으로 바꾼 직접적인 이산판이다. \(\vec H^{V,\varepsilon}\)이 tangent 성분을 가져도(<a href="48-3-weak-sff.html#fig-48-3-1">Figure 48.3.1</a>) 그 몫은 \(c^V\vec H^{V,\varepsilon}\)이 아니라 \(c^V_{jk}\vec H^{V,\varepsilon}_i\) 전체로 빠지므로 남지 않는다.</p>
+    </section>
+
+    <section id="sec-convergence">
+      <h2>Convergence for a Sequence of Varifolds</h2>
+      <p>이제 데이터의 열 \(V_h\)(point cloud, mesh 등)가 smooth한 \(V\)에 가까워질 때 \(\varepsilon_h\)-WSFF가 \(V\)의 WSFF로 가는지 묻는다. 두 정리는 <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-8">Theorem 47.4.8</a>과 <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-13">Theorem 47.4.13</a>을 tensor로 옮긴 것이고, 증명도 그 두 정리의 변형이다. 아래에서 \(B^{\eta}\)는 ball \(B\)의 \(\eta\)-neighborhood다.</p>
+      <div class="thm theorem" id="i-48-5-8">
+        <p><span class="thm-head">Theorem 48.5.8</span> <span class="thm-name">(convergence with rate \(1/\varepsilon^2\))</span>. \(V\)가 locally bounded variations를 갖는 rectifiable \(d\)-varifold이고 \((V_h)\)가 \(d\)-varifold의 열이라 하자. 양수이고 \(0\)으로 감소하는 열 \((\eta_h)\), \((d_h)\)가 있어 \(\supp\norm{V}\)의 점을 중심으로 하는 충분히 작은 모든 ball \(B \subseteq \Omega\)에서</p>
+        <div class="equation" id="eq-48-5-12">
+        \[ \begin{aligned} &\Delta^{1,1}_B(V, V_h) \\ &\le d_h\min\big(\norm{V}(B^{\eta_h}), \norm{V_h}(B^{\eta_h})\big) \end{aligned} \tag{48.5.12} \]
+        </div>
+        <p>이라 하자. 그러면 \(\norm{V}\)-a.e. \(x\), \(x\)로 가는 모든 열 \((z_h)\), \(\eta_h/\varepsilon_h \to 0\)인 모든 \(\varepsilon_h \to 0\)에 대해 \(h\)가 충분히 클 때</p>
+        <div class="equation" id="eq-48-5-13">
+        \[ \begin{aligned} &\max_{i,j,k}\Big\{\abs{\beta^{V_h,\varepsilon_h}_{ijk}(z_h) - \beta^{V,\varepsilon_h}_{ijk}(x)}, \\ &\qquad\quad \abs{A^{V_h,\varepsilon_h}_{ijk}(z_h) - A^{V,\varepsilon_h}_{ijk}(x)}\Big\} \\ &\qquad\le C\norm{\rho}_{W^{2,\infty}}\,\frac{d_h + \abs{x - z_h}}{\varepsilon_h^2}, \\ &\abs{c^{V_h,\varepsilon_h}(z_h) - c^{V,\varepsilon_h}(x)} \\ &\qquad\le C\norm{\rho}_{W^{1,\infty}}\,\frac{d_h + \abs{x - z_h}}{\varepsilon_h} \end{aligned} \tag{48.5.13} \]
+        </div>
+        <p>이다. 특히 \((d_h + \abs{x - z_h})/\varepsilon_h^2 \to 0\)이면 두 오른쪽이 \(0\)으로 간다. <a class="cite" href="../../references.html#BLM22">[BLM22, Thm 6.8, (6.15), (6.16)]</a></p>
+      </div>
+      <p><em>Proof sketch.</em> 모든 것이 하나의 부등식에서 나온다. \(\psi_h\)의 support가 ball \(B_h\)에 들어 있으면</p>
+      <div class="equation" id="eq-48-5-14">
+      \[ \begin{aligned} &\Big|\int\psi_h\,dV_h - \int\psi\,dV\Big| \\ &\le \mathrm{lip}(\psi_h)\,\Delta^{1,1}_{B_h}(V_h, V) + \int\abs{\psi_h - \psi}\,dV \end{aligned} \tag{48.5.14} \]
+      </div>
+      <p>(논문의 (6.19))이다. \(\beta\)의 분자에는 \(\psi_h(y, S) = \varepsilon_h^{-1}S_{jk}S\nabla\rho((y - z_h)/\varepsilon_h)\)를 넣는다. kernel의 <em>도함수</em>를 \(\varepsilon_h\)로 줄였으므로 Lipschitz 상수가 \(\norm{\rho}_{W^{2,\infty}}/\varepsilon_h^2\)이고(논문의 (6.18)), 둘째 항은 평가점의 이동 \(\abs{x - z_h}\)에서 같은 크기가 나온다. 분모(흐린 mass)와 \(c\)에는 kernel 자체가 들어가므로 \(1/\varepsilon_h\)이다(논문의 (6.17)). 분모의 크기 \(\varepsilon^n\norm{V}*\xi_\varepsilon \sim \varepsilon^d\)와 가정의 \(\norm{V}(B^{\eta_h}) \sim \varepsilon^d\)가 서로 상쇄되어 위의 속도가 남는다. \(A\)는 \(\beta\)와 \(c\)의 Lipschitz 함수이므로(<a href="48-3-weak-sff.html#eq-48-3-7">(48.3.7)</a>, <a href="#eq-48-5-7">(48.5.7)</a>와 같은 계산) 같은 bound를 받는다. \(\square\)</p>
+      <div class="thm theorem" id="i-48-5-9">
+        <p><span class="thm-head">Theorem 48.5.9</span> <span class="thm-name">(convergence with rate \(1/\varepsilon\))</span>. \(M \subseteq \Omega\)가 boundary 없는 \(C^2\) \(d\)-submanifold, \(V = v(M, 1)\)이고 \(P\)가 \(M\)의 tubular neighborhood에서 tangent plane을 넓힌 \(C^1\) map이라 하자. \((V_h)\)가 \(d\)-varifold의 열, \(x \in M\), \(z_h \in \supp\norm{V_h}\), \(z_h \to x\)이고, 양수이며 \(0\)으로 감소하는 열 \((\eta_h)\), \((d_{1,h})\), \((d_{2,h})\), \((\varepsilon_h)\)가 있어 \(\supp\norm{V}\)의 점을 중심으로 하고 \(x\)의 한 neighborhood에 들어가는 모든 ball \(B\)에서</p>
+        <div class="equation" id="eq-48-5-15">
+        \[ \begin{aligned} &\Delta^{1,1}_B(\norm{V}, \norm{V_h}) \\ &\le d_{1,h}\min\big(\norm{V}(B^{\eta_h}), \norm{V_h}(B^{\eta_h})\big), \\ &\sup_y\int_{G_{d,n}}\norm{P(y) - S}\,d\nu^h_y(S) \le d_{2,h} \end{aligned} \tag{48.5.15} \]
+        </div>
+        <p>(둘째 식의 \(\sup\)은 \(y \in B_{\varepsilon_h + \abs{x - z_h}}(x) \cap \supp\norm{V_h}\)에 대해, \(V_h = \norm{V_h} \otimes \{\nu^h_y\}_y\))이라 하자. 그러면 \(C \gt 0\)이 있어 \(h\)가 충분히 클 때 모든 \(i, j, k\)에서</p>
+        <div class="equation" id="eq-48-5-16">
+        \[ \begin{aligned} &\max\Big\{\abs{\beta^{V_h,\varepsilon_h,\perp}_{ijk}(z_h) - \beta^{V,\varepsilon_h,\perp}_{ijk}(x)}, \\ &\qquad\quad \abs{A^{V_h,\varepsilon_h,\perp}_{ijk}(z_h) - A^{V,\varepsilon_h,\perp}_{ijk}(x)}\Big\} \\ &\qquad\le C\,\frac{d_{1,h} + d_{2,h} + \abs{x - z_h}}{\varepsilon_h} \end{aligned} \tag{48.5.16} \]
+        </div>
+        <p>이다. 또 \(d_{1,h} + d_{2,h} + \eta_h + \abs{x - z_h} = o(\varepsilon_h)\)이면 \(\beta^{V_h,\varepsilon_h,\perp}_{ijk}(z_h) \to \beta^V_{ijk}(x)\)이다. <a class="cite" href="../../references.html#BLM22">[BLM22, Thm 6.11, (6.23)–(6.25)]</a></p>
+      </div>
+      <p><em>Proof sketch.</em> \(c^{V_h}(z_h)\)와 \(c^V(x)\)의 차이는 둘째 가정에서 바로 나온다. \(\beta^\perp\)를 <a href="#eq-48-5-11">(48.5.11)</a>처럼 “중심화한 항”과 “\(c^V_{jk}\)에 project한 mean curvature를 곱한 항”으로 나눈다(논문의 (6.26)). 뒤의 항의 차이 \(a_h\)는 <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-13">Theorem 47.4.13</a>이 이미 \(C(d_{1,h} + d_{2,h} + \abs{x - z_h})/\varepsilon_h\)로 bound했다(논문의 (6.27)). 앞의 항의 차이 \(b_h\)는 세 조각으로 나뉜다(논문의 (6.28), (6.29)).</p>
+      <ul>
+        <li>\(c_h\): mass distribution의 차이. test function \(\psi_h(x, y)\) \(= (P(y)_{jk} - P(x)_{jk})\) \(\cdot\nabla^{P(y)}\rho((y - x)/\varepsilon_h)\)의 Lipschitz 상수가 \(\mathrm{lip}(P)\)와 \(\norm{\rho}_{W^{2,\infty}}\)에만 의존한다. \(P(y) - P(x) = O(\varepsilon_h)\)가 kernel 도함수의 \(1/\varepsilon_h\)를 상쇄하기 때문이다. 그래서 \(c_h \le \mathrm{lip}(\psi_h)\,d_{1,h}\norm{V_h}(B_{\varepsilon_h + \eta_h}(x))\)이다(논문의 (6.30)).</li>
+        <li>\(d_h\): 평가점을 \(x\)에서 \(z_h\)로 옮긴 차이. \(\mathrm{lip}(\psi_h)\abs{x - z_h}\norm{V_h}(\cdots)\)이다.</li>
+        <li>\(e_h\): 데이터의 plane \(S\)와 넓힌 tangent plane \(P(y)\)의 차이. \(4d_{2,h}\norm{\rho}_{W^{1,\infty}}\norm{V_h}(\cdots)\)이다.</li>
+      </ul>
+      <p>앞에 \(1/\varepsilon_h\)이 하나 남고 분모의 비교에 <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-7">Lemma 47.4.7</a>을 쓰면 <a href="#eq-48-5-16">(48.5.16)</a>이다(논문의 (6.31)). 마지막 주장은 <a href="#eq-48-5-16">(48.5.16)</a>과 <a href="48-3-weak-sff.html#i-48-3-12">Proposition 48.3.12</a>(\(\beta^{V,\perp} = \beta^V\))에서 나온다. \(\square\)</p>
+      <p>두 정리가 말하는 것을 정리하면 이렇다.</p>
+      <ul>
+        <li><strong>속도</strong>: 간격 \(h\)인 point cloud에 정확한 plane을 주면 \(d_h\), \(d_{1,h}\), \(\abs{x - z_h}\)는 \(h\) 정도이고 \(d_{2,h} = 0\)이다(<a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-14">Remark 47.4.14</a>와 같은 해석). 그러면 \(\varepsilon\)-WSFF의 discretization 오차 bound는 \(h/\varepsilon^2\), \(\varepsilon\)-WSFF\(^\perp\)는 \(h/\varepsilon\)이다. 이웃의 개수를 고정하는 \(\varepsilon = kh\)에서는 앞의 것이 \(1/(k^2h)\)로 커질 수 있고 뒤의 것은 \(1/k\)로 bound된다(<a href="#ex-48-5-4">Exercise 48.5.4</a>).</li>
+        <li><strong>가정의 구조</strong>: Theorem 6.8은 varifold 전체의 거리 \(\Delta^{1,1}(V, V_h)\) 하나로 위치와 plane의 오차를 함께 잰다. Theorem 6.11은 mass의 거리(\(d_{1,h}\))와 plane의 오차(\(d_{2,h}\), 점마다의 \(\sup\))를 나눈다. point cloud에서 PCA로 얻은 plane의 질이 \(d_{2,h}\)로 직접 들어간다.</li>
+        <li><strong>대가</strong>: Theorem 6.11은 \(M\)이 \(C^2\)이고 boundary가 없으며 multiplicity가 \(1\)이어야 한다. 대신 결론이 a.e. \(x\)가 아니라 <em>모든</em> \(x \in M\)에서 성립한다.</li>
+        <li><strong>무엇과의 차이인가</strong>: 두 bound는 모두 데이터의 근사값과 <em>\(V\)를 같은 \(\varepsilon\)으로 흐린 값</em>의 차이다. 진짜 WSFF까지의 오차는 여기에 consistency 오차(<a href="#i-48-5-6">Proposition 48.5.6</a>, 속도 없음)를 더한 것이다.</li>
+      </ul>
+      <p><a href="#fig-48-5-1">Figure 48.5.1</a>은 이 예측을 unit sphere에서 확인한 것이다(우리의 실험). \(V\)는 정확한 tangent plane을 준 Fibonacci point cloud \(400000\)개로 대신했다(그 자체의 오차는 \(\varepsilon = 0.04\)에서 \(\varepsilon\)-WSFF가 \(0.08\)–\(0.09\), \(\varepsilon\)-WSFF\(^\perp\)가 \(0.003\) 정도로 아래의 값보다 훨씬 작다). 데이터 \(V_N\)은 sphere 위의 area-uniform random sample \(N = 20000\) 또는 \(80000\)개(정확한 plane, mass \(4\pi/N\))다. \(V_N\)의 점 \(60\)개에서 \(x = z_h\)로 두고 tensor의 차이 \(\max_{ijk}\)을 평균했다. (a)는 두 정리가 bound하는 양 그 자체다. 주홍(\(\varepsilon\)-WSFF)은 \(\varepsilon = 0.04\)에서 \(0.4\)까지 \(12.1\)에서 \(0.11\)로 기울기 \(-2.07\)로 줄고, 파랑(\(\varepsilon\)-WSFF\(^\perp\))은 \(0.36\)에서 \(0.036\)으로 기울기 \(-1.00\)으로 준다. 같은 \(\varepsilon = 0.04\)에서 두 오차의 비는 \(34\)배다. 점을 \(4\)배로 늘리면(속이 빈 사각형) 두 오차가 모두 약 절반(평균 비 \(0.50\))이 된다. random sample의 요동이 \(N^{-1/2}\)로 줄기 때문이다. (b)는 \(\varepsilon\)-WSFF\(^\perp\)를 정확한 tensor \(A_{ijk} = -(P_{ij}x_k + P_{ik}x_j)\)와 비교한 전체 오차다. 작은 \(\varepsilon\)에서는 discretization 오차가, 큰 \(\varepsilon\)에서는 \(V\) 자체를 흐린 bias(주황, 기울기 약 \(2\))가 지배하므로 오차가 U자를 그린다. \(N = 80000\)에서 최소는 \(\varepsilon = 0.15\)–\(0.25\)의 \(0.055\)이고, \(N = 20000\)에서는 \(\varepsilon = 0.25\)의 \(0.075\)이다.</p>
+      <figure class="dg-figure" id="fig-48-5-1">
+        <img src="figures/fig-48-5-1-two-rates.svg" alt="두 log-log 그래프. (a) 가로축 epsilon(0.04에서 0.4), 세로축 discretization 오차. 주홍 선 두 개가 왼쪽 위 12와 5에서 오른쪽 아래 0.1과 0.05로 가파르게 내려가고, 파란 선 두 개가 0.36과 0.19에서 0.036과 0.018로 완만하게 내려간다. 범례에 기울기 -2.07과 -1.00. (b) 가로축 epsilon, 세로축 전체 오차. 파란 선 두 개가 왼쪽에서 내려가다 epsilon 0.25 근처에서 바닥을 찍고 다시 0.11로 올라가고, 주황 파선이 0.007에서 0.11로 올라가며 오른쪽 끝에서 파란 선과 만난다.">
+        <figcaption><span class="fig-head">Figure 48.5.1.</span>
+          무엇을: unit sphere에서 Theorem 6.8과 6.11의 두 속도. \(V\) 대신 Fibonacci point cloud \(400000\)개(정확한 plane), 데이터 \(V_N\)은 area-uniform random sample \(N = 20000\), \(80000\)개(정확한 plane, mass \(4\pi/N\))다. kernel은 논문 §7.1의 \(\rho(t) = e^{-1/(1 - t^2)}\)과 natural 짝 \(\xi\), \(c^{V,\varepsilon}\)에는 \(\eta = \rho\)를 썼다. \(V_N\)의 점 \(60\)개에서 평균했다.
+          읽는 법: 두 패널 모두 log-log다. (a) 세로축은 \(\max_{ijk}\abs{A^{V_N,\varepsilon}(x) - A^{V,\varepsilon}(x)}\), 주홍이 \(\varepsilon\)-WSFF, 파랑이 \(\varepsilon\)-WSFF\(^\perp\), 채운 원이 \(N = 20000\), 빈 사각형이 \(N = 80000\)이다. 범례의 기울기는 \(N = 20000\)의 최소제곱 기울기다. (b) 세로축은 \(\varepsilon\)-WSFF\(^\perp\)와 정확한 tensor의 차이, 주황 파선은 \(V\) 자체를 흐린 bias \(\max_{ijk}\abs{A^{V,\varepsilon,\perp} - A}\)(\(\varepsilon \ge 0.1\))다.
+          볼 것: (a)의 기울기가 \(-2.07\)과 \(-1.00\)으로 두 정리의 \(1/\varepsilon^2\), \(1/\varepsilon\)과 맞고, \(\varepsilon = 0.04\)에서 두 오차는 \(34\)배 차이 난다. (b)는 discretization 오차(왼쪽)와 bias(오른쪽, 기울기 약 \(2\))의 균형으로 최적의 \(\varepsilon\)이 생기는 것을 보여 준다.
+          본문과의 연결: <a href="#i-48-5-8">Theorem 48.5.8</a>, <a href="#i-48-5-9">Theorem 48.5.9</a>, <a href="#i-48-5-6">Proposition 48.5.6</a>, 그리고 같은 비교를 mean curvature에서 한 <a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-14">Remark 47.4.14</a>.</figcaption>
+      </figure>
+      <p class="verified">Verification: <code>verify/v-48-5-approximate-wsff.py</code></p>
+      <p>이 실험은 정리의 가정을 그대로 재현한 것이 아니다. random sample에서 \(d_h\)는 결정론적인 \(h\)가 아니고, 요동이 \(1/\sqrt{N\varepsilon^d}\)의 꼴로 들어온다. 그래도 \(\varepsilon\)에 대한 기울기는 두 정리가 예측한 그대로 나온다. kernel 도함수의 Lipschitz 상수가 \(\varepsilon\)-WSFF에서 \(1/\varepsilon^2\), 중심화한 \(\varepsilon\)-WSFF\(^\perp\)에서 \(1/\varepsilon\)이라는 구조가 오차의 크기를 정하기 때문이다(우리의 해석).</p>
+      <aside class="box warning">
+        <p class="box-title">Warning: §6에 인쇄된 세부 사항</p>
+        <ul>
+          <li>Definition 6.1은 “for any vector field \(\varphi \in C^1_c(\Omega_\varepsilon)\)”이라 쓰지만 \(\varphi\)는 스칼라 함수다(G-linear variation은 스칼라 함수에 작용한다).</li>
+          <li>§6 첫머리의 kernel 조건은 \(\eta\)에 대해 \(C^1\)과 \(t \ge 1\)에서 \(0\)이라는 것만 적는다. \(c^{V,\varepsilon}\)의 분모 \(\norm{V}*\eta_\varepsilon(x)\)가 양수이려면 \(\eta\)가 \(0\) 근처에서 양수여야 한다. 정규화는 비에서 약분되므로 필요 없다. 논문의 실험은 \(c^{V,\varepsilon}\)을 쓰지 않는 \(\varepsilon\)-WSFF\(^\perp\)만 계산하므로 \(\eta\)를 고를 필요가 없었다. 이 장의 계산은 \(\eta = \rho\)를 쓴다.</li>
+          <li>§6은 \(\rho \in C^1\)만 가정하지만 Theorem 6.8과 6.11의 bound에는 \(\norm{\rho}_{W^{2,\infty}}\)가 들어간다. \(\rho'\)이 Lipschitz여야 하므로, [BLM17]의 Hypothesis 1(<a href="../47-paper-varifold-approximation/47-4-approximate-mean-curvature.html#i-47-4-6">Definition 47.4.6</a>)을 암묵적으로 가정한 것으로 읽는다. §7의 \(\rho(t) = e^{-1/(1 - t^2)}\)은 이것을 만족한다.</li>
+          <li>(6.16)의 \(c\)에 대한 bound와 그 증명의 (6.17)은 kernel \(\rho\)로 쓰여 있지만, \(c^{V,\varepsilon}\)은 \(\eta\)로 정의된다. 같은 논법을 \(\eta\)에 쓴 것으로 읽는다(\(\norm{\eta}_{W^{1,\infty}}\)).</li>
+          <li>Definition 6.9와 (6.21), (6.22)는 \(\beta^{V,\varepsilon,\perp}\)와 \(\beta^{V,\perp,\varepsilon}\), \(A^{V,\varepsilon,\perp}\)와 \(A^{V,\perp,\varepsilon}\)을 섞어 쓴다. 같은 대상이다. 이 장은 \(\beta^{V,\varepsilon,\perp}\), \(A^{V,\varepsilon,\perp}\)로 통일한다.</li>
+          <li>Proposition 6.7의 증명은 [BLM17]의 “Proposition 4.1”을, Proposition 6.2는 “Proposition 4.2”를 인용한다. 내용상 arXiv v1의 Theorem 4.3과 Proposition 3.2에 해당한다(<a href="48-1-problem-key-idea.html#sec-conventions">Conventions</a>).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>\(\beta^{V,\varepsilon} = -\tfrac{C_\xi}{C_\rho}\,\delta_{ijk}V*\rho_\varepsilon/\norm{V}*\xi_\varepsilon\)와 \(\eta\)로 흐린 mean projection \(c^{V,\varepsilon}\)을 같은 system에 넣은 해가 \(\varepsilon\)-WSFF다. 어떤 varifold에서도 정의되고, \(\sum_q\beta^\varepsilon_{qiq} = \vec H^{V,\varepsilon}_i\)가 유지된다.</li>
+        <li>\(\varepsilon\)-WSFF\(^\perp\)는 coefficient에 흐리지 않은 \(c^V(x)\)를 쓰고, 닫힌 꼴 \(A^{V,\varepsilon,\perp} = \beta^{V,\varepsilon}_{ijk} - c^V_{jk}\vec H^{V,\varepsilon}_i\), 곧 “이웃 plane과 중심 plane의 차를 kernel 도함수로 평균한 것” <a href="#eq-48-5-11">(48.5.11)</a>을 갖는다.</li>
+        <li>고정된 rectifiable \(V\)에서는 \(\varepsilon \to 0\)이면 맞는 값으로 간다(속도 없음). 데이터의 열에 대해서는 \(\varepsilon\)-WSFF가 \((d_h + \abs{x - z_h})/\varepsilon^2\), \(\varepsilon\)-WSFF\(^\perp\)가 \((d_{1,h} + d_{2,h} + \abs{x - z_h})/\varepsilon\)의 속도로 \(V\)의 흐린 값에 가깝다. 뒤의 것은 smooth하고 multiplicity \(1\)인 \(V\)를 가정한다.</li>
+        <li>sphere에서 두 기울기는 \(-2.07\)과 \(-1.00\)이고, 전체 오차는 discretization 오차와 \(\varepsilon^2\) 정도의 bias의 균형으로 U자를 그린다(<a href="#fig-48-5-1">Figure 48.5.1</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 논문 §7을 읽는다. point cloud에서 <a href="#eq-48-5-11">(48.5.11)</a>을 원자의 합으로 쓰고(식 (7.2)), PCA로 plane을, 이웃 개수로 \(\varepsilon\)을 정하는 구현과 논문의 Figure 1–5를 본다. 그리고 sphere, torus, cube에서 작은 재현을 한다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+      <div class="exercise" id="ex-48-5-1" data-level="1">
+        <p><span class="thm-head">Exercise 48.5.1</span> <span class="level">★</span> <a href="#eq-48-5-4">(48.5.4)</a>를 증명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-48-5-2">(48.5.2)</a>에서 \(\sum_qS_{iq}(S\nabla\rho_\varepsilon)_q = (S^2\nabla\rho_\varepsilon)_i = (S\nabla\rho_\varepsilon)_i\)이므로 \(\sum_q(\delta_{qiq}V*\rho_\varepsilon)(x)\) \(= \int(S\nabla\rho_\varepsilon(y - x))_i\,dV\) \(= \inner{(\delta V*\rho_\varepsilon)(x)}{e_i}\)이다(<a href="../47-paper-varifold-approximation/47-3-regularized-first-variation.html#i-47-3-3">Proposition 47.3.3</a>의 식). 같은 \(-\tfrac{C_\xi}{C_\rho}/\norm{V}*\xi_\varepsilon\)을 곱하면 \(\sum_q\beta^\varepsilon_{qiq} = \vec H^{V,\varepsilon}_i\)이다. \(\sum_qS_{qq} = d\)에서 \(\sum_q\beta^\varepsilon_{iqq} = d\vec H^{V,\varepsilon}_i\)이다. 흐리기 전의 <a href="48-4-hutchinson-properties.html#i-48-4-7">Proposition 48.4.7</a>(b)와 같은 계산이 적분 안에서 그대로 성립한다.</p>
+          <p class="verified">Verification: <code>verify/v-48-5-approximate-wsff.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-5-2" data-level="1">
+        <p><span class="thm-head">Exercise 48.5.2</span> <span class="level">★</span> point cloud varifold \(V = \sum_lm_l\delta_{x_l} \otimes \delta_{P_l}\)에서 \(c^{V,\varepsilon}(x)\)와 \(c^V(x_l)\)을 쓰고, 둘이 어떻게 다른지 말하여라. 점 \(x_l\)에서 \(\varepsilon\)-WSFF\(^\perp\)의 coefficient는 어느 것인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(c^{V,\varepsilon}(x) = \sum_lm_l\eta(r_l)P_l/\sum_lm_l\eta(r_l)\)(\(r_l = \abs{x_l - x}/\varepsilon\))로, 반지름 \(\varepsilon\) 안의 plane들의 가중 평균이다. 이웃의 plane이 다르면 projection이 아니다(eigenvalue가 \(0\)과 \(1\) 사이). \(c^V\)는 Young measure의 평균이고 원자 \(x_l\)에서 \(\nu_{x_l} = \delta_{P_l}\)이므로 \(c^V(x_l) = P_l\)이다. \(\varepsilon\)-WSFF\(^\perp\)는 \(c^V(x_l) = P_l\)을 쓰고(논문 §7.1), \(\varepsilon\)-WSFF는 \(c^{V,\varepsilon}(x_l)\)을 쓴다.</p>
+          <p class="verified">Verification: <code>verify/v-48-5-approximate-wsff.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-5-3" data-level="1">
+        <p><span class="thm-head">Exercise 48.5.3</span> <span class="level">★</span> <a href="#eq-48-5-10">(48.5.10)</a>에서 <a href="#eq-48-5-11">(48.5.11)</a>을 유도하여라. 평평한 plane 위의 point cloud(모든 \(P_l\)이 같다)에서 \(\varepsilon\)-WSFF\(^\perp\)는 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p><a href="#eq-48-5-3">(48.5.3)</a>과 <a href="#eq-48-5-2">(48.5.2)</a>에서 \(\beta^{V,\varepsilon}_{ijk}(x)\) \(= -\tfrac{C_\xi}{C_\rho}\int S_{jk}(S\nabla\rho_\varepsilon(y - x))_i\,dV\) \(/\norm{V}*\xi_\varepsilon(x)\)이다. \(S_{jk} = (S_{jk} - c^V_{jk}(x)) + c^V_{jk}(x)\)로 나누면 뒤의 몫은 \(c^V_{jk}(x)\)에 \(-\tfrac{C_\xi}{C_\rho}\int(S\nabla\rho_\varepsilon)_i\,dV/\norm{V}*\xi_\varepsilon = \vec H^{V,\varepsilon}_i\)를 곱한 것이다. 이것을 빼면 <a href="#eq-48-5-11">(48.5.11)</a>이다. 모든 \(P_l\)이 \(c^V(x) = P\)와 같으면 integrand의 \(S_{jk} - c^V_{jk}\)가 \(0\)이므로 \(\varepsilon\)-WSFF\(^\perp = 0\)이다. 점이 고르지 않게 놓여 있어도 그렇다. \(\varepsilon\)-WSFF는 그렇지 않다. 고르지 않은 sampling에서 \(\vec H^{V,\varepsilon}\)이 plane 안의 성분을 가지면 \(\beta^{V,\varepsilon} = P_{jk}\vec H^{V,\varepsilon}_i\)가 \(0\)이 아니고, <a href="48-4-hutchinson-properties.html#ex-48-4-4">Exercise 48.4.4</a>처럼 그 일부가 \(A^{V,\varepsilon}\)에 남는다.</p>
+          <p class="verified">Verification: <code>verify/v-48-5-approximate-wsff.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-48-5-4" data-level="2">
+        <p><span class="thm-head">Exercise 48.5.4</span> <span class="level">★★</span> 간격 \(h\)인 point cloud에 정확한 plane을 준다고 하자(\(d_h \sim d_{1,h} \sim \abs{x - z_h} \sim h\), \(d_{2,h} = 0\)). 이웃의 개수를 고정하는 선택 \(\varepsilon = kh\)(\(k\) 고정)에서 두 정리의 bound는 \(h \to 0\)일 때 어떻게 되는가? \(\varepsilon = h^{1/3}\)이면 어떤가? 이것이 실무에서 “\(k\)-nearest neighbor로 \(\varepsilon\)을 정하는” 관행에 대해 말하는 것은 무엇인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\varepsilon = kh\)이면 \(\varepsilon\)-WSFF의 bound \(h/\varepsilon^2 = 1/(k^2h)\)는 \(h \to 0\)에서 발산하고, \(\varepsilon\)-WSFF\(^\perp\)의 bound \(h/\varepsilon = 1/k\)는 \(h\)에 무관하게 \(1/k\)로 남는다. 어느 쪽도 \(0\)으로 가지 않는다(Theorem 6.11의 수렴 조건 \(h = o(\varepsilon)\)이 깨진다). \(\varepsilon = h^{1/3}\)이면 \(h/\varepsilon^2 = h^{1/3} \to 0\), \(h/\varepsilon = h^{2/3} \to 0\)이고 consistency 오차(bias)도 \(\varepsilon \to 0\)이므로 둘 다 수렴한다. 이웃 개수를 고정하는 관행은 \(\varepsilon\)-WSFF\(^\perp\)에서는 오차가 bound된 채로 남는 것을, \(\varepsilon\)-WSFF에서는 해상도를 높일수록 오히려 나빠질 수 있다는 것을 뜻한다. 수렴을 원하면 점이 늘어날 때 이웃 개수도 늘려야 한다. 논문의 실험은 이웃 개수 \(40\)을 고정하고 WSFF\(^\perp\)를 쓴다(<a href="48-6-numerical-illustrations.html">Section 48.6</a>).</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="48-4-hutchinson-properties.html">← 48.4 Comparison with Hutchinson and Structural Properties</a>
+    <a rel="next" href="48-6-numerical-illustrations.html">48.6 Implementation and Numerical Illustrations →</a>
+  </nav>
+</body>
+</html>
