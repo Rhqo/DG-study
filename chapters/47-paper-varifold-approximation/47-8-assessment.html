@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>47.8 Assessment — DG Study</title>
+  <meta name="dg-id" content="47.8">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="47.1, 47.2, 47.3, 47.4, 47.5, 47.6, 47.7">
+  <meta name="dg-refs" content="BLM17 (Introduction, §2–§8); BLM22; GeoSplat25; ManifoldGS26">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">47. Paper: A Varifold Approach to Surface Approximation</a> ›
+    <span>47.8 Assessment</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>47.8 Assessment</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#BLM17">[BLM17]</a>,
+        <a class="cite" href="../../references.html#BLM22">[BLM22]</a>,
+        <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25]</a>,
+        <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>논문이 주장한 기여마다 근거가 무엇이고 어디까지 지지되는지 판단할 수 있다.</li>
+        <li>저자가 밝힌 한계와 우리가 찾은 한계를 구분해 말할 수 있다.</li>
+        <li>인쇄된 오식과 불일치, 확인하지 못한 항목을 한 곳에서 찾아볼 수 있다.</li>
+        <li>이 논문이 Chapter 48–50의 논문에 무엇을 넘겨주는지 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>이 장의 앞 절 전부, 특히 논문이 주장한 기여의 목록(<a href="47-1-problem-key-idea.html#sec-claims">Section 47.1</a>)과 실험(<a href="47-7-numerical-experiments.html">Section 47.7</a>)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="47-7-numerical-experiments.html">Section 47.7</a>에서 논문의 정량적인 그림을 우리 코드로 다시 계산했고, 대부분이 두 자리까지 재현되었다. 재현은 동시에 논문이 적지 않은 것(회귀의 방법, 오차의 정규화, noise의 크기)을 드러냈다. 이 절은 장 전체를 돌아본다. <a href="47-1-problem-key-idea.html#sec-claims">Section 47.1</a>에서 적어 둔 일곱 가지 주장을 하나씩 근거와 맞대고, 저자가 밝힌 한계와 우리가 본 한계를 나누어 적는다. 앞 절들의 Warning 상자에 흩어 둔 오식을 한 표로 모으고, 이 논문이 다음 세 논문에 무엇을 넘겨주는지 정리한다. 이 절의 판단은 모두 우리의 평가다.</p>
+    </section>
+
+    <section id="sec-claims-evidence">
+      <h2>Claims and Evidence</h2>
+      <table id="tab-47-8-1">
+        <caption>Table 47.8.1. 논문이 주장한 기여(<a href="47-1-problem-key-idea.html#sec-claims">Section 47.1</a>의 번호), 그 근거, 우리의 평가</caption>
+        <thead>
+          <tr><th>주장</th><th>근거</th><th>우리의 평가</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1. discrete varifold로 이산 데이터를 하나의 framework에 담고, volumetric과 point cloud 사이의 거리를 bound한다</td><td>증명(Prop 2.13, <a href="47-2-discrete-varifolds.html#i-47-2-6">Proposition 47.2.6</a>)</td><td>성립한다. bound는 상수배를 빼면 정확한 크기다(<a href="47-2-discrete-varifolds.html#i-47-2-7">Example 47.2.7</a>, 실제 값은 bound의 \(0.27\)배).</td></tr>
+          <tr><td>2. regularized first variation과 Allard형 compactness·rectifiability</td><td>증명(Thm 3.6, <a href="47-3-regularized-first-variation.html#i-47-3-8">Theorem 47.3.8</a>)</td><td>성립한다. 다만 가정(regularized first variation의 \(L^1\) norm이 고르게 bounded)은 point cloud에서 \(\varepsilon/h\)를 고정하면 깨지고, \(\varepsilon/h\)가 충분히 빨리 커져야 성립한다(<a href="47-3-regularized-first-variation.html#fig-47-3-1">Figure 47.3.1</a>).</td></tr>
+          <tr><td>3. approximate mean curvature와 세 수렴 정리</td><td>증명(Thm 4.3, 4.5, 4.8, <a href="47-4-approximate-mean-curvature.html">Section 47.4</a>)</td><td>점근적 진술로서 성립한다. 인쇄된 증명의 작은 실수는 결론에 영향이 없다. 상수 \(C\)와 “\(i\)가 충분히 크면”의 범위가 주어지지 않아 실제 \(\varepsilon\)의 선택에는 order 수준의 지침만 준다. 예측한 scaling은 수치로 확인된다(<a href="47-4-approximate-mean-curvature.html#fig-47-4-2">Figure 47.4.2</a>).</td></tr>
+          <tr><td>4. natural kernel pair가 수렴과 안정성을 크게 개선한다</td><td>Taylor 전개 heuristic(§5)과 2D 실험(Fig. 4)</td><td>효과는 실제로 크고(Fig. 4(a)에서 \((\rho, \rho)\)는 멈추고 natural pair는 기울기 \(-2\)), curve에서는 우리 분석이 이유를 준다(이웃 배치의 오차가 점마다 약분되어 \(\varepsilon^2\)의 bias만 남는다, <a href="47-5-natural-kernel-pairs.html#i-47-5-4">Proposition 47.5.4</a>). 그러나 논문의 heuristic 자체는 이 효과를 보이지 않고(상수항은 모든 pair에서 \(0\)), surface에서는 이웃의 방향 distribution에 따른 오차가 남는다(<a href="47-5-natural-kernel-pairs.html#i-47-5-5">Remark 47.5.5</a>). 3D에서의 정량 시험은 없다.</td></tr>
+          <tr><td>5. rectifiable varifold의 cell 근사와 piecewise \(C^{1,\beta}\)에서의 rate \(\delta^\beta\)</td><td>증명(Lemma 6.1, Thm 6.4, <a href="47-6-discrete-approximation-cotangent.html">Section 47.6</a>)</td><td>성립한다(<a href="47-6-discrete-approximation-cotangent.html#fig-47-6-1">Figure 47.6.1</a>에서 기울기 \(1\)). 구성은 cell의 mass \(m_K = \norm{V}(K)\), 곧 cell 안의 넓이를 알아야 하는데, 실제 point cloud에서는 모르는 값이다.</td></tr>
+          <tr><td>6. cotangent formula는 polyhedral varifold의 first variation을 hat function에 쓴 값이다</td><td>계산(Prop 7.1)</td><td>항등식으로 정확하다(<a href="47-6-discrete-approximation-cotangent.html#i-47-6-9">Example 47.6.9</a>에서 기계 정밀도). 수렴 결과는 아니다. hat function “kernel”은 mesh마다 모양이 바뀌어 §4의 정리(고정된 profile)가 바로 적용되지 않고, 고르지 않은 mesh에서는 pointwise 값이 수렴하지 않을 수 있다(<a href="../41-discrete-curvature-variational/41-4-convergence.html#i-41-4-6">Remark 41.4.6</a>, icosphere의 valence 5 vertex에서 \(2.29\), <a href="../46-varifold-background/46-5-first-variation.html#i-46-5-13">Remark 46.5.13</a>).</td></tr>
+          <tr><td>7. 구현이 쉽고, 이론보다 빨리 수렴하며, singular point에서도 일관된 값을 준다</td><td>§8의 실험(Fig. 2–12)</td><td>2D 합성 curve에서는 지지된다. 우리 재현이 Fig. 3–9의 수치를 대부분 두 자리까지 맞춘다(<a href="47-7-numerical-experiments.html">Section 47.7</a>). 그러나 정량 증거는 2D 합성 데이터뿐이고, 비교 대상(baseline), 계산 시간, 코드가 없다. singular point에서 “일관된 값”은 junction 한 점의 값이고, 그 값은 가지들의 평균이다(<a href="47-7-numerical-experiments.html#i-47-7-7">Proposition 47.7.7</a>). 3D와 scan 데이터는 정성적이다.</td></tr>
+        </tbody>
+      </table>
+      <p>Introduction은 이 정리들로 Willmore형 범함수의 \(\Gamma\)-convergence를 보일 수 있다고 예고하지만, 이 논문에는 그 결과가 없다. 위의 표에 넣지 않았다.</p>
+    </section>
+
+    <section id="sec-author-limits">
+      <h2>Limitations Stated by the Authors</h2>
+      <p>저자들이 본문에서 직접 밝힌 한계는 다음과 같다 <a class="cite" href="../../references.html#BLM17">[BLM17]</a>.</p>
+      <ol>
+        <li><strong>kernel의 선택.</strong> 어떤 kernel pair가 더 좋은 rate를 주는지에 대해 “완전히 만족스러운 답을 줄 수 없다”고 쓰고, natural pair가 rate를 개선하는지는 분명하지 않다고 밝힌다(§5, <a href="47-5-natural-kernel-pairs.html">Section 47.5</a>).</li>
+        <li><strong>Theorem 4.5의 rate.</strong> 최소한의 regularity를 가정한 대가로 rate가 최적이 아니라고 말한다. orthogonal 버전은 tangent plane의 점별 추정에 매우 민감해 Theorem 4.5를 그대로 일반화할 수 없고, 더 강한 가정 (4.35)–(4.36)이 필요하다(<a href="47-4-approximate-mean-curvature.html#i-47-4-13">Theorem 47.4.13</a>).</li>
+        <li><strong>mass의 계산.</strong> 주어진 point cloud의 mass(밀도) \(m_j\)를 어떻게 계산할지는 “중요하지만 다루지 않았다”. 실험은 국소적으로 같은 mass를 가정한다(<a href="47-7-numerical-experiments.html#i-47-7-1">Definition 47.7.1</a>).</li>
+        <li><strong>회귀 반지름.</strong> \(R = \varepsilon/2\)는 미리 최적인 값이 아니고, 최적화할 또 하나의 매개변수다. tangent가 근사이면 수렴이 느리다(§8.1.3, §8.1.5).</li>
+        <li><strong>polyhedral 근사.</strong> polyhedral varifold의 열로 \(\Delta^{1,1}\) 수렴을 얻는 것은 미묘하다(Schwarz lantern, §2.2). 그래서 §6의 근사는 volumetric과 point cloud로 한다.</li>
+        <li><strong>singular point.</strong> 교차점에서 \(\vec H^{V,\perp}\)는 연속일 수 없고, singular point 근처에서 진동이 생겨 scale \(2\varepsilon\)의 평균을 추가로 썼다(§8.2).</li>
+        <li><strong>비교.</strong> 다른 이산 curvature 추정법과의 철저한 비교는 길이 때문에 후속 논문으로 미룬다(§8 첫머리). Introduction은 그 대신 여러 이산 curvature를 모은 <a class="cite" href="../../references.html#NajmanRomon14">[NajmanRomon14]</a>를 소개한다.</li>
+      </ol>
+    </section>
+
+    <section id="sec-our-evaluation">
+      <h2>Our Evaluation</h2>
+      <p>저자가 밝히지 않았거나 약하게 말한 한계를 적는다. 근거는 모두 앞 절에 있다.</p>
+      <ol>
+        <li><strong>정리는 점별이고 점근적이다.</strong> Theorem 4.3은 rate가 없고, Theorem 4.5와 4.8은 미지의 상수 \(C\)와 “\(i\)가 충분히 크면”을 가진다. 실제로 \(\varepsilon\)을 얼마로 잡을지는 \(\varepsilon \gg \sqrt d\)(Theorem 4.5) 또는 \(\varepsilon \gg d\)(Theorem 4.8)라는 order 수준의 지침뿐이다.</li>
+        <li><strong>빠른 정리는 실험이 강조하는 특이 배치를 덮지 않는다.</strong> Theorem 4.8은 boundary 없는 \(C^2\) surface와 multiplicity \(1\)을 요구한다. eight, 두 circle, double bubble에는 Theorem 4.3(rate 없음, 고정된 \(V\))과 Theorem 4.5(정사영하지 않은 \(\vec H^V\), \(\varepsilon^{-2}\)의 rate)만 적용된다. singular point에서의 좋은 결과는 수치적 증거이고, 그 값은 가지들의 curvature의 평균이다(<a href="47-7-numerical-experiments.html#i-47-7-7">Proposition 47.7.7</a>).</li>
+        <li><strong>natural pair의 이론적 근거가 약하다.</strong> 논문의 heuristic(상수항이 \(0\))은 모든 pair에서 성립하므로 natural pair를 고를 이유가 되지 못한다. 진짜 이유는 이산 합에서 integrand가 점마다 \(0\)이 되는 것이고(우리의 분석, <a href="47-5-natural-kernel-pairs.html">Section 47.5</a>), 이것이 Fig. 4의 기울기 \(-2\)와 \(-1.5\)를 정확히 설명한다(<a href="47-7-numerical-experiments.html#ex-47-7-4">Exercise 47.7.4</a>). surface에서는 이 약분이 완전하지 않다.</li>
+        <li><strong>인쇄된 공식을 그대로 구현하면 틀린다.</strong> (4.3)은 부호와 상수가, (8.1)과 (8.2)는 상수가 틀리거나 빠져 있다. 독자가 (8.2)를 그대로 구현하면 natural pair에서 평면 curve는 \(2\)배, surface는 \(1.5\)배의 값이 나온다. 저자의 구현에는 상수가 있었던 것으로 보인다(Fig. 3의 \(3.99998\)).</li>
+        <li><strong>실험의 세부 사항이 빠져 있다.</strong> 2D 회귀의 방법, 그림의 오차 정규화(인쇄된 \(\norm{\vec H}_\infty\)가 아니라 평균 \(\abs{\vec H}\)로 보인다), noise의 크기(분산이 아니라 표준편차 \(1/N\)으로 보인다), \(N_{\mathrm{neigh}}\)의 뜻, 데이터 점의 \(N\) 값, Fig. 7이 어느 버전인지, Fig. 12의 \(\varepsilon\), dragon과 조각상의 출처가 없다. 우리는 재현으로 일부를 추론했지만(<a href="#tab-47-8-3">Table 47.8.3</a>) 확정하지 못했다.</li>
+        <li><strong>noise 실험의 규모가 작다.</strong> 표준편차 \(1/N\)은 점 간격의 \(0.14\)배다. 실제 scanner나 SfM, 3DGS 중심의 위치 오차는 점 간격의 몇 배인 경우가 흔하다. Introduction의 “noise가 있어도”는 이 범위로 읽어야 한다. 3D에는 noise 실험이 없다. \(R = \varepsilon^{9/10}\)이 낫다는 본문의 말은 Fig. 6의 점과도 우리 재현과도 맞지 않는다(<a href="47-7-numerical-experiments.html#tab-47-7-7">Table 47.7.7</a>).</li>
+        <li><strong>정량 평가는 2D 합성 curve뿐이다.</strong> surface(\(d = 2\))의 수렴 실험, boundary가 있는 surface(boundary에서 \(\delta V_s\)가 생긴다), outlier, 이웃 수의 선택, 계산 시간이 시험되지 않았다. 3D double bubble의 수치는 특이 원을 따라 평균한 크기 하나(\(1.51\) 대 기대값 \(1.466\))다.</li>
+        <li><strong>mass의 문제는 정리에도 들어 있다.</strong> Theorem 4.5와 4.8의 가정 (4.24), (4.35)는 \(\norm{V_i}\)가 \(\norm{V}\)에 가까울 것을 요구하고, Theorem 6.4의 구성은 넓이 \(\norm{V}(K)\)를 쓴다. normal projection은 smooth 밀도의 tangential 효과를 지우지만(<a href="47-7-numerical-experiments.html#i-47-7-6">Remark 47.7.6</a>), 이것이 mass를 모를 때 정리의 가정을 대신하는 것은 아니다.</li>
+        <li><strong>\(2\varepsilon\) 평균은 공짜가 아니다.</strong> 2D double bubble에서 평균은 junction 근처의 진동을 없애지만, 영향을 받는 구간이 \(\varepsilon\)에서 \(3\varepsilon\) 가까이로 넓어진다. \(N = 800\)에서는 junction의 값도 평균 전(오차 \(4.5\)–\(7.1\%\))보다 나빠지므로(\(13.3\)–\(13.7\%\)) 논문이 보고한 \(13\%\)는 평균이 만든 오차가 대부분이다. \(N = 1600\)의 \(7\%\)는 점의 배치에 따라 평균 전의 오차가 더 클 수도 있어 그렇게 말할 수 없다(<a href="47-7-numerical-experiments.html#tab-47-7-8">Table 47.7.8</a>, <a href="47-7-numerical-experiments.html#fig-47-7-4">Figure 47.7.4</a>, 우리 재현).</li>
+        <li><strong>cotangent 해석은 항등식이다.</strong> 위의 <a href="#tab-47-8-1">Table 47.8.1</a> 6번 참고.</li>
+      </ol>
+      <p>그래도 이 논문의 핵심 구성은 단단하다. <a href="47-4-approximate-mean-curvature.html#eq-47-4-2">(47.4.2)</a>는 어떤 varifold에서도 뜻을 갖고, 계산은 이웃 합 두 개이며, 2D 실험의 수치는 독립적인 구현으로 재현된다. 우리가 본 약점은 대부분 “보고와 시험의 범위”에 있고 “구성 자체”에 있지 않다.</p>
+    </section>
+
+    <section id="sec-typos">
+      <h2>Printed Typos and Inconsistencies</h2>
+      <p>앞 절의 Warning 상자에서 원문과 대조해 확인한 것을 모았다. 결론을 바꾸는 것은 없지만, 4번과 16번은 공식을 그대로 구현하는 독자에게 틀린 값을 준다.</p>
+      <table id="tab-47-8-2">
+        <caption>Table 47.8.2. [BLM17] arXiv v1의 인쇄 오식과 불일치</caption>
+        <thead>
+          <tr><th>#</th><th>위치</th><th>인쇄된 것</th><th>바른 것 / 영향</th><th>다룬 곳</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Def 2.7 둘째 식</td><td>\(\mathrm{Lip}(\Omega)\)</td><td>\(\mathrm{Lip}_1(\Omega)\). 그대로면 sup이 무한대일 수 있다</td><td><a href="47-2-discrete-varifolds.html">47.2</a></td></tr>
+          <tr><td>2</td><td>Remark 2.10</td><td>varifold measure의 push-forward</td><td>넓이 배율 \(J_S\varphi_t\)를 곱한 image. 표준 관례를 줄여 쓴 것</td><td><a href="47-2-discrete-varifolds.html">47.2</a></td></tr>
+          <tr><td>3</td><td>§2.2 mesh의 정의</td><td>“countable partition, that is, a finite collection”</td><td>locally finite한 countable partition</td><td><a href="47-2-discrete-varifolds.html#i-47-2-3">47.2</a></td></tr>
+          <tr><td>4</td><td>(4.3)</td><td>음의 부호와 \(C_\xi/C_\rho\)가 없음</td><td><a href="47-4-approximate-mean-curvature.html#eq-47-4-3">(47.4.3)</a>. circle에서 \(-2\) 대신 \(+4\)</td><td><a href="47-4-approximate-mean-curvature.html">47.4</a></td></tr>
+          <tr><td>5</td><td>Thm 4.3 증명 (4.5), (4.10)</td><td>singular 항의 \(C_\xi/C_\rho\) 누락</td><td>상수배, 결론 영향 없음</td><td><a href="47-4-approximate-mean-curvature.html">47.4</a></td></tr>
+          <tr><td>6</td><td>(4.19)</td><td>\(\big|\abs{x - y} - \abs{z_i - y}\big|\)</td><td>vector 차 \(\abs{x - z_i}\). bound는 같음</td><td><a href="47-4-approximate-mean-curvature.html">47.4</a></td></tr>
+          <tr><td>7</td><td>(4.30) 앞의 계산</td><td>중간 단계의 상수 \(4/C_\rho\)</td><td>극한에서 필요한 상수는 \(\omega_d/C_\rho\)다. \(4/C_\rho\)는 \(\omega_d \lt 4\)(\(d \le 2\)와 \(d \ge 9\))에서만 맞지만, (4.30)의 \(8/C_\rho\)는 모든 \(d\)에서 성립한다(\(\omega_d \le \omega_5 \approx 5.26\)). 결론 영향 없음</td><td><a href="47-4-approximate-mean-curvature.html">47.4</a></td></tr>
+          <tr><td>8</td><td>(4.38)</td><td>“\(=\)”, 둘째 항 분자의 \(\varepsilon_i^n\) 누락</td><td>“\(\le\)”(왼쪽과 분자의 세 항이 크기다), 분자에 \(\varepsilon_i^n\). 결론 영향 없음</td><td><a href="47-4-approximate-mean-curvature.html">47.4</a></td></tr>
+          <tr><td>9</td><td>Thm 4.8, (4.37)</td><td>“\(C \gt 0\)이 있어”만</td><td>\(o(\varepsilon_i)\) 가정 아래 \(i\)가 클 때 (우리의 읽기)</td><td><a href="47-4-approximate-mean-curvature.html#i-47-4-13">47.4</a></td></tr>
+          <tr><td>10</td><td>p. 24 첫 식</td><td>왼쪽 \(\vec H^V(0) - \vec H(0)\)</td><td>오른쪽과 맞추면 \(\vec H(0) - \vec H^V(0)\). 결론 영향 없음</td><td><a href="47-5-natural-kernel-pairs.html">47.5</a></td></tr>
+          <tr><td>11</td><td>p. 26 정규화</td><td>\(\int_0^1\rho s^{n-1} = \int_0^1\xi s^{n-1} = 1\)</td><td>§1은 \(n\omega_n\)을 곱한 것이 \(1\). 결론 같음</td><td><a href="47-5-natural-kernel-pairs.html">47.5</a></td></tr>
+          <tr><td>12</td><td>Introduction의 Thm 6.4 소개</td><td>bounded first variation을 가정하는 것처럼 씀</td><td>정리는 유한 mass만 가정</td><td><a href="47-6-discrete-approximation-cotangent.html">47.6</a></td></tr>
+          <tr><td>13</td><td>Thm 6.4 증명 Step 6</td><td>\(\varphi \in C^0_c\)</td><td>\(\mathrm{lip}(\varphi) \le 1\), \(\abs{\varphi} \le 1\)</td><td><a href="47-6-discrete-approximation-cotangent.html">47.6</a></td></tr>
+          <tr><td>14</td><td>(7.3)–(7.4)</td><td>음의 부호 하나가 더 붙고 다음 식에서 하나가 빠짐, 괄호 위치</td><td>두 실수가 상쇄되어 (7.5), (7.2)는 맞음</td><td><a href="47-6-discrete-approximation-cotangent.html">47.6</a></td></tr>
+          <tr><td>15</td><td>nodal function의 정의</td><td>\(w \le v\)에서 \(\varphi_v(w) = 0\)</td><td>\(w \ne v\)</td><td><a href="47-6-discrete-approximation-cotangent.html">47.6</a></td></tr>
+          <tr><td>16</td><td>(8.1), (8.2)</td><td>\(C_\xi/C_\rho\) 없음, \(\rho'\) 안의 \(x\)</td><td><a href="47-7-numerical-experiments.html#eq-47-7-1">(47.7.1)</a>, <a href="47-7-numerical-experiments.html#eq-47-7-2">(47.7.2)</a>. natural pair에서 \(n/d\)배</td><td><a href="47-7-numerical-experiments.html">47.7</a></td></tr>
+          <tr><td>17</td><td>§8.1.1의 \(\xi_{\mathrm{tent}}\)</td><td>\(= r\)</td><td>\(r/n\). 결과 영향 없음</td><td><a href="47-7-numerical-experiments.html">47.7</a></td></tr>
+          <tr><td>18</td><td>Fig. 4 캡션</td><td>이웃 수 \(10N^{1/4}\)</td><td>본문의 \(10^{3/4}N^{1/4}\)(\(= \varepsilon N\))</td><td><a href="47-7-numerical-experiments.html">47.7</a></td></tr>
+          <tr><td>19</td><td>§8.1.5 noise</td><td>“variance \(\sigma = 1/N\)”</td><td>표준편차 \(1/N\)으로 읽어야 그림과 맞음</td><td><a href="47-7-numerical-experiments.html">47.7</a></td></tr>
+          <tr><td>20</td><td>§8.1.5 마지막 문장</td><td>\(R = \varepsilon^{9/10}\)이 더 낮은 오차</td><td>Fig. 6에서 \(R = \varepsilon^{1.1}\)이 가운데 세 점에서 뚜렷이 낮고 양 끝 두 점에서는 비슷하다. \(\varepsilon^{9/10}\)이 낮은 점은 없다. 우리 재현의 네 \(N\) 모두에서 \(R = \varepsilon^{1.1}\)이 낮음</td><td><a href="47-7-numerical-experiments.html#tab-47-7-7">47.7</a></td></tr>
+        </tbody>
+      </table>
+      <p>오식이 <em>아닌</em> 것도 하나 적어 둔다. §5의 (5.3)에서 normal 성분에 \(\tfrac12\)이 없는 것은 맞는 식이다(<a href="47-5-natural-kernel-pairs.html">Section 47.5</a>). 또 그림의 보고에서 빠진 것(Fig. 7이 \(\vec H^V\)인지 \(\vec H^{V,\perp}\)인지, Fig. 10–12의 colorbar, Fig. 12의 \(\varepsilon\), 데이터의 출처)은 오식이 아니므로 위의 평가 5번에 넣었다.</p>
+    </section>
+
+    <section id="sec-unverified">
+      <h2>Items We Could Not Confirm</h2>
+      <table id="tab-47-8-3">
+        <caption>Table 47.8.3. 확인하지 못한 항목, 우리가 가진 근거, 확인할 방법</caption>
+        <thead>
+          <tr><th>항목</th><th>우리의 근거와 추론</th><th>확인할 방법</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2D 실험의 회귀 방법</td><td>논문에 적혀 있지 않다. OLS가 Fig. 4의 회귀 곡선에, PCA가 Fig. 5의 회귀 곡선에 더 가깝고 둘 다 정확히 맞지는 않는다(<a href="47-7-numerical-experiments.html#tab-47-7-4">Table 47.7.4</a>, <a href="47-7-numerical-experiments.html#tab-47-7-6">Table 47.7.6</a>)</td><td>저자의 코드, 게재본(ARMA)의 본문</td></tr>
+          <tr><td>논문 그림의 오차 정규화</td><td>논문에 적힌 것은 \(\norm{\vec H}_\infty\)로 나누는 (8.5)뿐이다. 평균 \(\abs{\vec H}\)로 나눈 값이 여러 곡선, 여러 \(N\)에서 두 자리까지 맞는다(비 \(14.17\), <a href="47-7-numerical-experiments.html#i-47-7-4">Remark 47.7.4</a>)</td><td>저자의 코드</td></tr>
+          <tr><td>noise의 크기</td><td>논문에는 “variance \(\sigma = 1/N\)”만 적혀 있다. 표준편차 \(1/N\)이면 네 \(N\)에서 그림과 맞고, 분산 \(1/N\)이면 ball이 비어 오차를 정의할 수 없다</td><td>저자의 코드</td></tr>
+          <tr><td>논문이 \(N_{\mathrm{neigh}}\)을 어떻게 셌는지</td><td>논문에 적혀 있지 않다. 본문의 \(100\)은 \(\varepsilon N\)이고, 실제로 센 이웃 수는 \(35.2\)다</td><td>게재본, 저자</td></tr>
+          <tr><td>Fig. 7이 \(\vec H^V\)와 \(\vec H^{V,\perp}\) 가운데 어느 것인지</td><td>논문에 적혀 있지 않다. 곧은 가지의 화살표가 가지에 수직이고(같은 곳의 \(\vec H^V\)는 tangential 성분이 더 크다), colorbar 최대 \(6.76333\)은 우리의 \(\vec H^{V,\perp}\) 최대 \(6.7639\)에 더 가깝다(\(\vec H^V\)는 \(6.7686\)). 그래서 \(\vec H^{V,\perp}\)로 보인다</td><td>저자의 코드</td></tr>
+          <tr><td>Fig. 8(c)의 교차점 값</td><td>논문에 적혀 있지 않다. 색으로 \(\approx 1.46\)이고, 우리 재현은 \(1.4984\)(극한 \(1.5\))</td><td>저자의 데이터</td></tr>
+          <tr><td>[BLM22]가 인용하는 [BLM17]의 번호</td><td>[BLM22]는 게재본 번호로 보이는 “Proposition 4.2”(regularized variation의 표현), “Proposition 4.1”(regularized 양의 수렴)을 인용한다. 내용으로는 arXiv v1의 Proposition 3.2와 Theorem 4.3이다. “Theorems 4.5 and 4.8”, “Lemma 4.4”는 v1과 같은 번호다. 게재본의 번호는 우리가 확인하지 못했다</td><td>ARMA 게재본</td></tr>
+          <tr><td>Fig. 4–6의 데이터 점의 \(N\)</td><td>축에서 \(N = 5000\cdot5^k\)로 읽었고, 재현이 그 \(N\)에서 맞는다</td><td>저자의 코드</td></tr>
+        </tbody>
+      </table>
+      <p>이 장의 항목 번호와 식 번호는 arXiv v1을 따른다(<a class="cite" href="../../references.html#BLM17">[BLM17]</a>). 게재본의 번호는 다를 수 있다.</p>
+    </section>
+
+    <section id="sec-relations">
+      <h2>Relation to Chapters 48–50</h2>
+      <p>이 논문(2016년 arXiv, 2017년 게재)은 이 묶음의 다른 세 논문보다 먼저 나왔다. 아래는 뒤의 논문들이 이 논문에서 가져가는 것이다. 각 장에서 다시 다룬다.</p>
+      <div class="thm remark" id="i-47-8-1">
+        <p><span class="thm-head">Remark 47.8.1</span> <span class="thm-name">(what [BLM22] takes from this paper)</span>. 같은 저자들의 직접적인 후속작 <a class="cite" href="../../references.html#BLM22">[BLM22]</a>(<a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a>)는 이 논문의 regularization을 mean curvature에서 second fundamental form 전체로 넓힌다. point cloud varifold, mass, \(\Delta^{1,1}\)을 그대로 쓰고, regularized “G-linear variation” \(\delta_{ijk}V*\rho_\varepsilon\)은 <a href="47-3-regularized-first-variation.html#i-47-3-2">Definition 47.3.2</a>와 <a href="47-3-regularized-first-variation.html#i-47-3-3">Proposition 47.3.3</a>을 성분별로 넓힌 것이다. approximate mean curvature를 상수 \(C_\xi/C_\rho\)를 넣어 다시 적고(이 장의 <a href="47-4-approximate-mean-curvature.html#eq-47-4-2">(47.4.2)</a>와 같다), regularized weak second fundamental form의 trace가 이 approximate mean curvature가 되도록 맞춘다. natural kernel pair를 이 논문 §5에서 가져와 쓰고 §8의 수치 결과를 근거로 든다. 수렴 정리는 Theorem 4.5와 4.8의 변형이고 Lemma 4.4를 그대로 쓴다. 수치 실험은 이 논문처럼 point cloud에서 하지만 정성적인 그림뿐이다. 이 논문이 남긴 숙제 가운데 “principal curvature와 방향”은 거기서 풀리고, “mass를 어떻게 정하나”와 “다른 방법과의 정량 비교”는 남는다.</p>
+      </div>
+      <div class="thm remark" id="i-47-8-2">
+        <p><span class="thm-head">Remark 47.8.2</span> <span class="thm-name">(what GeoSplat takes)</span>. <a class="cite" href="../../references.html#GeoSplat25">[GeoSplat25]</a>(<a href="../49-paper-geosplat/index.html">Chapter 49</a>)는 Masnou가 공저자이고, 3DGS 학습 중에 Gaussian 중심을 point cloud varifold로 보아 [BLM22]의 approximate weak second fundamental form으로 curvature를 추정한다(varifold 기반 추정기). 그 식의 구조는 <a href="47-4-approximate-mean-curvature.html#eq-47-4-3">(47.4.3)</a>, <a href="47-7-numerical-experiments.html#eq-47-7-2">(47.7.2)</a>와 같다. 분자는 kernel의 도함수에 이웃 방향을 곱한 합이고 분모는 다른 kernel의 합이다. 다른 점은 이웃을 \(\varepsilon\)-ball 대신 KNN으로 잡는다는 것, 그리고 kernel과 \(\varepsilon\), mass의 선택을 적지 않는다는 것이다. 우리의 평가로는 <a href="47-7-numerical-experiments.html">Section 47.7</a>의 교훈이 그대로 적용된다. normal projection 버전을 쓸 것, natural pair를 쓸 것, 그리고 오차는 normal 추정이 지배한다는 것이다.</p>
+      </div>
+      <div class="thm remark" id="i-47-8-3">
+        <p><span class="thm-head">Remark 47.8.3</span> <span class="thm-name">(what Manifold-GS shares)</span>. <a class="cite" href="../../references.html#ManifoldGS26">[ManifoldGS26]</a>(<a href="../50-paper-manifold-gs/index.html">Chapter 50</a>)는 이 논문을 인용하지 않지만 같은 대상을 쓴다. Gaussian마다 (중심, covariance에서 얻은 tangent plane, opacity와 <em>다른</em> geometric mass)를 원자로 하는 “Gaussian varifold surrogate”는 정확히 point cloud varifold(<a href="../46-varifold-background/46-4-varifolds.html#i-46-4-6">Definition 46.4.6</a>)다. mass를 opacity와 떼어 놓는 설계는 이 논문이 열어 둔 “mass를 어떻게 정하나”에 대한 한 가지 답이다. 그 논문의 forward consistency bound(위치 오차 \(h\), plane 오차 \(\varepsilon_T\), mass 오차 \(\varepsilon_q\)로 \(A(M)(h + \varepsilon_T) + \varepsilon_q\))는 bounded Lipschitz distance의 bound이고, cell마다 위치와 plane의 오차를 더하는 <a href="47-6-discrete-approximation-cotangent.html#i-47-6-1">Lemma 47.6.1</a>, <a href="47-2-discrete-varifolds.html#i-47-2-6">Proposition 47.2.6</a>과 같은 논법에 mass 오차를 더한 것이다. 이 bound로 Gaussian 집합과 surface의 \(\Delta^{1,1}\)을 재면 Theorem 4.5와 4.8로 그 Gaussian 집합의 approximate mean curvature가 수렴한다는 보장까지 이어질 수 있다. 이 연결은 우리의 해석이고 어느 논문도 적지 않는다.</p>
+      </div>
+      <p>Track 2와의 관계는 <a href="47-6-discrete-approximation-cotangent.html">Section 47.6</a>의 Looking back에 있다. cotan formula(<a href="../40-discrete-curvature-integral/40-3-curvature-normals.html#i-40-3-3">Definition 40.3.3</a>)와 area gradient(<a href="../41-discrete-curvature-variational/41-2-gradients.html#i-41-2-7">Theorem 41.2.7</a>)는 polyhedral varifold의 first variation을 hat function으로 시험한 값이고, 이 장의 approximate mean curvature는 같은 비를 고정된 radial kernel로 계산한 것이다. Part IV의 Gaussian Splatting(<a href="../29-gaussian-splatting/index.html">Chapter 29</a>)과는 위의 두 Remark를 거쳐 이어진다.</p>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>수학적 주장(기여 1–3, 5, 6)은 증명으로 성립하고, 인쇄된 증명의 실수는 결론에 영향이 없다. 정리들은 점근적이고 상수를 주지 않는다(<a href="#tab-47-8-1">Table 47.8.1</a>).</li>
+        <li>natural kernel pair의 효과는 실제로 크지만 논문의 heuristic이 아니라 이산 합에서의 점별 약분으로 설명된다. surface와 3D에서는 정량적으로 시험되지 않았다.</li>
+        <li>실험은 2D 합성 curve에서 재현될 만큼 정확하지만, 회귀의 방법, 오차의 정규화, noise의 크기 같은 세부 사항이 빠져 있고, baseline과 계산 시간이 없다(<a href="#tab-47-8-3">Table 47.8.3</a>).</li>
+        <li>인쇄된 오식 20개를 모았다. 공식을 구현할 때 중요한 것은 (4.3)과 (8.1)·(8.2)의 상수 \(C_\xi/C_\rho\)다(<a href="#tab-47-8-2">Table 47.8.2</a>).</li>
+        <li>[BLM22]는 이 논문의 regularization을 second fundamental form 전체로 넓히고, GeoSplat은 그것을 3DGS에 쓰며, Manifold-GS는 같은 point cloud varifold에 opacity와 다른 mass를 준다(<a href="#i-47-8-1">Remark 47.8.1</a>–<a href="#i-47-8-3">Remark 47.8.3</a>).</li>
+      </ul>
+      <p class="next">이 장은 여기서 끝난다. 다음 장(<a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a>)에서는 같은 저자들이 이 regularization을 second fundamental form 전체로 넓힌 논문을 읽는다. approximate mean curvature가 그 tensor의 trace가 되도록 어떻게 맞추는지가 첫 질문이다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+      <div class="exercise" id="ex-47-8-1" data-level="1">
+        <p><span class="thm-head">Exercise 47.8.1</span> <span class="level">★</span> 논문의 일곱 가지 주장 가운데 증명이 아니라 수치 실험만으로 지지되는 것은 어느 것인가? 각각 어떤 실험이 근거인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>4번(natural kernel pair가 수렴을 개선한다: heuristic과 Fig. 4)과 7번(구현이 쉽고 이론보다 빨리 수렴하며 singular point에서 일관된 값을 준다: Fig. 3–12)이다. 4번의 heuristic은 모든 pair에서 성립하는 상수항의 소거만 보이므로 natural pair의 우월성을 증명하지 않는다. 7번의 singular point 결과는 정리의 가정(Theorem 4.8의 multiplicity \(1\), boundary 없는 \(C^2\)) 밖이다.</p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-47-8-2" data-level="2">
+        <p><span class="thm-head">Exercise 47.8.2</span> <span class="level">★★</span> 3DGS의 Gaussian 중심을 point cloud varifold로 쓰면서 mass로 opacity를 준다고 하자. opacity가 surface의 넓이 밀도와 매끄럽게 다른 경우와, Gaussian마다 들쭉날쭉한 경우에 \(\vec H^V\)와 \(\vec H^{V,\perp}\)는 각각 어떻게 되는가? <a href="47-7-numerical-experiments.html#i-47-7-6">Remark 47.7.6</a>과 Fig. 5를 근거로 답하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>mass가 넓이에 대해 밀도 \(\theta\)를 가지면 극한은 \(v(M, \theta)\)이고 그 generalized mean curvature는 \(\vec H_M + \nabla^M\theta/\theta\)다. \(\theta\)가 매끄러우면 \(\vec H^V\)는 tangential 항이 붙은 값으로 수렴하고(flower의 uniform 실험에서 \(0.787\)에서 멈춤), \(\vec H^{V,\perp}\)는 그 항을 지워 \(\vec H_M\)으로 간다. \(\theta\)가 Gaussian마다 들쭉날쭉하면 \(\theta'/\theta\)가 해상도와 함께 커져 \(\vec H^V\)의 오차는 발산하지만(Fig. 5의 non uniform, no projection), \(\vec H^{V,\perp}\)는 고른 경우와 거의 같이 수렴한다(Fig. 5의 non uniform). 다만 이것은 2D 실험이고, 정리의 가정이 mass를 모를 때도 성립한다는 보장은 아니다.</p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-47-8-3" data-level="1">
+        <p><span class="thm-head">Exercise 47.8.3</span> <span class="level">★</span> 2D double bubble에서 논문이 보고한 오차 \(13\%\)와 \(7\%\)는 무엇의 오차이고, 우리 재현은 그것에 대해 무엇을 덧붙이는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>junction에 가장 가까운 점에서 scale \(2\varepsilon\)으로 평균한 \(\vec H^V\)와, 세 호의 curvature vector의 평균 \((0, -0.839)\)의 상대 오차다. 우리 재현은 \(13.7\%\)와 \(6.8\%\)로 이것을 맞추고, 평균하기 전의 값은 같은 점에서 오차가 \(5.0\%\)와 \(2.8\%\)로 더 작다는 것을 덧붙인다. 다만 평균 전의 값은 점의 배치에 민감하다. 배치를 바꾸어도 \(N = 800\)에서는 평균 전(\(4.5\)–\(7.1\%\))이 평균 뒤(\(13.3\)–\(13.7\%\))보다 작으므로 보고된 \(13\%\)의 대부분은 평균이 만든 것이다. \(N = 1600\)에서는 평균 전이 \(2.8\)–\(10\%\), 평균 뒤가 \(6.8\)–\(9.0\%\)여서 어느 쪽이 작은지가 배치에 달려 있다(<a href="47-7-numerical-experiments.html#tab-47-7-8">Table 47.7.8</a>).</p>
+          <p class="verified">Verification: <code>verify/v-47-7-numerical-experiments.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="47-7-numerical-experiments.html">← 47.7 Numerical Experiments</a>
+    <a rel="next" href="../48-paper-varifold-curvatures/index.html">48. Paper: Weak and Approximate Curvatures of a Measure →</a>
+  </nav>
+</body>
+</html>

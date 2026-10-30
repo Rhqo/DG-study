@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>47. Paper: A Varifold Approach to Surface Approximation — DG Study</title>
   <meta name="dg-id" content="47">
-  <meta name="dg-status" content="planned">
+  <meta name="dg-status" content="reviewed">
   <meta name="dg-updated" content="2026-10-30">
   <link rel="stylesheet" href="../../assets/style.css">
   <script src="../../assets/mathjax-config.js"></script>
@@ -23,63 +23,99 @@
 
     <section id="sec-at-a-glance">
       <h2>At a Glance</h2>
-      <p>varifold의 first variation을 regularize해서 point cloud와 voxel에서도 쓸 수 있는 approximate mean curvature를 정의하고, 그것이 수렴함을 보인다. 이 장의 절과 논문의 절 대응은 장을 쓸 때 채운다.</p>
+      <table id="tab-47-0-1">
+        <caption>Table 47.0.1. The paper.</caption>
+        <tbody>
+          <tr><th>title</th><td>A Varifold Approach to Surface Approximation</td></tr>
+          <tr><th>authors</th><td>Blanche Buet, Gian Paolo Leonardi, Simon Masnou (arXiv PDF에는 소속이 인쇄되어 있지 않다)</td></tr>
+          <tr><th>venue</th><td><cite>Archive for Rational Mechanics and Analysis</cite> 226, 639–694, 2017</td></tr>
+          <tr><th>version</th><td>arXiv:1609.03625v1 [math.CA], 2016년 9월 12일. 이 장의 번호(정리·식·그림)는 v1을 따른다. 게재본은 번호가 다르다</td></tr>
+          <tr><th>length</th><td>46쪽. Introduction과 §1–§8, 부록 없음. 그림 12개, 표 없음</td></tr>
+          <tr><th>experiments</th><td>2D 합성 curve(circle, ellipse, flower, eight, 두 circle, double bubble)와 3D point cloud(double bubble, dragon, 조각상). C++ 구현, 코드 공개 없음</td></tr>
+        </tbody>
+      </table>
+      <p><strong>한 문단 요약.</strong> point cloud, voxel, triangle mesh 같은 이산 데이터를 모두 varifold, 곧 “위치와 그 위치의 (향 없는) plane”의 measure로 담을 수 있다. 문제는 이런 이산 varifold의 first variation(넓이의 미분, 곧 “mean curvature × mass”)이 measure가 아니어서 curvature를 바로 읽을 수 없다는 것이다. 이 논문은 first variation을 kernel \(\rho_\varepsilon\)로, mass를 다른 kernel \(\xi_\varepsilon\)로 흐린 뒤 그 비에 상수를 곱해 <em>approximate mean curvature</em> \(\vec H^V_{\rho,\xi,\varepsilon} = -\frac{C_\xi}{C_\rho}\frac{\delta V*\rho_\varepsilon}{\norm{V}*\xi_\varepsilon}\)을 정의한다. 이 식은 어떤 varifold에서도 뜻을 갖고, point cloud에서는 반지름 \(\varepsilon\) 안의 이웃에 대한 합 두 개로 계산된다. 고정된 rectifiable varifold에서는 \(\varepsilon \to 0\)일 때 generalized mean curvature로 수렴하고, 근사 varifold의 열에서는 \((d + \abs{x - z})/\varepsilon^2\)의 rate로, normal로 정사영한 버전은 \(C^2\) surface에서 \((d_1 + d_2 + \abs{x - z})/\varepsilon\)의 rate로 수렴한다. kernel의 짝으로 \(\xi = -s\rho'/n\)(natural kernel pair)을 제안하고, rectifiable varifold를 cell 데이터로 근사하는 rate를 주며, mesh의 cotangent formula가 polyhedral varifold의 first variation을 hat function에 쓴 값이라는 것을 보인다. 2D 실험에서 natural pair는 이론이 보장하지 않는 설정에서도 빠르게 수렴하고, 교차점과 junction에서는 가지들의 curvature의 평균을 준다.</p>
+      <p><strong>주장된 기여</strong>(논문 Introduction, <a href="47-1-problem-key-idea.html#sec-claims">Section 47.1</a>에 정리): (1) 이산 데이터를 discrete varifold로 담는 공통 framework와 volumetric ↔ point cloud 전환의 비용, (2) regularized first variation과 Allard형 compactness, (3) approximate mean curvature와 세 수렴 정리, (4) natural kernel pair, (5) piecewise \(C^{1,\beta}\) varifold의 cell 근사 rate, (6) cotangent formula의 varifold 해석, (7) 2D·3D 수치 실험. 근거에 대한 우리의 평가는 <a href="47-8-assessment.html#tab-47-8-1">Table 47.8.1</a>에 있다.</p>
+      <table id="tab-47-0-2">
+        <caption>Table 47.0.2. Sections of the paper and of this chapter.</caption>
+        <thead>
+          <tr><th>paper</th><th>content</th><th>here</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Introduction, §1</td><td>기존 방법, 핵심 아이디어, 기여, 기호, kernel의 조건과 정규화</td><td><a href="47-1-problem-key-idea.html">47.1</a></td></tr>
+          <tr><td>§2.1</td><td>varifold, mass, \(\Delta^{1,1}\), first variation (Def 2.1–2.9, Prop 2.4, 2.8, Remark 2.10)</td><td><a href="47-2-discrete-varifolds.html">47.2</a> (대응표로 Chapter 46에 연결)</td></tr>
+          <tr><td>§2.2</td><td>mesh, volumetric·point cloud·polyhedral varifold (Def 2.11, 2.12, 2.15, Prop 2.13, Remark 2.14)</td><td><a href="47-2-discrete-varifolds.html">47.2</a></td></tr>
+          <tr><td>§3</td><td>regularized first variation (Def 3.1, Prop 3.2, 3.5, Remark 3.3, 3.4, Thm 3.6)</td><td><a href="47-3-regularized-first-variation.html">47.3</a></td></tr>
+          <tr><td>§4</td><td>approximate mean curvature (Def 4.1, Example 4.2, Thm 4.3, Hypothesis 1, Lemma 4.4, Thm 4.5, Def 4.6, Prop 4.7, Thm 4.8)</td><td><a href="47-4-approximate-mean-curvature.html">47.4</a></td></tr>
+          <tr><td>§5</td><td>natural kernel pair (Def 5.1, (5.1)–(5.12))</td><td><a href="47-5-natural-kernel-pairs.html">47.5</a></td></tr>
+          <tr><td>§6, §7</td><td>cell 근사 (Lemma 6.1, Def 6.2, Remark 6.3, Thm 6.4), cotangent formula (Prop 7.1, Remark 7.2, Fig. 1)</td><td><a href="47-6-discrete-approximation-cotangent.html">47.6</a></td></tr>
+          <tr><td>§8</td><td>수치 실험 ((8.1)–(8.5), Fig. 2–12)</td><td><a href="47-7-numerical-experiments.html">47.7</a></td></tr>
+          <tr><td>(전체)</td><td>한계, 평가, 오식, 뒤 논문과의 관계</td><td><a href="47-8-assessment.html">47.8</a></td></tr>
+        </tbody>
+      </table>
+      <p><strong>읽는 순서.</strong> 처음부터 차례로 읽는 것을 권한다. 증명보다 쓰는 법이 궁금하면 47.1 → 47.4의 정의와 point cloud 공식(<a href="47-4-approximate-mean-curvature.html#i-47-4-1">Definition 47.4.1</a>, <a href="47-4-approximate-mean-curvature.html#i-47-4-2">Example 47.4.2</a>, <a href="47-4-approximate-mean-curvature.html#i-47-4-10">Definition 47.4.10</a>) → 47.5 → 47.7 → 47.8로 읽고, 47.2, 47.3과 47.4의 정리, 47.6으로 돌아와도 된다. 필요한 배경은 Chapter 46의 varifold(<a href="../46-varifold-background/46-4-varifolds.html">Section 46.4</a>), first variation(<a href="../46-varifold-background/46-5-first-variation.html">Section 46.5</a>), regularization과 bounded Lipschitz distance(<a href="../46-varifold-background/46-7-regularization-distances.html">Section 46.7</a>)다.</p>
     </section>
 
     <section class="questions">
       <h2>Questions</h2>
       <ul>
         <li>point cloud처럼 넓이도 tangent plane도 없는 데이터에서 mean curvature를 어떻게 정의하고, 어떤 조건에서 smooth surface의 값으로 수렴하는가?</li>
+        <li>분자와 분모에 어떤 kernel을 써야 하고, 실제 point cloud에서 오차는 얼마나 빨리 줄어드는가? 교차점과 junction에서는 무엇이 나오는가?</li>
+        <li>mesh의 cotangent formula와 point cloud의 curvature는 같은 것의 두 판인가?</li>
       </ul>
     </section>
 
     <section class="inherits">
       <h2>Builds on</h2>
       <ul>
-        <li><a href="index.html">이 장</a>은 <a href="../46-varifold-background/index.html">Chapter 46</a>의 varifold, first variation, regularization을 쓴다.</li>
+        <li><a href="../46-varifold-background/index.html">Chapter 46</a>의 varifold와 point cloud varifold(<a href="../46-varifold-background/46-4-varifolds.html#i-46-4-6">Definition 46.4.6</a>), first variation과 generalized mean curvature(<a href="../46-varifold-background/46-5-first-variation.html">Section 46.5</a>), convolution과 bounded Lipschitz distance(<a href="../46-varifold-background/46-7-regularization-distances.html">Section 46.7</a>).</li>
+        <li>Track 2의 discrete mean curvature normal과 cotan Laplacian(<a href="../40-discrete-curvature-integral/40-3-curvature-normals.html">Section 40.3</a>), area gradient(<a href="../41-discrete-curvature-variational/41-2-gradients.html">Section 41.2</a>), FEM의 hat function(<a href="../42-laplace-beltrami/42-3-fem.html">Section 42.3</a>).</li>
+        <li>Part IV의 Gaussian Splatting(<a href="../29-gaussian-splatting/index.html">Chapter 29</a>)과 Chapter 46의 Gaussian Splatting as geometry(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html">Section 46.8</a>): In computer vision 상자의 배경.</li>
       </ul>
     </section>
 
     <h2>Sections</h2>
     <ol class="toc">
       <li id="toc-47-1" data-file="47-1-problem-key-idea.html">
-        <span class="toc-title">47.1 Problem and Key Idea</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 Introduction, §1</p>
+        <a class="toc-title" href="47-1-problem-key-idea.html">47.1 Problem and Key Idea</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 Introduction, §1. 기존 discrete curvature의 어려움; 핵심 아이디어(흐린 first variation ÷ 흐린 mass, <a href="47-1-problem-key-idea.html#eq-47-1-1">(47.1.1)</a>, <a href="47-1-problem-key-idea.html#fig-47-1-1">Figure 47.1.1</a>); 주장된 기여; kernel pair(dfn, <a href="47-1-problem-key-idea.html#i-47-1-1">Definition 47.1.1</a>), exp와 tent profile(<a href="47-1-problem-key-idea.html#i-47-1-2">Example 47.1.2</a>, <a href="47-1-problem-key-idea.html#fig-47-1-2">Figure 47.1.2</a>), tent는 가정 밖(<a href="47-1-problem-key-idea.html#i-47-1-3">Non-example 47.1.3</a>), 두 kernel과 상수의 이유(<a href="47-1-problem-key-idea.html#i-47-1-4">Remark 47.1.4</a>); Conventions(기호표, mean curvature는 principal curvature의 합) · Exercises: 4개</p>
       </li>
       <li id="toc-47-2" data-file="47-2-discrete-varifolds.html">
-        <span class="toc-title">47.2 Varifolds and Discrete Varifolds</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §2</p>
+        <a class="toc-title" href="47-2-discrete-varifolds.html">47.2 Varifolds and Discrete Varifolds</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §2. §2.1과 Chapter 46의 대응(<a href="47-2-discrete-varifolds.html#tab-47-2-1">Table 47.2.1</a>); 국소 \(\Delta^{1,1}_U\)(<a href="47-2-discrete-varifolds.html#i-47-2-1">Definition 47.2.1</a> = Def 2.7), Remark 2.10(<a href="47-2-discrete-varifolds.html#i-47-2-2">Remark 47.2.2</a>); mesh(dfn, <a href="47-2-discrete-varifolds.html#i-47-2-3">Definition 47.2.3</a>), volumetric varifold(dfn, <a href="47-2-discrete-varifolds.html#i-47-2-4">Definition 47.2.4</a> = Def 2.11), mesh 위의 discretization(<a href="47-2-discrete-varifolds.html#i-47-2-5">Example 47.2.5</a>); 전환 비용(<a href="47-2-discrete-varifolds.html#i-47-2-6">Proposition 47.2.6</a> = Prop 2.13)과 그 날카로움(<a href="47-2-discrete-varifolds.html#i-47-2-7">Example 47.2.7</a>); 이산 varifold의 first variation(<a href="47-2-discrete-varifolds.html#i-47-2-8">Remark 47.2.8</a> = Remark 2.14, <a href="47-2-discrete-varifolds.html#i-47-2-9">Example 47.2.9</a>); polyhedral varifold(dfn, <a href="47-2-discrete-varifolds.html#i-47-2-10">Definition 47.2.10</a> = Def 2.15) · Figure 47.2.1 · Exercises: 4개</p>
       </li>
       <li id="toc-47-3" data-file="47-3-regularized-first-variation.html">
-        <span class="toc-title">47.3 Regularized First Variation</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §3</p>
+        <a class="toc-title" href="47-3-regularized-first-variation.html">47.3 Regularized First Variation</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §3. 확장된 first variation(<a href="47-3-regularized-first-variation.html#i-47-3-1">Definition 47.3.1</a>), regularized first variation(dfn, <a href="47-3-regularized-first-variation.html#i-47-3-2">Definition 47.3.2</a> = Def 3.1), 그 표현(<a href="47-3-regularized-first-variation.html#i-47-3-3">Proposition 47.3.3</a> = Prop 3.2), \(L^1\) bound(<a href="47-3-regularized-first-variation.html#i-47-3-4">Remark 47.3.4</a> = Remark 3.3), Remark 3.4(<a href="47-3-regularized-first-variation.html#i-47-3-5">Remark 47.3.5</a>), \(\varepsilon \to 0\)의 수렴(<a href="47-3-regularized-first-variation.html#i-47-3-6">Proposition 47.3.6</a> = Prop 3.5); circle 위의 point cloud(<a href="47-3-regularized-first-variation.html#i-47-3-7">Example 47.3.7</a>, <a href="47-3-regularized-first-variation.html#fig-47-3-1">Figure 47.3.1</a>); compactness와 rectifiability(<a href="47-3-regularized-first-variation.html#i-47-3-8">Theorem 47.3.8</a> = Thm 3.6), 밀도 lower bound가 필요한 이유(<a href="47-3-regularized-first-variation.html#i-47-3-9">Example 47.3.9</a>) · Exercises: 4개</p>
       </li>
       <li id="toc-47-4" data-file="47-4-approximate-mean-curvature.html">
-        <span class="toc-title">47.4 Approximate Mean Curvature and Its Convergence</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §4</p>
+        <a class="toc-title" href="47-4-approximate-mean-curvature.html">47.4 Approximate Mean Curvature and Its Convergence</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §4. approximate mean curvature(dfn, <a href="47-4-approximate-mean-curvature.html#i-47-4-1">Definition 47.4.1</a> = Def 4.1)와 point cloud 공식(<a href="47-4-approximate-mean-curvature.html#i-47-4-2">Example 47.4.2</a> = Example 4.2, 인쇄된 (4.3)의 Warning); a.e. 수렴(<a href="47-4-approximate-mean-curvature.html#i-47-4-3">Theorem 47.4.3</a> = Thm 4.3), ellipse와 모서리(<a href="47-4-approximate-mean-curvature.html#i-47-4-4">Example 47.4.4</a>, <a href="47-4-approximate-mean-curvature.html#i-47-4-5">Example 47.4.5</a>); Hypothesis 1(<a href="47-4-approximate-mean-curvature.html#i-47-4-6">Definition 47.4.6</a>), 핵심 추정(<a href="47-4-approximate-mean-curvature.html#i-47-4-7">Lemma 47.4.7</a> = Lemma 4.4), rate \(\varepsilon^{-2}\)(<a href="47-4-approximate-mean-curvature.html#i-47-4-8">Theorem 47.4.8</a> = Thm 4.5, <a href="47-4-approximate-mean-curvature.html#i-47-4-9">Remark 47.4.9</a>); orthogonal approximate mean curvature(dfn, <a href="47-4-approximate-mean-curvature.html#i-47-4-10">Definition 47.4.10</a> = Def 4.6), integral varifold에서의 수렴(<a href="47-4-approximate-mean-curvature.html#i-47-4-11">Proposition 47.4.11</a> = Prop 4.7)과 반례(<a href="47-4-approximate-mean-curvature.html#i-47-4-12">Example 47.4.12</a>, <a href="47-4-approximate-mean-curvature.html#fig-47-4-1">Figure 47.4.1</a>); rate \(\varepsilon^{-1}\)(<a href="47-4-approximate-mean-curvature.html#i-47-4-13">Theorem 47.4.13</a> = Thm 4.8), 두 rate의 수치 확인(<a href="47-4-approximate-mean-curvature.html#i-47-4-14">Remark 47.4.14</a>, <a href="47-4-approximate-mean-curvature.html#fig-47-4-2">Figure 47.4.2</a>) · Implementation: point cloud의 approximate mean curvature · Exercises: 4개</p>
       </li>
       <li id="toc-47-5" data-file="47-5-natural-kernel-pairs.html">
-        <span class="toc-title">47.5 Natural Kernel Pairs</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §5</p>
+        <a class="toc-title" href="47-5-natural-kernel-pairs.html">47.5 Natural Kernel Pairs</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §5. natural kernel pair(dfn, <a href="47-5-natural-kernel-pairs.html#i-47-5-1">Definition 47.5.1</a> = Def 5.1), 정규화와 \(C_\xi/C_\rho = d/n\)(<a href="47-5-natural-kernel-pairs.html#i-47-5-2">Proposition 47.5.2</a>); Taylor 전개 heuristic과 상수항(<a href="47-5-natural-kernel-pairs.html#i-47-5-3">Proposition 47.5.3</a> = (5.11)); 우리의 분석: circle에서의 점별 약분(<a href="47-5-natural-kernel-pairs.html#i-47-5-4">Proposition 47.5.4</a>)과 surface의 방향 distribution(<a href="47-5-natural-kernel-pairs.html#i-47-5-5">Remark 47.5.5</a>, <a href="47-5-natural-kernel-pairs.html#fig-47-5-1">Figure 47.5.1</a>) · Exercises: 4개</p>
       </li>
       <li id="toc-47-6" data-file="47-6-discrete-approximation-cotangent.html">
-        <span class="toc-title">47.6 Discrete Approximation and the Cotangent Formula</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §6–§7</p>
+        <a class="toc-title" href="47-6-discrete-approximation-cotangent.html">47.6 Discrete Approximation and the Cotangent Formula</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §6–§7. cell 근사(<a href="47-6-discrete-approximation-cotangent.html#i-47-6-1">Lemma 47.6.1</a> = Lemma 6.1); piecewise \(C^{1,\beta}\)와 Ahlfors regular(dfn, <a href="47-6-discrete-approximation-cotangent.html#i-47-6-2">Definition 47.6.2</a> = Def 6.2), 비누막(<a href="47-6-discrete-approximation-cotangent.html#i-47-6-3">Remark 47.6.3</a> = Remark 6.3), 평면 double bubble(<a href="47-6-discrete-approximation-cotangent.html#i-47-6-4">Example 47.6.4</a>, <a href="47-6-discrete-approximation-cotangent.html#fig-47-6-1">Figure 47.6.1</a>); 근사 rate(<a href="47-6-discrete-approximation-cotangent.html#i-47-6-5">Theorem 47.6.5</a> = Thm 6.4, <a href="47-6-discrete-approximation-cotangent.html#i-47-6-6">Remark 47.6.6</a>); cotangent formula = first variation(<a href="47-6-discrete-approximation-cotangent.html#i-47-6-7">Proposition 47.6.7</a> = Prop 7.1, 논문 Fig. 1), barycentric 정규화(<a href="47-6-discrete-approximation-cotangent.html#i-47-6-8">Remark 47.6.8</a> = Remark 7.2), sphere의 one-ring(<a href="47-6-discrete-approximation-cotangent.html#i-47-6-9">Example 47.6.9</a>, <a href="47-6-discrete-approximation-cotangent.html#fig-47-6-2">Figure 47.6.2</a>); Track 2와의 Looking back · Exercises: 4개</p>
       </li>
       <li id="toc-47-7" data-file="47-7-numerical-experiments.html">
-        <span class="toc-title">47.7 Numerical Experiments</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 §8, Fig. 2–12</p>
+        <a class="toc-title" href="47-7-numerical-experiments.html">47.7 Numerical Experiments</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 논문 §8, Fig. 2–12. 실험의 공식(<a href="47-7-numerical-experiments.html#i-47-7-1">Definition 47.7.1</a> = (8.1)–(8.2), 상수의 Warning), 고르지 않은 선분(<a href="47-7-numerical-experiments.html#i-47-7-2">Example 47.7.2</a>), 구현(<a href="47-7-numerical-experiments.html#i-47-7-3">Remark 47.7.3</a>); test shape와 kernel pair(<a href="47-7-numerical-experiments.html#tab-47-7-1">Table 47.7.1</a>, <a href="47-7-numerical-experiments.html#tab-47-7-2">Table 47.7.2</a>), 오차의 정규화(<a href="47-7-numerical-experiments.html#i-47-7-4">Remark 47.7.4</a>); Fig. 3 재계산(<a href="47-7-numerical-experiments.html#fig-47-7-1">Figure 47.7.1</a>, <a href="47-7-numerical-experiments.html#tab-47-7-3">Table 47.7.3</a>); 수렴 rate(<a href="47-7-numerical-experiments.html#i-47-7-5">Remark 47.7.5</a>)와 Fig. 4의 재현(<a href="47-7-numerical-experiments.html#tab-47-7-4">Table 47.7.4</a>, <a href="47-7-numerical-experiments.html#tab-47-7-5">Table 47.7.5</a>, <a href="47-7-numerical-experiments.html#fig-47-7-2">Figure 47.7.2</a>); 밀도와 normal projection(<a href="47-7-numerical-experiments.html#tab-47-7-6">Table 47.7.6</a>, <a href="47-7-numerical-experiments.html#i-47-7-6">Remark 47.7.6</a>), noise(<a href="47-7-numerical-experiments.html#tab-47-7-7">Table 47.7.7</a>, <a href="47-7-numerical-experiments.html#fig-47-7-3">Figure 47.7.3</a>); 교차점의 값(<a href="47-7-numerical-experiments.html#i-47-7-7">Proposition 47.7.7</a>), 특이 배치(<a href="47-7-numerical-experiments.html#tab-47-7-8">Table 47.7.8</a>, <a href="47-7-numerical-experiments.html#fig-47-7-4">Figure 47.7.4</a>); 3D와 scan 데이터; 실험 요약(<a href="47-7-numerical-experiments.html#tab-47-7-9">Table 47.7.9</a>) · Exercises: 5개</p>
       </li>
       <li id="toc-47-8" data-file="47-8-assessment.html">
-        <span class="toc-title">47.8 Assessment</span> <span class="status planned">Planned</span>
-        <p class="toc-note">Topics: 논문 한계와 평가</p>
+        <a class="toc-title" href="47-8-assessment.html">47.8 Assessment</a> <span class="status reviewed">Reviewed</span>
+        <p class="toc-note">Topics: 주장과 근거(<a href="47-8-assessment.html#tab-47-8-1">Table 47.8.1</a>); 저자가 밝힌 한계; 우리 평가; 인쇄 오식 20개(<a href="47-8-assessment.html#tab-47-8-2">Table 47.8.2</a>); 확인하지 못한 항목(<a href="47-8-assessment.html#tab-47-8-3">Table 47.8.3</a>); Chapter 48–50과의 관계(<a href="47-8-assessment.html#i-47-8-1">Remark 47.8.1</a>, <a href="47-8-assessment.html#i-47-8-2">Remark 47.8.2</a>, <a href="47-8-assessment.html#i-47-8-3">Remark 47.8.3</a>) · Exercises: 3개</p>
       </li>
     </ol>
 
     <section class="handoff">
       <h2>Leads to</h2>
       <ul>
-        <li>approximate mean curvature와 regularization → <a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a></li>
+        <li>approximate mean curvature의 regularization과 natural kernel pair, 수렴 정리의 틀 → second fundamental form 전체로 넓힌 [BLM22], <a href="../48-paper-varifold-curvatures/index.html">Chapter 48</a></li>
+        <li>point cloud varifold에서의 curvature 추정(분자는 kernel의 도함수, 분모는 kernel의 합) → 3DGS 학습 중의 curvature 추정, <a href="../49-paper-geosplat/index.html">Chapter 49</a></li>
+        <li>point cloud varifold와 bounded Lipschitz distance의 cell bound, 그리고 열린 문제 “mass를 어떻게 정하나” → Gaussian의 geometric mass, <a href="../50-paper-manifold-gs/index.html">Chapter 50</a></li>
       </ul>
     </section>
   </main>

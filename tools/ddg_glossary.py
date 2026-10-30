@@ -28,7 +28,7 @@ SECTIONS = [
      "<code>tools/ddg_glossary.py</code>가 만든다.",
      "sec-glossary-ddg"),
 ]
-DFN_RE = re.compile(r"<dfn(?:\s[^>]*)?>(.*?)</dfn>\s*\(([^)]*)\)", re.S)
+DFN_RE = re.compile(r"<dfn(?:\s[^>]*)?>(.*?)</dfn>\s*\(((?:\\\(.*?\\\)|[^()])*)\)", re.S)  # the gloss may contain inline math \(...\)
 ID_RE = re.compile(r'\sid="([^"]+)"')
 HEAD_RE = re.compile(r'<span class="thm-head">([^<]+)</span>')
 SECTION_FILE_RE = re.compile(r"^(\d+)-(\d+)-.*\.html$")

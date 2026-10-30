@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>47.2 Varifolds and Discrete Varifolds — DG Study</title>
+  <meta name="dg-id" content="47.2">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="46.3, 46.4, 46.5, 46.7, 47.1">
+  <meta name="dg-refs" content="BLM17 §2 (Def 2.1–2.15, Prop 2.4, 2.8, 2.13, Remark 2.10, 2.14)">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">47. Paper: A Varifold Approach to Surface Approximation</a> ›
+    <span>47.2 Varifolds and Discrete Varifolds</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>47.2 Varifolds and Discrete Varifolds</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#BLM17">[BLM17, §2]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>논문 §2.1의 정의들이 Chapter 46의 어느 정의와 같은지 알고, Chapter 46에 없던 국소 거리 \(\Delta^{1,1}_U\)를 정확히 쓸 수 있다.</li>
+        <li>mesh, volumetric varifold, polyhedral varifold를 정의하고, 같은 cell 데이터에서 volumetric과 point cloud 표현이 얼마나 다른지(Proposition 2.13)를 증명할 수 있다.</li>
+        <li>discrete varifold의 first variation이 왜 쓸 수 없는 대상인지 두 경우로 설명할 수 있다. point cloud에서는 measure가 아니고, volumetric에서는 measure이지만 cell이 작아지면 total variation이 \(1/a\)로 커진다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="47-1-problem-key-idea.html">Section 47.1</a>: 이 장의 기호(Conventions 상자)</li>
+        <li><a href="../46-varifold-background/46-4-varifolds.html">Section 46.4</a>: varifold, mass, rectifiable varifold, Young measure, 수렴</li>
+        <li><a href="../46-varifold-background/46-5-first-variation.html">Section 46.5</a>: first variation, generalized mean curvature, polygon의 first variation(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-6">Example 46.5.6</a>)</li>
+        <li><a href="../46-varifold-background/46-7-regularization-distances.html">Section 46.7</a>: bounded Lipschitz distance(<a href="../46-varifold-background/46-7-regularization-distances.html#i-46-7-6">Definition 46.7.6</a>)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="47-1-problem-key-idea.html">Section 47.1</a>의 <a href="47-1-problem-key-idea.html#eq-47-1-1">(47.1.1)</a>은 아무 varifold에나 쓸 수 있다. 그런데 실제 데이터는 어떤 varifold인가? 3D scanner의 point cloud, CT의 voxel, modeling 도구의 triangle mesh는 모두 유한 개의 숫자로 정해지는 varifold다. 논문 §2는 이것들을 <strong>discrete varifold</strong>라는 이름으로 모으고, 두 가지를 확인한다. 같은 데이터를 voxel로 쓰든 점으로 쓰든 varifold로서는 cell 크기만큼만 다르다는 것, 그리고 어느 쪽이든 first variation을 그대로는 쓸 수 없다는 것이다. 두 번째 사실이 <a href="47-3-regularized-first-variation.html">Section 47.3</a>의 regularization이 필요한 이유다.</p>
+    </section>
+
+    <section id="sec-classical">
+      <h2>Classical Definitions (Section 2.1)</h2>
+      <p>논문 §2.1은 고전적인 정의를 모은다. 이 study set에서는 모두 Chapter 46에서 정의했으므로 대응표로 정리하고, Chapter 46에 없는 것과 논문이 덧붙인 말만 따로 쓴다.</p>
+      <table id="tab-47-2-1">
+        <caption>Table 47.2.1. 논문 §2.1의 항목과 이 study set에서의 위치</caption>
+        <thead>
+          <tr><th>[BLM17]</th><th>내용</th><th>이 study set</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Def 2.1</td><td>\(d\)-varifold: \(\Omega \times G_{d,n}\) 위의 Radon measure</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-1">Definition 46.4.1</a></td></tr>
+          <tr><td>Def 2.2</td><td>rectifiable varifold \(v(M, \theta)\), integral varifold</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-4">Definition 46.4.4</a></td></tr>
+          <tr><td>Def 2.3</td><td>mass \(\norm{V}(B) = V(\pi^{-1}(B))\)</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-2">Definition 46.4.2</a></td></tr>
+          <tr><td>Prop 2.4</td><td>Young measure 표현 \(V = \norm{V} \otimes \{\nu_x\}_x\)</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-7">Proposition 46.4.7</a></td></tr>
+          <tr><td>Def 2.5</td><td>varifold의 weak-* 수렴</td><td><a href="../46-varifold-background/46-4-varifolds.html#i-46-4-8">Definition 46.4.8</a></td></tr>
+          <tr><td>Def 2.6</td><td>bounded Lipschitz distance \(\Delta^{1,1}\)</td><td><a href="../46-varifold-background/46-7-regularization-distances.html#i-46-7-6">Definition 46.7.6</a></td></tr>
+          <tr><td>Def 2.7</td><td>국소판 \(\Delta^{1,1}_U(V, W)\), \(\Delta^{1,1}_U(\norm{V}, \norm{W})\)</td><td><a href="#i-47-2-1">Definition 47.2.1</a></td></tr>
+          <tr><td>Prop 2.8</td><td>mass bounded, compact support이면 \(\Delta^{1,1} \to 0 \iff\) weak-* 수렴</td><td><a href="../46-varifold-background/46-7-regularization-distances.html#i-46-7-7">Proposition 46.7.7</a></td></tr>
+          <tr><td>(정의, 번호 없음)</td><td>tangential divergence \(\divg_PX = \sum_j\inner{P\nabla X_j}{e_j}\)</td><td><a href="../46-varifold-background/46-3-grassmannian.html#i-46-3-5">Definition 46.3.5</a></td></tr>
+          <tr><td>Def 2.9</td><td>first variation \(\delta V(X) = \int\divg_PX\,dV\)</td><td><a href="../46-varifold-background/46-5-first-variation.html#i-46-5-1">Definition 46.5.1</a></td></tr>
+          <tr><td>Remark 2.10, (2.1)</td><td>스칼라 \(\varphi\)에 대한 \(\delta V(\varphi)\), Lipschitz \(X\), 넓이의 변화율, bounded first variation, \(\delta V = -\vec H\norm{V} + \delta V_s\)</td><td><a href="#i-47-2-2">Remark 47.2.2</a>, <a href="../46-varifold-background/46-5-first-variation.html#i-46-5-2">Proposition 46.5.2</a>, <a href="../46-varifold-background/46-5-first-variation.html#i-46-5-4">Definition 46.5.4</a></td></tr>
+        </tbody>
+      </table>
+      <div class="thm definition" id="i-47-2-1">
+        <p><span class="thm-head">Definition 47.2.1</span> <span class="thm-name">(localized bounded Lipschitz distance)</span>. \(\Omega \subset \R^n\)이 open set이고 \(V\), \(W\)가 \(\Omega\) 위의 \(d\)-varifold라 하자. open set \(U \subset \Omega\)에 대해
+        \[ \begin{aligned} \Delta^{1,1}_U(V, W) &= \sup_\varphi\Big|\int\varphi\,dV - \int\varphi\,dW\Big|, \\ \Delta^{1,1}_U(\norm{V}, \norm{W}) &= \sup_\psi\Big|\int\psi\,d\norm{V} - \int\psi\,d\norm{W}\Big| \end{aligned} \]
+        로 정한다. 첫째 sup은 \(\varphi \in \mathrm{Lip}_1(\Omega \times G_{d,n})\), \(\norm{\varphi}_\infty \le 1\), \(\supp\varphi \subset U \times G_{d,n}\)인 \(\varphi\) 전체, 둘째 sup은 \(\psi \in \mathrm{Lip}_1(\Omega)\), \(\norm{\psi}_\infty \le 1\), \(\supp\psi \subset U\)인 \(\psi\) 전체에 대해 잡는다. \(U = \Omega\)이면 아래첨자를 생략한다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def 2.7]</a></p>
+      </div>
+      <p>\(\Delta^{1,1}_U\)는 \(U\) 밖에서 \(0\)인 test function만 쓰므로 “\(U\) 안에서 두 varifold가 얼마나 다른가”를 잰다. 수렴 정리(<a href="47-4-approximate-mean-curvature.html">Section 47.4</a>)는 점 \(x\) 근처의 ball \(U = B_{\varepsilon}(x)\)에서의 거리만 가정하므로 이 국소판이 필요하다. 첫 식의 \(\mathrm{Lip}_1(\Omega \times G_{d,n})\)은 거리 \(\abs{x - y} + \norm{P - S}\)에 대한 것이다(<a href="47-1-problem-key-idea.html">Section 47.1</a>의 Conventions 상자).</p>
+      <div class="thm remark" id="i-47-2-2">
+        <p><span class="thm-head">Remark 47.2.2</span> <span class="thm-name">(what the paper adds to the first variation)</span>. 논문의 Remark 2.10은 <a href="../46-varifold-background/46-5-first-variation.html">Section 46.5</a>의 내용에 네 가지를 붙인다. <a class="cite" href="../../references.html#BLM17">[BLM17, Remark 2.10]</a></p>
+        <ol>
+          <li>스칼라 함수 \(\varphi \in C^1_c(\Omega)\)에는 \(\delta V(\varphi) = \big(\delta V(\varphi e_1), \dots, \delta V(\varphi e_n)\big) \in \R^n\)으로 쓴다. 성분마다 계산하면 \(\delta V(\varphi) = \int S\nabla\varphi(x)\,dV(x, S)\)이다. 이 장의 regularized first variation과 approximate mean curvature는 모두 이 꼴로 쓴다.</li>
+          <li>\(X\)가 Lipschitz일 뿐이어도, 미분할 수 없는 점의 집합이 \(\norm{V}\)-null이면 \(\delta V(X)\)는 같은 식으로 정의된다. <a href="47-6-discrete-approximation-cotangent.html">Section 47.6</a>에서 mesh의 hat function을 넣을 때 이것을 쓴다.</li>
+          <li>\(X\)의 flow \(\varphi_t\)로 varifold를 움직이면 \(\delta V(X) = \tfrac{d}{dt}\norm{V_t}(A)|_{t=0}\)이다(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-2">Proposition 46.5.2</a>).</li>
+          <li>\(\delta V\)는 \(C^1\) topology에서 연속이지만 일반적으로 \(C^0\) topology에서는 아니다. compact set \(K\)마다 \(\abs{\delta V(X)} \le c_K\sup_K\abs{X}\)이면 locally bounded first variation이라 하고, 이때 \(\delta V = -\vec H\norm{V} + \delta V_s\)로 분해된다(<a href="../46-varifold-background/46-5-first-variation.html#eq-46-5-5">(46.5.5)</a>, 논문의 (2.1)). \(V = v(M, 1)\)이고 \(M\)이 \(C^2\)이면 \(\vec H\)는 고전적인 mean curvature vector다.</li>
+        </ol>
+      </div>
+      <aside class="box warning">
+        <p class="box-title">Warning: §2에 인쇄된 세부 사항</p>
+        <p>원문과 대조해 확인한 것들이다. 내용을 바꾸지는 않지만 그대로 읽으면 걸린다.</p>
+        <ul>
+          <li>Definition 2.7의 둘째 식(mass판)에는 \(\mathrm{Lip}(\Omega)\)로, Lipschitz 상수의 bound를 뜻하는 아래첨자 \(1\)이 빠져 있다. 첫째 식과 Definition 2.6에 맞추면 \(\mathrm{Lip}_1(\Omega)\)이어야 한다. 그렇지 않으면 sup이 무한대가 될 수 있다.</li>
+          <li>Remark 2.10은 \(V_t\)를 “varifold measure \(V\)를 \(\Phi^X_t(x, S) = (\varphi^X_t(x), d\varphi^X_t(S))\)로 push-forward한 것”이라 쓴다. measure의 push-forward로 읽으면 \(\varphi_t(A) = A\)이므로 \(\norm{V_t}(A) = \norm{V}(A)\)가 \(t\)에 무관하고 미분이 \(0\)이다. 넓이의 배율 \(J_S\varphi_t\)를 곱한 varifold의 image(<a href="../46-varifold-background/46-5-first-variation.html#eq-46-5-2">(46.5.2)</a>)로 읽어야 식이 맞는다. 이것은 varifold 문헌의 표준 관례이고, 논문이 말을 줄인 것으로 본다(우리의 해석).</li>
+          <li>§2.2의 mesh 정의는 “countable partition, that is, a finite collection of pairwise disjoint subdomains”이라고 쓴다. 바로 뒤의 조건(bounded set과 만나는 cell은 유한 개)과 \(\Omega\)를 덮어야 한다는 조건을 보면 “locally finite한 countable partition”이 뜻이다(<a href="#i-47-2-3">Definition 47.2.3</a>).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="sec-discrete">
+      <h2>Discrete Varifolds (Section 2.2)</h2>
+      <p>논문은 유한 개의 숫자로 정해지는 varifold를 discrete varifold라 부른다. polyhedral complex에도 varifold를 붙일 수 있지만, 논문은 주로 연결 정보가 없는 <strong>unstructured</strong> 종류(volumetric, point cloud)에 집중한다. 다만 §3과 §4의 정의와 결과는 polyhedral을 포함한 모든 discrete varifold의 열에 그대로 성립한다고 밝힌다. polyhedral이 어려운 곳은 §6의 근사 구성이다. polyhedral surface가 smooth surface에 Hausdorff distance로 수렴해도 face의 방향은 수렴하지 않을 수 있기 때문이다(Schwarz lantern, <a href="../46-varifold-background/46-1-why-varifolds.html#i-46-1-2">Example 46.1.2</a> 뒤의 Looking back 상자). volumetric과 point cloud에서는 plane을 마음대로 고를 수 있으므로 이 문제가 없다.</p>
+      <div class="thm definition" id="i-47-2-3">
+        <p><span class="thm-head">Definition 47.2.3</span> <span class="thm-name">(mesh)</span>. open set \(\Omega \subset \R^n\)의 <dfn>mesh (cell partition)</dfn>(메시, 셀 분할)는 서로소인 부분집합(cell)들의 countable 모음 \(\mathcal{K}\)로서 \(\Omega = \bigsqcup_{K \in \mathcal{K}}K\)이고, 모든 bounded set \(B \subset \Omega\)에 대해 \(\{K \in \mathcal{K} : K \cap B \ne \emptyset\}\)이 유한인 것이다. cell의 모양에 대한 다른 가정은 없다. \(\delta = \sup_{K \in \mathcal{K}}\operatorname{diam}K\)를 mesh의 size라 한다. <a class="cite" href="../../references.html#BLM17">[BLM17, §2.2]</a></p>
+      </div>
+      <p>여기서 “mesh”는 triangle mesh가 아니라 공간을 나눈 칸들이다. 2D의 정사각형 pixel, 3D의 voxel이 대표적이다. Track 2의 mesh와 헷갈리지 않도록 이 장에서는 될 수 있는 한 “cell 분할”이라고도 쓴다.</p>
+      <div class="thm definition" id="i-47-2-4">
+        <p><span class="thm-head">Definition 47.2.4</span> <span class="thm-name">(discrete volumetric varifold)</span>. \(\mathcal{K}\)가 \(\Omega\)의 mesh이고 \(\{(m_K, P_K)\}_{K \in \mathcal{K}} \subset \R_+ \times G_{d,n}\)일 때
+        \[ V^{\mathrm{vol}}_{\mathcal{K}} = \sum_{K \in \mathcal{K}}\frac{m_K}{\abs{K}}\,\mathcal{L}^n\llcorner K \otimes \delta_{P_K}, \qquad \abs{K} = \mathcal{L}^n(K) \]
+        를 <dfn>volumetric varifold</dfn>(부피 바리폴드, discrete volumetric varifold)라 한다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def 2.11]</a></p>
+      </div>
+      <p>cell \(K\)마다 mass \(m_K\)를 cell 안에 고르게 펴고, cell 안의 모든 점에 같은 plane \(P_K\)를 붙인 것이다. support가 \(n\)차원이므로 \(d \lt n\)이면 \(d\)-rectifiable이 아니다. 같은 cell 데이터에서 점 \(x_K \in K\)를 하나씩 골라 \(V^{\mathrm{pt}}_{\mathcal{K}} = \sum_Km_K\delta_{x_K} \otimes \delta_{P_K}\)를 만들면 point cloud varifold(<a href="../46-varifold-background/46-4-varifolds.html#i-46-4-6">Definition 46.4.6</a>, 논문의 Definition 2.12)가 된다. support가 \(0\)차원이므로 역시 rectifiable이 아니다.</p>
+      <div class="thm example" id="i-47-2-5">
+        <p><span class="thm-head">Example 47.2.5</span> <span class="thm-name">(discretizing a varifold on a mesh)</span>. 아무 \(d\)-varifold \(V\)와 mesh \(\mathcal{K}\)에 대해
+        \[ \begin{aligned} m_K &= \norm{V}(K), \\ P_K &\in \operatorname*{arg\,min}_{P \in G_{d,n}}\int_{K \times G_{d,n}}\norm{P - S}\,dV(x, S) \end{aligned} \]
+        로 두면 \(V\)의 volumetric 근사가 되고, \(x_K \in K\)를 골라 point cloud 근사도 만들 수 있다. <a class="cite" href="../../references.html#BLM17">[BLM17, §2.2]</a> \(P_K\)는 cell 안의 plane들과 가장 가까운 plane이고, cell 안에 plane이 하나뿐이면 그것이다.</p>
+        <p><a href="#fig-47-2-1">Figure 47.2.1</a>(a)는 반지름 \(0.5\)인 circle을 한 변 \(a = 0.1\)인 정사각형 cell로 나눈 것이다. circle과 만나는 cell은 \(40\)개이고, \(m_K\)는 cell 안의 arc length(합 \(\pi\))다. 색이 진할수록 밀도 \(m_K/\abs{K}\)가 크다. 그림은 \(P_K\)로, 호의 tangent projection을 길이로 가중 평균한 행렬의 첫 eigenvector를 썼다. 논문의 arg min과 같지는 않지만 곧 볼 Proposition 2.13은 어떤 \(P_K\)에도 성립한다. (b)는 같은 \((m_K, P_K)\)를 cell의 중심에 놓은 point cloud varifold다. 점의 크기가 \(m_K\)를 나타낸다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-47-2-discrete-varifolds.py</code></p>
+      <figure class="dg-figure" id="fig-47-2-1">
+        <img src="figures/fig-47-2-1-volumetric-point-cloud.svg" alt="네 패널. 위쪽은 circle을 정사각형 cell로 나눈 volumetric varifold(색칠한 cell과 cell마다의 선분)와 같은 데이터를 cell 중심의 점으로 바꾼 point cloud varifold. 아래 왼쪽은 두 varifold의 거리가 cell 크기에 비례해 줄어드는 log-log 그래프, 아래 오른쪽은 volumetric varifold의 first variation의 total variation이 cell 크기에 반비례해 커지는 그래프.">
+        <figcaption><span class="fig-head">Figure 47.2.1.</span>
+          무엇을: 반지름 \(0.5\)인 circle을 한 변 \(a\)인 정사각형 cell로 나누어(격자선 \(x = 0.123a + ka\), \(y = 0.071a + ka\)) 만든 두 discrete varifold와 그 비교. (a) volumetric varifold \(V^{\mathrm{vol}}_{\mathcal{K}}\)(\(a = 0.1\)). (b) 같은 데이터의 point cloud varifold \(V^{\mathrm{pt}}_{\mathcal{K}}\), \(x_K\) = cell 중심. (c) \(\Delta^{1,1}(V^{\mathrm{vol}}_{\mathcal{K}}, V^{\mathrm{pt}}_{\mathcal{K}})\)와 Proposition 2.13의 bound. (d) volumetric varifold의 first variation의 total variation \(\abs{\delta V^{\mathrm{vol}}_{\mathcal{K}}}(\R^2)\).
+          읽는 법: (a)의 파란 칸의 진하기는 밀도 \(m_K/a^2\), 파란 선분은 \(P_K\)다. (b)의 검은 점의 크기는 \(m_K\)다. 회색 점선은 원래 circle이다. (c), (d)는 log-log이고 가로축이 cell의 한 변 \(a\)다. (c)의 검은 선은 정확한 거리 \(0.3826\,a\pi\), 회색 점선은 bound \(\delta M = \sqrt2a\pi\)다. (d)의 주홍 선이 total variation, 검은 점선은 smooth circle의 값 \(2\pi\)다.
+          볼 것: (c)의 거리는 기울기 \(1\)로 \(0\)에 가고 bound의 \(0.27\)배다. (d)의 total variation은 기울기 \(-1\)로 커져 \(a = 0.2\)에서 \(22.5\), \(a = 0.003125\)에서 \(1345\)이고, \(2\pi\)에 다가가지 않는다.
+          본문과의 연결: <a href="#i-47-2-5">Example 47.2.5</a>, <a href="#i-47-2-6">Proposition 47.2.6</a>, <a href="#i-47-2-7">Example 47.2.7</a>, <a href="#i-47-2-9">Example 47.2.9</a>.</figcaption>
+      </figure>
+      <div class="thm proposition" id="i-47-2-6">
+        <p><span class="thm-head">Proposition 47.2.6</span> <span class="thm-name">(switching between volumetric and point cloud varifolds)</span>. \(\Omega \subset \R^n\)이 open set이고 \(\mathcal{K}\)가 size \(\delta\)인 \(\Omega\)의 mesh라 하자. \(\{(x_K, m_K, P_K)\}_{K \in \mathcal{K}} \subset \R^n \times \R_+ \times G_{d,n}\)이 모든 \(K\)에서 \(x_K \in K\)를 만족하면, 모든 open set \(U \subset \Omega\)에 대해
+        \[ \begin{aligned} &\Delta^{1,1}_U\big(V^{\mathrm{vol}}_{\mathcal{K}}, V^{\mathrm{pt}}_{\mathcal{K}}\big) \\ &\le \delta\min\Big(\norm{V^{\mathrm{vol}}_{\mathcal{K}}}(U^\delta),\ \norm{V^{\mathrm{pt}}_{\mathcal{K}}}(U^\delta)\Big) \end{aligned} \]
+        이다. \(U^\delta\)는 \(U\)의 \(\delta\)-neighborhood이다. <a class="cite" href="../../references.html#BLM17">[BLM17, Prop 2.13]</a></p>
+      </div>
+      <p><em>Proof.</em> \(\varphi \in \mathrm{Lip}_1\), \(\abs{\varphi} \le 1\), \(\supp\varphi \subset U \times G_{d,n}\)이라 하자. 두 varifold는 cell마다 같은 mass \(m_K\)와 같은 plane \(P_K\)를 가지므로
+      \[ \begin{aligned} &\Big|\int\varphi\,dV^{\mathrm{vol}}_{\mathcal{K}} - \int\varphi\,dV^{\mathrm{pt}}_{\mathcal{K}}\Big| \\ &= \Big|\sum_Km_K\Big(\frac{1}{\abs{K}}\int_K\varphi(x, P_K)\,dx - \varphi(x_K, P_K)\Big)\Big| \\ &\le \sum_{K \cap U \ne \emptyset}m_K\,\frac{1}{\abs{K}}\int_K\abs{x - x_K}\,dx \end{aligned} \]
+      이다. \(K\)가 \(U\)와 만나지 않으면 \(K\) 위에서 \(\varphi = 0\)이므로 그 항이 없고, Lipschitz 조건에서 \(\abs{\varphi(x, P_K) - \varphi(x_K, P_K)} \le \abs{x - x_K}\)이다. \(x, x_K \in K\)이므로 \(\abs{x - x_K} \le \delta\)이고 합은 \(\delta\sum_{K \cap U \ne \emptyset}m_K\) 이하다. \(U\)와 만나는 cell은 지름이 \(\delta\) 이하이므로 \(U^\delta\) 안에 있고, 두 varifold 모두 그 cell들에 mass \(m_K\)를 준다. 그래서 \(\sum_{K \cap U \ne \emptyset}m_K\)는 \(\norm{V^{\mathrm{vol}}_{\mathcal{K}}}(U^\delta)\)와 \(\norm{V^{\mathrm{pt}}_{\mathcal{K}}}(U^\delta)\) 각각 이하다. \(\square\)</p>
+      <p>이 명제가 말하는 것은 단순하다. 같은 cell 데이터로 만든 voxel 표현과 점 표현은 “cell 지름 × mass”만큼만 다르다. 둘은 plane이 같으므로 Grassmannian 쪽 비용은 없고, 위치만 cell 안에서 옮겨진다. 그래서 이론은 다루기 편한 쪽으로 증명하고 실험은 point cloud로 할 수 있다. 논문이 §6에서 volumetric 근사의 정리를 먼저 세우고 point cloud로 옮기는 것도 이 명제 덕분이다.</p>
+      <div class="thm example" id="i-47-2-7">
+        <p><span class="thm-head">Example 47.2.7</span> <span class="thm-name">(how sharp is the bound)</span>. 한 변 \(a\)인 정사각형 cell(\(\delta = \sqrt2a\))에서 \(x_K\)를 cell의 중심으로 고르면, 위 증명의 부등식은 \(U = \R^2\)일 때 등호가 된다. \(\varphi(x, P) = \operatorname{dist}(x, \{\text{all cell centres}\})\)는 \(\mathrm{lip}(\varphi) = 1\)이고 \(\abs{\varphi} \le a/\sqrt2 \le 1\)이며(\(a \le \sqrt2\)), cell \(K\) 안에서 가장 가까운 중심이 \(x_K\)이므로 \(\varphi(x, P_K) = \abs{x - x_K}\)이고 \(\varphi(x_K, P_K) = 0\)이다. 따라서
+        \[ \begin{aligned} \Delta^{1,1}\big(V^{\mathrm{vol}}_{\mathcal{K}}, V^{\mathrm{pt}}_{\mathcal{K}}\big) &= \sum_Km_K\,\frac{1}{a^2}\int_K\abs{x - x_K}\,dx \\ &= \frac{\sqrt2 + \ln(1 + \sqrt2)}{6}\,a\,M \\ &= 0.3826\,aM \end{aligned} \]
+        이다. \(M = \sum_Km_K\)이고, \(0.3826\)은 unit square의 점에서 중심까지의 평균 거리다. bound \(\delta M = 1.4142\,aM\)의 \(0.2705\)배다. circle(\(M = \pi\))에서 \(a = 0.1\)이면 \(0.1202\)이다(<a href="#fig-47-2-1">Figure 47.2.1</a>(c)). 곧 bound는 상수배를 빼면 정확한 크기이고, \(\delta\)에 대한 1차 의존성은 개선할 수 없다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-47-2-discrete-varifolds.py</code></p>
+      <div class="thm remark" id="i-47-2-8">
+        <p><span class="thm-head">Remark 47.2.8</span> <span class="thm-name">(first variations of discrete varifolds)</span>. point cloud varifold의 first variation은 measure가 아니라 distribution이다. Dirac mass들의 가중합을 방향 미분한 것이기 때문이다(<a href="../46-varifold-background/46-5-first-variation.html#ex-46-5-4">Exercise 46.5.4</a>). volumetric varifold의 first variation은 cell boundary의 \(\mathcal{H}^{n-1}\)이 유한이면(더 일반적으로 cell이 finite perimeter를 가지면) bounded, 곧 measure다. 그러나 mesh의 size가 \(0\)으로 가면 그 total variation은 보통 발산한다. 논문은 그 예로 Buet의 2015년 논문 <a class="cite" href="../../references.html#Buet15">[Buet15, Example 6]</a>을 든다. 이 나쁜 거동은 <a href="47-3-regularized-first-variation.html">Section 47.3</a>의 regularization으로 다스린다. <a class="cite" href="../../references.html#BLM17">[BLM17, Remark 2.14]</a></p>
+      </div>
+      <p>volumetric의 경우를 직접 보자.</p>
+      <div class="thm example" id="i-47-2-9">
+        <p><span class="thm-head">Example 47.2.9</span> <span class="thm-name">(the first variation of one cell)</span>. \(\R^2\)의 cell \(K = [0, a]^2\) 하나에 mass \(m\)과 수평 plane \(P = e_1e_1^{\mathsf T}\)를 준 \(V = \tfrac{m}{a^2}\mathcal{L}^2\llcorner K \otimes \delta_P\)를 보자. \(P\)가 상수이므로 \(\divg_PX = \tr(P\,DX) = \divg(PX)\)이고, divergence theorem으로
+        \[ \begin{aligned} \delta V(X) &= \frac{m}{a^2}\int_K\divg(PX)\,dx \\ &= \frac{m}{a^2}\int_{\partial K}\inner{X}{P\nu}\,d\mathcal{H}^1 \end{aligned} \]
+        이다. \(\nu\)는 바깥 unit normal이다. 위아래 변에서는 \(\nu = \pm e_2\)라 \(P\nu = 0\)이고, 좌우 변에서는 \(P\nu = \pm e_1\)이다. 그래서 \(\delta V\)는 좌우 변 위에 밀도 \(\pm\tfrac{m}{a^2}e_1\)로 놓인 vector measure이고, total variation은 \(\abs{\delta V}(\R^2) = 2\cdot\tfrac{m}{a^2}\cdot a = 2m/a\)이다. mass를 고정하고 cell을 줄이면 \(1/a\)로 커진다.</p>
+        <p>cell이 여럿이면 이웃한 두 cell \(K\), \(L\)의 공통 변에서 밀도가 \(\big(\tfrac{m_K}{\abs{K}}P_K - \tfrac{m_L}{\abs{L}}P_L\big)\nu\)가 된다. 이웃의 밀도와 plane이 같으면 상쇄되지만, curve의 cell 분할에서는 곡선의 옆 cell이 비어 있으므로 상쇄되지 않는다. <a href="#fig-47-2-1">Figure 47.2.1</a>(d)가 circle에서 이것을 계산한 것이다. \(\abs{\delta V^{\mathrm{vol}}_{\mathcal{K}}}(\R^2)\)는 대략 \(4.2/a\)로 커지고, smooth circle의 \(\abs{\delta V}(\R^2) = \int\abs{\vec H}\,ds = 2\pi\)에 다가가지 않는다. 그런데도 (c)에서 보듯 varifold 자체는 circle에 다가간다(<a href="47-6-discrete-approximation-cotangent.html">Section 47.6</a>의 Theorem 6.4). varifold로는 가까워지는데 first variation의 크기는 터진다는 것, 이것이 이 논문이 first variation을 직접 쓰지 않고 regularize하는 이유다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-47-2-discrete-varifolds.py</code></p>
+      <div class="thm definition" id="i-47-2-10">
+        <p><span class="thm-head">Definition 47.2.10</span> <span class="thm-name">(polyhedral varifold)</span>. \(M\)이 \(d\)차원 polyhedral surface이고 \(\mathcal{F}\)가 그 \(d\)-face의 집합일 때
+        \[ V = \sum_{F \in \mathcal{F}}\mathcal{H}^d\llcorner F \otimes \delta_{P_F} \]
+        를 \(M\)의 <dfn>polyhedral varifold</dfn>(다면체 바리폴드)라 한다. \(P_F \in G_{d,n}\)은 face \(F\)의 방향(\(F\)를 품는 affine plane에 평행한 \(d\)차원 subspace)이다. \(V\)는 integral \(d\)-varifold다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def 2.15]</a></p>
+      </div>
+      <p>triangle mesh의 varifold다. <a href="../46-varifold-background/46-5-first-variation.html#i-46-5-6">Example 46.5.6</a>의 polygon과 <a href="../46-varifold-background/46-5-first-variation.html#i-46-5-12">Proposition 46.5.12</a>의 triangle mesh가 이 정의의 예다. polygon에서는 \(\delta V\)가 vertex의 turning vector에 놓인 Dirac mass의 합이고, triangle mesh에서는 edge 위의 measure다. 논문은 polyhedral surface에 집중하지 않지만, <a href="47-6-discrete-approximation-cotangent.html">Section 47.6</a>에서 이 varifold의 first variation이 cotangent formula와 같다는 것을 보이는 데 이 정의를 쓴다.</p>
+      <aside class="box application">
+        <p class="box-title">In computer vision: voxel grid와 voxel downsampling</p>
+        <p>occupancy grid나 TSDF처럼 voxel마다 값을 두는 표현에 voxel마다 plane(예를 들어 TSDF의 gradient에 수직인 plane)과 mass(그 voxel 안의 넓이)을 주면 volumetric varifold가 된다. point cloud의 voxel downsampling(예를 들어 PCL의 VoxelGrid filter)은 voxel 안의 점들을 대표점 하나로 바꾸는 연산이다. 대표점이 voxel 안에 있으면, mass와 plane을 voxel 단위로 합친 두 표현의 차이는 <a href="#i-47-2-6">Proposition 47.2.6</a>에 의해 “voxel 지름 × mass” 이하다. 반대로 first variation(곧 curvature)은 voxel이 작아질수록 터질 수 있으므로(<a href="#i-47-2-9">Example 47.2.9</a>), voxel 표현에서 curvature를 읽으려면 반드시 voxel보다 큰 scale로 흐려야 한다. 이것이 다음 절의 내용이다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>논문 §2.1의 정의는 Chapter 46과 같고(<a href="#tab-47-2-1">Table 47.2.1</a>), 새로 필요한 것은 국소 거리 \(\Delta^{1,1}_U\)다(<a href="#i-47-2-1">Definition 47.2.1</a>).</li>
+        <li>mesh는 locally finite한 cell 분할이고, volumetric varifold는 cell마다 mass를 고르게 펴고 plane을 하나 붙인 것이다. 같은 cell 데이터의 volumetric과 point cloud 표현은 \(\Delta^{1,1}_U\)로 \(\delta\cdot\)(mass) 이하로 다르다(<a href="#i-47-2-6">Proposition 47.2.6</a>). 정사각형 cell과 중심에서는 정확히 \(0.3826\,aM\)이다(<a href="#i-47-2-7">Example 47.2.7</a>).</li>
+        <li>point cloud의 first variation은 measure가 아니고, volumetric의 first variation은 measure이지만 total variation이 \(1/a\)로 터진다(<a href="#i-47-2-8">Remark 47.2.8</a>, <a href="#i-47-2-9">Example 47.2.9</a>, <a href="#fig-47-2-1">Figure 47.2.1</a>).</li>
+        <li>polyhedral varifold는 face마다 넓이와 plane을 준 integral varifold다(<a href="#i-47-2-10">Definition 47.2.10</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 논문 §3을 읽는다. first variation을 kernel \(\rho_\varepsilon\)로 흐린 \(\delta V*\rho_\varepsilon\)이 언제나 \(L^1\) 함수라는 것, 그리고 그 \(L^1\) norm이 고르게 bounded이면 discrete varifold의 열이라도 극한이 rectifiable이라는 Allard형 정리를 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+      <div class="exercise" id="ex-47-2-1" data-level="1">
+        <p><span class="thm-head">Exercise 47.2.1</span> <span class="level">★</span> 한 변 \(a \le 1/\sqrt2\)인 정사각형 cell \(K\) 하나에 mass \(m\)과 plane \(P\)를 준 volumetric varifold와, 같은 \((m, P)\)를 cell의 vertex 하나 \(x_K\)에 놓은 point cloud varifold의 \(\Delta^{1,1}\)을 구하고 Proposition 2.13의 bound와 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>위 증명에서 거리는 \(m\cdot\tfrac{1}{a^2}\int_K\abs{x - x_K}\,dx\) 이하이고, \(\varphi = \min(\abs{x - x_K}, 1)\)로 등호가 된다. \(a \le 1/\sqrt2\)이면 \(K\) 위에서 \(\abs{x - x_K} \le \sqrt2a \le 1\)이라 \(\varphi = \abs{x - x_K}\)이다. vertex에서의 평균 거리는 중심에서의 평균 거리의 두 배다. 한 변 \(2a\)인 정사각형을 중심에서 넷으로 나누면 각 조각에서 중심은 vertex이기 때문이다. 따라서 \(\Delta^{1,1} = 2\cdot0.3826\,am = 0.7652\,am\)이고, bound \(\sqrt2am\)의 \(0.5411\)배다. 대표점을 중심으로 고르면 절반이 된다.</p>
+          <p class="verified">Verification: <code>verify/v-47-2-discrete-varifolds.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-47-2-2" data-level="1">
+        <p><span class="thm-head">Exercise 47.2.2</span> <span class="level">★</span> volumetric varifold \(V^{\mathrm{vol}}_{\mathcal{K}}\)가 \(d\)-rectifiable이 아닌 이유를 <a href="../46-varifold-background/46-4-varifolds.html#i-46-4-4">Definition 46.4.4</a>에 비추어 한 문장으로 설명하여라. point cloud varifold는 어떤가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>rectifiable varifold의 mass는 countably \(d\)-rectifiable set 위의 \(\theta\mathcal{H}^d\)인데, \(V^{\mathrm{vol}}_{\mathcal{K}}\)의 mass는 \(\mathcal{L}^n\)에 대해 absolutely continuous이고 \(n\)차원 집합(cell)에 퍼져 있어 \(\mathcal{H}^d\)-σ-finite한 집합에 모일 수 없다(\(d \lt n\)). point cloud varifold의 mass는 유한 개의 점에 모여 있는데, 유한 집합은 \(\mathcal{H}^d\)-null이므로 \(\theta\mathcal{H}^d\llcorner M\) 꼴로 쓸 수 없다(\(d \ge 1\)).</p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-47-2-3" data-level="1">
+        <p><span class="thm-head">Exercise 47.2.3</span> <span class="level">★</span> <a href="#i-47-2-9">Example 47.2.9</a>에서 plane을 대각선 방향 \(P = uu^{\mathsf T}\), \(u = (1, 1)/\sqrt2\)로 바꾸면 \(\abs{\delta V}(\R^2)\)는 얼마인가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>네 변 모두에서 \(\abs{P\nu} = \abs{\inner{u}{\nu}} = 1/\sqrt2\)이다. 따라서 \(\abs{\delta V}(\R^2) = 4\cdot\tfrac{m}{a^2}\cdot a\cdot\tfrac{1}{\sqrt2} = 2\sqrt2\,m/a\)이다. 역시 \(1/a\)로 커진다.</p>
+          <p class="verified">Verification: <code>verify/v-47-2-discrete-varifolds.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-47-2-4" data-level="2">
+        <p><span class="thm-head">Exercise 47.2.4</span> <span class="level">★★</span> unit square의 boundary를 polyhedral 1-varifold \(V\)로 보자(<a href="#i-47-2-10">Definition 47.2.10</a>). \(\delta V(X)\)를 vertex에서의 값으로 쓰고, \(V\)가 bounded first variation을 갖는지, 그 generalized mean curvature \(\vec H\)는 무엇인지 답하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>edge \(pq\)의 unit tangent를 \(t\)라 하면 \(P = tt^{\mathsf T}\)이고 \(\divg_PX = \inner{t}{(DX)t} = \tfrac{d}{ds}\inner{X}{t}\)이므로 \(\int_{pq}\divg_PX\,ds = \inner{X(q)}{t} - \inner{X(p)}{t}\)이다. 네 edge를 더하면 vertex \(v\)마다 \(\inner{X(v)}{t_{\mathrm{in}} - t_{\mathrm{out}}}\)이 남는다(\(t_{\mathrm{in}}\)은 \(v\)로 들어오는 edge, \(t_{\mathrm{out}}\)은 나가는 edge의 tangent). 곧 \(\delta V = \sum_v(t_{\mathrm{in}} - t_{\mathrm{out}})\delta_v\)이고, 각 vertex에서 길이 \(\sqrt2\)이며 square의 바깥 대각선 방향을 향한다(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-6">Example 46.5.6</a>의 turning vector). \(\abs{\delta V(X)} \le 4\sqrt2\sup\abs{X}\)이므로 bounded first variation이다. 이 measure는 유한 개의 점에 모여 있어 \(\norm{V} = \mathcal{H}^1\llcorner\partial[0, 1]^2\)에 대해 singular이므로 \(\vec H = 0\)이고 \(\delta V = \delta V_s\)이다. edge는 곧으므로 curvature가 vertex에만 모인다.</p>
+          <p class="verified">Verification: <code>verify/v-47-2-discrete-varifolds.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="47-1-problem-key-idea.html">← 47.1 Problem and Key Idea</a>
+    <a rel="next" href="47-3-regularized-first-variation.html">47.3 Regularized First Variation →</a>
+  </nav>
+</body>
+</html>

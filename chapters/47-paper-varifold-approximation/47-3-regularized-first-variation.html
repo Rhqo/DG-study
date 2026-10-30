@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>47.3 Regularized First Variation — DG Study</title>
+  <meta name="dg-id" content="47.3">
+  <meta name="dg-status" content="reviewed">
+  <meta name="dg-prereq" content="46.4, 46.5, 46.7, 47.1, 47.2">
+  <meta name="dg-refs" content="BLM17 §3 ((3.1)–(3.8), Def 3.1, Prop 3.2, 3.5, Remark 3.3, 3.4, Thm 3.6)">
+  <meta name="dg-updated" content="2026-10-30">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script src="../../assets/mathjax-config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Contents</a> ›
+    <a href="index.html">47. Paper: A Varifold Approach to Surface Approximation</a> ›
+    <span>47.3 Regularized First Variation</span>
+  </nav>
+
+  <main>
+    <header>
+      <h1>47.3 Regularized First Variation</h1>
+      <p class="meta">References:
+        <a class="cite" href="../../references.html#BLM17">[BLM17, §3]</a>,
+        <a class="cite" href="../../references.html#Allard72">[Allard72]</a>.</p>
+    </header>
+
+    <section class="goals">
+      <h2>Goals</h2>
+      <ul>
+        <li>regularized first variation \(\delta V*\rho_\varepsilon\)을 test vector field를 흐리는 것으로 정의하고, 그것이 언제나 연속인 \(L^1\) vector field로 표현된다는 것(식 (3.4))을 유도할 수 있다.</li>
+        <li>\(\varepsilon \to 0\)에서 \(\delta V*\rho_\varepsilon\)이 \(\delta V\)로 돌아간다는 것(Proposition 3.5)을 증명할 수 있다.</li>
+        <li>point cloud에서 \(\norm{\delta V*\rho_\varepsilon}_{L^1}\)이 scale \(\varepsilon\)과 점 간격의 관계에 따라 bounded로 남기도 하고 터지기도 한다는 것을 수치로 설명할 수 있다.</li>
+        <li>Theorem 3.6(compactness와 rectifiability)의 두 가정이 각각 무엇을 막는지 예로 설명할 수 있다.</li>
+      </ul>
+    </section>
+
+    <section class="prereq">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><a href="47-2-discrete-varifolds.html">Section 47.2</a>: discrete varifold와 그 first variation의 문제(<a href="47-2-discrete-varifolds.html#i-47-2-8">Remark 47.2.8</a>)</li>
+        <li><a href="../46-varifold-background/46-7-regularization-distances.html">Section 46.7</a>: convolution, smoothed first variation(<a href="../46-varifold-background/46-7-regularization-distances.html#i-46-7-4">Proposition 46.7.4</a>)</li>
+        <li><a href="../46-varifold-background/46-5-first-variation.html">Section 46.5</a>: Allard의 compactness theorem(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-10">Theorem 46.5.10</a>), 밀도가 고르지 않은 curve(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-9">Example 46.5.9</a>)</li>
+      </ul>
+    </section>
+
+    <section id="sec-motivation">
+      <h2>Motivation</h2>
+      <p><a href="47-2-discrete-varifolds.html">Section 47.2</a>는 discrete varifold의 first variation이 쓸 수 없는 대상이라는 것으로 끝났다. point cloud에서는 measure가 아니고, volumetric에서는 measure이지만 cell이 작아지면 크기가 \(1/a\)로 터진다. 그런데 고전 이론의 좋은 정리들은 first variation이 bounded라는 가정에 기대고 있다. 예를 들어 varifold의 열 \(V_i \overset{*}{\rightharpoonup} V\)에서
+</p>
+      <div class="equation" id="eq-47-3-1">
+      \[ \sup_i\abs{\delta V_i}(\Omega) \lt \infty \tag{47.3.1} \]
+      </div>
+      <p>이면 극한 \(V\)는 locally bounded first variation을 갖는다(논문의 (3.1)). discrete varifold의 열은 이 조건을 만족하지 않는다. 그래도 \(\delta V_i\)는 \(\delta V\)로 distribution의 뜻에서 수렴한다. 그래서 논문은 \(\delta\)에 kernel \(\rho_{\varepsilon_i}\)와의 convolution을 합성하고, 그 결과의 \(L^1\) norm을 고르게 제어하자고 한다. \(\varepsilon_i\)가 scale 매개변수 역할을 한다.</p>
+    </section>
+
+    <section id="sec-definition">
+      <h2>Definition and Representation</h2>
+      <p>convolution을 하려면 \(\Omega\) 밖까지 퍼지는 test vector field도 넣을 수 있어야 한다. 논문은 먼저 first variation을 \(\R^n\) 전체의 vector field로 넓힌다.</p>
+      <div class="thm definition" id="i-47-3-1">
+        <p><span class="thm-head">Definition 47.3.1</span> <span class="thm-name">(extended first variation)</span>. \(\Omega \subset \R^n\)이 open set이고 \(V\)가 \(\Omega\) 위의 \(d\)-varifold이며 \(\norm{V}(\Omega) \lt \infty\)라 하자. \((x, S) \mapsto \divg_SX(x)\)는 bounded이고 연속이므로
+        \[ \delta V(X) = \int_{\Omega \times G_{d,n}}\divg_SX(x)\,dV(x, S) \]
+        를 모든 \(X \in C^1_c(\R^n, \R^n)\)에 대해 정할 수 있다. 이것을 extended first variation이라 하고, 같은 기호 \(\delta V\)로 쓴다. <a class="cite" href="../../references.html#BLM17">[BLM17, (3.2)]</a></p>
+      </div>
+      <p>\(\abs{\divg_SX} \le n\norm{DX}_\infty\)이므로 바로 \(\abs{\delta V(X)} \le C\norm{X}_{C^1}\norm{V}(\Omega)\)이다(논문은 상수를 \(1\)로 쓴다. \(C^1\) norm을 어떻게 잡느냐에 달린 상수다). \(X \in C^1_c(\Omega, \R^n)\)이면 보통의 first variation과 같다. \(\norm{V}\)의 support가 \(\Omega\) 안에서 relatively compact가 아니면, boundary 근처의 정보가 더 들어간다.</p>
+      <div class="thm definition" id="i-47-3-2">
+        <p><span class="thm-head">Definition 47.3.2</span> <span class="thm-name">(regularized first variation)</span>. \(X \in C^1_c(\R^n, \R^n)\)와 \(\varepsilon \gt 0\)에 대해</p>
+        <div class="equation" id="eq-47-3-2">
+        \[ \begin{aligned} &\delta V*\rho_\varepsilon(X) \\ &:= \delta V(X*\rho_\varepsilon) \\ &= \int\divg_S(X*\rho_\varepsilon)(y)\,dV(y, S) \end{aligned} \tag{47.3.2} \]
+        </div>
+        <p>로 정의한 distribution \(\delta V*\rho_\varepsilon\)을(적분은 \(\Omega \times G_{d,n}\) 위에서 한다) \(V\)의 <dfn>regularized first variation</dfn>(정칙화된 제1변분)이라 한다. <a class="cite" href="../../references.html#BLM17">[BLM17, Def 3.1, (3.3)]</a></p>
+      </div>
+      <p>test vector field \(X\)를 먼저 흐린 뒤 first variation에 넣는 것이다. \(\rho_\varepsilon\)이 radial이라 짝함수이므로, 이것은 distribution \(\delta V\)를 \(\rho_\varepsilon\)과 convolution한 것과 같다. 그래서 이름이 \(\delta V*\rho_\varepsilon\)이다.</p>
+      <div class="thm proposition" id="i-47-3-3">
+        <p><span class="thm-head">Proposition 47.3.3</span> <span class="thm-name">(the regularized first variation is a function)</span>. \(\Omega \subset \R^n\)이 open set이고 \(V\)가 \(\norm{V}(\Omega) \lt \infty\)인 \(d\)-varifold이면, \(\delta V*\rho_\varepsilon\)은 연속 vector field</p>
+        <div class="equation" id="eq-47-3-3">
+        \[ \begin{aligned} &(\delta V*\rho_\varepsilon)(x) \\ &= \int\nabla^S\rho_\varepsilon(y - x)\,dV(y, S) \\ &= \frac{1}{\varepsilon^{n+1}}\int\nabla^S\rho_1\Big(\frac{y - x}{\varepsilon}\Big)\,dV(y, S) \end{aligned} \tag{47.3.3} \]
+        </div>
+        <p>로 표현되고, \(\delta V*\rho_\varepsilon \in L^1(\R^n; \R^n)\)이다. 여기서 \(\nabla^S\rho = S\nabla\rho\)이다. <a class="cite" href="../../references.html#BLM17">[BLM17, Prop 3.2, (3.4)]</a></p>
+      </div>
+      <p><em>Proof sketch.</em> 도함수를 kernel 쪽으로 옮기면
+      \[ \begin{aligned} \divg_S(X*\rho_\varepsilon)(y) &= \sum_i\big(X_i*\partial^S_i\rho_\varepsilon\big)(y) \\ &= \int X(x)\cdot\nabla^S\rho_\varepsilon(y - x)\,dx \end{aligned} \]
+      이다. 이것을 \(dV(y, S)\)로 적분하고 Fubini로 순서를 바꾸면 \(\delta V*\rho_\varepsilon(X) = \int X(x)\cdot\big(\int\nabla^S\rho_\varepsilon(y - x)\,dV\big)\,dx\)이고, 괄호 안이 <a href="#eq-47-3-3">(47.3.3)</a>이다. \(\nabla\rho_\varepsilon\)이 연속이고 bounded이며 \(\norm{V}\)가 유한이므로 dominated convergence로 연속이다. \(\square\)</p>
+      <p>이 식은 <a href="../46-varifold-background/46-7-regularization-distances.html#i-46-7-4">Proposition 46.7.4</a>와 같고, 계산의 전부다. point cloud \(V = \sum_jm_j\delta_{x_j} \otimes \delta_{P_j}\)에서는
+      \[ \begin{aligned} &(\delta V*\rho_\varepsilon)(x) \\ &= \frac{1}{\varepsilon^{n+1}}\sum_{j:\,\abs{x_j - x} \lt \varepsilon}m_j\,\rho'\Big(\frac{\abs{x_j - x}}{\varepsilon}\Big)P_j\frac{x_j - x}{\abs{x_j - x}} \end{aligned} \]
+      이다. 이웃마다 kernel의 기울기를 그 점의 plane에 정사영해 더한다. \(\rho\)가 감소하면 \(\rho' \le 0\)이므로 각 항은 \(x\)에서 \(x_j\) 쪽을 향하는 vector \(x_j - x\)를 정사영한 것에 음수를 곱한 것, 곧 대략 \(x_j\)에서 \(x\) 쪽을 향한다. circle에서는 tangent 방향 성분이 상쇄되고 바깥쪽 성분이 남는다. 그래서 approximate mean curvature의 정의 <a href="47-1-problem-key-idea.html#eq-47-1-1">(47.1.1)</a>에 음의 부호가 붙어 \(\vec H\)가 안쪽을 향한다.</p>
+      <div class="thm remark" id="i-47-3-4">
+        <p><span class="thm-head">Remark 47.3.4</span> <span class="thm-name">(\(L^1\) even without bounded first variation)</span>. 논문은 \(\delta V\)가 locally bounded가 아니어도 \(\delta V*\rho_\varepsilon \in L^1(\R^n)\)이라는 것을 강조한다. point cloud에서도 regularized first variation은 언제나 적분할 수 있는 함수다. <a class="cite" href="../../references.html#BLM17">[BLM17, Remark 3.3]</a> 논문은 \(L^1\)임을 “\(\nabla\rho_\varepsilon\)이 bounded라는 사실에서 바로 나온다”고만 쓴다. 정확히는 \(\nabla\rho_\varepsilon\)이 bounded이고 support가 compact라서 \(L^1\)이라는 것과 유한 mass가 함께 필요하다. Fubini로
+        \[ \begin{aligned} \norm{\delta V*\rho_\varepsilon}_{L^1} &\le \int\!\!\int\abs{\nabla\rho_\varepsilon(y - x)}\,dx\,d\norm{V}(y) \\ &= \frac{\norm{\nabla\rho_1}_{L^1}}{\varepsilon}\norm{V}(\Omega) \end{aligned} \]
+        이다(우리의 정리). \(\R^2\)에서 정규화한 exp kernel이면 부분적분으로 \(\norm{\nabla\rho_1}_{L^1} = 2\pi c\int_0^1\rho(r)\,dr = \pi C_\rho = 2.990\)(\(C_\rho = 0.9517\), \(d = 1\))이다. 이 bound는 \(1/\varepsilon\)로 커진다. point cloud에서는 실제로 그만큼 커질 수 있다는 것을 곧 본다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-47-3-regularized-first-variation.py</code></p>
+      <div class="thm remark" id="i-47-3-5">
+        <p><span class="thm-head">Remark 47.3.5</span> <span class="thm-name">(extended versus standard first variation)</span>. \(\norm{V}\)의 support가 \(\Omega\) 안에 compact하게 들어 있으면, convolution에 extended first variation을 쓰든 보통의 first variation을 쓰든 \(\varepsilon\)이 충분히 작을 때 같다. 일반적으로는 \(\Omega_\varepsilon = \{x \in \Omega : \operatorname{dist}(x, \partial\Omega) \gt \varepsilon\}\)로 제한하면, 곧 함수 \(\delta V*\rho_\varepsilon\)을 \(\Omega_\varepsilon\) 위에서만 보면 같다. <a class="cite" href="../../references.html#BLM17">[BLM17, Remark 3.4]</a></p>
+      </div>
+    </section>
+
+    <section id="sec-consistency">
+      <h2>Consistency as \(\varepsilon \to 0\)</h2>
+      <div class="thm proposition" id="i-47-3-6">
+        <p><span class="thm-head">Proposition 47.3.6</span> <span class="thm-name">(regularization recovers the first variation)</span>. \(\Omega \subset \R^n\)이 open set이고 \(V\)가 \(\norm{V}(\Omega) \lt \infty\)인 varifold이면, 모든 \(X \in C^1_c(\R^n, \R^n)\)에 대해</p>
+        <div class="equation" id="eq-47-3-4">
+        \[ \begin{aligned} &\abs{\delta V*\rho_\varepsilon(X) - \delta V(X)} \\ &\le \norm{V}\big(\Omega \cap (\supp X + B_\varepsilon(0))\big) \\ &\qquad\cdot\norm{\rho_\varepsilon*X - X}_{C^1} \xrightarrow[\varepsilon \to 0]{} 0 \end{aligned} \tag{47.3.4} \]
+        </div>
+        <p>이다. 또 \(V\)가 bounded extended first variation을 가지면 \(\varepsilon \to 0\)에서 \(\delta V*\rho_\varepsilon \overset{*}{\rightharpoonup} \delta V\)이다. <a class="cite" href="../../references.html#BLM17">[BLM17, Prop 3.5, (3.5), (3.6)]</a></p>
+      </div>
+      <p><em>Proof.</em> 정의에서 \(\delta V*\rho_\varepsilon(X) - \delta V(X) = \delta V(\rho_\varepsilon*X - X)\)이고, \(\rho_\varepsilon*X - X\)의 support는 \(\supp X + B_\varepsilon(0)\) 안에 있으므로 <a href="#i-47-3-1">Definition 47.3.1</a> 아래의 부등식에서 <a href="#eq-47-3-4">(47.3.4)</a>가 나온다. \(X\)가 \(C^1\)이고 compact support이면 \(X\)와 \(DX\)가 고르게 연속이므로 \(\norm{\rho_\varepsilon*X - X}_{C^1} \to 0\)이다. \(\delta V\)가 bounded measure이면
+      \[ \abs{\delta V(\rho_\varepsilon*X - X)} \le \abs{\delta V}(\R^n)\,\norm{\rho_\varepsilon*X - X}_\infty \to 0 \]
+      이 \(X \in C^0_c\)에도 성립하고, 이것이 weak-* 수렴이다. \(\square\)</p>
+      <p>이 명제는 “일관성”이다. regularization은 \(\varepsilon \to 0\)에서 원래 first variation을 돌려준다. 다만 고정된 \(V\)에 대한 이야기다. discrete varifold의 열 \(V_i\)와 scale \(\varepsilon_i\)를 함께 \(0\)으로 보낼 때 무슨 일이 생기는지는 따로 봐야 한다.</p>
+    </section>
+
+    <section id="sec-point-clouds">
+      <h2>What the \(L^1\) Norm Sees on a Point Cloud</h2>
+      <div class="thm example" id="i-47-3-7">
+        <p><span class="thm-head">Example 47.3.7</span> <span class="thm-name">(point clouds on a circle)</span>. 반지름 \(0.5\)인 circle 위에 \(N\)개의 점을 놓고, 정확한 tangent line과 같은 mass \(\pi/N\)을 준다. 평균 간격은 \(h = \pi/N\)이다. 점을 고르게 놓은 것을 <em>uniform</em>, 각 점의 매개변수를 standard normal distribution만큼 흔든 것(\(t_j = 2\pi(j + n_j)/N\))을 <em>jittered</em>라 하자. jittered에서는 mass가 같은 채 간격만 고르지 않으므로, varifold에 밀도의 요동이 생긴다(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-9">Example 46.5.9</a>). 둘 다 \(N \to \infty\)에서 circle의 varifold로 수렴한다. smooth circle에서는 \(\abs{\delta V}(\R^2) = \int\abs{\vec H}\,ds = 2\cdot\pi = 2\pi\)이다.</p>
+        <p><a href="#fig-47-3-1">Figure 47.3.1</a>(a), (b)는 \(N = 250\), \(\varepsilon = 4h\)에서 circle을 따라 \(\varepsilon(\delta V*\rho_\varepsilon)\)의 normal 성분과 tangential 성분을 그린 것이다. smooth circle에서는 normal 성분이 \(\abs{\vec H}C_\rho = 2\times0.9517 = 1.90\)(회색 점선)이고 tangential 성분이 \(0\)이다. uniform cloud의 normal 성분은 \(1.86\)과 \(1.99\) 사이로 맞지만, tangential 성분이 점 간격의 주기로 진폭 \(3.1\)만큼 흔들린다. 정확히 점 위와 두 점의 한가운데에서만 symmetry 때문에 \(0\)이다. jittered cloud에서는 tangential 성분이 \(25.7\)까지 커진다. 밀도가 높은 쪽을 향하는 가짜 성분 \(\theta'/\theta\)를 scale \(\varepsilon\)에서 본 것이다.</p>
+        <p>(c)는 \(\norm{\delta V*\rho_\varepsilon}_{L^1(\R^2)}\)를 \(N = 250\)부터 \(4000\)까지 계산한 것이다. 네 경우가 갈린다.</p>
+        <ul>
+          <li>uniform, \(\varepsilon = 16h\): \(6.216\)에서 \(6.285\)로, \(2\pi = 6.283\)에 붙어 있다. kernel이 점 간격에 비해 넓어서 sum이 적분을 잘 근사한다.</li>
+          <li>uniform, \(\varepsilon = 4h\): \(8.49\)에서 \(82.2\)로, 대략 \(N\)에 비례해 커진다. 위의 ripple이 폭 \(\varepsilon\)의 띠 전체에 \(1/\varepsilon\) 크기로 남기 때문이다.</li>
+          <li>jittered, \(\varepsilon = 4h\): \(31.8\)에서 \(485\)로, 역시 \(N\)에 비례한다.</li>
+          <li>jittered, \(\varepsilon = 4h_{250}(N/250)^{-1/3}\): \(\varepsilon\)이 \(h\)보다 느리게 줄어서 \(\varepsilon/h\)가 \(N^{2/3}\)로 커진다. \(31.8\)에서 \(11.2\)로 줄어 \(2\pi\)에 다가간다.</li>
+        </ul>
+        <p>모든 값은 <a href="#i-47-3-4">Remark 47.3.4</a>의 bound \(2.990\,\pi/\varepsilon\) 아래에 있다(\(N = 250\), \(\varepsilon = 4h\)에서 \(186.9\)).</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-47-3-regularized-first-variation.py</code></p>
+      <figure class="dg-figure" id="fig-47-3-1">
+        <img src="figures/fig-47-3-1-regularized-first-variation.svg" alt="세 패널. 위 두 패널은 circle을 따라 그린 regularized first variation의 normal 성분과 tangential 성분으로, 고르게 놓은 점에서는 tangential 성분이 점 간격의 주기로 흔들리고, 흔든 점에서는 훨씬 크게 요동한다. 아래 패널은 점의 개수에 따른 L1 norm의 log-log 그래프로, 네 가지 scale 선택 가운데 둘은 커지고 둘은 2 pi 근처로 간다.">
+        <figcaption><span class="fig-head">Figure 47.3.1.</span>
+          무엇을: 반지름 \(0.5\)인 circle 위의 point cloud(정확한 tangent line, mass \(\pi/N\))의 regularized first variation <a href="#eq-47-3-3">(47.3.3)</a>, kernel은 \(\R^2\)에서 정규화한 exp. (a) uniform, (b) jittered(\(t_j = 2\pi(j + n_j)/N\), \(n_j\)는 표준정규, seed \(3\)), 둘 다 \(N = 250\), \(\varepsilon = 4h\), \(h = \pi/N\). (c) \(\norm{\delta V*\rho_\varepsilon}_{L^1(\R^2)}\)와 \(N\).
+          읽는 법: (a), (b)의 가로축은 circle 위의 위치(각도, \(0^\circ\)–\(20^\circ\)), 세로축은 \(\varepsilon\)을 곱한 값이다. 검정은 바깥 방향 normal 성분, 주홍은 tangential 성분, 회색 점선은 smooth circle의 값 \(1.90\), 아래쪽의 파란 눈금은 점의 위치다. (b)의 세로 눈금은 (a)의 약 \(6\)배다. (c)는 log-log이고 회색 점선이 \(2\pi\)다.
+          볼 것: (a)의 tangential ripple(진폭 \(3.1\))은 점 위에서 \(0\)이다. (b)에서는 점이 몰린 곳 근처에서 tangential 성분이 \(\pm20\)을 넘는다. (c)에서 \(\varepsilon = 4h\)인 두 곡선은 기울기 약 \(1\)로 커지고, \(\varepsilon = 16h\)는 \(2\pi\)에 붙어 있으며, \(\varepsilon \propto N^{-1/3}\)인 jittered는 \(2\pi\)를 향해 내려간다.
+          본문과의 연결: <a href="#i-47-3-7">Example 47.3.7</a>, <a href="#i-47-3-8">Theorem 47.3.8</a>의 가정 <a href="#eq-47-3-5">(47.3.5)</a>.</figcaption>
+      </figure>
+      <aside class="box intuition">
+        <p class="box-title">Intuition: 왜 \(\varepsilon \propto N^{-1/3}\)이면 충분한가 (우리의 heuristic)</p>
+        <p>jittered cloud에서 각 점은 제자리에서 약 \(h\)만큼 독립적으로 움직인다. 폭 \(\varepsilon\)의 kernel로 흐린 밀도에는 이웃 \(\varepsilon/h\)개의 이동이 더해지는데, 각 이동의 기여는 \(h\cdot h/\varepsilon^2\)(mass × 이동 거리 × kernel의 기울기, 밀도 \(1\)로 정규화) 정도이고 부호가 무작위다. 그래서 밀도의 상대 요동은 \(\sqrt{\varepsilon/h}\cdot h^2/\varepsilon^2 = (h/\varepsilon)^{3/2}\), 그 도함수는 \((h/\varepsilon)^{3/2}/\varepsilon\) 정도다. 이것을 길이 \(\pi\)의 띠에서 적분하면 \(\norm{\delta V*\rho_\varepsilon}_{L^1} - 2\pi \sim (h/\varepsilon)^{3/2}/\varepsilon\)이다. \(\varepsilon = 4h\)이면 \(1/h \propto N\)으로 커지고, \(\varepsilon \propto N^{-1/3}\)이면 \(N^{-1}\cdot N^{1/3} = N^{-2/3}\)으로 줄어든다. (c)의 jittered \(N^{-1/3}\) 곡선에서 \(2\pi\)를 뺀 값을 log-log로 맞추면 기울기가 약 \(-0.6\)으로, 이 예측 \(-2/3\)과 비슷하다. 논문에 없는 계산이고 엄밀한 증명이 아니다.</p>
+      </aside>
+      <p class="verified">Verification: <code>verify/v-47-3-regularized-first-variation.py</code></p>
+    </section>
+
+    <section id="sec-compactness">
+      <h2>Compactness and Rectifiability</h2>
+      <p>이제 논문 §3의 주정리다. Allard의 compactness theorem(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-10">Theorem 46.5.10</a>)은 integral varifold의 열에서 mass와 first variation이 고르게 bounded이면 부분열이 integral varifold로 수렴한다고 했다. 논문은 이것을 integral이 아닌 일반 varifold(point cloud, volumetric)로 부분적으로 넓힌다.</p>
+      <div class="thm theorem" id="i-47-3-8">
+        <p><span class="thm-head">Theorem 47.3.8</span> <span class="thm-name">(compactness and rectifiability)</span>. \(\Omega \subset \R^n\)이 open set이고 \((V_i)_i\)가 \(d\)-varifold의 열이라 하자. 양수이고 감소하며 \(0\)으로 가는 열 \((\varepsilon_i)_i\)가 있어</p>
+        <div class="equation" id="eq-47-3-5">
+        \[ \begin{aligned} M &:= \sup_{i \in \mathbb{N}}\big\{\norm{V_i}(\Omega) + \norm{\delta V_i*\rho_{\varepsilon_i}}_{L^1}\big\} \\ &\lt +\infty \end{aligned} \tag{47.3.5} \]
+        </div>
+        <p>이면, 부분열 \((V_{\varphi(i)})_i\)가 bounded first variation을 갖는 \(d\)-varifold \(V\)로 \(\Omega\)에서 weak-* 수렴하고 \(\norm{V}(\Omega) + \abs{\delta V}(\Omega) \le M\)이다. 더 나아가 \(0\)으로 감소하는 열 \(\beta_i\)와 \(\theta_0, r_0 \gt 0\)이 있어 모든 \(\beta_i \lt r \lt r_0\)와 \(\norm{V_i}\)-a.e. \(x \in \Omega\)에 대해</p>
+        <div class="equation" id="eq-47-3-6">
+        \[ \norm{V_i}(B_r(x)) \ge \theta_0r^d \tag{47.3.6} \]
+        </div>
+        <p>이면 \(V\)는 rectifiable이다. <a class="cite" href="../../references.html#BLM17">[BLM17, Thm 3.6, (3.7), (3.8)]</a></p>
+      </div>
+      <p><em>Proof sketch.</em> (1) mass가 bounded이므로 weak-* 수렴하는 부분열이 있다(<a href="../46-varifold-background/46-4-varifolds.html#i-46-4-9">Proposition 46.4.9</a>(b)). (2) \(X \in C^1_c(\Omega, \R^n)\)이면
+      \[ \begin{aligned} &\abs{\delta V_{\varphi(i)}*\rho_{\varepsilon_{\varphi(i)}}(X) - \delta V(X)} \\ &\le \norm{V_{\varphi(i)}}(\Omega)\,\norm{X*\rho_{\varepsilon_{\varphi(i)}} - X}_{C^1} \\ &\quad + \abs{\delta V_{\varphi(i)}(X) - \delta V(X)} \end{aligned} \]
+      이다. 첫 항은 <a href="#eq-47-3-4">(47.3.4)</a>와 mass의 boundedness로 \(0\)으로 가고, 둘째 항은 \(\divg_SX(x)\)가 \(\Omega \times G_{d,n}\) 위의 compact support 연속함수이므로 weak-* 수렴에서 \(0\)으로 간다. (3) 그래서
+      \[ \begin{aligned} \abs{\delta V(X)} &= \lim_i\Big|\int X\cdot(\delta V_{\varphi(i)}*\rho_{\varepsilon_{\varphi(i)}})\,dx\Big| \\ &\le \sup_i\norm{\delta V_i*\rho_{\varepsilon_i}}_{L^1}\,\norm{X}_\infty \end{aligned} \]
+      이다. \(\delta V\)가 \(C^0\) norm에 대해 연속이므로 bounded first variation이고, mass의 하반연속성과 함께 \(\norm{V}(\Omega) + \abs{\delta V}(\Omega) \le M\)이다. (4) <a href="#eq-47-3-6">(47.3.6)</a>은 극한으로 넘어가 \(\norm{V}\)-a.e. \(x\)와 모든 \(0 \lt r \lt r_0\)에서 \(\norm{V}(B_r(x)) \ge \theta_0r^d\)가 된다(논문은 <a class="cite" href="../../references.html#Buet15">[Buet15, Prop 3.3]</a>을 인용한다). 그러면 \(d\)차원 밀도가 \(\norm{V}\)-a.e.에서 양수이고 first variation이 bounded이므로, Allard의 rectifiability theorem <a class="cite" href="../../references.html#Allard72">[Allard72, Thm 5.5(1)]</a>으로 \(V\)는 rectifiable이다. \(\square\)</p>
+      <p>이 정리가 말하는 것은 이렇다. Allard의 정리의 두 가정을 각각 discrete 데이터에 맞게 바꾼다.</p>
+      <ul>
+        <li>“first variation이 고르게 bounded” 대신 “scale \(\varepsilon_i\)로 흐린 first variation의 \(L^1\) norm이 고르게 bounded”를 쓴다. \(V_i\) 자신은 bounded first variation을 가질 필요가 없다. point cloud도 된다.</li>
+        <li>“integral(multiplicity \(\ge 1\))” 대신 “scale \(\beta_i\)보다 큰 ball에서의 \(d\)차원 밀도 lower bound”를 쓴다. integral varifold는 multiplicity가 \(1\) 이상이라 밀도 lower bound가 저절로 있지만, point cloud는 점 간격보다 작은 ball에서 \(d\)차원 밀도를 가질 수 없다. \(\beta_i\)가 그 간격을 허용한다.</li>
+      </ul>
+      <p>결론은 Allard보다 약하다. 극한은 rectifiable이지만 integral이라는 보장은 없다. 데이터의 mass가 정수일 이유가 없으니 당연하다. 논문은 이 정리가 discrete varifold 위의 variational problem에서 해의 존재를 보이는 데 쓰일 수 있다고 말하지만(Introduction), 이 논문 안에서 그렇게 쓰지는 않는다. <a href="#i-47-3-7">Example 47.3.7</a>의 uniform \(\varepsilon = 16h\)와 jittered \(\varepsilon \propto N^{-1/3}\)는 <a href="#eq-47-3-5">(47.3.5)</a>를 만족하는 것으로 보이고(수치상 bounded), 점 간격이 \(h\)인 curve 위의 cloud는 \(\beta_i = h_i\)로 <a href="#eq-47-3-6">(47.3.6)</a>을 만족한다. \(\varepsilon = 4h\)인 두 열은 (3.7)을 만족하지 않는다. 같은 데이터라도 scale을 어떻게 고르느냐에 따라 정리를 쓸 수 있느냐가 달라진다.</p>
+      <div class="thm example" id="i-47-3-9">
+        <p><span class="thm-head">Example 47.3.9</span> <span class="thm-name">(why the density bound is needed)</span>. \(\R^2\)에서 \(k\)개의 가로 선분에 mass \(1/k\)씩을 준
+        \[ V_k = \sum_{j=1}^k\frac1k\,\mathcal{H}^1\llcorner\big([0, 1] \times \{j/k\}\big) \otimes \delta_{e_1e_1^{\mathsf T}} \]
+        를 보자. 각 \(V_k\)는 rectifiable이고 mass는 \(1\)이다. 선분마다 first variation은 양 끝점의 Dirac mass \(\mp\tfrac1ke_1\)이므로 \(\abs{\delta V_k}(\R^2) = 2\)이고, 모든 \(\varepsilon\)에서 \(\norm{\delta V_k*\rho_\varepsilon}_{L^1} \le 2\)이다. 따라서 <a href="#eq-47-3-5">(47.3.5)</a>가 성립하고, 정리의 앞부분대로 \(V_k\)는 bounded first variation을 갖는 varifold \(V = \mathcal{L}^2\llcorner[0, 1]^2 \otimes \delta_{e_1e_1^{\mathsf T}}\)로 수렴한다. 그러나 \(V\)는 rectifiable이 아니다. mass가 \(2\)차원으로 퍼져 있다. <a href="#eq-47-3-6">(47.3.6)</a>이 깨지기 때문이다. 선분 위의 점 \(x\)에서 \(r \lt 1/k\)이면 \(\norm{V_k}(B_r(x)) = 2r/k\)이고, \(1/k \le r \ll 1\)이면 \(\norm{V_k}(B_r(x)) \approx \pi r^2\)이다. 어느 쪽이든 \(\theta_0r\)보다 작아지므로, \(\beta_k\)를 어떻게 골라도 고정된 \(\theta_0\)로 (3.8)을 만족시킬 수 없다.</p>
+      </div>
+      <p class="verified">Verification: <code>verify/v-47-3-regularized-first-variation.py</code></p>
+      <aside class="box application">
+        <p class="box-title">In computer vision: 불균일한 밀도와 tangential 성분</p>
+        <p><a href="#fig-47-3-1">Figure 47.3.1</a>(b)의 큰 tangential 성분은 실제 데이터에서 흔한 상황이다. SfM이나 depth sensor의 point cloud는 카메라에 가까운 곳에 점이 몰리고, 3DGS의 Gaussian은 densification 때문에 텍스처가 많은 곳에 몰린다. 점마다 같은 mass를 주면 이 밀도의 요동이 first variation의 tangent 방향 성분으로 나타난다. 두 가지 처방이 있다. mass \(m_j\)를 점이 대표하는 넓이에 맞추어 밀도를 고르게 하거나(<a href="../46-varifold-background/46-8-gaussian-splatting-geometry.html">Section 46.8</a>), 결과를 그 점의 normal 방향으로 정사영해 tangent 성분을 버리는 것이다. 논문은 둘째 방법을 <a href="47-4-approximate-mean-curvature.html">Section 47.4</a>의 orthogonal approximate mean curvature로 정식화하고, §8.1.4의 실험(<a href="47-7-numerical-experiments.html">Section 47.7</a>)으로 그 효과를 보인다.</p>
+      </aside>
+    </section>
+
+    <section class="summary">
+      <h2>Summary</h2>
+      <ul>
+        <li>regularized first variation은 test vector field를 먼저 흐린 \(\delta V*\rho_\varepsilon(X) = \delta V(X*\rho_\varepsilon)\)이고(<a href="#i-47-3-2">Definition 47.3.2</a>), 유한 mass의 모든 varifold에서 연속인 \(L^1\) vector field <a href="#eq-47-3-3">(47.3.3)</a>로 표현된다. point cloud에서는 반지름 \(\varepsilon\) 안의 이웃에 대한 합이다.</li>
+        <li>\(L^1\) norm은 \(\norm{\nabla\rho_1}_{L^1}\norm{V}(\Omega)/\varepsilon\) 이하이고(<a href="#i-47-3-4">Remark 47.3.4</a>), 고정된 \(V\)에서 \(\varepsilon \to 0\)이면 \(\delta V\)로 돌아간다(<a href="#i-47-3-6">Proposition 47.3.6</a>).</li>
+        <li>point cloud에서 \(\norm{\delta V*\rho_\varepsilon}_{L^1}\)은 \(\varepsilon/h\)가 고정이면 \(N\)에 비례해 터지고, \(\varepsilon/h\)가 충분히 빨리 커지면 \(\abs{\delta V}\)의 값 \(2\pi\)로 간다(<a href="#fig-47-3-1">Figure 47.3.1</a>).</li>
+        <li>흐린 first variation의 \(L^1\) norm과 mass가 고르게 bounded이면 부분열이 bounded first variation의 varifold로 수렴하고, scale \(\beta_i\) 위의 밀도 lower bound가 더해지면 극한이 rectifiable이다(<a href="#i-47-3-8">Theorem 47.3.8</a>). 밀도 lower bound가 없으면 극한이 넓은 영역으로 퍼질 수 있다(<a href="#i-47-3-9">Example 47.3.9</a>).</li>
+      </ul>
+      <p class="next">다음 절에서는 논문 §4를 읽는다. regularized first variation을 흐린 mass로 나눈 approximate mean curvature를 정의하고, 그것이 진짜 mean curvature로 수렴한다는 세 정리(Theorem 4.3, 4.5, 4.8)와 수렴 속도를 본다.</p>
+    </section>
+
+    <section class="exercises">
+      <h2>Quick check</h2>
+      <div class="exercise" id="ex-47-3-1" data-level="1">
+        <p><span class="thm-head">Exercise 47.3.1</span> <span class="level">★</span> \(\R^2\)에서 정규화한 exp kernel에 대해 \(\norm{\nabla\rho_1}_{L^1(\R^2)} = \pi C_\rho\)임을 부분적분으로 보이고(\(C_\rho\)는 \(d = 1\)의 상수), circle(반지름 \(0.5\)), \(N = 250\), \(\varepsilon = 4h\)에서 <a href="#i-47-3-4">Remark 47.3.4</a>의 bound를 계산하여 <a href="#fig-47-3-1">Figure 47.3.1</a>(c)의 값과 비교하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\rho_1(x) = c\rho(\abs{x})\)이고 \(\rho' \le 0\), \(\rho(1) = 0\)이므로
+          \[ \begin{aligned} \norm{\nabla\rho_1}_{L^1} &= 2\pi c\int_0^1(-\rho'(r))r\,dr \\ &= 2\pi c\Big([-\rho r]_0^1 + \int_0^1\rho\,dr\Big) \\ &= 2\pi c\int_0^1\rho\,dr \end{aligned} \]
+          이다. \(d = 1\)이면 \(C_\rho = 2c\int_0^1\rho\,dr\)이므로 이것은 \(\pi C_\rho = \pi\times0.9517 = 2.990\)이다. \(h = \pi/250\), \(\varepsilon = 4h = 0.0503\), \(\norm{V} = \pi\)이므로 bound는 \(2.990\pi/0.0503 = 186.9\)이다. 실제 값은 uniform \(8.49\), jittered \(31.8\)로 훨씬 작다. bound는 모든 varifold에 대한 것이라 거칠지만, 그림의 \(\varepsilon = 4h\) 곡선이 \(N\)에 비례해 커지듯 \(1/\varepsilon\)의 order는 실제로 일어난다.</p>
+          <p class="verified">Verification: <code>verify/v-47-3-regularized-first-variation.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-47-3-2" data-level="1">
+        <p><span class="thm-head">Exercise 47.3.2</span> <span class="level">★</span> \(X\)가 \(\supp\norm{V}\)의 \(\varepsilon\)-neighborhood에서 affine(\(X(x) = Ax + b\))이면 \(\delta V*\rho_\varepsilon(X) = \delta V(X)\)임을 보여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\rho_\varepsilon\)은 radial이므로 \(\int\rho_\varepsilon(z)\,dz = 1\), \(\int\rho_\varepsilon(z)z\,dz = 0\)이다. 그 neighborhood의 점 \(y\)에서
+          \[ (X*\rho_\varepsilon)(y) = \int(A(y - z) + b)\rho_\varepsilon(z)\,dz = Ay + b \]
+          이다. \(\delta V\)는 \(\supp\norm{V}\) 위에서의 \(D(X*\rho_\varepsilon)\)만 쓰므로 두 값이 같다. 곧 regularization은 test field의 2차 이상의 부분만 바꾸고, <a href="#eq-47-3-4">(47.3.4)</a>의 \(C^1\) 오차는 \(\varepsilon\norm{D^2X}_\infty + \tfrac12\varepsilon^2\norm{D^2X}_\infty\) 이하다(도함수 부분은 \(DX\)의 Lipschitz 상수가 \(\norm{D^2X}_\infty\)이므로, 값 부분은 Taylor 전개와 \(\int\rho_\varepsilon(z)z\,dz = 0\)으로).</p>
+          <p class="verified">Verification: <code>verify/v-47-3-regularized-first-variation.py</code></p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-47-3-3" data-level="2">
+        <p><span class="thm-head">Exercise 47.3.3</span> <span class="level">★★</span> <a href="#i-47-3-9">Example 47.3.9</a>에서 mass를 \(1/k\) 대신 \(1\)로 주면(\(W_k = \sum_j\mathcal{H}^1\llcorner([0, 1] \times \{j/k\}) \otimes \delta_{e_1e_1^{\mathsf T}}\)) <a href="#i-47-3-8">Theorem 47.3.8</a>의 어느 가정이 깨지는가? Allard의 정리(<a href="../46-varifold-background/46-5-first-variation.html#i-46-5-10">Theorem 46.5.10</a>)는 쓸 수 있는가?</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>\(\norm{W_k}(\Omega) = k\)와 \(\abs{\delta W_k}(\R^2) = 2k\)가 발산하므로 <a href="#eq-47-3-5">(47.3.5)</a>가 깨진다. 밀도 lower bound는 \(r \lt 1/k\)에서 \(2r\)로 성립한다. \(W_k\)는 integral varifold이지만 mass와 first variation이 고르게 bounded가 아니므로 Allard의 정리도 쓸 수 없다. 실제로 \(W_k\)는 어떤 Radon measure로도 수렴하지 않는다(mass가 무한대로 간다). mass를 \(1/k\)로 줄이면 mass는 bounded가 되지만 integral이 아니게 되고, 밀도 lower bound가 사라진다. 두 정리 모두 “넓이의 boundedness”와 “\(d\)차원 밀도”를 함께 요구하는 이유다.</p>
+        </details>
+      </div>
+      <div class="exercise" id="ex-47-3-4" data-level="1">
+        <p><span class="thm-head">Exercise 47.3.4</span> <span class="level">★</span> <a href="#fig-47-3-1">Figure 47.3.1</a>(a)의 uniform cloud에서 tangential 성분이 정확히 점 위와 두 점의 한가운데에서 \(0\)인 이유를 symmetry로 설명하여라.</p>
+        <details class="solution"><summary>Solution</summary>
+          <p>uniform cloud는 circle의 지름에 대한 반사 가운데 점 \(x_0\)을 지나는 것과 두 점의 한가운데를 지나는 것에 대해 symmetric이다(점 집합, plane, mass가 모두 보존된다). 그 지름 위의 점 \(x\)에서 <a href="#eq-47-3-3">(47.3.3)</a>은 반사에 대해 불변이어야 하므로, 반사로 부호가 바뀌는 tangential 성분은 \(0\)이다. 다른 위치에는 이런 symmetry가 없다. approximate mean curvature를 보통 점 위에서만 계산하므로 이 ripple은 계산에 드러나지 않지만, \(L^1\) norm은 평면 전체를 적분하므로 그것을 센다.</p>
+          <p class="verified">Verification: <code>verify/v-47-3-regularized-first-variation.py</code></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="pager">
+    <a rel="prev" href="47-2-discrete-varifolds.html">← 47.2 Varifolds and Discrete Varifolds</a>
+    <a rel="next" href="47-4-approximate-mean-curvature.html">47.4 Approximate Mean Curvature and Its Convergence →</a>
+  </nav>
+</body>
+</html>
